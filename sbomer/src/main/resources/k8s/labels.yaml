@@ -1,0 +1,13 @@
+kind: LabelTransformer
+apiVersion: builtin
+metadata:
+  name: global-labels
+labels:
+  app.kubernetes.io/component: "sbomer"
+  app.kubernetes.io/managed-by: "pct"
+
+fieldSpecs:
+  - path: metadata/labels
+    create: true
+  - path: spec/template/metadata/labels
+

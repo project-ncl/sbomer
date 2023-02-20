@@ -1,60 +1,45 @@
-# sbomer
+# SBOMer
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+## Development
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+### JDK
 
-## Running the application in dev mode
+This project is developed using JDK 17. Not that any features require it, but why not?
 
-You can run your application in dev mode that enables live coding using:
-```shell script
-./mvnw compile quarkus:dev
+You can use https://sdkman.io/ to install and manage JDKs:
+
+```
+sdk install java 17.0.6-tem
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+When you enter the project directory you can run:
 
-## Packaging and running the application
-
-The application can be packaged using:
-```shell script
-./mvnw package
 ```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
+sdk env
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+And you're all set!
 
-## Creating a native executable
+> You can add `$HOME/.sdkman/etc/config` following entry:
+> 
+> ```
+> sdkman_auto_env=true
+> ```
+>
+> And have the JDK set automatically when entering the directory.
 
-You can create a native executable using: 
-```shell script
-./mvnw package -Pnative
+### Database
+
+First log it into [redhat.io registry](https://access.redhat.com/terms-based-registry) and then run the command below:
+
+```
+podman run -it --rm -e POSTGRESQL_USER=username -e POSTGRESQL_PASSWORD=password -e POSTGRESQL_DATABASE=sbomer -p 5432:5432 registry.redhat.io/rhel9/postgresql-13@sha256:31fbd226db60cb48ff169491a8b88e69ec727c575ba76dc6095c87f70932b777
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
-```
+> **NOTE**
+>
+> Please note that this is an ephemeral container. All data will be destroyed when you stop the container.
 
-You can then execute your native executable with: `./target/sbomer-1.0.0-SNAPSHOT-runner`
+## API
 
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
-
-## Related Guides
-
-- RESTEasy Reactive ([guide](https://quarkus.io/guides/resteasy-reactive)): A JAX-RS implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-
-## Provided Code
-
-### RESTEasy Reactive
-
-Easily start your Reactive RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+A Swagger API is available at the `/api` endpoint: http://localhost:8080/api

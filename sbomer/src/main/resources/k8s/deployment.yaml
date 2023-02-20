@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sbomer
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: sbomer
+          image: quay.io/goldmann/sbomer:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
