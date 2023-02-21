@@ -45,7 +45,7 @@ images:
       - .m2/repository
   script:
     - cd sbomer
-    - mvn $MAVEN_CLI_OPTS package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
+    - mvn $MAVEN_CLI_OPTS -DskipTests package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
       -Dquarkus.container-image.builder=jib
   artifacts:
     name: "Maven artifacts from $CI_PROJECT_NAME on $CI_COMMIT_REF_SLUG"
