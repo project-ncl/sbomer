@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sbomer
+  labels:
+    app.kubernetes.io/component: "service"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: "service"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: "service"
+    spec:
+      containers:
+        - image: quay.io/goldmann/sbomer:latest
+          name: sbomer
+          imagePullPolicy: Always
+          env:
+            - name: QUARKUS_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-postgres
+                  key: POSTGRESQL_USER
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-postgres
+                  key: POSTGRESQL_PASSWORD
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: jdbc:postgresql://sbomer-postgres:5432/sbomer
+
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP

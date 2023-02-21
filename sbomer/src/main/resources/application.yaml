@@ -4,11 +4,18 @@ quarkus:
   swagger-ui:
     always-include: true
     path: /api
+  datasource:
+    db-kind: postgresql
+
+  hibernate-orm:
+    database:
+      generation: create
+    log:
+      sql: true
 
 "%dev":
   quarkus:
     datasource:
-      db-kind: postgresql
       username: username
       password: password
       jdbc:

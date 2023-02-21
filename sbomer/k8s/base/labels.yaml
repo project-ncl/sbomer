@@ -1,13 +1,15 @@
 kind: LabelTransformer
 apiVersion: builtin
 metadata:
-  name: global-labels
+  name: labels
 labels:
-  app.kubernetes.io/component: "sbomer"
   app.kubernetes.io/managed-by: "pct"
-
+  app.kubernetes.io/name: "sbomer"
+  app.kubernetes.io/version: "0.0.1"
 fieldSpecs:
   - path: metadata/labels
     create: true
   - path: spec/template/metadata/labels
+  - path: spec/selector/matchLabels
+
 
