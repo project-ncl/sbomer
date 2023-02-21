@@ -23,7 +23,7 @@ public class SBOMResourceTest {
 
     @Test
     public void testShouldAcceptValidSBOM() throws IOException {
-        with().body(TestResources.asString("sboms/bom-3.9.0-cx-2.7.5.json"))
+        with().body(TestResources.asString("payloads/payload-valid.json"))
                 .when()
                 .contentType(ContentType.JSON)
                 .request("POST", "/sboms")
@@ -33,7 +33,7 @@ public class SBOMResourceTest {
 
     @Test
     public void testShouldNotAcceptInvalidJson() throws IOException {
-        with().body(TestResources.asString("sboms/invalid-json.json"))
+        with().body(TestResources.asString("payloads/payload-invalid-bom.json"))
                 .when()
                 .contentType(ContentType.JSON)
                 .request("POST", "/sboms")
