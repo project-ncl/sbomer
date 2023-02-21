@@ -48,9 +48,9 @@ To run the service locally, just run:
 ./mvnw quarkus:dev
 ```
 
-## API
+## Documentation
 
-A Swagger API is available at the `/api` endpoint: http://localhost:8080/api
+See [the documentation](docs/index.md).
 
 ## Kubernetes deployment
 

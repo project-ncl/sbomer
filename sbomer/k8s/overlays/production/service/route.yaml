@@ -1,0 +1,17 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: sbomer
+  labels:
+    app.kubernetes.io/component: service
+spec:
+  host: sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com
+  to:
+    kind: Service
+    name: sbomer
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+  wildcardPolicy: None
