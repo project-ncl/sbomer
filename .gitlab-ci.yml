@@ -53,3 +53,5 @@ images:
       - "**/target"
   only: [main]
   tags: [docker]
+  needs:
+  - job: test
