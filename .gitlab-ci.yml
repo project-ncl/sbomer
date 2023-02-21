@@ -14,7 +14,7 @@ variables:
   MAVEN_CLI_OPTS: >-
     --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
 
-sbomer-images:
+test:
   # select the most appropriate image for your project
   image: maven:3.8-openjdk-17
   stage: build
@@ -26,9 +26,30 @@ sbomer-images:
       - .m2/repository
   script:
     - cd sbomer
-    - mvn $MAVEN_CLI_OPTS package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true -Dquarkus.container-image.builder=jib
+    - mvn $MAVEN_CLI_OPTS package
   artifacts:
     name: "Maven artifacts from $CI_PROJECT_NAME on $CI_COMMIT_REF_SLUG"
     paths:
       - "**/target"
+  tags: [docker]
+
+images:
+  # select the most appropriate image for your project
+  image: maven:3.8-openjdk-17
+  stage: build
+  # Cache downloaded dependencies and plugins between builds.
+  # The key here separates one cache per branch/tag ($CI_COMMIT_REF_SLUG)
+  cache:
+    key: "maven-$CI_COMMIT_REF_SLUG"
+    paths:
+      - .m2/repository
+  script:
+    - cd sbomer
+    - mvn $MAVEN_CLI_OPTS package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
+      -Dquarkus.container-image.builder=jib
+  artifacts:
+    name: "Maven artifacts from $CI_PROJECT_NAME on $CI_COMMIT_REF_SLUG"
+    paths:
+      - "**/target"
+  only: [main]
   tags: [docker]
