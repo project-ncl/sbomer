@@ -1,0 +1,5 @@
+*.tar.gz
+cyclonedx-maven-plugin/source
+cyclonedx-maven-plugin/maven
+
+k8s/secret*

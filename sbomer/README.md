@@ -21,14 +21,14 @@ sdk env
 And you're all set!
 
 > You can add `$HOME/.sdkman/etc/config` following entry:
-> 
+>
 > ```
 > sdkman_auto_env=true
 > ```
 >
 > And have the JDK set automatically when entering the directory.
 
-### Database
+### Local database
 
 First log it into [redhat.io registry](https://access.redhat.com/terms-based-registry) and then run the command below:
 
@@ -40,6 +40,24 @@ podman run -it --rm -e POSTGRESQL_USER=username -e POSTGRESQL_PASSWORD=password 
 >
 > Please note that this is an ephemeral container. All data will be destroyed when you stop the container.
 
+### Running the service locally
+
+To run the service locally, just run:
+
+```
+./mvnw quarkus:dev
+```
+
 ## API
 
 A Swagger API is available at the `/api` endpoint: http://localhost:8080/api
+
+## Kubernetes deployment
+
+Kustomize deployment scripts are available:
+
+```
+kubectl apply -k k8s/overlays/production
+```
+
+This will run the service using **published** images.
