@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.model.Bom;
@@ -36,7 +35,6 @@ public class SBOM implements Serializable {
 
   @Type(type = JsonTypes.JSON_BIN)
   @Column(name = "bom", columnDefinition = JsonTypes.JSON_BIN)
-  @NotNull(message = "Missing BOM")
   @CycloneDxBom
   private JsonNode bom;
 

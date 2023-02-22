@@ -17,14 +17,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.pnc.dto.Build;
 import org.redhat.sbomer.model.SBOM;
 import org.redhat.sbomer.service.SBOMService;
 import org.redhat.sbomer.validation.ValidationError;
-import org.redhat.sbomer.service.PNCService;
 
 @Path("/sboms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,26 +31,31 @@ import org.redhat.sbomer.service.PNCService;
 public class SBOMResource {
 
     @Inject
-    SBOMService databaseService;
-
-    @Inject
-    PNCService pncService;
+    SBOMService sbomService;
 
     @Inject
     Validator validator;
 
+    /**
+     * Make it possible to create a {@link SBOM} resource directly from the
+     * endpoint.
+     * 
+     * TODO: We probably shouldn't be really exposing this endpoint, but it's
+     * convenient at development.
+     * 
+     * @param sbom
+     * @return
+     */
     @POST
-    @Operation(summary = "SBOM creation entrypoint", description = "Save submitted SBOM. This endpoint expects an SBOM in the CycloneDX format serialized to JSON.")
+    @Operation(summary = "Create SBOM", description = "Save submitted SBOM. This endpoint expects an SBOM in the CycloneDX format serialized to JSON.")
     public Response take(final SBOM sbom) {
         Set<ConstraintViolation<SBOM>> violations = validator.validate(sbom);
-
-        System.out.println(violations);
 
         if (!violations.isEmpty()) {
             return Response.status(Status.BAD_REQUEST).entity(new ValidationError(violations)).build();
         }
 
-        databaseService.save(sbom);
+        sbomService.saveBom(sbom);
 
         return Response.status(Status.CREATED).entity(sbom).build();
     }
@@ -62,11 +64,8 @@ public class SBOMResource {
     @Operation(summary = "Create SBOM based on the PNC build", description = "SBOM generation for a particular PNC build Id offloaded to the service")
     @Path("{id}")
     public Response fromBuild(@PathParam("id") String id) throws Exception {
-        Build build = pncService.getBuild(id);
 
-        System.out.println(build.getScmUrl());
-        System.out.println(build.getScmRevision());
-        System.out.println(build.getEnvironment().getSystemImageId());
+        sbomService.createBomFromPncBuild(id);
 
         // Nothing is happening, yet!
         return Response.status(Status.ACCEPTED).build();
@@ -75,13 +74,13 @@ public class SBOMResource {
     @GET
     @Operation(summary = "List of all SBOMs", description = "List all SBOMs available in the system")
     public List<SBOM> list() {
-        return databaseService.list();
+        return sbomService.listBoms();
     }
 
     @GET
     @Path("{id}")
     @Operation(summary = "Get specific SBOM", description = "List all SBOMs available in the system")
-    public Bom get(@PathParam("id") String id) {
-        return null;
+    public SBOM get(@PathParam("id") String id) {
+        return sbomService.getBom(id);
     }
 }

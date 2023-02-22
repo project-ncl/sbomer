@@ -20,6 +20,7 @@ public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, 
   @Override
   public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
     if (value == null) {
+      context.unwrap(HibernateConstraintValidatorContext.class).addMessageParameter("errors", "missing BOM");
       return false;
     }
 
