@@ -15,7 +15,7 @@ import org.hibernate.validator.constraintvalidation.HibernateConstraintValidator
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class CycloneDxBomValidator implements ConstraintValidator<ValidCycloneDxBom, JsonNode> {
+public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
 
   @Override
   public boolean isValid(JsonNode value, ConstraintValidatorContext context) {

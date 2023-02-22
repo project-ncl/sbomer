@@ -36,17 +36,18 @@ public class SBOM implements Serializable {
   @Type(type = JsonTypes.JSON_BIN)
   @Column(name = "bom", columnDefinition = JsonTypes.JSON_BIN)
   @NotNull(message = "Missing BOM")
-  @ValidCycloneDxBom
+  @CycloneDxBom
   private JsonNode bom;
 
   public Bom getCycloneDxBom() {
     try {
       return new JsonParser().parse(bom.toString().getBytes());
     } catch (ParseException e) {
-      // Obviously, this should never happen, because the 
       e.printStackTrace();
     }
-    return null;
 
+    // Don't do this
+    // We always should a valid return
+    return null;
   }
 }

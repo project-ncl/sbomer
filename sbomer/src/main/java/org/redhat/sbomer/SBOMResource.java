@@ -20,8 +20,10 @@ import javax.ws.rs.core.Response.Status;
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.pnc.dto.Build;
 import org.redhat.sbomer.model.SBOM;
 import org.redhat.sbomer.model.ValidationError;
+import org.redhat.sbomer.service.PNCService;
 import org.redhat.sbomer.service.SBOMService;
 
 @Path("/sboms")
@@ -32,7 +34,10 @@ import org.redhat.sbomer.service.SBOMService;
 public class SBOMResource {
 
     @Inject
-    SBOMService service;
+    SBOMService sbomService;
+
+    @Inject
+    PNCService pncService;
 
     @Inject
     Validator validator;
@@ -48,16 +53,29 @@ public class SBOMResource {
             return Response.status(Status.BAD_REQUEST).entity(new ValidationError(violations)).build();
         }
 
-        service.create(sbom);
+        sbomService.create(sbom);
 
         return Response.status(Status.CREATED).entity(sbom).build();
+    }
 
+    @POST
+    @Operation(summary = "Create SBOM based on the PNC build", description = "SBOM generation for a particular PNC build Id offloaded to the service")
+    @Path("{id}")
+    public Response fromBuild(@PathParam("id") String id) throws Exception {
+        Build build = pncService.getBuild(id);
+
+        System.out.println(build.getScmUrl());
+        System.out.println(build.getScmRevision());
+        System.out.println(build.getEnvironment().getSystemImageId());
+
+        // Nothing is happening, yet!
+        return Response.status(Status.ACCEPTED).build();
     }
 
     @GET
     @Operation(summary = "List of all SBOMs", description = "List all SBOMs available in the system")
     public List<SBOM> list() {
-        return service.list();
+        return sbomService.list();
     }
 
     @GET

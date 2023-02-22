@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = CycloneDxBomValidator.class)
 @Documented
-public @interface ValidCycloneDxBom {
+public @interface CycloneDxBom {
   String message() default "not a valid CycloneDX object: {errors}";
 
   List<String> errors = Collections.emptyList();

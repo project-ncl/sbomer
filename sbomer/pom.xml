@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.redhat.pct</groupId>
   <artifactId>sbomer</artifactId>
@@ -18,6 +20,8 @@
     <version.cyclonedx>7.3.1</version.cyclonedx>
     <version.hibernatetypes>1.0.1</version.hibernatetypes>
     <version.lombok>1.18.26</version.lombok>
+    <version.pnc-api>2.4.3</version.pnc-api>
+    <version.quarkus-jgit>2.3.1</version.quarkus-jgit>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -53,7 +57,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-hibernate-orm</artifactId>
+      <artifactId>quarkus-hibernate-orm-panache</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkiverse.hibernatetypes</groupId>
@@ -65,6 +69,11 @@
       <artifactId>lombok</artifactId>
       <version>${version.lombok}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.pnc</groupId>
+      <artifactId>rest-client</artifactId>
+      <version>${version.pnc-api}</version>
     </dependency>
     <dependency>
       <groupId>org.cyclonedx</groupId>
@@ -86,6 +95,11 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-validator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkiverse.jgit</groupId>
+      <artifactId>quarkus-jgit</artifactId>
+      <version>${version.quarkus-jgit}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
