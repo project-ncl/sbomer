@@ -3,18 +3,5 @@ kind: Kustomization
 resources:
   - service/deployment.yaml
   - service/service.yaml
-  - database/statefulset.yaml
-  - database/service.yaml
-  - database/pvc.yaml
 transformers:
   - labels.yaml
-generatorOptions:
-  disableNameSuffixHash: true
-secretGenerator:
-  - name: sbomer-postgres
-    envs:
-      - secret-postgresql.txt
-  - name: sbomer-pull-secret
-    files:
-      - .dockerconfigjson=secret-redhatio.txt
-    type: kubernetes.io/dockerconfigjson

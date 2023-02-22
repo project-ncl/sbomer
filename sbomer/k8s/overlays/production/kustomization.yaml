@@ -4,5 +4,3 @@ bases:
   - ../../base
 resources:
   - service/route.yaml
-patches:
-  - path: patches/pvc-storage-class.yaml

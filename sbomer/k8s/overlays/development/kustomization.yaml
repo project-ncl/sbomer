@@ -2,3 +2,17 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
   - ../../base
+resources:
+  - database/statefulset.yaml
+  - database/service.yaml
+  - database/pvc.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+secretGenerator:
+  - name: sbomer-postgres
+    envs:
+      - secret-postgresql.txt
+  - name: sbomer-pull-secret
+    files:
+      - .dockerconfigjson=secret-redhatio.txt
+    type: kubernetes.io/dockerconfigjson
