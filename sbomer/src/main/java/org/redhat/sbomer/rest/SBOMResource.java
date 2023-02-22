@@ -23,7 +23,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.pnc.dto.Build;
 import org.redhat.sbomer.model.SBOM;
 import org.redhat.sbomer.service.SBOMService;
-import org.redhat.sbomer.validations.ValidationError;
+import org.redhat.sbomer.validation.ValidationError;
 import org.redhat.sbomer.service.PNCService;
 
 @Path("/sboms")

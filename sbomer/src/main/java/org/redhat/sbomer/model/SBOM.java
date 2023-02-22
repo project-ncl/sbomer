@@ -14,7 +14,7 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.redhat.sbomer.validations.CycloneDxBom;
+import org.redhat.sbomer.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

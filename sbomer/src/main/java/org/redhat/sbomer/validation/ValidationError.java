@@ -1,4 +1,4 @@
-package org.redhat.sbomer.validations;
+package org.redhat.sbomer.validation;
 
 import java.util.Collections;
 import java.util.List;
