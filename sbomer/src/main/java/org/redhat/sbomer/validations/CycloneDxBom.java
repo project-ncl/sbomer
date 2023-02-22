@@ -1,4 +1,4 @@
-package org.redhat.sbomer.model;
+package org.redhat.sbomer.validations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

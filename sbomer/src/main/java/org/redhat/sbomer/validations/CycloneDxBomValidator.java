@@ -1,4 +1,4 @@
-package org.redhat.sbomer.model;
+package org.redhat.sbomer.validations;
 
 import java.io.IOException;
 import java.util.Collections;

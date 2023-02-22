@@ -1,5 +1,9 @@
 package org.redhat.sbomer.service.generator;
 
+/**
+ * High-level interaction with the SBOM generator.
+ * 
+ */
 public interface SBOMGenerator {
   /**
    * Generates the SBOM in CycloneDX format for a project located in git under the

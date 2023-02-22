@@ -1,4 +1,4 @@
-package org.redhat.sbomer;
+package org.redhat.sbomer.rest;
 
 import java.util.List;
 import java.util.Set;
@@ -22,9 +22,9 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.pnc.dto.Build;
 import org.redhat.sbomer.model.SBOM;
-import org.redhat.sbomer.model.ValidationError;
-import org.redhat.sbomer.service.PNCService;
 import org.redhat.sbomer.service.SBOMService;
+import org.redhat.sbomer.validations.ValidationError;
+import org.redhat.sbomer.service.PNCService;
 
 @Path("/sboms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,7 +34,7 @@ import org.redhat.sbomer.service.SBOMService;
 public class SBOMResource {
 
     @Inject
-    SBOMService sbomService;
+    SBOMService databaseService;
 
     @Inject
     PNCService pncService;
@@ -53,7 +53,7 @@ public class SBOMResource {
             return Response.status(Status.BAD_REQUEST).entity(new ValidationError(violations)).build();
         }
 
-        sbomService.create(sbom);
+        databaseService.save(sbom);
 
         return Response.status(Status.CREATED).entity(sbom).build();
     }
@@ -75,7 +75,7 @@ public class SBOMResource {
     @GET
     @Operation(summary = "List of all SBOMs", description = "List all SBOMs available in the system")
     public List<SBOM> list() {
-        return sbomService.list();
+        return databaseService.list();
     }
 
     @GET

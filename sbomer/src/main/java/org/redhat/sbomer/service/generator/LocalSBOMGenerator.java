@@ -7,6 +7,9 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.jgit.api.Git;
 
+/**
+ * Executes the SBOM generation locally.
+ */
 @ApplicationScoped
 public class LocalSBOMGenerator implements SBOMGenerator {
 
@@ -19,7 +22,14 @@ public class LocalSBOMGenerator implements SBOMGenerator {
     }
   }
 
-  // WIP
+  /**
+   * Fetches the source code from the provided git repository. It checks out the
+   * given reference (can be a tag, branch or a commit).
+   * 
+   * @param url
+   * @param revision
+   * @throws Exception
+   */
   private void fetchSourceCode(String url, String revision) throws Exception {
     File tmpDir = Files.createTempDirectory("sbomer").toFile();
 
