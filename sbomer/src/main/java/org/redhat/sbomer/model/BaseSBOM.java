@@ -21,8 +21,6 @@ import java.time.Instant;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.NamedQueries;
@@ -37,7 +35,6 @@ import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.jboss.pnc.api.deliverablesanalyzer.dto.BuildSystemType;
 import org.redhat.sbomer.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
