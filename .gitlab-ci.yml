@@ -62,7 +62,7 @@ generator-image:
     entrypoint: [""]
   stage: build
   script:
-    - echo "{\"auths\":{\"quay.io\":{\"auth\":\"$(printf "%s:%s" "${QUARKUS_CONTAINER_IMAGE_USERNAME}" "${QUARKUS_CONTAINER_IMAGE_PASSWORD}" | base64 | tr -d '\n')\"}}" > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"quay.io\":{\"auth\":\"$(printf "%s:%s" "${QUARKUS_CONTAINER_IMAGE_USERNAME}" "${QUARKUS_CONTAINER_IMAGE_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/sbomer/src/main/docker/generator"
       --dockerfile "${CI_PROJECT_DIR}/sbomer/src/main/docker/generator/Containerfile"

@@ -15,6 +15,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.redhat.sbomer.validation.CycloneDxBom;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
@@ -38,6 +39,7 @@ public class SBOM implements Serializable {
   @CycloneDxBom
   private JsonNode bom;
 
+  @JsonIgnore
   public Bom getCycloneDxBom() {
     try {
       return new JsonParser().parse(bom.toString().getBytes());
