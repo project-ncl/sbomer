@@ -1,16 +1,17 @@
 package org.redhat.sbomer.service.generator;
 
+import org.redhat.sbomer.errors.ApplicationException;
+
 /**
  * High-level interaction with the SBOM generator.
  * 
  */
 public interface SBOMGenerator {
   /**
-   * Generates the SBOM in CycloneDX format for a project located in git under the
-   * provided coordinates.
+   * Generates the SBOM in CycloneDX format for a PNC build identified by the
+   * buildId
    * 
-   * @param url
-   * @param revision
+   * @param buildId PNC build id
    */
-  public void generate(String url, String revision);
+  public void generate(String buildId) throws ApplicationException;
 }

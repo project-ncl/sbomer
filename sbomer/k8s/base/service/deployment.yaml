@@ -14,6 +14,7 @@ spec:
       labels:
         app.kubernetes.io/component: "service"
     spec:
+      serviceAccountName: sbomer-sa
       containers:
         - image: quay.io/goldmann/sbomer:latest
           name: sbomer
@@ -31,6 +32,11 @@ spec:
                   key: POSTGRESQL_PASSWORD
             - name: QUARKUS_DATASOURCE_JDBC_URL
               value: jdbc:postgresql://sbomer-postgres:5432/sbomer
+            - name: QUARKUS_PROFILE
+              valueFrom:
+                configMapKeyRef:
+                  name: sbomer-config
+                  key: QUARKUS_PROFILE
 
           ports:
             - containerPort: 8080

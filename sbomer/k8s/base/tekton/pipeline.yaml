@@ -1,0 +1,53 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: sbom-generator
+spec:
+  params:
+    - name: git-url
+      type: string
+      description: The URL of the source repository
+    - name: git-rev
+      type: string
+      description: The revision of the source repository (branch/tag)
+    - name: build-id
+      type: string
+      description: "PNC build id for the project"
+    - name: additional-domino-args
+      type: string
+      default: "--include-non-managed"
+      description: "Additional arguments passed to Domino"
+  tasks:
+    - name: fetch-source
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: data
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-rev)
+          # Temporary workaround, we should use ssl-ca-directory and crtFileName
+        - name: sslVerify
+          value: false
+        - name: subdirectory
+          value: build-$(params.build-id)/source
+    - name: generate-sbom
+      runAfter:
+        - fetch-source
+      taskRef:
+        name: sbomer-generate
+      workspaces:
+        - name: data
+          workspace: data
+      params:
+        - name: additional-domino-args
+          value: $(params.additional-domino-args)
+        - name: workdir
+          value: build-$(params.build-id)
+        - name: build-id
+          value: $(params.build-id)
+  workspaces:
+    - name: data

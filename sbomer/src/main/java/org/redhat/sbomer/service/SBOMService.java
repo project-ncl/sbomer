@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
-import org.jboss.pnc.dto.Build;
 import org.redhat.sbomer.model.SBOM;
 import org.redhat.sbomer.service.generator.SBOMGenerator;
 
@@ -16,23 +15,22 @@ import org.redhat.sbomer.service.generator.SBOMGenerator;
  */
 @ApplicationScoped
 public class SBOMService {
+
   @Inject
   EntityManager em;
 
   @Inject
-  PNCService pncService;
-
-  @Inject
   SBOMGenerator sbomGenerator;
 
-  public SBOM createBomFromPncBuild(String buildId) {
-    Build build = pncService.getBuild(buildId);
-
-    System.out.println(build.getScmUrl());
-    System.out.println(build.getScmRevision());
-    System.out.println(build.getEnvironment().getSystemImageId());
-
-    return null;
+  /**
+   * Runs the generation of SBOM using the available implementation of the
+   * generator. This is done in an asynchronous way -- the generation is run
+   * behind the scenes.
+   * 
+   * @param buildId
+   */
+  public void createBomFromPncBuild(String buildId) {
+    sbomGenerator.generate(buildId);
   }
 
   /**

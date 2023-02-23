@@ -7,13 +7,10 @@ quarkus:
   datasource:
     db-kind: postgresql
 
-"%prod":
-  quarkus:
-    log:
-      sql: false
-
 "%dev":
   quarkus:
+    # class-loading:
+    #  parent-first-artifacts: io.quarkus:quarkus-bootstrap-maven-resolver
     datasource:
       username: username
       password: password
@@ -26,6 +23,10 @@ quarkus:
       log:
         sql: true
 
+  sbomer:
+    generation:
+      local:
+        path: /tmp/sbomer
 "%test":
   quarkus:
     devservices:

@@ -6,6 +6,7 @@ resources:
   - database/statefulset.yaml
   - database/service.yaml
   - database/pvc.yaml
+  - https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.37.5/release.yaml
 generatorOptions:
   disableNameSuffixHash: true
 secretGenerator:
@@ -16,3 +17,5 @@ secretGenerator:
     files:
       - .dockerconfigjson=secret-redhatio.txt
     type: kubernetes.io/dockerconfigjson
+patchesStrategicMerge:
+  - patches/cm.yaml

@@ -22,6 +22,8 @@
     <version.lombok>1.18.26</version.lombok>
     <version.pnc-api>2.4.3</version.pnc-api>
     <version.quarkus-jgit>2.3.1</version.quarkus-jgit>
+    <version.domino>0.0.76</version.domino>
+    <version.tekton-client>0.6.0</version.tekton-client>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -97,9 +99,19 @@
       <artifactId>quarkus-hibernate-validator</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.quarkiverse.tektonclient</groupId>
+      <artifactId>quarkus-tekton-client</artifactId>
+      <version>${version.tekton-client}</version>
+  </dependency>
+    <dependency>
       <groupId>io.quarkiverse.jgit</groupId>
       <artifactId>quarkus-jgit</artifactId>
       <version>${version.quarkus-jgit}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-domino-api</artifactId>
+      <version>${version.domino}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

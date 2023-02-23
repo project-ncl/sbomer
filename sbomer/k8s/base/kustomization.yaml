@@ -3,5 +3,11 @@ kind: Kustomization
 resources:
   - service/deployment.yaml
   - service/service.yaml
+  - service/rbac.yaml
+  - service/cm.yaml
+  - https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
+  - tekton/task-generate.yaml
+  - tekton/pipeline.yaml
+  - pvc.yaml
 transformers:
   - labels.yaml
