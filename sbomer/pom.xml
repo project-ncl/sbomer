@@ -1,4 +1,23 @@
 <?xml version="1.0"?>
+<!--
+
+    JBoss, Home of Professional Open Source.
+    Copyright 2023 Red Hat, Inc., and individual contributors
+    as indicated by the @author tags.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
   xmlns="http://maven.apache.org/POM/4.0.0"
@@ -7,6 +26,7 @@
   <groupId>org.redhat.pct</groupId>
   <artifactId>sbomer</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <inceptionYear>2023</inceptionYear>
   <properties>
     <compiler-plugin.version>3.10.1</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
@@ -24,6 +44,7 @@
     <version.quarkus-jgit>2.3.1</version.quarkus-jgit>
     <version.domino>0.0.76</version.domino>
     <version.tekton-client>0.6.0</version.tekton-client>
+    <version.mapstruct>1.4.2.Final</version.mapstruct>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -102,16 +123,23 @@
       <groupId>io.quarkiverse.tektonclient</groupId>
       <artifactId>quarkus-tekton-client</artifactId>
       <version>${version.tekton-client}</version>
-  </dependency>
+    </dependency>
     <dependency>
       <groupId>io.quarkiverse.jgit</groupId>
       <artifactId>quarkus-jgit</artifactId>
       <version>${version.quarkus-jgit}</version>
     </dependency>
+    <!-- mapstruct dependency -->
     <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-domino-api</artifactId>
-      <version>${version.domino}</version>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${version.mapstruct}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
+      <version>${version.mapstruct}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -184,6 +212,95 @@
           </execution>
         </executions>
       </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <tagNameFormat>@{project.version}${tagSuffix}</tagNameFormat>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <stagingRepository>https://oss.sonatype.org/service/local/staging/deploy/maven2/</stagingRepository>
+                    <goals>deploy</goals>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.13</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>2.21.0</version>
+                <configuration>
+                    <configFile>eclipse-codeStyle.xml</configFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>java-format</id>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+              <groupId>com.mycila</groupId>
+              <artifactId>license-maven-plugin</artifactId>
+              <version>3.0</version>
+              <configuration>
+                  <properties>
+                      <copyright-years>${project.inceptionYear}</copyright-years>
+                  </properties>
+                  <header>.license-header.txt</header>
+                  <excludes>
+                      <exclude>.license-header.txt</exclude>
+                      <exclude>.sdkmanrc</exclude>
+                      <exclude>.dockerignore</exclude>
+                      <exclude>**/README</exclude>
+                      <exclude>**/LICENSE.txt</exclude>
+                      <exclude>**/Dockerfile**</exclude>
+                      <exclude>**/eclipse-codeStyle.xml</exclude>
+                      <exclude>.github/dependabot.yml</exclude>
+                      <exclude>.mvn/**</exclude>
+                      <exclude>.m2/**</exclude>
+                      <exclude>mvnw**</exclude>
+                  </excludes>
+              </configuration>
+              <executions>
+                  <execution>
+                      <phase>process-sources</phase>
+                      <goals>
+                          <goal>check</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>
+          <plugin>
+              <groupId>net.revelc.code.formatter</groupId>
+              <artifactId>formatter-maven-plugin</artifactId>
+              <version>2.21.0</version>
+              <configuration>
+                  <configFile>eclipse-codeStyle.xml</configFile>
+              </configuration>
+              <executions>
+                  <execution>
+                      <id>java-format</id>
+                      <goals>
+                          <goal>format</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>
     </plugins>
   </build>
   <profiles>

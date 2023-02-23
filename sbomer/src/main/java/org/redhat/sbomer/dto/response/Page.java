@@ -15,28 +15,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.test;
+package org.redhat.sbomer.dto.response;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collection;
+import java.util.Collections;
 
-public class TestResources {
+/**
+ * Collection REST response.
+ *
+ */
+@Data
+@AllArgsConstructor
+public class Page<T> {
+
     /**
-     * Reads test resource file and returns it as a String.
+     * Page index.
      */
-    public static String asString(String path) throws IOException {
-        return Files.readString(Paths.get("src", "test", "resources", path));
-    }
+    private int pageIndex;
 
     /**
-     * Reads test resource JSON file and returns it as a Map.
+     * Number of records per page.
      */
-    @SuppressWarnings("unchecked")
-    public static Map<Object, Object> asMap(String path) throws IOException {
-        return new ObjectMapper().readValue(asString(path), Map.class);
+    private int pageSize;
+
+    /**
+     * Total pages provided by this query or -1 if unknown.
+     */
+    private int totalPages;
+
+    /**
+     * Number of all hits (not only this page).
+     */
+    private long totalHits;
+
+    /**
+     * Embedded collection of data.
+     */
+    private Collection<T> content;
+
+    public Page() {
+        content = Collections.emptyList();
     }
 }

@@ -15,28 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.test;
+package org.redhat.sbomer.repositories;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Map;
+import javax.enterprise.context.ApplicationScoped;
+import javax.transaction.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.redhat.sbomer.model.BaseSBOM;
 
-public class TestResources {
-    /**
-     * Reads test resource file and returns it as a String.
-     */
-    public static String asString(String path) throws IOException {
-        return Files.readString(Paths.get("src", "test", "resources", path));
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+
+@ApplicationScoped
+public class BaseSBOMRepository implements PanacheRepositoryBase<BaseSBOM, Long> {
+
+    public BaseSBOM getBaseSbom(String buildId) {
+        return find(BaseSBOM.FIND_BY_BUILDID, buildId).singleResult();
     }
 
-    /**
-     * Reads test resource JSON file and returns it as a Map.
-     */
-    @SuppressWarnings("unchecked")
-    public static Map<Object, Object> asMap(String path) throws IOException {
-        return new ObjectMapper().readValue(asString(path), Map.class);
+    @Transactional
+    public BaseSBOM saveBom(BaseSBOM baseSbom) {
+        persist(baseSbom);
+        return baseSbom;
     }
+
 }
