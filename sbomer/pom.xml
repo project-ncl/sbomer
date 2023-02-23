@@ -272,6 +272,7 @@
                       <exclude>**/eclipse-codeStyle.xml</exclude>
                       <exclude>.github/dependabot.yml</exclude>
                       <exclude>.mvn/**</exclude>
+                      <exclude>.m2/**</exclude>
                       <exclude>mvnw**</exclude>
                   </excludes>
               </configuration>
