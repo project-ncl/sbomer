@@ -17,32 +17,39 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
 
-  @Override
-  public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
-    if (value == null) {
-      context.unwrap(HibernateConstraintValidatorContext.class).addMessageParameter("errors", "missing BOM");
-      return false;
+    @Override
+    public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
+        if (value == null) {
+            context.unwrap(HibernateConstraintValidatorContext.class).addMessageParameter("errors", "missing BOM");
+            return false;
+        }
+
+        List<ParseException> exceptions = Collections.emptyList();
+
+        try {
+            exceptions = new JsonParser().validate(value, Version.VERSION_14);
+
+            if (exceptions.isEmpty()) {
+                return true;
+            }
+
+        } catch (IOException e) {
+            context.unwrap(HibernateConstraintValidatorContext.class)
+                    .addMessageParameter("errors", "unable to parse object");
+
+            return false;
+        }
+
+        context.unwrap(HibernateConstraintValidatorContext.class)
+                .addMessageParameter(
+                        "errors",
+                        exceptions.stream()
+                                .map(cv -> "bom" + cv.getMessage().substring(1))
+                                .toList()
+                                .stream()
+                                .collect(Collectors.joining(", ")));
+
+        return false;
     }
-
-    List<ParseException> exceptions = Collections.emptyList();
-
-    try {
-      exceptions = new JsonParser().validate(value, Version.VERSION_14);
-
-      if (exceptions.isEmpty()) {
-        return true;
-      }
-
-    } catch (IOException e) {
-      context.unwrap(HibernateConstraintValidatorContext.class).addMessageParameter("errors", "unable to parse object");
-
-      return false;
-    }
-
-    context.unwrap(HibernateConstraintValidatorContext.class).addMessageParameter("errors", exceptions.stream()
-        .map(cv -> "bom" + cv.getMessage().substring(1)).toList().stream().collect(Collectors.joining(", ")));
-
-    return false;
-  }
 
 }

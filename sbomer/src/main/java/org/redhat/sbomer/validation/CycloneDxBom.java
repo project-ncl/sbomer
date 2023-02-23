@@ -16,12 +16,12 @@ import javax.validation.Payload;
 @Constraint(validatedBy = CycloneDxBomValidator.class)
 @Documented
 public @interface CycloneDxBom {
-  String message() default "not a valid CycloneDX object: {errors}";
+    String message() default "not a valid CycloneDX object: {errors}";
 
-  List<String> errors = Collections.emptyList();
+    List<String> errors = Collections.emptyList();
 
-  Class<?>[] groups() default {};
+    Class<?>[] groups() default {};
 
-  Class<? extends Payload>[] payload() default {};
+    Class<? extends Payload>[] payload() default {};
 
 }

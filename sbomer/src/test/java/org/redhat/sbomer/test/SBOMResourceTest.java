@@ -16,10 +16,7 @@ public class SBOMResourceTest {
 
     @Test
     public void testExistenceOfSbomsEndpoint() {
-        given()
-                .when().get("/sboms")
-                .then()
-                .statusCode(200);
+        given().when().get("/sboms").then().statusCode(200);
     }
 
     @Test
@@ -49,8 +46,11 @@ public class SBOMResourceTest {
                 .contentType(ContentType.JSON)
                 .request("POST", "/sboms")
                 .then()
-                .statusCode(400).body("messages[0]", CoreMatchers.is(
-                        "bom: not a valid CycloneDX object: bom.specVersion: is missing but it is required, bom.specVdersion: is not defined in the schema and the schema does not allow additional properties"));
+                .statusCode(400)
+                .body(
+                        "messages[0]",
+                        CoreMatchers.is(
+                                "sbom: not a valid CycloneDX object: bom.specVersion: is missing but it is required, bom.specVdersion: is not defined in the schema and the schema does not allow additional properties"));
     }
 
 }
