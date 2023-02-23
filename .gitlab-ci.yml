@@ -33,7 +33,7 @@ test:
       - "**/target"
   tags: [docker]
 
-images:
+service-image:
   # select the most appropriate image for your project
   image: maven:3.8-openjdk-17
   stage: build
@@ -51,6 +51,22 @@ images:
     name: "Maven artifacts from $CI_PROJECT_NAME on $CI_COMMIT_REF_SLUG"
     paths:
       - "**/target"
+  only: [main]
+  tags: [docker]
+  needs:
+  - job: test
+
+generator-image:
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  stage: build
+  script:
+    - echo "{\"auths\":{\"quay.io\":{\"auth\":\"$(printf "%s:%s" "${QUARKUS_CONTAINER_IMAGE_USERNAME}" "${QUARKUS_CONTAINER_IMAGE_PASSWORD}" | base64 | tr -d '\n')\"}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/src/main/docker/generator"
+      --dockerfile "${CI_PROJECT_DIR}/src/main/docker/generator/Containerfile"
+      --destination "quay.io/goldmann/sbomer-generator:latest"
   only: [main]
   tags: [docker]
   needs:
