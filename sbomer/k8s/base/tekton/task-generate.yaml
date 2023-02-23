@@ -1,0 +1,53 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sbomer-generate
+spec:
+  params:
+    - name: workdir
+      type: string
+    - name: additional-domino-args
+      type: string
+      default: "--include-non-managed"
+    - name: build-id
+      type: string
+  steps:
+    - name: generate
+      image: quay.io/goldmann/sbomer-generator:latest
+      script: |
+        #!/usr/bin/env bash
+
+        source ~/.sdkman/bin/sdkman-init.sh
+
+
+        cd $(workspaces.data.path)/$(params.workdir)
+
+        echo "Working from the `pwd` directory"       
+
+        echo "Domino version:"
+        java -jar ~/domino.jar version
+
+        BOM_PATH="$(workspaces.data.path)/$(params.workdir)/bom.json"
+
+        echo "Running SBOM generation:"
+        java -jar ~/domino.jar from-maven report --project-dir=source --output-file=${BOM_PATH} --manifest -s ~/settings.xml $(params.additional-domino-args)
+
+        cat ${BOM_PATH}
+
+        echo "Done, SBOM generated at: ${BOM_PATH}"
+
+        printf "%s" "${BOM_PATH}" > "$(results.bom.path)"
+    - name: "publish"
+      image: quay.io/goldmann/sbomer-generator:latest
+      script: |
+        #!/usr/bin/env bash
+
+        jq -s '{buildId: "$(params.workdir)", bom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
+
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/sboms
+  results:
+    - name: "bom"
+      description: "Path to the generated SBOM"
+  workspaces:
+    - name: data
+      description: Main workspace
