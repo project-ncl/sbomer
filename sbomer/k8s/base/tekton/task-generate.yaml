@@ -62,7 +62,7 @@ spec:
 
         jq -s '{buildId: "$(params.build-id)", bom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
 
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/sboms
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/api/v1/sboms
   results:
     - name: "bom"
       description: "Path to the generated SBOM"

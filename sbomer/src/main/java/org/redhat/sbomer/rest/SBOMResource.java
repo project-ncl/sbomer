@@ -17,14 +17,9 @@
  */
 package org.redhat.sbomer.rest;
 
-import java.util.List;
-import java.util.Set;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -37,6 +32,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.redhat.sbomer.dto.BaseSBOM;
@@ -46,11 +45,11 @@ import org.redhat.sbomer.validation.exceptions.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Path("/sboms")
+@Path("/api/v1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Tag(name = "SBOMs", description = "Endpoints related to SBOM handling")
+@Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1")
 @Slf4j
 public class SBOMResource {
 
@@ -60,7 +59,7 @@ public class SBOMResource {
     /**
      * Make it possible to create a {@link BaseSBOM} resource directly from the endpoint.
      *
-     * TODO: We probably shouldn't be really exposing this endpoint, but it's convenient at development.
+     * TODO: Add authentication. It should be possible to create new SBOM's this way only from trusted places.
      *
      * @param sbom
      * @return
@@ -68,8 +67,17 @@ public class SBOMResource {
     @POST
     @Operation(
             summary = "Create SBOM",
-            description = "Save submitted SBOM. This endpoint expects an SBOM in the CycloneDX format serialized to JSON.")
-    public Response take(final BaseSBOM sbom) {
+            description = "Save submitted SBOM. This endpoint expects an SBOM in the CycloneDX format encapsulated in the BaseSBOM structure.")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "201",
+                    description = "The SBOM was successfully saved",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Provided SBOM couldn't be saved, probably due to validation failures",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response create(final BaseSBOM sbom) {
         try {
             sbomService.saveBom(sbom);
             return Response.status(Status.CREATED).entity(sbom).build();
@@ -82,8 +90,13 @@ public class SBOMResource {
     @Operation(
             summary = "Create SBOM based on the PNC build",
             description = "SBOM generation for a particular PNC build Id offloaded to the service")
-    @Path("{id}")
-    public Response fromBuild(@PathParam("id") String id) throws Exception {
+    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Path("{buildId}")
+    @APIResponses({ @APIResponse(
+            responseCode = "201",
+            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response fromBuild(@PathParam("buildId") String id) throws Exception {
 
         sbomService.createBomFromPncBuild(id);
 
@@ -92,7 +105,11 @@ public class SBOMResource {
     }
 
     @GET
-    @Operation(summary = "List of all SBOMs", description = "List all SBOMs available in the system")
+    @Operation(summary = "List SBOMs", description = "List SBOMs available in the system in a paginated way")
+    @APIResponses({ @APIResponse(
+            responseCode = "200",
+            description = "List of SBOMs in the system for a particular page and size.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Page<BaseSBOM> list(@Valid @BeanParam PaginationParameters paginationParams) {
         return sbomService.listBaseSboms(paginationParams.getPageIndex(), paginationParams.getPageSize());
     }
@@ -100,6 +117,16 @@ public class SBOMResource {
     @GET
     @Path("{buildId}")
     @Operation(summary = "Get specific BaseSBOM", description = "Get a specific BaseSBOM by the PNC buildId")
+    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The BaseSBOM structure for a specific PNC buildId.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "The BaseSBOM for the particular buildID couldn't be found in the system.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public BaseSBOM get(@PathParam("buildId") String buildId) {
         return sbomService.getBaseSbom(buildId);
     }
