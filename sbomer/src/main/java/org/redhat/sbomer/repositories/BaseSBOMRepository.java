@@ -28,12 +28,12 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 public class BaseSBOMRepository implements PanacheRepositoryBase<BaseSBOM, Long> {
 
     public BaseSBOM getBaseSbom(String buildId) {
-        return find(BaseSBOM.FIND_BY_BUILDID, buildId).singleResult();
+        return find("#" + BaseSBOM.FIND_BY_BUILDID, buildId).singleResult();
     }
 
     @Transactional
     public BaseSBOM saveBom(BaseSBOM baseSbom) {
-        persist(baseSbom);
+        persistAndFlush(baseSbom);
         return baseSbom;
     }
 
