@@ -15,26 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.repositories;
+package org.redhat.sbomer.test;
 
-import javax.enterprise.context.ApplicationScoped;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import javax.enterprise.inject.Stereotype;
 import javax.transaction.Transactional;
 
-import org.redhat.sbomer.model.BaseSBOM;
+import io.quarkus.test.junit.QuarkusTest;
 
-import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
-
-@ApplicationScoped
-public class BaseSBOMRepository implements PanacheRepositoryBase<BaseSBOM, Long> {
-
-    public BaseSBOM getBaseSbom(String buildId) {
-        return find("#" + BaseSBOM.FIND_BY_BUILDID, buildId).singleResult();
-    }
-
-    @Transactional
-    public BaseSBOM saveBom(BaseSBOM baseSbom) {
-        persistAndFlush(baseSbom);
-        return baseSbom;
-    }
-
+@QuarkusTest
+@Stereotype
+@Transactional
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface QuarkusTransactionalTest {
 }
