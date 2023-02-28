@@ -26,9 +26,11 @@ import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.ws.rs.NotFoundException;
 
 import org.redhat.sbomer.model.BaseSBOM;
 import org.redhat.sbomer.repositories.BaseSBOMRepository;
@@ -86,8 +88,12 @@ public class SBOMService {
 
     public org.redhat.sbomer.dto.BaseSBOM getBaseSbom(String buildId) {
         log.debug("Getting base SBOMS with buildId: {}", buildId);
-        BaseSBOM dbEntity = repository.getBaseSbom(buildId);
-        return baseSBOMMapper.toDTO(dbEntity);
+        try {
+            BaseSBOM dbEntity = repository.getBaseSbom(buildId);
+            return baseSBOMMapper.toDTO(dbEntity);
+        } catch (NoResultException nre) {
+            throw new NotFoundException("Base SBOM for build id " + buildId + " not found.");
+        }
     }
 
     /**
