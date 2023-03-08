@@ -24,6 +24,9 @@ quarkus:
     path: /api
   datasource:
     db-kind: postgresql
+  smallrye-openapi:
+    info-title: SBOMer service
+
 
 "%dev":
   quarkus:
@@ -37,9 +40,13 @@ quarkus:
 
     hibernate-orm:
       database:
-        generation: drop-and-create
+        generation:
+           drop-and-create
       log:
         sql: true
+
+    smallrye-openapi:
+      info-title: SBOMer service (development)
 
   sbomer:
     generation:
