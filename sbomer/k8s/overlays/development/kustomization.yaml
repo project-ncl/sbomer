@@ -24,6 +24,8 @@ resources:
   - database/statefulset.yaml
   - database/service.yaml
   - database/pvc.yaml
+    # This is in sync with OpenShift Pipelines 1.8.x which is deployed in our stage and production environments
+    # We need to ensure that it works in development as well.
   - https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.37.5/release.yaml
 generatorOptions:
   disableNameSuffixHash: true

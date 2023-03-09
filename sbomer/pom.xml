@@ -38,13 +38,13 @@
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
     <version.cyclonedx>7.3.1</version.cyclonedx>
+    <version.domino>0.0.76</version.domino>
     <version.hibernatetypes>1.0.1</version.hibernatetypes>
     <version.lombok>1.18.26</version.lombok>
+    <version.mapstruct>1.4.2.Final</version.mapstruct>
     <version.pnc-api>2.4.3</version.pnc-api>
     <version.quarkus-jgit>2.3.1</version.quarkus-jgit>
-    <version.domino>0.0.76</version.domino>
     <version.tekton-client>0.6.0</version.tekton-client>
-    <version.mapstruct>1.4.2.Final</version.mapstruct>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -129,7 +129,6 @@
       <artifactId>quarkus-jgit</artifactId>
       <version>${version.quarkus-jgit}</version>
     </dependency>
-    <!-- mapstruct dependency -->
     <dependency>
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct</artifactId>
@@ -140,6 +139,10 @@
       <artifactId>mapstruct-processor</artifactId>
       <version>${version.mapstruct}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-container-image-docker</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -165,7 +168,7 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5-mockito</artifactId>
       <scope>test</scope>
-  </dependency>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -223,7 +226,6 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <tagNameFormat>@{project.version}${tagSuffix}</tagNameFormat>
@@ -249,9 +251,6 @@
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
         <version>2.21.0</version>
-        <configuration>
-          <configFile>eclipse-codeStyle.xml</configFile>
-        </configuration>
         <executions>
           <execution>
             <id>java-format</id>
@@ -260,11 +259,22 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <configFile>eclipse-codeStyle.xml</configFile>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
         <version>3.0</version>
+        <executions>
+          <execution>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <properties>
             <copyright-years>${project.inceptionYear}</copyright-years>
@@ -277,29 +287,20 @@
             <exclude>**/README</exclude>
             <exclude>**/LICENSE.txt</exclude>
             <exclude>**/Dockerfile**</exclude>
+            <exclude>**/Containerfile**</exclude>
             <exclude>**/eclipse-codeStyle.xml</exclude>
             <exclude>.github/dependabot.yml</exclude>
             <exclude>.mvn/**</exclude>
             <exclude>.m2/**</exclude>
             <exclude>mvnw**</exclude>
+            <exclude>**/secret*.txt</exclude>
           </excludes>
         </configuration>
-        <executions>
-          <execution>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
         <version>2.21.0</version>
-        <configuration>
-          <configFile>eclipse-codeStyle.xml</configFile>
-        </configuration>
         <executions>
           <execution>
             <id>java-format</id>
@@ -308,6 +309,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <configFile>eclipse-codeStyle.xml</configFile>
+        </configuration>
       </plugin>
     </plugins>
   </build>
