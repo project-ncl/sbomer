@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.rest;
+package org.redhat.sbomer.rest.v1alpha1;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -45,7 +45,7 @@ import org.redhat.sbomer.validation.exceptions.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Path("/api/v1/sboms")
+@Path("/api/v1alpha1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
