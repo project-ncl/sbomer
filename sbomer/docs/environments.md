@@ -82,10 +82,14 @@ And you're all set!
 WARNING: A container engine is required. Below it is assumed that Podman is available. If you use a different engine,
 you need to adjust the command accordingly.
 
-The database can be started with following command:
+The database container can be started in `detach` mode with the following command:
 
 ```
-podman run -it --rm -e POSTGRESQL_USER=username -e POSTGRESQL_PASSWORD=password -e POSTGRESQL_DATABASE=sbomer -p 5432:5432 registry.redhat.io/rhel9/postgresql-13@sha256:31fbd226db60cb48ff169491a8b88e69ec727c575ba76dc6095c87f70932b777
+podman run -d --rm \
+  -e POSTGRESQL_USER=username \
+  -e POSTGRESQL_PASSWORD=password \
+  -e POSTGRESQL_DATABASE=sbomer \
+  -p 5432:5432 registry.redhat.io/rhel9/postgresql-13@sha256:31fbd226db60cb48ff169491a8b88e69ec727c575ba76dc6095c87f70932b777
 ```
 
 NOTE: You can authenticate with the registry.redhat.io registry by
@@ -95,14 +99,42 @@ you want as well.
 Please note that no data will be preserved when you restart the PostgreSQL container. If this is not what you expect you
 can add persistence with [volumes](https://docs.podman.io/en/latest/volume.html), for example.
 
+### Run local development environment
+
+To start SBOMer development environment:
+```
+./mvnw quarkus:dev
+```
+
 ## Local Kubernetes development environment
 
 ### Setting up Minikube
 
+#### Prerequisites
+
+1. Please make sure `kubectl` binary [is installed](https://kubernetes.io/docs/tasks/tools/) as the setup expects kustomize functionality to be available during resources provisioning.
+2. `sbomer/k8s/overlays/development/secrets/` directory should contain 2 files:
+  * `secret-postgresql.txt` with the following content
+  ```
+  cat > secret-postgresql.txt << EOF
+  POSTGRESQL_USER=username
+  POSTGRESQL_PASSWORD=password
+  POSTGRESQL_DATABASE=sbomer
+  EOF
+  ```
+  * `secret-redhatio.json` with `${XDG_RUNTIME_DIR}/containers/auth.json` or `$HOME/.docker/config.json` file contents. Please auth against registry.redhat.io first.
+
 This environment makes use of [Minikube](https://minikube.sigs.k8s.io/docs/).
 
 ```
-minikube start --driver=kvm2 --cpus=4 --memory=6g --disk-size=30GB --kubernetes-version=v1.23.16 --embed-certs -p sbomer
+minikube start \
+  --driver=kvm2 \
+  --cpus=4 \
+  --memory=6g \
+  --disk-size=30GB \
+  --kubernetes-version=v1.23.16 \
+  --embed-certs \
+  -p sbomer
 ```
 
 NOTE: If you use a different target (container engine, virtual machine manager) than KVM you need to adjust above

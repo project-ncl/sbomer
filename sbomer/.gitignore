@@ -40,3 +40,4 @@ nb-configuration.xml
 .env
 
 secret*.txt
+secret*.json
