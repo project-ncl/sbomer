@@ -32,10 +32,10 @@ generatorOptions:
 secretGenerator:
   - name: sbomer-postgres
     envs:
-      - secret-postgresql.txt
+      - secrets/secret-postgresql.txt
   - name: sbomer-pull-secret
     files:
-      - .dockerconfigjson=secret-redhatio.txt
+      - .dockerconfigjson=secrets/secret-redhatio.json
     type: kubernetes.io/dockerconfigjson
 patchesStrategicMerge:
   - patches/cm.yaml
