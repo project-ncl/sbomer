@@ -33,7 +33,7 @@ public class SBOMResourceTest {
 
     @Test
     public void testExistenceOfSbomsEndpoint() {
-        given().when().get("/api/v1/sboms").then().statusCode(200);
+        given().when().get("/api/v1alpha1/sboms").then().statusCode(200);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class SBOMResourceTest {
         with().body(TestResources.asString("payloads/payload-valid.json"))
                 .when()
                 .contentType(ContentType.JSON)
-                .request("POST", "/api/v1/sboms")
+                .request("POST", "/api/v1alpha1/sboms")
                 .then()
                 .statusCode(201);
     }
@@ -51,7 +51,7 @@ public class SBOMResourceTest {
         with().body(TestResources.asString("payloads/payload-invalid-json.json"))
                 .when()
                 .contentType(ContentType.JSON)
-                .request("POST", "/api/v1/sboms")
+                .request("POST", "/api/v1alpha1/sboms")
                 .then()
                 .statusCode(400);
     }
@@ -61,7 +61,7 @@ public class SBOMResourceTest {
         with().body(TestResources.asString("payloads/payload-invalid-bom.json"))
                 .when()
                 .contentType(ContentType.JSON)
-                .request("POST", "/api/v1/sboms")
+                .request("POST", "/api/v1alpha1/sboms")
                 .then()
                 .statusCode(400)
                 .body(

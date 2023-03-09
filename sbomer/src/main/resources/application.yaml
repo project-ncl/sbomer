@@ -19,6 +19,7 @@
 quarkus:
   container-image:
     image: quay.io/goldmann/sbomer:latest
+    builder: jib
   swagger-ui:
     always-include: true
     path: /api
