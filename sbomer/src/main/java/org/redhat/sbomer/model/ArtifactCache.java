@@ -29,15 +29,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 
-import org.cyclonedx.BomGeneratorFactory;
-import org.cyclonedx.CycloneDxSchema.Version;
 import org.cyclonedx.exception.ParseException;
-import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.redhat.sbomer.validation.ArtifactJsonProperty;
 import org.redhat.sbomer.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -51,8 +49,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import static org.redhat.sbomer.utils.SbomUtils.schemaVersion;
-
 @DynamicUpdate
 @Getter
 @Setter
@@ -61,43 +57,25 @@ import static org.redhat.sbomer.utils.SbomUtils.schemaVersion;
 @TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 @ToString
 @Table(
-        name = "base_sbom",
-        indexes = { @Index(name = "idx_basesbom_buildid", columnList = "build_id") },
-        uniqueConstraints = @UniqueConstraint(name = "uq_basesbom_buildid", columnNames = { "build_id" }))
-@NamedQueries({ @NamedQuery(name = BaseSBOM.FIND_BY_BUILDID, query = "FROM BaseSBOM WHERE buildId = ?1") })
-public class BaseSBOM extends PanacheEntityBase {
+        name = "artifact_cache",
+        indexes = { @Index(name = "idx_artifact_cache_purl", columnList = "purl") },
+        uniqueConstraints = @UniqueConstraint(name = "uq_artifact_cache_purl", columnNames = { "purl" }))
+@NamedQueries({ @NamedQuery(name = ArtifactCache.FIND_BY_PURL, query = "FROM ArtifactCache WHERE purl = ?1") })
+public class ArtifactCache extends PanacheEntityBase {
 
-    public static final String FIND_BY_BUILDID = "BaseSBOM.findByBuildId";
+    public static final String FIND_BY_PURL = "ArtifactCache.findByPurl";
 
     @Id
     @Column(nullable = false, updatable = false)
     private Long id;
 
-    @Column(name = "build_id", nullable = false, updatable = false)
-    @NotBlank(message = "Build identifier missing")
-    private String buildId;
-
-    private Instant generationTime;
+    @Column(name = "purl", nullable = false, updatable = false)
+    @NotBlank(message = "Purl identifier missing")
+    private String purl;
 
     @Type(type = JsonTypes.JSON_BIN)
-    @Column(name = "sbom", columnDefinition = JsonTypes.JSON_BIN)
-    @CycloneDxBom
-    private JsonNode sbom;
+    @Column(name = "info", columnDefinition = JsonTypes.JSON_BIN)
+    @ArtifactJsonProperty
+    private JsonNode info;
 
-    @JsonIgnore
-    public Bom getCycloneDxBom() {
-        try {
-            return new JsonParser().parse(sbom.textValue().getBytes());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), new Bom());
-            return new JsonParser().parse(generator.toJsonNode().textValue().getBytes());
-        } catch (ParseException e) {
-            return null;
-        }
-
-    }
 }

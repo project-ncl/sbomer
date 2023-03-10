@@ -17,8 +17,7 @@
  */
 package org.redhat.sbomer.mappers.api;
 
-import org.redhat.sbomer.model.BaseSBOM;
-
+import org.redhat.sbomer.model.ArtifactCache;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -29,20 +28,18 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.ERROR,
         implementationPackage = "org.redhat.sbomer.mappers",
         componentModel = "cdi")
-public interface BaseSBOMMapper {
+public interface ArtifactCacheMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "generationTime", ignore = true)
-    @Mapping(target = "buildId", source = "buildId")
-    @Mapping(target = "sbom", source = "bom")
-    @BeanMapping(ignoreUnmappedSourceProperties = { "cycloneDxBom", "generationTime", "id" })
-    BaseSBOM toEntity(org.redhat.sbomer.dto.BaseSBOM dtoEntity);
+    @Mapping(target = "purl", source = "purl")
+    @Mapping(target = "info", source = "info")
+    @BeanMapping(ignoreUnmappedSourceProperties = { "artifactInfo", "id" })
+    ArtifactCache toEntity(org.redhat.sbomer.dto.ArtifactCache dtoEntity);
 
     @Mapping(target = "id", expression = "java( dbEntity.getId().toString() )")
-    @Mapping(target = "buildId", source = "buildId")
-    @Mapping(target = "generationTime", source = "generationTime")
-    @Mapping(target = "bom", source = "sbom")
-    @BeanMapping(ignoreUnmappedSourceProperties = { "persistent", "cycloneDxBom", "id" })
-    org.redhat.sbomer.dto.BaseSBOM toDTO(BaseSBOM dbEntity);
+    @Mapping(target = "purl", source = "purl")
+    @Mapping(target = "info", source = "info")
+    @BeanMapping(ignoreUnmappedSourceProperties = { "persistent", "id" })
+    org.redhat.sbomer.dto.ArtifactCache toDTO(ArtifactCache dbEntity);
 
 }

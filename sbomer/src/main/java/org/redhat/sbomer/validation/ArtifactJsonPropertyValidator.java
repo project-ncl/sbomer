@@ -18,62 +18,43 @@
 package org.redhat.sbomer.validation;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.cyclonedx.CycloneDxSchema.Version;
-import org.cyclonedx.exception.ParseException;
-import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
-import static org.redhat.sbomer.utils.SbomUtils.schemaVersion;
+public class ArtifactJsonPropertyValidator implements ConstraintValidator<ArtifactJsonProperty, JsonNode> {
 
-public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
+    private ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     @Override
     public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
         if (value == null) {
-            context.unwrap(HibernateConstraintValidatorContext.class).addMessageParameter("errors", "missing BOM");
+            context.unwrap(HibernateConstraintValidatorContext.class)
+                    .addMessageParameter("errors", "missing artifact property");
             return false;
         }
 
-        List<ParseException> exceptions = Collections.emptyList();
-
         try {
             if (value instanceof ObjectNode) {
-                exceptions = new JsonParser().validate(value, schemaVersion());
+                mapper.readTree(((ObjectNode) value).asText());
             } else {
-                exceptions = new JsonParser().validate(value.textValue().getBytes(), schemaVersion());
-            }
-
-            if (exceptions.isEmpty()) {
-                return true;
+                mapper.readTree(((TextNode) value).toString());
             }
 
         } catch (IOException e) {
             context.unwrap(HibernateConstraintValidatorContext.class)
                     .addMessageParameter("errors", "unable to parse object");
-
             return false;
         }
-
-        context.unwrap(HibernateConstraintValidatorContext.class)
-                .addMessageParameter(
-                        "errors",
-                        exceptions.stream()
-                                .map(cv -> "bom" + cv.getMessage().substring(1))
-                                .toList()
-                                .stream()
-                                .collect(Collectors.joining(", ")));
-
-        return false;
+        return true;
     }
 
 }
