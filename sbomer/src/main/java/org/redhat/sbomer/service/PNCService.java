@@ -17,12 +17,21 @@
  */
 package org.redhat.sbomer.service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.client.RemoteResourceNotFoundException;
+import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.redhat.sbomer.errors.ApplicationException;
 
 /**
  * A service to interact with the PNC build system.
@@ -52,13 +61,38 @@ public class PNCService {
 
         try {
             return client.getSpecific(buildId);
-        } catch (RemoteResourceException e) {
-            e.printStackTrace();
+        } catch (RemoteResourceNotFoundException ex) {
+            throw new ApplicationException("Build was not found in PNC", ex);
+        } catch (RemoteResourceException ex) {
+            throw new ApplicationException("Build could not be retrieved because PNC responded with an error", ex);
         }
+    }
 
-        // TODO: Change this to throw an exception instead
+    /**
+     * Fetch information about the PNC {@link Artifact} identified by the particular purl.
+     *
+     * @param purl
+     * @return
+     */
+    public Artifact getArtifact(String purl) {
+        ArtifactClient client = new ArtifactClient(getConfiguration());
+
+        try {
+            String encodedPurl = URLEncoder.encode(purl, StandardCharsets.UTF_8);
+
+            Iterator<Artifact> artifacts = client
+                    .getAll(null, null, null, Optional.empty(), Optional.of("purl==%22" + encodedPurl + "%22"))
+                    .getAll()
+                    .iterator();
+            if (artifacts.hasNext()) {
+                return artifacts.next();
+            }
+        } catch (RemoteResourceNotFoundException ex) {
+            throw new ApplicationException("Artifact was not found in PNC", ex);
+        } catch (RemoteResourceException ex) {
+            throw new ApplicationException("Artifact could not be retrieved because PNC responded with an error", ex);
+        }
         return null;
-
     }
 
 }
