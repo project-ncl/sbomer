@@ -23,10 +23,12 @@ import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -50,7 +52,6 @@ import lombok.extern.slf4j.Slf4j;
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 @Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1")
-@Slf4j
 public class SBOMResource {
 
     @Inject
@@ -133,20 +134,28 @@ public class SBOMResource {
 
     @POST
     @Operation(
-            summary = "Augment SBOM into properties field, based on the PNC build",
-            description = "SBOM augmentation (inside the component properties) for a particular PNC build Id")
+            summary = "Enrich SBOM based on the PNC build",
+            description = "SBOM enrichment for a particular PNC build Id. Only sbom-spec currently available is `properties`")
     @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    @Path("/augment/properties/{buildId}")
+    @Path("/enrich/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "201",
-            description = "Schedules augmentation of an existing SBOM for a particular PNC buildId. This will be an asynchronous call. It will execute the generation behind the scenes.",
+            description = "Executes the enrichment of an existing SBOM for a particular PNC buildId.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response augmentPropertiesOfBuild(@PathParam("buildId") String id) throws Exception {
+    public Response runEnrichmentOfBaseSbom(
+            @PathParam("buildId") String buildId,
+            @QueryParam("sbomSpec") String sbomSpec) throws Exception {
 
-        sbomService.augmentBaseSbomOfPNCBuild(id);
-
-        // Nothing is happening, yet!
-        return Response.status(Status.ACCEPTED).build();
+        try {
+            org.redhat.sbomer.dto.BaseSBOM enrichedSBOM = sbomService.runEnrichmentOfBaseSbom(buildId, sbomSpec);
+            return Response.status(Response.Status.OK).entity(enrichedSBOM).build();
+        } catch (NotFoundException nfe) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("No existing baseSBOM for buildId: " + buildId)
+                    .build();
+        } catch (ValidationException vExc) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(vExc.getMessage()).build();
+        }
     }
 
 }

@@ -19,7 +19,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: sbom-generator
+  name: sbom-generator-domino
 spec:
   params:
     - name: git-url

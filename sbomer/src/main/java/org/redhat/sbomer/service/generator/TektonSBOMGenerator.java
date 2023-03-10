@@ -51,7 +51,7 @@ public class TektonSBOMGenerator implements SBOMGenerator {
                 .endMetadata()
                 .withNewSpec()
                 .withNewPipelineRef()
-                .withName("sbom-generator")
+                .withName("sbom-generator-domino")
                 .endPipelineRef()
                 .withNewPodTemplate()
                 .withSecurityContext(

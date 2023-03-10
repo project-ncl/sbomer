@@ -174,13 +174,24 @@ public class SBOMService {
     }
 
     @Transactional
-    public void augmentBaseSbomOfPNCBuild(String buildId) throws NotFoundException {
+    public org.redhat.sbomer.dto.BaseSBOM runEnrichmentOfBaseSbom(String buildId, String sbomSpec)
+            throws NotFoundException, ValidationException {
 
         try {
             org.redhat.sbomer.dto.BaseSBOM initialBaseSBOM = getBaseSbom(buildId);
             Bom bom = new org.cyclonedx.parsers.JsonParser().parse(initialBaseSBOM.getBom().textValue().getBytes());
-            Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
-            updateBom(initialBaseSBOM.getId(), modifiedBom);
+
+            // TODO change and improve with different strategies
+            // TODO need to switch to async futures
+            if (sbomSpec != null && "properties".equalsIgnoreCase(sbomSpec)) {
+                Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer)
+                        .runTransformers(bom);
+                return updateBom(initialBaseSBOM.getId(), modifiedBom);
+            } else {
+                Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer)
+                        .runTransformers(bom);
+                return updateBom(initialBaseSBOM.getId(), modifiedBom);
+            }
         } catch (ParseException e) {
             throw new ValidationException("Could not convert initial SBOM of build " + buildId);
         }
