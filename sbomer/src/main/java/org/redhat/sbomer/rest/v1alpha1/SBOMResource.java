@@ -131,4 +131,22 @@ public class SBOMResource {
         return sbomService.getBaseSbom(buildId);
     }
 
+    @POST
+    @Operation(
+            summary = "Augment SBOM into properties field, based on the PNC build",
+            description = "SBOM augmentation (inside the component properties) for a particular PNC build Id")
+    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Path("/augment/properties/{buildId}")
+    @APIResponses({ @APIResponse(
+            responseCode = "201",
+            description = "Schedules augmentation of an existing SBOM for a particular PNC buildId. This will be an asynchronous call. It will execute the generation behind the scenes.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response augmentPropertiesOfBuild(@PathParam("buildId") String id) throws Exception {
+
+        sbomService.augmentBaseSbomOfPNCBuild(id);
+
+        // Nothing is happening, yet!
+        return Response.status(Status.ACCEPTED).build();
+    }
+
 }

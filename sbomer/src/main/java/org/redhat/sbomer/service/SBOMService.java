@@ -38,6 +38,8 @@ import org.redhat.sbomer.model.BaseSBOM;
 import org.redhat.sbomer.repositories.ArtifactCacheRepository;
 import org.redhat.sbomer.repositories.BaseSBOMRepository;
 import org.redhat.sbomer.service.generator.SBOMGenerator;
+import org.redhat.sbomer.transformer.PncArtifactsToPropertiesSbomTransformer;
+import org.redhat.sbomer.transformer.SbomManipulator;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -45,6 +47,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema.Version;
+import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.jboss.pnc.common.concurrent.Sequence;
 import org.jboss.pnc.common.json.JsonUtils;
@@ -89,6 +92,12 @@ public class SBOMService {
 
     @Inject
     Validator validator;
+
+    @Inject
+    SbomManipulator sbomManipulator;
+
+    @Inject
+    PncArtifactsToPropertiesSbomTransformer artifactsToPropertiesSbomTransformer;
 
     /**
      * Runs the generation of SBOM using the available implementation of the generator. This is done in an asynchronous
@@ -162,6 +171,19 @@ public class SBOMService {
 
         baseSbomRepository.getEntityManager().merge(dbEntity);
         return baseSBOMMapper.toDTO(dbEntity);
+    }
+
+    @Transactional
+    public void augmentBaseSbomOfPNCBuild(String buildId) throws NotFoundException {
+
+        try {
+            org.redhat.sbomer.dto.BaseSBOM initialBaseSBOM = getBaseSbom(buildId);
+            Bom bom = new org.cyclonedx.parsers.JsonParser().parse(initialBaseSBOM.getBom().textValue().getBytes());
+            Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
+            updateBom(initialBaseSBOM.getId(), modifiedBom);
+        } catch (ParseException e) {
+            throw new ValidationException("Could not convert initial SBOM of build " + buildId);
+        }
     }
 
     public Page<org.redhat.sbomer.dto.ArtifactCache> listArtifactCache(int pageIndex, int pageSize) {
