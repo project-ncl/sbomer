@@ -220,7 +220,7 @@ public class TestSBOMService {
             scmRevision = findPropertyWithNameInComponent(SBOM_RED_HAT_SCM_REVISION, foundInPNCComponent);
             assertEquals("6f25bf15308ee95ef5a9783412be2b0557c9046d", scmRevision.get().getValue());
 
-            sbomService.updateBom(baseSBOM.getId(), modifiedBom);
+            sbomService.updateBom(Long.valueOf(baseSBOM.getId()), modifiedBom);
 
             // Now getting again from DB and re-run all the previous checks
             BaseSBOM updatedBaseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);

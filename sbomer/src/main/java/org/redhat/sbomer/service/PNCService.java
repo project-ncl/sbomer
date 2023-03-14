@@ -27,6 +27,7 @@ import javax.enterprise.context.ApplicationScoped;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.Configuration;
+import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.client.RemoteResourceNotFoundException;
 import org.jboss.pnc.dto.Artifact;
@@ -78,21 +79,21 @@ public class PNCService {
         ArtifactClient client = new ArtifactClient(getConfiguration());
 
         try {
-            String encodedPurl = URLEncoder.encode(purl, StandardCharsets.UTF_8);
-
-            Iterator<Artifact> artifacts = client
-                    .getAll(null, null, null, Optional.empty(), Optional.of("purl==%22" + encodedPurl + "%22"))
-                    .getAll()
-                    .iterator();
-            if (artifacts.hasNext()) {
-                return artifacts.next();
+            String artifactQuery = "purl==\"" + purl + "\"";
+            RemoteCollection<Artifact> artifacts = client
+                    .getAll(null, null, null, Optional.empty(), Optional.of(artifactQuery));
+            if (artifacts.size() == 0) {
+                return null;
+            } else if (artifacts.size() > 1) {
+                throw new IllegalStateException("There should exist only one artifact with purl " + purl);
             }
+            Artifact singleArtifact = artifacts.iterator().next();
+            return singleArtifact;
         } catch (RemoteResourceNotFoundException ex) {
             throw new ApplicationException("Artifact was not found in PNC", ex);
         } catch (RemoteResourceException ex) {
             throw new ApplicationException("Artifact could not be retrieved because PNC responded with an error", ex);
         }
-        return null;
     }
 
 }

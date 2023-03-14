@@ -154,10 +154,10 @@ public class SBOMService {
     }
 
     @Transactional
-    public org.redhat.sbomer.dto.BaseSBOM updateBom(String id, Bom bom) throws ValidationException {
+    public org.redhat.sbomer.dto.BaseSBOM updateBom(Long id, Bom bom) throws ValidationException {
         log.info("Updating SBOM of existing baseSBOM with id: {}", id);
 
-        BaseSBOM dbEntity = baseSbomRepository.findById(Long.valueOf(id));
+        BaseSBOM dbEntity = baseSbomRepository.findById(id);
         BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), bom);
         dbEntity.setSbom(generator.toJsonNode());
 
@@ -173,14 +173,12 @@ public class SBOMService {
         return baseSBOMMapper.toDTO(dbEntity);
     }
 
-    @Transactional
     public org.redhat.sbomer.dto.BaseSBOM runEnrichmentOfBaseSbom(String buildId, String sbomSpec)
             throws NotFoundException, ValidationException {
 
-        try {
-            org.redhat.sbomer.dto.BaseSBOM initialBaseSBOM = getBaseSbom(buildId);
-            Bom bom = new org.cyclonedx.parsers.JsonParser().parse(initialBaseSBOM.getBom().textValue().getBytes());
-
+        BaseSBOM initialBaseSBOM = baseSbomRepository.getBaseSbom(buildId);
+        Bom bom = initialBaseSBOM.getCycloneDxBom();
+        if (bom != null) {
             // TODO change and improve with different strategies
             // TODO need to switch to async futures
             if (sbomSpec != null && "properties".equalsIgnoreCase(sbomSpec)) {
@@ -192,9 +190,10 @@ public class SBOMService {
                         .runTransformers(bom);
                 return updateBom(initialBaseSBOM.getId(), modifiedBom);
             }
-        } catch (ParseException e) {
+        } else {
             throw new ValidationException("Could not convert initial SBOM of build " + buildId);
         }
+
     }
 
     public Page<org.redhat.sbomer.dto.ArtifactCache> listArtifactCache(int pageIndex, int pageSize) {
