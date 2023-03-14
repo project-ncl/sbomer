@@ -19,13 +19,19 @@ package org.redhat.sbomer.test;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
-import javax.json.stream.JsonParsingException;
+import javax.inject.Inject;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
-import org.junit.jupiter.api.Assertions;
+import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
+import org.jboss.pnc.common.json.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.redhat.sbomer.model.BaseSBOM;
 import org.redhat.sbomer.repositories.BaseSBOMRepository;
@@ -33,29 +39,31 @@ import org.redhat.sbomer.repositories.BaseSBOMRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import groovy.util.logging.Slf4j;
 import io.quarkus.arc.Priority;
 import io.quarkus.logging.Log;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Priority(1)
 @Alternative
 @ApplicationScoped
 @QuarkusTransactionalTest
-@Slf4j
 public class TestBaseSBOMRepository extends BaseSBOMRepository {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    @Inject
+    Validator validator;
 
     private BaseSBOM createBaseSBOM() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid.json");
-        JsonNode sbom = mapper.readTree(bom);
+        JsonNode sbom = JsonUtils.fromJson(bom, JsonNode.class);
         BaseSBOM baseSBOM = new BaseSBOM();
         baseSBOM.setBuildId("ARYT3LBXDVYAC");
         baseSBOM.setId(416640206274228224L);
         baseSBOM.setGenerationTime(Instant.now());
         baseSBOM.setSbom(sbom);
+
         return baseSBOM;
     }
 
@@ -72,17 +80,45 @@ public class TestBaseSBOMRepository extends BaseSBOMRepository {
     @Test
     public void testGetBaseSbom() throws JsonProcessingException, JsonMappingException {
         BaseSBOM baseSBOM = getBaseSbom("ARYT3LBXDVYAC");
-        Assertions.assertEquals(416640206274228224L, baseSBOM.getId());
-        Assertions.assertEquals("ARYT3LBXDVYAC", baseSBOM.getBuildId());
-        JsonNode sbom = mapper.readTree(baseSBOM.getSbom().asText());
+        Bom bom = baseSBOM.getCycloneDxBom();
 
-        Assertions.assertEquals("CycloneDX", sbom.get("bomFormat").textValue());
-        Assertions.assertEquals("CycloneDX", sbom.path("bomFormat").textValue());
-        Assertions.assertEquals(true, sbom.path("components").isArray());
-        JsonNode firstComponent = sbom.path("components").get(0);
-        Assertions.assertEquals("jcommander", firstComponent.path("name").textValue());
-        Assertions
-                .assertEquals("pkg:maven/com.beust/jcommander@1.72?type=jar", firstComponent.path("purl").textValue());
+        assertEquals(416640206274228224L, baseSBOM.getId());
+        assertEquals("ARYT3LBXDVYAC", baseSBOM.getBuildId());
+        assertEquals("CycloneDX", bom.getBomFormat());
+        Component firstComponent = bom.getComponents().get(0);
+        assertEquals("jcommander", firstComponent.getName());
+        assertEquals("pkg:maven/com.beust/jcommander@1.72?type=jar", firstComponent.getPurl());
+
+        Set<ConstraintViolation<BaseSBOM>> violations = validator.validate(baseSBOM);
+        if (!violations.isEmpty()) {
+            Log.error(
+                    "violations: " + violations.stream()
+                            .map(e -> e.getMessage().toString())
+                            .collect(Collectors.joining("\n\t")));
+            fail("Validation errors on the baseSBOM entity should be empty!");
+        }
+    }
+
+    @Test
+    public void testFindByIdBaseSbom() {
+        BaseSBOM baseSBOM = findById(416640206274228224L);
+        Bom bom = baseSBOM.getCycloneDxBom();
+
+        assertEquals(416640206274228224L, baseSBOM.getId());
+        assertEquals("ARYT3LBXDVYAC", baseSBOM.getBuildId());
+        assertEquals("CycloneDX", bom.getBomFormat());
+        Component firstComponent = bom.getComponents().get(0);
+        assertEquals("jcommander", firstComponent.getName());
+        assertEquals("pkg:maven/com.beust/jcommander@1.72?type=jar", firstComponent.getPurl());
+
+        Set<ConstraintViolation<BaseSBOM>> violations = validator.validate(baseSBOM);
+        if (!violations.isEmpty()) {
+            Log.error(
+                    "violations: " + violations.stream()
+                            .map(e -> e.getMessage().toString())
+                            .collect(Collectors.joining("\n\t")));
+            fail("Validation errors on the baseSBOM entity should be empty!");
+        }
     }
 
 }

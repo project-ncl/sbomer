@@ -1,0 +1,16 @@
+{
+  "identifier": "com.aayushatharva.brotli4j:brotli4j:jar:1.8.0.redhat-00003",
+  "purl": "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar",
+  "md5": "493ac341ddf64842497573deca9bee8c",
+  "sha1": "1fbe7cf5e48440584eee5b8da33f009bee730f9e",
+  "sha256": "75efe10bfb9d1e96c320ab9ca9daddc2aebfcc9d017be651f60cb41ed100f23f",
+  "publicUrl": "https://indy.psi.redhat.com/api/content/maven/hosted/pnc-builds/com/aayushatharva/brotli4j/brotli4j/1.8.0.redhat-00003/brotli4j-1.8.0.redhat-00003.jar",
+  "originUrl": "https://maven.repository.redhat.com/com/aayushatharva/brotli4j/brotli4j/1.8.0.redhat-00003/brotli4j-1.8.0.redhat-00003.jar",
+  "buildId": "AVOBVY3O23YAA",
+  "buildSystem": "PNC",
+  "scmUrl": "https://code.engineering.redhat.com/gerrit/hyperxpro/Brotli4j.git",
+  "scmRevision": "6f25bf15308ee95ef5a9783412be2b0557c9046d",
+  "scmTag": "1.8.0.redhat-00003",
+  "scmExternalUrl": "https://github.com/hyperxpro/Brotli4j.git",
+  "environmentImage": "quay.io/rh-newcastle/builder-rhel-8-j8-mvn3.5.4-netty-tcnative:1.0.2"
+}

@@ -16,19 +16,27 @@
 # limitations under the License.
 #
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - service/deployment.yaml
-  - service/service.yaml
-  - service/rbac.yaml
-  - service/cm.yaml
-  - https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
-  - tekton/task-generate-domino.yaml
-  - tekton/task-generate-cyclonedx.yaml
-  - tekton/task-base-enrichment.yaml
-  - tekton/pipeline-domino.yaml
-  - tekton/pipeline-cyclonedx.yaml
-  - pvc.yaml
-transformers:
-  - labels.yaml
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sbomer-base-enrichment
+spec:
+  params:
+    - name: build-id
+      type: string
+    - name: sbom-spec
+      value: sbom-spec
+  steps:
+    - name: run-base-enrichment
+      image: quay.io/goldmann/sbomer-generator:latest
+      script: |
+        #!/usr/bin/env bash
+
+        curl -vX POST -H "Content-Type: application/json" http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/api/v1alpha1/sboms/enrich/$(params.build-id)?sbomSpec=${params.sbom-spec}
+
+  results:
+    - name: "bom"
+      description: "Path to the generated SBOM"
+  workspaces:
+    - name: data
+      description: Main workspace
