@@ -5,6 +5,10 @@ RUN INSTALL_PKGS="jq unzip zip git" && \
     dnf clean all && \
     rm -rf /var/cache/* /var/log/dnf* /var/log/yum.*
 
+RUN curl -k -o /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt \
+    https://password.corp.redhat.com/RH-IT-Root-CA.crt && \ 
+    /usr/bin/update-ca-trust
+
 WORKDIR /workdir
 ENV HOME=/workdir
 

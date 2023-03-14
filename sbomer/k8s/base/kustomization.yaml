@@ -27,6 +27,7 @@ resources:
   - tekton/task-generate-domino.yaml
   - tekton/task-generate-cyclonedx.yaml
   - tekton/task-base-enrichment.yaml
+  - tekton/task-build-env.yaml
   - tekton/pipeline-domino.yaml
   - tekton/pipeline-cyclonedx.yaml
   - pvc.yaml

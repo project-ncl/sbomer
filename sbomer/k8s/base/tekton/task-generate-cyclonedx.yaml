@@ -22,6 +22,10 @@ metadata:
   name: sbomer-generate-cyclonedx
 spec:
   params:
+    - name: jdk-version
+      type: string
+    - name: mvn-version
+      type: string
     - name: workdir
       type: string
     - name: additional-cyclonedx-args
@@ -40,9 +44,12 @@ spec:
 
         source ~/.sdkman/bin/sdkman-init.sh
 
+        sdk use maven $(params.mvn-version)
+        sdk use java $(params.jdk-version)
+
         cd $(workspaces.data.path)/$(params.workdir)
 
-        echo "Working from the `pwd` directory"       
+        echo "Working from the `pwd` directory"
 
         BOM_PATH="$(workspaces.data.path)/$(params.workdir)/bom.json"
 

@@ -18,33 +18,23 @@
 #
 
 
-function install_maven() {
-  rm -rf maven
-  mkdir maven
-
-  pushd maven || exit
-
-  for version in 3.6.3 3.8.7 3.9.0; do
-
-    rm -rf apache-maven-${version}
-    curl -L https://dlcdn.apache.org/maven/maven-3/${version}/binaries/apache-maven-${version}-bin.tar.gz -o maven.tar.gz
-    tar -xf maven.tar.gz
-    rm -f maven.tar.gz
-    mv apache-maven-${version} apache-maven-${version%.*}
-  done
-
-  popd || exit
+function install_sdk() {
+  curl -s "https://get.sdkman.io" | bash
+  source .sdkman/bin/sdkman-init.sh
 }
 
 function install_java() {
-  curl -s "https://get.sdkman.io" | bash
-  source .sdkman/bin/sdkman-init.sh
-  # sdk install java 8.0.362-tem
-  # sdk install java 11.0.18-tem
-  sdk install java 17.0.6-tem
-  # sdk install java 8 "$(sdk home java 8.0.362-tem)"
-  # sdk install java 11 "$(sdk home java 11.0.18-tem)"
-  sdk install java 17 "$(sdk home java 17.0.6-tem)"
+  for java_version in 8.0.362 11.0.18 17.0.6; do
+    sdk install java ${java_version}-tem
+    sdk install java ${java_version%%.*} "$(sdk home java ${java_version}-tem)"
+  done
+}
+
+function install_maven() {
+  for mvn_version in 3.6.3 3.8.7 3.9.0; do
+    sdk install maven ${mvn_version}
+    sdk install maven ${mvn_version%.*} "$(sdk home maven ${mvn_version})"
+  done
 }
 
 function install_domino() {
@@ -56,7 +46,8 @@ function install_cert() {
   keytool -import -trustcacerts -alias redhat-ca -file RH-IT-Root-CA.crt -cacerts -noprompt -storepass changeit
 }
 
-# install_maven
+install_sdk
 install_java
+install_maven
 install_cert
 install_domino
