@@ -87,7 +87,7 @@ public class BaseSBOM extends PanacheEntityBase {
     @JsonIgnore
     public Bom getCycloneDxBom() {
         try {
-            return new JsonParser().parse(sbom.textValue().getBytes());
+            return new JsonParser().parse(sbom.isTextual() ? sbom.textValue().getBytes() : sbom.toString().getBytes());
         } catch (ParseException e) {
             e.printStackTrace();
         }
