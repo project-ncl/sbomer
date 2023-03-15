@@ -1,6 +1,6 @@
 {
   "buildId": "AWI7P3EJ23YAA",
-  "bom": {
+  "sbom": {
     "bomFormat": "CycloneDX",
     "specVersion": "1.4",
     "serialNumber": "urn:uuid:eb82ff17-f196-4539-8efa-cc98049ef4b4",

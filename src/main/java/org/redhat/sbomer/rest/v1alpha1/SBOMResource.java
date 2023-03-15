@@ -40,8 +40,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
-import org.redhat.sbomer.dto.BaseSBOM;
 import org.redhat.sbomer.dto.response.Page;
+import org.redhat.sbomer.model.BaseSBOM;
 import org.redhat.sbomer.service.SBOMService;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
 
@@ -147,7 +147,7 @@ public class SBOMResource {
             @QueryParam("sbomSpec") String sbomSpec) throws Exception {
 
         try {
-            org.redhat.sbomer.dto.BaseSBOM enrichedSBOM = sbomService.runEnrichmentOfBaseSbom(buildId, sbomSpec);
+            BaseSBOM enrichedSBOM = sbomService.runEnrichmentOfBaseSbom(buildId, sbomSpec);
             return Response.status(Response.Status.OK).entity(enrichedSBOM).build();
         } catch (NotFoundException nfe) {
             return Response.status(Response.Status.NOT_FOUND)

@@ -25,13 +25,11 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.cyclonedx.CycloneDxSchema.Version;
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import static org.redhat.sbomer.utils.SbomUtils.schemaVersion;
 
@@ -47,11 +45,9 @@ public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, 
         List<ParseException> exceptions = Collections.emptyList();
 
         try {
-            if (value instanceof ObjectNode) {
-                exceptions = new JsonParser().validate(value, schemaVersion());
-            } else {
-                exceptions = new JsonParser().validate(value.textValue().getBytes(), schemaVersion());
-            }
+            exceptions = new JsonParser().validate(
+                    value.isTextual() ? value.textValue().getBytes() : value.toString().getBytes(),
+                    schemaVersion());
 
             if (exceptions.isEmpty()) {
                 return true;

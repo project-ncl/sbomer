@@ -24,21 +24,18 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
-import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Property;
-import org.jboss.pnc.common.json.JsonUtils;
 import org.junit.jupiter.api.Test;
-import org.redhat.sbomer.dto.BaseSBOM;
 import org.redhat.sbomer.dto.response.Page;
+import org.redhat.sbomer.model.ArtifactCache;
+import org.redhat.sbomer.model.BaseSBOM;
 import org.redhat.sbomer.service.SBOMService;
 import org.redhat.sbomer.test.mock.PncServiceMock;
 import org.redhat.sbomer.transformer.PncArtifactsToPropertiesSbomTransformer;
 import org.redhat.sbomer.transformer.SbomManipulator;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.test.junit.QuarkusTest;
 import lombok.extern.slf4j.Slf4j;
@@ -122,7 +119,7 @@ public class TestSBOMService {
         log.info("testFetchArtifact ...");
         try {
             String purlFromDB = "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar";
-            org.redhat.sbomer.dto.ArtifactCache fromDB = sbomService.fetchArtifact(purlFromDB);
+            ArtifactCache fromDB = sbomService.fetchArtifact(purlFromDB);
             assertNotNull(fromDB);
         } catch (NotFoundException nfe) {
             fail("It should have not thrown a not found exception", nfe);
@@ -130,7 +127,7 @@ public class TestSBOMService {
 
         try {
             String purlFromPNC = "pkg:maven/com.vaadin.external.google/android-json@0.0.20131108.vaadin1?type=jar";
-            org.redhat.sbomer.dto.ArtifactCache fromPNC = sbomService.fetchArtifact(purlFromPNC);
+            ArtifactCache fromPNC = sbomService.fetchArtifact(purlFromPNC);
             assertNotNull(fromPNC);
         } catch (NotFoundException nfe) {
             fail("It should have not thrown a not found exception", nfe);
@@ -150,7 +147,7 @@ public class TestSBOMService {
 
         try {
             BaseSBOM baseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
-            Bom bom = new org.cyclonedx.parsers.JsonParser().parse(baseSBOM.getBom().textValue().getBytes());
+            Bom bom = baseSBOM.getCycloneDxBom();
 
             Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
 
@@ -224,8 +221,7 @@ public class TestSBOMService {
 
             // Now getting again from DB and re-run all the previous checks
             BaseSBOM updatedBaseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
-            Bom bomFromDB = new org.cyclonedx.parsers.JsonParser()
-                    .parse(updatedBaseSBOM.getBom().textValue().getBytes());
+            Bom bomFromDB = updatedBaseSBOM.getCycloneDxBom();
 
             notFoundInCacheNorPNCComponent = findComponentWithPurl(
                     "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar",
@@ -287,8 +283,6 @@ public class TestSBOMService {
             fail("It should not have thrown a 404 exception", nfe);
         } catch (ValidationException ve) {
             fail("It should not have thrown a validation exception", ve);
-        } catch (ParseException pExc) {
-            fail("It should not have thrown a parse exception", pExc);
         }
     }
 

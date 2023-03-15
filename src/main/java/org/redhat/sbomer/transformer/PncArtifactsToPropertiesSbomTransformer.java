@@ -40,8 +40,8 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Hash.Algorithm;
 import org.redhat.sbomer.utils.RhVersionPattern;
-import org.redhat.sbomer.dto.ArtifactCache;
 import org.redhat.sbomer.dto.ArtifactInfo;
+import org.redhat.sbomer.model.ArtifactCache;
 import org.redhat.sbomer.service.SBOMService;
 
 import lombok.extern.slf4j.Slf4j;
