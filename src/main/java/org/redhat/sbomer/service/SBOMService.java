@@ -34,12 +34,13 @@ import javax.validation.Validator;
 import javax.ws.rs.NotFoundException;
 
 import org.redhat.sbomer.model.ArtifactCache;
-import org.redhat.sbomer.model.BaseSBOM;
+import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.repositories.ArtifactCacheRepository;
-import org.redhat.sbomer.repositories.BaseSBOMRepository;
+import org.redhat.sbomer.repositories.SbomRepository;
 import org.redhat.sbomer.service.generator.SBOMGenerator;
 import org.redhat.sbomer.transformer.PncArtifactsToPropertiesSbomTransformer;
 import org.redhat.sbomer.transformer.SbomManipulator;
+import org.redhat.sbomer.utils.enums.GenerationMode;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,14 +60,14 @@ import lombok.extern.slf4j.Slf4j;
 import static org.redhat.sbomer.utils.SbomUtils.schemaVersion;
 
 /**
- * Main SBOM service that is dealing with the {@link BaseSBOM} resource.
+ * Main SBOM service that is dealing with the {@link Sbom} resource.
  */
 @ApplicationScoped
 @Slf4j
 public class SBOMService {
 
     @Inject
-    BaseSBOMRepository baseSbomRepository;
+    SbomRepository sbomRepository;
 
     @Inject
     ArtifactCacheRepository artifactCacheRepository;
@@ -99,56 +100,106 @@ public class SBOMService {
         sbomGenerator.generate(buildId);
     }
 
-    public Page<BaseSBOM> listBaseSboms(int pageIndex, int pageSize) {
+    public Page<Sbom> listSboms(int pageIndex, int pageSize) {
         log.debug("Getting list of all base SBOMS with pageIndex: {}, pageSize: {}", pageIndex, pageSize);
 
-        List<BaseSBOM> collection = baseSbomRepository.findAll().page(pageIndex, pageSize).list();
-        int totalPages = baseSbomRepository.findAll().page(io.quarkus.panache.common.Page.ofSize(pageSize)).pageCount();
-        long totalHits = baseSbomRepository.findAll().count();
-        List<BaseSBOM> content = nullableStreamOf(collection).collect(Collectors.toList());
+        List<Sbom> collection = sbomRepository.findAll().page(pageIndex, pageSize).list();
+        int totalPages = sbomRepository.findAll().page(io.quarkus.panache.common.Page.ofSize(pageSize)).pageCount();
+        long totalHits = sbomRepository.findAll().count();
+        List<Sbom> content = nullableStreamOf(collection).collect(Collectors.toList());
 
-        return new Page<BaseSBOM>(pageIndex, pageSize, totalPages, totalHits, content);
+        return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    public BaseSBOM getBaseSbom(String buildId) {
+    public Sbom getBaseSbom(String buildId) {
         log.debug("Getting base SBOMS with buildId: {}", buildId);
         try {
-            return baseSbomRepository.getBaseSbom(buildId);
+            return sbomRepository.getSbom(buildId, GenerationMode.BASE_CYCLONEDX);
         } catch (NoResultException nre) {
             throw new NotFoundException("Base SBOM for build id " + buildId + " not found.");
         }
     }
 
+    public Sbom getSbom(String buildId, GenerationMode mode) {
+        log.debug("Getting SBOM with buildId: {} and generationMode: {}", buildId, mode);
+        try {
+            return sbomRepository.getSbom(buildId, mode);
+        } catch (NoResultException nre) {
+            throw new NotFoundException("SBOM for build id " + buildId + " and mode " + mode + " not found.");
+        }
+    }
+
     /**
-     * Persist changes to the {@link BaseSBOM} in the database.
+     * Persist changes to the {@link Sbom} in the database.
      *
-     * @param baseSbom
+     * @param sbom
      * @return
      */
     @Transactional
-    public BaseSBOM saveBom(BaseSBOM baseSbom) throws ValidationException {
-        log.debug("Storing entity: " + baseSbom.toString());
+    public Sbom saveBaseSbom(Sbom sbom) throws ValidationException {
+        log.debug("Storing base sbom: {}", sbom.toString());
 
-        Set<ConstraintViolation<BaseSBOM>> violations = validator.validate(baseSbom);
+        sbom.setGenerationTime(Instant.now());
+        sbom.setId(Sequence.nextId());
+        if (sbom.getGenerationMode() == null) {
+            sbom.setGenerationMode(GenerationMode.BASE_CYCLONEDX);
+        }
+
+        Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
             throw new ValidationException(violations);
         }
 
-        baseSbom.setGenerationTime(Instant.now());
-        baseSbom.setId(Sequence.nextId());
-        baseSbomRepository.persistAndFlush(baseSbom);
-        return baseSbom;
+        sbomRepository.persistAndFlush(sbom);
+        return sbom;
+    }
+
+    /**
+     * Persist changes to the {@link Sbom} in the database.
+     *
+     * @param sbom
+     * @return
+     */
+    @Transactional
+    public Sbom saveSbom(Sbom sbom) throws ValidationException {
+        log.debug("Storing sbom: {}", sbom.toString());
+
+        sbom.setGenerationTime(Instant.now());
+        sbom.setId(Sequence.nextId());
+
+        Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
+        if (!violations.isEmpty()) {
+            throw new ValidationException(violations);
+        }
+
+        sbomRepository.persistAndFlush(sbom);
+        return sbom;
     }
 
     @Transactional
-    public BaseSBOM updateBom(Long id, Bom bom) throws ValidationException {
+    public Sbom updateSbom(Sbom sbom) throws ValidationException {
+        log.debug("Updating sbom: {}", sbom.toString());
+
+        sbom.setGenerationTime(Instant.now());
+
+        Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
+        if (!violations.isEmpty()) {
+            throw new ValidationException(violations);
+        }
+
+        sbomRepository.getEntityManager().merge(sbom);
+        return sbom;
+    }
+
+    @Transactional
+    public Sbom updateBom(Long id, Bom bom) throws ValidationException {
         log.info("Updating SBOM of existing baseSBOM with id: {}", id);
 
-        BaseSBOM dbEntity = baseSbomRepository.findById(id);
+        Sbom dbEntity = sbomRepository.findById(id);
         BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), bom);
         dbEntity.setSbom(generator.toJsonNode());
 
-        Set<ConstraintViolation<BaseSBOM>> violations = validator.validate(dbEntity);
+        Set<ConstraintViolation<Sbom>> violations = validator.validate(dbEntity);
         if (!violations.isEmpty()) {
             log.info(
                     "violations: {}",
@@ -156,31 +207,44 @@ public class SBOMService {
             throw new ValidationException(violations);
         }
 
-        baseSbomRepository.getEntityManager().merge(dbEntity);
+        sbomRepository.getEntityManager().merge(dbEntity);
         return dbEntity;
     }
 
-    public BaseSBOM runEnrichmentOfBaseSbom(String buildId, String sbomSpec)
+    public Sbom runEnrichmentOfBaseSbom(String buildId, GenerationMode mode)
             throws NotFoundException, ValidationException {
 
-        BaseSBOM initialBaseSBOM = baseSbomRepository.getBaseSbom(buildId);
-        Bom bom = initialBaseSBOM.getCycloneDxBom();
+        Sbom baseSBOM = getBaseSbom(buildId);
+        Bom bom = baseSBOM.getCycloneDxBom();
         if (bom != null) {
-            // TODO change and improve with different strategies
             // TODO need to switch to async futures
-            if (sbomSpec != null && "properties".equalsIgnoreCase(sbomSpec)) {
-                Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer)
-                        .runTransformers(bom);
-                return updateBom(initialBaseSBOM.getId(), modifiedBom);
+            Bom enrichedBom = null;
+            if (GenerationMode.ENRICHED_v1_0.equals(mode)) {
+                enrichedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
+
             } else {
-                Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer)
-                        .runTransformers(bom);
-                return updateBom(initialBaseSBOM.getId(), modifiedBom);
+                enrichedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
+            }
+
+            BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
+
+            // If there is already a SBOM enriched with this mode and for this buildId, we update it
+            try {
+                Sbom existingEnrichedSbom = sbomRepository.getSbom(buildId, mode);
+                existingEnrichedSbom.setSbom(generator.toJsonNode());
+                existingEnrichedSbom.setParentSbom(baseSBOM);
+                return updateSbom(existingEnrichedSbom);
+            } catch (NoResultException nre) {
+                Sbom enrichedSbom = new Sbom();
+                enrichedSbom.setBuildId(buildId);
+                enrichedSbom.setGenerationMode(mode);
+                enrichedSbom.setSbom(generator.toJsonNode());
+                enrichedSbom.setParentSbom(baseSBOM);
+                return saveSbom(enrichedSbom);
             }
         } else {
             throw new ValidationException("Could not convert initial SBOM of build " + buildId);
         }
-
     }
 
     public Page<ArtifactCache> listArtifactCache(int pageIndex, int pageSize) {

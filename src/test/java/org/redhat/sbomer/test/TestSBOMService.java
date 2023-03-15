@@ -30,7 +30,7 @@ import org.cyclonedx.model.Property;
 import org.junit.jupiter.api.Test;
 import org.redhat.sbomer.dto.response.Page;
 import org.redhat.sbomer.model.ArtifactCache;
-import org.redhat.sbomer.model.BaseSBOM;
+import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.service.SBOMService;
 import org.redhat.sbomer.test.mock.PncServiceMock;
 import org.redhat.sbomer.transformer.PncArtifactsToPropertiesSbomTransformer;
@@ -76,7 +76,7 @@ public class TestSBOMService {
     @Test
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
-        BaseSBOM baseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
+        Sbom baseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
         assertNotNull(baseSBOM);
     }
 
@@ -84,17 +84,17 @@ public class TestSBOMService {
     public void testListBaseSboms() throws IOException {
         log.info("testListBaseSboms ...");
 
-        Page<BaseSBOM> page = sbomService.listBaseSboms(0, 50);
+        Page<Sbom> page = sbomService.listSboms(0, 50);
         assertEquals(0, page.getPageIndex());
         assertEquals(50, page.getPageSize());
         assertTrue(page.getTotalHits() > 0);
         assertEquals(1, page.getTotalPages());
         assertTrue(page.getContent().size() > 0);
 
-        BaseSBOM foundSbom = null;
-        Iterator<BaseSBOM> contentIterator = page.getContent().iterator();
+        Sbom foundSbom = null;
+        Iterator<Sbom> contentIterator = page.getContent().iterator();
         while (contentIterator.hasNext()) {
-            BaseSBOM sbom = contentIterator.next();
+            Sbom sbom = contentIterator.next();
             if (sbom.getBuildId().equals(INITIAL_BUILD_ID)) {
                 foundSbom = sbom;
                 break;
@@ -146,7 +146,7 @@ public class TestSBOMService {
         log.info("testManipulateSBOMAddingProperties ...");
 
         try {
-            BaseSBOM baseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
+            Sbom baseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
             Bom bom = baseSBOM.getCycloneDxBom();
 
             Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
@@ -220,7 +220,7 @@ public class TestSBOMService {
             sbomService.updateBom(Long.valueOf(baseSBOM.getId()), modifiedBom);
 
             // Now getting again from DB and re-run all the previous checks
-            BaseSBOM updatedBaseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
+            Sbom updatedBaseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
             Bom bomFromDB = updatedBaseSBOM.getCycloneDxBom();
 
             notFoundInCacheNorPNCComponent = findComponentWithPurl(
