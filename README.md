@@ -2,8 +2,6 @@
 
 A service to generate SBOMs in the CycloneDX format for Project Newcastle (PNC) builds.
 
-This service is the implementation of the [Trusted Content MVP](https://docs.engineering.redhat.com/x/F_49F).
-
 ## Documentation
 
 See [the documentation](docs/index.md).
