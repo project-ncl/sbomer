@@ -46,17 +46,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.BomGeneratorFactory;
-import org.cyclonedx.CycloneDxSchema.Version;
-import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.jboss.pnc.common.concurrent.Sequence;
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.pnc.dto.Artifact;
 import org.redhat.sbomer.dto.ArtifactInfo;
 import org.redhat.sbomer.dto.response.Page;
-import org.redhat.sbomer.mappers.api.ArtifactCacheMapper;
 import org.redhat.sbomer.mappers.api.ArtifactInfoMapper;
-import org.redhat.sbomer.mappers.api.BaseSBOMMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -82,12 +78,6 @@ public class SBOMService {
     SBOMGenerator sbomGenerator;
 
     @Inject
-    BaseSBOMMapper baseSBOMMapper;
-
-    @Inject
-    ArtifactCacheMapper artifactCacheMapper;
-
-    @Inject
     ArtifactInfoMapper artifactInfoMapper;
 
     @Inject
@@ -109,23 +99,21 @@ public class SBOMService {
         sbomGenerator.generate(buildId);
     }
 
-    public Page<org.redhat.sbomer.dto.BaseSBOM> listBaseSboms(int pageIndex, int pageSize) {
+    public Page<BaseSBOM> listBaseSboms(int pageIndex, int pageSize) {
         log.debug("Getting list of all base SBOMS with pageIndex: {}, pageSize: {}", pageIndex, pageSize);
 
         List<BaseSBOM> collection = baseSbomRepository.findAll().page(pageIndex, pageSize).list();
         int totalPages = baseSbomRepository.findAll().page(io.quarkus.panache.common.Page.ofSize(pageSize)).pageCount();
         long totalHits = baseSbomRepository.findAll().count();
-        List<org.redhat.sbomer.dto.BaseSBOM> content = nullableStreamOf(collection).map(baseSBOMMapper::toDTO)
-                .collect(Collectors.toList());
+        List<BaseSBOM> content = nullableStreamOf(collection).collect(Collectors.toList());
 
-        return new Page<org.redhat.sbomer.dto.BaseSBOM>(pageIndex, pageSize, totalPages, totalHits, content);
+        return new Page<BaseSBOM>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    public org.redhat.sbomer.dto.BaseSBOM getBaseSbom(String buildId) {
+    public BaseSBOM getBaseSbom(String buildId) {
         log.debug("Getting base SBOMS with buildId: {}", buildId);
         try {
-            BaseSBOM dbEntity = baseSbomRepository.getBaseSbom(buildId);
-            return baseSBOMMapper.toDTO(dbEntity);
+            return baseSbomRepository.getBaseSbom(buildId);
         } catch (NoResultException nre) {
             throw new NotFoundException("Base SBOM for build id " + buildId + " not found.");
         }
@@ -138,23 +126,22 @@ public class SBOMService {
      * @return
      */
     @Transactional
-    public org.redhat.sbomer.dto.BaseSBOM saveBom(org.redhat.sbomer.dto.BaseSBOM baseSbom) throws ValidationException {
+    public BaseSBOM saveBom(BaseSBOM baseSbom) throws ValidationException {
         log.debug("Storing entity: " + baseSbom.toString());
-        BaseSBOM dbEntity = baseSBOMMapper.toEntity(baseSbom);
 
-        Set<ConstraintViolation<BaseSBOM>> violations = validator.validate(dbEntity);
+        Set<ConstraintViolation<BaseSBOM>> violations = validator.validate(baseSbom);
         if (!violations.isEmpty()) {
             throw new ValidationException(violations);
         }
 
-        dbEntity.setGenerationTime(Instant.now());
-        dbEntity.setId(Sequence.nextId());
-        baseSbomRepository.persistAndFlush(dbEntity);
-        return baseSBOMMapper.toDTO(dbEntity);
+        baseSbom.setGenerationTime(Instant.now());
+        baseSbom.setId(Sequence.nextId());
+        baseSbomRepository.persistAndFlush(baseSbom);
+        return baseSbom;
     }
 
     @Transactional
-    public org.redhat.sbomer.dto.BaseSBOM updateBom(Long id, Bom bom) throws ValidationException {
+    public BaseSBOM updateBom(Long id, Bom bom) throws ValidationException {
         log.info("Updating SBOM of existing baseSBOM with id: {}", id);
 
         BaseSBOM dbEntity = baseSbomRepository.findById(id);
@@ -170,10 +157,10 @@ public class SBOMService {
         }
 
         baseSbomRepository.getEntityManager().merge(dbEntity);
-        return baseSBOMMapper.toDTO(dbEntity);
+        return dbEntity;
     }
 
-    public org.redhat.sbomer.dto.BaseSBOM runEnrichmentOfBaseSbom(String buildId, String sbomSpec)
+    public BaseSBOM runEnrichmentOfBaseSbom(String buildId, String sbomSpec)
             throws NotFoundException, ValidationException {
 
         BaseSBOM initialBaseSBOM = baseSbomRepository.getBaseSbom(buildId);
@@ -196,7 +183,7 @@ public class SBOMService {
 
     }
 
-    public Page<org.redhat.sbomer.dto.ArtifactCache> listArtifactCache(int pageIndex, int pageSize) {
+    public Page<ArtifactCache> listArtifactCache(int pageIndex, int pageSize) {
         log.debug("Getting list of all base artifact caches with pageIndex: {}, pageSize: {}", pageIndex, pageSize);
 
         List<ArtifactCache> collection = artifactCacheRepository.findAll().page(pageIndex, pageSize).list();
@@ -204,17 +191,15 @@ public class SBOMService {
                 .page(io.quarkus.panache.common.Page.ofSize(pageSize))
                 .pageCount();
         long totalHits = artifactCacheRepository.findAll().count();
-        List<org.redhat.sbomer.dto.ArtifactCache> content = nullableStreamOf(collection).map(artifactCacheMapper::toDTO)
-                .collect(Collectors.toList());
+        List<ArtifactCache> content = nullableStreamOf(collection).collect(Collectors.toList());
 
-        return new Page<org.redhat.sbomer.dto.ArtifactCache>(pageIndex, pageSize, totalPages, totalHits, content);
+        return new Page<ArtifactCache>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    public org.redhat.sbomer.dto.ArtifactCache getArtifactCache(String purl) {
+    public ArtifactCache getArtifactCache(String purl) {
         log.debug("Getting artifact properties with purl: {}", purl);
         try {
-            ArtifactCache dbEntity = artifactCacheRepository.getArtifactCache(purl);
-            return artifactCacheMapper.toDTO(dbEntity);
+            return artifactCacheRepository.getArtifactCache(purl);
         } catch (NoResultException nre) {
             throw new NotFoundException("Artifact info for purl " + purl + " not found.");
         }
@@ -227,26 +212,24 @@ public class SBOMService {
      * @return
      */
     @Transactional
-    public org.redhat.sbomer.dto.ArtifactCache saveArtifactCache(org.redhat.sbomer.dto.ArtifactCache artifactCache)
-            throws ValidationException {
+    public ArtifactCache saveArtifactCache(ArtifactCache artifactCache) throws ValidationException {
         log.debug("Storing entity: " + artifactCache.toString());
-        ArtifactCache dbEntity = artifactCacheMapper.toEntity(artifactCache);
 
-        Set<ConstraintViolation<ArtifactCache>> violations = validator.validate(dbEntity);
+        Set<ConstraintViolation<ArtifactCache>> violations = validator.validate(artifactCache);
         if (!violations.isEmpty()) {
             throw new ValidationException(violations);
         }
 
-        dbEntity.setId(Sequence.nextId());
-        artifactCacheRepository.persistAndFlush(dbEntity);
-        return artifactCacheMapper.toDTO(dbEntity);
+        artifactCache.setId(Sequence.nextId());
+        artifactCacheRepository.persistAndFlush(artifactCache);
+        return artifactCache;
     }
 
     @Transactional
-    public org.redhat.sbomer.dto.ArtifactCache fetchArtifact(String purl) {
+    public ArtifactCache fetchArtifact(String purl) {
 
         try {
-            org.redhat.sbomer.dto.ArtifactCache cachedArtifact = getArtifactCache(purl);
+            ArtifactCache cachedArtifact = getArtifactCache(purl);
             log.info("Artifact with purl {} found in cache!", purl);
             return cachedArtifact;
         } catch (NotFoundException nre) {
@@ -263,11 +246,9 @@ public class SBOMService {
             info.setBuildSystem("PNC");
             String jsonString = JsonUtils.toJson(info);
             JsonNode node = JsonUtils.fromJson(jsonString, JsonNode.class);
-            org.redhat.sbomer.dto.ArtifactCache artifactCache = org.redhat.sbomer.dto.ArtifactCache.builder()
-                    .purl(purl)
-                    .info(node)
-                    .build();
-
+            ArtifactCache artifactCache = new ArtifactCache();
+            artifactCache.setInfo(node);
+            artifactCache.setPurl(purl);
             return saveArtifactCache(artifactCache);
         } catch (IOException ioExc) {
             throw new ValidationException(

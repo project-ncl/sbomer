@@ -17,7 +17,7 @@
  */
 package org.redhat.sbomer.model;
 
-import java.time.Instant;
+import java.io.IOException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,17 +29,15 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 
-import org.cyclonedx.exception.ParseException;
-import org.cyclonedx.model.Bom;
-import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.redhat.sbomer.dto.ArtifactInfo;
 import org.redhat.sbomer.validation.ArtifactJsonProperty;
-import org.redhat.sbomer.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
@@ -78,4 +76,16 @@ public class ArtifactCache extends PanacheEntityBase {
     @ArtifactJsonProperty
     private JsonNode info;
 
+    @JsonIgnore
+    public ArtifactInfo getArtifactInfo() {
+
+        try {
+            // Retrieved from DB
+            return new ObjectMapper().readValue(
+                    info.isTextual() ? info.textValue().getBytes() : info.toString().getBytes(),
+                    ArtifactInfo.class);
+        } catch (IOException e) {
+            return ArtifactInfo.builder().build();
+        }
+    }
 }
