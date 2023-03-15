@@ -1,0 +1,35 @@
+name: Build and push container images
+on:
+  push:
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Buildah Action
+      id: build-image
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: sbomer-generator
+        tags: latest ${{ github.sha }}
+        context: src/main/docker/generator
+        containerfiles: |
+          ./src/main/docker/generator/Containerfile
+          
+    - name: Push to quay.io
+      id: push-to-quay
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build-image.outputs.image }}
+        tags: ${{ steps.build-image.outputs.tags }}
+        # TODO: change to different organization
+        registry: quay.io/goldmann
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Print image url
+      run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
