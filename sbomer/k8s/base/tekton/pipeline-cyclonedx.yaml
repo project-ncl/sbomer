@@ -65,15 +65,30 @@ spec:
           value: false
         - name: subdirectory
           value: build-$(params.build-id)/source
+    - name: build-env
+      taskRef:
+        name: build-env
+      workspaces:
+        - name: data
+          workspace: data
+      params:
+        - name: build-id
+          value: $(params.build-id)
     - name: generate-sbom-cyclonedx
       runAfter:
         - fetch-source
+        - build-env
       taskRef:
         name: sbomer-generate-cyclonedx
       workspaces:
         - name: data
           workspace: data
       params:
+        - name: jdk-version
+          value: $(tasks.build-env.results.jdk-version)
+        - name: mvn-version
+          value: $(tasks.build-env.results.mvn-version)
+        - name: additional-domino-args
         - name: additional-cyclonedx-args
           value: $(params.additional-cyclonedx-args)
         - name: workdir
