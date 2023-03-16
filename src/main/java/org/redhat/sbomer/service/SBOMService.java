@@ -141,6 +141,8 @@ public class SBOMService {
 
         sbom.setGenerationTime(Instant.now());
         sbom.setId(Sequence.nextId());
+
+        // TODO: mgoldmann / I think we should require it being set
         if (sbom.getGenerationMode() == null) {
             sbom.setGenerationMode(GenerationMode.BASE_CYCLONEDX);
         }
