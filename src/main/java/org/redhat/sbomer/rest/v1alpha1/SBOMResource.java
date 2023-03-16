@@ -41,11 +41,10 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.redhat.sbomer.dto.response.Page;
-import org.redhat.sbomer.model.BaseSBOM;
+import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.service.SBOMService;
+import org.redhat.sbomer.utils.enums.GenerationMode;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1alpha1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,7 +57,7 @@ public class SBOMResource {
     SBOMService sbomService;
 
     /**
-     * Make it possible to create a {@link BaseSBOM} resource directly from the endpoint.
+     * Make it possible to create a {@link Sbom} resource directly from the endpoint.
      *
      * TODO: Add authentication. It should be possible to create new SBOM's this way only from trusted places.
      *
@@ -67,8 +66,8 @@ public class SBOMResource {
      */
     @POST
     @Operation(
-            summary = "Create SBOM",
-            description = "Save submitted SBOM. This endpoint expects an SBOM in the CycloneDX format encapsulated in the BaseSBOM structure.")
+            summary = "Create base SBOM",
+            description = "Save submitted base SBOM. This endpoint expects a base SBOM in the CycloneDX format encapsulated in the BaseSBOM structure.")
     @APIResponses({
             @APIResponse(
                     responseCode = "201",
@@ -78,9 +77,9 @@ public class SBOMResource {
                     responseCode = "400",
                     description = "Provided SBOM couldn't be saved, probably due to validation failures",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response create(final BaseSBOM sbom) {
+    public Response create(final Sbom sbom) {
         try {
-            sbomService.saveBom(sbom);
+            sbomService.saveBaseSbom(sbom);
             return Response.status(Status.CREATED).entity(sbom).build();
         } catch (ValidationException exc) {
             return Response.status(Status.BAD_REQUEST).entity(exc).build();
@@ -111,8 +110,8 @@ public class SBOMResource {
             responseCode = "200",
             description = "List of SBOMs in the system for a particular page and size.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Page<BaseSBOM> list(@Valid @BeanParam PaginationParameters paginationParams) {
-        return sbomService.listBaseSboms(paginationParams.getPageIndex(), paginationParams.getPageSize());
+    public Page<Sbom> list(@Valid @BeanParam PaginationParameters paginationParams) {
+        return sbomService.listSboms(paginationParams.getPageIndex(), paginationParams.getPageSize());
     }
 
     @GET
@@ -128,26 +127,30 @@ public class SBOMResource {
                     responseCode = "404",
                     description = "The BaseSBOM for the particular buildID couldn't be found in the system.",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public BaseSBOM get(@PathParam("buildId") String buildId) {
+    public Sbom get(@PathParam("buildId") String buildId) {
         return sbomService.getBaseSbom(buildId);
     }
 
     @POST
     @Operation(
             summary = "Enrich SBOM based on the PNC build",
-            description = "SBOM enrichment for a particular PNC build Id. Only sbom-spec currently available is `properties`")
+            description = "SBOM enrichment for a particular PNC build Id. The only mode currently available is `ENRICHED_v1_0`")
     @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Parameter(
+            name = "mode",
+            description = "Enrichment generation mode. Available modes: `ENRICHED_v1_0`",
+            example = "ENRICHED_v1_0")
     @Path("/enrich/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "201",
             description = "Executes the enrichment of an existing SBOM for a particular PNC buildId.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response runEnrichmentOfBaseSbom(
-            @PathParam("buildId") String buildId,
-            @QueryParam("sbomSpec") String sbomSpec) throws Exception {
+    public Response runEnrichmentOfBaseSbom(@PathParam("buildId") String buildId, @QueryParam("mode") String mode)
+            throws Exception {
 
         try {
-            BaseSBOM enrichedSBOM = sbomService.runEnrichmentOfBaseSbom(buildId, sbomSpec);
+            GenerationMode generationMode = GenerationMode.valueOf(mode);
+            Sbom enrichedSBOM = sbomService.runEnrichmentOfBaseSbom(buildId, generationMode);
             return Response.status(Response.Status.OK).entity(enrichedSBOM).build();
         } catch (NotFoundException nfe) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -155,6 +158,8 @@ public class SBOMResource {
                     .build();
         } catch (ValidationException vExc) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(vExc.getMessage()).build();
+        } catch (IllegalArgumentException iExc) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(iExc.getMessage()).build();
         }
     }
 

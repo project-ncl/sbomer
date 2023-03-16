@@ -88,7 +88,6 @@ spec:
           value: $(tasks.build-env.results.jdk-version)
         - name: mvn-version
           value: $(tasks.build-env.results.mvn-version)
-        - name: additional-domino-args
         - name: additional-cyclonedx-args
           value: $(params.additional-cyclonedx-args)
         - name: workdir
@@ -97,11 +96,13 @@ spec:
           value: $(params.build-id)
         - name: cyclonedx-version
           value: $(params.cyclonedx-version)
-        - name: override
-          value: $(params.override)
+        # mgoldman / Not specified params cannot be passed, commenting out
+        # - name: override
+        #   value: $(params.override)
           # Not used yet, to be added as a param to the REST API http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/api/v1alpha1/sboms
-        - name: sbom-spec
-          value: $(params.sbom-spec)
+          # mgoldman / Not specified params cannot be passed, commenting out
+        # - name: sbom-spec
+        #   value: $(params.sbom-spec)
     - name: enrich-base-sbom
       runAfter:
         - generate-sbom-cyclonedx
@@ -113,8 +114,6 @@ spec:
       params:
         - name: build-id
           value: $(params.build-id)
-        - name: sbom-spec
-          value: $(params.sbom-spec)
 
   workspaces:
     - name: data

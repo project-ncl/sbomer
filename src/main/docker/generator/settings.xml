@@ -59,7 +59,7 @@
         <repository>
           <id>redhat-repository</id>
           <name>Red Hat repository</name>
-          <url>http://maven.repository.redhat.com/ga/</url>
+          <url>https://maven.repository.redhat.com/ga/</url>
           <layout>default</layout>
           <releases>
             <enabled>true</enabled>
@@ -75,7 +75,7 @@
         <pluginRepository>
           <id>redhat-repository</id>
           <name>Red Hat repository</name>
-          <url>http://maven.repository.redhat.com/ga/</url>
+          <url>https://maven.repository.redhat.com/ga/</url>
           <layout>default</layout>
           <releases>
             <enabled>true</enabled>
@@ -95,7 +95,7 @@
         <repository>
           <id>indy</id>
           <name>Red Hat internal repository</name>
-          <url>http://indy.psi.redhat.com/api/content/maven/group/static/</url>
+          <url>https://indy.psi.redhat.com/api/content/maven/group/static/</url>
           <layout>default</layout>
           <releases>
             <enabled>true</enabled>

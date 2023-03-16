@@ -24,15 +24,15 @@ spec:
   params:
     - name: build-id
       type: string
-    - name: sbom-spec
-      value: sbom-spec
+    - name: mode
+      default: ENRICHED_v1_0
   steps:
     - name: run-base-enrichment
       image: quay.io/goldmann/sbomer-generator:latest
       script: |
         #!/usr/bin/env bash
 
-        curl -vX POST -H "Content-Type: application/json" http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/api/v1alpha1/sboms/enrich/$(params.build-id)?sbomSpec=${params.sbom-spec}
+        curl -vX POST -H "Content-Type: application/json" http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/api/v1alpha1/sboms/enrich/$(params.build-id)?mode=$(params.mode)
 
   results:
     - name: "bom"
