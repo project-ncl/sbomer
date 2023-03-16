@@ -25,7 +25,7 @@ spec:
     - name: build-id
       type: string
     - name: sbom-spec
-      value: sbom-spec
+      default: sbom-spec
   steps:
     - name: run-base-enrichment
       image: quay.io/goldmann/sbomer-generator:latest
