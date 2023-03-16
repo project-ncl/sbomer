@@ -1,4 +1,4 @@
 # SBOMer Documentation
 
-- [API](api.md)
+- [Usage](usage.md)
 - [Development and Deployment](development-and-deployment.md)
