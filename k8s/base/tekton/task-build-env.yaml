@@ -26,7 +26,7 @@ spec:
       type: string
   steps:
     - name: prepare
-      image: quay.io/goldmann/sbomer-generator:latest
+      image: quay.io/rh-newcastle/sbomer-generator:latest
       script: |
         #!/usr/bin/env python3
 

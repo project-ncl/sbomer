@@ -35,7 +35,7 @@ spec:
       type: string
   steps:
     - name: generate
-      image: quay.io/goldmann/sbomer-generator:latest
+      image: quay.io/rh-newcastle/sbomer-generator:latest
       script: |
         #!/usr/bin/env bash
 
@@ -62,7 +62,7 @@ spec:
 
         printf "%s" "${BOM_PATH}" > "$(results.bom.path)"
     - name: "publish"
-      image: quay.io/goldmann/sbomer-generator:latest
+      image: quay.io/rh-newcastle/sbomer-generator:latest
       script: |
         #!/usr/bin/env bash
 

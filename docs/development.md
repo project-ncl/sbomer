@@ -40,5 +40,5 @@ This uses the default builder configured (which is [Jib](https://github.com/Goog
 ### Building generator image
 
 ```
-podman build -f src/main/docker/generator/Containerfile -t quay.io/goldmann/sbomer-generator:latest
+podman build -f src/main/docker/generator/Containerfile -t quay.io/rh-newcastle/sbomer-generator:latest
 ```

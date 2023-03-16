@@ -28,7 +28,7 @@ spec:
       default: ENRICHED_v1_0
   steps:
     - name: run-base-enrichment
-      image: quay.io/goldmann/sbomer-generator:latest
+      image: quay.io/rh-newcastle/sbomer-generator:latest
       script: |
         #!/usr/bin/env bash
 

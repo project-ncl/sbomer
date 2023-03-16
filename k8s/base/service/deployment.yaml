@@ -34,7 +34,7 @@ spec:
     spec:
       serviceAccountName: sbomer-sa
       containers:
-        - image: quay.io/goldmann/sbomer:latest
+        - image: quay.io/rh-newcastle/sbomer-service:latest
           name: sbomer
           imagePullPolicy: Always
           env:
