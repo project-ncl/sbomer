@@ -15,18 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.transformer;
+package org.redhat.sbomer.processor;
 
 import org.cyclonedx.model.Bom;
 
-public interface SbomTransformer {
+public interface SbomProcessor {
 
     /**
-     * Allows implementing SBOM transformations, such as adjusting and augmenting component metadata.
+     * Allows implementing SBOM processing
      *
-     * @param ctx transformation context that provides access to the original SBOM to be transformed
+     * @param originalBom the original SBOM to be processed
      * @return transformed SBOM instance
      */
-    Bom transform(Bom originalBom);
+    Bom process(Bom originalBom);
 
 }

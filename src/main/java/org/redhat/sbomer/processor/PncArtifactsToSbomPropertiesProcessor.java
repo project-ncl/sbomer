@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.transformer;
+package org.redhat.sbomer.processor;
 
 import static org.redhat.sbomer.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 import static org.redhat.sbomer.utils.Constants.SBOM_RED_HAT_BUILD_SYSTEM;
@@ -47,14 +47,15 @@ import org.redhat.sbomer.service.SBOMService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@PncToSbomProperties
 @ApplicationScoped
-public class PncArtifactsToPropertiesSbomTransformer implements SbomTransformer {
+public class PncArtifactsToSbomPropertiesProcessor implements SbomProcessor {
 
     @Inject
     SBOMService sbomService;
 
     @Override
-    public Bom transform(Bom originalBom) {
+    public Bom process(Bom originalBom) {
         log.info("Adding PNC cached build info to the SBOM properties");
         if (originalBom.getComponents() == null) {
             return originalBom;
