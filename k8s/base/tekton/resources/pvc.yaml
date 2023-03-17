@@ -17,9 +17,12 @@
 #
 
 apiVersion: v1
-kind: ConfigMap
+kind: PersistentVolumeClaim
 metadata:
-  name: sbomer-tekton
-data:
-  # This is the default host IP address when running on Minikube with KVM driver
-  SBOMER_SERVICE_URL: http://192.168.39.1:8080
+  name: sbomer-data
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2G

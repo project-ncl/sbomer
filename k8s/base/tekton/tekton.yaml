@@ -16,10 +16,7 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sbomer-tekton
-data:
-  # This is the default host IP address when running on Minikube with KVM driver
-  SBOMER_SERVICE_URL: http://192.168.39.1:8080
+images:
+  - path: spec/steps/image
+    group: tekton.dev
+    kind: Task

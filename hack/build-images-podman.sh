@@ -1,3 +1,5 @@
+#!/bin/env bash
+
 #
 # JBoss, Home of Professional Open Source.
 # Copyright 2023 Red Hat, Inc., and individual contributors
@@ -16,10 +18,15 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sbomer-tekton
-data:
-  # This is the default host IP address when running on Minikube with KVM driver
-  SBOMER_SERVICE_URL: http://192.168.39.1:8080
+set -e
+
+# This file builds all container images using Podman.
+
+SCRIPT_DIR=$(dirname "$0")
+
+"$SCRIPT_DIR/run-maven.sh" package -DskipTests
+
+set -x
+
+podman build -t localhost/sbomer-service:latest -f src/main/images/service/Containerfile.jvm "$SCRIPT_DIR/../"
+podman build -t localhost/sbomer-generator:latest -f src/main/images/generator/Containerfile "$SCRIPT_DIR/../"

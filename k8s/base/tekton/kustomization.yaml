@@ -16,10 +16,20 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sbomer-tekton
-data:
-  # This is the default host IP address when running on Minikube with KVM driver
-  SBOMER_SERVICE_URL: http://192.168.39.1:8080
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
+  - resources/task-generate-domino.yaml
+  - resources/task-generate-cyclonedx.yaml
+  - resources/task-base-enrichment.yaml
+  - resources/task-build-env.yaml
+  - resources/pipeline-domino.yaml
+  - resources/pipeline-cyclonedx.yaml
+  - resources/pvc.yaml
+  - resources/cm.yaml
+  - resources/rbac.yaml
+transformers:
+  - resources/labels.yaml
+configurations:  
+  - tekton.yaml

@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # JBoss, Home of Professional Open Source.
 # Copyright 2023 Red Hat, Inc., and individual contributors
@@ -16,10 +17,13 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sbomer-tekton
-data:
-  # This is the default host IP address when running on Minikube with KVM driver
-  SBOMER_SERVICE_URL: http://192.168.39.1:8080
+set -e
+
+
+function install_cert() {
+  curl -L https://password.corp.redhat.com/RH-IT-Root-CA.crt -o /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt
+  curl -L https://password.corp.redhat.com/pki-ca-chain.crt -o /etc/pki/ca-trust/source/anchors/pki-ca-chain.crt
+  update-ca-trust
+}
+
+install_cert

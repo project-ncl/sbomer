@@ -1,3 +1,5 @@
+#!/bin/env bash
+
 #
 # JBoss, Home of Professional Open Source.
 # Copyright 2023 Red Hat, Inc., and individual contributors
@@ -16,10 +18,13 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sbomer-tekton
-data:
-  # This is the default host IP address when running on Minikube with KVM driver
-  SBOMER_SERVICE_URL: http://192.168.39.1:8080
+set -e
+
+# This file prepares an opinionated local Minikube enviroment.
+# It uses the KVM driver and creates a 'sbomer' Minikube profile
+#
+# After Minikube is setup you can use 'minikube-start.sh' and 'minikube-stop.sh' scripts.
+#
+# See: minikube profile list
+
+exec minikube start -p sbomer --driver=kvm2 --cpus=4 --memory=4g --disk-size=20GB --kubernetes-version=v1.23.16 --embed-certs

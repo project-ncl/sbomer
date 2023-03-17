@@ -50,6 +50,7 @@ public class TektonSBOMGenerator implements SBOMGenerator {
                 .withGenerateName("sbom-")
                 .endMetadata()
                 .withNewSpec()
+                .withServiceAccountName("sbomer-tekton-sa")
                 .withNewPipelineRef()
                 .withName("sbom-generator-domino")
                 .endPipelineRef()

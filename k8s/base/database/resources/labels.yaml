@@ -16,10 +16,16 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ConfigMap
+kind: LabelTransformer
+apiVersion: builtin
 metadata:
-  name: sbomer-tekton
-data:
-  # This is the default host IP address when running on Minikube with KVM driver
-  SBOMER_SERVICE_URL: http://192.168.39.1:8080
+  name: labels
+labels:
+  app.kubernetes.io/managed-by: "pct"
+  app.kubernetes.io/name: "sbomer"
+  app.kubernetes.io/version: "0.0.1"
+fieldSpecs:
+  - path: metadata/labels
+    create: true
+  - path: spec/template/metadata/labels
+  - path: spec/selector/matchLabels
