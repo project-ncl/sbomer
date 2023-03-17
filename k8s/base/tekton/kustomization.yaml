@@ -22,7 +22,6 @@ resources:
   - https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
   - resources/task-generate-domino.yaml
   - resources/task-generate-cyclonedx.yaml
-  - resources/task-base-enrichment.yaml
   - resources/task-build-env.yaml
   - resources/pipeline-domino.yaml
   - resources/pipeline-cyclonedx.yaml
