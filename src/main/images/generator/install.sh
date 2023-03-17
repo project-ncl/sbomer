@@ -17,21 +17,34 @@
 # limitations under the License.
 #
 
+set -e
 
 function install_sdk() {
   curl -s "https://get.sdkman.io" | bash
   source .sdkman/bin/sdkman-init.sh
+
+  echo "sdkman_auto_answer=true" > .sdkman/etc/config
 }
 
 function install_java() {
   for java_version in 8.0.362 11.0.18 17.0.6; do
     sdk install java ${java_version}-tem
     sdk install java ${java_version%%.*} "$(sdk home java ${java_version}-tem)"
+    sdk use java ${java_version}-tem
+
+    # Of course JDK 8 uses different paths and the keytool command does not have the '-cacerts' flag
+    ca_keystore_path="$HOME/.sdkman/candidates/java/${java_version}-tem/jre/lib/security/cacerts"
+
+    if [ ! -f "$ca_keystore_path" ]; then
+      ca_keystore_path="$HOME/.sdkman/candidates/java/${java_version}-tem/lib/security/cacerts"
+    fi 
+
+    keytool -import -trustcacerts -alias redhat-ca -file /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt -keystore "$ca_keystore_path" -noprompt -storepass changeit
   done
 }
 
 function install_maven() {
-  for mvn_version in 3.6.3 3.8.7 3.9.0; do
+  for mvn_version in 3.6.3 3.8.8 3.9.0; do
     sdk install maven ${mvn_version}
     sdk install maven ${mvn_version%.*} "$(sdk home maven ${mvn_version})"
   done
@@ -41,13 +54,7 @@ function install_domino() {
   curl -L https://github.com/quarkusio/quarkus-platform-bom-generator/releases/download/0.0.77/domino.jar -o domino.jar
 }
 
-function install_cert() {
-  curl -L https://password.corp.redhat.com/RH-IT-Root-CA.crt -o RH-IT-Root-CA.crt
-  keytool -import -trustcacerts -alias redhat-ca -file RH-IT-Root-CA.crt -cacerts -noprompt -storepass changeit
-}
-
 install_sdk
 install_java
 install_maven
-install_cert
 install_domino

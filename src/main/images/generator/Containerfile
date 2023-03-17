@@ -15,6 +15,9 @@ ENV HOME=/workdir
 RUN chown -R 65532:0 /workdir && \
     chmod -R g=u /workdir
 
+COPY --chown=65532:0 src/main/images/generator/install_cert.sh /workdir/
+RUN sh -c ./install_cert.sh
+
 USER 65532
 
 COPY --chown=65532:0 src/main/images/generator/settings.xml src/main/images/generator/install.sh /workdir/
