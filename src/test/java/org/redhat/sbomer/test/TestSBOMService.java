@@ -150,7 +150,7 @@ public class TestSBOMService {
             Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
             Bom bom = baseSBOM.getCycloneDxBom();
 
-            Bom modifiedBom = processors.select(Processors.PNC_TO_SBOM_PROPERTIES.getSelector()).get().process(bom);
+            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector()).get().process(bom);
 
             Component notFoundInCacheNorPNCComponent = findComponentWithPurl(
                     "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar",

@@ -81,7 +81,7 @@ public class TestSbomRepository extends SbomRepository {
         enrichedSBOM.setGenerationTime(Instant.now());
         enrichedSBOM.setSbom(sbom);
         enrichedSBOM.setGenerator(parentSbom.getGenerator());
-        enrichedSBOM.setProcessor(Processors.PNC_TO_SBOM_PROPERTIES);
+        enrichedSBOM.setProcessor(Processors.SBOM_PROPERTIES);
         enrichedSBOM.setParentSbom(parentSbom);
         return enrichedSBOM;
     }
@@ -148,13 +148,13 @@ public class TestSbomRepository extends SbomRepository {
 
     @Test
     public void testGetEnrichedSbom() throws JsonProcessingException, JsonMappingException {
-        Sbom enrichedSbom = getSbom("ARYT3LBXDVYAC", Generators.CYCLONEDX, Processors.PNC_TO_SBOM_PROPERTIES);
+        Sbom enrichedSbom = getSbom("ARYT3LBXDVYAC", Generators.CYCLONEDX, Processors.SBOM_PROPERTIES);
         Bom bom = enrichedSbom.getCycloneDxBom();
 
         assertEquals(416640206274228225L, enrichedSbom.getId());
         assertEquals("ARYT3LBXDVYAC", enrichedSbom.getBuildId());
         assertEquals(Generators.CYCLONEDX, enrichedSbom.getGenerator());
-        assertEquals(Processors.PNC_TO_SBOM_PROPERTIES, enrichedSbom.getProcessor());
+        assertEquals(Processors.SBOM_PROPERTIES, enrichedSbom.getProcessor());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
         assertEquals("cpaas-test-pnc-maven", firstComponent.getName());

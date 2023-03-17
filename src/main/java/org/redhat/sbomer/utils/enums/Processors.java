@@ -23,7 +23,7 @@ import org.redhat.sbomer.processor.PncToSbomProperties;
 
 public enum Processors {
 
-    PNC_TO_SBOM_PROPERTIES(PncToSbomProperties.Literal.INSTANCE);
+    SBOM_PROPERTIES(PncToSbomProperties.Literal.INSTANCE);
 
     private AnnotationLiteral selector;
 
