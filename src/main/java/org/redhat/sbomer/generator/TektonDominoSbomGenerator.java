@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.service.generator;
+package org.redhat.sbomer.generator;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -33,8 +33,9 @@ import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRunBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
 
+@Domino
 @ApplicationScoped
-public class TektonSBOMGenerator implements SBOMGenerator {
+public class TektonDominoSbomGenerator implements SbomGenerator {
 
     @Inject
     PNCService pncService;

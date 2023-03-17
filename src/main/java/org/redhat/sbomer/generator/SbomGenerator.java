@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.service.generator;
+package org.redhat.sbomer.generator;
 
 import org.redhat.sbomer.errors.ApplicationException;
 
@@ -23,7 +23,7 @@ import org.redhat.sbomer.errors.ApplicationException;
  * High-level interaction with the SBOM generator.
  *
  */
-public interface SBOMGenerator {
+public interface SbomGenerator {
 
     /**
      * Generates the SBOM in CycloneDX format for a PNC build identified by the buildId
