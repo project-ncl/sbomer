@@ -17,9 +17,6 @@
  */
 package org.redhat.sbomer.service;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;

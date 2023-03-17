@@ -61,13 +61,16 @@ public class TektonCycloneDXSbomGenerator implements SbomGenerator {
                                 .withRunAsUser(65532l)
                                 .build())
                 .endPodTemplate()
-                // TODO: can we pass the build environment attributes so that the task "build-env" does not need to refetch the build?
+                // TODO: can we pass the build environment attributes so that the task "build-env" does not need to
+                // refetch the build?
                 // TODO: make the below "additional-cyclonedx-args" and "cyclonedx-version" configurable
                 .withParams(
                         new Param("git-url", new ArrayOrString(build.getScmUrl())),
                         new Param("git-rev", new ArrayOrString(build.getScmRevision())),
                         new Param("build-id", new ArrayOrString(build.getId())),
-                        new Param("additional-cyclonedx-args", new ArrayOrString("--batch-mode --no-transfer-progress --quiet")),
+                        new Param(
+                                "additional-cyclonedx-args",
+                                new ArrayOrString("--batch-mode --no-transfer-progress --quiet")),
                         new Param("cyclonedx-version", new ArrayOrString("2.7.5")))
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withName("data")
