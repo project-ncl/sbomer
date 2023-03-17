@@ -1,5 +1,6 @@
 {
   "buildId": "AWI7P3EJ23YAA",
+  "generator": "CYCLONEDX",
   "sbom": {
     "bomFormat": "CycloneDX",
     "specVersion": "1.4",
