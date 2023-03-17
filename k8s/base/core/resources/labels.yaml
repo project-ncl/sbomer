@@ -16,20 +16,19 @@
 # limitations under the License.
 #
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - service/deployment.yaml
-  - service/service.yaml
-  - service/rbac.yaml
-  - service/cm.yaml
-  - https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
-  - tekton/task-generate-domino.yaml
-  - tekton/task-generate-cyclonedx.yaml
-  - tekton/task-base-enrichment.yaml
-  - tekton/task-build-env.yaml
-  - tekton/pipeline-domino.yaml
-  - tekton/pipeline-cyclonedx.yaml
-  - pvc.yaml
-transformers:
-  - labels.yaml
+kind: LabelTransformer
+apiVersion: builtin
+metadata:
+  name: labels
+labels:
+  app.kubernetes.io/managed-by: "pct"
+  app.kubernetes.io/name: "sbomer"
+  app.kubernetes.io/version: "0.0.1"
+fieldSpecs:
+  - path: metadata/labels
+    create: true
+  - path: spec/template/metadata/labels
+  - path: spec/selector/matchLabels
+  - path: metadata/labels
+    kind: Task
+    create: true

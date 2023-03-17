@@ -16,13 +16,19 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: PersistentVolumeClaim
+kind: LabelTransformer
+apiVersion: builtin
 metadata:
-  name: sbomer-data
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 2G
+  name: labels
+labels:
+  app.kubernetes.io/managed-by: "pct"
+  app.kubernetes.io/name: "sbomer"
+  app.kubernetes.io/version: "0.0.1"
+fieldSpecs:
+  - path: metadata/labels
+    create: true
+  - path: spec/template/metadata/labels
+  - path: spec/selector/matchLabels
+  - path: metadata/labels
+    kind: Task
+    create: true

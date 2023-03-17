@@ -28,7 +28,8 @@ spec:
       default: ENRICHED_v1_0
   steps:
     - name: run-base-enrichment
-      image: quay.io/rh-newcastle/sbomer-generator:latest
+      image: sbomer-generator
+      imagePullPolicy: IfNotPresent
       script: |
         #!/usr/bin/env bash
 

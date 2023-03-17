@@ -49,6 +49,7 @@ spec:
       description: "The sbom-spec to use when inserting additional information inside the base SBOM"
 
   tasks:
+    # TODO: Ged rid of this dependency
     - name: fetch-source
       taskRef:
         name: git-clone

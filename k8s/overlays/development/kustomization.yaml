@@ -16,26 +16,32 @@
 # limitations under the License.
 #
 
+##
+# DEVELOPMENT OVERLAY
+#
+# This overlay deploy a development environment. On a Kubernetes cluster only SBOMer
+# Tekton resources will be added and the database will be created.
+#
+# In the development environment the service is run outside of the cluster,
+# most probably on the developer's laptop.
+#
+# Below you can see list of all resources expected to be deployed by this overlay:
+#
+# kubectl get all -l app.kubernetes.io/name="sbomer"
+# NAME                    READY   STATUS    RESTARTS   AGE
+# pod/sbomer-postgres-0   1/1     Running   0          56s
+
+# NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+# service/sbomer-postgres   ClusterIP   192.168.55.87   <none>        5432/TCP   6m24s
+
+# NAME                               READY   AGE
+# statefulset.apps/sbomer-postgres   1/1     6m23
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
-  - ../../base
+  - ../../base/tekton
+  - ../../base/database
 resources:
-  - database/statefulset.yaml
-  - database/service.yaml
-  - database/pvc.yaml
-    # This is in sync with OpenShift Pipelines 1.8.x which is deployed in our stage and production environments
-    # We need to ensure that it works in development as well.
+  # This is in sync with OpenShift Pipelines 1.8.x which is deployed in our stage and production environments
+  # We need to ensure that it works in development as well.
   - https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.37.5/release.yaml
-generatorOptions:
-  disableNameSuffixHash: true
-secretGenerator:
-  - name: sbomer-postgres
-    envs:
-      - secrets/secret-postgresql.txt
-  - name: sbomer-pull-secret
-    files:
-      - .dockerconfigjson=secrets/secret-redhatio.json
-    type: kubernetes.io/dockerconfigjson
-patchesStrategicMerge:
-  - patches/cm.yaml

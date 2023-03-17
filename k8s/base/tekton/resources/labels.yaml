@@ -26,8 +26,8 @@ labels:
   app.kubernetes.io/version: "0.0.1"
 fieldSpecs:
   - path: metadata/labels
+    kind: Task
     create: true
-  - path: spec/template/metadata/labels
-  - path: spec/selector/matchLabels
-
-
+  - path: metadata/labels
+    kind: Pipeline
+    create: true

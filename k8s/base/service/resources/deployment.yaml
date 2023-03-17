@@ -34,9 +34,9 @@ spec:
     spec:
       serviceAccountName: sbomer-sa
       containers:
-        - image: quay.io/rh-newcastle/sbomer-service:latest
+        - image: sbomer-service
           name: sbomer
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: QUARKUS_DATASOURCE_USERNAME
               valueFrom:
@@ -55,7 +55,6 @@ spec:
                 configMapKeyRef:
                   name: sbomer-config
                   key: QUARKUS_PROFILE
-
           ports:
             - containerPort: 8080
               name: http
