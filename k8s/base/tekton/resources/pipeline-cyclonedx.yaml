@@ -104,17 +104,6 @@ spec:
           # mgoldman / Not specified params cannot be passed, commenting out
         # - name: sbom-spec
         #   value: $(params.sbom-spec)
-    - name: enrich-base-sbom
-      runAfter:
-        - generate-sbom-cyclonedx
-      taskRef:
-        name: sbomer-base-enrichment
-      workspaces:
-        - name: data
-          workspace: data
-      params:
-        - name: build-id
-          value: $(params.build-id)
 
   workspaces:
     - name: data

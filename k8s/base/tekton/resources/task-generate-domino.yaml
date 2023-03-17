@@ -74,7 +74,7 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        jq -s '{buildId: "$(params.build-id)", generationMode: "BASE_DOMINO", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
+        jq -s '{buildId: "$(params.build-id)", generator: "DOMINO", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
