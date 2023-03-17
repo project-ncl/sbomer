@@ -78,7 +78,7 @@ spec:
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/process/sbomproperties
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/process
 
   results:
     - name: "bom"

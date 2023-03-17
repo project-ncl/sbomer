@@ -37,6 +37,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.redhat.sbomer.dto.response.Page;
 import org.redhat.sbomer.model.Sbom;
@@ -121,40 +122,46 @@ public class SBOMResource {
 
     @POST
     @Operation(
-            summary = "Generate a base SBOM based on the PNC build using Domino.",
-            description = "SBOM base generation for a particular PNC build Id offloaded to the service, using Domino.")
+            summary = "Generate a base SBOM based on the PNC build.",
+            description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
     @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    @Path("/generate/domino/{buildId}")
+    @Parameter(
+            name = "generator",
+            description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are `DOMINO`, `CYCLONEDX`",
+            example = "CYCLONEDX")
+    @Path("/generate/{buildId}{generator:(/generator/[^/]+?)?}")
     @APIResponses({ @APIResponse(
             responseCode = "201",
             description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response generateFromBuildWithDomino(@PathParam("buildId") String id) throws Exception {
+    public Response generateFromBuildWithDomino(
+            @PathParam("buildId") String id,
+            @PathParam("generator") String generator) throws Exception {
 
-        return sbomService.generateSbomFromPncBuild(id, Generators.DOMINO);
-    }
-
-    @POST
-    @Operation(
-            summary = "Generate a base SBOM based on the PNC build using CycloneDX plugin.",
-            description = "SBOM base generation for a particular PNC build Id offloaded to the service, using CycloneDX plugin.")
-    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    @Path("/generate/cyclonedx/{buildId}")
-    @APIResponses({ @APIResponse(
-            responseCode = "201",
-            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response generateFromBuildWithCycloneDX(@PathParam("buildId") String id) throws Exception {
+        if (!Strings.isEmpty(generator)) {
+            try {
+                return sbomService.generateSbomFromPncBuild(id, Generators.valueOf(generator));
+            } catch (IllegalArgumentException iae) {
+                return Response.status(Status.BAD_REQUEST)
+                        .entity(
+                                "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use `CYCLONEDX`")
+                        .build();
+            }
+        }
 
         return sbomService.generateSbomFromPncBuild(id, Generators.CYCLONEDX);
     }
 
     @POST
     @Operation(
-            summary = "Save the base SBOM and run and enrichment with PncToSbomProperties processor.",
-            description = "Save the base SBOM and run and enrichment with PncToSbomProperties processor.")
+            summary = "Save the base SBOM and run and enrichment.",
+            description = "Save the base SBOM and run and enrichment..")
     @Parameter(name = "sbom", description = "The SBOM to save")
-    @Path("/process/sbomproperties")
+    @Parameter(
+            name = "processor",
+            description = "Processor to use to enrich the SBOM. If not specified, SBOM_PROPERTIES will be used. Options are `SBOM_PROPERTIES`",
+            example = "CYCLONEDX")
+    @Path("/process{processor:(/processor/[^/]+?)?}")
     @APIResponses({
             @APIResponse(
                     responseCode = "202",
@@ -164,13 +171,22 @@ public class SBOMResource {
                     responseCode = "400",
                     description = "Provided SBOM couldn't be saved, probably due to validation failures",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response processEnrichmentOfBaseSbom(final Sbom sbom) throws Exception {
-        try {
-            sbomService.saveAndEnrichSbom(sbom, Processors.PNC_TO_SBOM_PROPERTIES);
-            return Response.status(Status.ACCEPTED).build();
-        } catch (ValidationException exc) {
-            return Response.status(Status.BAD_REQUEST).entity(exc).build();
+    public Response processEnrichmentOfBaseSbom(final Sbom sbom, @PathParam("processor") String processor)
+            throws Exception {
+
+        if (!Strings.isEmpty(processor)) {
+            try {
+                sbomService.saveAndEnrichSbom(sbom, Processors.valueOf(processor));
+                return Response.status(Status.ACCEPTED).build();
+            } catch (IllegalArgumentException iae) {
+                return Response.status(Status.BAD_REQUEST)
+                        .entity(
+                                "The specified processor does not exist, allowed values are `SBOM_PROPERTIES`. Leave empty to use `SBOM_PROPERTIES`")
+                        .build();
+            }
         }
+        sbomService.saveAndEnrichSbom(sbom, Processors.SBOM_PROPERTIES);
+        return Response.status(Status.ACCEPTED).build();
     }
 
 }
