@@ -29,6 +29,3 @@ fieldSpecs:
     create: true
   - path: spec/template/metadata/labels
   - path: spec/selector/matchLabels
-  - path: metadata/labels
-    kind: Task
-    create: true

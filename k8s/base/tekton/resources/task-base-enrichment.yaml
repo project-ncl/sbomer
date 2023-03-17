@@ -29,12 +29,19 @@ spec:
   steps:
     - name: run-base-enrichment
       image: sbomer-generator
+      env:
+        - name: SBOMER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: sbomer-tekton
+              key: SBOMER_SERVICE_URL
       imagePullPolicy: IfNotPresent
       script: |
         #!/usr/bin/env bash
 
-        curl -vX POST -H "Content-Type: application/json" http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/api/v1alpha1/sboms/enrich/$(params.build-id)?mode=$(params.mode)
+        [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
+        curl -vX POST -H "Content-Type: application/json" ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich/$(params.build-id)?mode=$(params.mode)
   results:
     - name: "bom"
       description: "Path to the generated SBOM"

@@ -16,9 +16,10 @@
 # limitations under the License.
 #
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-transformers:
-  - resources/labels.yaml
-generatorOptions:
-  disableNameSuffixHash: true
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sbomer-tekton
+data:
+  # This is the default host IP address when running on Minikube with KVM driver
+  SBOMER_SERVICE_URL: http://192.168.39.1:8080

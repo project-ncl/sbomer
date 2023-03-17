@@ -16,19 +16,7 @@
 # limitations under the License.
 #
 
-kind: LabelTransformer
-apiVersion: builtin
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: labels
-labels:
-  app.kubernetes.io/managed-by: "pct"
-  app.kubernetes.io/name: "sbomer"
-  app.kubernetes.io/version: "0.0.1"
-fieldSpecs:
-  - path: metadata/labels
-    create: true
-  - path: spec/template/metadata/labels
-  - path: spec/selector/matchLabels
-  - path: metadata/labels
-    kind: Task
-    create: true
+  name: sbomer-tekton

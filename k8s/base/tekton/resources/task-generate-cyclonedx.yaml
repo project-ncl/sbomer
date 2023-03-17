@@ -39,6 +39,7 @@ spec:
   steps:
     - name: generate-cyclonedx-sbom
       image: sbomer-generator
+      imagePullPolicy: IfNotPresent
       script: |
         #!/usr/bin/env bash
 
@@ -63,12 +64,21 @@ spec:
         printf "%s" "${BOM_PATH}" > "$(results.bom.path)"
     - name: "store-cyclonedx-sbom"
       image: sbomer-generator
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: SBOMER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: sbomer-tekton
+              key: SBOMER_SERVICE_URL
       script: |
         #!/usr/bin/env bash
 
         jq -s '{buildId: "$(params.build-id)", generationMode: "BASE_CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
 
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/api/v1alpha1/sboms
+        [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
+
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms
 
   results:
     - name: "bom"

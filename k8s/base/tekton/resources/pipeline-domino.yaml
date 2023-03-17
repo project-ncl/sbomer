@@ -36,6 +36,7 @@ spec:
       default: "--include-non-managed"
       description: "Additional arguments passed to Domino"
   tasks:
+    # TODO: Ged rid of this dependency
     - name: fetch-source
       taskRef:
         name: git-clone

@@ -27,6 +27,7 @@ spec:
   steps:
     - name: prepare
       image: sbomer-generator
+      imagePullPolicy: IfNotPresent
       script: |
         #!/usr/bin/env python3
 

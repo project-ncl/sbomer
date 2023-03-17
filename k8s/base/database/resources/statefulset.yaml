@@ -35,7 +35,7 @@ spec:
       serviceAccountName: sbomer-postgresql-sa
       containers:
         - image: postgresql
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: postgres
           ports:
             - containerPort: 5432
