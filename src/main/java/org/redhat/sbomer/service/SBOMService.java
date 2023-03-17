@@ -26,21 +26,24 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.redhat.sbomer.model.ArtifactCache;
 import org.redhat.sbomer.model.Sbom;
+import org.redhat.sbomer.processor.SbomProcessor;
 import org.redhat.sbomer.repositories.ArtifactCacheRepository;
 import org.redhat.sbomer.repositories.SbomRepository;
-import org.redhat.sbomer.service.generator.SBOMGenerator;
-import org.redhat.sbomer.transformer.PncArtifactsToPropertiesSbomTransformer;
-import org.redhat.sbomer.transformer.SbomManipulator;
-import org.redhat.sbomer.utils.enums.GenerationMode;
+import org.redhat.sbomer.utils.enums.Generators;
+import org.redhat.sbomer.utils.enums.Processors;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -53,6 +56,7 @@ import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.pnc.dto.Artifact;
 import org.redhat.sbomer.dto.ArtifactInfo;
 import org.redhat.sbomer.dto.response.Page;
+import org.redhat.sbomer.generator.SbomGenerator;
 import org.redhat.sbomer.mappers.api.ArtifactInfoMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -75,8 +79,13 @@ public class SBOMService {
     @Inject
     PNCService pncService;
 
+    @Any
     @Inject
-    SBOMGenerator sbomGenerator;
+    Instance<SbomGenerator> generators;
+
+    @Any
+    @Inject
+    Instance<SbomProcessor> processors;
 
     @Inject
     ArtifactInfoMapper artifactInfoMapper;
@@ -84,20 +93,16 @@ public class SBOMService {
     @Inject
     Validator validator;
 
-    @Inject
-    SbomManipulator sbomManipulator;
-
-    @Inject
-    PncArtifactsToPropertiesSbomTransformer artifactsToPropertiesSbomTransformer;
-
     /**
      * Runs the generation of SBOM using the available implementation of the generator. This is done in an asynchronous
      * way -- the generation is run behind the scenes.
      *
      * @param buildId
      */
-    public void createBomFromPncBuild(String buildId) {
-        sbomGenerator.generate(buildId);
+    public Response generateSbomFromPncBuild(String buildId, Generators generator) {
+
+        generators.select(generator.getSelector()).get().generate(buildId);
+        return Response.status(Status.ACCEPTED).build();
     }
 
     public Page<Sbom> listSboms(int pageIndex, int pageSize) {
@@ -111,49 +116,28 @@ public class SBOMService {
         return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    public Sbom getBaseSbom(String buildId) {
-        log.debug("Getting base SBOMS with buildId: {}", buildId);
-        try {
-            return sbomRepository.getSbom(buildId, GenerationMode.BASE_CYCLONEDX);
-        } catch (NoResultException nre) {
-            throw new NotFoundException("Base SBOM for build id " + buildId + " not found.");
-        }
+    public Page<Sbom> listAllSbomsWithBuildId(String buildId, int pageIndex, int pageSize) {
+        log.debug("Getting list of all SBOMS with buildId: {}", buildId);
+
+        List<Sbom> collection = sbomRepository.getAllSbomWithBuildIdQuery(buildId).page(pageIndex, pageSize).list();
+        int totalPages = sbomRepository.getAllSbomWithBuildIdQuery(buildId)
+                .page(io.quarkus.panache.common.Page.ofSize(pageSize))
+                .pageCount();
+        long totalHits = sbomRepository.getAllSbomWithBuildIdQuery(buildId).count();
+        List<Sbom> content = nullableStreamOf(collection).collect(Collectors.toList());
+
+        return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    public Sbom getSbom(String buildId, GenerationMode mode) {
-        log.debug("Getting SBOM with buildId: {} and generationMode: {}", buildId, mode);
+    public Sbom getSbom(String buildId, Generators generator, Processors processor) {
+        log.debug("Getting SBOM with buildId: {} and generator: {} and processor: {}", buildId, generator, processor);
         try {
-            return sbomRepository.getSbom(buildId, mode);
+            return sbomRepository.getSbom(buildId, generator, processor);
         } catch (NoResultException nre) {
-            throw new NotFoundException("SBOM for build id " + buildId + " and mode " + mode + " not found.");
+            throw new NotFoundException(
+                    "SBOM for build id " + buildId + " and generator " + generator + " and processor " + processor
+                            + " not found.");
         }
-    }
-
-    /**
-     * Persist changes to the {@link Sbom} in the database.
-     *
-     * @param sbom
-     * @return
-     */
-    @Transactional
-    public Sbom saveBaseSbom(Sbom sbom) throws ValidationException {
-        log.debug("Storing base sbom: {}", sbom.toString());
-
-        sbom.setGenerationTime(Instant.now());
-        sbom.setId(Sequence.nextId());
-
-        // TODO: mgoldmann / I think we should require it being set
-        if (sbom.getGenerationMode() == null) {
-            sbom.setGenerationMode(GenerationMode.BASE_CYCLONEDX);
-        }
-
-        Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
-        if (!violations.isEmpty()) {
-            throw new ValidationException(violations);
-        }
-
-        sbomRepository.persistAndFlush(sbom);
-        return sbom;
     }
 
     /**
@@ -213,40 +197,40 @@ public class SBOMService {
         return dbEntity;
     }
 
-    public Sbom runEnrichmentOfBaseSbom(String buildId, GenerationMode mode)
-            throws NotFoundException, ValidationException {
+    private Sbom runEnrichmentOfBaseSbom(Sbom baseSbom, Processors processor) {
 
-        Sbom baseSBOM = getBaseSbom(buildId);
-        Bom bom = baseSBOM.getCycloneDxBom();
+        Bom bom = baseSbom.getCycloneDxBom();
         if (bom != null) {
-            // TODO need to switch to async futures
-            Bom enrichedBom = null;
-            if (GenerationMode.ENRICHED_v1_0.equals(mode)) {
-                enrichedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
-
-            } else {
-                enrichedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
-            }
-
-            BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
-
-            // If there is already a SBOM enriched with this mode and for this buildId, we update it
+            Bom enrichedBom = processors.select(processor.getSelector()).get().process(bom);
+            BomJsonGenerator bomGenerator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
+            // If there is already a SBOM enriched with this mode and for this buildId, we update it try { Sbom
             try {
-                Sbom existingEnrichedSbom = sbomRepository.getSbom(buildId, mode);
-                existingEnrichedSbom.setSbom(generator.toJsonNode());
-                existingEnrichedSbom.setParentSbom(baseSBOM);
+                Sbom existingEnrichedSbom = getSbom(baseSbom.getBuildId(), baseSbom.getGenerator(), processor);
+                existingEnrichedSbom.setSbom(bomGenerator.toJsonNode());
+                existingEnrichedSbom.setParentSbom(baseSbom);
                 return updateSbom(existingEnrichedSbom);
-            } catch (NoResultException nre) {
+            } catch (NotFoundException nre) {
                 Sbom enrichedSbom = new Sbom();
-                enrichedSbom.setBuildId(buildId);
-                enrichedSbom.setGenerationMode(mode);
-                enrichedSbom.setSbom(generator.toJsonNode());
-                enrichedSbom.setParentSbom(baseSBOM);
+                enrichedSbom.setBuildId(baseSbom.getBuildId());
+                enrichedSbom.setGenerator(baseSbom.getGenerator());
+                enrichedSbom.setProcessor(processor);
+                enrichedSbom.setSbom(bomGenerator.toJsonNode());
+                enrichedSbom.setParentSbom(baseSbom);
                 return saveSbom(enrichedSbom);
             }
-        } else {
-            throw new ValidationException("Could not convert initial SBOM of build " + buildId);
         }
+        throw new ValidationException("Could not convert initial SBOM of build " + baseSbom.getBuildId());
+    }
+
+    public Sbom saveAndEnrichSbom(Sbom sbom, Processors processor) throws ValidationException {
+        log.debug(
+                "Saving sbom for buildId {} and generator: {}, and running enrichment with processor: {}",
+                sbom.getBuildId(),
+                sbom.getGenerator(),
+                processor);
+
+        Sbom baseSbom = saveSbom(sbom);
+        return runEnrichmentOfBaseSbom(baseSbom, processor);
     }
 
     public Page<ArtifactCache> listArtifactCache(int pageIndex, int pageSize) {

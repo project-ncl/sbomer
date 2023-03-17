@@ -43,7 +43,8 @@ import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.redhat.sbomer.utils.enums.GenerationMode;
+import org.redhat.sbomer.utils.enums.Generators;
+import org.redhat.sbomer.utils.enums.Processors;
 import org.redhat.sbomer.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -70,13 +71,20 @@ import static org.redhat.sbomer.utils.SbomUtils.schemaVersion;
         name = "sbom",
         indexes = { @Index(name = "idx_sbom_buildid", columnList = "build_id") },
         uniqueConstraints = @UniqueConstraint(
-                name = "uq_sbom_buildid_strategy",
-                columnNames = { "build_id", "generation_mode" }))
-@NamedQueries({
-        @NamedQuery(name = Sbom.FIND_BY_BUILDID, query = "FROM Sbom WHERE buildId = ?1 and generationMode = ?2") })
+                name = "uq_sbom_buildid_generator_processor",
+                columnNames = { "build_id", "generator", "processor" }))
+@NamedQueries({ @NamedQuery(name = Sbom.FIND_ALL_BY_BUILDID, query = "FROM Sbom WHERE buildId = ?1"),
+        @NamedQuery(
+                name = Sbom.FIND_BASE_BY_BUILDID_GENERATOR,
+                query = "FROM Sbom WHERE buildId = ?1 AND generator = ?2 and processor IS NULL"),
+        @NamedQuery(
+                name = Sbom.FIND_BY_BUILDID_GENERATOR_PROCESSOR,
+                query = "FROM Sbom WHERE buildId = ?1 AND generator = ?2 AND processor = ?3") })
 public class Sbom extends PanacheEntityBase {
 
-    public static final String FIND_BY_BUILDID = "Sbom.findByBuildIdMode";
+    public static final String FIND_ALL_BY_BUILDID = "Sbom.findAllByBuildId";
+    public static final String FIND_BASE_BY_BUILDID_GENERATOR = "Sbom.findBaseByBuildIdGenerator";
+    public static final String FIND_BY_BUILDID_GENERATOR_PROCESSOR = "Sbom.findByBuildIdGeneratorProcessor";
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -89,9 +97,13 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "generation_time", nullable = false, updatable = false)
     private Instant generationTime;
 
-    @Column(name = "generation_mode", nullable = false, updatable = false)
+    @Column(name = "generator", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
-    private GenerationMode generationMode;
+    private Generators generator;
+
+    @Column(name = "processor", nullable = true, updatable = false)
+    @Enumerated(EnumType.STRING)
+    private Processors processor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(

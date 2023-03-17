@@ -15,18 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.transformer;
+package org.redhat.sbomer.generator;
 
-import org.cyclonedx.model.Bom;
+import org.redhat.sbomer.errors.ApplicationException;
 
-public interface SbomTransformer {
+/**
+ * High-level interaction with the SBOM generator.
+ *
+ */
+public interface SbomGenerator {
 
     /**
-     * Allows implementing SBOM transformations, such as adjusting and augmenting component metadata.
+     * Generates the SBOM in CycloneDX format for a PNC build identified by the buildId
      *
-     * @param ctx transformation context that provides access to the original SBOM to be transformed
-     * @return transformed SBOM instance
+     * @param buildId PNC build id
      */
-    Bom transform(Bom originalBom);
+    public void generate(String buildId) throws ApplicationException;
 
 }

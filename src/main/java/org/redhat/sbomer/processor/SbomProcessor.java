@@ -15,21 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.service.generator;
+package org.redhat.sbomer.processor;
 
-import org.redhat.sbomer.errors.ApplicationException;
+import org.cyclonedx.model.Bom;
 
-/**
- * High-level interaction with the SBOM generator.
- *
- */
-public interface SBOMGenerator {
+public interface SbomProcessor {
 
     /**
-     * Generates the SBOM in CycloneDX format for a PNC build identified by the buildId
+     * Allows implementing SBOM processing
      *
-     * @param buildId PNC build id
+     * @param originalBom the original SBOM to be processed
+     * @return transformed SBOM instance
      */
-    public void generate(String buildId) throws ApplicationException;
+    Bom process(Bom originalBom);
 
 }

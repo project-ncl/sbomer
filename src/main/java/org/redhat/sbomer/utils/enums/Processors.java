@@ -17,8 +17,21 @@
  */
 package org.redhat.sbomer.utils.enums;
 
-public enum GenerationMode {
+import javax.enterprise.util.AnnotationLiteral;
 
-    BASE_DOMINO, BASE_CYCLONEDX, ENRICHED_v1_0, ENRICHED_v1_1;
+import org.redhat.sbomer.processor.PncToSbomProperties;
 
+public enum Processors {
+
+    SBOM_PROPERTIES(PncToSbomProperties.Literal.INSTANCE);
+
+    private AnnotationLiteral selector;
+
+    private Processors(AnnotationLiteral selector) {
+        this.selector = selector;
+    }
+
+    public AnnotationLiteral getSelector() {
+        return this.selector;
+    }
 }

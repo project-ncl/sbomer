@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.service.generator;
+package org.redhat.sbomer.generator;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -33,8 +33,9 @@ import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
 import io.fabric8.tekton.pipeline.v1beta1.PipelineRunBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
 
+@CycloneDX
 @ApplicationScoped
-public class TektonSBOMGenerator implements SBOMGenerator {
+public class TektonCycloneDXSbomGenerator implements SbomGenerator {
 
     @Inject
     PNCService pncService;
@@ -50,9 +51,8 @@ public class TektonSBOMGenerator implements SBOMGenerator {
                 .withGenerateName("sbom-")
                 .endMetadata()
                 .withNewSpec()
-                .withServiceAccountName("sbomer-tekton-sa")
                 .withNewPipelineRef()
-                .withName("sbom-generator-domino")
+                .withName("sbom-generator-cyclonedx")
                 .endPipelineRef()
                 .withNewPodTemplate()
                 .withSecurityContext(
@@ -61,11 +61,17 @@ public class TektonSBOMGenerator implements SBOMGenerator {
                                 .withRunAsUser(65532l)
                                 .build())
                 .endPodTemplate()
+                // TODO: can we pass the build environment attributes so that the task "build-env" does not need to
+                // refetch the build?
+                // TODO: make the below "additional-cyclonedx-args" and "cyclonedx-version" configurable
                 .withParams(
                         new Param("git-url", new ArrayOrString(build.getScmUrl())),
                         new Param("git-rev", new ArrayOrString(build.getScmRevision())),
                         new Param("build-id", new ArrayOrString(build.getId())),
-                        new Param("additional-domino-args", new ArrayOrString("--include-non-managed")))
+                        new Param(
+                                "additional-cyclonedx-args",
+                                new ArrayOrString("--batch-mode --no-transfer-progress --quiet")),
+                        new Param("cyclonedx-version", new ArrayOrString("2.7.5")))
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withName("data")
                                 .withPersistentVolumeClaim(new PersistentVolumeClaimVolumeSource("sbomer-data", false))

@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Optional;
 
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
@@ -31,10 +33,11 @@ import org.junit.jupiter.api.Test;
 import org.redhat.sbomer.dto.response.Page;
 import org.redhat.sbomer.model.ArtifactCache;
 import org.redhat.sbomer.model.Sbom;
+import org.redhat.sbomer.processor.SbomProcessor;
 import org.redhat.sbomer.service.SBOMService;
 import org.redhat.sbomer.test.mock.PncServiceMock;
-import org.redhat.sbomer.transformer.PncArtifactsToPropertiesSbomTransformer;
-import org.redhat.sbomer.transformer.SbomManipulator;
+import org.redhat.sbomer.utils.enums.Generators;
+import org.redhat.sbomer.utils.enums.Processors;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -65,18 +68,16 @@ public class TestSBOMService {
     @Inject
     PncServiceMock pncServiceMock;
 
+    @Any
     @Inject
-    SbomManipulator sbomManipulator;
-
-    @Inject
-    PncArtifactsToPropertiesSbomTransformer artifactsToPropertiesSbomTransformer;
+    Instance<SbomProcessor> processors;
 
     private static final String INITIAL_BUILD_ID = "ARYT3LBXDVYAC";
 
     @Test
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
-        Sbom baseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
+        Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
         assertNotNull(baseSBOM);
     }
 
@@ -108,7 +109,7 @@ public class TestSBOMService {
     public void testBaseSbomNotFound() throws IOException {
         log.info("testBaseSbomNotFound ...");
         try {
-            sbomService.getBaseSbom("I_DO_NOT_EXIST");
+            sbomService.getSbom("I_DO_NOT_EXIST", Generators.CYCLONEDX, null);
             fail("It should have thrown a 404 exception");
         } catch (NotFoundException nfe) {
         }
@@ -146,10 +147,10 @@ public class TestSBOMService {
         log.info("testManipulateSBOMAddingProperties ...");
 
         try {
-            Sbom baseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
+            Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
             Bom bom = baseSBOM.getCycloneDxBom();
 
-            Bom modifiedBom = sbomManipulator.addTransformer(artifactsToPropertiesSbomTransformer).runTransformers(bom);
+            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector()).get().process(bom);
 
             Component notFoundInCacheNorPNCComponent = findComponentWithPurl(
                     "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar",
@@ -220,7 +221,7 @@ public class TestSBOMService {
             sbomService.updateBom(Long.valueOf(baseSBOM.getId()), modifiedBom);
 
             // Now getting again from DB and re-run all the previous checks
-            Sbom updatedBaseSBOM = sbomService.getBaseSbom(INITIAL_BUILD_ID);
+            Sbom updatedBaseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
             Bom bomFromDB = updatedBaseSBOM.getCycloneDxBom();
 
             notFoundInCacheNorPNCComponent = findComponentWithPurl(

@@ -23,7 +23,6 @@ import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -39,18 +38,20 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.redhat.sbomer.dto.response.Page;
 import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.service.SBOMService;
-import org.redhat.sbomer.utils.enums.GenerationMode;
+import org.redhat.sbomer.utils.enums.Generators;
+import org.redhat.sbomer.utils.enums.Processors;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
 
 @Path("/api/v1alpha1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1")
+@Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1alpha1")
 public class SBOMResource {
 
     @Inject
@@ -64,10 +65,12 @@ public class SBOMResource {
      * @param sbom
      * @return
      */
+
     @POST
     @Operation(
-            summary = "Create base SBOM",
+            summary = "Save base SBOM",
             description = "Save submitted base SBOM. This endpoint expects a base SBOM in the CycloneDX format encapsulated in the BaseSBOM structure.")
+    @Parameter(name = "sbom", description = "The SBOM to save")
     @APIResponses({
             @APIResponse(
                     responseCode = "201",
@@ -79,33 +82,15 @@ public class SBOMResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Response create(final Sbom sbom) {
         try {
-            sbomService.saveBaseSbom(sbom);
+            sbomService.saveSbom(sbom);
             return Response.status(Status.CREATED).entity(sbom).build();
         } catch (ValidationException exc) {
             return Response.status(Status.BAD_REQUEST).entity(exc).build();
         }
     }
 
-    @POST
-    @Operation(
-            summary = "Create SBOM based on the PNC build",
-            description = "SBOM generation for a particular PNC build Id offloaded to the service")
-    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    @Path("{buildId}")
-    @APIResponses({ @APIResponse(
-            responseCode = "201",
-            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response fromBuild(@PathParam("buildId") String id) throws Exception {
-
-        sbomService.createBomFromPncBuild(id);
-
-        // Nothing is happening, yet!
-        return Response.status(Status.ACCEPTED).build();
-    }
-
     @GET
-    @Operation(summary = "List SBOMs", description = "List SBOMs available in the system in a paginated way")
+    @Operation(summary = "List SBOMs", description = "List SBOMs available in the system, paginated.")
     @APIResponses({ @APIResponse(
             responseCode = "200",
             description = "List of SBOMs in the system for a particular page and size.",
@@ -116,51 +101,93 @@ public class SBOMResource {
 
     @GET
     @Path("{buildId}")
-    @Operation(summary = "Get specific BaseSBOM", description = "Get a specific BaseSBOM by the PNC buildId")
+    @Operation(
+            summary = "Get all SBOMs related to a PNC build.",
+            description = "Get all the SBOMs related to the specified PNC build, paginated.")
     @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
     @APIResponses({
             @APIResponse(
                     responseCode = "200",
-                    description = "The BaseSBOM structure for a specific PNC buildId.",
+                    description = "The SBOMs related to a specific PNC buildId.",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @APIResponse(
                     responseCode = "404",
-                    description = "The BaseSBOM for the particular buildID couldn't be found in the system.",
+                    description = "No SBOMs could be found for the specified PNC build.",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Sbom get(@PathParam("buildId") String buildId) {
-        return sbomService.getBaseSbom(buildId);
+    public Page<Sbom> listAllWithPncBuildId(
+            @PathParam("buildId") String buildId,
+            @Valid @BeanParam PaginationParameters paginationParams) {
+        return sbomService
+                .listAllSbomsWithBuildId(buildId, paginationParams.getPageIndex(), paginationParams.getPageSize());
     }
 
     @POST
     @Operation(
-            summary = "Enrich SBOM based on the PNC build",
-            description = "SBOM enrichment for a particular PNC build Id. The only mode currently available is `ENRICHED_v1_0`")
+            summary = "Generate a base SBOM based on the PNC build.",
+            description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
     @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
     @Parameter(
-            name = "mode",
-            description = "Enrichment generation mode. Available modes: `ENRICHED_v1_0`",
-            example = "ENRICHED_v1_0")
-    @Path("/enrich/{buildId}")
+            name = "generator",
+            description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are `DOMINO`, `CYCLONEDX`",
+            example = "CYCLONEDX")
+    @Path("/generate/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "201",
-            description = "Executes the enrichment of an existing SBOM for a particular PNC buildId.",
+            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response runEnrichmentOfBaseSbom(@PathParam("buildId") String buildId, @QueryParam("mode") String mode)
+    public Response generate(
+            @PathParam("buildId") String id,
+            @QueryParam("generator") String generator) throws Exception {
+
+        if (!Strings.isEmpty(generator)) {
+            try {
+                return sbomService.generateSbomFromPncBuild(id, Generators.valueOf(generator));
+            } catch (IllegalArgumentException iae) {
+                return Response.status(Status.BAD_REQUEST)
+                        .entity(
+                                "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use `CYCLONEDX`")
+                        .build();
+            }
+        }
+
+        return sbomService.generateSbomFromPncBuild(id, Generators.CYCLONEDX);
+    }
+
+    @POST
+    @Operation(
+            summary = "Save the base SBOM and run and enrichment.",
+            description = "Save the base SBOM and run and enrichment..")
+    @Parameter(name = "sbom", description = "The SBOM to save")
+    @Parameter(
+            name = "processor",
+            description = "Processor to use to enrich the SBOM. If not specified, SBOM_PROPERTIES will be used. Options are `SBOM_PROPERTIES`",
+            example = "SBOM_PROPERTIES")
+    @Path("/enrich")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "202",
+                    description = "The SBOM enrichment process was accepted.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Provided SBOM couldn't be saved, probably due to validation failures",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response processEnrichmentOfBaseSbom(final Sbom sbom, @QueryParam("processor") String processor)
             throws Exception {
 
-        try {
-            GenerationMode generationMode = GenerationMode.valueOf(mode);
-            Sbom enrichedSBOM = sbomService.runEnrichmentOfBaseSbom(buildId, generationMode);
-            return Response.status(Response.Status.OK).entity(enrichedSBOM).build();
-        } catch (NotFoundException nfe) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No existing baseSBOM for buildId: " + buildId)
-                    .build();
-        } catch (ValidationException vExc) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(vExc.getMessage()).build();
-        } catch (IllegalArgumentException iExc) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(iExc.getMessage()).build();
+        if (!Strings.isEmpty(processor)) {
+            try {
+                sbomService.saveAndEnrichSbom(sbom, Processors.valueOf(processor));
+                return Response.status(Status.ACCEPTED).build();
+            } catch (IllegalArgumentException iae) {
+                return Response.status(Status.BAD_REQUEST)
+                        .entity(
+                                "The specified processor does not exist, allowed values are `SBOM_PROPERTIES`. Leave empty to use `SBOM_PROPERTIES`")
+                        .build();
+            }
         }
+        sbomService.saveAndEnrichSbom(sbom, Processors.SBOM_PROPERTIES);
+        return Response.status(Status.ACCEPTED).build();
     }
 
 }

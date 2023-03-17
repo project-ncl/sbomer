@@ -74,11 +74,11 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        jq -s '{buildId: "$(params.build-id)", generationMode: "BASE_CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
+        jq -s '{buildId: "$(params.build-id)", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
 
   results:
     - name: "bom"

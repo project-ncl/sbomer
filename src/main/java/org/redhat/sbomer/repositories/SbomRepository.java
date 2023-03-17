@@ -21,15 +21,24 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
 import org.redhat.sbomer.model.Sbom;
-import org.redhat.sbomer.utils.enums.GenerationMode;
+import org.redhat.sbomer.utils.enums.Generators;
+import org.redhat.sbomer.utils.enums.Processors;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
 @ApplicationScoped
 public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
 
-    public Sbom getSbom(String buildId, GenerationMode generationMode) {
-        return find("#" + Sbom.FIND_BY_BUILDID, buildId, generationMode).singleResult();
+    public Sbom getSbom(String buildId, Generators generator, Processors processor) {
+        if (processor == null) {
+            return find("#" + Sbom.FIND_BASE_BY_BUILDID_GENERATOR, buildId, generator).singleResult();
+        }
+        return find("#" + Sbom.FIND_BY_BUILDID_GENERATOR_PROCESSOR, buildId, generator, processor).singleResult();
+    }
+
+    public PanacheQuery<Sbom> getAllSbomWithBuildIdQuery(String buildId) {
+        return find("#" + Sbom.FIND_ALL_BY_BUILDID, buildId);
     }
 
     @Transactional
