@@ -27,6 +27,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -129,14 +130,14 @@ public class SBOMResource {
             name = "generator",
             description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are `DOMINO`, `CYCLONEDX`",
             example = "CYCLONEDX")
-    @Path("/generate/{buildId}{generator:(/generator/[^/]+?)?}")
+    @Path("/generate/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "201",
             description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Response generateFromBuildWithDomino(
             @PathParam("buildId") String id,
-            @PathParam("generator") String generator) throws Exception {
+            @QueryParam("generator") String generator) throws Exception {
 
         if (!Strings.isEmpty(generator)) {
             try {
@@ -161,7 +162,7 @@ public class SBOMResource {
             name = "processor",
             description = "Processor to use to enrich the SBOM. If not specified, SBOM_PROPERTIES will be used. Options are `SBOM_PROPERTIES`",
             example = "CYCLONEDX")
-    @Path("/process{processor:(/processor/[^/]+?)?}")
+    @Path("/enrich")
     @APIResponses({
             @APIResponse(
                     responseCode = "202",
@@ -171,7 +172,7 @@ public class SBOMResource {
                     responseCode = "400",
                     description = "Provided SBOM couldn't be saved, probably due to validation failures",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response processEnrichmentOfBaseSbom(final Sbom sbom, @PathParam("processor") String processor)
+    public Response processEnrichmentOfBaseSbom(final Sbom sbom, @QueryParam("processor") String processor)
             throws Exception {
 
         if (!Strings.isEmpty(processor)) {
