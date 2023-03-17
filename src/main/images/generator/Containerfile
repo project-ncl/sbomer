@@ -17,5 +17,5 @@ RUN chown -R 65532:0 /workdir && \
 
 USER 65532
 
-COPY --chown=65532:0 settings.xml install.sh .
+COPY --chown=65532:0 src/main/images/generator/settings.xml src/main/images/generator/install.sh /workdir/
 RUN sh -c ./install.sh
