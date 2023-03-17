@@ -51,7 +51,7 @@ import org.redhat.sbomer.validation.exceptions.ValidationException;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1")
+@Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1alpha1")
 public class SBOMResource {
 
     @Inject
@@ -135,7 +135,7 @@ public class SBOMResource {
             responseCode = "201",
             description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response generateFromBuildWithDomino(
+    public Response generate(
             @PathParam("buildId") String id,
             @QueryParam("generator") String generator) throws Exception {
 
@@ -161,7 +161,7 @@ public class SBOMResource {
     @Parameter(
             name = "processor",
             description = "Processor to use to enrich the SBOM. If not specified, SBOM_PROPERTIES will be used. Options are `SBOM_PROPERTIES`",
-            example = "CYCLONEDX")
+            example = "SBOM_PROPERTIES")
     @Path("/enrich")
     @APIResponses({
             @APIResponse(
