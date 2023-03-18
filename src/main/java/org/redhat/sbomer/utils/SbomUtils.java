@@ -40,25 +40,37 @@ public class SbomUtils {
         return Version.VERSION_14;
     }
 
-    public static boolean hasProperty(List<Property> properties, String property) {
-        return properties.stream().filter(c -> c.getName().equalsIgnoreCase(property)).count() > 0;
+    public static boolean hasProperty(Component component, String property) {
+        return component.getProperties() != null
+                && component.getProperties().stream().filter(c -> c.getName().equalsIgnoreCase(property)).count() > 0;
     }
 
-    public static boolean hasHash(List<Hash> hashes, Algorithm algorithm) {
-        return hashes.stream().filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec())).count() > 0;
+    public static boolean hasHash(Component component, Algorithm algorithm) {
+        return component.getHashes() != null
+                && component.getHashes().stream().filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec())).count() > 0;
     }
 
-    public static void addHash(List<Hash> hashes, Algorithm algorithm, String value) {
+    public static void addHash(Component component, Algorithm algorithm, String value) {
         log.debug("addHash {}: {}", algorithm.getSpec(), value);
+        List<Hash> hashes = new ArrayList<Hash>();
+        if (component.getHashes() != null) {
+            hashes.addAll(component.getHashes());
+        }
         hashes.add(new Hash(algorithm, value));
+        component.setHashes(hashes);
     }
 
-    public static void addProperty(List<Property> properties, String key, String value) {
+    public static void addProperty(Component component, String key, String value) {
         log.debug("addProperty {}: {}", key, value);
+        List<Property> properties = new ArrayList<Property>();
+        if (component.getProperties() != null) {
+            properties.addAll(component.getProperties());
+        }
         Property property = new Property();
         property.setName(key);
         property.setValue(value != null ? value : "");
         properties.add(property);
+        component.setProperties(properties);
     }
 
     public static Optional<Component> findComponentWithPurl(String purl, Bom bom) {
@@ -71,7 +83,10 @@ public class SbomUtils {
 
     public static void addMrrc(Component c) {
         c.setPublisher(Constants.PUBLISHER);
-        List<ExternalReference> externalRefs = new ArrayList<>(c.getExternalReferences());
+        List<ExternalReference> externalRefs = new ArrayList<>();
+        if (c.getExternalReferences() != null) {
+            externalRefs.addAll(c.getExternalReferences());
+        }
         ExternalReference dist = null;
         for (ExternalReference r : externalRefs) {
             if (r.getType().equals(ExternalReference.Type.DISTRIBUTION)) {

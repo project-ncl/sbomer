@@ -68,42 +68,42 @@ public class PncArtifactsToSbomPropertiesProcessor implements SbomProcessor {
                     final ArtifactCache artifact = sbomService.fetchArtifact(c.getPurl());
                     final ArtifactInfo info = artifact.getArtifactInfo();
 
-                    if (info.getMd5() != null && !hasHash(c.getHashes(), Algorithm.MD5)) {
-                        addHash(c.getHashes(), Algorithm.MD5, info.getMd5());
+                    if (info.getMd5() != null && !hasHash(c, Algorithm.MD5)) {
+                        addHash(c, Algorithm.MD5, info.getMd5());
                     }
-                    if (info.getSha1() != null && !hasHash(c.getHashes(), Algorithm.SHA1)) {
-                        addHash(c.getHashes(), Algorithm.SHA1, info.getSha1());
+                    if (info.getSha1() != null && !hasHash(c, Algorithm.SHA1)) {
+                        addHash(c, Algorithm.SHA1, info.getSha1());
                     }
-                    if (info.getSha256() != null && !hasHash(c.getHashes(), Algorithm.SHA_256)) {
-                        addHash(c.getHashes(), Algorithm.SHA_256, info.getSha256());
+                    if (info.getSha256() != null && !hasHash(c, Algorithm.SHA_256)) {
+                        addHash(c, Algorithm.SHA_256, info.getSha256());
                     }
 
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_PUBLIC_URL)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_PUBLIC_URL, info.getPublicUrl());
+                    if (!hasProperty(c, SBOM_RED_HAT_PUBLIC_URL)) {
+                        addProperty(c, SBOM_RED_HAT_PUBLIC_URL, info.getPublicUrl());
                     }
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_ORIGIN_URL)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_ORIGIN_URL, info.getOriginUrl());
+                    if (!hasProperty(c, SBOM_RED_HAT_ORIGIN_URL)) {
+                        addProperty(c, SBOM_RED_HAT_ORIGIN_URL, info.getOriginUrl());
                     }
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_BUILD_ID)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_BUILD_ID, info.getBuildId());
+                    if (!hasProperty(c, SBOM_RED_HAT_BUILD_ID)) {
+                        addProperty(c, SBOM_RED_HAT_BUILD_ID, info.getBuildId());
                     }
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_BUILD_SYSTEM)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_BUILD_SYSTEM, info.getBuildSystem());
+                    if (!hasProperty(c, SBOM_RED_HAT_BUILD_SYSTEM)) {
+                        addProperty(c, SBOM_RED_HAT_BUILD_SYSTEM, info.getBuildSystem());
                     }
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_SCM_URL)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_SCM_URL, info.getScmUrl());
+                    if (!hasProperty(c, SBOM_RED_HAT_SCM_URL)) {
+                        addProperty(c, SBOM_RED_HAT_SCM_URL, info.getScmUrl());
                     }
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_SCM_REVISION)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_SCM_REVISION, info.getScmRevision());
+                    if (!hasProperty(c, SBOM_RED_HAT_SCM_REVISION)) {
+                        addProperty(c, SBOM_RED_HAT_SCM_REVISION, info.getScmRevision());
                     }
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_SCM_TAG)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_SCM_TAG, info.getScmTag());
+                    if (!hasProperty(c, SBOM_RED_HAT_SCM_TAG)) {
+                        addProperty(c, SBOM_RED_HAT_SCM_TAG, info.getScmTag());
                     }
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_SCM_EXTERNAL_URL)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_SCM_EXTERNAL_URL, info.getScmExternalUrl());
+                    if (!hasProperty(c, SBOM_RED_HAT_SCM_EXTERNAL_URL)) {
+                        addProperty(c, SBOM_RED_HAT_SCM_EXTERNAL_URL, info.getScmExternalUrl());
                     }
-                    if (!hasProperty(c.getProperties(), SBOM_RED_HAT_ENVIRONMENT_IMAGE)) {
-                        addProperty(c.getProperties(), SBOM_RED_HAT_ENVIRONMENT_IMAGE, info.getEnvironmentImage());
+                    if (!hasProperty(c, SBOM_RED_HAT_ENVIRONMENT_IMAGE)) {
+                        addProperty(c, SBOM_RED_HAT_ENVIRONMENT_IMAGE, info.getEnvironmentImage());
                     }
 
                     addMrrc(c);
