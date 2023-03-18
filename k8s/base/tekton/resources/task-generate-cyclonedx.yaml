@@ -48,21 +48,21 @@ spec:
         sdk use maven $(params.mvn-version)
         sdk use java $(params.jdk-version)
 
-        cd $(workspaces.data.path)/$(params.workdir)
+        cd $(workspaces.data.path)/$(params.workdir)/source
 
         echo "Working from the `pwd` directory"
 
-        BOM_PATH="$(workspaces.data.path)/$(params.workdir)/bom.json"
+        BOM_PATH="$(workspaces.data.path)/$(params.workdir)/source/target/$(params.workdir).json"
 
         echo "Running SBOM generation with CycloneDX Maven plugin:"
-        mvn org.cyclonedx:cyclonedx-maven-plugin:$(params.cyclonedx-version):makeAggregateBom -DoutputFormat=json -DoutputName=${BOM_PATH} --settings ~/settings.xml $(params.additional-cyclonedx-args)
+        mvn org.cyclonedx:cyclonedx-maven-plugin:$(params.cyclonedx-version):makeAggregateBom -DoutputFormat=json -DoutputName=$(params.workdir) --settings ~/settings.xml $(params.additional-cyclonedx-args)
 
         cat ${BOM_PATH}
 
         echo "Done, SBOM generated at: ${BOM_PATH}"
 
         printf "%s" "${BOM_PATH}" > "$(results.bom.path)"
-    - name: "store-cyclonedx-sbom"
+    - name: "store-and-enrich-cyclonedx-sbom"
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       env:
@@ -74,11 +74,11 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        jq -s '{buildId: "$(params.build-id)", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
+        jq -s '{buildId: "$(params.build-id)", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/source/target/$(params.workdir).json > $(workspaces.data.path)/$(params.workdir)/source/target/payload.json
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/source/target/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
 
   results:
     - name: "bom"

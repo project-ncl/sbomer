@@ -135,9 +135,8 @@ public class SBOMResource {
             responseCode = "201",
             description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response generate(
-            @PathParam("buildId") String id,
-            @QueryParam("generator") String generator) throws Exception {
+    public Response generate(@PathParam("buildId") String id, @QueryParam("generator") String generator)
+            throws Exception {
 
         if (!Strings.isEmpty(generator)) {
             try {
