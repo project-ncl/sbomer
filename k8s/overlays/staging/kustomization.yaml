@@ -31,11 +31,12 @@ resources:
   - service/route.yaml
 patchesStrategicMerge:
   - patches/sa.yaml
+  - patches/pvc.yaml
 
 # List of images used in staging
 # TODO: Currently happily using :latest tag but this will be changed in the future
 images:
   - name: sbomer-generator
-    newName: quay.io/rh-newcastle/sbomer-generator:latest
+    newName: quay.io/rh-newcastle-stage/sbomer-generator:latest
   - name: sbomer-service
-    newName: quay.io/rh-newcastle/sbomer-service:latest
+    newName: quay.io/rh-newcastle-stage/sbomer-service:latest

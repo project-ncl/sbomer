@@ -30,5 +30,5 @@ SCRIPT_DIR=$(dirname "$0")
 
 "$SCRIPT_DIR/run-maven.sh" package -DskipTests
 
-minikube -p sbomer image build -t localhost/sbomer-service:latest -f src/main/images/service/Containerfile.jvm "$SCRIPT_DIR/../"
-minikube -p sbomer image build -t localhost/sbomer-generator:latest -f src/main/images/generator/Containerfile "$SCRIPT_DIR/../"
+BUILDER=minikube "$SCRIPT_DIR/internal-build-image.sh" "sbomer-service"
+BUILDER=minikube "$SCRIPT_DIR/internal-build-image.sh" "sbomer-generator"

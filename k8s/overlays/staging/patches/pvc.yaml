@@ -1,5 +1,3 @@
-#!/bin/env bash
-
 #
 # JBoss, Home of Professional Open Source.
 # Copyright 2023 Red Hat, Inc., and individual contributors
@@ -18,15 +16,9 @@
 # limitations under the License.
 #
 
-set -e
-
-# This file builds all container images using Podman.
-
-SCRIPT_DIR=$(dirname "$0")
-
-#"$SCRIPT_DIR/run-maven.sh" package -DskipTests
-
-set -x
-
-BUILDER=podman "$SCRIPT_DIR/internal-build-image.sh" "sbomer-service"
-BUILDER=podman "$SCRIPT_DIR/internal-build-image.sh" "sbomer-generator"
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sbomer-postgres
+spec:
+  storageClassName: dynamic-nfs
