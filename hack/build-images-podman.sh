@@ -24,9 +24,9 @@ set -e
 
 SCRIPT_DIR=$(dirname "$0")
 
-"$SCRIPT_DIR/run-maven.sh" package -DskipTests
+#"$SCRIPT_DIR/run-maven.sh" package -DskipTests
 
 set -x
 
-podman build -t localhost/sbomer-service:latest -f src/main/images/service/Containerfile.jvm "$SCRIPT_DIR/../"
-podman build -t localhost/sbomer-generator:latest -f src/main/images/generator/Containerfile "$SCRIPT_DIR/../"
+BUILDER=podman "$SCRIPT_DIR/internal-build-image.sh" "sbomer-service"
+BUILDER=podman "$SCRIPT_DIR/internal-build-image.sh" "sbomer-generator"
