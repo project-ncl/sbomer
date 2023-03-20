@@ -57,64 +57,69 @@ public class PncArtifactsToSbomPropertiesProcessor implements SbomProcessor {
     @Override
     public Bom process(Bom originalBom) {
         log.info("Adding PNC cached build info to the SBOM properties");
-        if (originalBom.getComponents() == null) {
-            return originalBom;
+
+        if (originalBom.getMetadata() != null && originalBom.getMetadata().getComponent() != null) {
+            processComponent(originalBom.getMetadata().getComponent());
         }
-
-        for (Component c : originalBom.getComponents()) {
-            if (RhVersionPattern.isRhVersion(c.getVersion())) {
-                log.info("SBOM component with Red Hat version found, purl: {}", c.getPurl());
-                try {
-                    final ArtifactCache artifact = sbomService.fetchArtifact(c.getPurl());
-                    final ArtifactInfo info = artifact.getArtifactInfo();
-
-                    if (info.getMd5() != null && !hasHash(c, Algorithm.MD5)) {
-                        addHash(c, Algorithm.MD5, info.getMd5());
-                    }
-                    if (info.getSha1() != null && !hasHash(c, Algorithm.SHA1)) {
-                        addHash(c, Algorithm.SHA1, info.getSha1());
-                    }
-                    if (info.getSha256() != null && !hasHash(c, Algorithm.SHA_256)) {
-                        addHash(c, Algorithm.SHA_256, info.getSha256());
-                    }
-
-                    if (!hasProperty(c, SBOM_RED_HAT_PUBLIC_URL)) {
-                        addProperty(c, SBOM_RED_HAT_PUBLIC_URL, info.getPublicUrl());
-                    }
-                    if (!hasProperty(c, SBOM_RED_HAT_ORIGIN_URL)) {
-                        addProperty(c, SBOM_RED_HAT_ORIGIN_URL, info.getOriginUrl());
-                    }
-                    if (!hasProperty(c, SBOM_RED_HAT_BUILD_ID)) {
-                        addProperty(c, SBOM_RED_HAT_BUILD_ID, info.getBuildId());
-                    }
-                    if (!hasProperty(c, SBOM_RED_HAT_BUILD_SYSTEM)) {
-                        addProperty(c, SBOM_RED_HAT_BUILD_SYSTEM, info.getBuildSystem());
-                    }
-                    if (!hasProperty(c, SBOM_RED_HAT_SCM_URL)) {
-                        addProperty(c, SBOM_RED_HAT_SCM_URL, info.getScmUrl());
-                    }
-                    if (!hasProperty(c, SBOM_RED_HAT_SCM_REVISION)) {
-                        addProperty(c, SBOM_RED_HAT_SCM_REVISION, info.getScmRevision());
-                    }
-                    if (!hasProperty(c, SBOM_RED_HAT_SCM_TAG)) {
-                        addProperty(c, SBOM_RED_HAT_SCM_TAG, info.getScmTag());
-                    }
-                    if (!hasProperty(c, SBOM_RED_HAT_SCM_EXTERNAL_URL)) {
-                        addProperty(c, SBOM_RED_HAT_SCM_EXTERNAL_URL, info.getScmExternalUrl());
-                    }
-                    if (!hasProperty(c, SBOM_RED_HAT_ENVIRONMENT_IMAGE)) {
-                        addProperty(c, SBOM_RED_HAT_ENVIRONMENT_IMAGE, info.getEnvironmentImage());
-                    }
-
-                    addMrrc(c);
-                } catch (NotFoundException nfe) {
-                    log.warn(nfe.getMessage());
-                }
-
+        if (originalBom.getComponents() != null) {
+            for (Component c : originalBom.getComponents()) {
+                processComponent(c);
             }
         }
 
         return originalBom;
+    }
+
+    private void processComponent(Component component) {
+        if (RhVersionPattern.isRhVersion(component.getVersion())) {
+            log.info("SBOM component with Red Hat version found, purl: {}", component.getPurl());
+            try {
+                final ArtifactCache artifact = sbomService.fetchArtifact(component.getPurl());
+                final ArtifactInfo info = artifact.getArtifactInfo();
+
+                if (info.getMd5() != null && !hasHash(component, Algorithm.MD5)) {
+                    addHash(component, Algorithm.MD5, info.getMd5());
+                }
+                if (info.getSha1() != null && !hasHash(component, Algorithm.SHA1)) {
+                    addHash(component, Algorithm.SHA1, info.getSha1());
+                }
+                if (info.getSha256() != null && !hasHash(component, Algorithm.SHA_256)) {
+                    addHash(component, Algorithm.SHA_256, info.getSha256());
+                }
+
+                if (!hasProperty(component, SBOM_RED_HAT_PUBLIC_URL)) {
+                    addProperty(component, SBOM_RED_HAT_PUBLIC_URL, info.getPublicUrl());
+                }
+                if (!hasProperty(component, SBOM_RED_HAT_ORIGIN_URL)) {
+                    addProperty(component, SBOM_RED_HAT_ORIGIN_URL, info.getOriginUrl());
+                }
+                if (!hasProperty(component, SBOM_RED_HAT_BUILD_ID)) {
+                    addProperty(component, SBOM_RED_HAT_BUILD_ID, info.getBuildId());
+                }
+                if (!hasProperty(component, SBOM_RED_HAT_BUILD_SYSTEM)) {
+                    addProperty(component, SBOM_RED_HAT_BUILD_SYSTEM, info.getBuildSystem());
+                }
+                if (!hasProperty(component, SBOM_RED_HAT_SCM_URL)) {
+                    addProperty(component, SBOM_RED_HAT_SCM_URL, info.getScmUrl());
+                }
+                if (!hasProperty(component, SBOM_RED_HAT_SCM_REVISION)) {
+                    addProperty(component, SBOM_RED_HAT_SCM_REVISION, info.getScmRevision());
+                }
+                if (!hasProperty(component, SBOM_RED_HAT_SCM_TAG)) {
+                    addProperty(component, SBOM_RED_HAT_SCM_TAG, info.getScmTag());
+                }
+                if (!hasProperty(component, SBOM_RED_HAT_SCM_EXTERNAL_URL)) {
+                    addProperty(component, SBOM_RED_HAT_SCM_EXTERNAL_URL, info.getScmExternalUrl());
+                }
+                if (!hasProperty(component, SBOM_RED_HAT_ENVIRONMENT_IMAGE)) {
+                    addProperty(component, SBOM_RED_HAT_ENVIRONMENT_IMAGE, info.getEnvironmentImage());
+                }
+
+                addMrrc(component);
+            } catch (NotFoundException nfe) {
+                log.warn(nfe.getMessage());
+            }
+        }
     }
 
 }
