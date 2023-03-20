@@ -31,6 +31,7 @@ resources:
   - service/route.yaml
 patchesStrategicMerge:
   - patches/sa.yaml
+  - patches/pvc.yaml
 
 # List of images used in staging
 # TODO: Currently happily using :latest tag but this will be changed in the future
