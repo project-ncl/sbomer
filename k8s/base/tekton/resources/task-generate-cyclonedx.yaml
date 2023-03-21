@@ -22,47 +22,108 @@ metadata:
   name: sbomer-generate-cyclonedx
 spec:
   params:
-    - name: jdk-version
+    # TODO: Currently that JSON is not really easy to work with in a Bash script, but this will change once we move to a proper CLI.
+    - name: config
       type: string
-    - name: mvn-version
-      type: string
-    - name: workdir
-      type: string
-    - name: additional-cyclonedx-args
-      type: string
-      default: "--batch-mode --no-transfer-progress --quiet"
-    - name: cyclonedx-version
-      type: string
-      default: "2.7.5"
+      description: |
+        Additional parameters that instrument the CycloneDX plugin in th JSON format:
+
+        Currently only following keys are supported:
+
+          * version:            Version of the Maven CycloneDX plugin, default: 2.7.5
+          * additional-args:    Additional arguments passed to the Maven CycloneDX plugin invocation
+
+        Example: 
+
+        {"version": "2.7.5", "additional-args": "--batch-mode --no-transfer-progress --quiet"}
+      default: |
+        {"version": "2.7.5", "additional-args": "--batch-mode --no-transfer-progress --quiet"}
+
+
+    # TODO: Content available below is not supported in the Tekton version we use.
+    # For more information please refer to this TEP: https://github.com/tektoncd/community/blob/main/teps/0075-object-param-and-result-types.md
+
+    # - name: config
+    #   type: object
+    #   description: |
+    #     Additional parameters that instrument the CycloneDX plugin, available options:
+
+    #     * version:            Version of the Maven CycloneDX plugin, default: 2.7.5
+    #     * additional-args:    Additional arguments passed to the Maven CycloneDX plugin invocation
+    #   properties:
+    #     version:
+    #      type: string
+    #     additional-args:
+    #      type: string
+    #   default:
+    #     version: "2.7.5"
+    #     additional-args: "--batch-mode --no-transfer-progress --quiet"
     - name: build-id
       type: string
+      description: "The PNC build ID"
   steps:
-    - name: generate-cyclonedx-sbom
+    # TODO: Move implementation of this step into Java CLI
+    - name: checkout
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       script: |
         #!/usr/bin/env bash
 
+        set -e
+
+        # Fetch build information
+        curl https://orch.psi.redhat.com/pnc-rest/v2/builds/$(params.build-id) | jq > $(workspaces.data.path)/build.json
+
+        # Get information on what to clone
+        SCM_URL=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.scmUrl')
+        SCM_TAG=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.scmTag')
+
+        # Clone everything into 'source' directory
+        git clone --depth 1 --branch $SCM_TAG $SCM_URL $(workspaces.data.path)/source
+    # TODO: Move implementation of this step into Java CLI
+    # TODO: What with other build tools, like Gradle? Should it be covered here or a new Task should be prepared?
+    - name: generate
+      image: sbomer-generator
+      imagePullPolicy: IfNotPresent
+      script: |
+        #!/usr/bin/env bash
+
+        set -e
+
         source ~/.sdkman/bin/sdkman-init.sh
 
-        sdk use maven $(params.mvn-version)
-        sdk use java $(params.jdk-version)
+        JDK_VERSION=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.environment.attributes.JDK | split(".")[0]')
+        MAVEN_VERSION=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.environment.attributes.MAVEN | split(".") | .[0] + "." + .[1]')
 
-        cd $(workspaces.data.path)/$(params.workdir)/source
+        if [ "$JDK_VERSION" = "1" ]; then
+          JDK_VERSION="8"
+        fi
+
+        echo "Java version: ${JDK_VERSION}"
+        echo "Maven version: ${MAVEN_VERSION}"
+
+        sdk use maven $MAVEN_VERSION
+        sdk use java $JDK_VERSION
+
+        BOM_PATH="$(workspaces.data.path)/source/target/bom.json"
+
+        cd $(workspaces.data.path)/source
 
         echo "Working from the `pwd` directory"
 
-        BOM_PATH="$(workspaces.data.path)/$(params.workdir)/source/target/$(params.workdir).json"
+        echo "Running with following config:"
+        echo '$(params.config)' | tee config.json
 
-        echo "Running SBOM generation with CycloneDX Maven plugin:"
-        mvn org.cyclonedx:cyclonedx-maven-plugin:$(params.cyclonedx-version):makeAggregateBom -DoutputFormat=json -DoutputName=$(params.workdir) --settings ~/settings.xml $(params.additional-cyclonedx-args)
+        TOOL_VERSION=$(cat config.json | jq --raw-output '.version')
+        TOOL_ADDITIONAL_ARGS=$(cat config.json | jq --raw-output '."additional-args"')
+
+        echo "Running SBOM generation with CycloneDX Maven plugin ${TOOL_VERSION}..."
+        mvn org.cyclonedx:cyclonedx-maven-plugin:${TOOL_VERSION}:makeAggregateBom -DoutputFormat=json -DoutputName=bom --settings ~/settings.xml ${TOOL_ADDITIONAL_ARGS}
 
         cat ${BOM_PATH}
 
         echo "Done, SBOM generated at: ${BOM_PATH}"
-
-        printf "%s" "${BOM_PATH}" > "$(results.bom.path)"
-    - name: "store-and-enrich-cyclonedx-sbom"
+    - name: "publish"
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       env:
@@ -74,15 +135,15 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        jq -s '{buildId: "$(params.build-id)", type: "BUILD_TIME", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/source/target/$(params.workdir).json > $(workspaces.data.path)/$(params.workdir)/source/target/payload.json
+        set -e
+
+        jq -s '{buildId: "$(params.build-id)", type: "BUILD_TIME", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/source/target/bom.json > $(workspaces.data.path)/payload.json
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/source/target/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
+        # TODO: Why do we send it to the /enrich endpoint? We should just save it and make the service decide what to do with it later (if at all). Leaving for now.
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
 
-  results:
-    - name: "bom"
-      description: "Path to the generated SBOM"
+
   workspaces:
     - name: data
-      description: Main workspace
