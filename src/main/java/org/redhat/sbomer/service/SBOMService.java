@@ -44,6 +44,7 @@ import org.redhat.sbomer.repositories.ArtifactCacheRepository;
 import org.redhat.sbomer.repositories.SbomRepository;
 import org.redhat.sbomer.utils.enums.Generators;
 import org.redhat.sbomer.utils.enums.Processors;
+import org.redhat.sbomer.utils.enums.SbomType;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -216,6 +217,7 @@ public class SBOMService {
                 enrichedSbom.setProcessor(processor);
                 enrichedSbom.setSbom(bomGenerator.toJsonNode());
                 enrichedSbom.setParentSbom(baseSbom);
+                enrichedSbom.setType(SbomType.BUILD_TIME);
                 return saveSbom(enrichedSbom);
             }
         }

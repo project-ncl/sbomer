@@ -74,7 +74,7 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        jq -s '{buildId: "$(params.build-id)", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/source/target/$(params.workdir).json > $(workspaces.data.path)/$(params.workdir)/source/target/payload.json
+        jq -s '{buildId: "$(params.build-id)", type: "BUILD_TIME", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/source/target/$(params.workdir).json > $(workspaces.data.path)/$(params.workdir)/source/target/payload.json
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 

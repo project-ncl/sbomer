@@ -37,6 +37,7 @@ import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.repositories.SbomRepository;
 import org.redhat.sbomer.utils.enums.Generators;
 import org.redhat.sbomer.utils.enums.Processors;
+import org.redhat.sbomer.utils.enums.SbomType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -64,6 +65,7 @@ public class TestSbomRepository extends SbomRepository {
         Sbom parentSBOM = new Sbom();
         parentSBOM.setBuildId("ARYT3LBXDVYAC");
         parentSBOM.setId(416640206274228224L);
+        parentSBOM.setType(SbomType.BUILD_TIME);
         parentSBOM.setGenerationTime(Instant.now());
         parentSBOM.setSbom(sbom);
         parentSBOM.setGenerator(Generators.CYCLONEDX);
@@ -78,6 +80,7 @@ public class TestSbomRepository extends SbomRepository {
         Sbom enrichedSBOM = new Sbom();
         enrichedSBOM.setBuildId("ARYT3LBXDVYAC");
         enrichedSBOM.setId(416640206274228225L);
+        enrichedSBOM.setType(SbomType.BUILD_TIME);
         enrichedSBOM.setGenerationTime(Instant.now());
         enrichedSBOM.setSbom(sbom);
         enrichedSBOM.setGenerator(parentSbom.getGenerator());
@@ -107,6 +110,7 @@ public class TestSbomRepository extends SbomRepository {
         assertEquals(416640206274228224L, baseSBOM.getId());
         assertEquals("ARYT3LBXDVYAC", baseSBOM.getBuildId());
         assertEquals(Generators.CYCLONEDX, baseSBOM.getGenerator());
+        assertEquals(SbomType.BUILD_TIME, baseSBOM.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
         assertEquals("jcommander", firstComponent.getName());
@@ -130,6 +134,7 @@ public class TestSbomRepository extends SbomRepository {
         assertEquals(416640206274228224L, sbom.getId());
         assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
         assertEquals(Generators.CYCLONEDX, sbom.getGenerator());
+        assertEquals(SbomType.BUILD_TIME, sbom.getType());
         assertNull(sbom.getProcessor());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
@@ -155,6 +160,7 @@ public class TestSbomRepository extends SbomRepository {
         assertEquals("ARYT3LBXDVYAC", enrichedSbom.getBuildId());
         assertEquals(Generators.CYCLONEDX, enrichedSbom.getGenerator());
         assertEquals(Processors.SBOM_PROPERTIES, enrichedSbom.getProcessor());
+        assertEquals(SbomType.BUILD_TIME, enrichedSbom.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
         assertEquals("cpaas-test-pnc-maven", firstComponent.getName());
@@ -175,6 +181,7 @@ public class TestSbomRepository extends SbomRepository {
         assertEquals(416640206274228224L, parentSBOM.getId());
         assertEquals("ARYT3LBXDVYAC", parentSBOM.getBuildId());
         assertEquals(Generators.CYCLONEDX, parentSBOM.getGenerator());
+        assertEquals(SbomType.BUILD_TIME, parentSBOM.getType());
         assertNull(parentSBOM.getProcessor());
         assertEquals("CycloneDX", parentBom.getBomFormat());
         Component firstParentComponent = parentBom.getComponents().get(0);
