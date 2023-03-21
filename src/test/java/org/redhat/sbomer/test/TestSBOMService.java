@@ -26,8 +26,13 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
+import org.cyclonedx.BomGeneratorFactory;
+import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.junit.jupiter.api.Test;
 import org.redhat.sbomer.dto.response.Page;
@@ -36,6 +41,7 @@ import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.processor.SbomProcessor;
 import org.redhat.sbomer.service.SBOMService;
 import org.redhat.sbomer.test.mock.PncServiceMock;
+import org.redhat.sbomer.utils.Constants;
 import org.redhat.sbomer.utils.enums.Generators;
 import org.redhat.sbomer.utils.enums.Processors;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
@@ -54,9 +60,12 @@ import static org.redhat.sbomer.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 import static org.redhat.sbomer.utils.Constants.SBOM_RED_HAT_ORIGIN_URL;
 import static org.redhat.sbomer.utils.Constants.SBOM_RED_HAT_SCM_URL;
 import static org.redhat.sbomer.utils.Constants.SBOM_RED_HAT_SCM_REVISION;
+import static org.redhat.sbomer.utils.Constants.DISTRIBUTION;
+import static org.redhat.sbomer.utils.Constants.MRRC_URL;
 
 import static org.redhat.sbomer.utils.SbomUtils.findComponentWithPurl;
 import static org.redhat.sbomer.utils.SbomUtils.findPropertyWithNameInComponent;
+import static org.redhat.sbomer.utils.SbomUtils.schemaVersion;
 
 @QuarkusTest
 @Slf4j
@@ -279,6 +288,64 @@ public class TestSBOMService {
             assertEquals("https://code.engineering.redhat.com/gerrit/hyperxpro/Brotli4j.git", scmUrl.get().getValue());
             scmRevision = findPropertyWithNameInComponent(SBOM_RED_HAT_SCM_REVISION, foundInPNCComponent);
             assertEquals("6f25bf15308ee95ef5a9783412be2b0557c9046d", scmRevision.get().getValue());
+
+        } catch (NotFoundException nfe) {
+            fail("It should not have thrown a 404 exception", nfe);
+        } catch (ValidationException ve) {
+            fail("It should not have thrown a validation exception", ve);
+        }
+    }
+
+    @Test
+    public void testManipulateSBOMAddingPedigree() {
+        log.info("testManipulateSBOMAddingPedigree ...");
+
+        try {
+            Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
+            Bom bom = baseSBOM.getCycloneDxBom();
+
+            Bom modifiedBom = processors.select(Processors.SBOM_PEDIGREE.getSelector()).get().process(bom);
+
+            BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), modifiedBom);
+            Component testComponent = findComponentWithPurl(
+                    "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar",
+                    modifiedBom).get();
+            assertEquals(Constants.PUBLISHER, testComponent.getPublisher());
+
+            Pedigree pedigree = testComponent.getPedigree();
+
+            Optional<Commit> commit = pedigree.getCommits()
+                    .stream()
+                    .filter(c -> c.getUid().equals("6f25bf15308ee95ef5a9783412be2b0557c9046d"))
+                    .findFirst();
+            assertTrue(commit.isPresent());
+            assertEquals("6f25bf15308ee95ef5a9783412be2b0557c9046d", commit.get().getUid());
+            assertEquals(
+                    "https://code.engineering.redhat.com/gerrit/hyperxpro/Brotli4j.git#1.8.0.redhat-00003",
+                    commit.get().getUrl());
+
+            Optional<ExternalReference> ref1 = testComponent.getExternalReferences().stream().filter(ref -> {
+                return ref.getType().equals(ExternalReference.Type.BUILD_SYSTEM)
+                        && ref.getComment().equals(SBOM_RED_HAT_BUILD_ID);
+            }).findFirst();
+            assertTrue(ref1.isPresent());
+            assertEquals("https://orch.psi.redhat.com/pnc-rest/v2/builds/AVOBVY3O23YAA", ref1.get().getUrl());
+
+            Optional<ExternalReference> ref2 = testComponent.getExternalReferences().stream().filter(ref -> {
+                return ref.getType().equals(ExternalReference.Type.DISTRIBUTION)
+                        && ref.getComment().equals(DISTRIBUTION);
+            }).findFirst();
+            assertTrue(ref2.isPresent());
+            assertEquals(MRRC_URL, ref2.get().getUrl());
+
+            Optional<ExternalReference> ref3 = testComponent.getExternalReferences().stream().filter(ref -> {
+                return ref.getType().equals(ExternalReference.Type.BUILD_META)
+                        && ref.getComment().equals(SBOM_RED_HAT_ENVIRONMENT_IMAGE);
+            }).findFirst();
+            assertTrue(ref3.isPresent());
+            assertEquals("quay.io/rh-newcastle/builder-rhel-8-j8-mvn3.5.4-netty-tcnative:1.0.2", ref3.get().getUrl());
+
+            log.info("{}", generator.toJsonNode().toPrettyString());
 
         } catch (NotFoundException nfe) {
             fail("It should not have thrown a 404 exception", nfe);

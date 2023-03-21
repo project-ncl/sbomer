@@ -45,6 +45,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.redhat.sbomer.utils.enums.Generators;
 import org.redhat.sbomer.utils.enums.Processors;
+import org.redhat.sbomer.utils.enums.SbomType;
 import org.redhat.sbomer.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -96,6 +97,10 @@ public class Sbom extends PanacheEntityBase {
 
     @Column(name = "generation_time", nullable = false, updatable = false)
     private Instant generationTime;
+
+    @Column(name = "type", nullable = false, updatable = false)
+    @Enumerated(EnumType.STRING)
+    private SbomType type;
 
     @Column(name = "generator", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)

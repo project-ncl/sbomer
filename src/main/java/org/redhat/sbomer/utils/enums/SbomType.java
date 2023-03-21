@@ -17,22 +17,6 @@
  */
 package org.redhat.sbomer.utils.enums;
 
-import javax.enterprise.util.AnnotationLiteral;
-
-import org.redhat.sbomer.processor.PncToSbomPedigree;
-import org.redhat.sbomer.processor.PncToSbomProperties;
-
-public enum Processors {
-
-    SBOM_PROPERTIES(PncToSbomProperties.Literal.INSTANCE), SBOM_PEDIGREE(PncToSbomPedigree.Literal.INSTANCE);
-
-    private AnnotationLiteral selector;
-
-    private Processors(AnnotationLiteral selector) {
-        this.selector = selector;
-    }
-
-    public AnnotationLiteral getSelector() {
-        return this.selector;
-    }
+public enum SbomType {
+    BUILD_TIME, PRODUCT_RELEASE;
 }
