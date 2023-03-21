@@ -15,24 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redhat.sbomer.utils.enums;
+package org.redhat.sbomer.processor;
 
 import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-import org.redhat.sbomer.processor.PncToSbomPedigree;
-import org.redhat.sbomer.processor.PncToSbomProperties;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-public enum Processors {
+@Qualifier
+@Retention(RUNTIME)
+@Target({ METHOD, FIELD, PARAMETER, TYPE })
+public @interface PncToSbomPedigree {
 
-    SBOM_PROPERTIES(PncToSbomProperties.Literal.INSTANCE), SBOM_PEDIGREE(PncToSbomPedigree.Literal.INSTANCE);
-
-    private AnnotationLiteral selector;
-
-    private Processors(AnnotationLiteral selector) {
-        this.selector = selector;
-    }
-
-    public AnnotationLiteral getSelector() {
-        return this.selector;
+    final class Literal extends AnnotationLiteral<PncToSbomPedigree> implements PncToSbomPedigree {
+        public static final Literal INSTANCE = new Literal();
+        private static final long serialVersionUID = 1L;
     }
 }

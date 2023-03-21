@@ -138,9 +138,10 @@ public class SBOMResource {
     public Response generate(@PathParam("buildId") String id, @QueryParam("generator") String generator)
             throws Exception {
 
+        Generators gen = Generators.CYCLONEDX;
         if (!Strings.isEmpty(generator)) {
             try {
-                return sbomService.generateSbomFromPncBuild(id, Generators.valueOf(generator));
+                gen = Generators.valueOf(generator);
             } catch (IllegalArgumentException iae) {
                 return Response.status(Status.BAD_REQUEST)
                         .entity(
@@ -149,7 +150,7 @@ public class SBOMResource {
             }
         }
 
-        return sbomService.generateSbomFromPncBuild(id, Generators.CYCLONEDX);
+        return sbomService.generateSbomFromPncBuild(id, gen);
     }
 
     @POST
@@ -159,8 +160,8 @@ public class SBOMResource {
     @Parameter(name = "sbom", description = "The SBOM to save")
     @Parameter(
             name = "processor",
-            description = "Processor to use to enrich the SBOM. If not specified, SBOM_PROPERTIES will be used. Options are `SBOM_PROPERTIES`",
-            example = "SBOM_PROPERTIES")
+            description = "Processor to use to enrich the SBOM. If not specified, SBOM_PEDIGREE will be used. Options are `SBOM_PROPERTIES`, `SBOM_PEDIGREE`",
+            example = "SBOM_PEDIGREE")
     @Path("/enrich")
     @APIResponses({
             @APIResponse(
@@ -174,18 +175,19 @@ public class SBOMResource {
     public Response processEnrichmentOfBaseSbom(final Sbom sbom, @QueryParam("processor") String processor)
             throws Exception {
 
+        Processors proc = Processors.SBOM_PEDIGREE;
         if (!Strings.isEmpty(processor)) {
             try {
-                sbomService.saveAndEnrichSbom(sbom, Processors.valueOf(processor));
-                return Response.status(Status.ACCEPTED).build();
+                proc = Processors.valueOf(processor);
             } catch (IllegalArgumentException iae) {
                 return Response.status(Status.BAD_REQUEST)
                         .entity(
-                                "The specified processor does not exist, allowed values are `SBOM_PROPERTIES`. Leave empty to use `SBOM_PROPERTIES`")
+                                "The specified processor does not exist, allowed values are `SBOM_PROPERTIES`, `SBOM_PEDIGREE`. Leave empty to use `SBOM_PEDIGREE`")
                         .build();
             }
         }
-        sbomService.saveAndEnrichSbom(sbom, Processors.SBOM_PROPERTIES);
+
+        sbomService.saveAndEnrichSbom(sbom, proc);
         return Response.status(Status.ACCEPTED).build();
     }
 
