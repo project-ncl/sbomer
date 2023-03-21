@@ -64,7 +64,7 @@
           "value": "java"
         },
         {
-          "name": "build-id",
+          "name": "pnc-build-id",
           "value": "AXQIDEW26SYAC"
         },
         {
@@ -96,7 +96,7 @@
           "value": "https://gitlab.cee.redhat.com/ncross/cpaas-test-pnc-maven.git"
         },
         {
-          "name": "environment-image",
+          "name": "pnc-environment-image",
           "value": "quay.io/rh-newcastle/builder-rhel-7-j8-mvn3.6.0-gradle5.6.2:1.0.8"
         }
       ],

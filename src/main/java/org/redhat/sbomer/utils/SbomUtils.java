@@ -18,17 +18,20 @@
 package org.redhat.sbomer.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.cyclonedx.CycloneDxSchema.Version;
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
+import org.cyclonedx.model.OrganizationalEntity;
+import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.cyclonedx.model.Hash.Algorithm;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +49,10 @@ public class SbomUtils {
     }
 
     public static boolean hasHash(Component component, Algorithm algorithm) {
-        return component.getHashes() != null
-                && component.getHashes().stream().filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec())).count() > 0;
+        return component.getHashes() != null && component.getHashes()
+                .stream()
+                .filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))
+                .count() > 0;
     }
 
     public static void addHash(Component component, Algorithm algorithm, String value) {
@@ -79,6 +84,60 @@ public class SbomUtils {
 
     public static Optional<Property> findPropertyWithNameInComponent(String propertyName, Component component) {
         return component.getProperties().stream().filter(c -> c.getName().equals(propertyName)).findFirst();
+    }
+
+    public static boolean hasExternalReference(Component c, ExternalReference.Type type) {
+        return c.getExternalReferences() != null
+                && c.getExternalReferences().stream().filter(ref -> ref.getType().equals(type)).count() > 0;
+    }
+
+    public static void addExternalReference(Component c, ExternalReference.Type type, String url, String comment) {
+        List<ExternalReference> externalRefs = new ArrayList<>();
+        if (c.getExternalReferences() != null) {
+            externalRefs.addAll(c.getExternalReferences());
+        }
+        ExternalReference reference = null;
+        for (ExternalReference r : externalRefs) {
+            if (r.getType().equals(type)) {
+                reference = r;
+                break;
+            }
+        }
+        if (reference == null) {
+            reference = new ExternalReference();
+        }
+        reference.setType(type);
+        reference.setUrl(url);
+        reference.setComment(comment);
+        externalRefs.add(reference);
+        c.setExternalReferences(externalRefs);
+    }
+
+    public static void addPedigreeCommit(Component c, String url, String uid) {
+        Pedigree pedigree = c.getPedigree() == null ? new Pedigree() : c.getPedigree();
+        List<Commit> commits = new ArrayList<>();
+        if (pedigree.getCommits() != null) {
+            commits.addAll(pedigree.getCommits());
+        }
+
+        Commit newCommit = new Commit();
+        newCommit.setUid(uid);
+        newCommit.setUrl(url);
+        commits.add(newCommit);
+        pedigree.setCommits(commits);
+
+        c.setPedigree(pedigree);
+    }
+
+    public static void setPublisher(Component c) {
+        c.setPublisher(Constants.PUBLISHER);
+    }
+
+    public static void setSupplier(Component c) {
+        OrganizationalEntity org = new OrganizationalEntity();
+        org.setName(Constants.SUPPLIER_NAME);
+        org.setUrls(Arrays.asList(new String[] { Constants.SUPPLIER_URL }));
+        c.setSupplier(org);
     }
 
     public static void addMrrc(Component c) {
