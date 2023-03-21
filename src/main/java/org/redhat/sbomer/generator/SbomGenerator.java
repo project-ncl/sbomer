@@ -18,6 +18,7 @@
 package org.redhat.sbomer.generator;
 
 import org.redhat.sbomer.errors.ApplicationException;
+import org.redhat.sbomer.utils.enums.Processors;
 
 /**
  * High-level interaction with the SBOM generator.
@@ -30,6 +31,6 @@ public interface SbomGenerator {
      *
      * @param buildId PNC build id
      */
-    public void generate(String buildId) throws ApplicationException;
+    public void generate(String buildId, Processors processor) throws ApplicationException;
 
 }

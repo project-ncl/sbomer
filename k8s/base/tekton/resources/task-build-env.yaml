@@ -24,6 +24,10 @@ spec:
   params:
     - name: build-id
       type: string
+    - name: build-env-jdk
+      type: string
+    - name: build-env-mvn
+      type: string
   steps:
     - name: prepare
       image: sbomer-generator
@@ -54,15 +58,19 @@ spec:
         MVN_3_8 = re.compile(r"(3\.8)(\.*)")
         MVN_3_9 = re.compile(r"(3\.9)(\.*)")
 
-        url = urljoin(BUILD_API_ENDPOINT, BUILD_ID)
-        req = urllib.request.Request(url)
-        req.add_header("Content-Type", "application/json")
-        response = urllib.request.urlopen(req)
-        body = response.read()
-        build_info = json.loads(body.decode("utf-8"))
-        build_env_attr = build_info["environment"]["attributes"]
-
-        jdk_version = build_env_attr["JDK"]
+        if (not "$(params.build-env-jdk)" or not "$(params.build-env-mvn)"):
+            url = urljoin(BUILD_API_ENDPOINT, BUILD_ID)
+            req = urllib.request.Request(url)
+            req.add_header("Content-Type", "application/json")
+            response = urllib.request.urlopen(req)
+            body = response.read()
+            build_info = json.loads(body.decode("utf-8"))
+            build_env_attr = build_info["environment"]["attributes"]
+            jdk_version = build_env_attr["JDK"]
+            mvn_version = build_env_attr["MAVEN"]
+        else:
+            jdk_version = "$(params.build-env-jdk)"
+            mvn_version = "$(params.build-env-mvn)"
 
         if re.match(JDK_8, jdk_version):
             sdk_jdk_ver = 8
@@ -76,8 +84,6 @@ spec:
         print(f"Setting JDK {sdk_jdk_ver} for the current pipeline!")
         with open(JDK_RESULTS_FILE, "w") as f:
             f.write(str(sdk_jdk_ver))
-
-        mvn_version = build_env_attr["MAVEN"]
 
         if re.match(MVN_3_6, mvn_version):
             sdk_mvn_ver = 3.6

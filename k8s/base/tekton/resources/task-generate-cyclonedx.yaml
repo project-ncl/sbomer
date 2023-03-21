@@ -36,6 +36,8 @@ spec:
       default: "2.7.5"
     - name: build-id
       type: string
+    - name: sbom-processor
+      type: string
   steps:
     - name: generate-cyclonedx-sbom
       image: sbomer-generator
@@ -78,7 +80,7 @@ spec:
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/source/target/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/source/target/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich?$(params.sbom-processor)
 
   results:
     - name: "bom"

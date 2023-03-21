@@ -31,6 +31,12 @@ spec:
     - name: build-id
       type: string
       description: "PNC build id for the project"
+    - name: build-env-jdk
+      type: string
+      description: "The JDK version defined in the build environment attributes"
+    - name: build-env-mvn
+      type: string
+      description: "The Maven version defined in the build environment attributes"
     - name: additional-cyclonedx-args
       type: string
       default: "--batch-mode --no-transfer-progress --quiet"
@@ -43,10 +49,10 @@ spec:
       type: string
       default: "no"
       description: "Whether an existing SBOM should be replaced"
-    - name: sbom-spec
+    - name: sbom-processor
       type: string
-      default: "properties"
-      description: "The sbom-spec to use when inserting additional information inside the base SBOM"
+      default: "SBOM_PEDIGREE"
+      description: "The sbom-processor to use when inserting additional information inside the base SBOM"
 
   tasks:
     # TODO: Ged rid of this dependency
@@ -75,6 +81,10 @@ spec:
       params:
         - name: build-id
           value: $(params.build-id)
+        - name: build-env-jdk
+          value: $(params.build-env-jdk)
+        - name: build-env-mvn
+          value: $(params.build-env-mvn)
     - name: generate-sbom-cyclonedx
       runAfter:
         - fetch-source
@@ -101,9 +111,8 @@ spec:
         # - name: override
         #   value: $(params.override)
           # Not used yet, to be added as a param to the REST API http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}/api/v1alpha1/sboms
-          # mgoldman / Not specified params cannot be passed, commenting out
-        # - name: sbom-spec
-        #   value: $(params.sbom-spec)
+        - name: sbom-processor
+          value: $(params.sbom-processor)
 
   workspaces:
     - name: data

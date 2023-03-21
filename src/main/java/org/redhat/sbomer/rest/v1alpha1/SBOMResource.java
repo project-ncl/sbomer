@@ -130,17 +130,24 @@ public class SBOMResource {
             name = "generator",
             description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are `DOMINO`, `CYCLONEDX`",
             example = "CYCLONEDX")
+    @Parameter(
+            name = "processor",
+            description = "Processor to use to enrich the SBOM. If not specified, SBOM_PEDIGREE will be used. Options are `SBOM_PROPERTIES`, `SBOM_PEDIGREE`",
+            example = "SBOM_PEDIGREE")
     @Path("/generate/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "201",
             description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response generate(@PathParam("buildId") String id, @QueryParam("generator") String generator)
-            throws Exception {
+    public Response generate(
+            @PathParam("buildId") String id,
+            @QueryParam("generator") String generator,
+            @QueryParam("processor") String processor) throws Exception {
 
+        Generators gen = Generators.CYCLONEDX;
         if (!Strings.isEmpty(generator)) {
             try {
-                return sbomService.generateSbomFromPncBuild(id, Generators.valueOf(generator));
+                gen = Generators.valueOf(generator);
             } catch (IllegalArgumentException iae) {
                 return Response.status(Status.BAD_REQUEST)
                         .entity(
@@ -149,7 +156,19 @@ public class SBOMResource {
             }
         }
 
-        return sbomService.generateSbomFromPncBuild(id, Generators.CYCLONEDX);
+        Processors proc = Processors.SBOM_PEDIGREE;
+        if (!Strings.isEmpty(processor)) {
+            try {
+                proc = Processors.valueOf(processor);
+            } catch (IllegalArgumentException iae) {
+                return Response.status(Status.BAD_REQUEST)
+                        .entity(
+                                "The specified processor does not exist, allowed values are `SBOM_PROPERTIES`, `SBOM_PEDIGREE`. Leave empty to use `SBOM_PEDIGREE`")
+                        .build();
+            }
+        }
+
+        return sbomService.generateSbomFromPncBuild(id, gen, proc);
     }
 
     @POST
@@ -159,8 +178,8 @@ public class SBOMResource {
     @Parameter(name = "sbom", description = "The SBOM to save")
     @Parameter(
             name = "processor",
-            description = "Processor to use to enrich the SBOM. If not specified, SBOM_PROPERTIES will be used. Options are `SBOM_PROPERTIES`",
-            example = "SBOM_PROPERTIES")
+            description = "Processor to use to enrich the SBOM. If not specified, SBOM_PEDIGREE will be used. Options are `SBOM_PROPERTIES`, `SBOM_PEDIGREE`",
+            example = "SBOM_PEDIGREE")
     @Path("/enrich")
     @APIResponses({
             @APIResponse(
@@ -174,18 +193,19 @@ public class SBOMResource {
     public Response processEnrichmentOfBaseSbom(final Sbom sbom, @QueryParam("processor") String processor)
             throws Exception {
 
+        Processors proc = Processors.SBOM_PEDIGREE;
         if (!Strings.isEmpty(processor)) {
             try {
-                sbomService.saveAndEnrichSbom(sbom, Processors.valueOf(processor));
-                return Response.status(Status.ACCEPTED).build();
+                proc = Processors.valueOf(processor);
             } catch (IllegalArgumentException iae) {
                 return Response.status(Status.BAD_REQUEST)
                         .entity(
-                                "The specified processor does not exist, allowed values are `SBOM_PROPERTIES`. Leave empty to use `SBOM_PROPERTIES`")
+                                "The specified processor does not exist, allowed values are `SBOM_PROPERTIES`, `SBOM_PEDIGREE`. Leave empty to use `SBOM_PEDIGREE`")
                         .build();
             }
         }
-        sbomService.saveAndEnrichSbom(sbom, Processors.SBOM_PROPERTIES);
+
+        sbomService.saveAndEnrichSbom(sbom, proc);
         return Response.status(Status.ACCEPTED).build();
     }
 

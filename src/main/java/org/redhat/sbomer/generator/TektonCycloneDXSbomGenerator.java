@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import org.jboss.pnc.dto.Build;
 import org.redhat.sbomer.errors.ApplicationException;
 import org.redhat.sbomer.service.PNCService;
+import org.redhat.sbomer.utils.enums.Processors;
 
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
 import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
@@ -44,8 +45,19 @@ public class TektonCycloneDXSbomGenerator implements SbomGenerator {
     TektonClient tektonClient;
 
     @Override
-    public void generate(String buildId) throws ApplicationException {
+    public void generate(String buildId, Processors processor) throws ApplicationException {
         Build build = pncService.getBuild(buildId);
+        String jdkVersion = "";
+        if (build.getEnvironment().getAttributes() != null
+                && build.getEnvironment().getAttributes().containsKey("JDK")) {
+            jdkVersion = build.getEnvironment().getAttributes().get("JDK");
+        }
+
+        String mavenVersion = "";
+        if (build.getEnvironment().getAttributes() != null
+                && build.getEnvironment().getAttributes().containsKey("MAVEN")) {
+            mavenVersion = build.getEnvironment().getAttributes().get("MAVEN");
+        }
 
         PipelineRun pipelineRun = new PipelineRunBuilder().withNewMetadata()
                 .withGenerateName("sbom-")
@@ -61,13 +73,13 @@ public class TektonCycloneDXSbomGenerator implements SbomGenerator {
                                 .withRunAsUser(65532l)
                                 .build())
                 .endPodTemplate()
-                // TODO: can we pass the build environment attributes so that the task "build-env" does not need to
-                // refetch the build?
                 // TODO: make the below "additional-cyclonedx-args" and "cyclonedx-version" configurable
                 .withParams(
                         new Param("git-url", new ArrayOrString(build.getScmUrl())),
                         new Param("git-rev", new ArrayOrString(build.getScmRevision())),
                         new Param("build-id", new ArrayOrString(build.getId())),
+                        new Param("build-env-jdk", new ArrayOrString(jdkVersion)),
+                        new Param("build-env-mvn", new ArrayOrString(mavenVersion)),
                         new Param(
                                 "additional-cyclonedx-args",
                                 new ArrayOrString("--batch-mode --no-transfer-progress --quiet")),

@@ -99,9 +99,9 @@ public class SBOMService {
      *
      * @param buildId
      */
-    public Response generateSbomFromPncBuild(String buildId, Generators generator) {
+    public Response generateSbomFromPncBuild(String buildId, Generators generator, Processors processor) {
 
-        generators.select(generator.getSelector()).get().generate(buildId);
+        generators.select(generator.getSelector()).get().generate(buildId, processor);
         return Response.status(Status.ACCEPTED).build();
     }
 

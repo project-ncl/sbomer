@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import org.jboss.pnc.dto.Build;
 import org.redhat.sbomer.errors.ApplicationException;
 import org.redhat.sbomer.service.PNCService;
+import org.redhat.sbomer.utils.enums.Processors;
 
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
 import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
@@ -44,7 +45,7 @@ public class TektonDominoSbomGenerator implements SbomGenerator {
     TektonClient tektonClient;
 
     @Override
-    public void generate(String buildId) throws ApplicationException {
+    public void generate(String buildId, Processors processor) throws ApplicationException {
         Build build = pncService.getBuild(buildId);
 
         PipelineRun pipelineRun = new PipelineRunBuilder().withNewMetadata()
