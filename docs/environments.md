@@ -33,6 +33,8 @@ deploy everything into a _local_ Kubernetes cluster.
 
 We deploy to staging on every push to the `main` branch.
 
+See [deployment documentation](deployment.md).
+
 ### Production environment
 
 TBD
