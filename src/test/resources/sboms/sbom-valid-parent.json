@@ -1109,7 +1109,7 @@
           }
         }
       ],
-      "publisher": "redhat",
+      "publisher": "Red Hat",
       "properties": [
         {
           "name": "package:type",
@@ -1183,7 +1183,7 @@
           }
         }
       ],
-      "publisher": "redhat",
+      "publisher": "Red Hat",
       "properties": [
         {
           "name": "package:type",
@@ -1330,7 +1330,7 @@
           }
         }
       ],
-      "publisher": "redhat",
+      "publisher": "Red Hat",
       "properties": [
         {
           "name": "package:type",
@@ -1396,7 +1396,7 @@
           }
         }
       ],
-      "publisher": "redhat",
+      "publisher": "Red Hat",
       "properties": [
         {
           "name": "package:type",

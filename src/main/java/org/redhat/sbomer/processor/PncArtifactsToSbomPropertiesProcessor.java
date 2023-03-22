@@ -42,7 +42,6 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Hash.Algorithm;
 import org.redhat.sbomer.utils.RhVersionPattern;
 import org.redhat.sbomer.dto.ArtifactInfo;
-import org.redhat.sbomer.model.ArtifactCache;
 import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.service.SBOMService;
 
@@ -80,8 +79,7 @@ public class PncArtifactsToSbomPropertiesProcessor implements SbomProcessor {
         if (RhVersionPattern.isRhVersion(component.getVersion())) {
             log.info("SBOM component with Red Hat version found, purl: {}", component.getPurl());
             try {
-                final ArtifactCache artifact = sbomService.fetchArtifact(component.getPurl());
-                final ArtifactInfo info = artifact.getArtifactInfo();
+                final ArtifactInfo info = sbomService.fetchArtifact(component.getPurl());
 
                 if (info.getMd5() != null && !hasHash(component, Algorithm.MD5)) {
                     addHash(component, Algorithm.MD5, info.getMd5());

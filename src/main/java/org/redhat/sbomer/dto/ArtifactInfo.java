@@ -46,6 +46,7 @@ public class ArtifactInfo {
     private final String scmExternalUrl;
     private final String environmentImage;
     private String buildSystem = "PNC";
+    private String pncBuildIdRestResource;
 
     @lombok.Builder(builderClassName = "Builder", toBuilder = true)
     private ArtifactInfo(

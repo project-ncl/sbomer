@@ -52,6 +52,8 @@ public class PncServiceMock extends PNCService {
         } else if ("pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-api@1.1.0.redhat-00008?type=jar"
                 .equalsIgnoreCase(purl)) {
             return createArtifactMock3();
+        } else if ("pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar".equalsIgnoreCase(purl)) {
+            return createArtifactMock4();
         }
 
         return null;
@@ -163,6 +165,52 @@ public class PncServiceMock extends PNCService {
                 .buildContentId("build-MOCKMOCKMOCK3")
                 .environment(environment)
                 .id("MOCKMOCKMOCK3")
+                .scmRepository(scmRepository)
+                .scmRevision("6f25bf15308ee95ef5a9783412be2b0557c9046d")
+                .scmTag("1.8.0.redhat-00003")
+                .scmUrl("https://code.engineering.redhat.com/gerrit/hyperxpro/Brotli4j.git")
+                .build();
+
+        return Artifact.builder()
+                .build(build)
+                .deployPath("com/aayushatharva/brotli4j/brotli4j/1.8.0.redhat-00003/brotli4j-1.8.0.redhat-00003.jar")
+                .deployUrl(
+                        "https://indy-gateway.indy.svc.cluster.local/api/content/maven/hosted/pnc-builds/com/aayushatharva/brotli4j/brotli4j/1.8.0.redhat-00003/brotli4j-1.8.0.redhat-00003.jar")
+                .filename("brotli4j-1.8.0.redhat-00003.jar")
+                .id("15748222")
+                .identifier("com.aayushatharva.brotli4j:brotli4j:jar:1.8.0.redhat-00003")
+                .md5("c4156881267c9cd11e53c8f2a4ea8cb3")
+                .originUrl(
+                        "https://maven.repository.redhat.com/ga/com/aayushatharva/brotli4j/brotli4j/1.8.0.redhat-00003/brotli4j-1.8.0.redhat-00003.jar")
+                .publicUrl(
+                        "https://indy.psi.redhat.com/api/content/maven/hosted/pnc-builds/com/aayushatharva/brotli4j/brotli4j/1.8.0.redhat-00003/brotli4j-1.8.0.redhat-00003.jar")
+                .purl("pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar")
+                .sha1("1fbe7cf5e48440584eee5b8da33f009bee730f9e")
+                .sha256("75efe10bfb9d1e96c320ab9ca9daddc2aebfcc9d017be651f60cb41ed100f23f")
+                .size(131313131399L)
+                .artifactQuality(org.jboss.pnc.enums.ArtifactQuality.NEW)
+                .buildCategory(org.jboss.pnc.enums.BuildCategory.STANDARD)
+                .creationUser(User.builder().build())
+                .modificationUser(User.builder().build())
+                .targetRepository(TargetRepository.refBuilder().build())
+                .build();
+    }
+
+    private Artifact createArtifactMock4() {
+
+        Environment environment = Environment.builder()
+                .systemImageRepositoryUrl("quay.io/rh-newcastle")
+                .systemImageId("builder-rhel-8-j8-mvn3.5.4-netty-tcnative:1.0.2")
+                .build();
+        SCMRepository scmRepository = SCMRepository.builder()
+                .externalUrl("https://github.com/hyperxpro/Brotli4j.git")
+                .internalUrl("git+ssh://code.engineering.redhat.com/hyperxpro/Brotli4j.git")
+                .build();
+
+        Build build = Build.builder()
+                .buildContentId("build-AVOBVY3O23YAA")
+                .environment(environment)
+                .id("AVOBVY3O23YAA")
                 .scmRepository(scmRepository)
                 .scmRevision("6f25bf15308ee95ef5a9783412be2b0557c9046d")
                 .scmTag("1.8.0.redhat-00003")

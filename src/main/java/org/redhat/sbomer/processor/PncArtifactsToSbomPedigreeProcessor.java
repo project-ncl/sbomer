@@ -38,7 +38,6 @@ import org.jboss.util.Strings;
 import org.redhat.sbomer.utils.Constants;
 import org.redhat.sbomer.utils.RhVersionPattern;
 import org.redhat.sbomer.dto.ArtifactInfo;
-import org.redhat.sbomer.model.ArtifactCache;
 import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.service.SBOMService;
 
@@ -76,14 +75,12 @@ public class PncArtifactsToSbomPedigreeProcessor implements SbomProcessor {
         if (RhVersionPattern.isRhVersion(component.getVersion())) {
             log.info("SBOM component with Red Hat version found, purl: {}", component.getPurl());
             try {
-                final ArtifactCache artifact = sbomService.fetchArtifact(component.getPurl());
-                final ArtifactInfo info = artifact.getArtifactInfo();
+                final ArtifactInfo info = sbomService.fetchArtifact(component.getPurl());
 
-                // TODO: make url configurable
                 addExternalReference(
                         component,
                         ExternalReference.Type.BUILD_SYSTEM,
-                        "https://orch.psi.redhat.com/pnc-rest/v2/builds/" + info.getBuildId(),
+                        info.getPncBuildIdRestResource(),
                         SBOM_RED_HAT_BUILD_ID);
                 addExternalReference(component, ExternalReference.Type.DISTRIBUTION, Constants.MRRC_URL, DISTRIBUTION);
                 addExternalReference(
