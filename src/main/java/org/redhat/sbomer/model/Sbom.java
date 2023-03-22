@@ -89,6 +89,7 @@ public class Sbom extends PanacheEntityBase {
 
     @Id
     @Column(nullable = false, updatable = false)
+    @ToString.Exclude
     private Long id;
 
     @Column(name = "build_id", nullable = false, updatable = false)
@@ -116,11 +117,13 @@ public class Sbom extends PanacheEntityBase {
             foreignKey = @ForeignKey(name = "fk_sbom_parent_sbom"),
             nullable = true,
             updatable = false)
+    @ToString.Exclude
     private Sbom parentSbom;
 
     @Type(type = JsonTypes.JSON_BIN)
     @Column(name = "sbom", columnDefinition = JsonTypes.JSON_BIN)
     @CycloneDxBom
+    @ToString.Exclude
     private JsonNode sbom;
 
     @JsonIgnore

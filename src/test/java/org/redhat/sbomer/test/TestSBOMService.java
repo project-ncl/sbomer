@@ -157,9 +157,7 @@ public class TestSBOMService {
 
         try {
             Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
-            Bom bom = baseSBOM.getCycloneDxBom();
-
-            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector()).get().process(bom);
+            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector()).get().process(baseSBOM);
 
             Component notFoundInCacheNorPNCComponent = findComponentWithPurl(
                     "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar",
@@ -302,9 +300,7 @@ public class TestSBOMService {
 
         try {
             Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
-            Bom bom = baseSBOM.getCycloneDxBom();
-
-            Bom modifiedBom = processors.select(Processors.SBOM_PEDIGREE.getSelector()).get().process(bom);
+            Bom modifiedBom = processors.select(Processors.SBOM_PEDIGREE.getSelector()).get().process(baseSBOM);
 
             BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), modifiedBom);
             Component testComponent = findComponentWithPurl(

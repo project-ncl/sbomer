@@ -200,28 +200,24 @@ public class SBOMService {
 
     private Sbom runEnrichmentOfBaseSbom(Sbom baseSbom, Processors processor) {
 
-        Bom bom = baseSbom.getCycloneDxBom();
-        if (bom != null) {
-            Bom enrichedBom = processors.select(processor.getSelector()).get().process(bom);
-            BomJsonGenerator bomGenerator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
-            // If there is already a SBOM enriched with this mode and for this buildId, we update it try { Sbom
-            try {
-                Sbom existingEnrichedSbom = getSbom(baseSbom.getBuildId(), baseSbom.getGenerator(), processor);
-                existingEnrichedSbom.setSbom(bomGenerator.toJsonNode());
-                existingEnrichedSbom.setParentSbom(baseSbom);
-                return updateSbom(existingEnrichedSbom);
-            } catch (NotFoundException nre) {
-                Sbom enrichedSbom = new Sbom();
-                enrichedSbom.setBuildId(baseSbom.getBuildId());
-                enrichedSbom.setGenerator(baseSbom.getGenerator());
-                enrichedSbom.setProcessor(processor);
-                enrichedSbom.setSbom(bomGenerator.toJsonNode());
-                enrichedSbom.setParentSbom(baseSbom);
-                enrichedSbom.setType(SbomType.BUILD_TIME);
-                return saveSbom(enrichedSbom);
-            }
+        Bom enrichedBom = processors.select(processor.getSelector()).get().process(baseSbom);
+        BomJsonGenerator bomGenerator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
+        // If there is already a SBOM enriched with this mode and for this buildId, we update it try { Sbom
+        try {
+            Sbom existingEnrichedSbom = getSbom(baseSbom.getBuildId(), baseSbom.getGenerator(), processor);
+            existingEnrichedSbom.setSbom(bomGenerator.toJsonNode());
+            existingEnrichedSbom.setParentSbom(baseSbom);
+            return updateSbom(existingEnrichedSbom);
+        } catch (NotFoundException nre) {
+            Sbom enrichedSbom = new Sbom();
+            enrichedSbom.setBuildId(baseSbom.getBuildId());
+            enrichedSbom.setGenerator(baseSbom.getGenerator());
+            enrichedSbom.setProcessor(processor);
+            enrichedSbom.setSbom(bomGenerator.toJsonNode());
+            enrichedSbom.setParentSbom(baseSbom);
+            enrichedSbom.setType(SbomType.BUILD_TIME);
+            return saveSbom(enrichedSbom);
         }
-        throw new ValidationException("Could not convert initial SBOM of build " + baseSbom.getBuildId());
     }
 
     public Sbom saveAndEnrichSbom(Sbom sbom, Processors processor) throws ValidationException {
