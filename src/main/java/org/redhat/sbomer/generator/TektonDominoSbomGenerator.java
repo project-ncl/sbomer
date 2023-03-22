@@ -51,7 +51,7 @@ public class TektonDominoSbomGenerator implements SbomGenerator {
                 .withGenerateName("sbom-")
                 .endMetadata()
                 .withNewSpec()
-                .withServiceAccountName("sbomer-tekton-sa")
+                .withServiceAccountName("sbomer-sa")
                 .withNewPipelineRef()
                 .withName("sbom-generator-domino")
                 .endPipelineRef()

@@ -22,7 +22,6 @@ resources:
   - resources/statefulset.yaml
   - resources/service.yaml
   - resources/pvc.yaml
-  - resources/rbac.yaml
 transformers:
   - resources/labels.yaml
 images:
