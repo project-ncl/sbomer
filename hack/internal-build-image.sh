@@ -37,9 +37,6 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-# Use podman as the default builder
-BUILDER="podman"
-
 # Handle the PUSH env var
 # Don't push by default
 if [ -z "$PUSH" ]; then
@@ -57,7 +54,7 @@ podman)
   BUILD_SCRIPT=("podman")
   ;;
 minikube)
-  BUILD_SCRIPT=("minikube -p sbomer image")
+  BUILD_SCRIPT=("minikube" "-p" "sbomer" "image")
   ;;
 *)
   echo "Unrecognized builder specified, using Podman"
