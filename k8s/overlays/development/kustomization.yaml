@@ -39,14 +39,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
+  - ../../base/cache
   - ../../base/tekton
   - ../../base/database
 resources:
   # This is in sync with OpenShift Pipelines 1.8.x which is deployed in our stage and production environments
   # We need to ensure that it works in development as well.
   - https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.37.5/release.yaml
+  - resources/database-secret.yaml
 patchesStrategicMerge:
   - patches/cm.yaml
 images:
   - name: sbomer-generator
     newName: localhost/sbomer-generator:latest
+  - name: sbomer-cache
+    newName: localhost/sbomer-cache:latest

@@ -24,7 +24,7 @@
 
   <profiles>
     <profile>
-      <id>public-repositories</id>
+      <id>central</id>
       <repositories>
         <repository>
           <id>central</id>
@@ -54,10 +54,10 @@
     </profile>
 
     <profile>
-      <id>redhat-repository</id>
+      <id>redhat-ga</id>
       <repositories>
         <repository>
-          <id>redhat-repository</id>
+          <id>redhat-ga</id>
           <name>Red Hat repository</name>
           <url>https://maven.repository.redhat.com/ga/</url>
           <layout>default</layout>
@@ -73,7 +73,7 @@
       </repositories>
       <pluginRepositories>
         <pluginRepository>
-          <id>redhat-repository</id>
+          <id>redhat-ga</id>
           <name>Red Hat repository</name>
           <url>https://maven.repository.redhat.com/ga/</url>
           <layout>default</layout>
@@ -112,7 +112,27 @@
 
   <activeProfiles>
     <activeProfile>indy</activeProfile>
-    <activeProfile>redhat-repository</activeProfile>
-    <activeProfile>public-repositories</activeProfile>
+    <activeProfile>redhat-ga</activeProfile>
+    <activeProfile>central</activeProfile>
   </activeProfiles>
+
+  <mirrors>
+    <mirror>
+      <id>proxy-central</id>
+      <url>http://${env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/central/</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>proxy-redhat-ga</id>
+      <url>http://${env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/redhat-ga/</url>
+      <mirrorOf>redhat-ga</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>proxy-indy</id>
+      <url>http://${env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/indy-static/</url>
+      <mirrorOf>indy</mirrorOf>
+    </mirror>
+  </mirrors>
 </settings>

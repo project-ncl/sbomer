@@ -17,8 +17,12 @@
 #
 
 apiVersion: v1
-kind: ConfigMap
+kind: PersistentVolumeClaim
 metadata:
-  name: sbomer-tekton
-data:
-    SBOMER_SERVICE_URL: ""
+  name: sbomer-cache
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5G

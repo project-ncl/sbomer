@@ -28,6 +28,8 @@ quarkus:
   smallrye-openapi:
     info-title: SBOMer service
 
+sbomer:
+  pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:orch.psi.redhat.com}"
 
 "%dev":
   quarkus:
@@ -53,6 +55,9 @@ quarkus:
     generation:
       local:
         path: /tmp/sbomer
+
+    pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
+
 "%test":
   quarkus:
     devservices:
@@ -64,3 +69,6 @@ quarkus:
     hibernate-orm:
       database:
         generation: drop-and-create
+
+  sbomer:
+    pnc-api-url: "localhost/pnc/orch"

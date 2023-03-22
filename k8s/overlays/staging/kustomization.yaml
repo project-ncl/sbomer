@@ -24,6 +24,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
+  - ../../base/cache
   - ../../base/tekton
   - ../../base/database # TODO: Remove this -- it will be managed outside of the cluster, leaving for now
   - ../../base/service
@@ -40,3 +41,5 @@ images:
     newName: quay.io/rh-newcastle-stage/sbomer-generator:latest
   - name: sbomer-service
     newName: quay.io/rh-newcastle-stage/sbomer-service:latest
+  - name: sbomer-cache
+    newName: quay.io/rh-newcastle-stage/sbomer-cache:latest

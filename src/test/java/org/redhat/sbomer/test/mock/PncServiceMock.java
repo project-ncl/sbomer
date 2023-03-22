@@ -17,6 +17,7 @@
  */
 package org.redhat.sbomer.test.mock;
 
+import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.Environment;
@@ -35,6 +36,10 @@ public class PncServiceMock extends PNCService {
     @Override
     public Build getBuild(String buildId) {
         return null;
+    }
+
+    public Configuration getClientConfiguration() {
+        return this.getConfiguration();
     }
 
     @Override

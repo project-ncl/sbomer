@@ -34,12 +34,9 @@ And you're all set!
 ./hack/minikube-setup.sh
 ```
 
-## Preparing required secrets
+## Preparing required secret
 
-We need two:
-
-1. Pull secret to be able to pull images from Red Hat registry: `sbomer-redhatio-pull-secret`
-2. Secret containing PostgreSQL database credentials: `sbomer-postgres`
+We need two create a pull secret to be able to pull images from Red Hat registry: `sbomer-redhatio-pull-secret`
 
 ### Image registry pull secret
 
@@ -63,12 +60,6 @@ type: kubernetes.io/dockerconfigjson
 
 Then apply it.
 
-### PostgreSQL secret
-
-```
-kubectl create secret generic sbomer-postgres --from-literal=POSTGRESQL_USER=username --from-literal=POSTGRESQL_PASSWORD=password --from-literal=POSTGRESQL_DATABASE=sbomer
-```
-
 ## Deploying development overlay
 
 ```
@@ -85,6 +76,14 @@ To make the service work we need to expose the database.
 
 ```
 ./hack/minikube-expose-db.sh
+```
+
+## Exposing the cache
+
+Similarly to the database we need to expose the cache, so that our local builds can perform faster (and we test the usage of th cache at the same time!).
+
+```
+./hack/minikube-expose-cache.sh
 ```
 
 ## Running service in development mode

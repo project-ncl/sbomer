@@ -55,6 +55,8 @@ spec:
                 configMapKeyRef:
                   name: sbomer-config
                   key: QUARKUS_PROFILE
+            - name: SBOMER_CACHE_SERVICE_URL
+              value: "$(SBOMER_CACHE_SERVICE_HOST):$(SBOMER_CACHE_SERVICE_PORT)/pnc/orch"
           ports:
             - containerPort: 8080
               name: http
