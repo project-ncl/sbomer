@@ -21,4 +21,4 @@ kind: ConfigMap
 metadata:
   name: sbomer-config
 data:
-  QUARKUS_PROFILE: dev
+  SBOMER_SERVICE_URL: ""

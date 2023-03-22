@@ -1,3 +1,5 @@
+#!/bin/env bash
+
 #
 # JBoss, Home of Professional Open Source.
 # Copyright 2023 Red Hat, Inc., and individual contributors
@@ -16,9 +18,8 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sbomer-tekton
-data:
-    SBOMER_SERVICE_URL: ""
+set -e
+
+# Expose the nginx cache locally.
+
+exec kubectl port-forward services/sbomer-cache 7070:7070

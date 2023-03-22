@@ -16,9 +16,15 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sbomer-tekton
-data:
-    SBOMER_SERVICE_URL: ""
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - resources/deployment.yaml
+  - resources/service.yaml
+  - resources/pvc.yaml
+  - resources/rbac.yaml
+transformers:
+  - resources/labels.yaml
+images:
+  - name: postgresql
+    newName: registry.redhat.io/rhel9/postgresql-13@sha256:31fbd226db60cb48ff169491a8b88e69ec727c575ba76dc6095c87f70932b777

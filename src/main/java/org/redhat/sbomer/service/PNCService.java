@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.Configuration;
@@ -37,15 +38,17 @@ import org.redhat.sbomer.errors.ApplicationException;
 @ApplicationScoped
 public class PNCService {
 
+    @ConfigProperty(name = "sbomer.pnc-api-url")
+    String apiUrl;
+
     /**
      * Setup basic configuration to be able to talk to PNC.
      *
-     * TODO: Make it configurable -- move to ConfigMap.
      *
      * @return
      */
-    private Configuration getConfiguration() {
-        return Configuration.builder().host("orch.psi.redhat.com").protocol("http").build();
+    protected Configuration getConfiguration() {
+        return Configuration.builder().host(apiUrl).protocol("http").build();
     }
 
     /**

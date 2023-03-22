@@ -28,9 +28,10 @@ bases:
 
 # List of images used in production
 # TODO: Currently happily using :latest tag but this will be changed in the future
-# TODO: These are currently the same as for staging, tag management needs to be established
 images:
   - name: sbomer-generator
     newName: quay.io/rh-newcastle/sbomer-generator:latest
   - name: sbomer-service
     newName: quay.io/rh-newcastle/sbomer-service:latest
+  - name: sbomer-cache
+    newName: quay.io/rh-newcastle/sbomer-cache:latest
