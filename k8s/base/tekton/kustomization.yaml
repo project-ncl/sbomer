@@ -27,7 +27,6 @@ resources:
   - resources/pipeline-cyclonedx.yaml
   - resources/pvc.yaml
   - resources/cm.yaml
-  - resources/rbac.yaml
 transformers:
   - resources/labels.yaml
 configurations:  

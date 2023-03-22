@@ -16,34 +16,9 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: sbomer-tekton-sa
-  labels:
-    app.kubernetes.io/component: "tekton"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: sbomer-tekton
-  labels:
-    app.kubernetes.io/component: "tekton"
-rules:
-  - apiGroups: ["tekton.dev"]
-    resources: ["pipelineruns"]
-    verbs: ["create", "get", "watch", "list"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: sbomer-tekton-pod-creator
-  labels:
-    app.kubernetes.io/component: "tekton"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: sbomer-tekton
-subjects:
-  - kind: ServiceAccount
-    name: sbomer-tekton-sa
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - resources/rbac.yaml
+transformers:
+  - resources/labels.yaml

@@ -51,6 +51,7 @@ public class TektonCycloneDXSbomGenerator implements SbomGenerator {
                 .withGenerateName("sbom-")
                 .endMetadata()
                 .withNewSpec()
+                .withServiceAccountName("sbomer-sa")
                 .withNewPipelineRef()
                 .withName("sbom-generator-cyclonedx")
                 .endPipelineRef()

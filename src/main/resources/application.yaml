@@ -28,6 +28,10 @@ quarkus:
   smallrye-openapi:
     info-title: SBOMer service
 
+  hibernate-orm:
+    database:
+      generation: update # TODO: This is for now, so that we can work on stage, remove this once we maintain the DB properly
+
 sbomer:
   pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:orch.psi.redhat.com}"
 
