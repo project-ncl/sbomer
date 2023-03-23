@@ -35,8 +35,8 @@ import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.junit.jupiter.api.Test;
+import org.redhat.sbomer.dto.ArtifactInfo;
 import org.redhat.sbomer.dto.response.Page;
-import org.redhat.sbomer.model.ArtifactCache;
 import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.processor.SbomProcessor;
 import org.redhat.sbomer.service.SBOMService;
@@ -128,16 +128,8 @@ public class TestSBOMService {
     public void testFetchArtifact() throws IOException {
         log.info("testFetchArtifact ...");
         try {
-            String purlFromDB = "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar";
-            ArtifactCache fromDB = sbomService.fetchArtifact(purlFromDB);
-            assertNotNull(fromDB);
-        } catch (NotFoundException nfe) {
-            fail("It should have not thrown a not found exception", nfe);
-        }
-
-        try {
             String purlFromPNC = "pkg:maven/com.vaadin.external.google/android-json@0.0.20131108.vaadin1?type=jar";
-            ArtifactCache fromPNC = sbomService.fetchArtifact(purlFromPNC);
+            ArtifactInfo fromPNC = sbomService.fetchArtifact(purlFromPNC);
             assertNotNull(fromPNC);
         } catch (NotFoundException nfe) {
             fail("It should have not thrown a not found exception", nfe);
@@ -157,9 +149,7 @@ public class TestSBOMService {
 
         try {
             Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
-            Bom bom = baseSBOM.getCycloneDxBom();
-
-            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector()).get().process(bom);
+            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector()).get().process(baseSBOM);
 
             Component notFoundInCacheNorPNCComponent = findComponentWithPurl(
                     "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar",
@@ -188,26 +178,6 @@ public class TestSBOMService {
                     SBOM_RED_HAT_SCM_REVISION,
                     notFoundInCacheNorPNCComponent);
             assertFalse(scmRevision.isPresent());
-
-            Component foundInCacheComponent = findComponentWithPurl(
-                    "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar",
-                    modifiedBom).get();
-            build = findPropertyWithNameInComponent(SBOM_RED_HAT_BUILD_ID, foundInCacheComponent);
-            assertEquals("AVOBVY3O23YAA", build.get().getValue());
-            buildSystem = findPropertyWithNameInComponent(SBOM_RED_HAT_BUILD_SYSTEM, foundInCacheComponent);
-            assertEquals("PNC", buildSystem.get().getValue());
-            environmentImage = findPropertyWithNameInComponent(SBOM_RED_HAT_ENVIRONMENT_IMAGE, foundInCacheComponent);
-            assertEquals(
-                    "quay.io/rh-newcastle/builder-rhel-8-j8-mvn3.5.4-netty-tcnative:1.0.2",
-                    environmentImage.get().getValue());
-            originUrl = findPropertyWithNameInComponent(SBOM_RED_HAT_ORIGIN_URL, foundInCacheComponent);
-            assertEquals(
-                    "https://maven.repository.redhat.com/com/aayushatharva/brotli4j/brotli4j/1.8.0.redhat-00003/brotli4j-1.8.0.redhat-00003.jar",
-                    originUrl.get().getValue());
-            scmUrl = findPropertyWithNameInComponent(SBOM_RED_HAT_SCM_URL, foundInCacheComponent);
-            assertEquals("https://code.engineering.redhat.com/gerrit/hyperxpro/Brotli4j.git", scmUrl.get().getValue());
-            scmRevision = findPropertyWithNameInComponent(SBOM_RED_HAT_SCM_REVISION, foundInCacheComponent);
-            assertEquals("6f25bf15308ee95ef5a9783412be2b0557c9046d", scmRevision.get().getValue());
 
             Component foundInPNCComponent = findComponentWithPurl(
                     "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-api@1.1.0.redhat-00008?type=jar",
@@ -251,26 +221,6 @@ public class TestSBOMService {
             scmRevision = findPropertyWithNameInComponent(SBOM_RED_HAT_SCM_REVISION, notFoundInCacheNorPNCComponent);
             assertFalse(scmRevision.isPresent());
 
-            foundInCacheComponent = findComponentWithPurl(
-                    "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar",
-                    bomFromDB).get();
-            build = findPropertyWithNameInComponent(SBOM_RED_HAT_BUILD_ID, foundInCacheComponent);
-            assertEquals("AVOBVY3O23YAA", build.get().getValue());
-            buildSystem = findPropertyWithNameInComponent(SBOM_RED_HAT_BUILD_SYSTEM, foundInCacheComponent);
-            assertEquals("PNC", buildSystem.get().getValue());
-            environmentImage = findPropertyWithNameInComponent(SBOM_RED_HAT_ENVIRONMENT_IMAGE, foundInCacheComponent);
-            assertEquals(
-                    "quay.io/rh-newcastle/builder-rhel-8-j8-mvn3.5.4-netty-tcnative:1.0.2",
-                    environmentImage.get().getValue());
-            originUrl = findPropertyWithNameInComponent(SBOM_RED_HAT_ORIGIN_URL, foundInCacheComponent);
-            assertEquals(
-                    "https://maven.repository.redhat.com/com/aayushatharva/brotli4j/brotli4j/1.8.0.redhat-00003/brotli4j-1.8.0.redhat-00003.jar",
-                    originUrl.get().getValue());
-            scmUrl = findPropertyWithNameInComponent(SBOM_RED_HAT_SCM_URL, foundInCacheComponent);
-            assertEquals("https://code.engineering.redhat.com/gerrit/hyperxpro/Brotli4j.git", scmUrl.get().getValue());
-            scmRevision = findPropertyWithNameInComponent(SBOM_RED_HAT_SCM_REVISION, foundInCacheComponent);
-            assertEquals("6f25bf15308ee95ef5a9783412be2b0557c9046d", scmRevision.get().getValue());
-
             foundInPNCComponent = findComponentWithPurl(
                     "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-api@1.1.0.redhat-00008?type=jar",
                     bomFromDB).get();
@@ -302,9 +252,7 @@ public class TestSBOMService {
 
         try {
             Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
-            Bom bom = baseSBOM.getCycloneDxBom();
-
-            Bom modifiedBom = processors.select(Processors.SBOM_PEDIGREE.getSelector()).get().process(bom);
+            Bom modifiedBom = processors.select(Processors.SBOM_PEDIGREE.getSelector()).get().process(baseSBOM);
 
             BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), modifiedBom);
             Component testComponent = findComponentWithPurl(
@@ -329,7 +277,7 @@ public class TestSBOMService {
                         && ref.getComment().equals(SBOM_RED_HAT_BUILD_ID);
             }).findFirst();
             assertTrue(ref1.isPresent());
-            assertEquals("https://orch.psi.redhat.com/pnc-rest/v2/builds/AVOBVY3O23YAA", ref1.get().getUrl());
+            assertTrue(ref1.get().getUrl().contains("/pnc-rest/v2/builds/AVOBVY3O23YAA"));
 
             Optional<ExternalReference> ref2 = testComponent.getExternalReferences().stream().filter(ref -> {
                 return ref.getType().equals(ExternalReference.Type.DISTRIBUTION)

@@ -28,6 +28,7 @@ import static org.redhat.sbomer.utils.SbomUtils.addPedigreeCommit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.ValidationException;
 import javax.ws.rs.NotFoundException;
 
 import org.cyclonedx.model.Bom;
@@ -37,7 +38,7 @@ import org.jboss.util.Strings;
 import org.redhat.sbomer.utils.Constants;
 import org.redhat.sbomer.utils.RhVersionPattern;
 import org.redhat.sbomer.dto.ArtifactInfo;
-import org.redhat.sbomer.model.ArtifactCache;
+import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.service.SBOMService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -51,8 +52,13 @@ public class PncArtifactsToSbomPedigreeProcessor implements SbomProcessor {
     SBOMService sbomService;
 
     @Override
-    public Bom process(Bom originalBom) {
-        log.info("Adding PNC cached build info to the SBOM properties");
+    public Bom process(Sbom originalSbom) {
+        log.info("Applying SBOM_PEDIGREE processing to the SBOM: {}", originalSbom);
+
+        Bom originalBom = originalSbom.getCycloneDxBom();
+        if (originalBom == null) {
+            throw new ValidationException("Could not convert initial SBOM of build: " + originalSbom.getBuildId());
+        }
 
         if (originalBom.getMetadata() != null && originalBom.getMetadata().getComponent() != null) {
             processComponent(originalBom.getMetadata().getComponent());
@@ -62,7 +68,6 @@ public class PncArtifactsToSbomPedigreeProcessor implements SbomProcessor {
                 processComponent(c);
             }
         }
-
         return originalBom;
     }
 
@@ -70,14 +75,12 @@ public class PncArtifactsToSbomPedigreeProcessor implements SbomProcessor {
         if (RhVersionPattern.isRhVersion(component.getVersion())) {
             log.info("SBOM component with Red Hat version found, purl: {}", component.getPurl());
             try {
-                final ArtifactCache artifact = sbomService.fetchArtifact(component.getPurl());
-                final ArtifactInfo info = artifact.getArtifactInfo();
+                final ArtifactInfo info = sbomService.fetchArtifact(component.getPurl());
 
-                // TODO: make url configurable
                 addExternalReference(
                         component,
                         ExternalReference.Type.BUILD_SYSTEM,
-                        "https://orch.psi.redhat.com/pnc-rest/v2/builds/" + info.getBuildId(),
+                        info.getPncBuildIdRestResource(),
                         SBOM_RED_HAT_BUILD_ID);
                 addExternalReference(component, ExternalReference.Type.DISTRIBUTION, Constants.MRRC_URL, DISTRIBUTION);
                 addExternalReference(

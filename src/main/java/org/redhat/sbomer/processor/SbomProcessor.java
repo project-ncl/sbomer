@@ -18,15 +18,16 @@
 package org.redhat.sbomer.processor;
 
 import org.cyclonedx.model.Bom;
+import org.redhat.sbomer.model.Sbom;
 
 public interface SbomProcessor {
 
     /**
      * Allows implementing SBOM processing
      *
-     * @param originalBom the original SBOM to be processed
-     * @return transformed SBOM instance
+     * @param originalSbom the original SBOM entity to be processed
+     * @return transformed SBOM BOM instance
      */
-    Bom process(Bom originalBom);
+    Bom process(Sbom originalSbom);
 
 }

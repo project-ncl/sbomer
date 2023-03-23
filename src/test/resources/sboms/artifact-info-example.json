@@ -12,5 +12,6 @@
   "scmRevision": "6f25bf15308ee95ef5a9783412be2b0557c9046d",
   "scmTag": "1.8.0.redhat-00003",
   "scmExternalUrl": "https://github.com/hyperxpro/Brotli4j.git",
-  "environmentImage": "quay.io/rh-newcastle/builder-rhel-8-j8-mvn3.5.4-netty-tcnative:1.0.2"
+  "environmentImage": "quay.io/rh-newcastle/builder-rhel-8-j8-mvn3.5.4-netty-tcnative:1.0.2",
+  "pncBuildIdRestResource": "https://orch.psi.redhat.com/pnc-rest/v2/builds/AVOBVY3O23YAA" 
 }

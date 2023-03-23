@@ -17,7 +17,6 @@
  */
 package org.redhat.sbomer.service;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -37,23 +36,18 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.redhat.sbomer.model.ArtifactCache;
 import org.redhat.sbomer.model.Sbom;
 import org.redhat.sbomer.processor.SbomProcessor;
-import org.redhat.sbomer.repositories.ArtifactCacheRepository;
 import org.redhat.sbomer.repositories.SbomRepository;
 import org.redhat.sbomer.utils.enums.Generators;
 import org.redhat.sbomer.utils.enums.Processors;
 import org.redhat.sbomer.utils.enums.SbomType;
 import org.redhat.sbomer.validation.exceptions.ValidationException;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.jboss.pnc.common.concurrent.Sequence;
-import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.pnc.dto.Artifact;
 import org.redhat.sbomer.dto.ArtifactInfo;
 import org.redhat.sbomer.dto.response.Page;
@@ -73,9 +67,6 @@ public class SBOMService {
 
     @Inject
     SbomRepository sbomRepository;
-
-    @Inject
-    ArtifactCacheRepository artifactCacheRepository;
 
     @Inject
     PNCService pncService;
@@ -200,28 +191,24 @@ public class SBOMService {
 
     private Sbom runEnrichmentOfBaseSbom(Sbom baseSbom, Processors processor) {
 
-        Bom bom = baseSbom.getCycloneDxBom();
-        if (bom != null) {
-            Bom enrichedBom = processors.select(processor.getSelector()).get().process(bom);
-            BomJsonGenerator bomGenerator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
-            // If there is already a SBOM enriched with this mode and for this buildId, we update it try { Sbom
-            try {
-                Sbom existingEnrichedSbom = getSbom(baseSbom.getBuildId(), baseSbom.getGenerator(), processor);
-                existingEnrichedSbom.setSbom(bomGenerator.toJsonNode());
-                existingEnrichedSbom.setParentSbom(baseSbom);
-                return updateSbom(existingEnrichedSbom);
-            } catch (NotFoundException nre) {
-                Sbom enrichedSbom = new Sbom();
-                enrichedSbom.setBuildId(baseSbom.getBuildId());
-                enrichedSbom.setGenerator(baseSbom.getGenerator());
-                enrichedSbom.setProcessor(processor);
-                enrichedSbom.setSbom(bomGenerator.toJsonNode());
-                enrichedSbom.setParentSbom(baseSbom);
-                enrichedSbom.setType(SbomType.BUILD_TIME);
-                return saveSbom(enrichedSbom);
-            }
+        Bom enrichedBom = processors.select(processor.getSelector()).get().process(baseSbom);
+        BomJsonGenerator bomGenerator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
+        // If there is already a SBOM enriched with this mode and for this buildId, we update it try { Sbom
+        try {
+            Sbom existingEnrichedSbom = getSbom(baseSbom.getBuildId(), baseSbom.getGenerator(), processor);
+            existingEnrichedSbom.setSbom(bomGenerator.toJsonNode());
+            existingEnrichedSbom.setParentSbom(baseSbom);
+            return updateSbom(existingEnrichedSbom);
+        } catch (NotFoundException nre) {
+            Sbom enrichedSbom = new Sbom();
+            enrichedSbom.setBuildId(baseSbom.getBuildId());
+            enrichedSbom.setGenerator(baseSbom.getGenerator());
+            enrichedSbom.setProcessor(processor);
+            enrichedSbom.setSbom(bomGenerator.toJsonNode());
+            enrichedSbom.setParentSbom(baseSbom);
+            enrichedSbom.setType(SbomType.BUILD_TIME);
+            return saveSbom(enrichedSbom);
         }
-        throw new ValidationException("Could not convert initial SBOM of build " + baseSbom.getBuildId());
     }
 
     public Sbom saveAndEnrichSbom(Sbom sbom, Processors processor) throws ValidationException {
@@ -235,77 +222,15 @@ public class SBOMService {
         return runEnrichmentOfBaseSbom(baseSbom, processor);
     }
 
-    public Page<ArtifactCache> listArtifactCache(int pageIndex, int pageSize) {
-        log.debug("Getting list of all base artifact caches with pageIndex: {}, pageSize: {}", pageIndex, pageSize);
-
-        List<ArtifactCache> collection = artifactCacheRepository.findAll().page(pageIndex, pageSize).list();
-        int totalPages = artifactCacheRepository.findAll()
-                .page(io.quarkus.panache.common.Page.ofSize(pageSize))
-                .pageCount();
-        long totalHits = artifactCacheRepository.findAll().count();
-        List<ArtifactCache> content = nullableStreamOf(collection).collect(Collectors.toList());
-
-        return new Page<ArtifactCache>(pageIndex, pageSize, totalPages, totalHits, content);
-    }
-
-    public ArtifactCache getArtifactCache(String purl) {
-        log.debug("Getting artifact properties with purl: {}", purl);
-        try {
-            return artifactCacheRepository.getArtifactCache(purl);
-        } catch (NoResultException nre) {
-            throw new NotFoundException("Artifact info for purl " + purl + " not found.");
-        }
-    }
-
-    /**
-     * Persist changes to the {@link ArtifactCache} in the database.
-     *
-     * @param baseSbom
-     * @return
-     */
-    @Transactional
-    public ArtifactCache saveArtifactCache(ArtifactCache artifactCache) throws ValidationException {
-        log.debug("Storing entity: " + artifactCache.toString());
-
-        Set<ConstraintViolation<ArtifactCache>> violations = validator.validate(artifactCache);
-        if (!violations.isEmpty()) {
-            throw new ValidationException(violations);
-        }
-
-        artifactCache.setId(Sequence.nextId());
-        artifactCacheRepository.persistAndFlush(artifactCache);
-        return artifactCache;
-    }
-
-    @Transactional
-    public ArtifactCache fetchArtifact(String purl) {
-
-        try {
-            ArtifactCache cachedArtifact = getArtifactCache(purl);
-            log.info("Artifact with purl {} found in cache!", purl);
-            return cachedArtifact;
-        } catch (NotFoundException nre) {
-            log.info("Artifact with purl {} not found in cache, will fetch from PNC", purl);
-        }
+    public ArtifactInfo fetchArtifact(String purl) {
 
         Artifact artifact = pncService.getArtifact(purl);
         if (artifact == null) {
             throw new NotFoundException("Artifact with purl " + purl + " not found in PNC.");
         }
-
-        try {
-            ArtifactInfo info = artifactInfoMapper.toArtifactInfo(artifact);
-            info.setBuildSystem("PNC");
-            String jsonString = JsonUtils.toJson(info);
-            JsonNode node = JsonUtils.fromJson(jsonString, JsonNode.class);
-            ArtifactCache artifactCache = new ArtifactCache();
-            artifactCache.setInfo(node);
-            artifactCache.setPurl(purl);
-            return saveArtifactCache(artifactCache);
-        } catch (IOException ioExc) {
-            throw new ValidationException(
-                    "Could not convert artifatc with purl " + purl + ", exception msg: " + ioExc.getMessage());
-        }
+        ArtifactInfo info = artifactInfoMapper.toArtifactInfo(artifact);
+        info.setPncBuildIdRestResource("https://" + pncService.apiUrl + "/pnc-rest/v2/builds/" + info.getBuildId());
+        return info;
     }
 
     public static <T> Stream<T> nullableStreamOf(Collection<T> nullableCollection) {
