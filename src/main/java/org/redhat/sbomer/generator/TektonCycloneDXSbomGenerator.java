@@ -29,13 +29,13 @@ import org.redhat.sbomer.errors.ApplicationException;
 @ApplicationScoped
 public class TektonCycloneDXSbomGenerator extends AbstractTektonSbomGenerator {
 
-        @Override
-        public void generate(String buildId) throws ApplicationException {
-                var config = Json.createObjectBuilder()
-                                .add("version", "2.7.5")
-                                .add("additional-args", "--batch-mode --no-transfer-progress --quiet")
-                                .build();
+    @Override
+    public void generate(String buildId) throws ApplicationException {
+        var config = Json.createObjectBuilder()
+                .add("version", "2.7.5")
+                .add("additional-args", "--batch-mode --no-transfer-progress --quiet")
+                .build();
 
-                runTektonTask("sbomer-generate-cyclonedx", buildId, config);
-        }
+        runTektonTask("sbomer-generate-cyclonedx", buildId, config);
+    }
 }

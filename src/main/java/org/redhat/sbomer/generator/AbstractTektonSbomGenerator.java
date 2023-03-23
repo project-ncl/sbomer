@@ -32,53 +32,55 @@ import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
 
 public abstract class AbstractTektonSbomGenerator implements SbomGenerator {
 
-	@Inject
-	TektonClient tektonClient;
+    private static String SERVICE_ACCOUNT_NAME = "sbomer-sa";
 
-	/**
-	 * Runs specific {@link Task}.
-	 * 
-	 * @param tektonTaskName Name of the {@link Task}.
-	 * @param buildId The PNC build identifier.
-	 * @param config Additional configuration passed as a {@link JsonObject}.
-	 * @return A {@link TaskRun} object representing the execution.
-	 */
-	protected TaskRun runTektonTask(final String tektonTaskName, final String buildId, final JsonObject config) {
-		TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
-				.withGenerateName(toTaskRunNamePrefix(tektonTaskName, buildId))
-				.endMetadata()
-				.withNewSpec()
-				.withServiceAccountName("sbomer-sa")
-				.withNewTaskRef()
-				.withName(tektonTaskName)
-				.endTaskRef()
-				.withNewPodTemplate()
-				.withSecurityContext(
-						new PodSecurityContextBuilder().withFsGroup(65532l)
-								.withRunAsNonRoot()
-								.withRunAsUser(65532l)
-								.build())
-				.endPodTemplate()
-				.withParams(
-						new Param("build-id", new ArrayOrString(buildId)),
-						new Param("config", new ArrayOrString(config.toString())))
-				.withWorkspaces(
-						new WorkspaceBindingBuilder().withName("data").withEmptyDir(new EmptyDirVolumeSource()).build())
-				.endSpec()
-				.build();
+    @Inject
+    TektonClient tektonClient;
 
-		return tektonClient.v1beta1().taskRuns().resource(taskRun).createOrReplace();
-	}
+    /**
+     * Runs specific {@link Task}.
+     *
+     * @param tektonTaskName Name of the {@link Task}.
+     * @param buildId The PNC build identifier.
+     * @param config Additional configuration passed as a {@link JsonObject}.
+     * @return A {@link TaskRun} object representing the execution.
+     */
+    protected TaskRun runTektonTask(final String tektonTaskName, final String buildId, final JsonObject config) {
+        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
+                .withGenerateName(toTaskRunNamePrefix(tektonTaskName, buildId))
+                .endMetadata()
+                .withNewSpec()
+                .withServiceAccountName(SERVICE_ACCOUNT_NAME)
+                .withNewTaskRef()
+                .withName(tektonTaskName)
+                .endTaskRef()
+                .withNewPodTemplate()
+                .withSecurityContext(
+                        new PodSecurityContextBuilder().withFsGroup(65532l)
+                                .withRunAsNonRoot()
+                                .withRunAsUser(65532l)
+                                .build())
+                .endPodTemplate()
+                .withParams(
+                        new Param("build-id", new ArrayOrString(buildId)),
+                        new Param("config", new ArrayOrString(config.toString())))
+                .withWorkspaces(
+                        new WorkspaceBindingBuilder().withName("data").withEmptyDir(new EmptyDirVolumeSource()).build())
+                .endSpec()
+                .build();
 
-	/**
-	 * Based on the provided {@link Task} we generate a string that could be used as the prefix for the generated
-	 * {@link TaskRun} name based on the {@link Task}.
-	 * 
-	 * @param tektonTaskName The Tekton {@link Task} name.
-	 * @return Prefix
-	 */
-	private String toTaskRunNamePrefix(final String tektonTaskName, final String buildId) {
-		var parts = tektonTaskName.split("-");
-		return parts[0] + "-" + parts[2] + "-" + buildId.toLowerCase() + "-";
-	}
+        return tektonClient.v1beta1().taskRuns().resource(taskRun).createOrReplace();
+    }
+
+    /**
+     * Based on the provided {@link Task} we generate a string that could be used as the prefix for the generated
+     * {@link TaskRun} name based on the {@link Task}.
+     *
+     * @param tektonTaskName The Tekton {@link Task} name.
+     * @return Prefix
+     */
+    private String toTaskRunNamePrefix(final String tektonTaskName, final String buildId) {
+        var parts = tektonTaskName.split("-");
+        return parts[0] + "-" + parts[2] + "-" + buildId.toLowerCase() + "-";
+    }
 }

@@ -29,10 +29,10 @@ import org.redhat.sbomer.errors.ApplicationException;
 @ApplicationScoped
 public class TektonDominoSbomGenerator extends AbstractTektonSbomGenerator {
 
-        @Override
-        public void generate(String buildId) throws ApplicationException {
-                var config = Json.createObjectBuilder().add("additional-args", "--include-non-managed").build();
-                runTektonTask("sbomer-generate-domino", buildId, config);
-        }
+    @Override
+    public void generate(String buildId) throws ApplicationException {
+        var config = Json.createObjectBuilder().add("additional-args", "--include-non-managed").build();
+        runTektonTask("sbomer-generate-domino", buildId, config);
+    }
 
 }
