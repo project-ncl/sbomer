@@ -18,64 +18,21 @@
 package org.redhat.sbomer.generator;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import javax.json.Json;
 
-import org.jboss.pnc.dto.Build;
 import org.redhat.sbomer.errors.ApplicationException;
-import org.redhat.sbomer.service.PNCService;
 
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
-import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
-import io.fabric8.tekton.client.TektonClient;
-import io.fabric8.tekton.pipeline.v1beta1.ArrayOrString;
-import io.fabric8.tekton.pipeline.v1beta1.Param;
-import io.fabric8.tekton.pipeline.v1beta1.PipelineRun;
-import io.fabric8.tekton.pipeline.v1beta1.PipelineRunBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
-
+/**
+ * Implementation responsible for running the Domino SBOM generator.
+ */
 @Domino
 @ApplicationScoped
-public class TektonDominoSbomGenerator implements SbomGenerator {
+public class TektonDominoSbomGenerator extends AbstractTektonSbomGenerator {
 
-    @Inject
-    PNCService pncService;
-
-    @Inject
-    TektonClient tektonClient;
-
-    @Override
-    public void generate(String buildId) throws ApplicationException {
-        Build build = pncService.getBuild(buildId);
-
-        PipelineRun pipelineRun = new PipelineRunBuilder().withNewMetadata()
-                .withGenerateName("sbom-")
-                .endMetadata()
-                .withNewSpec()
-                .withServiceAccountName("sbomer-sa")
-                .withNewPipelineRef()
-                .withName("sbom-generator-domino")
-                .endPipelineRef()
-                .withNewPodTemplate()
-                .withSecurityContext(
-                        new PodSecurityContextBuilder().withFsGroup(65532l)
-                                .withRunAsNonRoot()
-                                .withRunAsUser(65532l)
-                                .build())
-                .endPodTemplate()
-                .withParams(
-                        new Param("git-url", new ArrayOrString(build.getScmUrl())),
-                        new Param("git-rev", new ArrayOrString(build.getScmRevision())),
-                        new Param("build-id", new ArrayOrString(build.getId())),
-                        new Param("additional-domino-args", new ArrayOrString("--include-non-managed")))
-                .withWorkspaces(
-                        new WorkspaceBindingBuilder().withName("data")
-                                .withPersistentVolumeClaim(new PersistentVolumeClaimVolumeSource("sbomer-data", false))
-                                .build())
-
-                .endSpec()
-                .build();
-
-        tektonClient.v1beta1().pipelineRuns().resource(pipelineRun).createOrReplace();
-    }
+        @Override
+        public void generate(String buildId) throws ApplicationException {
+                var config = Json.createObjectBuilder().add("additional-args", "--include-non-managed").build();
+                runTektonTask("sbomer-generate-domino", buildId, config);
+        }
 
 }

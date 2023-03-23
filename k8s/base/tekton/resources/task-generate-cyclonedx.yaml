@@ -22,6 +22,9 @@ metadata:
   name: sbomer-generate-cyclonedx
 spec:
   params:
+    - name: build-id
+      type: string
+      description: "The PNC build ID"
     # TODO: Currently that JSON is not really easy to work with in a Bash script, but this will change once we move to a proper CLI.
     - name: config
       type: string
@@ -33,7 +36,7 @@ spec:
           * version:            Version of the Maven CycloneDX plugin, default: 2.7.5
           * additional-args:    Additional arguments passed to the Maven CycloneDX plugin invocation
 
-        Example: 
+        Example (and default):
 
         {"version": "2.7.5", "additional-args": "--batch-mode --no-transfer-progress --quiet"}
       default: |
@@ -58,10 +61,8 @@ spec:
     #   default:
     #     version: "2.7.5"
     #     additional-args: "--batch-mode --no-transfer-progress --quiet"
-    - name: build-id
-      type: string
-      description: "The PNC build ID"
   steps:
+    # TODO: This is duplicated across every generation Task
     # TODO: Move implementation of this step into Java CLI
     - name: checkout
       image: sbomer-generator
@@ -92,6 +93,8 @@ spec:
 
         source ~/.sdkman/bin/sdkman-init.sh
 
+        # TODO: This is duplicated across every generation Task for now
+        # TODO: Move implementation of this step into Java CLI
         JDK_VERSION=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.environment.attributes.JDK | split(".")[0]')
         MAVEN_VERSION=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.environment.attributes.MAVEN | split(".") | .[0] + "." + .[1]')
 
@@ -101,6 +104,7 @@ spec:
 
         echo "Java version: ${JDK_VERSION}"
         echo "Maven version: ${MAVEN_VERSION}"
+        # TODO: Duplication end
 
         sdk use maven $MAVEN_VERSION
         sdk use java $JDK_VERSION
@@ -123,6 +127,8 @@ spec:
         cat ${BOM_PATH}
 
         echo "Done, SBOM generated at: ${BOM_PATH}"
+    # TODO: This is duplicated across every generation Task
+    # TODO: Move implementation of this step into Java CLI
     - name: "publish"
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
