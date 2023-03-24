@@ -191,7 +191,7 @@ public class SBOMService {
 
     private Sbom runEnrichmentOfBaseSbom(Sbom baseSbom, Processors processor) {
 
-        Bom enrichedBom = processors.select(processor.getSelector()).get().process(baseSbom);
+        Bom enrichedBom = processors.select(processor.getSelector()).get().process(baseSbom.getCycloneDxBom());
         BomJsonGenerator bomGenerator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
         // If there is already a SBOM enriched with this mode and for this buildId, we update it try { Sbom
         try {

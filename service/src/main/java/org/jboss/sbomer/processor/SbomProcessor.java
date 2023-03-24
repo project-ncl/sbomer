@@ -18,16 +18,15 @@
 package org.jboss.sbomer.processor;
 
 import org.cyclonedx.model.Bom;
-import org.jboss.sbomer.model.Sbom;
 
 public interface SbomProcessor {
 
     /**
      * Allows implementing SBOM processing
      *
-     * @param originalSbom the original SBOM entity to be processed
+     * @param originalSbom the original SBOM BOM instance
      * @return transformed SBOM BOM instance
      */
-    Bom process(Sbom originalSbom);
+    Bom process(Bom originalSbom);
 
 }

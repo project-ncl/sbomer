@@ -56,13 +56,8 @@ public class PncArtifactsToSbomPropertiesProcessor implements SbomProcessor {
     SBOMService sbomService;
 
     @Override
-    public Bom process(Sbom originalSbom) {
-        log.info("Applying SBOM_PROPERTIES processing to the SBOM: {}", originalSbom);
-
-        Bom originalBom = originalSbom.getCycloneDxBom();
-        if (originalBom == null) {
-            throw new ValidationException("Could not convert initial SBOM of build: " + originalSbom.getBuildId());
-        }
+    public Bom process(Bom originalBom) {
+        log.info("Applying SBOM_PROPERTIES processing to the SBOM: {}", originalBom.getMetadata().getComponent().getPurl());
 
         if (originalBom.getMetadata() != null && originalBom.getMetadata().getComponent() != null) {
             processComponent(originalBom.getMetadata().getComponent());

@@ -17,29 +17,27 @@
  */
 package org.jboss.sbomer.processor;
 
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 import static org.jboss.sbomer.core.utils.Constants.DISTRIBUTION;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 import static org.jboss.sbomer.core.utils.SbomUtils.addExternalReference;
+import static org.jboss.sbomer.core.utils.SbomUtils.addPedigreeCommit;
 import static org.jboss.sbomer.core.utils.SbomUtils.hasExternalReference;
 import static org.jboss.sbomer.core.utils.SbomUtils.setPublisher;
 import static org.jboss.sbomer.core.utils.SbomUtils.setSupplier;
-import static org.jboss.sbomer.core.utils.SbomUtils.addPedigreeCommit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.validation.ValidationException;
 import javax.ws.rs.NotFoundException;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
-import org.jboss.util.Strings;
 import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.core.utils.RhVersionPattern;
 import org.jboss.sbomer.dto.ArtifactInfo;
-import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SBOMService;
+import org.jboss.util.Strings;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,13 +50,8 @@ public class PncArtifactsToSbomPedigreeProcessor implements SbomProcessor {
     SBOMService sbomService;
 
     @Override
-    public Bom process(Sbom originalSbom) {
-        log.info("Applying SBOM_PEDIGREE processing to the SBOM: {}", originalSbom);
-
-        Bom originalBom = originalSbom.getCycloneDxBom();
-        if (originalBom == null) {
-            throw new ValidationException("Could not convert initial SBOM of build: " + originalSbom.getBuildId());
-        }
+    public Bom process(Bom originalBom) {
+        log.info("Applying SBOM_PEDIGREE processing to the SBOM: {}", originalBom.getMetadata().getComponent().getPurl());
 
         if (originalBom.getMetadata() != null && originalBom.getMetadata().getComponent() != null) {
             processComponent(originalBom.getMetadata().getComponent());
