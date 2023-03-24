@@ -29,6 +29,12 @@
     <name>SBOMer</name>
     <inceptionYear>2023</inceptionYear>
 
+    <parent>
+        <artifactId>jboss-parent</artifactId>
+        <groupId>org.jboss</groupId>
+        <version>39</version>
+    </parent>
+
     <modules>
         <module>core</module>
         <module>cli</module>
@@ -69,7 +75,7 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>${quarkus.platform.group-id}</groupId>
+                    <groupId>io.quarkus</groupId>
                     <artifactId>quarkus-maven-plugin</artifactId>
                     <version>${quarkus.platform.version}</version>
                     <extensions>true</extensions>
@@ -82,15 +88,6 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${compiler-plugin.version}</version>
-                    <configuration>
-                        <compilerArgs>
-                            <arg>-parameters</arg>
-                        </compilerArgs>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -145,58 +142,59 @@
                         <autoReleaseAfterClose>false</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>net.revelc.code.formatter</groupId>
-                    <artifactId>formatter-maven-plugin</artifactId>
-                    <version>2.21.0</version>
-                    <executions>
-                        <execution>
-                            <id>java-format</id>
-                            <goals>
-                                <goal>format</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <configFile>eclipse-codeStyle.xml</configFile>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>com.mycila</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <version>3.0</version>
-                    <executions>
-                        <execution>
-                            <phase>process-sources</phase>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <properties>
-                            <copyright-years>${project.inceptionYear}</copyright-years>
-                        </properties>
-                        <header>.license-header.txt</header>
-                        <excludes>
-                            <exclude>.license-header.txt</exclude>
-                            <exclude>.sdkmanrc</exclude>
-                            <exclude>.dockerignore</exclude>
-                            <exclude>**/README</exclude>
-                            <exclude>**/LICENSE.txt</exclude>
-                            <exclude>**/Dockerfile**</exclude>
-                            <exclude>**/Containerfile**</exclude>
-                            <exclude>**/eclipse-codeStyle.xml</exclude>
-                            <exclude>.github/dependabot.yml</exclude>
-                            <exclude>.mvn/**</exclude>
-                            <exclude>.m2/**</exclude>
-                            <exclude>mvnw**</exclude>
-                            <exclude>**/secret*.txt</exclude>
-                            <exclude>.gitlab-ci.yml</exclude>
-                        </excludes>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>2.21.0</version>
+                <executions>
+                    <execution>
+                        <id>java-format</id>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <configFile>${maven.multiModuleProjectDirectory}/eclipse-codeStyle.xml</configFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <properties>
+                        <copyright-years>${project.inceptionYear}</copyright-years>
+                    </properties>
+                    <header>${maven.multiModuleProjectDirectory}/.license-header.txt</header>
+                    <excludes>
+                        <exclude>.license-header.txt</exclude>
+                        <exclude>.sdkmanrc</exclude>
+                        <exclude>.dockerignore</exclude>
+                        <exclude>**/README</exclude>
+                        <exclude>**/LICENSE.txt</exclude>
+                        <exclude>**/Dockerfile**</exclude>
+                        <exclude>**/Containerfile**</exclude>
+                        <exclude>**/eclipse-codeStyle.xml</exclude>
+                        <exclude>.github/dependabot.yml</exclude>
+                        <exclude>.mvn/**</exclude>
+                        <exclude>.m2/**</exclude>
+                        <exclude>mvnw**</exclude>
+                        <exclude>**/secret*.txt</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>
