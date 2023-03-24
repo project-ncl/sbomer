@@ -26,13 +26,13 @@
   <name>SBOMer Core</name>
 
   <parent>
-    <groupId>org.redhat.pct</groupId>
+    <groupId>org.jboss.sbomer</groupId>
     <artifactId>sbomer-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>org.redhat.pct</groupId>
+  <groupId>org.jboss.sbomer</groupId>
   <artifactId>sbomer-core</artifactId>
 
   <dependencies>
