@@ -19,49 +19,86 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: sbomer-generate
+  name: sbomer-generate-domino
 spec:
   params:
-    - name: jdk-version
-      type: string
-    - name: mvn-version
-      type: string
-    - name: workdir
-      type: string
-    - name: additional-domino-args
-      type: string
-      default: "--include-non-managed"
     - name: build-id
       type: string
+      description: "The PNC build ID"
+    # TODO: Currently that JSON is not really easy to work with in a Bash script, but this will change once we move to a proper CLI.
+    - name: config
+      type: string
+      description: |
+        Additional parameters that instrument the CycloneDX plugin in th JSON format:
+
+        Currently only following keys are supported:
+
+          * additional-args:    Additional arguments passed to the Domino CLI invocation
+
+        Example (and default):
+
+        {"additional-args": "--include-non-managed"}
+      default: |
+        {"additional-args": "--include-non-managed"}
+    # TODO: See the task-generate-cyclonedx.yaml file for more information about structured parameters
   steps:
+    # TODO: This is duplicated across every generation Task
+    # TODO: Move implementation of this step into Java CLI
+    - name: checkout
+      image: sbomer-generator
+      imagePullPolicy: IfNotPresent
+      script: |
+        #!/usr/bin/env bash
+
+        set -e
+
+        # Fetch build information
+        curl https://orch.psi.redhat.com/pnc-rest/v2/builds/$(params.build-id) | jq > $(workspaces.data.path)/build.json
+
+        # Get information on what to clone
+        SCM_URL=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.scmUrl')
+        SCM_TAG=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.scmTag')
+
+        # Clone everything into 'source' directory
+        git clone --depth 1 --branch $SCM_TAG $SCM_URL $(workspaces.data.path)/source
     - name: generate
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       script: |
         #!/usr/bin/env bash
 
+        set -e
+
         source ~/.sdkman/bin/sdkman-init.sh
 
-        sdk use maven $(params.mvn-version)
-        sdk use java $(params.jdk-version)
+        MAVEN_VERSION=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.environment.attributes.MAVEN | split(".") | .[0] + "." + .[1]')
 
-        cd $(workspaces.data.path)/$(params.workdir)
+        # TODO: In order to run Domino, we need JDK 11 at least
+        JDK_VERSION="11"
+
+        echo "Java version: ${JDK_VERSION}"
+        echo "Maven version: ${MAVEN_VERSION}"
+
+        sdk use maven $MAVEN_VERSION
+        sdk use java $JDK_VERSION
+
+        BOM_PATH="$(workspaces.data.path)/source/target/bom.json"
 
         echo "Working from the `pwd` directory"
 
         echo "Domino version:"
         java -jar ~/domino.jar version
 
-        BOM_PATH="$(workspaces.data.path)/$(params.workdir)/bom.json"
+        TOOL_ADDITIONAL_ARGS=$(cat config.json | jq --raw-output '."additional-args"')
 
         echo "Running SBOM generation:"
-        java -jar ~/domino.jar from-maven report --project-dir=source --output-file=${BOM_PATH} --manifest -s ~/settings.xml $(params.additional-domino-args)
+        java -jar ~/domino.jar from-maven report --project-dir="$(workspaces.data.path)/source" --output-file="${BOM_PATH}" --manifest -s ~/settings.xml ${TOOL_ADDITIONAL_ARGS}
 
         cat ${BOM_PATH}
 
         echo "Done, SBOM generated at: ${BOM_PATH}"
-
-        printf "%s" "${BOM_PATH}" > "$(results.bom.path)"
+    # TODO: This is duplicated across every generation Task
+    # TODO: Move implementation of this step into Java CLI
     - name: "publish"
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
@@ -74,14 +111,14 @@ spec:
       script: |
         #!/usr/bin/env bash
 
-        jq -s '{buildId: "$(params.build-id)", type: "BUILD_TIME", generator: "DOMINO", sbom: .[0]}' $(workspaces.data.path)/$(params.workdir)/bom.json > $(workspaces.data.path)/$(params.workdir)/payload.json
+        set -e
+
+        jq -s '{buildId: "$(params.build-id)", type: "BUILD_TIME", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/source/target/bom.json > $(workspaces.data.path)/payload.json
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/$(params.workdir)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms
-  results:
-    - name: "bom"
-      description: "Path to the generated SBOM"
+        # TODO: Why do we send it to the /enrich endpoint? We should just save it and make the service decide what to do with it later (if at all). Leaving for now.
+        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
   workspaces:
     - name: data
       description: Main workspace
