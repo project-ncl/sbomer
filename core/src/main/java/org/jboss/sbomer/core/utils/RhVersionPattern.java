@@ -15,9 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.utils;
+package org.jboss.sbomer.core.utils;
 
 import java.util.regex.Pattern;
+
 import io.quarkus.util.GlobUtil;
 
 public class RhVersionPattern {

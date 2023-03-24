@@ -20,15 +20,43 @@ package org.jboss.sbomer.cli.commands;
 import javax.inject.Inject;
 
 import org.jboss.sbomer.cli.CLI;
+import org.jboss.sbomer.core.enums.Generator;
 
+import lombok.Getter;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 // TODO: Add paramaters and implement the generation
 @Command(mixinStandardHelpOptions = true, name = "generate", aliases = { "g" }, description = "Generate SBOM")
 public class GenerateCommand implements Runnable {
 
+    public static enum OutputFormat {
+        json
+    }
+
     @Inject
     CLI cli;
+
+    @Option(
+            names = { "-g", "--generator" },
+            description = "The generator that should be used, valid values: ${COMPLETION-CANDIDATES}, default: ${DEFAULT-VALUE}.",
+            defaultValue = "CYCLONEDX")
+    @Getter
+    Generator generator;
+
+    @Option(
+            names = { "-f", "--format" },
+            description = "Output format, valid values: ${COMPLETION-CANDIDATES}, default: ${DEFAULT-VALUE}.",
+            defaultValue = "json")
+    @Getter
+    OutputFormat format;
+
+    @Option(
+            names = { "-o", "--output" },
+            defaultValue = "bom.json",
+            paramLabel = "DIR",
+            description = "Path to file where the SBOM should be generated")
+    String output;
 
     @Override
     public void run() {

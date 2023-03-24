@@ -17,14 +17,14 @@
  */
 package org.jboss.sbomer.processor;
 
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_BUILD_ID;
-import static org.jboss.sbomer.utils.Constants.DISTRIBUTION;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
-import static org.jboss.sbomer.utils.SbomUtils.addExternalReference;
-import static org.jboss.sbomer.utils.SbomUtils.hasExternalReference;
-import static org.jboss.sbomer.utils.SbomUtils.setPublisher;
-import static org.jboss.sbomer.utils.SbomUtils.setSupplier;
-import static org.jboss.sbomer.utils.SbomUtils.addPedigreeCommit;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.core.utils.Constants.DISTRIBUTION;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.core.utils.SbomUtils.addExternalReference;
+import static org.jboss.sbomer.core.utils.SbomUtils.hasExternalReference;
+import static org.jboss.sbomer.core.utils.SbomUtils.setPublisher;
+import static org.jboss.sbomer.core.utils.SbomUtils.setSupplier;
+import static org.jboss.sbomer.core.utils.SbomUtils.addPedigreeCommit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -35,8 +35,8 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.jboss.util.Strings;
-import org.jboss.sbomer.utils.Constants;
-import org.jboss.sbomer.utils.RhVersionPattern;
+import org.jboss.sbomer.core.utils.Constants;
+import org.jboss.sbomer.core.utils.RhVersionPattern;
 import org.jboss.sbomer.dto.ArtifactInfo;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SBOMService;

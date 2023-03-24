@@ -56,7 +56,7 @@ import org.jboss.sbomer.mappers.api.ArtifactInfoMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-import static org.jboss.sbomer.utils.SbomUtils.schemaVersion;
+import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 /**
  * Main SBOM service that is dealing with the {@link Sbom} resource.

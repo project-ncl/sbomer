@@ -31,7 +31,7 @@ import org.hibernate.validator.constraintvalidation.HibernateConstraintValidator
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import static org.jboss.sbomer.utils.SbomUtils.schemaVersion;
+import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
 

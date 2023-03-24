@@ -59,7 +59,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import static org.jboss.sbomer.utils.SbomUtils.schemaVersion;
+import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 @DynamicUpdate
 @Getter

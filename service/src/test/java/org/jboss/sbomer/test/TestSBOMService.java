@@ -41,7 +41,7 @@ import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.service.SBOMService;
 import org.jboss.sbomer.test.mock.PncServiceMock;
-import org.jboss.sbomer.utils.Constants;
+import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.utils.enums.Generators;
 import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.validation.exceptions.ValidationException;
@@ -54,18 +54,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_BUILD_ID;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_BUILD_SYSTEM;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_ORIGIN_URL;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_SCM_URL;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_SCM_REVISION;
-import static org.jboss.sbomer.utils.Constants.DISTRIBUTION;
-import static org.jboss.sbomer.utils.Constants.MRRC_URL;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_SYSTEM;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ORIGIN_URL;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_URL;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_REVISION;
+import static org.jboss.sbomer.core.utils.Constants.DISTRIBUTION;
+import static org.jboss.sbomer.core.utils.Constants.MRRC_URL;
 
-import static org.jboss.sbomer.utils.SbomUtils.findComponentWithPurl;
-import static org.jboss.sbomer.utils.SbomUtils.findPropertyWithNameInComponent;
-import static org.jboss.sbomer.utils.SbomUtils.schemaVersion;
+import static org.jboss.sbomer.core.utils.SbomUtils.findComponentWithPurl;
+import static org.jboss.sbomer.core.utils.SbomUtils.findPropertyWithNameInComponent;
+import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 @QuarkusTest
 @Slf4j

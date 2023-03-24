@@ -34,20 +34,8 @@ public class CLI implements QuarkusApplication {
     @Inject
     CommandLine.IFactory factory;
 
-    public static enum Output {
-        plain, yaml, json
-    }
-
     @Option(names = { "-v", "--verbose" }, scope = ScopeType.INHERIT)
     boolean verbose = false;
-
-    @Option(
-            names = { "--output", "-o" },
-            description = "Output format, valid values: ${COMPLETION-CANDIDATES}, default: ${DEFAULT-VALUE}.",
-            defaultValue = "plain",
-            scope = ScopeType.INHERIT)
-    @Getter
-    Output output;
 
     public void usage(Class<?> command) {
         new CommandLine(command, factory).usage(System.out);

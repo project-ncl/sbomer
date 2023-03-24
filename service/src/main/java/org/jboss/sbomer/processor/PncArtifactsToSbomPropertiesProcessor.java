@@ -17,20 +17,20 @@
  */
 package org.jboss.sbomer.processor;
 
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_BUILD_ID;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_BUILD_SYSTEM;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_ORIGIN_URL;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_PUBLIC_URL;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_SCM_EXTERNAL_URL;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_SCM_REVISION;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_SCM_TAG;
-import static org.jboss.sbomer.utils.Constants.SBOM_RED_HAT_SCM_URL;
-import static org.jboss.sbomer.utils.SbomUtils.addHash;
-import static org.jboss.sbomer.utils.SbomUtils.addMrrc;
-import static org.jboss.sbomer.utils.SbomUtils.addProperty;
-import static org.jboss.sbomer.utils.SbomUtils.hasHash;
-import static org.jboss.sbomer.utils.SbomUtils.hasProperty;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_SYSTEM;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ORIGIN_URL;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_PUBLIC_URL;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_EXTERNAL_URL;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_REVISION;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_TAG;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_URL;
+import static org.jboss.sbomer.core.utils.SbomUtils.addHash;
+import static org.jboss.sbomer.core.utils.SbomUtils.addMrrc;
+import static org.jboss.sbomer.core.utils.SbomUtils.addProperty;
+import static org.jboss.sbomer.core.utils.SbomUtils.hasHash;
+import static org.jboss.sbomer.core.utils.SbomUtils.hasProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -40,7 +40,7 @@ import javax.ws.rs.NotFoundException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Hash.Algorithm;
-import org.jboss.sbomer.utils.RhVersionPattern;
+import org.jboss.sbomer.core.utils.RhVersionPattern;
 import org.jboss.sbomer.dto.ArtifactInfo;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SBOMService;
