@@ -30,7 +30,7 @@ metadata:
   name: sbomer
 rules:
   - apiGroups: ["tekton.dev"]
-    resources: ["pipelineruns"]
+    resources: ["taskruns"]
     verbs: ["create", "get", "watch", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
