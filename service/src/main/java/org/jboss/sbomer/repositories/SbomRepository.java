@@ -20,8 +20,8 @@ package org.jboss.sbomer.repositories;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.utils.enums.Generators;
 import org.jboss.sbomer.utils.enums.Processors;
 
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
@@ -30,7 +30,7 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 @ApplicationScoped
 public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
 
-    public Sbom getSbom(String buildId, Generators generator, Processors processor) {
+    public Sbom getSbom(String buildId, GeneratorImplementation generator, Processors processor) {
         if (processor == null) {
             return find("#" + Sbom.FIND_BASE_BY_BUILDID_GENERATOR, buildId, generator).singleResult();
         }

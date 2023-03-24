@@ -17,6 +17,23 @@
  */
 package org.jboss.sbomer.test;
 
+import static org.jboss.sbomer.core.utils.Constants.DISTRIBUTION;
+import static org.jboss.sbomer.core.utils.Constants.MRRC_URL;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_SYSTEM;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ORIGIN_URL;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_REVISION;
+import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_URL;
+import static org.jboss.sbomer.core.utils.SbomUtils.findComponentWithPurl;
+import static org.jboss.sbomer.core.utils.SbomUtils.findPropertyWithNameInComponent;
+import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Optional;
@@ -34,38 +51,20 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
-import org.junit.jupiter.api.Test;
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.dto.ArtifactInfo;
 import org.jboss.sbomer.dto.response.Page;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.service.SBOMService;
 import org.jboss.sbomer.test.mock.PncServiceMock;
-import org.jboss.sbomer.core.utils.Constants;
-import org.jboss.sbomer.utils.enums.Generators;
 import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.validation.exceptions.ValidationException;
+import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_SYSTEM;
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ORIGIN_URL;
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_URL;
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_SCM_REVISION;
-import static org.jboss.sbomer.core.utils.Constants.DISTRIBUTION;
-import static org.jboss.sbomer.core.utils.Constants.MRRC_URL;
-
-import static org.jboss.sbomer.core.utils.SbomUtils.findComponentWithPurl;
-import static org.jboss.sbomer.core.utils.SbomUtils.findPropertyWithNameInComponent;
-import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 @QuarkusTest
 @Slf4j
@@ -86,7 +85,7 @@ public class TestSBOMService {
     @Test
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
-        Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
+        Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, GeneratorImplementation.CYCLONEDX, null);
         assertNotNull(baseSBOM);
     }
 
@@ -118,7 +117,7 @@ public class TestSBOMService {
     public void testBaseSbomNotFound() throws IOException {
         log.info("testBaseSbomNotFound ...");
         try {
-            sbomService.getSbom("I_DO_NOT_EXIST", Generators.CYCLONEDX, null);
+            sbomService.getSbom("I_DO_NOT_EXIST", GeneratorImplementation.CYCLONEDX, null);
             fail("It should have thrown a 404 exception");
         } catch (NotFoundException nfe) {
         }
@@ -148,8 +147,11 @@ public class TestSBOMService {
         log.info("testManipulateSBOMAddingProperties ...");
 
         try {
-            Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
-            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector()).get().process(baseSBOM.getCycloneDxBom());
+            Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, GeneratorImplementation.CYCLONEDX, null);
+            System.out.println(baseSBOM.getCycloneDxBom());
+            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector())
+                    .get()
+                    .process(baseSBOM.getCycloneDxBom());
 
             Component notFoundInCacheNorPNCComponent = findComponentWithPurl(
                     "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar",
@@ -200,7 +202,7 @@ public class TestSBOMService {
             sbomService.updateBom(Long.valueOf(baseSBOM.getId()), modifiedBom);
 
             // Now getting again from DB and re-run all the previous checks
-            Sbom updatedBaseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
+            Sbom updatedBaseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, GeneratorImplementation.CYCLONEDX, null);
             Bom bomFromDB = updatedBaseSBOM.getCycloneDxBom();
 
             notFoundInCacheNorPNCComponent = findComponentWithPurl(
@@ -251,8 +253,10 @@ public class TestSBOMService {
         log.info("testManipulateSBOMAddingPedigree ...");
 
         try {
-            Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, Generators.CYCLONEDX, null);
-            Bom modifiedBom = processors.select(Processors.SBOM_PEDIGREE.getSelector()).get().process(baseSBOM.getCycloneDxBom());
+            Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, GeneratorImplementation.CYCLONEDX, null);
+            Bom modifiedBom = processors.select(Processors.SBOM_PEDIGREE.getSelector())
+                    .get()
+                    .process(baseSBOM.getCycloneDxBom());
 
             BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), modifiedBom);
             Component testComponent = findComponentWithPurl(

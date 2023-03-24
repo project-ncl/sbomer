@@ -51,7 +51,9 @@ public class PncArtifactsToSbomPedigreeProcessor implements SbomProcessor {
 
     @Override
     public Bom process(Bom originalBom) {
-        log.info("Applying SBOM_PEDIGREE processing to the SBOM: {}", originalBom.getMetadata().getComponent().getPurl());
+        log.info(
+                "Applying SBOM_PEDIGREE processing to the SBOM: {}",
+                originalBom.getMetadata().getComponent().getPurl());
 
         if (originalBom.getMetadata() != null && originalBom.getMetadata().getComponent() != null) {
             processComponent(originalBom.getMetadata().getComponent());

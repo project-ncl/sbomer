@@ -15,25 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.utils.enums;
+package org.jboss.sbomer.core.enums;
 
-import javax.enterprise.util.AnnotationLiteral;
-
-import org.jboss.sbomer.generator.CycloneDX;
-import org.jboss.sbomer.generator.Domino;
-
-public enum Generators {
-
-    DOMINO(Domino.Literal.INSTANCE), CYCLONEDX(CycloneDX.Literal.INSTANCE);
-
-    private AnnotationLiteral selector;
-
-    private Generators(AnnotationLiteral selector) {
-        this.selector = selector;
-    }
-
-    public AnnotationLiteral getSelector() {
-        return this.selector;
-    }
-
+public enum GeneratorImplementation {
+    CYCLONEDX, DOMINO;
 }

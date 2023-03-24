@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.generator;
 
+import static org.jboss.sbomer.core.enums.GeneratorImplementation.DOMINO;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.json.Json;
 
@@ -25,7 +27,7 @@ import org.jboss.sbomer.errors.ApplicationException;
 /**
  * Implementation responsible for running the Domino SBOM generator.
  */
-@Domino
+@Generator(DOMINO)
 @ApplicationScoped
 public class TektonDominoSbomGenerator extends AbstractTektonSbomGenerator {
 

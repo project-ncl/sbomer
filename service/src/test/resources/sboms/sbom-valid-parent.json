@@ -1,6 +1,44 @@
 {
   "version": 1,
   "bomFormat": "CycloneDX",
+  "metadata": {
+    "component": {
+      "name": "jcommander",
+      "purl": "pkg:maven/com.beust/jcommander@1.72?type=jar",
+      "type": "library",
+      "group": "com.beust",
+      "version": "1.72",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "publisher": "central",
+      "properties": [
+        {
+          "name": "package:type",
+          "value": "maven"
+        },
+        {
+          "name": "package:language",
+          "value": "java"
+        }
+      ],
+      "description": "Command line parsing",
+      "externalReferences": [
+        {
+          "url": "http://jcommander.org",
+          "type": "website"
+        },
+        {
+          "url": "https://github.com/cbeust/jcommander",
+          "type": "vcs"
+        }
+      ]
+    }
+  },
   "components": [
     {
       "name": "jcommander",

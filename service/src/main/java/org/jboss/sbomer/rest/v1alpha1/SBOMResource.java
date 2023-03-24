@@ -40,10 +40,10 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.dto.response.Page;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SBOMService;
-import org.jboss.sbomer.utils.enums.Generators;
 import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.validation.exceptions.ValidationException;
 
@@ -138,10 +138,10 @@ public class SBOMResource {
     public Response generate(@PathParam("buildId") String id, @QueryParam("generator") String generator)
             throws Exception {
 
-        Generators gen = Generators.CYCLONEDX;
+        GeneratorImplementation gen = GeneratorImplementation.CYCLONEDX;
         if (!Strings.isEmpty(generator)) {
             try {
-                gen = Generators.valueOf(generator);
+                gen = GeneratorImplementation.valueOf(generator);
             } catch (IllegalArgumentException iae) {
                 return Response.status(Status.BAD_REQUEST)
                         .entity(

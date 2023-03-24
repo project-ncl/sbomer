@@ -17,24 +17,40 @@
  */
 package org.jboss.sbomer.generator;
 
-import javax.enterprise.util.AnnotationLiteral;
-import javax.inject.Qualifier;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
+
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
+
 @Qualifier
 @Retention(RUNTIME)
-@Target({ METHOD, FIELD, PARAMETER, TYPE })
-public @interface CycloneDX {
+@Target({ FIELD, TYPE })
+public @interface Generator {
+    public GeneratorImplementation value();
 
-    final class Literal extends AnnotationLiteral<CycloneDX> implements CycloneDX {
-        public static final Literal INSTANCE = new Literal();
+    public final class GeneratorLiteral extends AnnotationLiteral<Generator> implements Generator {
         private static final long serialVersionUID = 1L;
+
+        private final GeneratorImplementation value;
+
+        public static GeneratorLiteral of(GeneratorImplementation value) {
+            return new GeneratorLiteral(value);
+        }
+
+        private GeneratorLiteral(GeneratorImplementation value) {
+            this.value = value;
+        }
+
+        @Override
+        public GeneratorImplementation value() {
+            return value;
+        }
     }
 }

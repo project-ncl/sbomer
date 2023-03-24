@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.model;
 
+import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
+
 import java.time.Instant;
 
 import javax.persistence.Column;
@@ -43,7 +45,7 @@ import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.jboss.sbomer.utils.enums.Generators;
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.utils.enums.SbomType;
 import org.jboss.sbomer.validation.CycloneDxBom;
@@ -58,8 +60,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 @DynamicUpdate
 @Getter
@@ -105,7 +105,7 @@ public class Sbom extends PanacheEntityBase {
 
     @Column(name = "generator", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
-    private Generators generator;
+    private GeneratorImplementation generator;
 
     @Column(name = "processor", nullable = true, updatable = false)
     @Enumerated(EnumType.STRING)

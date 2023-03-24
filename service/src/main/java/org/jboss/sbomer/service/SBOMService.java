@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service;
 
+import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
+
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -36,27 +38,25 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.cyclonedx.BomGeneratorFactory;
+import org.cyclonedx.generators.json.BomJsonGenerator;
+import org.cyclonedx.model.Bom;
+import org.jboss.pnc.common.concurrent.Sequence;
+import org.jboss.pnc.dto.Artifact;
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.dto.ArtifactInfo;
+import org.jboss.sbomer.dto.response.Page;
+import org.jboss.sbomer.generator.Generator.GeneratorLiteral;
+import org.jboss.sbomer.generator.SbomGenerator;
+import org.jboss.sbomer.mappers.api.ArtifactInfoMapper;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.repositories.SbomRepository;
-import org.jboss.sbomer.utils.enums.Generators;
 import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.utils.enums.SbomType;
 import org.jboss.sbomer.validation.exceptions.ValidationException;
 
-import org.cyclonedx.model.Bom;
-import org.cyclonedx.BomGeneratorFactory;
-import org.cyclonedx.generators.json.BomJsonGenerator;
-import org.jboss.pnc.common.concurrent.Sequence;
-import org.jboss.pnc.dto.Artifact;
-import org.jboss.sbomer.dto.ArtifactInfo;
-import org.jboss.sbomer.dto.response.Page;
-import org.jboss.sbomer.generator.SbomGenerator;
-import org.jboss.sbomer.mappers.api.ArtifactInfoMapper;
-
 import lombok.extern.slf4j.Slf4j;
-
-import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 /**
  * Main SBOM service that is dealing with the {@link Sbom} resource.
@@ -91,9 +91,8 @@ public class SBOMService {
      *
      * @param buildId
      */
-    public Response generateSbomFromPncBuild(String buildId, Generators generator) {
-
-        generators.select(generator.getSelector()).get().generate(buildId);
+    public Response generateSbomFromPncBuild(String buildId, GeneratorImplementation generator) {
+        generators.select(GeneratorLiteral.of(generator)).get().generate(buildId);
         return Response.status(Status.ACCEPTED).build();
     }
 
@@ -121,8 +120,8 @@ public class SBOMService {
         return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    public Sbom getSbom(String buildId, Generators generator, Processors processor) {
-        log.debug("Getting SBOM with buildId: {} and generator: {} and processor: {}", buildId, generator, processor);
+    public Sbom getSbom(String buildId, GeneratorImplementation generator, Processors processor) {
+        log.info("Getting SBOM with buildId: {} and generator: {} and processor: {}", buildId, generator, processor);
         try {
             return sbomRepository.getSbom(buildId, generator, processor);
         } catch (NoResultException nre) {

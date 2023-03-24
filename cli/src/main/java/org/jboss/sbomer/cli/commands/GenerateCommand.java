@@ -20,7 +20,7 @@ package org.jboss.sbomer.cli.commands;
 import javax.inject.Inject;
 
 import org.jboss.sbomer.cli.CLI;
-import org.jboss.sbomer.core.enums.Generator;
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
 
 import lombok.Getter;
 import picocli.CommandLine.Command;
@@ -42,7 +42,7 @@ public class GenerateCommand implements Runnable {
             description = "The generator that should be used, valid values: ${COMPLETION-CANDIDATES}, default: ${DEFAULT-VALUE}.",
             defaultValue = "CYCLONEDX")
     @Getter
-    Generator generator;
+    GeneratorImplementation generator;
 
     @Option(
             names = { "-f", "--format" },
