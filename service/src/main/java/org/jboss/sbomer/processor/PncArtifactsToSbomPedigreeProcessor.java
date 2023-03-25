@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.processor;
 
+import static org.jboss.sbomer.core.enums.ProcessorImplementation.PEDIGREE;
 import static org.jboss.sbomer.core.utils.Constants.DISTRIBUTION;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
@@ -42,7 +43,7 @@ import org.jboss.util.Strings;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@PncToSbomPedigree
+@Processor(PEDIGREE)
 @ApplicationScoped
 public class PncArtifactsToSbomPedigreeProcessor implements SbomProcessor {
 

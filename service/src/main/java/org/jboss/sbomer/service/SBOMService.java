@@ -44,15 +44,16 @@ import org.cyclonedx.model.Bom;
 import org.jboss.pnc.common.concurrent.Sequence;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.dto.ArtifactInfo;
 import org.jboss.sbomer.dto.response.Page;
 import org.jboss.sbomer.generator.Generator.GeneratorLiteral;
 import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.mappers.api.ArtifactInfoMapper;
 import org.jboss.sbomer.model.Sbom;
+import org.jboss.sbomer.processor.Processor.ProcessorLiteral;
 import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.repositories.SbomRepository;
-import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.utils.enums.SbomType;
 import org.jboss.sbomer.validation.exceptions.ValidationException;
 
@@ -120,7 +121,7 @@ public class SBOMService {
         return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    public Sbom getSbom(String buildId, GeneratorImplementation generator, Processors processor) {
+    public Sbom getSbom(String buildId, GeneratorImplementation generator, ProcessorImplementation processor) {
         log.info("Getting SBOM with buildId: {} and generator: {} and processor: {}", buildId, generator, processor);
         try {
             return sbomRepository.getSbom(buildId, generator, processor);
@@ -188,9 +189,9 @@ public class SBOMService {
         return dbEntity;
     }
 
-    private Sbom runEnrichmentOfBaseSbom(Sbom baseSbom, Processors processor) {
+    private Sbom runEnrichmentOfBaseSbom(Sbom baseSbom, ProcessorImplementation processor) {
 
-        Bom enrichedBom = processors.select(processor.getSelector()).get().process(baseSbom.getCycloneDxBom());
+        Bom enrichedBom = processors.select(ProcessorLiteral.of(processor)).get().process(baseSbom.getCycloneDxBom());
         BomJsonGenerator bomGenerator = BomGeneratorFactory.createJson(schemaVersion(), enrichedBom);
         // If there is already a SBOM enriched with this mode and for this buildId, we update it try { Sbom
         try {
@@ -210,7 +211,7 @@ public class SBOMService {
         }
     }
 
-    public Sbom saveAndEnrichSbom(Sbom sbom, Processors processor) throws ValidationException {
+    public Sbom saveAndEnrichSbom(Sbom sbom, ProcessorImplementation processor) throws ValidationException {
         log.debug(
                 "Saving sbom for buildId {} and generator: {}, and running enrichment with processor: {}",
                 sbom.getBuildId(),

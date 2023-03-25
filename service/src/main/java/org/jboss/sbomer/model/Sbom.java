@@ -46,7 +46,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.utils.enums.Processors;
+import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.utils.enums.SbomType;
 import org.jboss.sbomer.validation.CycloneDxBom;
 
@@ -109,7 +109,7 @@ public class Sbom extends PanacheEntityBase {
 
     @Column(name = "processor", nullable = true, updatable = false)
     @Enumerated(EnumType.STRING)
-    private Processors processor;
+    private ProcessorImplementation processor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(

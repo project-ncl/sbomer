@@ -41,10 +41,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.dto.response.Page;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SBOMService;
-import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.validation.exceptions.ValidationException;
 
 @Path("/api/v1alpha1/sboms")
@@ -175,10 +175,10 @@ public class SBOMResource {
     public Response processEnrichmentOfBaseSbom(final Sbom sbom, @QueryParam("processor") String processor)
             throws Exception {
 
-        Processors proc = Processors.SBOM_PEDIGREE;
+        ProcessorImplementation proc = ProcessorImplementation.PEDIGREE;
         if (!Strings.isEmpty(processor)) {
             try {
-                proc = Processors.valueOf(processor);
+                proc = ProcessorImplementation.valueOf(processor);
             } catch (IllegalArgumentException iae) {
                 return Response.status(Status.BAD_REQUEST)
                         .entity(

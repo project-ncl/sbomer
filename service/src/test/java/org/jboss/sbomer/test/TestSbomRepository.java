@@ -37,9 +37,9 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.repositories.SbomRepository;
-import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.utils.enums.SbomType;
 import org.junit.jupiter.api.Test;
 
@@ -84,7 +84,7 @@ public class TestSbomRepository extends SbomRepository {
         enrichedSBOM.setGenerationTime(Instant.now());
         enrichedSBOM.setSbom(sbom);
         enrichedSBOM.setGenerator(parentSbom.getGenerator());
-        enrichedSBOM.setProcessor(Processors.SBOM_PROPERTIES);
+        enrichedSBOM.setProcessor(ProcessorImplementation.PROPERTIES);
         enrichedSBOM.setParentSbom(parentSbom);
         return enrichedSBOM;
     }
@@ -153,13 +153,16 @@ public class TestSbomRepository extends SbomRepository {
 
     @Test
     public void testGetEnrichedSbom() throws JsonProcessingException, JsonMappingException {
-        Sbom enrichedSbom = getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, Processors.SBOM_PROPERTIES);
+        Sbom enrichedSbom = getSbom(
+                "ARYT3LBXDVYAC",
+                GeneratorImplementation.CYCLONEDX,
+                ProcessorImplementation.PROPERTIES);
         Bom bom = enrichedSbom.getCycloneDxBom();
 
         assertEquals(416640206274228225L, enrichedSbom.getId());
         assertEquals("ARYT3LBXDVYAC", enrichedSbom.getBuildId());
         assertEquals(GeneratorImplementation.CYCLONEDX, enrichedSbom.getGenerator());
-        assertEquals(Processors.SBOM_PROPERTIES, enrichedSbom.getProcessor());
+        assertEquals(ProcessorImplementation.PROPERTIES, enrichedSbom.getProcessor());
         assertEquals(SbomType.BUILD_TIME, enrichedSbom.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);

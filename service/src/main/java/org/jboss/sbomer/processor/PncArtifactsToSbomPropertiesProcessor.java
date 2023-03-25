@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.processor;
 
+import static org.jboss.sbomer.core.enums.ProcessorImplementation.PROPERTIES;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_SYSTEM;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
@@ -34,7 +35,6 @@ import static org.jboss.sbomer.core.utils.SbomUtils.hasProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.validation.ValidationException;
 import javax.ws.rs.NotFoundException;
 
 import org.cyclonedx.model.Bom;
@@ -42,13 +42,12 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Hash.Algorithm;
 import org.jboss.sbomer.core.utils.RhVersionPattern;
 import org.jboss.sbomer.dto.ArtifactInfo;
-import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SBOMService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@PncToSbomProperties
+@Processor(PROPERTIES)
 @ApplicationScoped
 public class PncArtifactsToSbomPropertiesProcessor implements SbomProcessor {
 

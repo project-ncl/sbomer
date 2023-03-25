@@ -52,14 +52,15 @@ import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.dto.ArtifactInfo;
 import org.jboss.sbomer.dto.response.Page;
 import org.jboss.sbomer.model.Sbom;
+import org.jboss.sbomer.processor.Processor.ProcessorLiteral;
 import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.service.SBOMService;
 import org.jboss.sbomer.test.mock.PncServiceMock;
-import org.jboss.sbomer.utils.enums.Processors;
 import org.jboss.sbomer.validation.exceptions.ValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -149,7 +150,7 @@ public class TestSBOMService {
         try {
             Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, GeneratorImplementation.CYCLONEDX, null);
             System.out.println(baseSBOM.getCycloneDxBom());
-            Bom modifiedBom = processors.select(Processors.SBOM_PROPERTIES.getSelector())
+            Bom modifiedBom = processors.select(ProcessorLiteral.of(ProcessorImplementation.PROPERTIES))
                     .get()
                     .process(baseSBOM.getCycloneDxBom());
 
@@ -254,7 +255,7 @@ public class TestSBOMService {
 
         try {
             Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, GeneratorImplementation.CYCLONEDX, null);
-            Bom modifiedBom = processors.select(Processors.SBOM_PEDIGREE.getSelector())
+            Bom modifiedBom = processors.select(ProcessorLiteral.of(ProcessorImplementation.PEDIGREE))
                     .get()
                     .process(baseSBOM.getCycloneDxBom());
 

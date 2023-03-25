@@ -17,24 +17,40 @@
  */
 package org.jboss.sbomer.processor;
 
-import javax.enterprise.util.AnnotationLiteral;
-import javax.inject.Qualifier;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
+
+import org.jboss.sbomer.core.enums.ProcessorImplementation;
+
 @Qualifier
 @Retention(RUNTIME)
-@Target({ METHOD, FIELD, PARAMETER, TYPE })
-public @interface PncToSbomPedigree {
+@Target({ FIELD, TYPE })
+public @interface Processor {
+    public ProcessorImplementation value();
 
-    final class Literal extends AnnotationLiteral<PncToSbomPedigree> implements PncToSbomPedigree {
-        public static final Literal INSTANCE = new Literal();
+    public final class ProcessorLiteral extends AnnotationLiteral<Processor> implements Processor {
         private static final long serialVersionUID = 1L;
+
+        private final ProcessorImplementation value;
+
+        public static ProcessorLiteral of(ProcessorImplementation value) {
+            return new ProcessorLiteral(value);
+        }
+
+        private ProcessorLiteral(ProcessorImplementation value) {
+            this.value = value;
+        }
+
+        @Override
+        public ProcessorImplementation value() {
+            return value;
+        }
     }
 }
