@@ -38,9 +38,9 @@ import org.cyclonedx.model.Component;
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.repositories.SbomRepository;
-import org.jboss.sbomer.utils.enums.SbomType;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

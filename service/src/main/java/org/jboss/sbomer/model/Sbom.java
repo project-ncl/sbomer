@@ -47,7 +47,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
-import org.jboss.sbomer.utils.enums.SbomType;
+import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

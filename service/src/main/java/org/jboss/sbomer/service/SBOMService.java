@@ -45,6 +45,7 @@ import org.jboss.pnc.common.concurrent.Sequence;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.dto.ArtifactInfo;
 import org.jboss.sbomer.dto.response.Page;
 import org.jboss.sbomer.generator.Generator.GeneratorLiteral;
@@ -54,7 +55,6 @@ import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.processor.Processor.ProcessorLiteral;
 import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.repositories.SbomRepository;
-import org.jboss.sbomer.utils.enums.SbomType;
 import org.jboss.sbomer.validation.exceptions.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;

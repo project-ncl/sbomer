@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.utils.enums;
+package org.jboss.sbomer.core.enums;
 
 public enum SbomType {
     BUILD_TIME, PRODUCT_RELEASE;
