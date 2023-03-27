@@ -24,6 +24,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
+// TODO: @goldmann: Why do we need this?
 @Mapper(
         unmappedSourcePolicy = ReportingPolicy.WARN,
         unmappedTargetPolicy = ReportingPolicy.WARN,

@@ -71,9 +71,9 @@ IMAGE_TAG_COMMIT="${IMAGE_REGISTRY}/${IMAGE_SLUG}:${SHORTCOMMIT}"
 
 set -x
 
-pushd "$SCRIPT_DIR/../" > /dev/null
+pushd "$SCRIPT_DIR/../../" > /dev/null
 
-"${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "src/main/images/${IMAGE_SLUG}/Containerfile" .
+"${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "images/${IMAGE_SLUG}/Containerfile" .
 
 if [ "$PUSH" = "yes" ]; then
 "${BUILD_SCRIPT[@]}" tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_COMMIT"
