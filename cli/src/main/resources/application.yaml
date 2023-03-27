@@ -1,5 +1,3 @@
-#!/bin/env bash
-
 #
 # JBoss, Home of Professional Open Source.
 # Copyright 2023 Red Hat, Inc., and individual contributors
@@ -18,18 +16,18 @@
 # limitations under the License.
 #
 
-set -e
+quarkus:
+  banner:
+    enabled: false
 
-# This file builds all container images and makes these available in the
-# Minikube environemt. This is useful in case of deployment of the 'local'
-# environment/overrides.
-#
-# This script should be run after you set up the Minikube environment.
-
-SCRIPT_DIR=$(dirname "$0")
-
-"$SCRIPT_DIR/run-maven.sh" package -DskipTests
-
-BUILDER=minikube "$SCRIPT_DIR/internal/build-image.sh" "sbomer-service"
-BUILDER=minikube "$SCRIPT_DIR/internal/build-image.sh" "sbomer-generator"
-BUILDER=minikube "$SCRIPT_DIR/internal/build-image.sh" "sbomer-cache"
+"%dev":
+  quarkus:
+    log:
+      level: INFO
+      console:
+        format: "%m%n"
+      category:
+        "io.quarkus.kubernetes":
+          level: DEBUG
+        "org.jboss.sbomer":
+          level: DEBUG
