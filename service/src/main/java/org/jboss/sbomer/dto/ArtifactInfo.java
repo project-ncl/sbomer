@@ -48,6 +48,7 @@ public class ArtifactInfo {
     private String buildSystem = "PNC";
     private String pncBuildIdRestResource;
 
+    // TODO: @goldmann -- why do we need this?
     @lombok.Builder(builderClassName = "Builder", toBuilder = true)
     private ArtifactInfo(
             String identifier,
