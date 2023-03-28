@@ -51,7 +51,9 @@ function install_maven() {
 }
 
 function install_domino() {
-  curl -L https://github.com/quarkusio/quarkus-platform-bom-generator/releases/download/0.0.77/domino.jar -o domino.jar
+  for domino_version in 0.0.80 0.0.81; do
+    curl -L https://github.com/quarkusio/quarkus-platform-bom-generator/releases/download/${domino_version}/domino.jar -o domino-${domino_version}.jar
+  done
 }
 
 install_sdk

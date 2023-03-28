@@ -19,6 +19,7 @@ package org.jboss.sbomer.test.generator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 
@@ -31,6 +32,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.generator.TektonCycloneDXSbomGenerator;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -45,14 +52,23 @@ public class TestTektonCycloneDxSbomGenerator {
     @Inject
     Instance<SbomGenerator> generators;
 
+    @ConfigProperty(name = "sbomer.cyclonedx-default-version")
+    String cyclonedxDefaultVersion;
+
+    @ConfigProperty(name = "sbomer.cyclonedx-additional-args")
+    String cyclonedxAdditionalArgs;
+
     SbomGenerator generator;
 
     @InjectMock(convertScopes = true)
     TektonClient tektonClient;
 
+    ObjectMapper mapper;
+
     @BeforeEach
     void init() {
         generator = generators.select(TektonCycloneDXSbomGenerator.class).get();
+        mapper = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
     }
 
     @Test
@@ -73,9 +89,16 @@ public class TestTektonCycloneDxSbomGenerator {
             assertEquals("sbomer-generate-cyclonedx", taskRun.getSpec().getTaskRef().getName());
             assertEquals("sbomer-sa", taskRun.getSpec().getServiceAccountName());
             assertEquals("AAABBBB", taskRun.getSpec().getParams().get(0).getValue().getStringVal());
-            assertEquals(
-                    "{\"version\":\"2.7.5\",\"additional-args\":\"--batch-mode --no-transfer-progress --quiet\"}",
-                    taskRun.getSpec().getParams().get(1).getValue().getStringVal());
+            try {
+                JsonNode config = mapper.readTree(taskRun.getSpec().getParams().get(1).getValue().getStringVal());
+                String version = config.get("version").asText().toString();
+                String additionalArgs = config.get("additional-args").asText().toString();
+                assertEquals(cyclonedxDefaultVersion, version);
+                assertEquals(cyclonedxAdditionalArgs, additionalArgs);
+            } catch (JsonProcessingException e) {
+                fail("Should not have thrown a parse error when processing the config object");
+            }
+
             assertEquals(1, taskRun.getSpec().getWorkspaces().size());
             assertEquals("data", taskRun.getSpec().getWorkspaces().get(0).getName());
             return true;

@@ -22,6 +22,7 @@ import static org.jboss.sbomer.core.enums.GeneratorImplementation.CYCLONEDX;
 import javax.enterprise.context.ApplicationScoped;
 import javax.json.Json;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.errors.ApplicationException;
 
 /**
@@ -31,11 +32,17 @@ import org.jboss.sbomer.errors.ApplicationException;
 @ApplicationScoped
 public class TektonCycloneDXSbomGenerator extends AbstractTektonSbomGenerator {
 
+    @ConfigProperty(name = "sbomer.cyclonedx-default-version")
+    String cyclonedxDefaultVersion;
+
+    @ConfigProperty(name = "sbomer.cyclonedx-additional-args")
+    String cyclonedxAdditionalArgs;
+
     @Override
     public void generate(String buildId) throws ApplicationException {
         var config = Json.createObjectBuilder()
-                .add("version", "2.7.5")
-                .add("additional-args", "--batch-mode --no-transfer-progress --quiet")
+                .add("version", cyclonedxDefaultVersion)
+                .add("additional-args", cyclonedxAdditionalArgs)
                 .build();
 
         runTektonTask("sbomer-generate-cyclonedx", buildId, config);
