@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service;
+package org.jboss.sbomer.cli.service;
 
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 @ApplicationScoped
 public class PNCService {
 
-    @ConfigProperty(name = "sbomer.pnc.api-url")
+    @ConfigProperty(name = "sbomer.pnc-api-url")
     String apiUrl;
 
     /**
@@ -61,7 +61,9 @@ public class PNCService {
         BuildClient client = new BuildClient(getConfiguration());
 
         try {
-            return client.getSpecific(buildId);
+            Build build = client.getSpecific(buildId);
+            client.close();
+            return build;
         } catch (RemoteResourceNotFoundException ex) {
             throw new ApplicationException("Build was not found in PNC", ex);
         } catch (RemoteResourceException ex) {

@@ -1,6 +1,4 @@
 *
-!*/target/*-runner
-!*/target/*-runner.jar
-!*/target/lib/*
-!*/target/quarkus-app/*
 !images/*
+!cli/target/*
+!service/target/*

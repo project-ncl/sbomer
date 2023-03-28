@@ -19,17 +19,20 @@ package org.jboss.sbomer.cli;
 
 import javax.inject.Inject;
 
+import org.jboss.sbomer.cli.commands.CloneCommand;
 import org.jboss.sbomer.cli.commands.GenerateCommand;
 
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
-import lombok.Getter;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
 @QuarkusMain
-@CommandLine.Command(name = "sbomer", mixinStandardHelpOptions = true, subcommands = { GenerateCommand.class })
+@CommandLine.Command(
+        name = "sbomer",
+        mixinStandardHelpOptions = true,
+        subcommands = { CloneCommand.class, GenerateCommand.class })
 public class CLI implements QuarkusApplication {
     @Inject
     CommandLine.IFactory factory;

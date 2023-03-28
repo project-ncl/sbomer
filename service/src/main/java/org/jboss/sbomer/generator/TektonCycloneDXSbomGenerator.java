@@ -23,7 +23,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.json.Json;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.sbomer.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
 /**
  * Implementation responsible for running the Maven CycloneDX generator.

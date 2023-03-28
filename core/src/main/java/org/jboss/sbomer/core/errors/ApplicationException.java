@@ -15,16 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.errors;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+package org.jboss.sbomer.core.errors;
 
 import org.slf4j.helpers.MessageFormatter;
 
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+// TODO @goldmann
+// @Produces(MediaType.APPLICATION_JSON)
+// @Consumes(MediaType.APPLICATION_JSON)
 public class ApplicationException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
@@ -35,10 +32,6 @@ public class ApplicationException extends RuntimeException {
     public ApplicationException(String msg, Object... params) {
         super(msg, MessageFormatter.getThrowableCandidate(params));
         this.params = params;
-    }
-
-    public Error toError() {
-        return new Error(this.getMessage());
     }
 
     @Override

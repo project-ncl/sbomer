@@ -62,25 +62,11 @@ spec:
     #     version: "2.7.5"
     #     additional-args: "--batch-mode --no-transfer-progress --quiet"
   steps:
-    # TODO: This is duplicated across every generation Task
-    # TODO: Move implementation of this step into Java CLI
     - name: checkout
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
-      script: |
-        #!/usr/bin/env bash
-
-        set -e
-
-        # Fetch build information
-        curl https://orch.psi.redhat.com/pnc-rest/v2/builds/$(params.build-id) | jq > $(workspaces.data.path)/build.json
-
-        # Get information on what to clone
-        SCM_URL=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.scmUrl')
-        SCM_TAG=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.scmTag')
-
-        # Clone everything into 'source' directory
-        git clone --depth 1 --branch $SCM_TAG $SCM_URL $(workspaces.data.path)/source
+      # TODO: Make this a native binary
+      script: /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar clone --build-id=$(params.build-id) --directory=$(workspaces.data.path)/source
     # TODO: Move implementation of this step into Java CLI
     # TODO: What with other build tools, like Gradle? Should it be covered here or a new Task should be prepared?
     - name: generate

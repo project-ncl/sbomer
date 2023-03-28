@@ -20,6 +20,9 @@ quarkus:
   banner:
     enabled: false
 
+sbomer:
+  pnc-api-url: orch.psi.redhat.com
+
 "%dev":
   quarkus:
     log:

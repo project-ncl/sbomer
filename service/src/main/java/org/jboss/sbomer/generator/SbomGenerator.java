@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.generator;
 
-import org.jboss.sbomer.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
 /**
  * High-level interaction with the SBOM generator.

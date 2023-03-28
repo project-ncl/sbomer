@@ -51,6 +51,7 @@
         <quarkus.platform.version>2.16.6.Final</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+        <failsafe-plugin.version>3.0.0-M7</failsafe-plugin.version>
         <version.cyclonedx>7.3.1</version.cyclonedx>
         <version.hibernatetypes>1.0.1</version.hibernatetypes>
         <version.lombok>1.18.26</version.lombok>
@@ -111,7 +112,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${surefire-plugin.version}</version>
+                    <version>${failsafe-plugin.version}</version>
                     <executions>
                         <execution>
                             <goals>
@@ -121,7 +122,7 @@
                             <configuration>
                                 <systemPropertyVariables>
                                     <native.image.path>
-                                        ${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                                        ${project.build.directory}/${project.build.finalName}</native.image.path>
                                     <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                                     <maven.home>${maven.home}</maven.home>
                                 </systemPropertyVariables>

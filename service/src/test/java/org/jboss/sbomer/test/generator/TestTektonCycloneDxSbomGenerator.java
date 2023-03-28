@@ -27,11 +27,11 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.jboss.sbomer.generator.SbomGenerator;
+import org.jboss.sbomer.generator.TektonCycloneDXSbomGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.jboss.sbomer.generator.SbomGenerator;
-import org.jboss.sbomer.generator.TektonCycloneDXSbomGenerator;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;

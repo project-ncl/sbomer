@@ -75,6 +75,8 @@ pushd "$SCRIPT_DIR/../../" > /dev/null
 
 "${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "images/${IMAGE_SLUG}/Containerfile" .
 
+echo $?
+
 if [ "$PUSH" = "yes" ]; then
 "${BUILD_SCRIPT[@]}" tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_COMMIT"
 "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_LATEST"

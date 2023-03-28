@@ -28,7 +28,7 @@ set -x
 
 ARGS="--help"
 
-if [ "$#" -gt 1 ]; then
+if [[ $# -ne 0 ]]; then
 	ARGS="$*"
 fi
 
