@@ -132,8 +132,8 @@ public class SBOMResource {
             example = "CYCLONEDX")
     @Path("/generate/{buildId}")
     @APIResponses({ @APIResponse(
-            responseCode = "201",
-            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
+            responseCode = "202",
+            description = "The SBOM generation process was accepted.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Response generate(@PathParam("buildId") String id, @QueryParam("generator") String generator)
             throws Exception {

@@ -22,6 +22,7 @@ import static org.jboss.sbomer.core.enums.GeneratorImplementation.DOMINO;
 import javax.enterprise.context.ApplicationScoped;
 import javax.json.Json;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.errors.ApplicationException;
 
 /**
@@ -31,9 +32,18 @@ import org.jboss.sbomer.errors.ApplicationException;
 @ApplicationScoped
 public class TektonDominoSbomGenerator extends AbstractTektonSbomGenerator {
 
+    @ConfigProperty(name = "sbomer.domino-default-version")
+    String dominoDefaultVersion;
+
+    @ConfigProperty(name = "sbomer.domino-additional-args")
+    String dominoAdditionalArgs;
+
     @Override
     public void generate(String buildId) throws ApplicationException {
-        var config = Json.createObjectBuilder().add("additional-args", "--include-non-managed").build();
+        var config = Json.createObjectBuilder()
+                .add("version", dominoDefaultVersion)
+                .add("additional-args", dominoAdditionalArgs)
+                .build();
         runTektonTask("sbomer-generate-domino", buildId, config);
     }
 

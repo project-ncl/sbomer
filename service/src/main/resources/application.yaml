@@ -34,6 +34,10 @@ quarkus:
 
 sbomer:
   pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:orch.psi.redhat.com}"
+  domino-default-version: "0.0.81"
+  domino-additional-args: "--include-non-managed"
+  cyclonedx-default-version: "2.7.5"
+  cyclonedx-additional-args: "--batch-mode --no-transfer-progress --quiet"
 
 "%dev":
   quarkus:
@@ -61,6 +65,10 @@ sbomer:
         path: /tmp/sbomer
 
     pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
+    domino-default-version: "0.0.81"
+    domino-additional-args: "--include-non-managed"
+    cyclonedx-default-version: "2.7.5"
+    cyclonedx-additional-args: "--batch-mode --no-transfer-progress"
 
 "%test":
   quarkus:
@@ -76,3 +84,7 @@ sbomer:
 
   sbomer:
     pnc-api-url: "localhost/pnc/orch"
+    domino-default-version: "0.0.81"
+    domino-additional-args: "--include-non-managed"
+    cyclonedx-default-version: "2.7.5"
+    cyclonedx-additional-args: "--batch-mode --no-transfer-progress"

@@ -37,9 +37,9 @@ spec:
 
         Example (and default):
 
-        {"additional-args": "--include-non-managed"}
+        {"version": "0.0.81", "additional-args": "--include-non-managed"}
       default: |
-        {"additional-args": "--include-non-managed"}
+        {"version": "0.0.81", "additional-args": "--include-non-managed"}
     # TODO: See the task-generate-cyclonedx.yaml file for more information about structured parameters
   steps:
     # TODO: This is duplicated across every generation Task
@@ -86,13 +86,17 @@ spec:
 
         echo "Working from the `pwd` directory"
 
-        echo "Domino version:"
-        java -jar ~/domino.jar version
+        echo "Running with following config:"
+        echo '$(params.config)' | tee config.json
 
+        TOOL_VERSION=$(cat config.json | jq --raw-output '.version')
         TOOL_ADDITIONAL_ARGS=$(cat config.json | jq --raw-output '."additional-args"')
 
+        echo "Domino version:"
+        java -jar ~/domino-${TOOL_VERSION}.jar version
+
         echo "Running SBOM generation:"
-        java -jar ~/domino.jar from-maven report --project-dir="$(workspaces.data.path)/source" --output-file="${BOM_PATH}" --manifest -s ~/settings.xml ${TOOL_ADDITIONAL_ARGS}
+        java -jar ~/domino-${TOOL_VERSION}.jar from-maven report --project-dir="$(workspaces.data.path)/source" --output-file="${BOM_PATH}" --manifest -s ~/settings.xml ${TOOL_ADDITIONAL_ARGS}
 
         cat ${BOM_PATH}
 
@@ -122,3 +126,4 @@ spec:
   workspaces:
     - name: data
       description: Main workspace
+
