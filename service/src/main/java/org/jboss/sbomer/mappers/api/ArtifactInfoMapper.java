@@ -37,16 +37,26 @@ public interface ArtifactInfoMapper {
     @Mapping(target = "md5", source = "md5")
     @Mapping(target = "sha1", source = "sha1")
     @Mapping(target = "sha256", source = "sha256")
-    @Mapping(target = "buildId", expression = "java( artifact.getBuild().getId().toString() )")
+    @Mapping(
+            target = "buildId",
+            expression = "java( artifact.getBuild() != null ? artifact.getBuild().getId().toString() : null )")
     @Mapping(target = "publicUrl", source = "publicUrl")
     @Mapping(target = "originUrl", source = "originUrl")
-    @Mapping(target = "scmUrl", expression = "java( artifact.getBuild().getScmUrl() )")
-    @Mapping(target = "scmRevision", expression = "java( artifact.getBuild().getScmRevision() )")
-    @Mapping(target = "scmTag", expression = "java( artifact.getBuild().getScmTag() )")
-    @Mapping(target = "scmExternalUrl", expression = "java( artifact.getBuild().getScmRepository().getExternalUrl() )")
+    @Mapping(
+            target = "scmUrl",
+            expression = "java( artifact.getBuild() != null ? artifact.getBuild().getScmUrl() : null )")
+    @Mapping(
+            target = "scmRevision",
+            expression = "java( artifact.getBuild() != null ? artifact.getBuild().getScmRevision() : null)")
+    @Mapping(
+            target = "scmTag",
+            expression = "java( artifact.getBuild() != null ? artifact.getBuild().getScmTag() : null )")
+    @Mapping(
+            target = "scmExternalUrl",
+            expression = "java( artifact.getBuild() != null ? artifact.getBuild().getScmRepository().getExternalUrl() : null)")
     @Mapping(
             target = "environmentImage",
-            expression = "java( artifact.getBuild().getEnvironment().getSystemImageRepositoryUrl() + \"/\" + artifact.getBuild().getEnvironment().getSystemImageId() )")
+            expression = "java( artifact.getBuild() != null ? (artifact.getBuild().getEnvironment().getSystemImageRepositoryUrl() + \"/\" + artifact.getBuild().getEnvironment().getSystemImageId()) : null )")
     @Mapping(target = "buildSystem", ignore = true)
     @BeanMapping(
             ignoreUnmappedSourceProperties = { "artifactQuality", "buildCategory", "creationTime", "deployPath",
