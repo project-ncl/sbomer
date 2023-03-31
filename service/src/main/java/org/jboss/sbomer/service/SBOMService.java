@@ -41,6 +41,7 @@ import javax.ws.rs.core.Response.Status;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
+import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.common.concurrent.Sequence;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
@@ -206,7 +207,7 @@ public class SBOMService {
             enrichedSbom.setProcessor(processor);
             enrichedSbom.setSbom(bomGenerator.toJsonNode());
             enrichedSbom.setParentSbom(baseSbom);
-            enrichedSbom.setType(SbomType.BUILD_TIME);
+            enrichedSbom.setType(baseSbom.getType());
             return saveSbom(enrichedSbom);
         }
     }
@@ -229,7 +230,11 @@ public class SBOMService {
             throw new NotFoundException("Artifact with purl " + purl + " not found in PNC.");
         }
         ArtifactInfo info = artifactInfoMapper.toArtifactInfo(artifact);
-        info.setPncBuildIdRestResource("https://" + pncService.apiUrl + "/pnc-rest/v2/builds/" + info.getBuildId());
+        if (!Strings.isEmpty(info.getBuildId())) {
+            info.setPncBuildIdRestResource("https://" + pncService.apiUrl + "/pnc-rest/v2/builds/" + info.getBuildId());
+        } else {
+            log.info("Artifact with purl {} not built in PNC!", purl);
+        }
         return info;
     }
 
