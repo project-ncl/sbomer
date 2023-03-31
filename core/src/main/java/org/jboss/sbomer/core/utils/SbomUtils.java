@@ -107,11 +107,13 @@ public class SbomUtils {
             }
             if (reference == null) {
                 reference = new ExternalReference();
+                reference.setType(type);
+                externalRefs.add(reference);
             }
-            reference.setType(type);
+
             reference.setUrl(url);
             reference.setComment(comment);
-            externalRefs.add(reference);
+
             c.setExternalReferences(externalRefs);
         }
     }
