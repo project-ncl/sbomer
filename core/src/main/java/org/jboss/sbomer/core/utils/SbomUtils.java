@@ -32,6 +32,7 @@ import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.cyclonedx.model.Hash.Algorithm;
+import org.jboss.pnc.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,41 +93,45 @@ public class SbomUtils {
     }
 
     public static void addExternalReference(Component c, ExternalReference.Type type, String url, String comment) {
-        List<ExternalReference> externalRefs = new ArrayList<>();
-        if (c.getExternalReferences() != null) {
-            externalRefs.addAll(c.getExternalReferences());
-        }
-        ExternalReference reference = null;
-        for (ExternalReference r : externalRefs) {
-            if (r.getType().equals(type)) {
-                reference = r;
-                break;
+        if (!Strings.isEmpty(url)) {
+            List<ExternalReference> externalRefs = new ArrayList<>();
+            if (c.getExternalReferences() != null) {
+                externalRefs.addAll(c.getExternalReferences());
             }
+            ExternalReference reference = null;
+            for (ExternalReference r : externalRefs) {
+                if (r.getType().equals(type)) {
+                    reference = r;
+                    break;
+                }
+            }
+            if (reference == null) {
+                reference = new ExternalReference();
+            }
+            reference.setType(type);
+            reference.setUrl(url);
+            reference.setComment(comment);
+            externalRefs.add(reference);
+            c.setExternalReferences(externalRefs);
         }
-        if (reference == null) {
-            reference = new ExternalReference();
-        }
-        reference.setType(type);
-        reference.setUrl(url);
-        reference.setComment(comment);
-        externalRefs.add(reference);
-        c.setExternalReferences(externalRefs);
     }
 
     public static void addPedigreeCommit(Component c, String url, String uid) {
-        Pedigree pedigree = c.getPedigree() == null ? new Pedigree() : c.getPedigree();
-        List<Commit> commits = new ArrayList<>();
-        if (pedigree.getCommits() != null) {
-            commits.addAll(pedigree.getCommits());
+        if (!Strings.isEmpty(url)) {
+            Pedigree pedigree = c.getPedigree() == null ? new Pedigree() : c.getPedigree();
+            List<Commit> commits = new ArrayList<>();
+            if (pedigree.getCommits() != null) {
+                commits.addAll(pedigree.getCommits());
+            }
+
+            Commit newCommit = new Commit();
+            newCommit.setUid(uid);
+            newCommit.setUrl(url);
+            commits.add(newCommit);
+            pedigree.setCommits(commits);
+
+            c.setPedigree(pedigree);
         }
-
-        Commit newCommit = new Commit();
-        newCommit.setUid(uid);
-        newCommit.setUrl(url);
-        commits.add(newCommit);
-        pedigree.setCommits(commits);
-
-        c.setPedigree(pedigree);
     }
 
     public static void setPublisher(Component c) {

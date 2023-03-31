@@ -41,6 +41,11 @@
       <artifactId>quarkus-bootstrap-app-model</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.jboss.pnc</groupId>
+      <artifactId>common</artifactId>
+      <version>${version.pnc-api}</version>
+    </dependency>
+    <dependency>
       <groupId>org.cyclonedx</groupId>
       <artifactId>cyclonedx-core-java</artifactId>
       <version>${version.cyclonedx}</version>

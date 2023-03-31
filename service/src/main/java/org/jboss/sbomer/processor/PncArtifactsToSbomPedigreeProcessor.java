@@ -38,7 +38,6 @@ import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.core.utils.RhVersionPattern;
 import org.jboss.sbomer.dto.ArtifactInfo;
 import org.jboss.sbomer.service.SBOMService;
-import org.jboss.util.Strings;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -84,8 +83,7 @@ public class PncArtifactsToSbomPedigreeProcessor implements SbomProcessor {
                         ExternalReference.Type.BUILD_META,
                         info.getEnvironmentImage(),
                         SBOM_RED_HAT_ENVIRONMENT_IMAGE);
-                if (!hasExternalReference(component, ExternalReference.Type.VCS)
-                        && !Strings.isEmpty(info.getScmExternalUrl())) {
+                if (!hasExternalReference(component, ExternalReference.Type.VCS)) {
                     addExternalReference(component, ExternalReference.Type.VCS, info.getScmExternalUrl(), "");
                 }
 
