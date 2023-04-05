@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/api/v1alpha1/sboms/1234"
+  },
+  "response": {
+    "status": 404,
+    "jsonBody": {
+      "message": "Not Found",
+      "errorId": "12345"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

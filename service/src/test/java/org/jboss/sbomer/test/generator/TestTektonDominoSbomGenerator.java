@@ -29,7 +29,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.generator.SbomGenerator;
-import org.jboss.sbomer.generator.TektonDominoSbomGenerator;
+import org.jboss.sbomer.tekton.generator.TektonDominoSbomGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

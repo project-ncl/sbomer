@@ -42,10 +42,11 @@ import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
-import org.jboss.sbomer.dto.response.Page;
+import org.jboss.sbomer.core.errors.ApiException;
+import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.service.SBOMService;
-import org.jboss.sbomer.validation.exceptions.ValidationException;
+import org.jboss.sbomer.rest.dto.Page;
+import org.jboss.sbomer.service.SbomService;
 
 @Path("/api/v1alpha1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -55,21 +56,20 @@ import org.jboss.sbomer.validation.exceptions.ValidationException;
 public class SBOMResource {
 
     @Inject
-    SBOMService sbomService;
+    SbomService sbomService;
 
     /**
      * Make it possible to create a {@link Sbom} resource directly from the endpoint.
      *
      * TODO: Add authentication. It should be possible to create new SBOM's this way only from trusted places.
      *
-     * @param sbom
+     * @param sbom {@link Sbom}
      * @return
      */
-
     @POST
     @Operation(
-            summary = "Save base SBOM",
-            description = "Save submitted base SBOM. This endpoint expects a base SBOM in the CycloneDX format encapsulated in the BaseSBOM structure.")
+            summary = "Save SBOM",
+            description = "Save submitted SBOM. This endpoint expects a SBOM in the CycloneDX format encapsulated in the structure.")
     @Parameter(name = "sbom", description = "The SBOM to save")
     @APIResponses({
             @APIResponse(
@@ -77,45 +77,89 @@ public class SBOMResource {
                     description = "The SBOM was successfully saved",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @APIResponse(
-                    responseCode = "400",
-                    description = "Provided SBOM couldn't be saved, probably due to validation failures",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response create(final Sbom sbom) {
-        try {
-            sbomService.saveSbom(sbom);
-            return Response.status(Status.CREATED).entity(sbom).build();
-        } catch (ValidationException exc) {
-            return Response.status(Status.BAD_REQUEST).entity(exc).build();
-        }
+                    responseCode = "422",
+                    description = "Provided SBOM couldn't be saved because of validation failures",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Response save(final Sbom sbom) {
+        // Save the SBOM in the database
+        sbomService.saveSbom(sbom);
+        return Response.status(Status.CREATED).entity(sbom).build();
     }
 
     @GET
     @Operation(summary = "List SBOMs", description = "List SBOMs available in the system, paginated.")
-    @APIResponses({ @APIResponse(
-            responseCode = "200",
-            description = "List of SBOMs in the system for a particular page and size.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "List of SBOMs in the system for a particular page and size.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
     public Page<Sbom> list(@Valid @BeanParam PaginationParameters paginationParams) {
         return sbomService.listSboms(paginationParams.getPageIndex(), paginationParams.getPageSize());
     }
 
     @GET
-    @Path("{buildId}")
-    @Operation(
-            summary = "Get all SBOMs related to a PNC build.",
-            description = "Get all the SBOMs related to the specified PNC build, paginated.")
-    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Path("{id}")
+    @Operation(summary = "Get specific SBOM", description = "Get specific SBOM with the provided ID.")
+    @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
     @APIResponses({
             @APIResponse(
                     responseCode = "200",
-                    description = "The SBOMs related to a specific PNC buildId.",
+                    description = "The SBOM",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @APIResponse(
                     responseCode = "404",
-                    description = "No SBOMs could be found for the specified PNC build.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+                    description = "Requested SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Sbom getById(@PathParam("id") String id) {
+
+        Sbom sbom = null;
+
+        try {
+            sbom = sbomService.getSbomById(Long.valueOf(id));
+        } catch (NumberFormatException e) {
+            throw new ApiException(400, "Invalid SBOM id provided: '{}', a number was expected", id);
+        }
+
+        if (sbom == null) {
+            throw new NotFoundException("Sbom with id '{}' not found", String.valueOf(id));
+        }
+
+        return sbom;
+    }
+
+    @GET
+    @Path("/build/{id}")
+    @Operation(
+            summary = "Get all SBOMs related to a PNC build",
+            description = "Get all the SBOMs related to the specified PNC build, paginated.")
+    @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The SBOMs related to a specific PNC buildId",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "No SBOMs could be found for the specified PNC build",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
     public Page<Sbom> listAllWithPncBuildId(
-            @PathParam("buildId") String buildId,
+            @PathParam("id") String buildId,
             @Valid @BeanParam PaginationParameters paginationParams) {
         return sbomService
                 .listAllSbomsWithBuildId(buildId, paginationParams.getPageIndex(), paginationParams.getPageSize());
@@ -123,46 +167,51 @@ public class SBOMResource {
 
     @POST
     @Operation(
-            summary = "Generate a base SBOM based on the PNC build.",
+            summary = "Generate a base SBOM based on the PNC build",
             description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
-    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
     @Parameter(
             name = "generator",
             description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are `DOMINO`, `CYCLONEDX`",
             example = "CYCLONEDX")
-    @Path("/generate/{buildId}")
+    @Path("/generate/build/{id}")
     @APIResponses({ @APIResponse(
-            responseCode = "202",
-            description = "The SBOM generation process was accepted.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response generate(@PathParam("buildId") String id, @QueryParam("generator") String generator)
+            responseCode = "201",
+            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response generate(@PathParam("id") String buildId, @QueryParam("generator") String generator)
             throws Exception {
 
         GeneratorImplementation gen = GeneratorImplementation.CYCLONEDX;
+
         if (!Strings.isEmpty(generator)) {
             try {
                 gen = GeneratorImplementation.valueOf(generator);
             } catch (IllegalArgumentException iae) {
-                return Response.status(Status.BAD_REQUEST)
-                        .entity(
-                                "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use `CYCLONEDX`")
-                        .build();
+                throw new ApiException(
+                        Status.BAD_REQUEST.getStatusCode(),
+                        "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use `CYCLONEDX`",
+                        iae);
             }
         }
 
-        return sbomService.generateSbomFromPncBuild(id, gen);
+        sbomService.generateSbomFromPncBuild(buildId, gen);
+
+        return Response.status(Status.ACCEPTED).build();
     }
 
     @POST
-    @Operation(
-            summary = "Save the base SBOM and run and enrichment.",
-            description = "Save the base SBOM and run and enrichment..")
-    @Parameter(name = "sbom", description = "The SBOM to save")
+    @Operation(summary = "Process selected SBOM", description = "Process selected SBOM using specified prcoessor")
+    @Parameter(name = "id", description = "The SBOM identifier")
     @Parameter(
             name = "processor",
-            description = "Processor to use to enrich the SBOM. If not specified, SBOM_PEDIGREE will be used. Options are `SBOM_PROPERTIES`, `SBOM_PEDIGREE`",
-            example = "SBOM_PEDIGREE")
-    @Path("/enrich")
+            description = "Processor to use to enrich the SBOM. If not specified, DEFAULT will be used. Options are `PROPERTIES`, `PEDIGREE`",
+            example = "DEFAULT")
+    @Path("/{id}/process")
     @APIResponses({
             @APIResponse(
                     responseCode = "202",
@@ -171,23 +220,30 @@ public class SBOMResource {
             @APIResponse(
                     responseCode = "400",
                     description = "Provided SBOM couldn't be saved, probably due to validation failures",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response processEnrichmentOfBaseSbom(final Sbom sbom, @QueryParam("processor") String processor)
-            throws Exception {
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Response processEnrichmentOfBaseSbom(
+            @PathParam("id") final Long sbomId,
+            @QueryParam("processor") String processor) throws Exception {
 
-        ProcessorImplementation proc = ProcessorImplementation.PEDIGREE;
+        ProcessorImplementation proc = ProcessorImplementation.DEFAULT;
         if (!Strings.isEmpty(processor)) {
             try {
                 proc = ProcessorImplementation.valueOf(processor);
             } catch (IllegalArgumentException iae) {
-                return Response.status(Status.BAD_REQUEST)
-                        .entity(
-                                "The specified processor does not exist, allowed values are `SBOM_PROPERTIES`, `SBOM_PEDIGREE`. Leave empty to use `SBOM_PEDIGREE`")
-                        .build();
+                throw new ApiException(
+                        Status.BAD_REQUEST.getStatusCode(),
+                        "The specified processor does not exist, allowed values are `PROPERTIES`, `DEFAULT`. Leave empty to use `DEFAULT`",
+                        iae);
+
             }
         }
 
-        sbomService.saveAndEnrichSbom(sbom, proc);
+        sbomService.processSbom(sbomId, proc);
+
         return Response.status(Status.ACCEPTED).build();
     }
 

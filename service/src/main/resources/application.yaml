@@ -17,9 +17,6 @@
 #
 
 quarkus:
-  container-image:
-    image: quay.io/rh-newcastle/sbomer-service:latest
-    builder: jib
   swagger-ui:
     always-include: true
     path: /api
@@ -57,8 +54,7 @@ sbomer:
         url: jdbc:postgresql://localhost:5432/sbomer
     hibernate-orm:
       database:
-        generation:
-           drop-and-create
+        generation: drop-and-create
       log:
         sql: true
     smallrye-openapi:

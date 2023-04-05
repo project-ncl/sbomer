@@ -28,7 +28,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jboss.sbomer.generator.SbomGenerator;
-import org.jboss.sbomer.generator.TektonCycloneDXSbomGenerator;
+import org.jboss.sbomer.tekton.generator.TektonCycloneDXSbomGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

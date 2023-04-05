@@ -22,14 +22,14 @@ metadata:
   name: sbomer-generate-cyclonedx
 spec:
   params:
-    - name: build-id
+    - name: id
       type: string
       description: "The PNC build ID"
     # TODO: Currently that JSON is not really easy to work with in a Bash script, but this will change once we move to a proper CLI.
     - name: config
       type: string
       description: |
-        Additional parameters that instrument the CycloneDX plugin in th JSON format:
+        Additional parameters that instrument the CycloneDX plugin in the JSON format:
 
         Currently only following keys are supported:
 
@@ -62,60 +62,7 @@ spec:
     #     version: "2.7.5"
     #     additional-args: "--batch-mode --no-transfer-progress --quiet"
   steps:
-    - name: checkout
-      image: sbomer-generator
-      imagePullPolicy: IfNotPresent
-      # TODO: Make this a native binary
-      script: /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar clone --build-id=$(params.build-id) --directory=$(workspaces.data.path)/source
-    # TODO: Move implementation of this step into Java CLI
-    # TODO: What with other build tools, like Gradle? Should it be covered here or a new Task should be prepared?
     - name: generate
-      image: sbomer-generator
-      imagePullPolicy: IfNotPresent
-      script: |
-        #!/usr/bin/env bash
-
-        set -e
-
-        source ~/.sdkman/bin/sdkman-init.sh
-
-        # TODO: This is duplicated across every generation Task for now
-        # TODO: Move implementation of this step into Java CLI
-        JDK_VERSION=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.environment.attributes.JDK | split(".")[0]')
-        MAVEN_VERSION=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.environment.attributes.MAVEN | split(".") | .[0] + "." + .[1]')
-
-        if [ "$JDK_VERSION" = "1" ]; then
-          JDK_VERSION="8"
-        fi
-
-        echo "Java version: ${JDK_VERSION}"
-        echo "Maven version: ${MAVEN_VERSION}"
-        # TODO: Duplication end
-
-        sdk use maven $MAVEN_VERSION
-        sdk use java $JDK_VERSION
-
-        BOM_PATH="$(workspaces.data.path)/source/target/bom.json"
-
-        cd $(workspaces.data.path)/source
-
-        echo "Working from the `pwd` directory"
-
-        echo "Running with following config:"
-        echo '$(params.config)' | tee config.json
-
-        TOOL_VERSION=$(cat config.json | jq --raw-output '.version')
-        TOOL_ADDITIONAL_ARGS=$(cat config.json | jq --raw-output '."additional-args"')
-
-        echo "Running SBOM generation with CycloneDX Maven plugin ${TOOL_VERSION}..."
-        mvn org.cyclonedx:cyclonedx-maven-plugin:${TOOL_VERSION}:makeAggregateBom -DoutputFormat=json -DoutputName=bom --settings ~/settings.xml ${TOOL_ADDITIONAL_ARGS}
-
-        cat ${BOM_PATH}
-
-        echo "Done, SBOM generated at: ${BOM_PATH}"
-    # TODO: This is duplicated across every generation Task
-    # TODO: Move implementation of this step into Java CLI
-    - name: "publish"
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       env:
@@ -129,13 +76,10 @@ spec:
 
         set -e
 
-        jq -s '{buildId: "$(params.build-id)", type: "BUILD_TIME", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/source/target/bom.json > $(workspaces.data.path)/payload.json
+        source ~/.sdkman/bin/sdkman-init.sh
 
-        [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
+        sdk use maven 3.9
 
-        # TODO: Why do we send it to the /enrich endpoint? We should just save it and make the service decide what to do with it later (if at all). Leaving for now.
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
-
-
+        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate --build-id=$(params.id) maven-cyclonedx --target=$(workspaces.data.path)/source --settings=~/settings.xml
   workspaces:
     - name: data

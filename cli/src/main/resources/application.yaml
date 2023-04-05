@@ -16,12 +16,23 @@
 # limitations under the License.
 #
 
+microprofile:
+  rest:
+    client:
+      disable:
+        default:
+          mapper: true
+
 quarkus:
   banner:
     enabled: false
 
+  rest-client:
+    "sbomer":
+      url: "${SBOMER_SERVICE_URL:http://localhost:8080}"
+
 sbomer:
-  pnc-api-url: orch.psi.redhat.com
+  pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:orch.psi.redhat.com}"
 
 "%dev":
   quarkus:
@@ -34,3 +45,12 @@ sbomer:
           level: DEBUG
         "org.jboss.sbomer":
           level: DEBUG
+  sbomer:
+    generation:
+      local:
+        path: /tmp/sbomer
+    pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
+
+"%test":
+  sbomer:
+    pnc-api-url: "localhost/pnc/orch"

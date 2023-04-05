@@ -18,5 +18,5 @@
 package org.jboss.sbomer.core.enums;
 
 public enum ProcessorImplementation {
-    PROPERTIES, PEDIGREE;
+    PROPERTIES, DEFAULT;
 }

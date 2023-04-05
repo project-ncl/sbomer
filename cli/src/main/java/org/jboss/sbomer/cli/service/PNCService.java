@@ -19,6 +19,8 @@ package org.jboss.sbomer.cli.service;
 
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -32,14 +34,33 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
+import lombok.Getter;
+
 /**
  * A service to interact with the PNC build system.
  */
 @ApplicationScoped
 public class PNCService {
 
-    @ConfigProperty(name = "sbomer.pnc-api-url")
+    @ConfigProperty(name = "sbomer.pnc.api-url")
+    @Getter
     String apiUrl;
+
+    ArtifactClient artifactClient;
+
+    BuildClient buildClient;
+
+    @PostConstruct
+    void init() {
+        artifactClient = new ArtifactClient(getConfiguration());
+        buildClient = new BuildClient(getConfiguration());
+    }
+
+    @PreDestroy
+    void cleanup() {
+        artifactClient.close();
+        buildClient.close();
+    }
 
     /**
      * Setup basic configuration to be able to talk to PNC.
@@ -47,7 +68,7 @@ public class PNCService {
      *
      * @return
      */
-    protected Configuration getConfiguration() {
+    public Configuration getConfiguration() {
         return Configuration.builder().host(apiUrl).protocol("http").build();
     }
 
@@ -58,11 +79,8 @@ public class PNCService {
      * @return
      */
     public Build getBuild(String buildId) {
-        BuildClient client = new BuildClient(getConfiguration());
-
         try {
-            Build build = client.getSpecific(buildId);
-            client.close();
+            Build build = buildClient.getSpecific(buildId);
             return build;
         } catch (RemoteResourceNotFoundException ex) {
             throw new ApplicationException("Build was not found in PNC", ex);
@@ -78,19 +96,16 @@ public class PNCService {
      * @return
      */
     public Artifact getArtifact(String purl) {
-        ArtifactClient client = new ArtifactClient(getConfiguration());
-
         try {
             String artifactQuery = "purl==\"" + purl + "\"";
-            RemoteCollection<Artifact> artifacts = client
+            RemoteCollection<Artifact> artifacts = artifactClient
                     .getAll(null, null, null, Optional.empty(), Optional.of(artifactQuery));
             if (artifacts.size() == 0) {
                 return null;
             } else if (artifacts.size() > 1) {
                 throw new IllegalStateException("There should exist only one artifact with purl " + purl);
             }
-            Artifact singleArtifact = artifacts.iterator().next();
-            return singleArtifact;
+            return artifacts.iterator().next();
         } catch (RemoteResourceNotFoundException ex) {
             throw new ApplicationException("Artifact was not found in PNC", ex);
         } catch (RemoteResourceException ex) {

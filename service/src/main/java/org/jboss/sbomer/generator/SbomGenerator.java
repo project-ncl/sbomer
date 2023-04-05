@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.generator;
 
-import org.jboss.sbomer.core.errors.ApplicationException;
-
 /**
  * High-level interaction with the SBOM generator.
  *
@@ -30,6 +28,6 @@ public interface SbomGenerator {
      *
      * @param buildId PNC build id
      */
-    public void generate(String buildId) throws ApplicationException;
+    public void generate(String buildId);
 
 }

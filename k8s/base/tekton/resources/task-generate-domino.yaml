@@ -22,7 +22,7 @@ metadata:
   name: sbomer-generate-domino
 spec:
   params:
-    - name: build-id
+    - name: id
       type: string
       description: "The PNC build ID"
     # TODO: Currently that JSON is not really easy to work with in a Bash script, but this will change once we move to a proper CLI.
@@ -42,16 +42,21 @@ spec:
         {"version": "0.0.84", "additional-args": "--include-non-managed"}
     # TODO: See the task-generate-cyclonedx.yaml file for more information about structured parameters
   steps:
-    - name: checkout
+    - name: generate
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       # TODO: Make this a native binary
-      script: /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar clone --build-id=$(params.build-id) --directory=$(workspaces.data.path)/source
+      script: /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate domino --target=$(workspaces.data.path)/source 
+   
+   
+   
     - name: generate
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       script: |
         #!/usr/bin/env bash
+
+        # script: /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate domino --directory=$(workspaces.data.path)/source --output=bom.json
 
         set -e
 
@@ -103,7 +108,7 @@ spec:
 
         set -e
 
-        jq -s '{buildId: "$(params.build-id)", type: "BUILD_TIME", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/source/target/bom.json > $(workspaces.data.path)/payload.json
+        jq -s '{buildId: "$(params.id)", type: "BUILD_TIME", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/source/target/bom.json > $(workspaces.data.path)/payload.json
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 

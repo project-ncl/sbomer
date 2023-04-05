@@ -19,12 +19,7 @@ package org.jboss.sbomer.core.errors;
 
 import org.slf4j.helpers.MessageFormatter;
 
-// TODO @goldmann
-// @Produces(MediaType.APPLICATION_JSON)
-// @Consumes(MediaType.APPLICATION_JSON)
 public class ApplicationException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
-
     private final Object[] params;
 
     private String formattedMessage;
@@ -41,4 +36,5 @@ public class ApplicationException extends RuntimeException {
         }
         return formattedMessage;
     }
+
 }

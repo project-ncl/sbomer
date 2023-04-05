@@ -17,24 +17,31 @@
  */
 package org.jboss.sbomer.core.utils;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema.Version;
+import org.cyclonedx.exception.ParseException;
+import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
+import org.cyclonedx.model.Hash.Algorithm;
 import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
-import org.cyclonedx.model.Hash.Algorithm;
+import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class SbomUtils {
 
@@ -169,4 +176,43 @@ public class SbomUtils {
         c.setExternalReferences(externalRefs);
     }
 
+    /**
+     * Converts the given CycloneDX {@link Bom} into a {@link JsonNode} object.
+     *
+     * @param bom The CycloneDX {@link Bom} to convert
+     * @return {@link JsonNode} representation of the {@link Bom}.
+     */
+    public static JsonNode toJsonNode(Bom bom) {
+        BomJsonGenerator generator = BomGeneratorFactory.createJson(SbomUtils.schemaVersion(), bom);
+        return generator.toJsonNode();
+    }
+
+    /**
+     * Converts the {@link JsonNode} into a CycloneDX {@link Bom} object.
+     *
+     * @param jsonNode The {@link JsonNode} to convert.
+     * @return The converted {@link Bom} or <code>null</code> in case of troubles in converting it.
+     */
+    public static Bom fromJsonNode(JsonNode jsonNode) {
+        if (jsonNode == null) {
+            return null;
+        }
+
+        try {
+            return new JsonParser()
+                    .parse(jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes());
+        } catch (ParseException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static Bom fromPath(Path path) {
+        try {
+            return new JsonParser().parse(path.toFile());
+        } catch (ParseException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
 }

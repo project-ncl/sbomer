@@ -23,17 +23,33 @@ import static io.restassured.RestAssured.with;
 import java.io.IOException;
 
 import org.hamcrest.CoreMatchers;
+import org.jboss.sbomer.model.Sbom;
+import org.jboss.sbomer.rest.dto.Page;
+import org.jboss.sbomer.service.SbomService;
+import org.jboss.sbomer.test.utils.TestResources;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import io.restassured.http.ContentType;
 
 @QuarkusTest
 public class SBOMResourceTest {
 
+    @InjectSpy
+    SbomService sbomService;
+
     @Test
     public void testExistenceOfSbomsEndpoint() {
+        Mockito.when(sbomService.listSboms(0, 50)).thenReturn(new Page<>());
         given().when().get("/api/v1alpha1/sboms").then().statusCode(200);
+    }
+
+    @Test
+    public void testListSbomsPageParams() {
+        Mockito.when(sbomService.listSboms(1, 20)).thenReturn(new Page<>());
+        given().when().get("/api/v1alpha1/sboms?pageIndex=1&pageSize=20").then().statusCode(200);
     }
 
     @Test
@@ -63,11 +79,71 @@ public class SBOMResourceTest {
                 .contentType(ContentType.JSON)
                 .request("POST", "/api/v1alpha1/sboms")
                 .then()
-                .statusCode(400)
+                .statusCode(422)
+                .body("message", CoreMatchers.equalTo("SBOM validation error"))
+                .and()
                 .body(
-                        "messages[0]",
+                        "errors[0]",
+                        CoreMatchers.is("Invalid CycloneDX object: sbom.specVersion: is missing but it is required"))
+                .and()
+                .body(
+                        "errors[1]",
                         CoreMatchers.is(
-                                "sbom: not a valid CycloneDX object: bom.specVersion: is missing but it is required, bom.specVdersion: is not defined in the schema and the schema does not allow additional properties"));
+                                "Invalid CycloneDX object: sbom.specVdersion: is not defined in the schema and the schema does not allow additional properties"));
     }
 
+    @Test
+    public void testShouldNotAcceptMissingBuildId() throws IOException {
+        with().body(TestResources.asString("payloads/payload-invalid-missing-buildid.json"))
+                .when()
+                .contentType(ContentType.JSON)
+                .request("POST", "/api/v1alpha1/sboms")
+                .then()
+                .statusCode(422)
+                .body("message", CoreMatchers.equalTo("SBOM validation error"))
+                .and()
+                .body("errors[0]", CoreMatchers.is("buildId: Build identifier missing"));
+    }
+
+    @Test
+    public void testGetSbomByIdShouldNotFailForMissing() throws IOException {
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/5644785")
+                .then()
+                .statusCode(404)
+                .body("message", CoreMatchers.is("Sbom with id '5644785' not found"))
+                .and()
+                .body("errorId", CoreMatchers.isA(String.class));
+    }
+
+    @Test
+    public void testGetSbomById() throws IOException {
+        Sbom sbom = new Sbom();
+        sbom.setBuildId("AAAABBBB");
+        sbom.setId(12345L);
+
+        Mockito.when(sbomService.getSbomById(12345)).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/12345")
+                .then()
+                .statusCode(200)
+                .body("id", CoreMatchers.equalTo(12345))
+                .and()
+                .body("buildId", CoreMatchers.equalTo("AAAABBBB"));
+    }
+
+    @Test
+    public void testGetSbomByIdShouldHandleIncorrecInput() throws IOException {
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/fgETHHG4785")
+                .then()
+                .statusCode(400)
+                .body("message", CoreMatchers.is("Invalid SBOM id provided: 'fgETHHG4785', a number was expected"))
+                .and()
+                .body("errorId", CoreMatchers.isA(String.class));
+    }
 }

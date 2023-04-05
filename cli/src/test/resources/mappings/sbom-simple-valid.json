@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/api/v1alpha1/sboms/123"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": 123,
+      "buildId": "AABBCC",
+      "sbom": {}
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

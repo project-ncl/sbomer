@@ -17,10 +17,11 @@
  */
 package org.jboss.sbomer.validation;
 
+import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -31,14 +32,14 @@ import org.hibernate.validator.constraintvalidation.HibernateConstraintValidator
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
-
 public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
+
+    List<String> errors = Collections.emptyList();
 
     @Override
     public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
         if (value == null) {
-            context.unwrap(HibernateConstraintValidatorContext.class).addMessageParameter("errors", "missing BOM");
+            setPayload(context, Collections.singletonList("sbom: no SBOM provided"));
             return false;
         }
 
@@ -54,22 +55,18 @@ public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, 
             }
 
         } catch (IOException e) {
-            context.unwrap(HibernateConstraintValidatorContext.class)
-                    .addMessageParameter("errors", "unable to parse object");
+            setPayload(context, Collections.singletonList("sbom: unable to parse as CycloneDX format"));
 
             return false;
         }
 
-        context.unwrap(HibernateConstraintValidatorContext.class)
-                .addMessageParameter(
-                        "errors",
-                        exceptions.stream()
-                                .map(cv -> "bom" + cv.getMessage().substring(1))
-                                .toList()
-                                .stream()
-                                .collect(Collectors.joining(", ")));
+        setPayload(context, exceptions.stream().map(cv -> "sbom" + cv.getMessage().substring(1)).toList());
 
         return false;
+    }
+
+    private void setPayload(ConstraintValidatorContext context, List<String> errors) {
+        context.unwrap(HibernateConstraintValidatorContext.class).withDynamicPayload(errors);
     }
 
 }

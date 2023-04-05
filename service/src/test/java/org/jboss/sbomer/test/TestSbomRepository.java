@@ -40,7 +40,9 @@ import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.repositories.SbomRepository;
+import org.jboss.sbomer.service.SbomRepository;
+import org.jboss.sbomer.test.utils.QuarkusTransactionalTest;
+import org.jboss.sbomer.test.utils.TestResources;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
