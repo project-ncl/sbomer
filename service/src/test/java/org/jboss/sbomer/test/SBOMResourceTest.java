@@ -23,6 +23,7 @@ import static io.restassured.RestAssured.with;
 import java.io.IOException;
 
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.dto.Page;
@@ -83,13 +84,12 @@ public class SBOMResourceTest {
                 .body("message", CoreMatchers.equalTo("SBOM validation error"))
                 .and()
                 .body(
-                        "errors[0]",
-                        CoreMatchers.is("Invalid CycloneDX object: sbom.specVersion: is missing but it is required"))
-                .and()
-                .body(
-                        "errors[1]",
-                        CoreMatchers.is(
-                                "Invalid CycloneDX object: sbom.specVdersion: is not defined in the schema and the schema does not allow additional properties"));
+                        "errors",
+                        CoreMatchers.hasItems(
+                                CoreMatchers.is(
+                                        "Invalid CycloneDX object: sbom.specVersion: is missing but it is required"),
+                                CoreMatchers.is(
+                                        "Invalid CycloneDX object: sbom.specVdersion: is not defined in the schema and the schema does not allow additional properties")));
     }
 
     @Test
