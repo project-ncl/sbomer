@@ -20,8 +20,11 @@ package org.jboss.sbomer.core.utils;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema.Version;
@@ -95,8 +98,17 @@ public class SbomUtils {
     }
 
     public static boolean hasExternalReference(Component c, ExternalReference.Type type) {
-        return c.getExternalReferences() != null
-                && c.getExternalReferences().stream().filter(ref -> ref.getType().equals(type)).count() > 0;
+        return getExternalReferences(c, type).size() > 0;
+    }
+
+    public static List<ExternalReference> getExternalReferences(Component c, ExternalReference.Type type) {
+        List<ExternalReference> filteredExternalReferences = Optional.ofNullable(c.getExternalReferences())
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .filter(ref -> ref.getType().equals(type))
+                .toList();
+
+        return filteredExternalReferences;
     }
 
     public static void addExternalReference(Component c, ExternalReference.Type type, String url, String comment) {

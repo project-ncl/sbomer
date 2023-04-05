@@ -23,10 +23,10 @@ import static io.restassured.RestAssured.with;
 import java.io.IOException;
 
 import org.hamcrest.CoreMatchers;
+import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.dto.Page;
 import org.jboss.sbomer.service.SbomService;
-import org.jboss.sbomer.test.utils.TestResources;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

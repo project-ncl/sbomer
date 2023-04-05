@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.test.utils;
+package org.jboss.sbomer.core.test;
 
 import java.io.IOException;
 import java.nio.file.Files;

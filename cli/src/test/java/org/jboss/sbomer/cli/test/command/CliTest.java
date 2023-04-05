@@ -58,6 +58,6 @@ public class CliTest {
     void shouldPrintUsageOnWrongCommand() throws Exception {
         int exitCode = cli.run(new PrintWriter(out), new PrintWriter(err));
         assertEquals(2, exitCode);
-        assertThat(err.toString(), CoreMatchers.containsString("blah"));
+        assertThat(err.toString(), CoreMatchers.containsString("Usage: sbomer [-hvV] [COMMAND]"));
     }
 }

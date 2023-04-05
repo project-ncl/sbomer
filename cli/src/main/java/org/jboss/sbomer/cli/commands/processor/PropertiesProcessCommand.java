@@ -37,8 +37,6 @@ public class PropertiesProcessCommand extends AbstractBaseProcessCommand {
 
     @Override
     protected void processComponentWithArtifact(Component component, Artifact artifact) {
-        log.info("SBOM component with Red Hat version found, purl: {}", component.getPurl());
-
         if (artifact.getMd5() != null && !SbomUtils.hasHash(component, Algorithm.MD5)) {
             SbomUtils.addHash(component, Algorithm.MD5, artifact.getMd5());
         }

@@ -17,23 +17,27 @@
  */
 package org.jboss.sbomer.cli.test.command.processor;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Property;
+import org.cyclonedx.model.ExternalReference;
+import org.hamcrest.CoreMatchers;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.sbomer.cli.CLI;
-import org.jboss.sbomer.cli.commands.processor.PropertiesProcessCommand;
+import org.jboss.sbomer.cli.commands.processor.DefaultProcessCommand;
 import org.jboss.sbomer.cli.service.PNCService;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.test.TestResources;
@@ -50,7 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @QuarkusTest
-public class PropertiesProcessCommandTest extends PropertiesProcessCommand {
+public class DefaultProcessCommandTest extends DefaultProcessCommand {
     @Inject
     CLI cli;
 
@@ -93,21 +97,24 @@ public class PropertiesProcessCommandTest extends PropertiesProcessCommand {
                 .build();
     }
 
-    private void assertPropertyInComponent(String propertyName, String propertyValue, Component component) {
-        Optional<Property> property = SbomUtils.findPropertyWithNameInComponent(propertyName, component);
-        assertTrue(property.isPresent());
-        assertEquals(propertyValue, property.get().getValue());
+    private void assertExternalReference(Component component, ExternalReference.Type type, String value) {
+        assertThat(
+                SbomUtils.getExternalReferences(component, type).stream().map(ref -> ref.getUrl()).toList(),
+                CoreMatchers.hasItem(value));
     }
 
     @Test
     void shouldReturnCorrectImplementationType() {
         log.info("test: shouldReturnCorrectImplementationType");
-        assertEquals(ProcessorImplementation.PROPERTIES, this.getImplementationType());
+        assertEquals(ProcessorImplementation.DEFAULT, this.getImplementationType());
     }
 
     @Test
-    void shouldManipulateProperties() throws Exception {
-        log.info("test: shouldManipulateProperties");
+    void shouldManipulateBomContent() throws Exception {
+        log.info("test: shouldManipulateBomContent");
+
+        Mockito.when(pncService.getApiUrl()).thenReturn("apiurl");
+
         String[] componentPurls = { "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar",
                 "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar",
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-api@1.1.0.redhat-00008?type=jar",
@@ -125,9 +132,6 @@ public class PropertiesProcessCommandTest extends PropertiesProcessCommand {
             Component component = componentOpt.get();
 
             assertEquals(2, component.getProperties().size());
-
-            assertPropertyInComponent("package:type", "maven", component);
-            assertPropertyInComponent("package:language", "java", component);
         }
 
         doProcess(bom);
@@ -137,18 +141,26 @@ public class PropertiesProcessCommandTest extends PropertiesProcessCommand {
             assertTrue(componentOpt.isPresent());
             Component component = componentOpt.get();
 
-            assertEquals(10, component.getProperties().size());
+            assertEquals(2, component.getProperties().size());
 
-            assertPropertyInComponent("package:type", "maven", component);
-            assertPropertyInComponent("package:language", "java", component);
-            assertPropertyInComponent("public-url", "artifactpublicurl", component);
-            assertPropertyInComponent("origin-url", "originurl", component);
-            assertPropertyInComponent("scm-tag", "scmtag", component);
-            assertPropertyInComponent("scm-url", "scmurl", component);
-            assertPropertyInComponent("scm-revision", "scmrevision", component);
-            assertPropertyInComponent("scm-external-url", "externalurl", component);
-            assertPropertyInComponent("pnc-environment-image", "systemImageRepositoryUrl/imageid", component);
-            assertPropertyInComponent("pnc-build-id", "BBVVCC", component);
+            assertExternalReference(
+                    component,
+                    ExternalReference.Type.BUILD_SYSTEM,
+                    "https://apiurl/pnc-rest/v2/builds/BBVVCC");
+            assertExternalReference(
+                    component,
+                    ExternalReference.Type.DISTRIBUTION,
+                    "https://maven.repository.redhat.com/ga/");
+            assertExternalReference(component, ExternalReference.Type.BUILD_META, "systemImageRepositoryUrl/imageid");
+
+            assertEquals("Red Hat", component.getPublisher());
+            assertEquals("Red Hat", component.getSupplier().getName());
+            assertEquals(List.of("https://www.redhat.com"), component.getSupplier().getUrls());
+
+            Commit commit = component.getPedigree().getCommits().get(0);
+
+            assertEquals("scmrevision", commit.getUid());
+            assertEquals("scmurl#scmtag", commit.getUrl());
         }
     }
 }
