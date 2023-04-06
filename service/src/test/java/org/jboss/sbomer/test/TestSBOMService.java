@@ -259,7 +259,6 @@ public class TestSBOMService {
                     .get()
                     .process(baseSBOM.getCycloneDxBom());
 
-            BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), modifiedBom);
             Component testComponent = findComponentWithPurl(
                     "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar",
                     modifiedBom).get();
@@ -297,8 +296,6 @@ public class TestSBOMService {
             }).findFirst();
             assertTrue(ref3.isPresent());
             assertEquals("quay.io/rh-newcastle/builder-rhel-8-j8-mvn3.5.4-netty-tcnative:1.0.2", ref3.get().getUrl());
-
-            log.info("{}", generator.toJsonNode().toPrettyString());
 
         } catch (NotFoundException nfe) {
             fail("It should not have thrown a 404 exception", nfe);
