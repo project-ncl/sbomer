@@ -1,0 +1,83 @@
+{
+  "attribute": "state-change",
+  "build": {
+    "buildConfigRevision": {
+      "brewPullActive": false,
+      "buildScript": "echo registry=http://indy-admin.psi.redhat.com/api/folo/track/$buildContentId/npm/remote/npmjs/ > ~/.npmrc; echo fetch-timeout=3600000 >> ~/.npmrc; mvn deploy -B -Dfull=true -Dmaven.test.failure.ignore=true -Drevapi.skip=true -Denforcer.skip=true -Dgwt.compiler.localWorkers=1 -Dproductized=true -DskipTests=true -DskipITs -Dfindbugs.skip=true -Dspotbugs.skip=true -Dcheckstyle.skip=true -Dmaven.artifact.threads=10 -DnpmRegistryURL=http://indy-admin.psi.redhat.com/api/folo/track/$buildContentId/npm/remote/npmjs/ -DnodeDownloadRoot=http://download.devel.redhat.com/rcm-guest/staging/rhba/dist/node/ -DnpmDownloadRoot=http://download.devel.redhat.com/rcm-guest/staging/rhba/dist/npm/ -DyarnDownloadRoot=http://download.devel.redhat.com/rcm-guest/staging/rhba/dist/yarn/ dependency:tree",
+      "buildType": "MVN",
+      "creationTime": 1680523454.776,
+      "defaultAlignmentParams": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true -DstrictPropertyValidation=true",
+      "id": "10884",
+      "modificationTime": 1680523454.775,
+      "name": "org.kie-kie-jpmml-integration-7.67.0.Final-7.13.3",
+      "rev": 2653483,
+      "scmRevision": "7.67.x"
+    },
+    "buildContentId": "build-AX5TJMYHQAIAE",
+    "endTime": 1680597024.568,
+    "environment": {
+      "attributes": {
+        "DEPRECATION_REPLACEMENT": "456",
+        "JDK": "11",
+        "MAVEN": "3.6.3",
+        "OS": "Linux"
+      },
+      "deprecated": true,
+      "description": "OpenJDK 11.0; Mvn 3.6.3 [builder-rhel-7-j11-mvn3.6.3:1.0.4]",
+      "hidden": false,
+      "id": "302",
+      "name": "OpenJDK 11.0; Mvn 3.6.3",
+      "systemImageId": "builder-rhel-7-j11-mvn3.6.3:1.0.4",
+      "systemImageRepositoryUrl": "quay.io/rh-newcastle",
+      "systemImageType": "DOCKER_IMAGE"
+    },
+    "groupBuild": {
+      "groupConfig": {
+        "id": "1569",
+        "name": "rhba-7.13.3-all"
+      },
+      "id": "37969",
+      "productVersion": {
+        "attributes": {
+          "BREW_TAG_PREFIX": "rhba-7.13-pnc"
+        },
+        "id": "337",
+        "version": "7.13"
+      },
+      "startTime": 1680594285.384,
+      "status": "BUILDING",
+      "temporaryBuild": false,
+      "user": {
+        "id": "183",
+        "username": "service-account-cpaas-ci"
+      }
+    },
+    "id": "AX5TJMYHQAIAE",
+    "productMilestone": {
+      "id": "2165",
+      "plannedEndDate": 1680566400.0,
+      "startingDate": 1680480000.0,
+      "version": "7.13.3.CR1"
+    },
+    "progress": "FINISHED",
+    "project": {
+      "id": "666",
+      "name": "kiegroup/kie-jpmml-integration"
+    },
+    "scmRepository": {
+      "externalUrl": "https://github.com/kiegroup/kie-jpmml-integration.git",
+      "id": "697",
+      "internalUrl": "git+ssh://code.engineering.redhat.com/kiegroup/kie-jpmml-integration.git",
+      "preBuildSyncEnabled": true
+    },
+    "startTime": 1680596869.155,
+    "status": "SUCCESS",
+    "submitTime": 1680594285.384,
+    "temporaryBuild": false,
+    "user": {
+      "id": "183",
+      "username": "service-account-cpaas-ci"
+    }
+  },
+  "oldStatus": "BUILDING"
+}

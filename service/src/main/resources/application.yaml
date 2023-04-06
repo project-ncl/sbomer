@@ -27,10 +27,11 @@ quarkus:
     db-kind: postgresql
   smallrye-openapi:
     info-title: SBOMer service
-
   hibernate-orm:
     database:
       generation: update # TODO: This is for now, so that we can work on stage, remove this once we maintain the DB properly
+  qpid-jms:
+    url: amqps://umb.api.redhat.com:5671
 
 sbomer:
   pnc:
@@ -41,6 +42,8 @@ sbomer:
   cyclonedx:
     default-version: "2.7.5"
     additional-args: "--batch-mode --no-transfer-progress --quiet"
+  umb:
+    pnc-builds-topic: "Consumer.pncsbomer.prod.VirtualTopic.eng.pnc.>"
 
 "%dev":
   quarkus:
@@ -51,14 +54,12 @@ sbomer:
       password: password
       jdbc:
         url: jdbc:postgresql://localhost:5432/sbomer
-
     hibernate-orm:
       database:
         generation:
            drop-and-create
       log:
         sql: true
-
     smallrye-openapi:
       info-title: SBOMer service (development)
 
@@ -66,7 +67,6 @@ sbomer:
     generation:
       local:
         path: /tmp/sbomer
-
     pnc:
       api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
     domino:
@@ -75,6 +75,8 @@ sbomer:
     cyclonedx:
       default-version: "2.7.5"
       additional-args: "--batch-mode --no-transfer-progress"
+    umb:
+      pnc-builds-topic: "Consumer.pncsbomer.nonprod.VirtualTopic.eng.pnc.>"
 
 "%test":
   quarkus:
@@ -87,6 +89,10 @@ sbomer:
     hibernate-orm:
       database:
         generation: drop-and-create
+    qpid-jms:
+      url: amqp://localhost:5672
+      username: 
+      password: 
 
   sbomer:
     pnc:
@@ -97,3 +103,5 @@ sbomer:
     cyclonedx:
       default-version: "2.7.5"
       additional-args: "--batch-mode --no-transfer-progress"
+    umb:
+      pnc-builds-topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"
