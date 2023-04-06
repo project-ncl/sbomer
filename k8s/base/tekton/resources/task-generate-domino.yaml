@@ -37,9 +37,9 @@ spec:
 
         Example (and default):
 
-        {"version": "0.0.81", "additional-args": "--include-non-managed"}
+        {"version": "0.0.84", "additional-args": "--include-non-managed"}
       default: |
-        {"version": "0.0.81", "additional-args": "--include-non-managed"}
+        {"version": "0.0.84", "additional-args": "--include-non-managed"}
     # TODO: See the task-generate-cyclonedx.yaml file for more information about structured parameters
   steps:
     # TODO: This is duplicated across every generation Task
