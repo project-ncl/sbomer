@@ -48,7 +48,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>2.16.3.Final</quarkus.platform.version>
+        <quarkus.platform.version>2.16.6.Final</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
         <version.cyclonedx>7.3.1</version.cyclonedx>
@@ -58,6 +58,9 @@
         <version.pnc-api>2.4.3</version.pnc-api>
         <version.quarkus-jgit>2.3.1</version.quarkus-jgit>
         <version.tekton-client>0.6.0</version.tekton-client>
+        <quarkus.qpid.jms.group-id>${quarkus.platform.group-id}</quarkus.qpid.jms.group-id>
+        <quarkus.qpid.jms.version>${quarkus.platform.version}</quarkus.qpid.jms.version>
+        <quarkus-test-artemis-version>2.0.3</quarkus-test-artemis-version>
     </properties>
 
     <dependencyManagement>
@@ -69,6 +72,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>${quarkus.qpid.jms.group-id}</groupId>
+                <artifactId>quarkus-qpid-jms-bom</artifactId>
+                <version>${quarkus.qpid.jms.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+              </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
