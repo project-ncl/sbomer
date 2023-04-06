@@ -38,7 +38,7 @@ import org.jboss.sbomer.errors.ApplicationException;
 @ApplicationScoped
 public class PNCService {
 
-    @ConfigProperty(name = "sbomer.pnc-api-url")
+    @ConfigProperty(name = "sbomer.pnc.api-url")
     String apiUrl;
 
     /**

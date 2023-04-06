@@ -52,10 +52,10 @@ public class TestTektonCycloneDxSbomGenerator {
     @Inject
     Instance<SbomGenerator> generators;
 
-    @ConfigProperty(name = "sbomer.cyclonedx-default-version")
+    @ConfigProperty(name = "sbomer.cyclonedx.default-version")
     String cyclonedxDefaultVersion;
 
-    @ConfigProperty(name = "sbomer.cyclonedx-additional-args")
+    @ConfigProperty(name = "sbomer.cyclonedx.additional-args")
     String cyclonedxAdditionalArgs;
 
     SbomGenerator generator;

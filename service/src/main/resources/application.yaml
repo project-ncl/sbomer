@@ -27,17 +27,24 @@ quarkus:
     db-kind: postgresql
   smallrye-openapi:
     info-title: SBOMer service
-
   hibernate-orm:
     database:
       generation: update # TODO: This is for now, so that we can work on stage, remove this once we maintain the DB properly
+  qpid-jms:
+    url: amqps://umb.api.redhat.com:5671
 
 sbomer:
-  pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:orch.psi.redhat.com}"
-  domino-default-version: "0.0.81"
-  domino-additional-args: "--include-non-managed"
-  cyclonedx-default-version: "2.7.5"
-  cyclonedx-additional-args: "--batch-mode --no-transfer-progress --quiet"
+  pnc:
+    api-url: "${SBOMER_CACHE_SERVICE_URL:orch.psi.redhat.com}"
+  domino:
+    default-version: "0.0.84"
+    additional-args: "--include-non-managed"
+  cyclonedx:
+    default-version: "2.7.5"
+    additional-args: "--batch-mode --no-transfer-progress --quiet"
+  umb:
+    trigger-sbom-generation: false
+    pnc-builds-topic: "Consumer.pncsbomer.prod.VirtualTopic.eng.pnc.>"
 
 "%dev":
   quarkus:
@@ -48,14 +55,12 @@ sbomer:
       password: password
       jdbc:
         url: jdbc:postgresql://localhost:5432/sbomer
-
     hibernate-orm:
       database:
         generation:
            drop-and-create
       log:
         sql: true
-
     smallrye-openapi:
       info-title: SBOMer service (development)
 
@@ -63,12 +68,17 @@ sbomer:
     generation:
       local:
         path: /tmp/sbomer
-
-    pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
-    domino-default-version: "0.0.81"
-    domino-additional-args: "--include-non-managed"
-    cyclonedx-default-version: "2.7.5"
-    cyclonedx-additional-args: "--batch-mode --no-transfer-progress"
+    pnc:
+      api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
+    domino:
+      default-version: "0.0.84"
+      additional-args: "--include-non-managed"
+    cyclonedx:
+      default-version: "2.7.5"
+      additional-args: "--batch-mode --no-transfer-progress"
+    umb:
+      trigger-sbom-generation: false
+      pnc-builds-topic: "Consumer.pncsbomer.nonprod.VirtualTopic.eng.pnc.>"
 
 "%test":
   quarkus:
@@ -81,10 +91,20 @@ sbomer:
     hibernate-orm:
       database:
         generation: drop-and-create
+    qpid-jms:
+      url: amqp://localhost:5672
+      username: 
+      password: 
 
   sbomer:
-    pnc-api-url: "localhost/pnc/orch"
-    domino-default-version: "0.0.81"
-    domino-additional-args: "--include-non-managed"
-    cyclonedx-default-version: "2.7.5"
-    cyclonedx-additional-args: "--batch-mode --no-transfer-progress"
+    pnc:
+      api-url: "localhost/pnc/orch"
+    domino:
+      default-version: "0.0.84"
+      additional-args: "--include-non-managed"
+    cyclonedx:
+      default-version: "2.7.5"
+      additional-args: "--batch-mode --no-transfer-progress"
+    umb:
+      trigger-sbom-generation: true
+      pnc-builds-topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"
