@@ -61,13 +61,19 @@ public class PNCMessageParser implements Runnable {
     private AtomicInteger receivedMessages = new AtomicInteger(0);
     private ConnectionFactory cf;
     private SBOMService sbomService;
+    private boolean generateSboms;
     private String incomingTopic;
     private Message lastMessage;
 
-    public PNCMessageParser(ConnectionFactory cf, String incomingTopic, SBOMService sbomService) {
+    public PNCMessageParser(
+            ConnectionFactory cf,
+            String incomingTopic,
+            SBOMService sbomService,
+            boolean generateSboms) {
         this.cf = cf;
         this.incomingTopic = incomingTopic;
         this.sbomService = sbomService;
+        this.generateSboms = generateSboms;
         this.shouldRun.set(true);
     }
 
@@ -96,7 +102,7 @@ public class PNCMessageParser implements Runnable {
                     if (msgBody == null) {
                         continue;
                     }
-                    if (shouldGenerateSBOM(msgBody)) {
+                    if (generateSboms && isSuccessfulPersistentBuild(msgBody)) {
                         String buildId = msgBody.path("build").path("id").asText();
                         if (!Strings.isEmpty(buildId)) {
                             log.info("I SHOULD REALLY GENERATE AN SBOM FOR BUILD {}", buildId);
@@ -139,7 +145,7 @@ public class PNCMessageParser implements Runnable {
         return receivedMessages.get();
     }
 
-    public boolean shouldGenerateSBOM(JsonNode msgBody) {
+    public boolean isSuccessfulPersistentBuild(JsonNode msgBody) {
 
         JsonNode buildNode = msgBody.path("build");
         Boolean persistent = !buildNode.path("temporaryBuild").asBoolean();

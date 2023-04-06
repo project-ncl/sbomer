@@ -52,6 +52,9 @@ public class UmbMessageConsumer implements MessageConsumer {
     @ConfigProperty(name = "quarkus.qpid-jms.url")
     String amqpConnection;
 
+    @ConfigProperty(name = "sbomer.umb.trigger-sbom-generation")
+    boolean generateSboms;
+
     @Inject
     ConnectionFactory connectionFactory;
 
@@ -66,7 +69,7 @@ public class UmbMessageConsumer implements MessageConsumer {
     public void init(@Observes StartupEvent ev) {
         log.info("Initializing connection: {}", amqpConnection);
         if (!Strings.isEmpty(pncUmbIncomingTopic)) {
-            pncMessageParser = new PNCMessageParser(connectionFactory, pncUmbIncomingTopic, sbomService);
+            pncMessageParser = new PNCMessageParser(connectionFactory, pncUmbIncomingTopic, sbomService, generateSboms);
             scheduler.submit(pncMessageParser);
         }
     }
@@ -99,7 +102,7 @@ public class UmbMessageConsumer implements MessageConsumer {
         if (pncMessageParser != null && pncMessageParser.shouldRun() && !pncMessageParser.isConnected()) {
             log.info("Reconnecting UMB connection for topic {} ...", pncUmbIncomingTopic);
 
-            pncMessageParser = new PNCMessageParser(connectionFactory, pncUmbIncomingTopic, sbomService);
+            pncMessageParser = new PNCMessageParser(connectionFactory, pncUmbIncomingTopic, sbomService, generateSboms);
             scheduler.submit(pncMessageParser);
         }
     }
