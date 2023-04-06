@@ -27,7 +27,6 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.core.utils.SbomUtils;
-import org.jboss.util.Strings;
 
 import picocli.CommandLine.Command;
 
@@ -52,8 +51,7 @@ public class DefaultProcessCommand extends AbstractBaseProcessCommand {
                 artifact.getBuild().getEnvironment().getSystemImageRepositoryUrl() + "/"
                         + artifact.getBuild().getEnvironment().getSystemImageId(),
                 SBOM_RED_HAT_ENVIRONMENT_IMAGE);
-        if (!SbomUtils.hasExternalReference(component, ExternalReference.Type.VCS)
-                && !Strings.isEmpty(artifact.getBuild().getScmRepository().getExternalUrl())) {
+        if (!SbomUtils.hasExternalReference(component, ExternalReference.Type.VCS)) {
             SbomUtils.addExternalReference(
                     component,
                     ExternalReference.Type.VCS,

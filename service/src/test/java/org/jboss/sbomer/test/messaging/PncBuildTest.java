@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.test.messaging;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,13 +33,13 @@ import javax.jms.TextMessage;
 
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.ProgressStatus;
+import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.messaging.JmsUtils;
 import org.jboss.sbomer.messaging.UmbMessageConsumer;
-import org.jboss.sbomer.test.TestResources;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

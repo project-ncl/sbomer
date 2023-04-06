@@ -31,8 +31,6 @@ quarkus:
     url: amqps://umb.api.redhat.com:5671
 
 sbomer:
-  pnc:
-    api-url: "${SBOMER_CACHE_SERVICE_URL:orch.psi.redhat.com}"
   domino:
     default-version: "0.0.84"
     additional-args: "--include-non-managed"
@@ -64,8 +62,6 @@ sbomer:
     generation:
       local:
         path: /tmp/sbomer
-    pnc:
-      api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
     domino:
       default-version: "0.0.84"
       additional-args: "--include-non-managed"
@@ -89,12 +85,10 @@ sbomer:
         generation: drop-and-create
     qpid-jms:
       url: amqp://localhost:5672
-      username: 
-      password: 
+      username: ""
+      password: ""
 
   sbomer:
-    pnc:
-      api-url: "localhost/pnc/orch"
     domino:
       default-version: "0.0.84"
       additional-args: "--include-non-managed"
