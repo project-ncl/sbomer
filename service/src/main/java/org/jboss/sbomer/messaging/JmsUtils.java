@@ -52,7 +52,7 @@ public class JmsUtils {
         msgMapper.disable(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS);
     }
 
-    public static JsonNode getLastMsgBody(Message message) throws JMSException, IOException {
+    public static JsonNode getMsgBody(Message message) throws JMSException, IOException {
         if (message == null) {
             return null;
         }

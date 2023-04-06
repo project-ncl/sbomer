@@ -86,7 +86,7 @@ public class PncBuildTest {
         String producer = msg.getStringProperty("producer");
         assertEquals("PNC", producer);
 
-        JsonNode msgBody = JmsUtils.getLastMsgBody(msg);
+        JsonNode msgBody = JmsUtils.getMsgBody(msg);
         JsonNode buildNode = msgBody.path("build");
 
         Boolean persistent = !buildNode.path("temporaryBuild").asBoolean();

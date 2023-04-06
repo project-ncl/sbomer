@@ -98,7 +98,7 @@ public class PNCMessageParser implements Runnable {
 
                 try {
 
-                    JsonNode msgBody = JmsUtils.getLastMsgBody(lastMessage);
+                    JsonNode msgBody = JmsUtils.getMsgBody(lastMessage);
                     if (msgBody == null) {
                         continue;
                     }
