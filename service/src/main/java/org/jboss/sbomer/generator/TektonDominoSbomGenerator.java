@@ -32,10 +32,10 @@ import org.jboss.sbomer.errors.ApplicationException;
 @ApplicationScoped
 public class TektonDominoSbomGenerator extends AbstractTektonSbomGenerator {
 
-    @ConfigProperty(name = "sbomer.domino-default-version")
+    @ConfigProperty(name = "sbomer.domino.default-version")
     String dominoDefaultVersion;
 
-    @ConfigProperty(name = "sbomer.domino-additional-args")
+    @ConfigProperty(name = "sbomer.domino.additional-args")
     String dominoAdditionalArgs;
 
     @Override

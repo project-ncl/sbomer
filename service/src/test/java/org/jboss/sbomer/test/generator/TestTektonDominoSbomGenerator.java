@@ -53,10 +53,10 @@ public class TestTektonDominoSbomGenerator {
     @Inject
     Instance<SbomGenerator> generators;
 
-    @ConfigProperty(name = "sbomer.domino-default-version")
+    @ConfigProperty(name = "sbomer.domino.default-version")
     String dominoDefaultVersion;
 
-    @ConfigProperty(name = "sbomer.domino-additional-args")
+    @ConfigProperty(name = "sbomer.domino.additional-args")
     String dominoAdditionalArgs;
 
     SbomGenerator generator;

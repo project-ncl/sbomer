@@ -32,10 +32,10 @@ import org.jboss.sbomer.errors.ApplicationException;
 @ApplicationScoped
 public class TektonCycloneDXSbomGenerator extends AbstractTektonSbomGenerator {
 
-    @ConfigProperty(name = "sbomer.cyclonedx-default-version")
+    @ConfigProperty(name = "sbomer.cyclonedx.default-version")
     String cyclonedxDefaultVersion;
 
-    @ConfigProperty(name = "sbomer.cyclonedx-additional-args")
+    @ConfigProperty(name = "sbomer.cyclonedx.additional-args")
     String cyclonedxAdditionalArgs;
 
     @Override
