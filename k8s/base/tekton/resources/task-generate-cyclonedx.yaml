@@ -80,6 +80,11 @@ spec:
 
         sdk use maven 3.9
 
-        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate --build-id=$(params.id) maven-cyclonedx --target=$(workspaces.data.path)/source --settings=~/settings.xml
+        echo '$(params.config)' | tee config.json
+        TOOL_VERSION=$(cat config.json | jq --raw-output '.version')
+
+        [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
+
+        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate --build-id=$(params.id) maven cyclonedx --plugin-version=$TOOL_VERSION --target=$(workspaces.data.path)/source --settings=~/settings.xml
   workspaces:
     - name: data

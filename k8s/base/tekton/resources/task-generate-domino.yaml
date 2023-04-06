@@ -45,58 +45,6 @@ spec:
     - name: generate
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
-      # TODO: Make this a native binary
-      script: /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate domino --target=$(workspaces.data.path)/source 
-   
-   
-   
-    - name: generate
-      image: sbomer-generator
-      imagePullPolicy: IfNotPresent
-      script: |
-        #!/usr/bin/env bash
-
-        # script: /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate domino --directory=$(workspaces.data.path)/source --output=bom.json
-
-        set -e
-
-        source ~/.sdkman/bin/sdkman-init.sh
-
-        MAVEN_VERSION=$(cat $(workspaces.data.path)/build.json | jq --raw-output '.environment.attributes.MAVEN | split(".") | .[0] + "." + .[1]')
-
-        # TODO: In order to run Domino, we need JDK 11 at least
-        JDK_VERSION="11"
-
-        echo "Java version: ${JDK_VERSION}"
-        echo "Maven version: ${MAVEN_VERSION}"
-
-        sdk use maven $MAVEN_VERSION
-        sdk use java $JDK_VERSION
-
-        BOM_PATH="$(workspaces.data.path)/source/target/bom.json"
-
-        echo "Working from the `pwd` directory"
-
-        echo "Running with following config:"
-        echo '$(params.config)' | tee config.json
-
-        TOOL_VERSION=$(cat config.json | jq --raw-output '.version')
-        TOOL_ADDITIONAL_ARGS=$(cat config.json | jq --raw-output '."additional-args"')
-
-        echo "Domino version:"
-        java -jar ~/domino-${TOOL_VERSION}.jar version
-
-        echo "Running SBOM generation:"
-        java -jar ~/domino-${TOOL_VERSION}.jar from-maven report --project-dir="$(workspaces.data.path)/source" --output-file="${BOM_PATH}" --manifest -s ~/settings.xml ${TOOL_ADDITIONAL_ARGS}
-
-        cat ${BOM_PATH}
-
-        echo "Done, SBOM generated at: ${BOM_PATH}"
-    # TODO: This is duplicated across every generation Task
-    # TODO: Move implementation of this step into Java CLI
-    - name: "publish"
-      image: sbomer-generator
-      imagePullPolicy: IfNotPresent
       env:
         - name: SBOMER_SERVICE_URL
           valueFrom:
@@ -108,13 +56,15 @@ spec:
 
         set -e
 
-        jq -s '{buildId: "$(params.id)", type: "BUILD_TIME", generator: "CYCLONEDX", sbom: .[0]}' $(workspaces.data.path)/source/target/bom.json > $(workspaces.data.path)/payload.json
+        source ~/.sdkman/bin/sdkman-init.sh
+
+        sdk use maven 3.9
+
+        echo '$(params.config)' | tee config.json
+        TOOL_VERSION=$(cat config.json | jq --raw-output '.version')
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
-        # TODO: Why do we send it to the /enrich endpoint? We should just save it and make the service decide what to do with it later (if at all). Leaving for now.
-        curl -vX POST -H "Content-Type: application/json" -d @$(workspaces.data.path)/payload.json ${SBOMER_SERVICE_URL}/api/v1alpha1/sboms/enrich
+        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate --build-id=$(params.id) maven domino --domino-version=$TOOL_VERSION --target=$(workspaces.data.path)/source --settings=~/settings.xml
   workspaces:
     - name: data
-      description: Main workspace
-

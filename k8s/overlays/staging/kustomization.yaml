@@ -53,34 +53,6 @@ patches:
       - op: replace
         path: /spec/steps/0/imagePullPolicy
         value: Always
-  - target:
-      kind: Task
-      name: sbomer-generate-cyclonedx
-    patch: |-
-      - op: replace
-        path: /spec/steps/1/imagePullPolicy
-        value: Always
-  - target:
-      kind: Task
-      name: sbomer-generate-domino
-    patch: |-
-      - op: replace
-        path: /spec/steps/1/imagePullPolicy
-        value: Always
-  - target:
-      kind: Task
-      name: sbomer-generate-cyclonedx
-    patch: |-
-      - op: replace
-        path: /spec/steps/2/imagePullPolicy
-        value: Always
-  - target:
-      kind: Task
-      name: sbomer-generate-domino
-    patch: |-
-      - op: replace
-        path: /spec/steps/2/imagePullPolicy
-        value: Always
 
 # List of images used in staging
 # TODO: Currently happily using :latest tag but this will be changed in the future

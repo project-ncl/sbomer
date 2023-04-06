@@ -21,7 +21,7 @@ kind: Kustomization
 resources:
   - resources/task-generate-domino.yaml
   - resources/task-generate-cyclonedx.yaml
-  - resources/task-process-default.yaml
+  - resources/task-process.yaml
   - resources/cm.yaml
 transformers:
   - resources/labels.yaml

@@ -86,6 +86,9 @@ public abstract class AbstractTektonTaskRunner {
      */
     private String toTaskRunNamePrefix(final String tektonTaskName, final String suffix) {
         var parts = tektonTaskName.split("-");
-        return parts[0] + "-" + parts[2] + "-" + suffix.toLowerCase() + "-";
+
+        String type = parts.length > 2 ? parts[2] : parts[1];
+
+        return parts[0] + "-" + type + "-" + suffix.toLowerCase() + "-";
     }
 }

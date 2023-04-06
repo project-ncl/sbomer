@@ -18,6 +18,7 @@
 package org.jboss.sbomer.tekton.processor;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.json.Json;
 
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.processor.Processor;
@@ -33,6 +34,8 @@ public class TektonDefaultSbomProcessor extends AbstractTektonTaskRunner impleme
 
     @Override
     public void process(long sbomId) {
-        runTektonTask("sbomer-process-default", String.valueOf(sbomId));
+        var config = Json.createObjectBuilder().add("processor", "default").build();
+
+        runTektonTask("sbomer-process", String.valueOf(sbomId), config);
     }
 }

@@ -44,7 +44,7 @@ function install_java() {
 }
 
 function install_maven() {
-  for mvn_version in 3.6.3 3.8.8 3.9.0; do
+  for mvn_version in 3.6.3 3.8.8 3.9.1; do
     sdk install maven ${mvn_version}
     sdk install maven ${mvn_version%.*} "$(sdk home maven ${mvn_version})"
   done

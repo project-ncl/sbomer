@@ -19,7 +19,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: sbomer-process-default
+  name: sbomer-process
 spec:
   params:
     - name: id
@@ -30,7 +30,7 @@ spec:
       description: |
         Additional parameters that instrument the processor. Currently unused.
       default: |
-        {}
+        {"processor": "default"}
   steps:
     - name: process
       image: sbomer-generator
@@ -41,7 +41,17 @@ spec:
             configMapKeyRef:
               name: sbomer-tekton
               key: SBOMER_SERVICE_URL
-      script: /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v process default --sbom-id=$(params.id)
+      script: |
+        #!/usr/bin/env bash
+
+        set -e
+        
+        echo '$(params.config)' | tee config.json
+        PROCESSOR=$(cat config.json | jq --raw-output '.processor')
+
+        [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
+        
+        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v process $PROCESSOR --sbom-id=$(params.id)
   workspaces:
     - name: data
       description: Main workspace
