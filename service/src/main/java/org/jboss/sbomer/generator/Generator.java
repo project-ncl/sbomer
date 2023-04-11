@@ -35,6 +35,7 @@ import org.jboss.sbomer.core.enums.GeneratorImplementation;
 public @interface Generator {
     public GeneratorImplementation value();
 
+    @SuppressWarnings("all")
     public final class GeneratorLiteral extends AnnotationLiteral<Generator> implements Generator {
         private static final long serialVersionUID = 1L;
 

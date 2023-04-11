@@ -16,4 +16,4 @@
 -- limitations under the License.
 --
 
-CREATE TYPE "JSONB" AS json;
+CREATE domain IF NOT EXISTS "JSONB" AS json;

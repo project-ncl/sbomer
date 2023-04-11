@@ -17,16 +17,17 @@
  */
 package org.jboss.sbomer.processor;
 
-import org.cyclonedx.model.Bom;
-
+/**
+ * High-level interaction with the SBOM processor.
+ *
+ */
 public interface SbomProcessor {
 
     /**
-     * Allows implementing SBOM processing
+     * Processes a given SBOM.
      *
-     * @param originalSbom the original SBOM BOM instance
-     * @return transformed SBOM BOM instance
+     * @param sbomId The SBOM id.
      */
-    Bom process(Bom originalSbom);
+    public void process(long sbomId);
 
 }

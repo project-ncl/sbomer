@@ -21,18 +21,18 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jboss.pnc.api.enums.BuildStatus;
-import org.jboss.pnc.api.enums.ProgressStatus;
-import org.jboss.pnc.common.Strings;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.service.SBOMService;
-
 import javax.jms.ConnectionFactory;
-import javax.jms.Session;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Session;
+
+import org.jboss.pnc.api.enums.BuildStatus;
+import org.jboss.pnc.api.enums.ProgressStatus;
+import org.jboss.pnc.common.Strings;
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.service.SbomService;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -60,7 +60,7 @@ public class PNCMessageParser implements Runnable {
     private AtomicBoolean connected = new AtomicBoolean(false);
     private AtomicInteger receivedMessages = new AtomicInteger(0);
     private ConnectionFactory cf;
-    private SBOMService sbomService;
+    private SbomService sbomService;
     private boolean generateSboms;
     private String incomingTopic;
     private Message lastMessage;
@@ -68,7 +68,7 @@ public class PNCMessageParser implements Runnable {
     public PNCMessageParser(
             ConnectionFactory cf,
             String incomingTopic,
-            SBOMService sbomService,
+            SbomService sbomService,
             boolean generateSboms) {
         this.cf = cf;
         this.incomingTopic = incomingTopic;

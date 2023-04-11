@@ -30,7 +30,7 @@ import javax.jms.Message;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.common.Strings;
-import org.jboss.sbomer.service.SBOMService;
+import org.jboss.sbomer.service.SbomService;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.scheduler.Scheduled;
@@ -59,7 +59,7 @@ public class UmbMessageConsumer implements MessageConsumer {
     ConnectionFactory connectionFactory;
 
     @Inject
-    SBOMService sbomService;
+    SbomService sbomService;
 
     private final ExecutorService scheduler = Executors.newSingleThreadExecutor();
 

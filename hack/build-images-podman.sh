@@ -24,7 +24,7 @@ set -e
 
 SCRIPT_DIR=$(dirname "$0")
 
-#"$SCRIPT_DIR/run-maven.sh" package -DskipTests
+"$SCRIPT_DIR/run-maven.sh" package -DskipTests
 
 set -x
 

@@ -22,7 +22,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Constraint;
@@ -35,7 +35,7 @@ import javax.validation.Payload;
 public @interface ArtifactJsonProperty {
     String message() default "not a valid Json property object: {errors}";
 
-    List<String> errors = Collections.emptyList();
+    List<String> errors = new ArrayList<>();
 
     Class<?>[] groups() default {};
 

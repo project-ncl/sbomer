@@ -81,6 +81,8 @@ if [ "$PUSH" = "yes" ]; then
 "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_COMMIT"
 fi
 
+mkdir -p target
+
 "${BUILD_SCRIPT[@]}" inspect "$IMAGE_TAG_LATEST" > "target/image-${IMAGE_SLUG}.json"
 
 popd > /dev/null

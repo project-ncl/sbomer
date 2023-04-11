@@ -161,6 +161,10 @@
       <groupId>io.quarkiverse.artemis</groupId>
       <artifactId>quarkus-test-artemis</artifactId>
       <version>${quarkus-test-artemis-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-panache-mock</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

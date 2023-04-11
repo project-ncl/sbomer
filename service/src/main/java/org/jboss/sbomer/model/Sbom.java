@@ -48,6 +48,7 @@ import org.hibernate.annotations.TypeDef;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.enums.SbomType;
+import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -128,18 +129,17 @@ public class Sbom extends PanacheEntityBase {
 
     @JsonIgnore
     public Bom getCycloneDxBom() {
-        try {
-            return new JsonParser().parse(sbom.isTextual() ? sbom.textValue().getBytes() : sbom.toString().getBytes());
-        } catch (ParseException e) {
-            e.printStackTrace();
+        Bom bom = SbomUtils.fromJsonNode(sbom);
+
+        if (bom == null) {
+            try {
+                BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), new Bom());
+                bom = new JsonParser().parse(generator.toJsonNode().textValue().getBytes());
+            } catch (ParseException e) {
+            }
         }
 
-        try {
-            BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), new Bom());
-            return new JsonParser().parse(generator.toJsonNode().textValue().getBytes());
-        } catch (ParseException e) {
-            return null;
-        }
+        return bom;
 
     }
 }

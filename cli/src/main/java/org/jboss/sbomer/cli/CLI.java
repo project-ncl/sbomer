@@ -17,9 +17,12 @@
  */
 package org.jboss.sbomer.cli;
 
+import java.io.PrintWriter;
+
 import javax.inject.Inject;
 
-import org.jboss.sbomer.cli.commands.GenerateCommand;
+import org.jboss.sbomer.cli.commands.generator.GenerateCommand;
+import org.jboss.sbomer.cli.commands.processor.ProcessCommand;
 
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
@@ -29,24 +32,29 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
 @QuarkusMain
-@CommandLine.Command(name = "sbomer", mixinStandardHelpOptions = true, subcommands = { GenerateCommand.class })
+@CommandLine.Command(
+        name = "sbomer",
+        mixinStandardHelpOptions = true,
+        subcommands = { GenerateCommand.class, ProcessCommand.class })
 public class CLI implements QuarkusApplication {
     @Inject
     CommandLine.IFactory factory;
 
+    @Getter
     @Option(names = { "-v", "--verbose" }, scope = ScopeType.INHERIT)
     boolean verbose = false;
 
-    public void usage(Class<?> command) {
-        new CommandLine(command, factory).usage(System.out);
-    }
+    // public int usage(Class<?> command) {
+    // new CommandLine(command, factory).usage(System.out);
+    // return CommandLine.ExitCode.USAGE;
+    // }
 
     @Override
     public int run(String... args) throws Exception {
         return new CommandLine(this, factory).setExecutionExceptionHandler(new ExceptionHandler()).execute(args);
     }
 
-    public int run(Class<? extends Runnable> command, String... args) {
-        return new CommandLine(command, factory).execute(args);
+    public int run(PrintWriter out, PrintWriter err, String... args) {
+        return new CommandLine(this, factory).setOut(out).setErr(err).execute(args);
     }
 }

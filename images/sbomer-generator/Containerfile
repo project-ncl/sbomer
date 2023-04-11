@@ -22,3 +22,8 @@ USER 65532
 
 COPY --chown=65532:0 images/sbomer-generator/settings.xml images/sbomer-generator/install.sh /workdir/
 RUN sh -c ./install.sh
+
+COPY --chown=65532:0 cli/target/quarkus-app/lib/ /workdir/generator/lib/
+COPY --chown=65532:0 cli/target/quarkus-app/*.jar /workdir/generator/
+COPY --chown=65532:0 cli/target/quarkus-app/app/ /workdir/generator/app/
+COPY --chown=65532:0 cli/target/quarkus-app/quarkus/ /workdir/generator/quarkus/

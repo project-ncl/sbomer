@@ -35,6 +35,7 @@ import org.jboss.sbomer.core.enums.ProcessorImplementation;
 public @interface Processor {
     public ProcessorImplementation value();
 
+    @SuppressWarnings("all")
     public final class ProcessorLiteral extends AnnotationLiteral<Processor> implements Processor {
         private static final long serialVersionUID = 1L;
 
