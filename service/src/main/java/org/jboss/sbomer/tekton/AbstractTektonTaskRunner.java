@@ -38,7 +38,7 @@ public abstract class AbstractTektonTaskRunner {
     @Inject
     TektonClient tektonClient;
 
-    protected TaskRun runTektonTask(final String tektonTaskName, final String id) {
+    protected TaskRun runTektonTask(final String tektonTaskName, final Long id) {
         return runTektonTask(tektonTaskName, id, Json.createObjectBuilder().build());
     }
 
@@ -50,9 +50,9 @@ public abstract class AbstractTektonTaskRunner {
      * @param config Additional configuration passed as a {@link JsonObject}.
      * @return A {@link TaskRun} object representing the execution.
      */
-    protected TaskRun runTektonTask(final String tektonTaskName, final String id, final JsonObject config) {
+    protected TaskRun runTektonTask(final String tektonTaskName, final Long id, final JsonObject config) {
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
-                .withGenerateName(toTaskRunNamePrefix(tektonTaskName, id))
+                .withGenerateName(toTaskRunNamePrefix(tektonTaskName, String.valueOf(id)))
                 .endMetadata()
                 .withNewSpec()
                 .withServiceAccountName(SERVICE_ACCOUNT_NAME)
@@ -67,7 +67,7 @@ public abstract class AbstractTektonTaskRunner {
                                 .build())
                 .endPodTemplate()
                 .withParams(
-                        new Param("id", new ArrayOrString(id)),
+                        new Param("id", new ArrayOrString(String.valueOf(id))),
                         new Param("config", new ArrayOrString(config.toString())))
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withName("data").withEmptyDir(new EmptyDirVolumeSource()).build())

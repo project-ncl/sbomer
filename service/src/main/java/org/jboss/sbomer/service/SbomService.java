@@ -20,6 +20,7 @@ package org.jboss.sbomer.service;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,6 +38,8 @@ import javax.ws.rs.NotFoundException;
 import org.jboss.pnc.common.concurrent.Sequence;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.SbomStatus;
+import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.generator.Generator.GeneratorLiteral;
@@ -46,6 +49,8 @@ import org.jboss.sbomer.processor.Processor.ProcessorLiteral;
 import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.rest.RestUtils;
 import org.jboss.sbomer.rest.dto.Page;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,23 +76,37 @@ public class SbomService {
     Validator validator;
 
     /**
-     * Runs the generation of SBOM using the available implementation of the generator. This is done in an asynchronous
-     * way -- the generation is run behind the scenes.
+     * Runs the generation of SBOM using the available implementation of the generator.
      *
-     * @param buildId
+     * Generation is done in an asynchronous way. The returned object is a handle which will let the client to retrieve
+     * the SBOM content once the generation is finished.
+     *
+     * @param buildId The PNC build ID for which the generation should be performed.
+     * @param generator The selected generator implementation, see {@link GeneratorImplementation}
+     * @return Returns a {@link Sbom} object that will represent the generated CycloneDX sbom.
      */
-    public void generateSbomFromPncBuild(String buildId, GeneratorImplementation generator) {
-        generators.select(GeneratorLiteral.of(generator)).get().generate(buildId);
-    }
+    public Sbom generate(String buildId, GeneratorImplementation generator) {
 
-    /**
-     * Performs processing of the provided SBOM using selected processor.
-     *
-     * @param sbom {@link Sbom} object to process
-     * @param processor Selected {@link ProcessorImplementation}
-     */
-    public void processSbom(Sbom sbom, ProcessorImplementation processor) {
-        processSbom(sbom.getId(), processor);
+        try {
+            // Return in case we have it generated already
+            return sbomRepository.getSbom(buildId, generator, null);
+        } catch (NoResultException ex) {
+            // Ignored
+        }
+
+        Sbom sbom = new Sbom();
+        sbom.setStatus(SbomStatus.GENERATING);
+        sbom.setType(SbomType.BUILD_TIME); // TODO Is it always the case?
+        sbom.setBuildId(buildId);
+        sbom.setGenerator(generator);
+
+        // Store it in database
+        sbom = save(sbom);
+
+        // Schedule the generation
+        generators.select(GeneratorLiteral.of(generator)).get().generate(sbom.getId());
+
+        return sbom;
     }
 
     /**
@@ -96,20 +115,38 @@ public class SbomService {
      * @param sbomId SBOM identifier being a {@link Long}
      * @param processor Selected {@link ProcessorImplementation}
      */
-    public void processSbom(Long sbomId, ProcessorImplementation processor) {
-        processors.select(ProcessorLiteral.of(processor)).get().process(sbomId);
+    public Sbom process(Sbom sbom, ProcessorImplementation processor) {
+        log.debug("Preparing to process SBOM id '{}' with '{}' processor", sbom.getId(), processor);
+
+        // Create the child object
+        Sbom child = sbom.giveBirth();
+
+        // Set the correct status
+        child.setStatus(SbomStatus.PROCESSING);
+
+        // Store the child in database
+        child = save(child);
+
+        // Schedule processing
+        processors.select(ProcessorLiteral.of(processor)).get().process(sbom.getId());
+
+        return child;
     }
 
     /**
      * Get list of {@link Sbom}s in a paginated way.
      */
-    public Page<Sbom> listSboms(int pageIndex, int pageSize) {
+    // TODO: Should we return Page here?
+    public Page<Sbom> list(int pageIndex, int pageSize) {
         log.debug("Getting list of all base SBOMS with pageIndex: {}, pageSize: {}", pageIndex, pageSize);
 
         List<Sbom> collection = sbomRepository.findAll().page(pageIndex, pageSize).list();
         int totalPages = sbomRepository.findAll().page(io.quarkus.panache.common.Page.ofSize(pageSize)).pageCount();
         long totalHits = sbomRepository.findAll().count();
-        List<Sbom> content = nullableStreamOf(collection).collect(Collectors.toList());
+        List<Sbom> content = Optional.ofNullable(collection)
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .collect(Collectors.toList());
 
         return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
     }
@@ -121,13 +158,17 @@ public class SbomService {
         log.debug("Getting list of all SBOMS with buildId: {}", buildId);
 
         List<Sbom> collection = sbomRepository.getAllSbomWithBuildIdQuery(buildId).list();
-        return nullableStreamOf(collection).collect(Collectors.toList());
+        return Optional.ofNullable(collection)
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .collect(Collectors.toList());
     }
 
     /**
      * Get list of {@link Sbom}s for a given PNC build ID in a paginated way.
      */
-    public Page<Sbom> listAllSbomsWithBuildId(String buildId, int pageIndex, int pageSize) {
+    // TODO: Should we return Page here?
+    public Page<Sbom> list(String buildId, int pageIndex, int pageSize) {
         log.debug("Getting list of all SBOMS with buildId: {}", buildId);
 
         List<Sbom> collection = sbomRepository.getAllSbomWithBuildIdQuery(buildId).page(pageIndex, pageSize).list();
@@ -135,24 +176,27 @@ public class SbomService {
                 .page(io.quarkus.panache.common.Page.ofSize(pageSize))
                 .pageCount();
         long totalHits = sbomRepository.getAllSbomWithBuildIdQuery(buildId).count();
-        List<Sbom> content = nullableStreamOf(collection).collect(Collectors.toList());
+        List<Sbom> content = Optional.ofNullable(collection)
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .collect(Collectors.toList());
 
         return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    /**
-     * Get list of {@link Sbom}s for a given PNC build ID in a paginated way.
-     */
-    public Sbom getSbom(String buildId, GeneratorImplementation generator, ProcessorImplementation processor) {
-        log.info("Getting SBOM with buildId: {} and generator: {} and processor: {}", buildId, generator, processor);
-        try {
-            return sbomRepository.getSbom(buildId, generator, processor);
-        } catch (NoResultException nre) {
-            throw new NotFoundException(
-                    "SBOM for build id " + buildId + " and generator " + generator + " and processor " + processor
-                            + " not found.");
-        }
-    }
+    // /**
+    // * Get list of {@link Sbom}s for a given PNC build ID in a paginated way.
+    // */
+    // public Sbom get(String buildId, GeneratorImplementation generator, ProcessorImplementation processor) {
+    // log.info("Getting SBOM with buildId: {} and generator: {} and processor: {}", buildId, generator, processor);
+    // try {
+    // return sbomRepository.getSbom(buildId, generator, processor);
+    // } catch (NoResultException nre) {
+    // throw new NotFoundException(
+    // "SBOM for build id " + buildId + " and generator " + generator + " and processor " + processor
+    // + " not found.");
+    // }
+    // }
 
     /**
      * Get base {@link Sbom} for a given PNC build ID.
@@ -208,22 +252,78 @@ public class SbomService {
      * @param sbomId
      * @return The {@link Sbom} object.
      */
-    public Sbom getSbomById(long sbomId) {
+    public Sbom get(Long sbomId) {
         return sbomRepository.findById(sbomId);
     }
 
     /**
-     * Persist changes to the {@link Sbom} in the database.
+     * Persists changes to given {@link Sbom} in the database.
      *
-     * @param sbom
-     * @return
+     * The difference between the {@link SbomService#create(Sbom)} method is that this one is used for updating
+     * already-existing resources in the database.
+     *
+     * @param sbom The {@link Sbom} resource to store in database.
+     * @return Updated {@link Sbom} resource.
      */
     @Transactional
-    public Sbom saveSbom(Sbom sbom) throws ApplicationException {
+    public Sbom updateBom(Long sbomId, JsonNode bom) {
+        Sbom sbom = sbomRepository.findById(sbomId);
+
+        if (sbom == null) {
+            throw new ApplicationException("Could not find SBOM with ID '{}'", sbomId);
+        }
+
+        // Update the SBOM field
+        sbom.setSbom(bom);
+        // and status
+        sbom.setStatus(SbomStatus.READY);
+
+        log.debug("Updating SBOM: {}", sbom.toString());
+
+        validate(sbom);
+        sbom = sbomRepository.getEntityManager().merge(sbom);
+
+        log.debug("SBOM '{}' updated!", sbom.getId());
+
+        return sbom;
+    }
+
+    /**
+     * Persists given {@link Sbom} in the database.
+     *
+     * @param sbom The {@link Sbom} resource to store in database.
+     * @return Updated {@link Sbom} resource.
+     */
+    @Transactional
+    public Sbom save(Sbom sbom) {
+
+        // Sbom stored = sbomRepository.findById(sbom.getId());
+
         log.debug("Storing sbom: {}", sbom.toString());
 
         sbom.setGenerationTime(Instant.now());
         sbom.setId(Sequence.nextId());
+
+        validate(sbom);
+
+        sbomRepository.persistAndFlush(sbom);
+
+        // TODO
+        // In case of a base SBOM, we start the default processing automatically
+        // if (sbom.getProcessor() == null && sbom.getSbom() != null) {
+        // process(sbom, ProcessorImplementation.DEFAULT);
+        // }
+
+        return sbom;
+    }
+
+    /**
+     * Validates given {@link Sbom}.
+     *
+     * @param sbom
+     */
+    private void validate(Sbom sbom) {
+        log.debug("Performing validation of SBOM: {}", sbom);
 
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
 
@@ -233,20 +333,6 @@ public class SbomService {
                     RestUtils.constraintViolationsToMessages(violations));
         }
 
-        sbomRepository.persistAndFlush(sbom);
-
-        // In case of a base SBOM, we start the default processing automatically
-        if (sbom.getProcessor() == null) {
-            processSbom(sbom, ProcessorImplementation.DEFAULT);
-        }
-
-        return sbom;
-    }
-
-    public static <T> Stream<T> nullableStreamOf(Collection<T> nullableCollection) {
-        if (nullableCollection == null) {
-            return Stream.empty();
-        }
-        return nullableCollection.stream();
+        log.debug("SBOM '{}' is valid!", sbom.getId());
     }
 }

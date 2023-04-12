@@ -49,6 +49,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.validation.CycloneDxBom;
@@ -116,15 +117,21 @@ public class Sbom extends PanacheEntityBase {
     private String buildId;
 
     @Column(name = "root_purl")
-    @NotBlank(message = "Root purl identifier missing")
+    // @NotBlank(message = "Root purl identifier missing") // TODO
     private String rootPurl;
 
+    // TODO: rename this field? Is it covering the creation of the entity, started generation process time or finished
+    // generation time?
     @Column(name = "generation_time", nullable = false, updatable = false)
     private Instant generationTime;
 
     @Column(name = "type", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     private SbomType type;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SbomStatus status;
 
     @Column(name = "generator", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
@@ -149,8 +156,36 @@ public class Sbom extends PanacheEntityBase {
     @ToString.Exclude
     private JsonNode sbom;
 
+    /**
+     * Creates a child of the current {@link Sbom} resource with status set to {@link SbomStatus#NEW}.
+     *
+     * @return New {@link Sbom} resource which parent is set to the current one.
+     */
+    public Sbom giveBirth() {
+        Sbom child = new Sbom();
+        child.setBuildId(this.getBuildId());
+        child.setGenerator(this.getGenerator());
+        child.setProcessor(this.getProcessor());
+        child.setType(this.getType());
+        child.setStatus(SbomStatus.NEW);
+        child.setParentSbom(this);
+
+        return child;
+    }
+
+    /**
+     * Returns the generated SBOM as the CycloneDX {@link Bom} object.
+     *
+     * In case the SBOM is not available yet, returns <code>null</code>.
+     *
+     * @return The {@link Bom} object representing the SBOM.
+     */
     @JsonIgnore
     public Bom getCycloneDxBom() {
+        if (sbom == null) {
+            return null;
+        }
+
         Bom bom = SbomUtils.fromJsonNode(sbom);
 
         if (bom == null) {
@@ -165,15 +200,20 @@ public class Sbom extends PanacheEntityBase {
 
     }
 
+    /**
+     * Updates the purl for the object based on the SBOM content, if provided.
+     *
+     */
     @JsonIgnore
     @PrePersist
     @PreUpdate
     private void setupRootPurl() {
         Bom bom = getCycloneDxBom();
+
+        rootPurl = null;
+
         if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             rootPurl = bom.getMetadata().getComponent().getPurl();
-        } else {
-            rootPurl = null;
         }
     }
 }

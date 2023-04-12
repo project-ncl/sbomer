@@ -39,7 +39,6 @@ import org.jboss.sbomer.cli.client.SBOMerClient;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.cli.service.PNCService;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
@@ -71,11 +70,14 @@ public abstract class AbstractMavenBaseGenerateCommand implements Callable<Integ
 
     @Override
     public Integer call() throws Exception {
+        // First, fetch the SBOM metadata
+        Sbom sbom = sbomerClient.getById(parent.getParent().getSbomId());
+
         // Fetch build information
-        Build build = pncService.getBuild(parent.getParent().getBuildId());
+        Build build = pncService.getBuild(sbom.getBuildId());
 
         if (build == null) {
-            log.error("Could not fetch the PNC build with id '{}'", parent.getParent().getBuildId());
+            log.error("Could not fetch the PNC build with id '{}'", parent.getParent().getSbomId());
             return CommandLine.ExitCode.SOFTWARE;
         }
 
@@ -85,25 +87,9 @@ public abstract class AbstractMavenBaseGenerateCommand implements Callable<Integ
         // Generate the SBOM
         Path bomPath = generate();
 
-        doUpload(bomPath);
-
-        return CommandLine.ExitCode.OK;
-    }
-
-    protected abstract GeneratorImplementation getGeneratorType();
-
-    protected abstract Path generate();
-
-    /**
-     * Responsible for uploading the generated SBOM to the service using a REST endpoint.
-     *
-     * @param bomPath The path to the SBOM file
-     * @throws ParametrizedException In case processing or upload fails.
-     */
-    protected void doUpload(Path bomPath) {
         log.info(
                 "Preparing to upload SBOM for build '{}' from path '{}' to the service...",
-                parent.getParent().getBuildId(),
+                parent.getParent().getSbomId(),
                 bomPath);
 
         log.debug("Reading generated SBOM from '{}' path", bomPath);
@@ -115,23 +101,18 @@ public abstract class AbstractMavenBaseGenerateCommand implements Callable<Integ
             throw new ApplicationException("Could parse the generated SBOM from '{}' path", bomPath.toString());
         }
 
-        log.debug("Creating SBOM object out of the generated SBOM...");
+        log.info("Uploading generated CycloneDX BOM...");
 
-        // Create the Sbom object
-        Sbom sbom = new Sbom();
-        sbom.setBuildId(parent.getParent().getBuildId());
-        sbom.setGenerator(getGeneratorType());
-        sbom.setSbom(SbomUtils.toJsonNode(bom));
-        sbom.setType(SbomType.BUILD_TIME);
+        sbomerClient.updateSbom(String.valueOf(sbom.getId()), SbomUtils.toJsonNode(bom));
 
-        log.debug("SBOM: {}", sbom.toString());
+        log.info("SBOM '{}' updated with generated BOM!", sbom.getId());
 
-        log.info("Uploading generated SBOM...");
-
-        sbomerClient.save(sbom);
-
-        log.info("SBOM uploaded!");
+        return CommandLine.ExitCode.OK;
     }
+
+    protected abstract GeneratorImplementation getGeneratorType();
+
+    protected abstract Path generate();
 
     protected void doClone(String url, String tag, Path path, boolean force) {
         log.info("Cloning '{}' repository and '{}' tag...", url, tag);

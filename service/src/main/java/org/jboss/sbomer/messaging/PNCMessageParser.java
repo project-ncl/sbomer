@@ -106,7 +106,7 @@ public class PNCMessageParser implements Runnable {
                         String buildId = msgBody.path("build").path("id").asText();
                         if (!Strings.isEmpty(buildId)) {
                             log.info("I SHOULD REALLY GENERATE AN SBOM FOR BUILD {}", buildId);
-                            sbomService.generateSbomFromPncBuild(buildId, GeneratorImplementation.CYCLONEDX);
+                            sbomService.generate(buildId, GeneratorImplementation.CYCLONEDX);
                         }
                     }
                 } catch (JMSException | IOException e) {

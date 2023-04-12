@@ -39,8 +39,7 @@ public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, 
     @Override
     public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
         if (value == null) {
-            setPayload(context, Collections.singletonList("sbom: no SBOM provided"));
-            return false;
+            return true;
         }
 
         List<ParseException> exceptions = Collections.emptyList();

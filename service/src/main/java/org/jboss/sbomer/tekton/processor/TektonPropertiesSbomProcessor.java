@@ -33,9 +33,9 @@ import org.jboss.sbomer.tekton.AbstractTektonTaskRunner;
 public class TektonPropertiesSbomProcessor extends AbstractTektonTaskRunner implements SbomProcessor {
 
     @Override
-    public void process(long sbomId) {
+    public void process(Long sbomId) {
         var config = Json.createObjectBuilder().add("processor", "properties").build();
 
-        runTektonTask("sbomer-process", String.valueOf(sbomId), config);
+        runTektonTask("sbomer-process", sbomId, config);
     }
 }

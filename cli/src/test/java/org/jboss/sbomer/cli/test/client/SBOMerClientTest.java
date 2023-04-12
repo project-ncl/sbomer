@@ -43,7 +43,7 @@ public class SBOMerClientTest {
 
     @Test
     void testGetValidSbom() {
-        Sbom sbom = client.getById(123);
+        Sbom sbom = client.getById("123");
         assertNotNull(sbom);
         assertEquals(123, sbom.getId());
         assertEquals("AABBCC", sbom.getBuildId());
@@ -52,7 +52,7 @@ public class SBOMerClientTest {
     @Test
     void testNotFoundSbom() {
         ApiException ex = assertThrows(ApiException.class, () -> {
-            client.getById(1234);
+            client.getById("1234");
         });
 
         assertEquals(404, ex.getCode());

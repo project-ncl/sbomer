@@ -45,11 +45,14 @@ public class SbomerExceptionMapper implements ExceptionMapper<Throwable> {
         if (ex instanceof WebApplicationException) {
             WebApplicationException wex = (WebApplicationException) ex;
 
-            if (wex.getCause() instanceof JsonParseException) {
-                status = 400;
-                message = "An error occurred while parsing the request";
-                errors = Collections.singletonList(((JsonParseException) wex.getCause()).getOriginalMessage());
-            }
+            status = wex.getResponse().getStatus();
+            message = wex.getResponse().getStatusInfo().getReasonPhrase();
+
+            // if (wex.getCause() instanceof JsonParseException) {
+            // // status = 400;
+            // // message = "An error occurred while parsing the request";
+            // errors = Collections.singletonList(((JsonParseException) wex.getCause()).getOriginalMessage());
+            // }
         }
 
         ErrorResponse error = ErrorResponse.builder()

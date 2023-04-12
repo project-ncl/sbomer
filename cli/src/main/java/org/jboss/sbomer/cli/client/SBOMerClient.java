@@ -29,6 +29,8 @@ import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.sbomer.cli.model.Sbom;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * Client used to interact with the SBOMer REST API.
  */
@@ -43,7 +45,8 @@ public interface SBOMerClient {
      * Saves the SBOM in the service.
      */
     @POST
-    String save(Sbom sbom);
+    @Path("/{id}/bom")
+    String updateSbom(@PathParam("id") String sbomId, JsonNode bom);
 
     /**
      * Retrieves SBOM based on the ID.
@@ -53,5 +56,5 @@ public interface SBOMerClient {
      */
     @GET
     @Path("/{id}")
-    Sbom getById(@PathParam("id") long id);
+    Sbom getById(@PathParam("id") String id);
 }

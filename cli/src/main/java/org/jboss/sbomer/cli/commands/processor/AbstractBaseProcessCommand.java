@@ -65,24 +65,9 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
         // Run the actual processing
         Bom processedBom = doProcess(bom);
 
-        // Create the new SBOM based on the old one with updated fields.
-        Sbom newSbom = processed(sbom, processedBom);
-
-        // Save the SBOM in the service
-        sbomerClient.save(newSbom);
+        sbomerClient.updateSbom(parent.getSbomId(), SbomUtils.toJsonNode(processedBom));
 
         return CommandLine.ExitCode.OK;
-    }
-
-    private Sbom processed(Sbom originalSbom, Bom bom) {
-        Sbom processed = new Sbom();
-        processed.setBuildId(originalSbom.getBuildId());
-        processed.setGenerator(originalSbom.getGenerator());
-        processed.setProcessor(getImplementationType());
-        processed.setType(originalSbom.getType());
-        processed.setSbom(SbomUtils.toJsonNode(bom));
-
-        return processed;
     }
 
     protected abstract ProcessorImplementation getImplementationType();

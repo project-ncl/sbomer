@@ -47,7 +47,7 @@ public class ProcessCommand implements Callable<Integer> {
             required = true,
             description = "The SBOM identifier to fetch the SBOM for processing.",
             scope = ScopeType.INHERIT)
-    Long sbomId;
+    String sbomId;
 
     @Spec
     CommandSpec spec;

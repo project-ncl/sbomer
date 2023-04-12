@@ -48,6 +48,8 @@ sbomer:
 
 "%dev":
   quarkus:
+    devservices:
+      enabled: false
     # class-loading:
     #  parent-first-artifacts: io.quarkus:quarkus-bootstrap-maven-resolver
     datasource:
@@ -59,6 +61,12 @@ sbomer:
       database:
         generation: drop-and-create
       log:
+        level: INFO
+        console:
+          format: "%m%n"
+        category:
+          "org.jboss.sbomer":
+            level: DEBUG
         sql: true
     smallrye-openapi:
       info-title: SBOMer service (development)

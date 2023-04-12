@@ -20,7 +20,6 @@ package org.jboss.sbomer.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -28,9 +27,7 @@ import java.util.Iterator;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
 
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.rest.dto.Page;
@@ -47,9 +44,6 @@ public class TestSBOMService {
     @Inject
     SbomService sbomService;
 
-    // @Inject
-    // PncServiceMock pncServiceMock;
-
     @Any
     @Inject
     Instance<SbomProcessor> processors;
@@ -59,7 +53,7 @@ public class TestSBOMService {
     @Test
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
-        Sbom baseSBOM = sbomService.getSbom(INITIAL_BUILD_ID, GeneratorImplementation.CYCLONEDX, null);
+        Sbom baseSBOM = sbomService.getBaseSbomByBuildId(INITIAL_BUILD_ID);
         assertNotNull(baseSBOM);
     }
 
@@ -67,7 +61,7 @@ public class TestSBOMService {
     public void testListBaseSboms() throws IOException {
         log.info("testListBaseSboms ...");
 
-        Page<Sbom> page = sbomService.listSboms(0, 50);
+        Page<Sbom> page = sbomService.list(0, 50);
         assertEquals(0, page.getPageIndex());
         assertEquals(50, page.getPageSize());
         assertTrue(page.getTotalHits() > 0);
@@ -85,15 +79,5 @@ public class TestSBOMService {
         }
 
         assertNotNull(foundSbom);
-    }
-
-    @Test
-    public void testBaseSbomNotFound() throws IOException {
-        log.info("testBaseSbomNotFound ...");
-        try {
-            sbomService.getSbom("I_DO_NOT_EXIST", GeneratorImplementation.CYCLONEDX, null);
-            fail("It should have thrown a 404 exception");
-        } catch (NotFoundException nfe) {
-        }
     }
 }

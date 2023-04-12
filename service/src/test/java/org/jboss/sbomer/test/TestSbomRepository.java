@@ -39,6 +39,7 @@ import org.cyclonedx.model.Component;
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.model.Sbom;
@@ -69,6 +70,7 @@ public class TestSbomRepository extends SbomRepository {
         Sbom parentSBOM = new Sbom();
         parentSBOM.setBuildId("ARYT3LBXDVYAC");
         parentSBOM.setId(416640206274228224L);
+        parentSBOM.setStatus(SbomStatus.READY);
         parentSBOM.setType(SbomType.BUILD_TIME);
         parentSBOM.setGenerationTime(Instant.now());
         parentSBOM.setSbom(sbom);
@@ -85,6 +87,7 @@ public class TestSbomRepository extends SbomRepository {
         Sbom enrichedSBOM = new Sbom();
         enrichedSBOM.setBuildId("ARYT3LBXDVYAC");
         enrichedSBOM.setId(416640206274228225L);
+        enrichedSBOM.setStatus(SbomStatus.READY);
         enrichedSBOM.setType(SbomType.BUILD_TIME);
         enrichedSBOM.setGenerationTime(Instant.now());
         enrichedSBOM.setSbom(sbom);

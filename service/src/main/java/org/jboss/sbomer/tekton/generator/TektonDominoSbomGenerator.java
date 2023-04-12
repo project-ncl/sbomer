@@ -42,12 +42,12 @@ public class TektonDominoSbomGenerator extends AbstractTektonTaskRunner implemen
     String dominoAdditionalArgs;
 
     @Override
-    public void generate(String buildId) throws ApplicationException {
+    public void generate(Long sbomId) throws ApplicationException {
         var config = Json.createObjectBuilder()
                 .add("version", dominoDefaultVersion)
                 .add("additional-args", dominoAdditionalArgs)
                 .build();
-        runTektonTask("sbomer-generate-domino", buildId, config);
+        runTektonTask("sbomer-generate-domino", sbomId, config);
     }
 
 }
