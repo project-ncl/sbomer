@@ -37,6 +37,22 @@ public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
         return find("#" + Sbom.FIND_BY_BUILDID_GENERATOR_PROCESSOR, buildId, generator, processor).singleResult();
     }
 
+    public Sbom getBaseSbomByBuildId(String buildId) {
+        return find("#" + Sbom.FIND_BASE_BY_BUILDID, buildId).singleResult();
+    }
+
+    public Sbom getEnrichedSbomByBuildId(String buildId) {
+        return find("#" + Sbom.FIND_ENRICHED_BY_BUILDID, buildId).singleResult();
+    }
+
+    public Sbom getBaseSbomByRootPurl(String purl) {
+        return find("#" + Sbom.FIND_BASE_BY_ROOT_PURL, purl).singleResult();
+    }
+
+    public Sbom getEnrichedSbomByRootPurl(String purl) {
+        return find("#" + Sbom.FIND_ENRICHED_BY_ROOT_PURL, purl).singleResult();
+    }
+
     public PanacheQuery<Sbom> getAllSbomWithBuildIdQuery(String buildId) {
         return find("#" + Sbom.FIND_ALL_BY_BUILDID, buildId);
     }

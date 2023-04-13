@@ -145,6 +145,54 @@ public class SbomService {
     }
 
     /**
+     * Get base {@link Sbom} for a given PNC build ID.
+     */
+    public Sbom getBaseSbomByBuildId(String buildId) {
+        log.info("Getting base SBOM with buildId: {}", buildId);
+        try {
+            return sbomRepository.getBaseSbomByBuildId(buildId);
+        } catch (NoResultException nre) {
+            throw new NotFoundException("Base SBOM for build id " + buildId + " not found.");
+        }
+    }
+
+    /**
+     * Get enriched {@link Sbom} for a given PNC build ID.
+     */
+    public Sbom getEnrichedSbomByBuildId(String buildId) {
+        log.info("Getting enriched SBOM with buildId: {}", buildId);
+        try {
+            return sbomRepository.getEnrichedSbomByBuildId(buildId);
+        } catch (NoResultException nre) {
+            throw new NotFoundException("Enriched SBOM for build id " + buildId + " not found.");
+        }
+    }
+
+    /**
+     * Get base {@link Sbom} for a given root purl.
+     */
+    public Sbom getBaseSbomByRootPurl(String rootPurl) {
+        log.info("Getting base SBOM with root purl: {}", rootPurl);
+        try {
+            return sbomRepository.getBaseSbomByRootPurl(rootPurl);
+        } catch (NoResultException nre) {
+            throw new NotFoundException("Base SBOM for root purl " + rootPurl + " not found.");
+        }
+    }
+
+    /**
+     * Get enriched {@link Sbom} for a given root purl.
+     */
+    public Sbom getEnrichedSbomByRootPurl(String rootPurl) {
+        log.info("Getting enriched SBOM with root purl: {}", rootPurl);
+        try {
+            return sbomRepository.getEnrichedSbomByRootPurl(rootPurl);
+        } catch (NoResultException nre) {
+            throw new NotFoundException("Enriched SBOM for root purl " + rootPurl + " not found.");
+        }
+    }
+
+    /**
      * Returns {@link Sbom} for the specified identifier.
      *
      * @param sbomId
