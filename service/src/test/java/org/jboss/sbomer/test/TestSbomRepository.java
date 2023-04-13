@@ -19,6 +19,7 @@ package org.jboss.sbomer.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -64,6 +65,7 @@ public class TestSbomRepository extends SbomRepository {
     private Sbom createParentSBOM() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid-parent.json");
         JsonNode sbom = JsonUtils.fromJson(bom, JsonNode.class);
+        // Not setting rootPurl, as it will be set by PrePersist
         Sbom parentSBOM = new Sbom();
         parentSBOM.setBuildId("ARYT3LBXDVYAC");
         parentSBOM.setId(416640206274228224L);
@@ -79,6 +81,7 @@ public class TestSbomRepository extends SbomRepository {
         Sbom parentSbom = createParentSBOM();
         String bom = TestResources.asString("sboms/sbom-valid-enriched-v10.json");
         JsonNode sbom = JsonUtils.fromJson(bom, JsonNode.class);
+        // Not setting rootPurl, as it will be set by PrePersist
         Sbom enrichedSBOM = new Sbom();
         enrichedSBOM.setBuildId("ARYT3LBXDVYAC");
         enrichedSBOM.setId(416640206274228225L);
@@ -105,6 +108,20 @@ public class TestSbomRepository extends SbomRepository {
     }
 
     @Test
+    public void testNonNullRootComponents() {
+        Sbom baseSBOM = getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, null);
+        assertNotNull(baseSBOM.getRootPurl());
+        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom", baseSBOM.getRootPurl());
+
+        Sbom enrichedSbom = getSbom(
+                "ARYT3LBXDVYAC",
+                GeneratorImplementation.CYCLONEDX,
+                ProcessorImplementation.PROPERTIES);
+        assertNotNull(enrichedSbom.getRootPurl());
+        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom", enrichedSbom.getRootPurl());
+    }
+
+    @Test
     public void testGetBaseSbom() throws JsonProcessingException, JsonMappingException {
         Sbom baseSBOM = getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, null);
         Bom bom = baseSBOM.getCycloneDxBom();
@@ -115,8 +132,8 @@ public class TestSbomRepository extends SbomRepository {
         assertEquals(SbomType.BUILD_TIME, baseSBOM.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
-        assertEquals("jcommander", firstComponent.getName());
-        assertEquals("pkg:maven/com.beust/jcommander@1.72?type=jar", firstComponent.getPurl());
+        assertEquals("cpaas-test-pnc-maven", firstComponent.getName());
+        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=jar", firstComponent.getPurl());
 
         Set<ConstraintViolation<Sbom>> violations = validator.validate(baseSBOM);
         if (!violations.isEmpty()) {
@@ -140,8 +157,8 @@ public class TestSbomRepository extends SbomRepository {
         assertNull(sbom.getProcessor());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
-        assertEquals("jcommander", firstComponent.getName());
-        assertEquals("pkg:maven/com.beust/jcommander@1.72?type=jar", firstComponent.getPurl());
+        assertEquals("cpaas-test-pnc-maven", firstComponent.getName());
+        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=jar", firstComponent.getPurl());
 
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
@@ -190,8 +207,10 @@ public class TestSbomRepository extends SbomRepository {
         assertNull(parentSBOM.getProcessor());
         assertEquals("CycloneDX", parentBom.getBomFormat());
         Component firstParentComponent = parentBom.getComponents().get(0);
-        assertEquals("jcommander", firstParentComponent.getName());
-        assertEquals("pkg:maven/com.beust/jcommander@1.72?type=jar", firstParentComponent.getPurl());
+        assertEquals("cpaas-test-pnc-maven", firstParentComponent.getName());
+        assertEquals(
+                "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=jar",
+                firstParentComponent.getPurl());
 
     }
 
