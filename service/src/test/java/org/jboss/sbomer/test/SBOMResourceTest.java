@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.time.Instant;
 
 import org.hamcrest.CoreMatchers;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
@@ -175,7 +173,7 @@ public class SBOMResourceTest {
     }
 
     @Test
-    public void testGetBaseSbomByBuildId() throws IOException {
+    public void testGetBomOfBaseSbomByBuildId() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid-parent.json");
         JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
         Sbom sbom = new Sbom();
@@ -191,7 +189,7 @@ public class SBOMResourceTest {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/base/build/ARYT3LBXDVYAC")
+                .request("GET", "/api/v1alpha1/sboms/build/ARYT3LBXDVYAC/base/bom")
                 .then()
                 .statusCode(200)
                 .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
@@ -200,7 +198,7 @@ public class SBOMResourceTest {
     }
 
     @Test
-    public void testGetBaseSbomByRootPurl() throws IOException {
+    public void testGetBomOfBaseSbomByRootPurl() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid-parent.json");
         JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
         String rootPurl = "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom";
@@ -218,7 +216,7 @@ public class SBOMResourceTest {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/base/purl/" + UrlUtils.urlencode(rootPurl))
+                .request("GET", "/api/v1alpha1/sboms/purl/" + UrlUtils.urlencode(rootPurl) + "/base/bom")
                 .then()
                 .statusCode(200)
                 .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
@@ -227,7 +225,7 @@ public class SBOMResourceTest {
     }
 
     @Test
-    public void testGetEnrichedSbomByBuildId() throws IOException {
+    public void testGetBomOfEnrichedSbomByBuildId() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid-enriched-v10.json");
         JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
         Sbom sbom = new Sbom();
@@ -244,7 +242,7 @@ public class SBOMResourceTest {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/base/build/ARYT3LBXDVYAC")
+                .request("GET", "/api/v1alpha1/sboms/build/ARYT3LBXDVYAC/enriched/bom")
                 .then()
                 .statusCode(200)
                 .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
@@ -257,7 +255,7 @@ public class SBOMResourceTest {
     }
 
     @Test
-    public void testGetEnrichedSbomByRootPurl() throws IOException {
+    public void testGetBomOfEnrichedSbomByRootPurl() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid-enriched-v10.json");
         JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
         String rootPurl = "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom";
@@ -276,7 +274,7 @@ public class SBOMResourceTest {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/base/purl/" + UrlUtils.urlencode(rootPurl))
+                .request("GET", "/api/v1alpha1/sboms/purl/" + UrlUtils.urlencode(rootPurl) + "/enriched/bom")
                 .then()
                 .statusCode(200)
                 .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
