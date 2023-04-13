@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
@@ -44,6 +45,7 @@ import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApiException;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.utils.UrlUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.dto.Page;
 import org.jboss.sbomer.service.SbomService;
@@ -140,11 +142,11 @@ public class SBOMResource {
     }
 
     @GET
-    @Path("/build/{id}")
+    @Path("/build/{buildId}")
     @Operation(
             summary = "Get all SBOMs related to a PNC build",
             description = "Get all the SBOMs related to the specified PNC build, paginated.")
-    @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
     @APIResponses({
             @APIResponse(
                     responseCode = "200",
@@ -159,10 +161,104 @@ public class SBOMResource {
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
     public Page<Sbom> listAllWithPncBuildId(
-            @PathParam("id") String buildId,
+            @PathParam("buildId") String buildId,
             @Valid @BeanParam PaginationParameters paginationParams) {
         return sbomService
                 .listAllSbomsWithBuildId(buildId, paginationParams.getPageIndex(), paginationParams.getPageSize());
+    }
+
+    @GET
+    @Path("/base/build/{buildId}")
+    @Operation(summary = "Get the base SBOM content related to a PNC build")
+    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The base SBOM content in CycloneDX format",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested base SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Bom getBaseSbomWithPncBuildId(@PathParam("buildId") String buildId) {
+
+        return sbomService.getBaseSbomByBuildId(buildId).getCycloneDxBom();
+    }
+
+    @GET
+    @Path("/enriched/build/{buildId}")
+    @Operation(summary = "Get the enriched SBOM content related to a PNC build")
+    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The enriched SBOM content in CycloneDX format",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested enriched SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Bom getEnrichedSbomWithPncBuildId(@PathParam("buildId") String buildId) {
+
+        return sbomService.getEnrichedSbomByBuildId(buildId).getCycloneDxBom();
+    }
+
+    @GET
+    @Path("/base/purl/{rootPurl}")
+    @Operation(summary = "Get the base SBOM content related to a root component purl")
+    @Parameter(
+            name = "rootPurl",
+            description = "Root component purl",
+            example = "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The base SBOM content in CycloneDX format",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested base SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Bom getBaseSbomWithRootPurl(@PathParam("rootPurl") String rootPurl) {
+
+        return sbomService.getBaseSbomByRootPurl(UrlUtils.urldecode(rootPurl)).getCycloneDxBom();
+    }
+
+    @GET
+    @Path("/enriched/purl/{rootPurl}")
+    @Operation(summary = "Get the enriched SBOM content related to a root component purl")
+    @Parameter(
+            name = "buildId",
+            description = "Root component purl",
+            example = "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The enriched SBOM content in CycloneDX format",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested enriched SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Bom getEnrichedSbomWithRootPurl(@PathParam("rootPurl") String rootPurl) {
+
+        return sbomService.getEnrichedSbomByRootPurl(UrlUtils.urldecode(rootPurl)).getCycloneDxBom();
     }
 
     @POST
