@@ -38,8 +38,13 @@ sbomer:
     default-version: "2.7.5"
     additional-args: "--batch-mode --no-transfer-progress --quiet"
   umb:
-    trigger-sbom-generation: false
-    pnc-builds-topic: "Consumer.pncsbomer.prod.VirtualTopic.eng.pnc.>"
+    consumers:
+      enabled: true
+      topic: "Consumer.pncsbomer.prod.VirtualTopic.eng.pnc.>"
+      trigger-sbom-generation: false
+    producers:
+      enabled: false
+      topic: "Consumer.pncsbomer.prod.VirtualTopic.eng.pnc.>"
 
 "%dev":
   quarkus:
@@ -69,8 +74,13 @@ sbomer:
       default-version: "2.7.5"
       additional-args: "--batch-mode --no-transfer-progress"
     umb:
-      trigger-sbom-generation: false
-      pnc-builds-topic: "Consumer.pncsbomer.nonprod.VirtualTopic.eng.pnc.>"
+      consumers:
+        enabled: false
+        topic: "notdefined"
+        trigger-sbom-generation: false
+      producers:
+        enabled: false
+        topic: "notdefined"
 
 "%test":
   quarkus:
@@ -96,5 +106,10 @@ sbomer:
       default-version: "2.7.5"
       additional-args: "--batch-mode --no-transfer-progress"
     umb:
-      trigger-sbom-generation: true
-      pnc-builds-topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"
+      consumers:
+        enabled: true
+        topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"
+        trigger-sbom-generation: true
+      producers:
+        enabled: false
+        topic: "notdefined"
