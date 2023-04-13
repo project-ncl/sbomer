@@ -19,16 +19,22 @@ package org.jboss.sbomer.test;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.with;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.dto.Page;
 import org.jboss.sbomer.service.SbomService;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -55,12 +61,21 @@ public class SBOMResourceTest {
 
     @Test
     public void testShouldAcceptValidSbom() throws IOException {
+        ArgumentCaptor<Sbom> sbomCapture = ArgumentCaptor.forClass(Sbom.class);
+
+        Mockito.doNothing().when(sbomService).processSbom(sbomCapture.capture(), eq(ProcessorImplementation.DEFAULT));
+
         with().body(TestResources.asString("payloads/payload-valid.json"))
                 .when()
                 .contentType(ContentType.JSON)
                 .request("POST", "/api/v1alpha1/sboms")
                 .then()
                 .statusCode(201);
+
+        assertEquals("AWI7P3EJ23YAA", sbomCapture.getValue().getBuildId());
+        assertEquals(GeneratorImplementation.CYCLONEDX, sbomCapture.getValue().getGenerator());
+
+        verify(sbomService, times(1)).processSbom(sbomCapture.getValue(), ProcessorImplementation.DEFAULT);
     }
 
     @Test
