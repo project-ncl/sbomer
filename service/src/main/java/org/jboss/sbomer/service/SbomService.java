@@ -115,6 +115,16 @@ public class SbomService {
     }
 
     /**
+     * Get list of {@link Sbom}s for a given PNC build ID.
+     */
+    public List<Sbom> listAllSbomsWithBuildId(String buildId) {
+        log.debug("Getting list of all SBOMS with buildId: {}", buildId);
+
+        List<Sbom> collection = sbomRepository.getAllSbomWithBuildIdQuery(buildId).list();
+        return nullableStreamOf(collection).collect(Collectors.toList());
+    }
+
+    /**
      * Get list of {@link Sbom}s for a given PNC build ID in a paginated way.
      */
     public Page<Sbom> listAllSbomsWithBuildId(String buildId, int pageIndex, int pageSize) {

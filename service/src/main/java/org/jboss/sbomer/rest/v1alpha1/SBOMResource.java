@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.rest.v1alpha1;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -145,7 +147,7 @@ public class SBOMResource {
     @Path("/build/{buildId}")
     @Operation(
             summary = "Get all SBOMs related to a PNC build",
-            description = "Get all the SBOMs related to the specified PNC build, paginated.")
+            description = "Get all the SBOMs related to the specified PNC build.")
     @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
     @APIResponses({
             @APIResponse(
@@ -160,11 +162,8 @@ public class SBOMResource {
                     responseCode = "500",
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
-    public Page<Sbom> listAllWithPncBuildId(
-            @PathParam("buildId") String buildId,
-            @Valid @BeanParam PaginationParameters paginationParams) {
-        return sbomService
-                .listAllSbomsWithBuildId(buildId, paginationParams.getPageIndex(), paginationParams.getPageSize());
+    public List<Sbom> listAllWithPncBuildId(@PathParam("buildId") String buildId) {
+        return sbomService.listAllSbomsWithBuildId(buildId);
     }
 
     @GET
