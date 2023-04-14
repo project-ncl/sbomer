@@ -25,17 +25,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import org.hamcrest.CoreMatchers;
+import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.core.utils.UrlUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.dto.Page;
 import org.jboss.sbomer.service.SbomService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
@@ -117,7 +123,11 @@ public class SBOMResourceTest {
                 .statusCode(422)
                 .body("message", CoreMatchers.equalTo("SBOM validation error"))
                 .and()
-                .body("errors[0]", CoreMatchers.is("buildId: Build identifier missing"));
+                .body(
+                        "errors",
+                        CoreMatchers.hasItems(
+                                CoreMatchers.is("rootPurl: Root purl identifier missing"),
+                                CoreMatchers.is("buildId: Build identifier missing")));
     }
 
     @Test
@@ -160,5 +170,119 @@ public class SBOMResourceTest {
                 .body("message", CoreMatchers.is("Invalid SBOM id provided: 'fgETHHG4785', a number was expected"))
                 .and()
                 .body("errorId", CoreMatchers.isA(String.class));
+    }
+
+    @Test
+    public void testGetBomOfBaseSbomByBuildId() throws IOException {
+        String bom = TestResources.asString("sboms/sbom-valid-parent.json");
+        JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
+        Sbom sbom = new Sbom();
+        sbom.setBuildId("ARYT3LBXDVYAC");
+        sbom.setId(416640206274228224L);
+        sbom.setType(SbomType.BUILD_TIME);
+        sbom.setGenerationTime(Instant.now());
+        sbom.setSbom(sbomJson);
+        sbom.setRootPurl("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom");
+        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+
+        Mockito.when(sbomService.getBaseSbomByBuildId("ARYT3LBXDVYAC")).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/build/ARYT3LBXDVYAC/base/bom")
+                .then()
+                .statusCode(200)
+                .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
+                .and()
+                .body("metadata.component.version", CoreMatchers.equalTo("1.0.0.redhat-04562"));
+    }
+
+    @Test
+    public void testGetBomOfBaseSbomByRootPurl() throws IOException {
+        String bom = TestResources.asString("sboms/sbom-valid-parent.json");
+        JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
+        String rootPurl = "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom";
+
+        Sbom sbom = new Sbom();
+        sbom.setBuildId("ARYT3LBXDVYAC");
+        sbom.setId(416640206274228224L);
+        sbom.setType(SbomType.BUILD_TIME);
+        sbom.setGenerationTime(Instant.now());
+        sbom.setSbom(sbomJson);
+        sbom.setRootPurl(rootPurl);
+        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+
+        Mockito.when(sbomService.getBaseSbomByRootPurl(rootPurl)).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/purl/" + UrlUtils.urlencode(rootPurl) + "/base/bom")
+                .then()
+                .statusCode(200)
+                .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
+                .and()
+                .body("metadata.component.version", CoreMatchers.equalTo("1.0.0.redhat-04562"));
+    }
+
+    @Test
+    public void testGetBomOfEnrichedSbomByBuildId() throws IOException {
+        String bom = TestResources.asString("sboms/sbom-valid-enriched-v10.json");
+        JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
+        Sbom sbom = new Sbom();
+        sbom.setBuildId("ARYT3LBXDVYAC");
+        sbom.setId(416640206274228224L);
+        sbom.setType(SbomType.BUILD_TIME);
+        sbom.setGenerationTime(Instant.now());
+        sbom.setSbom(sbomJson);
+        sbom.setRootPurl("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom");
+        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+        sbom.setProcessor(ProcessorImplementation.PROPERTIES);
+
+        Mockito.when(sbomService.getEnrichedSbomByBuildId("ARYT3LBXDVYAC")).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/build/ARYT3LBXDVYAC/enriched/bom")
+                .then()
+                .statusCode(200)
+                .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
+                .and()
+                .body("metadata.component.version", CoreMatchers.equalTo("1.0.0.redhat-04562"))
+                .and()
+                .body(
+                        "components.properties.name",
+                        CoreMatchers.hasItem(CoreMatchers.hasItem(CoreMatchers.is("pnc-build-id"))));
+    }
+
+    @Test
+    public void testGetBomOfEnrichedSbomByRootPurl() throws IOException {
+        String bom = TestResources.asString("sboms/sbom-valid-enriched-v10.json");
+        JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
+        String rootPurl = "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom";
+
+        Sbom sbom = new Sbom();
+        sbom.setBuildId("ARYT3LBXDVYAC");
+        sbom.setId(416640206274228224L);
+        sbom.setType(SbomType.BUILD_TIME);
+        sbom.setGenerationTime(Instant.now());
+        sbom.setSbom(sbomJson);
+        sbom.setRootPurl(rootPurl);
+        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+        sbom.setProcessor(ProcessorImplementation.PROPERTIES);
+
+        Mockito.when(sbomService.getBaseSbomByRootPurl(rootPurl)).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/purl/" + UrlUtils.urlencode(rootPurl) + "/enriched/bom")
+                .then()
+                .statusCode(200)
+                .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
+                .and()
+                .body("metadata.component.version", CoreMatchers.equalTo("1.0.0.redhat-04562"))
+                .and()
+                .body(
+                        "components.properties.name",
+                        CoreMatchers.hasItem(CoreMatchers.hasItem(CoreMatchers.is("pnc-build-id"))));
     }
 }

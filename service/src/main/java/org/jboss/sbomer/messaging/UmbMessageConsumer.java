@@ -46,13 +46,16 @@ import io.quarkus.runtime.StartupEvent;
 @Slf4j
 public class UmbMessageConsumer implements MessageConsumer {
 
-    @ConfigProperty(name = "sbomer.umb.pnc-builds-topic")
-    String pncUmbIncomingTopic;
-
     @ConfigProperty(name = "quarkus.qpid-jms.url")
     String amqpConnection;
 
-    @ConfigProperty(name = "sbomer.umb.trigger-sbom-generation")
+    @ConfigProperty(name = "sbomer.umb.consumers.topic")
+    String topic;
+
+    @ConfigProperty(name = "sbomer.umb.consumers.enabled")
+    boolean enabled;
+
+    @ConfigProperty(name = "sbomer.umb.consumers.trigger-sbom-generation")
     boolean generateSboms;
 
     @Inject
@@ -68,8 +71,8 @@ public class UmbMessageConsumer implements MessageConsumer {
     @Override
     public void init(@Observes StartupEvent ev) {
         log.info("Initializing connection: {}", amqpConnection);
-        if (!Strings.isEmpty(pncUmbIncomingTopic)) {
-            pncMessageParser = new PNCMessageParser(connectionFactory, pncUmbIncomingTopic, sbomService, generateSboms);
+        if (!Strings.isEmpty(topic) && enabled) {
+            pncMessageParser = new PNCMessageParser(connectionFactory, topic, sbomService, generateSboms);
             scheduler.submit(pncMessageParser);
         }
     }
@@ -99,10 +102,10 @@ public class UmbMessageConsumer implements MessageConsumer {
     public void checkActiveConnection() throws IOException {
         log.info("Checking if UMB connection is active...");
 
-        if (pncMessageParser != null && pncMessageParser.shouldRun() && !pncMessageParser.isConnected()) {
-            log.info("Reconnecting UMB connection for topic {} ...", pncUmbIncomingTopic);
+        if (enabled && pncMessageParser != null && pncMessageParser.shouldRun() && !pncMessageParser.isConnected()) {
+            log.info("Reconnecting UMB connection for topic {} ...", topic);
 
-            pncMessageParser = new PNCMessageParser(connectionFactory, pncUmbIncomingTopic, sbomService, generateSboms);
+            pncMessageParser = new PNCMessageParser(connectionFactory, topic, sbomService, generateSboms);
             scheduler.submit(pncMessageParser);
         }
     }

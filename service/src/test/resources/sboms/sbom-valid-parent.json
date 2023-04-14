@@ -3,19 +3,111 @@
   "bomFormat": "CycloneDX",
   "metadata": {
     "component": {
-      "name": "jcommander",
-      "purl": "pkg:maven/com.beust/jcommander@1.72?type=jar",
-      "type": "library",
-      "group": "com.beust",
-      "version": "1.72",
+      "publisher": "redhat",
+      "group": "cpaas.tp",
+      "name": "cpaas-test-pnc-maven",
+      "version": "1.0.0.redhat-04562",
+      "description": "Provides, via submodules, a base configuration for JBoss project builds, as well as a derived configuration supporting multi-release JARs",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "c687700ef201fd2ab81e71da01596388"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "a0e9a9ee5635ec94513e89b9282cc718eefa2407"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "4e066a9c790121e2cc7582a21b9a3d53c911f79e13293543814a399f6cf534c0"
+        }
+      ],
       "licenses": [
         {
           "license": {
-            "id": "Apache-2.0"
+            "name": "Public Domain",
+            "url": "http://repository.jboss.org/licenses/cc0-1.0.txt"
           }
         }
       ],
-      "publisher": "central",
+      "purl": "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "http://www.jboss.org/cpaas-test-pnc-maven"
+        },
+        {
+          "type": "distribution",
+          "url": "https://maven.repository.redhat.com/ga/"
+        },
+        {
+          "type": "issue-tracker",
+          "url": "https://issues.jboss.org/"
+        },
+        {
+          "type": "mailing-list",
+          "url": "http://lists.jboss.org/pipermail/jboss-user/"
+        },
+        {
+          "type": "vcs",
+          "url": "cpaas.tp:cpaas-test-pnc-maven"
+        }
+      ],
+      "type": "library"
+    }
+  },
+  "components": [
+    {
+      "publisher": "redhat",
+      "group": "cpaas.tp",
+      "name": "cpaas-test-pnc-maven",
+      "version": "1.0.0.redhat-04562",
+      "description": "Provides, via submodules, a base configuration for JBoss project builds, as well as a derived configuration supporting multi-release JARs",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "c687700ef201fd2ab81e71da01596388"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "a0e9a9ee5635ec94513e89b9282cc718eefa2407"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "4e066a9c790121e2cc7582a21b9a3d53c911f79e13293543814a399f6cf534c0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "Public Domain",
+            "url": "http://repository.jboss.org/licenses/cc0-1.0.txt"
+          }
+        }
+      ],
+      "purl": "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=jar",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "http://www.jboss.org/cpaas-test-pnc-maven"
+        },
+        {
+          "type": "distribution",
+          "url": "https://maven.repository.redhat.com/ga/"
+        },
+        {
+          "type": "issue-tracker",
+          "url": "https://issues.jboss.org/"
+        },
+        {
+          "type": "mailing-list",
+          "url": "http://lists.jboss.org/pipermail/jboss-user/"
+        },
+        {
+          "type": "vcs",
+          "url": "cpaas.tp:cpaas-test-pnc-maven"
+        }
+      ],
       "properties": [
         {
           "name": "package:type",
@@ -26,20 +118,8 @@
           "value": "java"
         }
       ],
-      "description": "Command line parsing",
-      "externalReferences": [
-        {
-          "url": "http://jcommander.org",
-          "type": "website"
-        },
-        {
-          "url": "https://github.com/cbeust/jcommander",
-          "type": "vcs"
-        }
-      ]
-    }
-  },
-  "components": [
+      "type": "library"
+    },
     {
       "name": "jcommander",
       "purl": "pkg:maven/com.beust/jcommander@1.72?type=jar",

@@ -2,6 +2,7 @@
   "buildId": "AWI7P3EJ23YAA",
   "generator": "CYCLONEDX",
   "type": "BUILD_TIME",
+  "rootPurl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
   "sbom": {
     "bomFormat": "CycloneDX",
     "specVersion": "1.4",

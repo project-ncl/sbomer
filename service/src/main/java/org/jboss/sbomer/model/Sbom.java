@@ -33,6 +33,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
@@ -81,12 +83,28 @@ import lombok.ToString;
                 query = "FROM Sbom WHERE buildId = ?1 AND generator = ?2 and processor IS NULL"),
         @NamedQuery(
                 name = Sbom.FIND_BY_BUILDID_GENERATOR_PROCESSOR,
-                query = "FROM Sbom WHERE buildId = ?1 AND generator = ?2 AND processor = ?3") })
+                query = "FROM Sbom WHERE buildId = ?1 AND generator = ?2 AND processor = ?3"),
+        @NamedQuery(
+                name = Sbom.FIND_BASE_BY_BUILDID,
+                query = "FROM Sbom WHERE buildId = ?1 AND generator IS NOT NULL and processor IS NULL"),
+        @NamedQuery(
+                name = Sbom.FIND_ENRICHED_BY_BUILDID,
+                query = "FROM Sbom WHERE buildId = ?1 AND generator IS NOT NULL AND processor IS NOT NULL"),
+        @NamedQuery(
+                name = Sbom.FIND_BASE_BY_ROOT_PURL,
+                query = "FROM Sbom WHERE rootPurl = ?1 AND generator IS NOT NULL and processor IS NULL"),
+        @NamedQuery(
+                name = Sbom.FIND_ENRICHED_BY_ROOT_PURL,
+                query = "FROM Sbom WHERE rootPurl = ?1 AND generator IS NOT NULL AND processor IS NOT NULL") })
 public class Sbom extends PanacheEntityBase {
 
     public static final String FIND_ALL_BY_BUILDID = "Sbom.findAllByBuildId";
     public static final String FIND_BASE_BY_BUILDID_GENERATOR = "Sbom.findBaseByBuildIdGenerator";
     public static final String FIND_BY_BUILDID_GENERATOR_PROCESSOR = "Sbom.findByBuildIdGeneratorProcessor";
+    public static final String FIND_BASE_BY_BUILDID = "Sbom.findBaseByBuildId";
+    public static final String FIND_ENRICHED_BY_BUILDID = "Sbom.findEnrichedByBuildId";
+    public static final String FIND_BASE_BY_ROOT_PURL = "Sbom.findBaseByRootPurl";
+    public static final String FIND_ENRICHED_BY_ROOT_PURL = "Sbom.findEnrichedByRootPurl";
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -96,6 +114,10 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "build_id", nullable = false, updatable = false)
     @NotBlank(message = "Build identifier missing")
     private String buildId;
+
+    @Column(name = "root_purl")
+    @NotBlank(message = "Root purl identifier missing")
+    private String rootPurl;
 
     @Column(name = "generation_time", nullable = false, updatable = false)
     private Instant generationTime;
@@ -141,5 +163,17 @@ public class Sbom extends PanacheEntityBase {
 
         return bom;
 
+    }
+
+    @JsonIgnore
+    @PrePersist
+    @PreUpdate
+    private void setupRootPurl() {
+        Bom bom = getCycloneDxBom();
+        if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
+            rootPurl = bom.getMetadata().getComponent().getPurl();
+        } else {
+            rootPurl = null;
+        }
     }
 }
