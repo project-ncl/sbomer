@@ -25,7 +25,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
   - ../staging
-
+patchesStrategicMerge:
+  - patches/route.yaml
 # List of images used in production
 # TODO: Currently happily using :latest tag but this will be changed in the future
 images:
