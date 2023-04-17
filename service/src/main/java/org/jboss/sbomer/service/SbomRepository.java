@@ -17,12 +17,16 @@
  */
 package org.jboss.sbomer.service;
 
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.model.Sbom;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;

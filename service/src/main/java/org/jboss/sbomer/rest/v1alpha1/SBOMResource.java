@@ -45,6 +45,7 @@ import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.errors.ApiException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.UrlUtils;
@@ -129,7 +130,7 @@ public class SBOMResource {
     @Parameter(name = "sbom", description = "The SBOM to save")
     @APIResponses({
             @APIResponse(
-                    responseCode = "202",
+                    responseCode = "200",
                     description = "The SBOM was successfully saved",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @APIResponse(
@@ -156,7 +157,7 @@ public class SBOMResource {
 
         Sbom sbom = sbomService.updateBom(id, bom);
 
-        return Response.status(Status.ACCEPTED).entity(sbom).build();
+        return Response.status(Status.OK).entity(sbom).build();
     }
 
     @GET
@@ -456,6 +457,14 @@ public class SBOMResource {
 
         if (sbom == null) {
             throw new NotFoundException("Sbom with id '{}' not found", sbomId);
+        }
+
+        if (sbom.getStatus() != SbomStatus.READY) {
+            throw new ApiException(
+                    400,
+                    "Sbom with id '{}' is not ready yet, current status: {}",
+                    sbomId,
+                    sbom.getStatus());
         }
 
         ProcessorImplementation proc = ProcessorImplementation.DEFAULT;

@@ -56,7 +56,12 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Sbom sbom = sbomerClient.getById(parent.getSbomId());
-        Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
+
+        if (sbom.getParentSbom() == null) {
+            throw new ApplicationException("Requested SBOM (id: '{}') does not have a parent SBOM", sbom.getId());
+        }
+
+        Bom bom = SbomUtils.fromJsonNode(sbom.getParentSbom().getSbom());
 
         if (bom == null) {
             throw new ApplicationException("Invalid CycloneDX SBOM received from the '{}' ID", sbom.getId());
@@ -65,7 +70,9 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
         // Run the actual processing
         Bom processedBom = doProcess(bom);
 
-        sbomerClient.updateSbom(parent.getSbomId(), SbomUtils.toJsonNode(processedBom));
+        sbomerClient.updateSbom(String.valueOf(sbom.getId()), SbomUtils.toJsonNode(processedBom));
+
+        log.info("SBOM with id '{}' updated!", sbom.getId());
 
         return CommandLine.ExitCode.OK;
     }
@@ -74,7 +81,7 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
 
     protected Bom doProcess(Bom bom) {
         log.info(
-                "Applying {} processing to the SBOM: {}",
+                "Applying {} processing to the SBOM: '{}'",
                 getImplementationType(),
                 bom.getMetadata().getComponent().getPurl());
 

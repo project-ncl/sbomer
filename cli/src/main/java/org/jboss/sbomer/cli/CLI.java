@@ -44,11 +44,6 @@ public class CLI implements QuarkusApplication {
     @Option(names = { "-v", "--verbose" }, scope = ScopeType.INHERIT)
     boolean verbose = false;
 
-    // public int usage(Class<?> command) {
-    // new CommandLine(command, factory).usage(System.out);
-    // return CommandLine.ExitCode.USAGE;
-    // }
-
     @Override
     public int run(String... args) throws Exception {
         return new CommandLine(this, factory).setExecutionExceptionHandler(new ExceptionHandler()).execute(args);

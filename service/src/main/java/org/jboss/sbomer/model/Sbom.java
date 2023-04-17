@@ -109,7 +109,6 @@ public class Sbom extends PanacheEntityBase {
 
     @Id
     @Column(nullable = false, updatable = false)
-    @ToString.Exclude
     private Long id;
 
     @Column(name = "build_id", nullable = false, updatable = false)
@@ -141,7 +140,7 @@ public class Sbom extends PanacheEntityBase {
     @Enumerated(EnumType.STRING)
     private ProcessorImplementation processor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
             name = "parent_sbom_id",
             foreignKey = @ForeignKey(name = "fk_sbom_parent_sbom"),

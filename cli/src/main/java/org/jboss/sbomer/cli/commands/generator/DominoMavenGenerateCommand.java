@@ -92,8 +92,6 @@ public class DominoMavenGenerateCommand extends AbstractMavenBaseGenerateCommand
                 "--include-non-managed",
                 "--warn-on-missing-scm");
 
-        System.out.println(processBuilder.command());
-
         if (parent.getSettingsXmlPath() != null) {
             log.debug(
                     "Using provided Maven settings.xml configuration file located at '{}'",
@@ -101,9 +99,6 @@ public class DominoMavenGenerateCommand extends AbstractMavenBaseGenerateCommand
             processBuilder.command().add("-s");
             processBuilder.command().add(parent.getSettingsXmlPath().toString());
         }
-
-        // log.info("Working directory: '{}'", parent.getParent().getTargetDir());
-        // processBuilder.directory(parent.getParent().getTargetDir().toFile());
 
         Process process = null;
 

@@ -29,6 +29,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
@@ -52,6 +53,7 @@ import org.jboss.sbomer.rest.dto.Page;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.quarkus.hibernate.orm.panache.Panache;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -85,6 +87,7 @@ public class SbomService {
      * @param generator The selected generator implementation, see {@link GeneratorImplementation}
      * @return Returns a {@link Sbom} object that will represent the generated CycloneDX sbom.
      */
+    @Transactional
     public Sbom generate(String buildId, GeneratorImplementation generator) {
 
         try {
@@ -115,6 +118,7 @@ public class SbomService {
      * @param sbomId SBOM identifier being a {@link Long}
      * @param processor Selected {@link ProcessorImplementation}
      */
+    @Transactional
     public Sbom process(Sbom sbom, ProcessorImplementation processor) {
         log.debug("Preparing to process SBOM id '{}' with '{}' processor", sbom.getId(), processor);
 
@@ -123,12 +127,13 @@ public class SbomService {
 
         // Set the correct status
         child.setStatus(SbomStatus.PROCESSING);
+        child.setProcessor(processor);
 
         // Store the child in database
         child = save(child);
 
         // Schedule processing
-        processors.select(ProcessorLiteral.of(processor)).get().process(sbom.getId());
+        processors.select(ProcessorLiteral.of(processor)).get().process(child.getId());
 
         return child;
     }
@@ -259,7 +264,7 @@ public class SbomService {
     /**
      * Persists changes to given {@link Sbom} in the database.
      *
-     * The difference between the {@link SbomService#create(Sbom)} method is that this one is used for updating
+     * The difference between the {@link SbomService#save(Sbom)} method is that this one is used for updating
      * already-existing resources in the database.
      *
      * @param sbom The {@link Sbom} resource to store in database.
@@ -281,9 +286,10 @@ public class SbomService {
         log.debug("Updating SBOM: {}", sbom.toString());
 
         validate(sbom);
-        sbom = sbomRepository.getEntityManager().merge(sbom);
 
-        log.debug("SBOM '{}' updated!", sbom.getId());
+        sbom = sbomRepository.saveSbom(sbom);
+
+        log.debug("SBOM '{}' updated!", sbomId);
 
         return sbom;
     }
@@ -296,23 +302,18 @@ public class SbomService {
      */
     @Transactional
     public Sbom save(Sbom sbom) {
-
-        // Sbom stored = sbomRepository.findById(sbom.getId());
-
-        log.debug("Storing sbom: {}", sbom.toString());
+        log.debug("Preparing for storing SBOM: {}", sbom.toString());
 
         sbom.setGenerationTime(Instant.now());
         sbom.setId(Sequence.nextId());
 
         validate(sbom);
 
-        sbomRepository.persistAndFlush(sbom);
+        log.debug("Storing SBOM in the database: {}", sbom.toString());
 
-        // TODO
-        // In case of a base SBOM, we start the default processing automatically
-        // if (sbom.getProcessor() == null && sbom.getSbom() != null) {
-        // process(sbom, ProcessorImplementation.DEFAULT);
-        // }
+        sbom = sbomRepository.saveSbom(sbom);
+
+        log.debug("SBOM id: '{}' stored!", sbom.getId());
 
         return sbom;
     }
