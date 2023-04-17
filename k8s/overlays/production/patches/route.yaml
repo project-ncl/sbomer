@@ -23,13 +23,4 @@ metadata:
   labels:
     app.kubernetes.io/component: service
 spec:
-  host: sbomer-stage.apps.ocp-c1.prod.psi.redhat.com
-  to:
-    kind: Service
-    name: sbomer
-    weight: 100
-  port:
-    targetPort: http
-  tls:
-    termination: edge
-  wildcardPolicy: None
+  host: sbomer.apps.ocp-c1.prod.psi.redhat.com
