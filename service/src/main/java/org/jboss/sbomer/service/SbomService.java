@@ -29,7 +29,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
@@ -53,7 +52,6 @@ import org.jboss.sbomer.rest.dto.Page;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.quarkus.hibernate.orm.panache.Panache;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -188,20 +186,6 @@ public class SbomService {
 
         return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
     }
-
-    // /**
-    // * Get list of {@link Sbom}s for a given PNC build ID in a paginated way.
-    // */
-    // public Sbom get(String buildId, GeneratorImplementation generator, ProcessorImplementation processor) {
-    // log.info("Getting SBOM with buildId: {} and generator: {} and processor: {}", buildId, generator, processor);
-    // try {
-    // return sbomRepository.getSbom(buildId, generator, processor);
-    // } catch (NoResultException nre) {
-    // throw new NotFoundException(
-    // "SBOM for build id " + buildId + " and generator " + generator + " and processor " + processor
-    // + " not found.");
-    // }
-    // }
 
     /**
      * Get base {@link Sbom} for a given PNC build ID.
