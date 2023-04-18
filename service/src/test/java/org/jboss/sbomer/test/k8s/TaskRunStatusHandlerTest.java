@@ -78,29 +78,6 @@ public class TaskRunStatusHandlerTest {
     }
 
     @Test
-    void testTaskRunNotKnown() {
-        TaskRun taskRun = new TaskRunBuilder().withNewMetadata().withName("somename").endMetadata().build();
-        assertFalse(statusHandler.isUpdateable(taskRun));
-        assertThat(
-                logHandler.getMessages(),
-                CoreMatchers.hasItems("Found Tekton TaskRun not related to SBOMer: 'somename', skipping"));
-    }
-
-    @Test
-    void testTaskRunMissingSbomId() {
-        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
-                .withName("somename")
-                .withLabels(Map.of(Constants.TEKTON_LABEL_NAME_APP_PART_OF, Constants.TEKTON_LABEL_VALUE_APP_PART_OF))
-                .endMetadata()
-                .build();
-        assertFalse(statusHandler.isUpdateable(taskRun));
-        assertThat(
-                logHandler.getMessages(),
-                CoreMatchers.hasItems(
-                        "Found a Tekton TaskRun without the SBOM id label: 'somename', skipping, but this is not good!"));
-    }
-
-    @Test
     void testTaskRunWithoutStatus() {
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withName("somename")

@@ -34,10 +34,9 @@ import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SbomRepository;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
-import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
+import io.fabric8.tekton.client.TektonClient;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.Startup;
@@ -51,12 +50,12 @@ import lombok.extern.slf4j.Slf4j;
 public class TaskRunStatusHandler {
 
     @Inject
-    KubernetesClient kubernetesClient;
+    TektonClient tektonClient;
 
     @Inject
     SbomRepository sbomRepository;
 
-    SharedInformerFactory factory;
+    SharedIndexInformer<TaskRun> taskRunInformer;
 
     /**
      * A very simple cache so that we don't read the database to get the status of a particular resource.
@@ -72,30 +71,34 @@ public class TaskRunStatusHandler {
 
     @Startup
     public void onStart() {
-        factory = kubernetesClient.informers();
+        log.info("Starting handler for TaskRun status updates...");
 
-        SharedIndexInformer<TaskRun> informer = factory.sharedIndexInformerFor(TaskRun.class, resyncPeriod);
+        taskRunInformer = tektonClient.v1beta1()
+                .taskRuns()
+                .withLabel(Constants.TEKTON_LABEL_NAME_APP_PART_OF, Constants.TEKTON_LABEL_VALUE_APP_PART_OF)
+                .withLabel(Constants.TEKTON_LABEL_SBOM_ID)
+                .inform(new ResourceEventHandler<TaskRun>() {
 
-        informer.addEventHandler(new ResourceEventHandler<TaskRun>() {
+                    @Override
+                    public void onAdd(TaskRun taskRun) {
+                        handleTaskRunUpdate(taskRun);
+                    }
 
-            @Override
-            public void onAdd(TaskRun taskRun) {
-                handleTaskRunUpdate(taskRun);
-            }
+                    @Override
+                    public void onUpdate(TaskRun oldTaskRun, TaskRun taskRun) {
+                        handleTaskRunUpdate(taskRun);
+                    }
 
-            @Override
-            public void onUpdate(TaskRun oldTaskRun, TaskRun taskRun) {
-                handleTaskRunUpdate(taskRun);
-            }
+                    @Override
+                    public void onDelete(TaskRun taskRun, boolean deletedFinalStateUnknown) {
 
-            @Override
-            public void onDelete(TaskRun taskRun, boolean deletedFinalStateUnknown) {
+                    }
 
-            }
+                }, resyncPeriod);
 
-        });
+        taskRunInformer.start();
 
-        factory.startAllRegisteredInformers();
+        log.info("Handler started!");
     }
 
     /**
@@ -105,27 +108,6 @@ public class TaskRunStatusHandler {
      * @return {@code true} if is valid, {@code false} otherwise
      */
     protected boolean isUpdateable(TaskRun taskRun) {
-        String partOf = taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_NAME_APP_PART_OF);
-
-        System.out.println(partOf);
-        System.out.println(Constants.TEKTON_LABEL_VALUE_APP_PART_OF);
-
-        // In case the TaskRun wasn't created by SBOMer, ignore it!
-        if (!Objects.equals(Constants.TEKTON_LABEL_VALUE_APP_PART_OF, partOf)) {
-            log.debug("Found Tekton TaskRun not related to SBOMer: '{}', skipping", taskRun.getMetadata().getName());
-            return false;
-        }
-
-        String sbomId = taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_ID);
-
-        // In case the Sbom ID is not provided, it generally means a bug, but not a fatal one, hopefully
-        if (sbomId == null) {
-            log.warn(
-                    "Found a Tekton TaskRun without the SBOM id label: '{}', skipping, but this is not good!",
-                    taskRun.getMetadata().getName());
-            return false;
-        }
-
         // TaskRun does not have proper status yet, nothing to update, skipping
         if (taskRun.getStatus() == null || taskRun.getStatus().getConditions() == null
                 || taskRun.getStatus().getConditions().isEmpty()) {
@@ -214,6 +196,6 @@ public class TaskRunStatusHandler {
     }
 
     void onStop(@Observes ShutdownEvent ev) {
-        factory.stopAllRegisteredInformers();
+        taskRunInformer.stop();
     }
 }
