@@ -41,4 +41,5 @@ public class Sbom {
     private GeneratorImplementation generator;
     private ProcessorImplementation processor;
     private SbomType type;
+    private Sbom parentSbom;
 }

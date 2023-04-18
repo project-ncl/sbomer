@@ -41,12 +41,12 @@ public class TektonCycloneDXSbomGenerator extends AbstractTektonTaskRunner imple
     String cyclonedxAdditionalArgs;
 
     @Override
-    public void generate(String buildId) {
+    public void generate(Long sbomId) {
         var config = Json.createObjectBuilder()
                 .add("version", cyclonedxDefaultVersion)
                 .add("additional-args", cyclonedxAdditionalArgs)
                 .build();
 
-        runTektonTask("sbomer-generate-cyclonedx", buildId, config);
+        runTektonTask("sbomer-generate-cyclonedx", sbomId, config);
     }
 }

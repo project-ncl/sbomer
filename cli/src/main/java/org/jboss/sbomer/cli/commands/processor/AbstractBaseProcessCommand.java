@@ -56,7 +56,12 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Sbom sbom = sbomerClient.getById(parent.getSbomId());
-        Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
+
+        if (sbom.getParentSbom() == null) {
+            throw new ApplicationException("Requested SBOM (id: '{}') does not have a parent SBOM", sbom.getId());
+        }
+
+        Bom bom = SbomUtils.fromJsonNode(sbom.getParentSbom().getSbom());
 
         if (bom == null) {
             throw new ApplicationException("Invalid CycloneDX SBOM received from the '{}' ID", sbom.getId());
@@ -65,33 +70,17 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
         // Run the actual processing
         Bom processedBom = doProcess(bom);
 
-        // Create the new SBOM based on the old one with updated fields.
-        Sbom newSbom = processed(sbom, processedBom);
+        sbomerClient.updateSbom(String.valueOf(sbom.getId()), SbomUtils.toJsonNode(processedBom));
 
-        // Save the SBOM in the service
-        sbomerClient.save(newSbom);
+        log.info("SBOM with id '{}' updated!", sbom.getId());
 
         return CommandLine.ExitCode.OK;
-    }
-
-    private Sbom processed(Sbom originalSbom, Bom bom) {
-        Sbom processed = new Sbom();
-        processed.setBuildId(originalSbom.getBuildId());
-        processed.setGenerator(originalSbom.getGenerator());
-        processed.setProcessor(getImplementationType());
-        processed.setType(originalSbom.getType());
-        processed.setSbom(SbomUtils.toJsonNode(bom));
-
-        return processed;
     }
 
     protected abstract ProcessorImplementation getImplementationType();
 
     protected Bom doProcess(Bom bom) {
-        log.info(
-                "Applying {} processing to the SBOM: {}",
-                getImplementationType(),
-                bom.getMetadata().getComponent().getPurl());
+        log.info("Applying {} processing...", getImplementationType());
 
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             processComponent(bom.getMetadata().getComponent());

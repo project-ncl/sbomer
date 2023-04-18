@@ -15,19 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.processor;
+package org.jboss.sbomer.core.enums;
 
 /**
- * High-level interaction with the SBOM processor.
- *
+ * Enum representing the status of the Sbom.
  */
-public interface SbomProcessor {
-
-    /**
-     * Processes a given SBOM.
-     *
-     * @param sbomId The SBOM id.
-     */
-    public void process(Long sbomId);
-
+public enum SbomStatus {
+    NEW, GENERATING, GENERATION_FAILED, PROCESSING, PROCESSING_FAILED, READY;
 }

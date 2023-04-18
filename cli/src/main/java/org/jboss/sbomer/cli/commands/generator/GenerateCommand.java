@@ -57,11 +57,11 @@ public class GenerateCommand implements Callable<Integer> {
 
     @Getter
     @Option(
-            names = { "-b", "--build-id" },
+            names = { "--sbom-id" },
             required = true,
-            description = "The PNC build id for which we should fetch the source code, example: AABBCCDD",
+            description = "The SBOM identifier in the SBOMer, example: 1234566",
             scope = ScopeType.INHERIT)
-    String buildId;
+    String sbomId;
 
     @Getter
     @Option(

@@ -28,6 +28,6 @@ public interface SbomGenerator {
      *
      * @param buildId PNC build id
      */
-    public void generate(String buildId);
+    public void generate(Long sbomId);
 
 }

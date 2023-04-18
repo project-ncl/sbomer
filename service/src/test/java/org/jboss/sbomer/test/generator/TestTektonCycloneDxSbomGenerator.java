@@ -81,14 +81,14 @@ public class TestTektonCycloneDxSbomGenerator {
         Mockito.when(v1beta1.taskRuns()).thenReturn(taskRuns);
         Mockito.when(tektonClient.v1beta1()).thenReturn(v1beta1);
 
-        generator.generate("AAABBBB");
+        generator.generate(12345l);
 
         Mockito.verify(tektonClient.v1beta1().taskRuns(), Mockito.times(1)).resource(argThat(taskRun -> {
             assertNotNull(taskRun);
-            assertEquals("sbomer-cyclonedx-aaabbbb-", taskRun.getMetadata().getGenerateName());
+            assertEquals("sbomer-cyclonedx-12345-", taskRun.getMetadata().getGenerateName());
             assertEquals("sbomer-generate-cyclonedx", taskRun.getSpec().getTaskRef().getName());
             assertEquals("sbomer-sa", taskRun.getSpec().getServiceAccountName());
-            assertEquals("AAABBBB", taskRun.getSpec().getParams().get(0).getValue().getStringVal());
+            assertEquals("12345", taskRun.getSpec().getParams().get(0).getValue().getStringVal());
             try {
                 JsonNode config = mapper.readTree(taskRun.getSpec().getParams().get(1).getValue().getStringVal());
                 String version = config.get("version").asText().toString();

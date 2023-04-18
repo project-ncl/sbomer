@@ -40,8 +40,6 @@ public class ClientExceptionMapper implements ResponseExceptionMapper<Throwable>
 
         ErrorResponse error = null;
 
-        System.out.println(response);
-
         try {
             error = objectMapper.readValue((ByteArrayInputStream) response.getEntity(), ErrorResponse.class);
         } catch (IOException e) {
