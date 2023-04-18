@@ -28,6 +28,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.tekton.generator.TektonDominoSbomGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,6 +100,8 @@ public class TestTektonDominoSbomGenerator {
                 fail("Should not have thrown a parse error when processing the config object");
             }
 
+            assertEquals("sbomer", taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_NAME_APP_PART_OF));
+            assertEquals("123456", taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_ID));
             assertEquals(1, taskRun.getSpec().getWorkspaces().size());
             assertEquals("data", taskRun.getSpec().getWorkspaces().get(0).getName());
             return true;
