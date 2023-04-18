@@ -116,7 +116,6 @@ public class Sbom extends PanacheEntityBase {
     private String buildId;
 
     @Column(name = "root_purl")
-    // @NotBlank(message = "Root purl identifier missing") // TODO
     private String rootPurl;
 
     // TODO: rename this field? Is it covering the creation of the entity, started generation process time or finished

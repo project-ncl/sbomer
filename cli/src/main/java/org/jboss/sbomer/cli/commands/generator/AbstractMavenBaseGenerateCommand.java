@@ -77,7 +77,7 @@ public abstract class AbstractMavenBaseGenerateCommand implements Callable<Integ
         Build build = pncService.getBuild(sbom.getBuildId());
 
         if (build == null) {
-            log.error("Could not fetch the PNC build with id '{}'", parent.getParent().getSbomId());
+            log.error("Could not fetch the PNC build with id '{}'", sbom.getBuildId());
             return CommandLine.ExitCode.SOFTWARE;
         }
 
@@ -88,8 +88,9 @@ public abstract class AbstractMavenBaseGenerateCommand implements Callable<Integ
         Path bomPath = generate();
 
         log.info(
-                "Preparing to upload SBOM for build '{}' from path '{}' to the service...",
-                parent.getParent().getSbomId(),
+                "Preparing to update SBOM id: '{}' (PNC build '{}') with generated SBOM content from path '{}'...",
+                sbom.getId(),
+                sbom.getBuildId(),
                 bomPath);
 
         log.debug("Reading generated SBOM from '{}' path", bomPath);

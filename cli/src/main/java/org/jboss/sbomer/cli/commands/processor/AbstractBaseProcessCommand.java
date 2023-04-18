@@ -80,10 +80,7 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
     protected abstract ProcessorImplementation getImplementationType();
 
     protected Bom doProcess(Bom bom) {
-        log.info(
-                "Applying {} processing to the SBOM: '{}'",
-                getImplementationType(),
-                bom.getMetadata().getComponent().getPurl());
+        log.info("Applying {} processing...", getImplementationType());
 
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             processComponent(bom.getMetadata().getComponent());
