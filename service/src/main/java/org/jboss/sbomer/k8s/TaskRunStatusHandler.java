@@ -205,6 +205,11 @@ public class TaskRunStatusHandler {
 
         SbomStatus status = toStatus(taskRun);
 
+        // In case of an unknown status (it shouldn't happen!) we don't do the update
+        if (status == null) {
+            return;
+        }
+
         updateStatus(taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_ID), status);
     }
 
