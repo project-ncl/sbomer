@@ -37,6 +37,7 @@ quarkus:
         level: DEBUG
 
 sbomer:
+  namespace: newcastle
   domino:
     default-version: "0.0.84"
     additional-args: "--include-non-managed"
@@ -53,6 +54,7 @@ sbomer:
       topic: "Consumer.pncsbomer.prod.VirtualTopic.eng.pnc.>"
 
 "%dev":
+  namespace: default
   quarkus:
     devservices:
       enabled: false

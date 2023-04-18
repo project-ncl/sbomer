@@ -21,5 +21,5 @@ package org.jboss.sbomer.core.enums;
  * Enum representing the status of the Sbom.
  */
 public enum SbomStatus {
-    NEW, GENERATING, GENERATION_FAILED, PROCESSING, PROCESSING_FAILED, READY;
+    NEW, IN_PROGRESS, FAILED, READY;
 }

@@ -96,7 +96,6 @@ public class SbomService {
         }
 
         Sbom sbom = new Sbom();
-        sbom.setStatus(SbomStatus.GENERATING);
         sbom.setType(SbomType.BUILD_TIME); // TODO Is it always the case?
         sbom.setBuildId(buildId);
         sbom.setGenerator(generator);
@@ -123,8 +122,6 @@ public class SbomService {
         // Create the child object
         Sbom child = sbom.giveBirth();
 
-        // Set the correct status
-        child.setStatus(SbomStatus.PROCESSING);
         child.setProcessor(processor);
 
         // Store the child in database
@@ -264,8 +261,6 @@ public class SbomService {
 
         // Update the SBOM field
         sbom.setSbom(bom);
-        // and status
-        sbom.setStatus(SbomStatus.READY);
 
         log.debug("Updating SBOM: {}", sbom.toString());
 
