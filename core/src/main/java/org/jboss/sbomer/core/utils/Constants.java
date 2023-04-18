@@ -38,4 +38,24 @@ public class Constants {
     public static final String SUPPLIER_URL = "https://www.redhat.com";
     public static final String MRRC_URL = "https://maven.repository.redhat.com/ga/";
 
+    /**
+     * The Service Account used to run the TaskRun.
+     */
+    public static String TEKTON_SERVICE_ACCOUNT_NAME = "sbomer-sa";
+
+    /**
+     * The label name that identifies the particular Sbom resource.
+     */
+    public static String TEKTON_LABEL_SBOM_ID = "sbomer.jboss.org/sbom-id";
+
+    /**
+     * Default Kubernetes label: app.kubernetes.io/part-of
+     */
+    public static String TEKTON_LABEL_NAME_APP_PART_OF = "app.kubernetes.io/part-of";
+
+    /**
+     * Value for the default Kubernetes label: app.kubernetes.io/part-of: sbomer
+     */
+    public static String TEKTON_LABEL_VALUE_APP_PART_OF = "sbomer";
+
 }

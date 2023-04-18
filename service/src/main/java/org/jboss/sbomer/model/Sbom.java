@@ -129,7 +129,7 @@ public class Sbom extends PanacheEntityBase {
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private SbomStatus status;
+    private SbomStatus status = SbomStatus.NEW;
 
     @Column(name = "generator", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
@@ -165,7 +165,6 @@ public class Sbom extends PanacheEntityBase {
         child.setGenerator(this.getGenerator());
         child.setProcessor(this.getProcessor());
         child.setType(this.getType());
-        child.setStatus(SbomStatus.NEW);
         child.setParentSbom(this);
 
         return child;

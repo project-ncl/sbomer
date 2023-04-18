@@ -27,17 +27,18 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.tekton.generator.TektonCycloneDXSbomGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -99,6 +100,8 @@ public class TestTektonCycloneDxSbomGenerator {
                 fail("Should not have thrown a parse error when processing the config object");
             }
 
+            assertEquals("sbomer", taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_NAME_APP_PART_OF));
+            assertEquals("12345", taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_ID));
             assertEquals(1, taskRun.getSpec().getWorkspaces().size());
             assertEquals("data", taskRun.getSpec().getWorkspaces().get(0).getName());
             return true;

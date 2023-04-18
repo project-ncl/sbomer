@@ -17,9 +17,13 @@
  */
 package org.jboss.sbomer.tekton;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
+
+import org.jboss.sbomer.core.utils.Constants;
 
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
@@ -32,8 +36,6 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
 
 public abstract class AbstractTektonTaskRunner {
-
-    private static String SERVICE_ACCOUNT_NAME = "sbomer-sa";
 
     @Inject
     TektonClient tektonClient;
@@ -53,9 +55,15 @@ public abstract class AbstractTektonTaskRunner {
     protected TaskRun runTektonTask(final String tektonTaskName, final Long id, final JsonObject config) {
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withGenerateName(toTaskRunNamePrefix(tektonTaskName, String.valueOf(id)))
+                .withLabels(
+                        Map.of(
+                                Constants.TEKTON_LABEL_NAME_APP_PART_OF,
+                                Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
+                                Constants.TEKTON_LABEL_SBOM_ID,
+                                String.valueOf(id)))
                 .endMetadata()
                 .withNewSpec()
-                .withServiceAccountName(SERVICE_ACCOUNT_NAME)
+                .withServiceAccountName(Constants.TEKTON_SERVICE_ACCOUNT_NAME)
                 .withNewTaskRef()
                 .withName(tektonTaskName)
                 .endTaskRef()
