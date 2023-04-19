@@ -41,6 +41,10 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
+  - target:
+      kind: Deployment
+      name: sbomer
+    patch: |-
       - op: add
         path: /spec/template/spec/volumes/-
         value:
@@ -99,6 +103,7 @@ patches:
         value:
           name: JAVA_TOOL_OPTIONS
           value: "-Djavax.net.ssl.trustStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.jks -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -Djavax.net.ssl.trustStoreType=PKCS12 -Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.p12 -Djavax.net.ssl.keyStorePassword=${KEYSTORE_PASSWORD} -Djavax.net.ssl.keyStoreType=PKCS12"
+
   - target:
       kind: StatefulSet
     patch: |-
