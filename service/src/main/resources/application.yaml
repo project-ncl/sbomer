@@ -28,7 +28,7 @@ quarkus:
     database:
       generation: update # TODO: This is for now, so that we can work on stage, remove this once we maintain the DB properly
   qpid-jms:
-    url: amqps://umb.api.redhat.com:5671
+    url: "${UMB_BROKER_URL}"
   
   log:
     level: INFO
@@ -47,11 +47,11 @@ sbomer:
   umb:
     consumers:
       enabled: true
-      topic: "Consumer.pncsbomer.prod.VirtualTopic.eng.pnc.>"
+      topic: "${CONSUMER_TOPIC}"
       trigger-sbom-generation: false
     producers:
       enabled: false
-      topic: "Consumer.pncsbomer.prod.VirtualTopic.eng.pnc.>"
+      topic: "${PRODUCER_TOPIC}"
 
 "%dev":
   namespace: default
