@@ -41,6 +41,64 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: volume-secrets-sbomer
+          secret:
+            defaultMode: 420
+            secretName: sbomer-umb
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: volume-secrets-sbomer
+          mountPath: /mnt/secrets-sbomer
+          readOnly: true
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          - name: CONSUMER_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: sbomer-umb
+                key: consumer.topic
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          - name: PRODUCER_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: sbomer-umb
+                key: producer.topic
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          - name: UMB_BROKER_URL
+            valueFrom:
+              secretKeyRef:
+                name: sbomer-umb
+                key: qpid-jms.url
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          - name: TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: sbomer-umb
+                key: nonprod-pnc-sbomer.password
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          - name: KEYSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: sbomer-umb
+                key: nonprod-pnc-sbomer.password
+      - op: add
+        path: "/spec/template/spec/containers/0/env/-"
+        value:
+          - name: JAVA_TOOL_OPTIONS
+            value: "-Djavax.net.ssl.trustStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.jks -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -Djavax.net.ssl.trustStoreType=PKCS12 -Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.p12 -Djavax.net.ssl.keyStorePassword=${KEYSTORE_PASSWORD} -Djavax.net.ssl.keyStoreType=PKCS12"
   - target:
       kind: StatefulSet
     patch: |-
@@ -53,6 +111,7 @@ patches:
       - op: replace
         path: /spec/steps/0/imagePullPolicy
         value: Always
+
 
 # List of images used in staging
 # TODO: Currently happily using :latest tag but this will be changed in the future
