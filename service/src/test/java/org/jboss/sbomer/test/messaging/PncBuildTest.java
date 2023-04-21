@@ -46,12 +46,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.quarkus.artemis.test.ArtemisTestResource;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
 @QuarkusTestResource(ArtemisTestResource.class)
 @TestMethodOrder(OrderAnnotation.class)
 @Slf4j
+@WithKubernetesTestServer
 public class PncBuildTest {
 
     @Inject

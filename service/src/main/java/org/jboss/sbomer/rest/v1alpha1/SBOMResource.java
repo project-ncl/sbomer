@@ -34,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
@@ -48,6 +47,7 @@ import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.errors.ApiException;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.core.utils.UrlUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.dto.Page;
@@ -222,9 +222,10 @@ public class SBOMResource {
                     responseCode = "500",
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
-    public Bom getBomOfBaseSbomWithPncBuildId(@PathParam("buildId") String buildId) {
-
-        return sbomService.getBaseSbomByBuildId(buildId).getCycloneDxBom();
+    public Response getBomOfBaseSbomWithPncBuildId(@PathParam("buildId") String buildId) {
+        return Response.status(Status.OK)
+                .entity(SbomUtils.toJsonNode(sbomService.getBaseSbomByBuildId(buildId).getCycloneDxBom()))
+                .build();
     }
 
     @GET
@@ -266,9 +267,10 @@ public class SBOMResource {
                     responseCode = "500",
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
-    public Bom getBomOfEnrichedSbomWithPncBuildId(@PathParam("buildId") String buildId) {
-
-        return sbomService.getEnrichedSbomByBuildId(buildId).getCycloneDxBom();
+    public Response getBomOfEnrichedSbomWithPncBuildId(@PathParam("buildId") String buildId) {
+        return Response.status(Status.OK)
+                .entity(SbomUtils.toJsonNode(sbomService.getEnrichedSbomByBuildId(buildId).getCycloneDxBom()))
+                .build();
     }
 
     @GET
@@ -316,9 +318,12 @@ public class SBOMResource {
                     responseCode = "500",
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
-    public Bom getBomOfBaseSbomWithRootPurl(@PathParam("rootPurl") String rootPurl) {
-
-        return sbomService.getBaseSbomByRootPurl(UrlUtils.urldecode(rootPurl)).getCycloneDxBom();
+    public Response getBomOfBaseSbomWithRootPurl(@PathParam("rootPurl") String rootPurl) {
+        return Response.status(Status.OK)
+                .entity(
+                        SbomUtils.toJsonNode(
+                                sbomService.getBaseSbomByRootPurl(UrlUtils.urldecode(rootPurl)).getCycloneDxBom()))
+                .build();
     }
 
     @GET
@@ -366,9 +371,12 @@ public class SBOMResource {
                     responseCode = "500",
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
-    public Bom getBomOfEnrichedSbomWithRootPurl(@PathParam("rootPurl") String rootPurl) {
-
-        return sbomService.getEnrichedSbomByRootPurl(UrlUtils.urldecode(rootPurl)).getCycloneDxBom();
+    public Response getBomOfEnrichedSbomWithRootPurl(@PathParam("rootPurl") String rootPurl) {
+        return Response.status(Status.OK)
+                .entity(
+                        SbomUtils.toJsonNode(
+                                sbomService.getEnrichedSbomByRootPurl(UrlUtils.urldecode(rootPurl)).getCycloneDxBom()))
+                .build();
 
     }
 

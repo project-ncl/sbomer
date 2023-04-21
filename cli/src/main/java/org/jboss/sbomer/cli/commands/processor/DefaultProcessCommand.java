@@ -17,19 +17,21 @@
  */
 package org.jboss.sbomer.cli.commands.processor;
 
-import static org.jboss.sbomer.core.utils.Constants.DISTRIBUTION;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
-import org.jboss.sbomer.core.utils.Constants;
+import org.jboss.sbomer.core.utils.RhVersionPattern;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 
+@Slf4j
 @Command(
         mixinStandardHelpOptions = true,
         name = "default",
@@ -37,40 +39,56 @@ import picocli.CommandLine.Command;
         description = "Process the SBOM with enrichments applied to known CycloneDX fields")
 public class DefaultProcessCommand extends AbstractBaseProcessCommand {
     @Override
-    protected void processComponentWithArtifact(Component component, Artifact artifact) {
+    protected void processComponent(Component component) {
+        if (!RhVersionPattern.isRhVersion(component.getVersion())) {
+            log.info("Component unknown to PNC found, purl: '{}', skipping processing", component.getPurl());
+            return;
+        }
+
+        log.info("Component with Red Hat version found, purl: {}", component.getPurl());
+
+        Artifact artifact = pncService.getArtifact(component.getPurl());
+
+        log.debug(
+                "Starting processing of component '{}' with PNC artifact '{}'...",
+                component.getPurl(),
+                artifact.getId());
+
+        SbomUtils.setPublisher(component);
+        SbomUtils.setSupplier(component);
+        SbomUtils.addMrrc(component);
+
+        // Add build-related information, if we found a build in PNC
+        if (artifact.getBuild() != null) {
+            processBuild(component, artifact.getBuild());
+        }
+    }
+
+    private void processBuild(Component component, Build build) {
         SbomUtils.addExternalReference(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM,
-                "https://" + pncService.getApiUrl() + "/pnc-rest/v2/builds/" + artifact.getBuild().getId().toString(),
+                "https://" + pncService.getApiUrl() + "/pnc-rest/v2/builds/" + build.getId().toString(),
                 SBOM_RED_HAT_BUILD_ID);
-        SbomUtils
-                .addExternalReference(component, ExternalReference.Type.DISTRIBUTION, Constants.MRRC_URL, DISTRIBUTION);
+
         SbomUtils.addExternalReference(
                 component,
                 ExternalReference.Type.BUILD_META,
-                artifact.getBuild().getEnvironment().getSystemImageRepositoryUrl() + "/"
-                        + artifact.getBuild().getEnvironment().getSystemImageId(),
+                build.getEnvironment().getSystemImageRepositoryUrl() + "/" + build.getEnvironment().getSystemImageId(),
                 SBOM_RED_HAT_ENVIRONMENT_IMAGE);
         if (!SbomUtils.hasExternalReference(component, ExternalReference.Type.VCS)) {
             SbomUtils.addExternalReference(
                     component,
                     ExternalReference.Type.VCS,
-                    artifact.getBuild().getScmRepository().getExternalUrl(),
+                    build.getScmRepository().getExternalUrl(),
                     "");
         }
 
-        SbomUtils.setPublisher(component);
-        SbomUtils.setSupplier(component);
-        SbomUtils.addPedigreeCommit(
-                component,
-                artifact.getBuild().getScmUrl() + "#" + artifact.getBuild().getScmTag(),
-                artifact.getBuild().getScmRevision());
-
+        SbomUtils.addPedigreeCommit(component, build.getScmUrl() + "#" + build.getScmTag(), build.getScmRevision());
     }
 
     @Override
     protected ProcessorImplementation getImplementationType() {
         return ProcessorImplementation.DEFAULT;
     }
-
 }

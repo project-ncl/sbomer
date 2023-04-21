@@ -17,13 +17,13 @@
  */
 package org.jboss.sbomer.core.utils;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.cyclonedx.BomGeneratorFactory;
@@ -34,7 +34,6 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
-import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
 import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
@@ -64,16 +63,6 @@ public class SbomUtils {
                 .stream()
                 .filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))
                 .count() > 0;
-    }
-
-    public static void addHash(Component component, Algorithm algorithm, String value) {
-        log.debug("addHash {}: {}", algorithm.getSpec(), value);
-        List<Hash> hashes = new ArrayList<Hash>();
-        if (component.getHashes() != null) {
-            hashes.addAll(component.getHashes());
-        }
-        hashes.add(new Hash(algorithm, value));
-        component.setHashes(hashes);
     }
 
     public static void addProperty(Component component, String key, String value) {
@@ -167,7 +156,6 @@ public class SbomUtils {
     }
 
     public static void addMrrc(Component c) {
-        c.setPublisher(Constants.PUBLISHER);
         List<ExternalReference> externalRefs = new ArrayList<>();
         if (c.getExternalReferences() != null) {
             externalRefs.addAll(c.getExternalReferences());
@@ -222,6 +210,15 @@ public class SbomUtils {
     public static Bom fromPath(Path path) {
         try {
             return new JsonParser().parse(path.toFile());
+        } catch (ParseException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static Bom fromString(String bomStr) {
+        try {
+            return new JsonParser().parse(bomStr.getBytes(Charset.defaultCharset()));
         } catch (ParseException e) {
             log.error(e.getMessage(), e);
             return null;

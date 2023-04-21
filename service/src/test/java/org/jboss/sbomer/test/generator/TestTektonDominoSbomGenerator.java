@@ -46,8 +46,10 @@ import io.fabric8.tekton.client.TektonClient;
 import io.fabric8.tekton.client.dsl.V1beta1APIGroupDSL;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 
 @QuarkusTest
+@WithKubernetesTestServer
 public class TestTektonDominoSbomGenerator {
     @Any
     @Inject

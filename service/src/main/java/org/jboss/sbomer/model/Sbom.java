@@ -38,6 +38,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.exception.ParseException;
@@ -125,6 +126,7 @@ public class Sbom extends PanacheEntityBase {
 
     @Column(name = "type", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "Type not specified")
     private SbomType type;
 
     @Column(name = "status", nullable = false)
@@ -133,6 +135,7 @@ public class Sbom extends PanacheEntityBase {
 
     @Column(name = "generator", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "Generator is required")
     private GeneratorImplementation generator;
 
     @Column(name = "processor", nullable = true, updatable = false)

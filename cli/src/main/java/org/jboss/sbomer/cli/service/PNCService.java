@@ -35,10 +35,12 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A service to interact with the PNC build system.
  */
+@Slf4j
 @ApplicationScoped
 public class PNCService {
 
@@ -96,20 +98,25 @@ public class PNCService {
      * @return
      */
     public Artifact getArtifact(String purl) {
+        log.debug("Fetching artifact from PNC for purl '{}'", purl);
+
         try {
             String artifactQuery = "purl==\"" + purl + "\"";
             RemoteCollection<Artifact> artifacts = artifactClient
                     .getAll(null, null, null, Optional.empty(), Optional.of(artifactQuery));
             if (artifacts.size() == 0) {
-                return null;
+                throw new ApplicationException("Artifact with purl '{}' was not found in PNC", purl);
             } else if (artifacts.size() > 1) {
                 throw new IllegalStateException("There should exist only one artifact with purl " + purl);
             }
             return artifacts.iterator().next();
         } catch (RemoteResourceNotFoundException ex) {
-            throw new ApplicationException("Artifact was not found in PNC", ex);
+            throw new ApplicationException("Artifact with purl '{}' was not found in PNC", purl, ex);
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException("Artifact could not be retrieved because PNC responded with an error", ex);
+            throw new ApplicationException(
+                    "Artifact with purl '{}' could not be retrieved because PNC responded with an error",
+                    purl,
+                    ex);
         }
     }
 

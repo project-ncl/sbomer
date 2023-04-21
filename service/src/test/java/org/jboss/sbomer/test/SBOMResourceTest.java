@@ -20,14 +20,16 @@ package org.jboss.sbomer.test;
 import static io.restassured.RestAssured.given;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.Instant;
 
+import org.cyclonedx.model.Bom;
 import org.hamcrest.CoreMatchers;
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.core.utils.UrlUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.dto.Page;
@@ -38,13 +40,15 @@ import org.mockito.Mockito;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectSpy;
+import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.http.ContentType;
 
 @QuarkusTest
+@WithKubernetesTestServer
 public class SBOMResourceTest {
 
-    @InjectSpy
+    @InjectMock
     SbomService sbomService;
 
     @Test
@@ -127,6 +131,35 @@ public class SBOMResourceTest {
     }
 
     @Test
+    public void ensureValidLicense() throws IOException {
+
+        Bom bom = SbomUtils.fromPath(Paths.get("src", "test", "resources", "sboms", "base.json"));
+
+        Sbom sbom = new Sbom();
+        sbom.setBuildId("ARYT3LBXDVYIII");
+        sbom.setId(416640206274228224L);
+        sbom.setType(SbomType.BUILD_TIME);
+        sbom.setGenerationTime(Instant.now());
+        sbom.setSbom(SbomUtils.toJsonNode(bom));
+        sbom.setRootPurl(
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom");
+        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+
+        Mockito.when(sbomService.getBaseSbomByBuildId("ARYT3LBXDVYIII")).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/build/ARYT3LBXDVYIII/base/bom")
+                .then()
+                .statusCode(200)
+                .body("metadata.component.name", CoreMatchers.equalTo("microprofile-graphql-parent"))
+                .and()
+                .body("metadata.component.version", CoreMatchers.equalTo("1.1.0.redhat-00008"))
+                .and()
+                .body("metadata.component.licenses[0].license.id", CoreMatchers.equalTo("Apache-2.0"));
+    }
+
+    @Test
     public void testGetBomOfBaseSbomByRootPurl() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid-parent.json");
         JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
@@ -153,68 +186,6 @@ public class SBOMResourceTest {
                 .body("metadata.component.version", CoreMatchers.equalTo("1.0.0.redhat-04562"));
     }
 
-    @Test
-    public void testGetBomOfEnrichedSbomByBuildId() throws IOException {
-        String bom = TestResources.asString("sboms/sbom-valid-enriched-v10.json");
-        JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
-        Sbom sbom = new Sbom();
-        sbom.setBuildId("ARYT3LBXDVYAC");
-        sbom.setId(416640206274228224L);
-        sbom.setType(SbomType.BUILD_TIME);
-        sbom.setGenerationTime(Instant.now());
-        sbom.setSbom(sbomJson);
-        sbom.setRootPurl("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom");
-        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
-        sbom.setProcessor(ProcessorImplementation.PROPERTIES);
-
-        Mockito.when(sbomService.getEnrichedSbomByBuildId("ARYT3LBXDVYAC")).thenReturn(sbom);
-
-        given().when()
-                .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/build/ARYT3LBXDVYAC/enriched/bom")
-                .then()
-                .statusCode(200)
-                .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
-                .and()
-                .body("metadata.component.version", CoreMatchers.equalTo("1.0.0.redhat-04562"))
-                .and()
-                .body(
-                        "components.properties.name",
-                        CoreMatchers.hasItem(CoreMatchers.hasItem(CoreMatchers.is("pnc-build-id"))));
-    }
-
-    @Test
-    public void testGetBomOfEnrichedSbomByRootPurl() throws IOException {
-        String bom = TestResources.asString("sboms/sbom-valid-enriched-v10.json");
-        JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
-        String rootPurl = "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom";
-
-        Sbom sbom = new Sbom();
-        sbom.setBuildId("ARYT3LBXDVYAC");
-        sbom.setId(416640206274228224L);
-        sbom.setType(SbomType.BUILD_TIME);
-        sbom.setGenerationTime(Instant.now());
-        sbom.setSbom(sbomJson);
-        sbom.setRootPurl(rootPurl);
-        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
-        sbom.setProcessor(ProcessorImplementation.PROPERTIES);
-
-        Mockito.when(sbomService.getBaseSbomByRootPurl(rootPurl)).thenReturn(sbom);
-
-        given().when()
-                .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/purl/" + UrlUtils.urlencode(rootPurl) + "/enriched/bom")
-                .then()
-                .statusCode(200)
-                .body("metadata.component.name", CoreMatchers.equalTo("cpaas-test-pnc-maven"))
-                .and()
-                .body("metadata.component.version", CoreMatchers.equalTo("1.0.0.redhat-04562"))
-                .and()
-                .body(
-                        "components.properties.name",
-                        CoreMatchers.hasItem(CoreMatchers.hasItem(CoreMatchers.is("pnc-build-id"))));
-    }
-
     /**
      * It should return a stub for the {@link Sbom} object, where the sbom field is empty.
      *
@@ -222,6 +193,15 @@ public class SBOMResourceTest {
      */
     @Test
     public void shouldStartGenerationForAGivenPncBuild() throws IOException {
+        Sbom sbom = new Sbom();
+        sbom.setBuildId("AABBCC");
+        sbom.setId(416640206274228224L);
+        sbom.setType(SbomType.BUILD_TIME);
+        sbom.setGenerationTime(Instant.now());
+        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+
+        Mockito.when(sbomService.generate("AABBCC", GeneratorImplementation.CYCLONEDX)).thenReturn(sbom);
+
         given().when()
                 .contentType(ContentType.JSON)
                 .request("POST", "/api/v1alpha1/sboms/generate/build/AABBCC")

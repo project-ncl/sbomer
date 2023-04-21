@@ -19,6 +19,7 @@ package org.jboss.sbomer.core.test;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -28,8 +29,15 @@ public class TestResources {
     /**
      * Reads test resource file and returns it as a String.
      */
+    public static String asString(Path path) throws IOException {
+        return Files.readString(path);
+    }
+
+    /**
+     * Reads test resource file and returns it as a String.
+     */
     public static String asString(String path) throws IOException {
-        return Files.readString(Paths.get("src", "test", "resources", path));
+        return TestResources.asString(Paths.get("src", "test", "resources", path));
     }
 
     /**
@@ -37,6 +45,6 @@ public class TestResources {
      */
     @SuppressWarnings("unchecked")
     public static Map<Object, Object> asMap(String path) throws IOException {
-        return new ObjectMapper().readValue(asString(path), Map.class);
+        return new ObjectMapper().readValue(TestResources.asString(path), Map.class);
     }
 }

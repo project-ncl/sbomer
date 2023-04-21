@@ -24,29 +24,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.Iterator;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.rest.dto.Page;
 import org.jboss.sbomer.service.SbomService;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
+@WithKubernetesTestServer
 @Slf4j
 public class TestSBOMService {
 
     @Inject
     SbomService sbomService;
-
-    @Any
-    @Inject
-    Instance<SbomProcessor> processors;
 
     private static final String INITIAL_BUILD_ID = "ARYT3LBXDVYAC";
 
@@ -60,6 +57,13 @@ public class TestSBOMService {
     @Test
     public void testListBaseSboms() throws IOException {
         log.info("testListBaseSboms ...");
+
+        Sbom dummySbom = new Sbom();
+        dummySbom.setBuildId(INITIAL_BUILD_ID);
+        dummySbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+        dummySbom.setType(SbomType.BUILD_TIME);
+
+        sbomService.save(dummySbom);
 
         Page<Sbom> page = sbomService.list(0, 50);
         assertEquals(0, page.getPageIndex());

@@ -37,12 +37,11 @@ quarkus:
         level: DEBUG
 
 sbomer:
-  namespace: newcastle
   domino:
-    default-version: "0.0.84"
+    default-version: "0.0.86"
     additional-args: "--include-non-managed"
   cyclonedx:
-    default-version: "2.7.5"
+    default-version: "2.7.7"
     additional-args: "--batch-mode --no-transfer-progress --quiet"
   umb:
     consumers:
@@ -54,7 +53,6 @@ sbomer:
       topic: "${PRODUCER_TOPIC}"
 
 "%dev":
-  namespace: default
   quarkus:
     devservices:
       enabled: false
@@ -67,21 +65,25 @@ sbomer:
         url: jdbc:postgresql://localhost:5432/sbomer
     hibernate-orm:
       database:
-        generation: drop-and-create
+        generation: update
       log:
         sql: true
     smallrye-openapi:
       info-title: SBOMer service (development)
+    qpid-jms:
+      url: amqp://localhost:5672
+      username: ""
+      password: ""
 
   sbomer:
     generation:
       local:
         path: /tmp/sbomer
     domino:
-      default-version: "0.0.84"
+      default-version: "0.0.86"
       additional-args: "--include-non-managed"
     cyclonedx:
-      default-version: "2.7.5"
+      default-version: "2.7.7"
       additional-args: "--batch-mode --no-transfer-progress"
     umb:
       consumers:
@@ -110,10 +112,10 @@ sbomer:
 
   sbomer:
     domino:
-      default-version: "0.0.84"
+      default-version: "0.0.86"
       additional-args: "--include-non-managed"
     cyclonedx:
-      default-version: "2.7.5"
+      default-version: "2.7.7"
       additional-args: "--batch-mode --no-transfer-progress"
     umb:
       consumers:

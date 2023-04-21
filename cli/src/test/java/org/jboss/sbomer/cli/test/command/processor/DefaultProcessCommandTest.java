@@ -31,6 +31,7 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.ExternalReference.Type;
 import org.hamcrest.CoreMatchers;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
@@ -97,10 +98,12 @@ public class DefaultProcessCommandTest extends DefaultProcessCommand {
                 .build();
     }
 
+    private List<String> getExternalReferences(Component component, ExternalReference.Type type) {
+        return SbomUtils.getExternalReferences(component, type).stream().map(ref -> ref.getUrl()).toList();
+    }
+
     private void assertExternalReference(Component component, ExternalReference.Type type, String value) {
-        assertThat(
-                SbomUtils.getExternalReferences(component, type).stream().map(ref -> ref.getUrl()).toList(),
-                CoreMatchers.hasItem(value));
+        assertThat(getExternalReferences(component, type), CoreMatchers.hasItem(value));
     }
 
     @Test
@@ -141,6 +144,9 @@ public class DefaultProcessCommandTest extends DefaultProcessCommand {
             assertTrue(componentOpt.isPresent());
             Component component = componentOpt.get();
 
+            List<String> hashes = component.getHashes().stream().map(h -> h.getValue()).toList();
+
+            assertEquals(3, hashes.size());
             assertEquals(2, component.getProperties().size());
 
             assertExternalReference(
@@ -162,5 +168,64 @@ public class DefaultProcessCommandTest extends DefaultProcessCommand {
             assertEquals("scmrevision", commit.getUid());
             assertEquals("scmurl#scmtag", commit.getUrl());
         }
+    }
+
+    @Test
+    void shouldHandleArtifactsBuiltOutsideOfPNC() throws Exception {
+        Mockito.when(pncService.getApiUrl()).thenReturn("apiurl");
+
+        String[] componentPurls = { "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar",
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-api@1.1.0.redhat-00008?type=jar",
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-tck@1.1.0.redhat-00008?type=jar" };
+
+        for (String purl : componentPurls) {
+            Mockito.when(pncService.getArtifact(purl)).thenReturn(generateArtifact(purl));
+        }
+
+        String specialPurl = "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar";
+        Artifact artifact = Artifact.builder()
+                .id("AA1122")
+                .md5("md5")
+                .sha1("sha1")
+                .sha256("sha256")
+                .purl(specialPurl)
+                .publicUrl("artifactpublicurl")
+                .originUrl("originurl")
+                .build();
+
+        Mockito.when(pncService.getArtifact(specialPurl)).thenReturn(artifact);
+
+        Bom bom = SbomUtils.fromJsonNode(generateBom());
+
+        doProcess(bom);
+
+        Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(specialPurl, bom);
+        assertTrue(componentOpt.isPresent());
+        Component component = componentOpt.get();
+
+        assertEquals(2, component.getProperties().size());
+
+        assertEquals("Red Hat", component.getPublisher());
+        assertEquals("Red Hat", component.getSupplier().getName());
+        assertEquals(List.of("https://www.redhat.com"), component.getSupplier().getUrls());
+
+        assertExternalReference(
+                component,
+                ExternalReference.Type.DISTRIBUTION,
+                "https://maven.repository.redhat.com/ga/");
+
+        List<String> systems = getExternalReferences(component, Type.BUILD_SYSTEM);
+
+        // It should contain only a single, default entry which is not enriched
+        assertEquals(1, systems.size());
+        assertEquals("https://builds.apache.org/", systems.get(0));
+
+        List<String> vcss = getExternalReferences(component, Type.BUILD_SYSTEM);
+
+        // It should contain only a single, default entry which is not enriched
+        assertEquals(1, vcss.size());
+        assertEquals("https://builds.apache.org/", vcss.get(0));
+
+        assertEquals(0, getExternalReferences(component, Type.BUILD_META).size());
     }
 }
