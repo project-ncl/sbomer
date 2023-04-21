@@ -52,7 +52,7 @@
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
         <failsafe-plugin.version>3.0.0-M7</failsafe-plugin.version>
-        <version.cyclonedx>7.3.1</version.cyclonedx>
+        <version.cyclonedx>7.3.2</version.cyclonedx>
         <version.hibernatetypes>1.0.1</version.hibernatetypes>
         <version.lombok>1.18.26</version.lombok>
         <version.mapstruct>1.4.2.Final</version.mapstruct>

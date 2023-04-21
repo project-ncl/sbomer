@@ -42,7 +42,7 @@ sbomer:
     default-version: "0.0.84"
     additional-args: "--include-non-managed"
   cyclonedx:
-    default-version: "2.7.5"
+    default-version: "2.7.7"
     additional-args: "--batch-mode --no-transfer-progress --quiet"
   umb:
     consumers:
@@ -72,6 +72,10 @@ sbomer:
         sql: true
     smallrye-openapi:
       info-title: SBOMer service (development)
+    qpid-jms:
+      url: amqp://localhost:5672
+      username: ""
+      password: ""
 
   sbomer:
     generation:
@@ -81,7 +85,7 @@ sbomer:
       default-version: "0.0.84"
       additional-args: "--include-non-managed"
     cyclonedx:
-      default-version: "2.7.5"
+      default-version: "2.7.7"
       additional-args: "--batch-mode --no-transfer-progress"
     umb:
       consumers:
@@ -113,7 +117,7 @@ sbomer:
       default-version: "0.0.84"
       additional-args: "--include-non-managed"
     cyclonedx:
-      default-version: "2.7.5"
+      default-version: "2.7.7"
       additional-args: "--batch-mode --no-transfer-progress"
     umb:
       consumers:

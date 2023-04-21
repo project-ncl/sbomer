@@ -18,30 +18,30 @@
 package org.jboss.sbomer.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.enums.SbomType;
-import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SbomRepository;
 import org.jboss.sbomer.test.utils.QuarkusTransactionalTest;
@@ -49,23 +49,28 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 
-import io.quarkus.arc.Priority;
 import io.quarkus.logging.Log;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 
-@Priority(1)
-@Alternative
 @ApplicationScoped
 @QuarkusTransactionalTest
-public class TestSbomRepository extends SbomRepository {
+@WithKubernetesTestServer
+public class TestSbomRepository {
 
     @Inject
     Validator validator;
 
+    @Inject
+    SbomRepository sbomRepository;
+
+    static Path sbomPath(String fileName) {
+        return Paths.get("src", "test", "resources", "sboms", fileName);
+    }
+
     private Sbom createParentSBOM() throws IOException {
-        String bom = TestResources.asString("sboms/sbom-valid-parent.json");
-        JsonNode sbom = JsonUtils.fromJson(bom, JsonNode.class);
+        Bom bom = SbomUtils.fromPath(sbomPath("base.json"));
+
         // Not setting rootPurl, as it will be set by PrePersist
         Sbom parentSBOM = new Sbom();
         parentSBOM.setBuildId("ARYT3LBXDVYAC");
@@ -73,16 +78,15 @@ public class TestSbomRepository extends SbomRepository {
         parentSBOM.setStatus(SbomStatus.READY);
         parentSBOM.setType(SbomType.BUILD_TIME);
         parentSBOM.setGenerationTime(Instant.now());
-        parentSBOM.setSbom(sbom);
+        parentSBOM.setSbom(SbomUtils.toJsonNode(bom));
         parentSBOM.setGenerator(GeneratorImplementation.CYCLONEDX);
         parentSBOM.setParentSbom(null);
         return parentSBOM;
     }
 
-    private Sbom createEnrichedSBOM() throws IOException {
-        Sbom parentSbom = createParentSBOM();
-        String bom = TestResources.asString("sboms/sbom-valid-enriched-v10.json");
-        JsonNode sbom = JsonUtils.fromJson(bom, JsonNode.class);
+    private Sbom createEnrichedSBOM(Sbom parentSbom) throws IOException {
+        Bom bom = SbomUtils.fromPath(sbomPath("processed-default.json"));
+
         // Not setting rootPurl, as it will be set by PrePersist
         Sbom enrichedSBOM = new Sbom();
         enrichedSBOM.setBuildId("ARYT3LBXDVYAC");
@@ -90,43 +94,41 @@ public class TestSbomRepository extends SbomRepository {
         enrichedSBOM.setStatus(SbomStatus.READY);
         enrichedSBOM.setType(SbomType.BUILD_TIME);
         enrichedSBOM.setGenerationTime(Instant.now());
-        enrichedSBOM.setSbom(sbom);
+        enrichedSBOM.setSbom(SbomUtils.toJsonNode(bom));
         enrichedSBOM.setGenerator(parentSbom.getGenerator());
-        enrichedSBOM.setProcessor(ProcessorImplementation.PROPERTIES);
+        enrichedSBOM.setProcessor(ProcessorImplementation.DEFAULT);
         enrichedSBOM.setParentSbom(parentSbom);
         return enrichedSBOM;
     }
 
     @PostConstruct
-    public void init() {
-        try {
-            Sbom parentSBOM = createParentSBOM();
-            saveSbom(parentSBOM);
+    public void init() throws Exception {
+        Sbom parentSBOM = createParentSBOM();
+        parentSBOM = sbomRepository.saveSbom(parentSBOM);
 
-            Sbom enrichedSBOM = createEnrichedSBOM();
-            saveSbom(enrichedSBOM);
-        } catch (IOException exc) {
-            Log.error("Failed to persist parent and enriched SBOMs", exc);
-        }
+        Sbom enrichedSBOM = createEnrichedSBOM(parentSBOM);
+        sbomRepository.saveSbom(enrichedSBOM);
     }
 
     @Test
     public void testNonNullRootComponents() {
-        Sbom baseSBOM = getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, null);
+        Sbom baseSBOM = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, null);
         assertNotNull(baseSBOM.getRootPurl());
-        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom", baseSBOM.getRootPurl());
+        assertEquals(
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
+                baseSBOM.getRootPurl());
 
-        Sbom enrichedSbom = getSbom(
-                "ARYT3LBXDVYAC",
-                GeneratorImplementation.CYCLONEDX,
-                ProcessorImplementation.PROPERTIES);
+        Sbom enrichedSbom = sbomRepository
+                .getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, ProcessorImplementation.DEFAULT);
         assertNotNull(enrichedSbom.getRootPurl());
-        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=pom", enrichedSbom.getRootPurl());
+        assertEquals(
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
+                enrichedSbom.getRootPurl());
     }
 
     @Test
     public void testGetBaseSbom() throws JsonProcessingException, JsonMappingException {
-        Sbom baseSBOM = getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, null);
+        Sbom baseSBOM = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, null);
         Bom bom = baseSBOM.getCycloneDxBom();
 
         assertEquals(416640206274228224L, baseSBOM.getId());
@@ -135,8 +137,10 @@ public class TestSbomRepository extends SbomRepository {
         assertEquals(SbomType.BUILD_TIME, baseSBOM.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
-        assertEquals("cpaas-test-pnc-maven", firstComponent.getName());
-        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=jar", firstComponent.getPurl());
+        assertEquals("microprofile-graphql-spec", firstComponent.getName());
+        assertEquals(
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",
+                firstComponent.getPurl());
 
         Set<ConstraintViolation<Sbom>> violations = validator.validate(baseSBOM);
         if (!violations.isEmpty()) {
@@ -150,7 +154,7 @@ public class TestSbomRepository extends SbomRepository {
 
     @Test
     public void testFindByIdSbom() {
-        Sbom sbom = findById(416640206274228224L);
+        Sbom sbom = sbomRepository.findById(416640206274228224L);
         Bom bom = sbom.getCycloneDxBom();
 
         assertEquals(416640206274228224L, sbom.getId());
@@ -160,8 +164,10 @@ public class TestSbomRepository extends SbomRepository {
         assertNull(sbom.getProcessor());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
-        assertEquals("cpaas-test-pnc-maven", firstComponent.getName());
-        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=jar", firstComponent.getPurl());
+        assertEquals("microprofile-graphql-spec", firstComponent.getName());
+        assertEquals(
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",
+                firstComponent.getPurl());
 
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
@@ -175,21 +181,21 @@ public class TestSbomRepository extends SbomRepository {
 
     @Test
     public void testGetEnrichedSbom() throws JsonProcessingException, JsonMappingException {
-        Sbom enrichedSbom = getSbom(
-                "ARYT3LBXDVYAC",
-                GeneratorImplementation.CYCLONEDX,
-                ProcessorImplementation.PROPERTIES);
+        Sbom enrichedSbom = sbomRepository
+                .getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, ProcessorImplementation.DEFAULT);
         Bom bom = enrichedSbom.getCycloneDxBom();
 
         assertEquals(416640206274228225L, enrichedSbom.getId());
         assertEquals("ARYT3LBXDVYAC", enrichedSbom.getBuildId());
         assertEquals(GeneratorImplementation.CYCLONEDX, enrichedSbom.getGenerator());
-        assertEquals(ProcessorImplementation.PROPERTIES, enrichedSbom.getProcessor());
+        assertEquals(ProcessorImplementation.DEFAULT, enrichedSbom.getProcessor());
         assertEquals(SbomType.BUILD_TIME, enrichedSbom.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
-        assertEquals("cpaas-test-pnc-maven", firstComponent.getName());
-        assertEquals("pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=jar", firstComponent.getPurl());
+        assertEquals("microprofile-graphql-spec", firstComponent.getName());
+        assertEquals(
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",
+                firstComponent.getPurl());
 
         Set<ConstraintViolation<Sbom>> violations = validator.validate(enrichedSbom);
         if (!violations.isEmpty()) {
@@ -210,9 +216,9 @@ public class TestSbomRepository extends SbomRepository {
         assertNull(parentSBOM.getProcessor());
         assertEquals("CycloneDX", parentBom.getBomFormat());
         Component firstParentComponent = parentBom.getComponents().get(0);
-        assertEquals("cpaas-test-pnc-maven", firstParentComponent.getName());
+        assertEquals("microprofile-graphql-spec", firstParentComponent.getName());
         assertEquals(
-                "pkg:maven/cpaas.tp/cpaas-test-pnc-maven@1.0.0.redhat-04562?type=jar",
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",
                 firstParentComponent.getPurl());
 
     }

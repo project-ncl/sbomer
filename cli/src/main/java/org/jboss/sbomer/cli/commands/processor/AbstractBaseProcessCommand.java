@@ -17,14 +17,19 @@
  */
 package org.jboss.sbomer.cli.commands.processor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Hash;
+import org.cyclonedx.model.Hash.Algorithm;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.CLI;
 import org.jboss.sbomer.cli.client.SBOMerClient;
 import org.jboss.sbomer.cli.model.Sbom;
@@ -94,28 +99,10 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
         return bom;
     }
 
-    private void processComponent(Component component) {
-        if (RhVersionPattern.isRhVersion(component.getVersion())) {
-            log.info("SBOM component with Red Hat version found, purl: {}", component.getPurl());
-
-            Artifact artifact = null;
-
-            try {
-                artifact = pncService.getArtifact(component.getPurl());
-            } catch (ApplicationException e) {
-                log.warn(e.getMessage());
-                return;
-            }
-
-            log.debug(
-                    "Processing Component '{}' with PNC artifact '{}' from Build '{}'",
-                    component.getPurl(),
-                    artifact.getId(),
-                    artifact.getBuild().getId());
-            processComponentWithArtifact(component, artifact);
-        }
-    }
-
-    protected abstract void processComponentWithArtifact(Component component, Artifact artifact);
-
+    /**
+     * Performs processing for a given {@link Component}.
+     *
+     * @param component
+     */
+    protected abstract void processComponent(Component component);
 }

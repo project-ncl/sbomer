@@ -19,7 +19,6 @@ package org.jboss.sbomer.k8s;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -196,6 +195,8 @@ public class TaskRunStatusHandler {
     }
 
     void onStop(@Observes ShutdownEvent ev) {
-        taskRunInformer.stop();
+        if (taskRunInformer != null) {
+            taskRunInformer.stop();
+        }
     }
 }
