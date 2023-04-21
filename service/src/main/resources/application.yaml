@@ -37,9 +37,8 @@ quarkus:
         level: DEBUG
 
 sbomer:
-  namespace: newcastle
   domino:
-    default-version: "0.0.84"
+    default-version: "0.0.86"
     additional-args: "--include-non-managed"
   cyclonedx:
     default-version: "2.7.7"
@@ -54,7 +53,6 @@ sbomer:
       topic: "${PRODUCER_TOPIC}"
 
 "%dev":
-  namespace: default
   quarkus:
     devservices:
       enabled: false
@@ -67,7 +65,7 @@ sbomer:
         url: jdbc:postgresql://localhost:5432/sbomer
     hibernate-orm:
       database:
-        generation: drop-and-create
+        generation: update
       log:
         sql: true
     smallrye-openapi:
@@ -82,7 +80,7 @@ sbomer:
       local:
         path: /tmp/sbomer
     domino:
-      default-version: "0.0.84"
+      default-version: "0.0.86"
       additional-args: "--include-non-managed"
     cyclonedx:
       default-version: "2.7.7"
@@ -114,7 +112,7 @@ sbomer:
 
   sbomer:
     domino:
-      default-version: "0.0.84"
+      default-version: "0.0.86"
       additional-args: "--include-non-managed"
     cyclonedx:
       default-version: "2.7.7"
