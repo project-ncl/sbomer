@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
@@ -32,6 +34,7 @@ import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.features.umb.UmbConfig;
 import org.jboss.sbomer.service.SbomService;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -41,9 +44,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import io.quarkus.arc.Unremovable;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Unremovable
+@ApplicationScoped
 public class PNCMessageParser implements Runnable {
 
     private static final ObjectMapper msgMapper = new ObjectMapper();
@@ -59,32 +65,34 @@ public class PNCMessageParser implements Runnable {
     private AtomicBoolean shouldRun = new AtomicBoolean(false);
     private AtomicBoolean connected = new AtomicBoolean(false);
     private AtomicInteger receivedMessages = new AtomicInteger(0);
-    private ConnectionFactory cf;
+
+    @Inject
     private SbomService sbomService;
-    private boolean generateSboms;
-    private String incomingTopic;
+
+    @Inject
+    UmbConfig config;
+
+    @Inject
+    ConnectionFactory cf;
+
     private Message lastMessage;
 
-    public PNCMessageParser(
-            ConnectionFactory cf,
-            String incomingTopic,
-            SbomService sbomService,
-            boolean generateSboms) {
-        this.cf = cf;
-        this.incomingTopic = incomingTopic;
-        this.sbomService = sbomService;
-        this.generateSboms = generateSboms;
+    public PNCMessageParser() {
         this.shouldRun.set(true);
     }
 
     @Override
     public void run() {
-        log.info("Listening on topic: {}", incomingTopic);
+        if (config.consumer().topic().isEmpty()) {
+            log.warn("Topic not specified, PNC message parser won't run");
+        }
+
+        log.info("Listening on topic: {}", config.consumer().topic().get());
 
         try (JMSContext context = cf.createContext(Session.AUTO_ACKNOWLEDGE)) {
             log.info("JMS client ID {}.", context.getClientID());
 
-            JMSConsumer consumer = context.createConsumer(context.createQueue(incomingTopic));
+            JMSConsumer consumer = context.createConsumer(context.createQueue(config.consumer().topic().get()));
             while (shouldRun.get()) {
                 connected.set(true);
                 Message message = consumer.receive();
@@ -104,7 +112,7 @@ public class PNCMessageParser implements Runnable {
                     }
 
                     if (isSuccessfulPersistentBuild(msgBody)) {
-                        if (generateSboms) {
+                        if (config.isEnabled()) {
                             String buildId = msgBody.path("build").path("id").asText();
                             if (!Strings.isEmpty(buildId)) {
                                 log.info("Triggering the automated SBOM generation for build {} ...", buildId);

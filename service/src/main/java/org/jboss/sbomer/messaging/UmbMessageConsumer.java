@@ -23,40 +23,50 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-
+import javax.inject.Singleton;
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.pnc.common.Strings;
+import org.jboss.sbomer.features.umb.UmbConfig;
 import org.jboss.sbomer.service.SbomService;
 
 import io.quarkus.arc.Unremovable;
-import io.quarkus.scheduler.Scheduled;
-import lombok.extern.slf4j.Slf4j;
-
-import javax.enterprise.event.Observes;
-
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
+import io.quarkus.scheduler.Scheduled;
+import io.quarkus.scheduler.Scheduled.SkipPredicate;
+import io.quarkus.scheduler.ScheduledExecution;
+import lombok.extern.slf4j.Slf4j;
 
 @Unremovable
 @ApplicationScoped
 @Slf4j
 public class UmbMessageConsumer implements MessageConsumer {
 
+    @Singleton
+    static class UmbNotEnabledPredicate implements SkipPredicate {
+
+        @Inject
+        UmbConfig umbConfig;
+
+        @Override
+        public boolean test(ScheduledExecution execution) {
+            if (!umbConfig.isEnabled() || !umbConfig.consumer().isEnabled() || umbConfig.consumer().topic().isEmpty()) {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
     @ConfigProperty(name = "quarkus.qpid-jms.url")
     String amqpConnection;
 
-    @ConfigProperty(name = "sbomer.umb.consumers.topic")
-    String topic;
-
-    @ConfigProperty(name = "sbomer.umb.consumers.enabled")
-    boolean enabled;
-
-    @ConfigProperty(name = "sbomer.umb.consumers.trigger-sbom-generation")
-    boolean generateSboms;
+    @Inject
+    UmbConfig umbConfig;
 
     @Inject
     ConnectionFactory connectionFactory;
@@ -66,31 +76,37 @@ public class UmbMessageConsumer implements MessageConsumer {
 
     private final ExecutorService scheduler = Executors.newSingleThreadExecutor();
 
+    @Inject
     private PNCMessageParser pncMessageParser;
 
     @Override
     public void init(@Observes StartupEvent ev) {
+        if (!umbConfig.isEnabled()) {
+            log.info("UMB feature disabled");
+            return;
+        }
+
+        if (!umbConfig.consumer().isEnabled()) {
+            log.info("UMB feature to consume messages disabled");
+            return;
+        }
+
         log.info("Initializing connection: {}", amqpConnection);
-        if (!Strings.isEmpty(topic) && enabled) {
-            pncMessageParser = new PNCMessageParser(connectionFactory, topic, sbomService, generateSboms);
+
+        if (umbConfig.consumer().topic().isPresent()) {
             scheduler.submit(pncMessageParser);
         }
     }
 
     @Override
     public void destroy(@Observes ShutdownEvent ev) {
-        if (pncMessageParser != null) {
-            pncMessageParser.setShouldRun(false);
-        }
+        pncMessageParser.setShouldRun(false);
         scheduler.shutdown();
     }
 
     @Override
     public Message getLastMessageReceived() {
-        if (pncMessageParser != null) {
-            return pncMessageParser.getLastMessage();
-        }
-        return null;
+        return pncMessageParser.getLastMessage();
     }
 
     @Override
@@ -98,14 +114,12 @@ public class UmbMessageConsumer implements MessageConsumer {
         return UmbMessageConsumer.class.getName();
     }
 
-    @Scheduled(every = "60s", delay = 30, delayUnit = TimeUnit.SECONDS)
+    @Scheduled(every = "60s", delay = 30, delayUnit = TimeUnit.SECONDS, skipExecutionIf = UmbNotEnabledPredicate.class)
     public void checkActiveConnection() throws IOException {
         log.info("Checking if UMB connection is active...");
 
-        if (enabled && pncMessageParser != null && pncMessageParser.shouldRun() && !pncMessageParser.isConnected()) {
-            log.info("Reconnecting UMB connection for topic {} ...", topic);
-
-            pncMessageParser = new PNCMessageParser(connectionFactory, topic, sbomService, generateSboms);
+        if (pncMessageParser.shouldRun() && !pncMessageParser.isConnected()) {
+            log.info("Reconnecting UMB connection for topic {} ...", umbConfig.consumer().topic().get());
             scheduler.submit(pncMessageParser);
         }
     }

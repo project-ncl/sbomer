@@ -38,22 +38,26 @@ quarkus:
 sbomer:
   # List of all feature flags supported in SBOMer
   features:
+    # UMB feature
     umb:
-      publish-message-on-completion: true # TODO: Not used yet, do not remove
+      # Global filter on the UMB support. If disabled -- all features below will be disabled as well.
+      enabled: true
+      consumer:
+        enabled: false
+        topic: "${CONSUMER_TOPIC}"
+        # Defines which UMB messages received should result in SBOM generation. Accepted values are:
+        # * all -- every message will result in SBOM generation
+        # * product -- only Builds that are related to a Product will be triggerring SBOM generation
+        trigger: product
+      producer:
+        enabled: false
+        topic: "${PRODUCER_TOPIC}"
   domino:
     default-version: "0.0.86"
     additional-args: "--include-non-managed"
   cyclonedx:
     default-version: "2.7.7"
     additional-args: "--batch-mode --no-transfer-progress --quiet"
-  umb:
-    consumers:
-      enabled: true
-      topic: "${CONSUMER_TOPIC}"
-      trigger-sbom-generation: false
-    producers:
-      enabled: false
-      topic: "${PRODUCER_TOPIC}"
 
 "%dev":
   quarkus:
@@ -79,23 +83,19 @@ sbomer:
       password: ""
 
   sbomer:
-    generation:
-      local:
-        path: /tmp/sbomer
+    features:
+      umb:
+        enabled: false
+        consumer:
+          enabled: false
+        producer:
+          enabled: false
     domino:
       default-version: "0.0.86"
       additional-args: "--include-non-managed"
     cyclonedx:
       default-version: "2.7.7"
       additional-args: "--batch-mode --no-transfer-progress"
-    umb:
-      consumers:
-        enabled: false
-        topic: "notdefined"
-        trigger-sbom-generation: false
-      producers:
-        enabled: false
-        topic: "notdefined"
 
 "%test":
   quarkus:
@@ -114,17 +114,17 @@ sbomer:
       password: ""
 
   sbomer:
+    features:
+      umb:
+        enabled: true
+        consumer:
+          enabled: true
+          topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"
+        producer:
+          enabled: false
     domino:
       default-version: "0.0.86"
       additional-args: "--include-non-managed"
     cyclonedx:
       default-version: "2.7.7"
       additional-args: "--batch-mode --no-transfer-progress"
-    umb:
-      consumers:
-        enabled: true
-        topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"
-        trigger-sbom-generation: true
-      producers:
-        enabled: false
-        topic: "notdefined"
