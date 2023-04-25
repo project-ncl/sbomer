@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://jboss.org/sbomer/message.json",
   "title": "UMB message",
-  "description": "A UMB message sent after the Sbom generation process is done",
+  "description": "A UMB message sent after the SBOM generation process is done",
   "type": "object",
   "properties": {
     "purl": {
