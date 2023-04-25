@@ -18,7 +18,7 @@
           "type": "object",
           "properties": {
             "productName": {
-              "description": "Errata product name",
+              "description": "Errata Tool product name",
               "type": "string"
             },
             "productVersion": {
