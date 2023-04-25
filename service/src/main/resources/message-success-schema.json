@@ -22,7 +22,7 @@
               "type": "string"
             },
             "productVersion": {
-              "description": "Errata product version",
+              "description": "Errata Tool product version",
               "type": "string"
             }
           },
