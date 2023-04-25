@@ -40,6 +40,7 @@ public class ProductConfig {
     public static class ErrataProductConfig {
         String productName;
         String productVersion;
+        String productVariant;
     }
 
     /**

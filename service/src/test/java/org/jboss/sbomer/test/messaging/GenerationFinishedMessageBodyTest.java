@@ -48,6 +48,7 @@ public class GenerationFinishedMessageBodyTest {
                                         ErrataProductConfig.builder()
                                                 .productName("BLAH")
                                                 .productVersion("AABB")
+                                                .productVariant("DDDD")
                                                 .build())
                                 .build())
                 .sbom(
