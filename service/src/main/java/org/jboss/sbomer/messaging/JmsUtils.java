@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JmsUtils {
 
-    private static final ObjectMapper msgMapper = new ObjectMapper();
+    public static final ObjectMapper msgMapper = new ObjectMapper();
 
     static {
         msgMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

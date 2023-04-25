@@ -37,6 +37,10 @@ quarkus:
         level: DEBUG
 
 sbomer:
+  # List of all feature flags supported in SBOMer
+  features:
+    umb:
+      publish-message-on-completion: true # TODO: Not used yet, do not remove
   domino:
     default-version: "0.0.86"
     additional-args: "--include-non-managed"
