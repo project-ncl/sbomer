@@ -11,7 +11,7 @@
     },
     "productConfig": {
       "type": "object",
-      "description": "Product information related to the Sbom and build",
+      "description": "Product information related to the SBOM and build",
       "properties": {
         "errataTool": {
           "description": "Product information from the Errata Tool",
