@@ -23,17 +23,17 @@ import org.jboss.sbomer.core.enums.SbomType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * This is a just-enough representation of the {@link org.jboss.sbomer.model.Sbom} class that is required for
  * processing. This is used by the {@link org.jboss.sbomer.cli.client.SBOMerClient} REST client.
  */
-@Getter
-@Setter
-@ToString
+@Data
+@Builder
+@Jacksonized
 public class Sbom {
     private Long id;
     private String buildId;

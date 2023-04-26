@@ -20,10 +20,12 @@ package org.jboss.sbomer.cli.commands.processor;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 
+import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.utils.RhVersionPattern;
 import org.jboss.sbomer.core.utils.SbomUtils;
@@ -38,7 +40,30 @@ import picocli.CommandLine.Command;
         aliases = { "def" },
         description = "Process the SBOM with enrichments applied to known CycloneDX fields")
 public class DefaultProcessCommand extends AbstractBaseProcessCommand {
+
     @Override
+    protected Bom doProcess(Sbom sbom) {
+        Bom bom = getBom(sbom);
+
+        log.info("Applying {} processing...", getImplementationType());
+
+        if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
+            processComponent(bom.getMetadata().getComponent());
+        }
+        if (bom.getComponents() != null) {
+            for (Component c : bom.getComponents()) {
+                processComponent(c);
+            }
+        }
+
+        return bom;
+    }
+
+    /**
+     * Performs processing for a given {@link Component}.
+     *
+     * @param component
+     */
     protected void processComponent(Component component) {
         if (!RhVersionPattern.isRhVersion(component.getVersion())) {
             log.info("Component unknown to PNC found, purl: '{}', skipping processing", component.getPurl());

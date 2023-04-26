@@ -39,6 +39,7 @@ import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.sbomer.cli.CLI;
 import org.jboss.sbomer.cli.commands.processor.DefaultProcessCommand;
+import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.cli.service.PNCService;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.test.TestResources;
@@ -98,6 +99,10 @@ public class DefaultProcessCommandTest extends DefaultProcessCommand {
                 .build();
     }
 
+    private Sbom generateSbom() throws IOException {
+        return Sbom.builder().sbom(generateBom()).id(123456l).build();
+    }
+
     private List<String> getExternalReferences(Component component, ExternalReference.Type type) {
         return SbomUtils.getExternalReferences(component, type).stream().map(ref -> ref.getUrl()).toList();
     }
@@ -127,17 +132,18 @@ public class DefaultProcessCommandTest extends DefaultProcessCommand {
             Mockito.when(pncService.getArtifact(purl)).thenReturn(generateArtifact(purl));
         }
 
-        Bom bom = SbomUtils.fromJsonNode(generateBom());
+        Sbom sbom = generateSbom();
 
         for (String purl : componentPurls) {
-            Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(purl, bom);
+            Optional<Component> componentOpt = SbomUtils
+                    .findComponentWithPurl(purl, SbomUtils.fromJsonNode(sbom.getSbom()));
             assertTrue(componentOpt.isPresent());
             Component component = componentOpt.get();
 
             assertEquals(2, component.getProperties().size());
         }
 
-        doProcess(bom);
+        Bom bom = doProcess(sbom);
 
         for (String purl : componentPurls) {
             Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(purl, bom);
@@ -195,9 +201,7 @@ public class DefaultProcessCommandTest extends DefaultProcessCommand {
 
         Mockito.when(pncService.getArtifact(specialPurl)).thenReturn(artifact);
 
-        Bom bom = SbomUtils.fromJsonNode(generateBom());
-
-        doProcess(bom);
+        Bom bom = doProcess(generateSbom());
 
         Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(specialPurl, bom);
         assertTrue(componentOpt.isPresent());

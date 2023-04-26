@@ -36,7 +36,8 @@ import picocli.CommandLine.Spec;
         name = "process",
         aliases = { "p" },
         description = "Process SBOM using selected processor",
-        subcommands = { DefaultProcessCommand.class })
+        subcommands = { DefaultProcessCommand.class, RedHatProductProcessCommand.class },
+        subcommandsRepeatable = true)
 public class ProcessCommand implements Callable<Integer> {
     @Inject
     CLI cli;

@@ -17,26 +17,18 @@
  */
 package org.jboss.sbomer.cli.commands.processor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
-import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Hash;
-import org.cyclonedx.model.Hash.Algorithm;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.pnc.dto.Artifact;
-import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.CLI;
 import org.jboss.sbomer.cli.client.SBOMerClient;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.cli.service.PNCService;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.utils.RhVersionPattern;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +45,7 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
     SBOMerClient sbomerClient;
 
     @Inject
-    PNCService pncService;
+    protected PNCService pncService;
 
     @ParentCommand
     ProcessCommand parent;
@@ -66,14 +58,21 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
             throw new ApplicationException("Requested SBOM (id: '{}') does not have a parent SBOM", sbom.getId());
         }
 
-        Bom bom = SbomUtils.fromJsonNode(sbom.getParentSbom().getSbom());
+        log.debug("Starting {} processor", getImplementationType());
 
-        if (bom == null) {
-            throw new ApplicationException("Invalid CycloneDX SBOM received from the '{}' ID", sbom.getId());
+        Bom processedBom;
+
+        // In case the SBOM is null, it means that this is an initial processing of the SBOM and because of this, the
+        // relevant CycloneDX Bom is available in the parent SBOM only. Future processing will be done on the actual
+        // object, because the BOM will be populated.
+        if (sbom.getSbom() == null) {
+            log.debug("BOM missing, processing base BOM");
+            processedBom = doProcess(sbom.getParentSbom());
+        } else {
+            processedBom = doProcess(sbom);
         }
 
-        // Run the actual processing
-        Bom processedBom = doProcess(bom);
+        log.debug("{} processor finished", getImplementationType());
 
         sbomerClient.updateSbom(String.valueOf(sbom.getId()), SbomUtils.toJsonNode(processedBom));
 
@@ -82,27 +81,17 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
         return CommandLine.ExitCode.OK;
     }
 
-    protected abstract ProcessorImplementation getImplementationType();
+    protected Bom getBom(Sbom sbom) {
+        Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
 
-    protected Bom doProcess(Bom bom) {
-        log.info("Applying {} processing...", getImplementationType());
-
-        if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-            processComponent(bom.getMetadata().getComponent());
-        }
-        if (bom.getComponents() != null) {
-            for (Component c : bom.getComponents()) {
-                processComponent(c);
-            }
+        if (bom == null) {
+            throw new ApplicationException("No CycloneDX SBOM received from the '{}' ID", sbom.getId());
         }
 
         return bom;
     }
 
-    /**
-     * Performs processing for a given {@link Component}.
-     *
-     * @param component
-     */
-    protected abstract void processComponent(Component component);
+    protected abstract ProcessorImplementation getImplementationType();
+
+    protected abstract Bom doProcess(Sbom bom);
 }
