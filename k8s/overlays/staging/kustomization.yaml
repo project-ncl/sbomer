@@ -48,16 +48,34 @@ patches:
       - op: add
         path: /spec/template/spec/volumes/-
         value:
-          name: volume-secrets-sbomer
+          name: sbomer-volume-secrets
           secret:
             defaultMode: 420
             secretName: sbomer-umb
       - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:
-          name: volume-secrets-sbomer
+          name: sbomer-volume-secrets
           mountPath: /mnt/secrets-sbomer
           readOnly: true
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: sbomer-certs-volume
+          persistentVolumeClaim:
+            claimName: sbomer-ca-trust-certificate
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: sbomer-certs-volume
+          mountPath: /etc/pki/ca-trust/source/anchors
+          subPath: ca-trust/source/anchors
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: sbomer-certs-volume
+          mountPath: /etc/pki/ca-trust/extracted
+          subPath: ca-trust/extracted
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
@@ -85,14 +103,6 @@ patches:
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
-          name: TRUSTSTORE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-umb
-              key: nonprod-pnc-sbomer.password
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
           name: KEYSTORE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -102,7 +112,7 @@ patches:
         path: /spec/template/spec/containers/0/env/-
         value:
           name: JAVA_TOOL_OPTIONS
-          value: "-Djavax.net.ssl.trustStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.jks -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD) -Djavax.net.ssl.trustStoreType=PKCS12 -Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.p12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12"
+          value: "-Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12"
 
   - target:
       kind: StatefulSet
