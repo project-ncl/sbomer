@@ -44,9 +44,9 @@ import picocli.CommandLine.Command;
         description = "Process the SBOM with Red Hat product enrichment")
 public class RedHatProductProcessCommand extends AbstractBaseProcessCommand {
 
-    private final static String PROPERTY_ERRATA_PRODUCT_NAME = "errata-tool-product-name";
-    private final static String PROPERTY_ERRATA_PRODUCT_VERSION = "errata-tool-product-version";
-    private final static String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
+    public final static String PROPERTY_ERRATA_PRODUCT_NAME = "errata-tool-product-name";
+    public final static String PROPERTY_ERRATA_PRODUCT_VERSION = "errata-tool-product-version";
+    public final static String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
 
     @Inject
     ProductVersionMapper productVersionMapper;
