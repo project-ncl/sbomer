@@ -77,7 +77,7 @@ public class UmbMessageConsumer implements MessageConsumer {
     private final ExecutorService scheduler = Executors.newSingleThreadExecutor();
 
     @Inject
-    private PNCMessageParser pncMessageParser;
+    PNCMessageParser pncMessageParser;
 
     @Override
     public void init(@Observes StartupEvent ev) {

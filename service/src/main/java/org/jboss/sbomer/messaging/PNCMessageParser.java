@@ -31,6 +31,7 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 import org.jboss.pnc.api.enums.BuildStatus;
+import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
@@ -67,7 +68,7 @@ public class PNCMessageParser implements Runnable {
     private AtomicInteger receivedMessages = new AtomicInteger(0);
 
     @Inject
-    private SbomService sbomService;
+    SbomService sbomService;
 
     @Inject
     UmbConfig config;
@@ -115,6 +116,7 @@ public class PNCMessageParser implements Runnable {
                         if (config.isEnabled()) {
                             String buildId = msgBody.path("build").path("id").asText();
                             if (!Strings.isEmpty(buildId)) {
+
                                 log.info("Triggering the automated SBOM generation for build {} ...", buildId);
                                 sbomService.generate(buildId, GeneratorImplementation.CYCLONEDX);
                             }
@@ -162,19 +164,23 @@ public class PNCMessageParser implements Runnable {
 
         JsonNode buildNode = msgBody.path("build");
         Boolean persistent = !buildNode.path("temporaryBuild").asBoolean();
+        JsonNode buildConfigRevision = buildNode.path("buildConfigRevision");
         String status = buildNode.path("status").asText();
         String progress = msgBody.path("build").path("progress").asText();
         String buildId = msgBody.path("build").path("id").asText();
+        String buildType = buildConfigRevision.path("buildType").asText();
 
         log.info(
-                "Received UMB message notification for {} build {}, with status {} and progress {}",
+                "Received UMB message notification for {} build {}, with status {}, progress {} and build type {}",
                 persistent ? "persistent" : "temporary",
                 buildId,
                 status,
-                progress);
+                progress,
+                buildType);
 
-        if (persistent && ProgressStatus.FINISHED.name().equals(progress) && (BuildStatus.SUCCESS.name().equals(status)
-                || BuildStatus.NO_REBUILD_REQUIRED.name().equals(status))) {
+        if (persistent && ProgressStatus.FINISHED.name().equals(progress)
+                && (BuildStatus.SUCCESS.name().equals(status) || BuildStatus.NO_REBUILD_REQUIRED.name().equals(status))
+                && BuildType.MVN.name().equals(buildType)) {
             return true;
         }
 
