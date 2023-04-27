@@ -117,6 +117,45 @@ public class SBOMResource {
         return sbom;
     }
 
+    @GET
+    @Path("{id}/bom")
+    @Operation(
+            summary = "Get the BOM content of particular SBOM",
+            description = "Get the BOM content of particular SBOM")
+    @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The BOM",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Could not parse provided arguments",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Response getBomById(@PathParam("id") String sbomId) {
+        Sbom sbom = null;
+
+        try {
+            sbom = sbomService.get(Long.valueOf(sbomId));
+        } catch (NumberFormatException e) {
+            throw new ApiException(400, "Invalid SBOM id provided: '{}', a number was expected", sbomId);
+        }
+
+        if (sbom == null) {
+            throw new NotFoundException("Sbom with id '{}' not found", sbomId);
+        }
+
+        return Response.status(Status.OK).entity(SbomUtils.toJsonNode(sbom.getCycloneDxBom())).build();
+    }
+
     /**
      * Update the Bom within the {@link Sbom} resource.
      *

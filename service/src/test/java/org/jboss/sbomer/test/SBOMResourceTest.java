@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
@@ -91,6 +92,30 @@ public class SBOMResourceTest {
                 .body("id", CoreMatchers.equalTo(12345))
                 .and()
                 .body("buildId", CoreMatchers.equalTo("AAAABBBB"));
+    }
+
+    @Test
+    public void testGetBomById() throws IOException {
+        Sbom sbom = new Sbom();
+        sbom.setBuildId("AAAABBBB");
+        sbom.setId(12345L);
+
+        String bomJson = TestResources.asString("sboms/base.json");
+        sbom.setSbom(new ObjectMapper().readTree(bomJson));
+
+        Mockito.when(sbomService.get(12345l)).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha1/sboms/12345/bom")
+                .then()
+                .statusCode(200)
+                .body(
+                        "metadata.component.purl",
+                        CoreMatchers.equalTo(
+                                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom"))
+                .and()
+                .body("bomFormat", CoreMatchers.equalTo("CycloneDX"));
     }
 
     @Test

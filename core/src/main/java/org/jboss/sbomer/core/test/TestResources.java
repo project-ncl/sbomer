@@ -26,6 +26,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestResources {
+
     /**
      * Reads test resource file and returns it as a String.
      */
