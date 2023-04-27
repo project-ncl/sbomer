@@ -102,11 +102,16 @@ public class PNCMessageParser implements Runnable {
                     if (msgBody == null) {
                         continue;
                     }
-                    if (generateSboms && isSuccessfulPersistentBuild(msgBody)) {
-                        String buildId = msgBody.path("build").path("id").asText();
-                        if (!Strings.isEmpty(buildId)) {
-                            log.info("I SHOULD REALLY GENERATE AN SBOM FOR BUILD {}", buildId);
-                            sbomService.generate(buildId, GeneratorImplementation.CYCLONEDX);
+
+                    if (isSuccessfulPersistentBuild(msgBody)) {
+                        if (generateSboms) {
+                            String buildId = msgBody.path("build").path("id").asText();
+                            if (!Strings.isEmpty(buildId)) {
+                                log.info("Triggering the automated SBOM generation for build {} ...", buildId);
+                                sbomService.generate(buildId, GeneratorImplementation.CYCLONEDX);
+                            }
+                        } else {
+                            log.info("Not configured to automatically trigger any SBOM generation.");
                         }
                     }
                 } catch (JMSException | IOException e) {
@@ -151,6 +156,14 @@ public class PNCMessageParser implements Runnable {
         Boolean persistent = !buildNode.path("temporaryBuild").asBoolean();
         String status = buildNode.path("status").asText();
         String progress = msgBody.path("build").path("progress").asText();
+        String buildId = msgBody.path("build").path("id").asText();
+
+        log.info(
+                "Received UMB message notification for {} build {}, with status {} and progress {}",
+                persistent ? "persistent" : "temporary",
+                buildId,
+                status,
+                progress);
 
         if (persistent && ProgressStatus.FINISHED.name().equals(progress) && (BuildStatus.SUCCESS.name().equals(status)
                 || BuildStatus.NO_REBUILD_REQUIRED.name().equals(status))) {
