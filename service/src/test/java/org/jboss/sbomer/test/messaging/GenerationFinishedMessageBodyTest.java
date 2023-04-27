@@ -53,20 +53,20 @@ public class GenerationFinishedMessageBodyTest {
                                 .build())
                 .sbom(
                         Sbom.builder()
-                                .id("aaa")
-                                .link("https://sbomer/api/v1alpha1/sboms/1234")
+                                .id("429305915731435500")
+                                .link("https://sbomer/api/v1alpha1/sboms/429305915731435500")
                                 .bom(
                                         Bom.builder()
                                                 .format(BomFormat.CYCLONEDX)
                                                 .version("1.4")
-                                                .link("https://sbomer/api/v1alpha1/sboms/1234/bom")
+                                                .link("https://sbomer/api/v1alpha1/sboms/429305915731435500/bom")
                                                 .build())
                                 .build())
                 .build(
                         Build.builder()
-                                .id("AABBCC")
+                                .id("AWY5AHXBLAQAA")
                                 .buildSystem(BuildSystem.PNC)
-                                .link("https://orch.pnc/builds/AABBCC")
+                                .link("https://orch.psi.redhat.com/pnc-rest/v2/builds/AWY5AHXBLAQAA")
                                 .build())
                 .build();
     }
