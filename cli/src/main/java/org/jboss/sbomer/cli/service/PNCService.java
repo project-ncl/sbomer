@@ -67,6 +67,7 @@ public class PNCService {
     void cleanup() {
         artifactClient.close();
         buildClient.close();
+        buildConfigurationClient.close();
     }
 
     /**
