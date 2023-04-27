@@ -17,42 +17,29 @@
  */
 package org.jboss.sbomer.cli.commands.processor;
 
-import java.util.concurrent.Callable;
-
-import javax.inject.Inject;
-
 import org.cyclonedx.model.Bom;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.sbomer.cli.CLI;
-import org.jboss.sbomer.cli.client.SBOMerClient;
+import org.jboss.sbomer.cli.commands.AbstractCommand;
 import org.jboss.sbomer.cli.model.Sbom;
-import org.jboss.sbomer.cli.service.PNCService;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
-    @Inject
-    CLI cli;
+public abstract class AbstractProcessCommand extends AbstractCommand {
 
-    @Inject
-    @RestClient
-    SBOMerClient sbomerClient;
-
-    @Inject
-    protected PNCService pncService;
-
+    @Getter
     @ParentCommand
     ProcessCommand parent;
 
     @Override
     public Integer call() throws Exception {
-        Sbom sbom = sbomerClient.getById(parent.getSbomId());
+        log.debug("Fetching SBOM with id '{}' from SBOMer...", parent.getSbomMixin().getSbomId());
+        Sbom sbom = sbomerClient.getById(parent.getSbomMixin().getSbomId());
 
         if (sbom.getParentSbom() == null) {
             throw new ApplicationException("Requested SBOM (id: '{}') does not have a parent SBOM", sbom.getId());
@@ -66,7 +53,7 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
         // relevant CycloneDX Bom is available in the parent SBOM only. Future processing will be done on the actual
         // object, because the BOM will be populated.
         if (sbom.getSbom() == null) {
-            log.debug("BOM missing, processing base BOM");
+            // log.debug("BOM missing, processing base BOM");
             processedBom = doProcess(sbom.getParentSbom());
         } else {
             processedBom = doProcess(sbom);
@@ -91,7 +78,7 @@ public abstract class AbstractBaseProcessCommand implements Callable<Integer> {
         return bom;
     }
 
-    protected abstract ProcessorImplementation getImplementationType();
+    public abstract ProcessorImplementation getImplementationType();
 
-    protected abstract Bom doProcess(Sbom bom);
+    public abstract Bom doProcess(Sbom bom);
 }

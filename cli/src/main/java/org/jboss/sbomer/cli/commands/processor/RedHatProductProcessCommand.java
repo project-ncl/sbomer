@@ -42,7 +42,7 @@ import picocli.CommandLine.Command;
         mixinStandardHelpOptions = true,
         name = "redhat-product",
         description = "Process the SBOM with Red Hat product enrichment")
-public class RedHatProductProcessCommand extends AbstractBaseProcessCommand {
+public class RedHatProductProcessCommand extends AbstractProcessCommand {
 
     public final static String PROPERTY_ERRATA_PRODUCT_NAME = "errata-tool-product-name";
     public final static String PROPERTY_ERRATA_PRODUCT_VERSION = "errata-tool-product-version";
@@ -73,12 +73,12 @@ public class RedHatProductProcessCommand extends AbstractBaseProcessCommand {
     }
 
     @Override
-    protected ProcessorImplementation getImplementationType() {
+    public ProcessorImplementation getImplementationType() {
         return ProcessorImplementation.REDHAT_PRODUCT;
     }
 
     @Override
-    protected Bom doProcess(Sbom sbom) {
+    public Bom doProcess(Sbom sbom) {
         Bom bom = getBom(sbom);
         Build build = pncService.getBuild(sbom.getBuildId());
 

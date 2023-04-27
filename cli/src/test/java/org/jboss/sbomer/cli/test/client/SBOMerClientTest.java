@@ -46,7 +46,7 @@ public class SBOMerClientTest {
         Sbom sbom = client.getById("123");
         assertNotNull(sbom);
         assertEquals(123, sbom.getId());
-        assertEquals("AABBCC", sbom.getBuildId());
+        assertEquals("BUILD123", sbom.getBuildId());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class SBOMerClientTest {
 
         assertEquals(404, ex.getCode());
         assertEquals("Not Found", ex.getMessage());
-        assertEquals("12345", ex.getErrorId());
+        assertEquals("cc015e2c-e4e7-11ed-b5ea-0242ac120002", ex.getErrorId());
         assertNull(ex.getErrors());
 
     }

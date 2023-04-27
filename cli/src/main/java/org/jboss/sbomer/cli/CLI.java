@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.cli;
 
-import java.io.PrintWriter;
-
 import javax.inject.Inject;
 
 import org.jboss.sbomer.cli.commands.generator.GenerateCommand;
@@ -49,7 +47,4 @@ public class CLI implements QuarkusApplication {
         return new CommandLine(this, factory).setExecutionExceptionHandler(new ExceptionHandler()).execute(args);
     }
 
-    public int run(PrintWriter out, PrintWriter err, String... args) {
-        return new CommandLine(this, factory).setOut(out).setErr(err).execute(args);
-    }
 }

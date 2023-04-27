@@ -1,13 +1,14 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha1/sboms/1234"
+    "url": "/api/v1alpha1/sboms/111"
   },
   "response": {
-    "status": 404,
+    "status": 200,
     "jsonBody": {
-      "message": "Not Found",
-      "errorId": "cc015e2c-e4e7-11ed-b5ea-0242ac120002"
+      "id": 111,
+      "buildId": "BUILD111",
+      "sbom": {}
     },
     "headers": {
       "Content-Type": "application/json"

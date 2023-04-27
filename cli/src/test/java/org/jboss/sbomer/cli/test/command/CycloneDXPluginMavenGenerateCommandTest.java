@@ -17,68 +17,33 @@
  */
 package org.jboss.sbomer.cli.test.command;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import java.util.Set;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import javax.inject.Inject;
-
-import org.eclipse.jgit.api.CloneCommand;
-import org.eclipse.jgit.api.Git;
-import org.jboss.pnc.dto.Build;
-import org.jboss.sbomer.cli.CLI;
-import org.jboss.sbomer.cli.service.PNCService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.jboss.sbomer.cli.test.MockedPncService;
+import org.jboss.sbomer.cli.test.command.CycloneDXPluginMavenGenerateCommandTest.CustomPncServiceProfile;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.junit.QuarkusTestProfile;
+import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.junit.main.Launch;
+import io.quarkus.test.junit.main.QuarkusMainTest;
 
-@QuarkusTest
+@QuarkusMainTest
+@TestProfile(CustomPncServiceProfile.class)
 public class CycloneDXPluginMavenGenerateCommandTest {
-    @Inject
-    CLI cli;
-
-    @InjectMock
-    PNCService pncService;
-
-    StringWriter out = new StringWriter();
-    StringWriter err = new StringWriter();
-
-    @BeforeEach
-    void init() {
-        out = new StringWriter();
-        err = new StringWriter();
-    }
-
-    @AfterEach
-    void cleanup() throws IOException {
-        out.close();
-        err.close();
+    public static class CustomPncServiceProfile implements QuarkusTestProfile {
+        @Override
+        public Set<Class<?>> getEnabledAlternatives() {
+            return Set.of(MockedPncService.class);
+        }
     }
 
     @Test
-    @Disabled("Integration testing is not that easy, but leaving here for now")
+    @Disabled("Figure out how to run a generation integration test")
+    @DisplayName("Should run the cyclonedx generation")
+    @Launch(value = { "-v", "generate", "--sbom-id", "123", "maven", "cyclonedx" })
     void shouldRunGeneration() throws Exception {
-        try (MockedStatic<Git> git = Mockito.mockStatic(Git.class)) {
-            git.when(Git::cloneRepository).thenReturn(Mockito.mock(CloneCommand.class, RETURNS_DEEP_STUBS));
-        }
-
-        Mockito.mockStatic(Git.class);
-        Mockito.when(pncService.getBuild("AAABBB"))
-                .thenReturn(Build.builder().scmUrl("scmurl").scmTag("scmtag").build());
-
-        int exitCode = cli
-                .run(new PrintWriter(out), new PrintWriter(err), "generate", "--build-id", "AAABBB", "maven", "cdx");
-
-        assertEquals(err.toString(), "");
-        assertEquals(0, exitCode);
     }
 }

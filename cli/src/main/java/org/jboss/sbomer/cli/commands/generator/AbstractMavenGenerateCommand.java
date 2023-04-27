@@ -23,55 +23,33 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
-import org.jboss.sbomer.cli.CLI;
-import org.jboss.sbomer.cli.client.SBOMerClient;
+import org.jboss.sbomer.cli.commands.AbstractCommand;
 import org.jboss.sbomer.cli.model.Sbom;
-import org.jboss.sbomer.cli.service.PNCService;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-public abstract class AbstractMavenBaseGenerateCommand implements Callable<Integer> {
-    @Getter
+public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
+    // @Getter
     @ParentCommand
     MavenGenerateCommand parent;
-
-    @Inject
-    ObjectMapper objectMapper;
-
-    @Inject
-    CLI cli;
-
-    @Inject
-    PNCService pncService;
-
-    @Inject
-    @RestClient
-    SBOMerClient sbomerClient;
 
     @Override
     public Integer call() throws Exception {
         // First, fetch the SBOM metadata
-        Sbom sbom = sbomerClient.getById(parent.getParent().getSbomId());
+        Sbom sbom = sbomerClient.getById(parent.getParent().getSbomMixin().getSbomId());
 
         // Fetch build information
         Build build = pncService.getBuild(sbom.getBuildId());

@@ -39,10 +39,10 @@ import picocli.CommandLine.Command;
         name = "default",
         aliases = { "def" },
         description = "Process the SBOM with enrichments applied to known CycloneDX fields")
-public class DefaultProcessCommand extends AbstractBaseProcessCommand {
+public class DefaultProcessCommand extends AbstractProcessCommand {
 
     @Override
-    protected Bom doProcess(Sbom sbom) {
+    public Bom doProcess(Sbom sbom) {
         Bom bom = getBom(sbom);
 
         log.info("Applying {} processing...", getImplementationType());
@@ -113,7 +113,7 @@ public class DefaultProcessCommand extends AbstractBaseProcessCommand {
     }
 
     @Override
-    protected ProcessorImplementation getImplementationType() {
+    public ProcessorImplementation getImplementationType() {
         return ProcessorImplementation.DEFAULT;
     }
 }

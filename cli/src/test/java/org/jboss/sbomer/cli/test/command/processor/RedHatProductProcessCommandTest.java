@@ -32,7 +32,6 @@ import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.SCMRepository;
-import org.jboss.sbomer.cli.CLI;
 import org.jboss.sbomer.cli.commands.processor.RedHatProductProcessCommand;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.cli.service.PNCService;
@@ -51,9 +50,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 
 @QuarkusTest
-public class RedHatProductProcessCommandTest extends RedHatProductProcessCommand {
+public class RedHatProductProcessCommandTest {
     @Inject
-    CLI cli;
+    RedHatProductProcessCommand command;
 
     @Inject
     ObjectMapper objectMapper;
@@ -88,7 +87,7 @@ public class RedHatProductProcessCommandTest extends RedHatProductProcessCommand
 
     @Test
     void shouldReturnCorrectImplementationType() {
-        assertEquals(ProcessorImplementation.REDHAT_PRODUCT, this.getImplementationType());
+        assertEquals(ProcessorImplementation.REDHAT_PRODUCT, command.getImplementationType());
     }
 
     @Test
@@ -96,7 +95,7 @@ public class RedHatProductProcessCommandTest extends RedHatProductProcessCommand
         Sbom sbom = generateSbom();
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-            doProcess(sbom);
+            command.doProcess(sbom);
         });
 
         assertEquals("Build related to the SBOM could not be found in PNC, interrupting processing", ex.getMessage());
@@ -128,7 +127,7 @@ public class RedHatProductProcessCommandTest extends RedHatProductProcessCommand
 
         Sbom sbom = generateSbom();
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-            doProcess(sbom);
+            command.doProcess(sbom);
         });
 
         assertEquals(
@@ -148,7 +147,7 @@ public class RedHatProductProcessCommandTest extends RedHatProductProcessCommand
         Sbom sbom = generateSbom();
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-            doProcess(sbom);
+            command.doProcess(sbom);
         });
 
         assertEquals("Could not find mapping for the PNC Product Version 'PV' (id: PVID)", ex.getMessage());
@@ -164,7 +163,7 @@ public class RedHatProductProcessCommandTest extends RedHatProductProcessCommand
                                 .build());
 
         Sbom sbom = generateSbom();
-        Bom bom = doProcess(sbom);
+        Bom bom = command.doProcess(sbom);
 
         assertTrue(
                 SbomUtils.hasProperty(
@@ -182,14 +181,16 @@ public class RedHatProductProcessCommandTest extends RedHatProductProcessCommand
         assertEquals(
                 "RHBQ",
                 SbomUtils
-                        .findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, bom.getMetadata().getComponent())
+                        .findPropertyWithNameInComponent(
+                                RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_NAME,
+                                bom.getMetadata().getComponent())
                         .get()
                         .getValue());
         assertEquals(
                 "RHEL-8-RHBQ-2.13",
                 SbomUtils
                         .findPropertyWithNameInComponent(
-                                PROPERTY_ERRATA_PRODUCT_VERSION,
+                                RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_VERSION,
                                 bom.getMetadata().getComponent())
                         .get()
                         .getValue());
@@ -197,7 +198,7 @@ public class RedHatProductProcessCommandTest extends RedHatProductProcessCommand
                 "8Base-RHBQ-2.13",
                 SbomUtils
                         .findPropertyWithNameInComponent(
-                                PROPERTY_ERRATA_PRODUCT_VARIANT,
+                                RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_VARIANT,
                                 bom.getMetadata().getComponent())
                         .get()
                         .getValue());

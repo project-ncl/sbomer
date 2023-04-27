@@ -15,27 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.command;
+package org.jboss.sbomer.cli.test.command.processor;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import java.util.Set;
 
-import org.hamcrest.Matchers;
+import org.jboss.sbomer.cli.test.MockedPncService;
+import org.jboss.sbomer.cli.test.command.processor.MultipleProcessorTest.CustomPncServiceProfile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.junit.QuarkusTestProfile;
+import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.main.Launch;
 import io.quarkus.test.junit.main.LaunchResult;
 import io.quarkus.test.junit.main.QuarkusMainTest;
 
 @QuarkusMainTest
-public class CliTest {
-    @Test
-    @DisplayName("Should run the command without any options and print help")
-    @Launch(exitCode = 2)
-    void shouldPrintUsageOnWrongCommand(LaunchResult result) throws Exception {
-        assertThat(result.getErrorStream(), Matchers.hasItem("Usage: sbomer [-hvV] [COMMAND]"));
-        assertThat(result.getErrorStream(), Matchers.hasItem("  generate, g  Generate SBOM from source code"));
-        assertThat(result.getErrorStream(), Matchers.hasItem("  process, p   Process SBOM using selected processor"));
+@TestProfile(CustomPncServiceProfile.class)
+public class MultipleProcessorTest {
+    public static class CustomPncServiceProfile implements QuarkusTestProfile {
+        @Override
+        public Set<Class<?>> getEnabledAlternatives() {
+            return Set.of(MockedPncService.class);
+        }
     }
 
+    @Test
+    @DisplayName("Should allow for running multiple processors")
+    @Launch(value = { "-v", "process", "--sbom-id", "123", "default", "redhat-product" })
+    void testMultipleProcessors(LaunchResult result) throws Exception {
+
+    }
 }

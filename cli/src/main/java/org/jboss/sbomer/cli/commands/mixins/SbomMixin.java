@@ -15,25 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.commands.processor;
-
-import org.jboss.sbomer.cli.commands.AbstractCommand;
-import org.jboss.sbomer.cli.commands.mixins.SbomMixin;
+package org.jboss.sbomer.cli.commands.mixins;
 
 import lombok.Getter;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Mixin;
+import picocli.CommandLine.Option;
 
-@Command(
-        mixinStandardHelpOptions = true,
-        name = "process",
-        aliases = { "p" },
-        description = "Process SBOM using selected processor",
-        subcommands = { DefaultProcessCommand.class, RedHatProductProcessCommand.class },
-        subcommandsRepeatable = true)
-public class ProcessCommand extends AbstractCommand {
-
-    @Mixin
+public class SbomMixin {
     @Getter
-    SbomMixin sbomMixin;
+    @Option(
+            names = { "--sbom-id" },
+            required = true,
+            description = "The SBOM identifier to fetch the SBOM for processing.")
+    String sbomId;
 }
