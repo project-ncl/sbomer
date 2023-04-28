@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.messaging;
+package org.jboss.sbomer.features.umb;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -28,7 +28,7 @@ import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
 import org.jboss.pnc.common.json.JsonUtils;
-import org.jboss.sbomer.features.umb.consumer.PncBuildNotificationMessageBody;
+import org.jboss.sbomer.features.umb.consumer.model.PncBuildNotificationMessageBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;

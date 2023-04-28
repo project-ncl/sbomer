@@ -19,7 +19,7 @@
 package org.jboss.sbomer.features.umb.producer.model;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.messaging.JmsUtils;
+import org.jboss.sbomer.features.umb.JmsUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;

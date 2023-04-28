@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.messaging;
+package org.jboss.sbomer.features.umb.consumer;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,8 +35,9 @@ import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.features.umb.JmsUtils;
 import org.jboss.sbomer.features.umb.UmbConfig;
-import org.jboss.sbomer.features.umb.consumer.PncBuildNotificationMessageBody;
+import org.jboss.sbomer.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.SbomService;
 
 import io.quarkus.arc.Unremovable;

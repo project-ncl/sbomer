@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.messaging;
+package org.jboss.sbomer.features.umb.consumer;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
