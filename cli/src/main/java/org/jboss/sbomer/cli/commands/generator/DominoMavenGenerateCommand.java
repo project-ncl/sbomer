@@ -39,7 +39,7 @@ import picocli.CommandLine.Option;
         name = "domino",
         aliases = { "d" },
         description = "Generate SBOM using Domino.")
-public class DominoMavenGenerateCommand extends AbstractMavenBaseGenerateCommand {
+public class DominoMavenGenerateCommand extends AbstractMavenGenerateCommand {
 
     @Inject
     CLI cli;

@@ -23,26 +23,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.inject.Inject;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.jboss.sbomer.cli.CLI;
+import org.jboss.sbomer.cli.commands.AbstractCommand;
+import org.jboss.sbomer.cli.commands.mixins.SbomMixin;
 import org.jboss.sbomer.cli.converters.PathConverter;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.ScopeType;
-import picocli.CommandLine.Spec;
 
 @Slf4j
 @Command(
@@ -51,17 +47,10 @@ import picocli.CommandLine.Spec;
         aliases = { "g" },
         description = "Generate SBOM from source code",
         subcommands = { MavenGenerateCommand.class })
-public class GenerateCommand implements Callable<Integer> {
-    @Inject
-    CLI cli;
-
+public class GenerateCommand extends AbstractCommand {
+    @Mixin
     @Getter
-    @Option(
-            names = { "--sbom-id" },
-            required = true,
-            description = "The SBOM identifier in the SBOMer, example: 1234566",
-            scope = ScopeType.INHERIT)
-    String sbomId;
+    SbomMixin sbomMixin;
 
     @Getter
     @Option(
@@ -79,14 +68,6 @@ public class GenerateCommand implements Callable<Integer> {
             converter = PathConverter.class,
             scope = ScopeType.INHERIT)
     Path targetDir;
-
-    @Spec
-    CommandSpec spec;
-
-    @Override
-    public Integer call() throws Exception {
-        throw new ParameterException(spec.commandLine(), "Missing required subcommand");
-    }
 
     protected void doClone(String url, String tag, Path path, boolean force) {
         log.info("Cloning '{}' repository and '{}' tag...", url, tag);

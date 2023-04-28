@@ -18,21 +18,16 @@
 package org.jboss.sbomer.cli.commands.generator;
 
 import java.nio.file.Path;
-import java.util.concurrent.Callable;
 
-import javax.inject.Inject;
-
-import org.jboss.sbomer.cli.CLI;
+import org.jboss.sbomer.cli.commands.AbstractCommand;
 import org.jboss.sbomer.cli.converters.PathConverter;
 
 import lombok.Getter;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.ScopeType;
-import picocli.CommandLine.Spec;
 
 @Command(
         mixinStandardHelpOptions = true,
@@ -40,10 +35,7 @@ import picocli.CommandLine.Spec;
         aliases = { "m" },
         description = "Generate SBOM for a Maven project",
         subcommands = { CycloneDXPluginMavenGenerateCommand.class, DominoMavenGenerateCommand.class })
-public class MavenGenerateCommand implements Callable<Integer> {
-    @Inject
-    CLI cli;
-
+public class MavenGenerateCommand extends AbstractCommand {
     @Getter
     @ParentCommand
     GenerateCommand parent;
@@ -55,9 +47,6 @@ public class MavenGenerateCommand implements Callable<Integer> {
             converter = PathConverter.class,
             scope = ScopeType.INHERIT)
     Path settingsXmlPath;
-
-    @Spec
-    CommandSpec spec;
 
     @Override
     public Integer call() throws Exception {

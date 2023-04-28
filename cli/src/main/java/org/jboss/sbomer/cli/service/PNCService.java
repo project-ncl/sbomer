@@ -26,12 +26,14 @@ import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
 import org.jboss.pnc.client.RemoteResourceNotFoundException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import lombok.Getter;
@@ -52,16 +54,20 @@ public class PNCService {
 
     BuildClient buildClient;
 
+    BuildConfigurationClient buildConfigurationClient;
+
     @PostConstruct
     void init() {
         artifactClient = new ArtifactClient(getConfiguration());
         buildClient = new BuildClient(getConfiguration());
+        buildConfigurationClient = new BuildConfigurationClient(getConfiguration());
     }
 
     @PreDestroy
     void cleanup() {
         artifactClient.close();
         buildClient.close();
+        buildConfigurationClient.close();
     }
 
     /**
@@ -75,19 +81,53 @@ public class PNCService {
     }
 
     /**
-     * Fetch information about the PNC {@link Build} identified by the particular buildId.
+     * <p>
+     * Fetch information about the PNC {@link Build} identified by the particular {@code buildId}.
+     * </p>
      *
-     * @param buildId
-     * @return
+     * <p>
+     * In case the {@link Build} with provided identifier cannot be found {@code null} is returned.
+     * </p>
+     *
+     * @param buildId Tbe {@link Build} identifier in PNC
+     * @return The {@link Build} object or {@code null} in case the {@link Build} could not be found.
      */
     public Build getBuild(String buildId) {
+        log.debug("Fetching Build from PNC with id '{}'", buildId);
         try {
-            Build build = buildClient.getSpecific(buildId);
-            return build;
+            return buildClient.getSpecific(buildId);
         } catch (RemoteResourceNotFoundException ex) {
-            throw new ApplicationException("Build was not found in PNC", ex);
+            log.warn("Build with id '{}' was not found in PNC", buildId);
+            return null;
         } catch (RemoteResourceException ex) {
             throw new ApplicationException("Build could not be retrieved because PNC responded with an error", ex);
+        }
+    }
+
+    /**
+     * <p>
+     * Fetch information about the PNC {@link BuildConfiguration} identified by the particular {@code buildConfigId}.
+     * </p>
+     *
+     * <p>
+     * In case the {@link BuildConfiguration} with provided identifier cannot be found {@code null} is returned.
+     * </p>
+     *
+     * @param buildId Tbe {@link BuildConfiguration} identifier in PNC
+     * @return The {@link BuildConfiguration} object or {@code null} in case the {@link BuildConfiguration} could not be
+     *         found.
+     */
+    public BuildConfiguration getBuildConfig(String buildConfigId) {
+        log.debug("Fetching BuildConfig from PNC with id '{}'", buildConfigId);
+        try {
+            return buildConfigurationClient.getSpecific(buildConfigId);
+        } catch (RemoteResourceNotFoundException ex) {
+            log.warn("BuildConfig with id '{}' was not found in PNC", buildConfigId);
+            return null;
+        } catch (RemoteResourceException ex) {
+            throw new ApplicationException(
+                    "BuildConfig could not be retrieved because PNC responded with an error",
+                    ex);
         }
     }
 

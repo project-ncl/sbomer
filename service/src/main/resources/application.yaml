@@ -29,7 +29,6 @@ quarkus:
       generation: update # TODO: This is for now, so that we can work on stage, remove this once we maintain the DB properly
   qpid-jms:
     url: "${UMB_BROKER_URL}"
-  
   log:
     level: INFO
     category:

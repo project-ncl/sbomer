@@ -15,8 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.enums;
+package org.jboss.sbomer.cli.commands.mixins;
 
-public enum ProcessorImplementation {
-    DEFAULT, REDHAT_PRODUCT;
+import lombok.Getter;
+import picocli.CommandLine.Option;
+
+public class SbomMixin {
+    @Getter
+    @Option(
+            names = { "--sbom-id" },
+            required = true,
+            description = "The SBOM identifier to fetch the SBOM for processing.")
+    String sbomId;
 }

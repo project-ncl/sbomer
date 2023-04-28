@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/api/v1alpha1/sboms/123/bom"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": 123,
+      "buildId": "BUILD123",
+      "sbom": {},
+      "parentSbom": {
+        "id": 111,
+        "buildId": "BUILD111",
+        "sbom": {}
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

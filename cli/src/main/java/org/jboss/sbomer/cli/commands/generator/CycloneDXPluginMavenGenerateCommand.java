@@ -33,7 +33,7 @@ import picocli.CommandLine.Option;
         name = "cyclonedx-plugin",
         aliases = { "c", "cdx", "cyclonedx" },
         description = "Generate SBOM using CycloneDX plugin.")
-public class CycloneDXPluginMavenGenerateCommand extends AbstractMavenBaseGenerateCommand {
+public class CycloneDXPluginMavenGenerateCommand extends AbstractMavenGenerateCommand {
 
     @Option(names = { "--plugin-version" }, description = "Version of the CycloneDX Maven plugin")
     String version = "2.7.5";

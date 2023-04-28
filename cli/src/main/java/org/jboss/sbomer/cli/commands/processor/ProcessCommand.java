@@ -17,43 +17,23 @@
  */
 package org.jboss.sbomer.cli.commands.processor;
 
-import java.util.concurrent.Callable;
-
-import javax.inject.Inject;
-
-import org.jboss.sbomer.cli.CLI;
+import org.jboss.sbomer.cli.commands.AbstractCommand;
+import org.jboss.sbomer.cli.commands.mixins.SbomMixin;
 
 import lombok.Getter;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.ParameterException;
-import picocli.CommandLine.ScopeType;
-import picocli.CommandLine.Spec;
+import picocli.CommandLine.Mixin;
 
 @Command(
         mixinStandardHelpOptions = true,
         name = "process",
         aliases = { "p" },
         description = "Process SBOM using selected processor",
-        subcommands = { DefaultProcessCommand.class })
-public class ProcessCommand implements Callable<Integer> {
-    @Inject
-    CLI cli;
+        subcommands = { DefaultProcessCommand.class, RedHatProductProcessCommand.class },
+        subcommandsRepeatable = true)
+public class ProcessCommand extends AbstractCommand {
 
+    @Mixin
     @Getter
-    @Option(
-            names = { "--sbom-id" },
-            required = true,
-            description = "The SBOM identifier to fetch the SBOM for processing.",
-            scope = ScopeType.INHERIT)
-    String sbomId;
-
-    @Spec
-    CommandSpec spec;
-
-    @Override
-    public Integer call() throws Exception {
-        throw new ParameterException(spec.commandLine(), "Missing required subcommand");
-    }
+    SbomMixin sbomMixin;
 }
