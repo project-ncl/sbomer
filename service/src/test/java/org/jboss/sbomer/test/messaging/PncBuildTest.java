@@ -34,14 +34,14 @@ import javax.jms.TextMessage;
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.messaging.JmsUtils;
-import org.jboss.sbomer.messaging.UmbMessageConsumer;
+import org.jboss.sbomer.features.umb.JmsUtils;
+import org.jboss.sbomer.features.umb.consumer.PncMessageParser;
+import org.jboss.sbomer.features.umb.consumer.UmbMessageConsumer;
+import org.jboss.sbomer.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.artemis.test.ArtemisTestResource;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -61,6 +61,9 @@ public class PncBuildTest {
 
     @Inject
     ConnectionFactory connectionFactory;
+
+    @Inject
+    PncMessageParser pncMessageParser;
 
     @Test
     @Order(1)
@@ -88,24 +91,14 @@ public class PncBuildTest {
         String producer = msg.getStringProperty("producer");
         assertEquals("PNC", producer);
 
-        JsonNode msgBody = JmsUtils.getMsgBody(msg);
-        JsonNode buildNode = msgBody.path("build");
+        PncBuildNotificationMessageBody msgBody = JmsUtils.getMsgBody(msg);
 
-        Boolean persistent = !buildNode.path("temporaryBuild").asBoolean();
-        String status = buildNode.path("status").asText();
-        String progress = msgBody.path("build").path("progress").asText();
-        String buildId = msgBody.path("build").path("id").asText();
+        assertEquals(false, msgBody.getBuild().isTemporaryBuild());
+        assertEquals(BuildStatus.SUCCESS, msgBody.getBuild().getStatus());
+        assertEquals(ProgressStatus.FINISHED, msgBody.getBuild().getProgress());
+        assertEquals("AX5TJMYHQAIAE", msgBody.getBuild().getId());
 
-        assertEquals(true, persistent);
-        assertEquals(BuildStatus.SUCCESS.name(), status);
-        assertEquals(ProgressStatus.FINISHED.name(), progress);
-        assertEquals("AX5TJMYHQAIAE", buildId);
-
-        assertTrue(
-                persistent && ProgressStatus.FINISHED.name().equals(progress)
-                        && (BuildStatus.SUCCESS.name().equals(status)
-                                || BuildStatus.NO_REBUILD_REQUIRED.name().equals(status)));
-
+        assertTrue(pncMessageParser.isSuccessfulPersistentBuild(msgBody));
     }
 
     private TextMessage preparePNCBuildMsg(JMSContext context) throws IOException {

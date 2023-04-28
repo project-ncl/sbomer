@@ -25,16 +25,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collections;
 
 import org.hamcrest.CoreMatchers;
-import org.jboss.sbomer.messaging.umb.Build;
-import org.jboss.sbomer.messaging.umb.Build.BuildSystem;
-import org.jboss.sbomer.messaging.umb.GenerationFinishedMessageBody;
-import org.jboss.sbomer.messaging.umb.GenerationFinishedMessageBodyValidator;
-import org.jboss.sbomer.messaging.umb.GenerationFinishedMessageBodyValidator.ValidationResult;
-import org.jboss.sbomer.messaging.umb.ProductConfig;
-import org.jboss.sbomer.messaging.umb.ProductConfig.ErrataProductConfig;
-import org.jboss.sbomer.messaging.umb.Sbom;
-import org.jboss.sbomer.messaging.umb.Sbom.Bom;
-import org.jboss.sbomer.messaging.umb.Sbom.BomFormat;
+import org.jboss.sbomer.features.umb.producer.GenerationFinishedMessageBodyValidator;
+import org.jboss.sbomer.features.umb.producer.GenerationFinishedMessageBodyValidator.ValidationResult;
+import org.jboss.sbomer.features.umb.producer.model.Build;
+import org.jboss.sbomer.features.umb.producer.model.Build.BuildSystem;
+import org.jboss.sbomer.features.umb.producer.model.GenerationFinishedMessageBody;
+import org.jboss.sbomer.features.umb.producer.model.ProductConfig;
+import org.jboss.sbomer.features.umb.producer.model.ProductConfig.ErrataProductConfig;
+import org.jboss.sbomer.features.umb.producer.model.Sbom;
+import org.jboss.sbomer.features.umb.producer.model.Sbom.Bom;
+import org.jboss.sbomer.features.umb.producer.model.Sbom.BomFormat;
 import org.junit.jupiter.api.Test;
 
 public class GenerationFinishedMessageBodyTest {

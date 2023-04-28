@@ -25,7 +25,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.cli.CLI;
 import org.jboss.sbomer.cli.client.SBOMerClient;
-import org.jboss.sbomer.cli.service.PNCService;
+import org.jboss.sbomer.core.service.PncService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,7 +43,7 @@ public abstract class AbstractCommand implements Callable<Integer> {
     protected CommandSpec spec;
 
     @Inject
-    protected PNCService pncService;
+    protected PncService pncService;
 
     @Inject
     protected ObjectMapper objectMapper;
