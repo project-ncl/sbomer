@@ -27,13 +27,12 @@ bases:
   - ../../base/core
   - ../../base/cache
   - ../../base/tekton
-  - ../../base/database # TODO: Remove this -- it will be managed outside of the cluster, leaving for now
   - ../../base/service
 resources:
   - service/route.yaml
 patchesStrategicMerge:
   #- patches/sa.yaml
-  - patches/pvc.yaml
+  - patches/db.yaml
 patches:
   - target:
       kind: Deployment
@@ -51,7 +50,7 @@ patches:
           name: sbomer-volume-secrets
           secret:
             defaultMode: 420
-            secretName: sbomer-umb
+            secretName: sbomer-secrets
       - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:
@@ -82,7 +81,7 @@ patches:
           name: CONSUMER_TOPIC
           valueFrom:
             secretKeyRef:
-              name: sbomer-umb
+              name: sbomer-secrets
               key: consumer.topic
       - op: add
         path: /spec/template/spec/containers/0/env/-
@@ -90,7 +89,7 @@ patches:
           name: PRODUCER_TOPIC
           valueFrom:
             secretKeyRef:
-              name: sbomer-umb
+              name: sbomer-secrets
               key: producer.topic
       - op: add
         path: /spec/template/spec/containers/0/env/-
@@ -98,7 +97,7 @@ patches:
           name: UMB_BROKER_URL
           valueFrom:
             secretKeyRef:
-              name: sbomer-umb
+              name: sbomer-secrets
               key: qpid-jms.url
       - op: add
         path: /spec/template/spec/containers/0/env/-
@@ -106,13 +105,28 @@ patches:
           name: KEYSTORE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: sbomer-umb
+              name: sbomer-secrets
               key: nonprod-pnc-sbomer.password
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
           name: JAVA_TOOL_OPTIONS
           value: "-Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE
+          value: "1"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: QUARKUS_DATASOURCE_JDBC_MIN_SIZE
+          value: "0"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: QUARKUS_DATASOURCE_JDBC_MAX_SIZE
+          value: "20"
 
   - target:
       kind: StatefulSet
