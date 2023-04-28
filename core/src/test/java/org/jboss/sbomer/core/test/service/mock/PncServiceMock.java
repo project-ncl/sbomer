@@ -29,7 +29,6 @@ import org.jboss.sbomer.core.service.PncService;
 import io.quarkus.test.Mock;
 import lombok.extern.slf4j.Slf4j;
 
-@Mock
 @Slf4j
 public class PncServiceMock extends PncService {
 

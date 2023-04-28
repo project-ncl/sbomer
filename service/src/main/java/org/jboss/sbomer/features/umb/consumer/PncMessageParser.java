@@ -18,6 +18,7 @@
 package org.jboss.sbomer.features.umb.consumer;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,9 +35,14 @@ import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
+import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.service.PncService;
+import org.jboss.sbomer.core.service.ProductVersionMapper;
+import org.jboss.sbomer.core.service.ProductVersionMapper.ProductVersionMapping;
 import org.jboss.sbomer.features.umb.JmsUtils;
 import org.jboss.sbomer.features.umb.UmbConfig;
+import org.jboss.sbomer.features.umb.UmbConfig.UmbConsumerTrigger;
 import org.jboss.sbomer.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.SbomService;
 
@@ -46,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Unremovable
 @ApplicationScoped
-public class PNCMessageParser implements Runnable {
+public class PncMessageParser implements Runnable {
 
     private AtomicBoolean shouldRun = new AtomicBoolean(false);
     private AtomicBoolean connected = new AtomicBoolean(false);
@@ -56,21 +62,41 @@ public class PNCMessageParser implements Runnable {
     SbomService sbomService;
 
     @Inject
+    PncService pncService;
+
+    @Inject
     UmbConfig config;
 
     @Inject
     ConnectionFactory cf;
 
+    @Inject
+    ProductVersionMapper productVersionMapper;
+
     private Message lastMessage;
 
-    public PNCMessageParser() {
+    public PncMessageParser() {
         this.shouldRun.set(true);
     }
 
     @Override
     public void run() {
+        if (!config.isEnabled()) {
+            log.warn("The UMB feature is disabled");
+            return;
+        }
+
+        if (!config.consumer().isEnabled()) {
+            log.warn("The UMB consumer is disabled");
+            return;
+        }
         if (config.consumer().topic().isEmpty()) {
             log.warn("Topic not specified, PNC message parser won't run");
+            return;
+        }
+
+        if (config.consumer().trigger() == UmbConsumerTrigger.NONE) {
+            log.warn("The UMB consumer configuration is set to NONE, all builds are skipped");
         }
 
         log.info("Listening on topic: {}", config.consumer().topic().get());
@@ -91,25 +117,55 @@ public class PNCMessageParser implements Runnable {
                 receivedMessages.incrementAndGet();
 
                 try {
-
                     PncBuildNotificationMessageBody msgBody = JmsUtils.getMsgBody(lastMessage);
 
                     if (msgBody == null) {
                         continue;
                     }
 
-                    if (isSuccessfulPersistentBuild(msgBody)) {
-                        if (config.isEnabled()) {
-                            // String buildId = msgBody.path("build").path("id").asText();
-                            if (!Strings.isEmpty(msgBody.getBuild().getId())) {
+                    if (Strings.isEmpty(msgBody.getBuild().getId())) {
+                        log.warn("Received UMB message without Build ID specified");
+                        continue;
+                    }
 
-                                log.info(
-                                        "Triggering the automated SBOM generation for build {} ...",
+                    if (Objects.equals(config.consumer().trigger(), UmbConsumerTrigger.NONE)) {
+                        log.warn(
+                                "The UMB consumer configuration is set to NONE, skipping SBOM generation for PNC Build '{}'",
+                                msgBody.getBuild().getId());
+                        continue;
+                    }
+
+                    if (isSuccessfulPersistentBuild(msgBody)) {
+                        // Check whether it is a product-related build
+                        if (Objects.equals(config.consumer().trigger(), UmbConsumerTrigger.PRODUCT)) {
+                            ProductVersionRef productVersion = pncService.getProductVersion(msgBody.getBuild().getId());
+
+                            if (productVersion == null) {
+                                log.warn(
+                                        "The UMB consumer configuration is set to PRODUCT, skipping SBOM generation for PNC Build '{}' because it is not related to a Product",
                                         msgBody.getBuild().getId());
-                                sbomService.generate(msgBody.getBuild().getId(), GeneratorImplementation.CYCLONEDX);
+                                continue;
                             }
+
+                            ProductVersionMapping mapping = productVersionMapper.getMapping()
+                                    .get(productVersion.getId());
+
+                            if (mapping == null) {
+                                log.warn(
+                                        "Could not find mapping for the PNC Product Version '{}' (id: {}), skipping SBOM generation",
+                                        productVersion.getVersion(),
+                                        productVersion.getId());
+                                continue;
+                            }
+
+                            sbomService.generate(msgBody.getBuild().getId(), GeneratorImplementation.DOMINO);
+
                         } else {
-                            log.info("Not configured to automatically trigger any SBOM generation.");
+                            log.info(
+                                    "Triggering the automated SBOM generation for build {} ...",
+                                    msgBody.getBuild().getId());
+
+                            sbomService.generate(msgBody.getBuild().getId(), GeneratorImplementation.CYCLONEDX);
                         }
                     }
                 } catch (JMSException | IOException e) {

@@ -52,6 +52,7 @@ sbomer:
       producer:
         enabled: false
         topic: "${PRODUCER_TOPIC}"
+
   domino:
     default-version: "0.0.86"
     additional-args: "--include-non-managed"

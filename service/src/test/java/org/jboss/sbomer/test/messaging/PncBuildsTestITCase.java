@@ -20,6 +20,6 @@ package org.jboss.sbomer.test.messaging;
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
 @QuarkusIntegrationTest
-public class PNCBuildsTestITCase extends PncBuildTest {
+public class PncBuildsTestITCase extends PncBuildTest {
 
 }

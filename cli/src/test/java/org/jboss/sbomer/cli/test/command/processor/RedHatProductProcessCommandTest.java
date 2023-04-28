@@ -26,31 +26,25 @@ import java.io.IOException;
 import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
-import org.jboss.pnc.dto.Build;
-import org.jboss.pnc.dto.BuildConfiguration;
-import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
-import org.jboss.pnc.dto.Environment;
-import org.jboss.pnc.dto.ProductVersionRef;
-import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.sbomer.cli.commands.processor.RedHatProductProcessCommand;
 import org.jboss.sbomer.cli.model.Sbom;
+import org.jboss.sbomer.cli.test.PncWireMock;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.service.PncService;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.core.utils.SbomUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 
 @QuarkusTest
+@QuarkusTestResource(PncWireMock.class)
 public class RedHatProductProcessCommandTest {
     @Inject
     RedHatProductProcessCommand command;
@@ -58,32 +52,13 @@ public class RedHatProductProcessCommandTest {
     @Inject
     ObjectMapper objectMapper;
 
-    @InjectMock
-    PncService pncService;
-
     private JsonNode generateBom() throws IOException {
         String bomJson = TestResources.asString("sboms/sbom-valid.json");
         return objectMapper.readTree(bomJson);
     }
 
-    private Build generateBuild() {
-        return Build.builder()
-                .id("BBVVCC")
-                .environment(
-                        Environment.builder()
-                                .systemImageId("imageid")
-                                .systemImageRepositoryUrl("systemImageRepositoryUrl")
-                                .build())
-                .scmRepository(SCMRepository.builder().externalUrl("externalurl").build())
-                .scmTag("scmtag")
-                .scmRevision("scmrevision")
-                .scmUrl("scmurl")
-                .buildConfigRevision(BuildConfigurationRevisionRef.refBuilder().id("BCID").build())
-                .build();
-    }
-
     private Sbom generateSbom() throws IOException {
-        return Sbom.builder().buildId("BBVVCC").sbom(generateBom()).id(123456l).build();
+        return Sbom.builder().buildId("ARYT3LBXDVYAC").sbom(generateBom()).id(123456l).build();
     }
 
     @Test
@@ -94,12 +69,16 @@ public class RedHatProductProcessCommandTest {
     @Test
     void shouldStopProcessingIfTheBuildIsNotFound() throws Exception {
         Sbom sbom = generateSbom();
+        sbom.setBuildId("NOTEXISTING");
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
             command.doProcess(sbom);
         });
 
-        assertEquals("Build related to the SBOM could not be found in PNC, interrupting processing", ex.getMessage());
+        assertEquals(
+                "Could not obtain PNC Product Version information for the 'NOTEXISTING' PNC build, interrupting processing",
+                ex.getMessage());
+
     }
 
     @Test
@@ -123,48 +102,36 @@ public class RedHatProductProcessCommandTest {
     }
 
     @Test
+    // TODO: Add tests for logs
     void shouldStopWhenBuildConfigIsNotFound() throws Exception {
-        Mockito.when(pncService.getBuild("BBVVCC")).thenReturn(generateBuild());
-
         Sbom sbom = generateSbom();
+        sbom.setBuildId("MISSINGBUILDCONFIG");
+
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
             command.doProcess(sbom);
         });
 
         assertEquals(
-                "BuildConfig related to the SBOM could not be found in PNC, interrupting processing",
+                "Could not obtain PNC Product Version information for the 'MISSINGBUILDCONFIG' PNC build, interrupting processing",
                 ex.getMessage());
     }
 
     @Test
     void shouldFailOnMissingMapping() throws Exception {
-        Mockito.when(pncService.getBuild("BBVVCC")).thenReturn(generateBuild());
-        Mockito.when(pncService.getBuildConfig("BCID"))
-                .thenReturn(
-                        BuildConfiguration.builder()
-                                .productVersion(ProductVersionRef.refBuilder().id("PVID").version("PV").build())
-                                .build());
-
         Sbom sbom = generateSbom();
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
             command.doProcess(sbom);
         });
 
-        assertEquals("Could not find mapping for the PNC Product Version 'PV' (id: PVID)", ex.getMessage());
+        assertEquals("Could not find mapping for the PNC Product Version '1.0' (id: 179)", ex.getMessage());
     }
 
     @Test
     @DisplayName("Should run the processor successfully")
     void shouldProcess() throws Exception {
-        Mockito.when(pncService.getBuild("BBVVCC")).thenReturn(generateBuild());
-        Mockito.when(pncService.getBuildConfig("BCID"))
-                .thenReturn(
-                        BuildConfiguration.builder()
-                                .productVersion(ProductVersionRef.refBuilder().id("377").version("PV").build())
-                                .build());
-
         Sbom sbom = generateSbom();
+        sbom.setBuildId("QUARKUS");
         Bom bom = command.doProcess(sbom);
 
         assertTrue(
@@ -209,17 +176,15 @@ public class RedHatProductProcessCommandTest {
     @Test
     @DisplayName("Should interrupt processing on missing product version")
     void shouldMissingProductVersion() throws Exception {
-        Mockito.when(pncService.getBuild("BBVVCC")).thenReturn(generateBuild());
-        Mockito.when(pncService.getBuildConfig("BCID")).thenReturn(BuildConfiguration.builder().build());
-
         Sbom sbom = generateSbom();
+        sbom.setBuildId("MISSINGPRODUCTVERSION");
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
             command.doProcess(sbom);
         });
 
         assertEquals(
-                "BuildConfig related to the SBOM does not provide product version information, interrupting processing",
+                "Could not obtain PNC Product Version information for the 'MISSINGPRODUCTVERSION' PNC build, interrupting processing",
                 ex.getMessage());
     }
 

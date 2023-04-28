@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/builds/NOTEXISTING"
+  },
+  "response": {
+    "status": 404,
+    "jsonBody": {},
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

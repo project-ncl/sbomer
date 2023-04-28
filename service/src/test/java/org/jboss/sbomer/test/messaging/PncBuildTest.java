@@ -35,7 +35,7 @@ import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.features.umb.JmsUtils;
-import org.jboss.sbomer.features.umb.consumer.PNCMessageParser;
+import org.jboss.sbomer.features.umb.consumer.PncMessageParser;
 import org.jboss.sbomer.features.umb.consumer.UmbMessageConsumer;
 import org.jboss.sbomer.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -63,7 +63,7 @@ public class PncBuildTest {
     ConnectionFactory connectionFactory;
 
     @Inject
-    PNCMessageParser pncMessageParser;
+    PncMessageParser pncMessageParser;
 
     @Test
     @Order(1)

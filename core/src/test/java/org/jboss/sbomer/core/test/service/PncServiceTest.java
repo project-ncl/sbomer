@@ -23,43 +23,54 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import javax.inject.Inject;
 
-import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.service.PncService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @QuarkusTest
+@QuarkusTestResource(PncWireMock.class)
 public class PncServiceTest {
 
     @Inject
     PncService service;
 
     @Test
-    void testConfigurationWithCustomCacheUrl() {
-        Configuration config = service.getConfiguration();
-        assertEquals("localhost/pnc/orch", config.getHost());
-        assertEquals("http", config.getProtocol());
-    }
-
-    @Test
-    public void testFetchArtifact() throws Exception {
+    void testFetchArtifact() throws Exception {
         log.info("testFetchArtifact ...");
-        String purlFromPNC = "pkg:maven/com.vaadin.external.google/android-json@0.0.20131108.vaadin1?type=jar";
-        Artifact fromPNC = service.getArtifact(purlFromPNC);
+        Artifact fromPNC = service
+                .getArtifact("pkg:maven/org.jboss.logging/commons-logging-jboss-logging@1.0.0.Final-redhat-1?type=jar");
         assertNotNull(fromPNC);
-        assertEquals("MOCKMOCKMOCK1", fromPNC.getBuild().getId());
+        assertEquals("312123", fromPNC.getId());
     }
 
     @Test
-    public void testFetchNonExistingArtifact() throws Exception {
+    void testFetchNonExistingArtifact() throws Exception {
+        ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
+            service.getArtifact("purlnonexisting");
+        });
 
-        String purlNotExisting = "pkg:maven/i.do.not/exist@0.0.0?type=jar";
-        Artifact missing = service.getArtifact(purlNotExisting);
-        assertNull(missing);
+        assertEquals("Artifact with purl 'purlnonexisting' was not found in PNC", ex.getMessage());
+    }
 
+    @Test
+    void testGetProductVersionMissingBuild() {
+        assertNull(service.getProductVersion("NOTEXISTING"));
+    }
+
+    @Test
+    void testGetProductVersion() {
+        ProductVersionRef productVersionRef = service.getProductVersion("ARYT3LBXDVYAC");
+
+        assertNotNull(productVersionRef);
+        assertEquals("179", productVersionRef.getId());
+        assertEquals("1.0", productVersionRef.getVersion());
     }
 }

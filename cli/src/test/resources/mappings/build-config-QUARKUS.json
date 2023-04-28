@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/build-configs/QUARKUS"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "QUARKUS",
+      "productVersion": {
+        "id": "377",
+        "version": "1.0"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

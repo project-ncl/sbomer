@@ -34,6 +34,7 @@ import org.jboss.pnc.client.RemoteResourceNotFoundException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import lombok.Getter;
@@ -129,6 +130,46 @@ public class PncService {
                     "BuildConfig could not be retrieved because PNC responded with an error",
                     ex);
         }
+    }
+
+    /**
+     * <p>
+     * Obtains the {@link ProductVersionRef} for a given PNC {@link Build} identifier.
+     * <p>
+     *
+     * @param buildId The {@link Build} identifier to get the Product Version for.
+     * @return The {@link ProductVersionRef} object for the related or {@code null} in case it is not possible to obtain
+     *         it.
+     */
+    public ProductVersionRef getProductVersion(String buildId) {
+        log.debug("Fetching Product Version information from PNC for build '{}'", buildId);
+
+        if (buildId == null) {
+            return null;
+        }
+        Build build = getBuild(buildId);
+
+        if (build == null) {
+            log.warn("Build related to the SBOM could not be found in PNC, interrupting processing");
+            return null;
+        }
+
+        BuildConfiguration buildConfig = getBuildConfig(build.getBuildConfigRevision().getId());
+
+        if (buildConfig == null) {
+            log.warn("BuildConfig related to the SBOM could not be found in PNC, interrupting processing");
+            return null;
+        }
+
+        ProductVersionRef productVersion = buildConfig.getProductVersion();
+
+        if (productVersion == null) {
+            log.warn(
+                    "BuildConfig related to the SBOM does not provide product version information, interrupting processing");
+            return null;
+        }
+
+        return productVersion;
     }
 
     /**

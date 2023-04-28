@@ -15,16 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.commands.processor;
+package org.jboss.sbomer.core.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.service.ProductVersionMapper.Mapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -66,12 +66,11 @@ public class ProductVersionMapper {
     @Getter
     Mapping mapping;
 
-    @Startup
+    @PostConstruct
     void init() {
         try {
-            mapping = new ObjectMapper().readValue(
-                    Files.readString(Paths.get("src", "main", "resources", "product-mapping.json")),
-                    Mapping.class);
+            mapping = new ObjectMapper()
+                    .readValue(getClass().getClassLoader().getResourceAsStream("product-mapping.json"), Mapping.class);
         } catch (IOException e) {
             throw new ApplicationException("Could not read product mappings", e);
         }

@@ -21,12 +21,12 @@ import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.jboss.pnc.dto.Build;
-import org.jboss.pnc.dto.BuildConfiguration;
-import org.jboss.sbomer.cli.commands.processor.ProductVersionMapper.ProductVersionMapping;
+import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.service.ProductVersionMapper;
+import org.jboss.sbomer.core.service.ProductVersionMapper.ProductVersionMapping;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -80,32 +80,22 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
     @Override
     public Bom doProcess(Sbom sbom) {
         Bom bom = getBom(sbom);
-        Build build = pncService.getBuild(sbom.getBuildId());
 
-        if (build == null) {
+        ProductVersionRef productVersion = pncService.getProductVersion(sbom.getBuildId());
+
+        if (productVersion == null) {
             throw new ApplicationException(
-                    "Build related to the SBOM could not be found in PNC, interrupting processing");
+                    "Could not obtain PNC Product Version information for the '{}' PNC build, interrupting processing",
+                    sbom.getBuildId());
         }
 
-        BuildConfiguration buildConfig = pncService.getBuildConfig(build.getBuildConfigRevision().getId());
-
-        if (buildConfig == null) {
-            throw new ApplicationException(
-                    "BuildConfig related to the SBOM could not be found in PNC, interrupting processing");
-        }
-
-        if (buildConfig.getProductVersion() == null) {
-            throw new ApplicationException(
-                    "BuildConfig related to the SBOM does not provide product version information, interrupting processing");
-        }
-
-        ProductVersionMapping mapping = productVersionMapper.getMapping().get(buildConfig.getProductVersion().getId());
+        ProductVersionMapping mapping = productVersionMapper.getMapping().get(productVersion.getId());
 
         if (mapping == null) {
             throw new ApplicationException(
                     "Could not find mapping for the PNC Product Version '{}' (id: {})",
-                    buildConfig.getProductVersion().getVersion(),
-                    buildConfig.getProductVersion().getId());
+                    productVersion.getVersion(),
+                    productVersion.getId());
         }
 
         Component component = bom.getMetadata().getComponent();
