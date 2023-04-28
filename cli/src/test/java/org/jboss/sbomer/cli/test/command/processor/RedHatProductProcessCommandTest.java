@@ -40,6 +40,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.core.utils.SbomUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -154,7 +155,8 @@ public class RedHatProductProcessCommandTest {
     }
 
     @Test
-    void shouldFadsingMapping() throws Exception {
+    @DisplayName("Should run the processor successfully")
+    void shouldProcess() throws Exception {
         Mockito.when(pncService.getBuild("BBVVCC")).thenReturn(generateBuild());
         Mockito.when(pncService.getBuildConfig("BCID"))
                 .thenReturn(
@@ -202,6 +204,23 @@ public class RedHatProductProcessCommandTest {
                                 bom.getMetadata().getComponent())
                         .get()
                         .getValue());
+    }
+
+    @Test
+    @DisplayName("Should interrupt processing on missing product version")
+    void shouldMissingProductVersion() throws Exception {
+        Mockito.when(pncService.getBuild("BBVVCC")).thenReturn(generateBuild());
+        Mockito.when(pncService.getBuildConfig("BCID")).thenReturn(BuildConfiguration.builder().build());
+
+        Sbom sbom = generateSbom();
+
+        ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
+            command.doProcess(sbom);
+        });
+
+        assertEquals(
+                "BuildConfig related to the SBOM does not provide product version information, interrupting processing",
+                ex.getMessage());
     }
 
 }

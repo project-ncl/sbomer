@@ -94,6 +94,11 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
                     "BuildConfig related to the SBOM could not be found in PNC, interrupting processing");
         }
 
+        if (buildConfig.getProductVersion() == null) {
+            throw new ApplicationException(
+                    "BuildConfig related to the SBOM does not provide product version information, interrupting processing");
+        }
+
         ProductVersionMapping mapping = productVersionMapper.getMapping().get(buildConfig.getProductVersion().getId());
 
         if (mapping == null) {
