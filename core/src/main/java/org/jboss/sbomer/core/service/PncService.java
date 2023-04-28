@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.service;
+package org.jboss.sbomer.core.service;
 
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @ApplicationScoped
-public class PNCService {
+public class PncService {
 
     @ConfigProperty(name = "sbomer.pnc.api-url")
     @Getter

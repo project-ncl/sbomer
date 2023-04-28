@@ -19,7 +19,7 @@ package org.jboss.sbomer.cli.test.command.processor;
 
 import java.util.Set;
 
-import org.jboss.sbomer.cli.test.MockedPncService;
+import org.jboss.sbomer.cli.test.AlternativePncService;
 import org.jboss.sbomer.cli.test.command.processor.MultipleProcessorTest.CustomPncServiceProfile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class MultipleProcessorTest {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {
         @Override
         public Set<Class<?>> getEnabledAlternatives() {
-            return Set.of(MockedPncService.class);
+            return Set.of(AlternativePncService.class);
         }
     }
 

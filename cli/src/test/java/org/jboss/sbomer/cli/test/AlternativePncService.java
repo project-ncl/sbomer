@@ -27,11 +27,12 @@ import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.SCMRepository;
-import org.jboss.sbomer.cli.service.PNCService;
+import org.jboss.sbomer.core.service.PncService;
 
 @Alternative
 @Singleton
-public class MockedPncService extends PNCService {
+public class AlternativePncService extends PncService {
+
     @Override
     public Build getBuild(String buildId) {
         return Build.builder()

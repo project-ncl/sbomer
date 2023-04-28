@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.mock;
+package org.jboss.sbomer.core.test.service.mock;
 
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.dto.Artifact;
@@ -24,14 +24,14 @@ import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.TargetRepository;
 import org.jboss.pnc.dto.User;
-import org.jboss.sbomer.cli.service.PNCService;
+import org.jboss.sbomer.core.service.PncService;
 
 import io.quarkus.test.Mock;
 import lombok.extern.slf4j.Slf4j;
 
 @Mock
 @Slf4j
-public class PncServiceMock extends PNCService {
+public class PncServiceMock extends PncService {
 
     @Override
     public Build getBuild(String buildId) {

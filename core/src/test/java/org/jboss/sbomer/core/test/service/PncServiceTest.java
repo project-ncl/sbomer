@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.service;
+package org.jboss.sbomer.core.test.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +25,7 @@ import javax.inject.Inject;
 
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.dto.Artifact;
-import org.jboss.sbomer.cli.service.PNCService;
+import org.jboss.sbomer.core.service.PncService;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -33,10 +33,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @QuarkusTest
-public class TestPNCService {
+public class PncServiceTest {
 
     @Inject
-    PNCService service;
+    PncService service;
 
     @Test
     void testConfigurationWithCustomCacheUrl() {

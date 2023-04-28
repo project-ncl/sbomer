@@ -34,9 +34,9 @@ import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.sbomer.cli.commands.processor.RedHatProductProcessCommand;
 import org.jboss.sbomer.cli.model.Sbom;
-import org.jboss.sbomer.cli.service.PNCService;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.service.PncService;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.core.utils.SbomUtils;
 import org.junit.jupiter.api.Assertions;
@@ -59,7 +59,7 @@ public class RedHatProductProcessCommandTest {
     ObjectMapper objectMapper;
 
     @InjectMock
-    PNCService pncService;
+    PncService pncService;
 
     private JsonNode generateBom() throws IOException {
         String bomJson = TestResources.asString("sboms/sbom-valid.json");
