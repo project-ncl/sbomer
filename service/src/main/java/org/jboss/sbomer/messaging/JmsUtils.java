@@ -28,6 +28,7 @@ import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
 import org.jboss.pnc.common.json.JsonUtils;
+import org.jboss.sbomer.features.umb.consumer.PncBuildNotificationMessageBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -52,7 +53,7 @@ public class JmsUtils {
         msgMapper.disable(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS);
     }
 
-    public static JsonNode getMsgBody(Message message) throws JMSException, IOException {
+    public static PncBuildNotificationMessageBody getMsgBody(Message message) throws JMSException, IOException {
         if (message == null) {
             return null;
         }
@@ -60,17 +61,17 @@ public class JmsUtils {
             if (message instanceof TextMessage) {
 
                 String textMessage = message.getBody(String.class);
-                return msgMapper.readTree(textMessage);
+                return msgMapper.readValue(textMessage, PncBuildNotificationMessageBody.class);
 
             } else if (message instanceof BytesMessage) {
 
                 byte[] bytesMessage = message.getBody(byte[].class);
-                return msgMapper.readTree(bytesMessage);
+                return msgMapper.readValue(bytesMessage, PncBuildNotificationMessageBody.class);
 
             } else if (message instanceof ObjectMessage) {
 
                 Object objectMessage = message.getBody(Object.class);
-                return msgMapper.readTree(JsonUtils.toJson(objectMessage));
+                return msgMapper.readValue(JsonUtils.toJson(objectMessage), PncBuildNotificationMessageBody.class);
 
             } else if (message instanceof MapMessage) {
 
@@ -82,7 +83,9 @@ public class JmsUtils {
                     root.set(field, msgMapper.convertValue(mm.getObject(field), JsonNode.class));
                 }
 
-                return msgMapper.readTree(msgMapper.writerWithDefaultPrettyPrinter().writeValueAsString(root));
+                return msgMapper.readValue(
+                        msgMapper.writerWithDefaultPrettyPrinter().writeValueAsString(root),
+                        PncBuildNotificationMessageBody.class);
             }
             return null;
         } catch (JMSException | IOException exc) {
@@ -90,5 +93,4 @@ public class JmsUtils {
             throw exc;
         }
     }
-
 }

@@ -1,4 +1,3 @@
-
 /**
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
@@ -16,31 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.messaging.umb;
+package org.jboss.sbomer.features.umb.consumer;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jboss.pnc.api.enums.BuildStatus;
+import org.jboss.pnc.api.enums.BuildType;
+import org.jboss.pnc.api.enums.ProgressStatus;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
-public class Sbom {
-    public static enum BomFormat {
-        @JsonProperty("cyclonedx")
-        CYCLONEDX
+public class PncBuildNotificationMessageBody {
+    @Data
+    public static class Build {
+        String id;
+        BuildConfigRevision buildConfigRevision;
+        ProgressStatus progress;
+        BuildStatus status;
+        boolean temporaryBuild;
     }
 
     @Data
-    @Builder
-    public static class Bom {
-        @Builder.Default
-        BomFormat format = BomFormat.CYCLONEDX;
-        String version;
-        String link;
+    public static class BuildConfigRevision {
+        String id;
+        BuildType buildType;
     }
 
-    String id;
-    String link;
-    Bom bom;
+    Build build;
 }

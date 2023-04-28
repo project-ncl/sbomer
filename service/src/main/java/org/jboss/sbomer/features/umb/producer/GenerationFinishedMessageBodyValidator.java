@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.messaging.umb;
+package org.jboss.sbomer.features.umb.producer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.features.umb.producer.model.GenerationFinishedMessageBody;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.Draft;

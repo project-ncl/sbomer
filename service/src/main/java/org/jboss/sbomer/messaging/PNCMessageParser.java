@@ -36,14 +36,8 @@ import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.features.umb.UmbConfig;
+import org.jboss.sbomer.features.umb.consumer.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.SbomService;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.quarkus.arc.Unremovable;
 import lombok.extern.slf4j.Slf4j;
@@ -52,16 +46,6 @@ import lombok.extern.slf4j.Slf4j;
 @Unremovable
 @ApplicationScoped
 public class PNCMessageParser implements Runnable {
-
-    private static final ObjectMapper msgMapper = new ObjectMapper();
-
-    static {
-        msgMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        msgMapper.registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        msgMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        msgMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        msgMapper.disable(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS);
-    }
 
     private AtomicBoolean shouldRun = new AtomicBoolean(false);
     private AtomicBoolean connected = new AtomicBoolean(false);
@@ -107,18 +91,21 @@ public class PNCMessageParser implements Runnable {
 
                 try {
 
-                    JsonNode msgBody = JmsUtils.getMsgBody(lastMessage);
+                    PncBuildNotificationMessageBody msgBody = JmsUtils.getMsgBody(lastMessage);
+
                     if (msgBody == null) {
                         continue;
                     }
 
                     if (isSuccessfulPersistentBuild(msgBody)) {
                         if (config.isEnabled()) {
-                            String buildId = msgBody.path("build").path("id").asText();
-                            if (!Strings.isEmpty(buildId)) {
+                            // String buildId = msgBody.path("build").path("id").asText();
+                            if (!Strings.isEmpty(msgBody.getBuild().getId())) {
 
-                                log.info("Triggering the automated SBOM generation for build {} ...", buildId);
-                                sbomService.generate(buildId, GeneratorImplementation.CYCLONEDX);
+                                log.info(
+                                        "Triggering the automated SBOM generation for build {} ...",
+                                        msgBody.getBuild().getId());
+                                sbomService.generate(msgBody.getBuild().getId(), GeneratorImplementation.CYCLONEDX);
                             }
                         } else {
                             log.info("Not configured to automatically trigger any SBOM generation.");
@@ -160,27 +147,19 @@ public class PNCMessageParser implements Runnable {
         return receivedMessages.get();
     }
 
-    public boolean isSuccessfulPersistentBuild(JsonNode msgBody) {
-
-        JsonNode buildNode = msgBody.path("build");
-        Boolean persistent = !buildNode.path("temporaryBuild").asBoolean();
-        JsonNode buildConfigRevision = buildNode.path("buildConfigRevision");
-        String status = buildNode.path("status").asText();
-        String progress = msgBody.path("build").path("progress").asText();
-        String buildId = msgBody.path("build").path("id").asText();
-        String buildType = buildConfigRevision.path("buildType").asText();
-
+    public boolean isSuccessfulPersistentBuild(PncBuildNotificationMessageBody msgBody) {
         log.info(
                 "Received UMB message notification for {} build {}, with status {}, progress {} and build type {}",
-                persistent ? "persistent" : "temporary",
-                buildId,
-                status,
-                progress,
-                buildType);
+                msgBody.getBuild().isTemporaryBuild() ? "temporary" : "persistent",
+                msgBody.getBuild().getId(),
+                msgBody.getBuild().getStatus(),
+                msgBody.getBuild().getProgress(),
+                msgBody.getBuild().getBuildConfigRevision().getBuildType());
 
-        if (persistent && ProgressStatus.FINISHED.name().equals(progress)
-                && (BuildStatus.SUCCESS.name().equals(status) || BuildStatus.NO_REBUILD_REQUIRED.name().equals(status))
-                && BuildType.MVN.name().equals(buildType)) {
+        if (!msgBody.getBuild().isTemporaryBuild() && ProgressStatus.FINISHED.equals(msgBody.getBuild().getProgress())
+                && (BuildStatus.SUCCESS.equals(msgBody.getBuild().getStatus())
+                        || BuildStatus.NO_REBUILD_REQUIRED.equals(msgBody.getBuild().getStatus()))
+                && BuildType.MVN.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())) {
             return true;
         }
 

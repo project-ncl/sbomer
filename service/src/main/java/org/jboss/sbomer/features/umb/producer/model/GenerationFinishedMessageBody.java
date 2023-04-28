@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.messaging.umb;
+package org.jboss.sbomer.features.umb.producer.model;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.messaging.JmsUtils;
