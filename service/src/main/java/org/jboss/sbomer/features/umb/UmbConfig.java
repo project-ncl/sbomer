@@ -32,6 +32,10 @@ import io.smallrye.config.WithName;
 @ConfigMapping(prefix = "sbomer.features.umb")
 public interface UmbConfig {
 
+    enum UmbConsumerTrigger {
+        NONE, ALL, PRODUCT
+    }
+
     interface UmbConsumerConfig {
         /**
          * Enables the UMB consumer feature
@@ -47,7 +51,7 @@ public interface UmbConfig {
          */
         Optional<String> topic();
 
-        String trigger();
+        UmbConsumerTrigger trigger();
     }
 
     interface UmbProducerConfig {
