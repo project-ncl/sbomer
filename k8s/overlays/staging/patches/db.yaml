@@ -16,9 +16,28 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: sbomer-postgres
+  name: sbomer
 spec:
-  storageClassName: dynamic-nfs
+  template:
+    spec:
+      containers:
+        - name: sbomer
+          env:
+            - name: QUARKUS_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-secrets
+                  key: datasource.user
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-secrets
+                  key: datasource.password
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-secrets
+                  key: datasource.connection

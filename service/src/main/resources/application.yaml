@@ -26,7 +26,7 @@ quarkus:
     info-title: SBOMer service
   hibernate-orm:
     database:
-      generation: update # TODO: This is for now, so that we can work on stage, remove this once we maintain the DB properly
+      generation: update
   qpid-jms:
     url: "${UMB_BROKER_URL}"
   log:
