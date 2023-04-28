@@ -37,7 +37,4 @@ spec:
                   name: sbomer-secrets
                   key: datasource.password
             - name: QUARKUS_DATASOURCE_JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: sbomer-secrets
-                  key: datasource.connection
+              $patch: delete

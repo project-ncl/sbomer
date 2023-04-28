@@ -127,6 +127,14 @@ patches:
         value:
           name: QUARKUS_DATASOURCE_JDBC_MAX_SIZE
           value: "20"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: QUARKUS_DATASOURCE_JDBC_URL
+          valueFrom:
+            secretKeyRef:
+              name: sbomer-secrets
+              key: datasource.connection
 
   - target:
       kind: StatefulSet
