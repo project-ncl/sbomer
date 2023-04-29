@@ -26,13 +26,15 @@ import org.jboss.sbomer.generator.SbomGenerator;
 
 /**
  * Implementation responsible for running the Maven CycloneDX generator.
+ * 
+ * @author Marek Goldmann
  */
 @Generator(CYCLONEDX)
 @ApplicationScoped
 public class TektonCycloneDXSbomGenerator extends AbstractGeneratorTektonTaskRunner implements SbomGenerator {
 
     @Override
-    public void generate(Long sbomId, String version, String args) {
-        runTektonTask("sbomer-generate-cyclonedx", sbomId, CYCLONEDX, version, args);
+    public void generate(Long sbomId, String generatorVersion, String generatorArgs) {
+        runTektonTask("sbomer-generate-cyclonedx", sbomId, CYCLONEDX, generatorVersion, generatorArgs);
     }
 }

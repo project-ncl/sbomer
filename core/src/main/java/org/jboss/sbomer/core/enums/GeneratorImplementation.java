@@ -17,6 +17,11 @@
  */
 package org.jboss.sbomer.core.enums;
 
+/**
+ * Supported generator implementations.
+ * 
+ * @author Marek Goldmann
+ */
 public enum GeneratorImplementation {
     CYCLONEDX, DOMINO;
 }
