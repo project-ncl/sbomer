@@ -36,29 +36,35 @@ quarkus:
         level: DEBUG
 
 sbomer:
-  # List of all feature flags supported in SBOMer
+  # See documentation about features and feature flags
   features:
-    # UMB feature
     umb:
-      # Global filter on the UMB support. If disabled -- all features below will be disabled as well.
       enabled: true
       consumer:
         enabled: false
         topic: "${CONSUMER_TOPIC}"
-        # Defines which UMB messages received should result in SBOM generation. Accepted values are:
-        # * all -- every message will result in SBOM generation
-        # * product -- only Builds that are related to a Product will be triggerring SBOM generation
         trigger: product
       producer:
         enabled: false
         topic: "${PRODUCER_TOPIC}"
 
-  domino:
-    default-version: "0.0.86"
-    additional-args: "--include-non-managed"
-  cyclonedx:
-    default-version: "2.7.7"
-    additional-args: "--batch-mode --no-transfer-progress --quiet"
+  generation:
+    enabled: true # TODO: not used yet
+    default-generator: cyclonedx
+    generators:
+      domino:
+        default-version: "0.0.88"
+        default-args: "--include-non-managed"
+      cyclonedx:
+        default-version: "2.7.8"
+        default-args: "--batch-mode --no-transfer-progress --quiet"
+
+  processing:
+    enabled: true # TODO: not used yet
+    # List of default processors that will be run on every generated SBOM
+    default-processors:
+      - name: "default"
+      - name: "redhat-product"
 
 "%dev":
   quarkus:
@@ -91,12 +97,6 @@ sbomer:
           enabled: false
         producer:
           enabled: false
-    domino:
-      default-version: "0.0.86"
-      additional-args: "--include-non-managed"
-    cyclonedx:
-      default-version: "2.7.7"
-      additional-args: "--batch-mode --no-transfer-progress"
 
 "%test":
   quarkus:
@@ -123,9 +123,3 @@ sbomer:
           topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"
         producer:
           enabled: false
-    domino:
-      default-version: "0.0.86"
-      additional-args: "--include-non-managed"
-    cyclonedx:
-      default-version: "2.7.7"
-      additional-args: "--batch-mode --no-transfer-progress"

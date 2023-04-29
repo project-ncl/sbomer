@@ -27,7 +27,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.sbomer.config.GenerationConfig;
 import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.tekton.generator.TektonDominoSbomGenerator;
@@ -54,12 +54,6 @@ public class TestTektonDominoSbomGenerator {
     @Any
     @Inject
     Instance<SbomGenerator> generators;
-
-    @ConfigProperty(name = "sbomer.domino.default-version")
-    String dominoDefaultVersion;
-
-    @ConfigProperty(name = "sbomer.domino.additional-args")
-    String dominoAdditionalArgs;
 
     SbomGenerator generator;
 
@@ -96,8 +90,8 @@ public class TestTektonDominoSbomGenerator {
                 JsonNode config = mapper.readTree(taskRun.getSpec().getParams().get(1).getValue().getStringVal());
                 String version = config.get("version").asText().toString();
                 String additionalArgs = config.get("additional-args").asText().toString();
-                assertEquals(dominoDefaultVersion, version);
-                assertEquals(dominoAdditionalArgs, additionalArgs);
+                assertEquals("0.0.88", version);
+                assertEquals("--include-non-managed", additionalArgs);
             } catch (JsonProcessingException e) {
                 fail("Should not have thrown a parse error when processing the config object");
             }

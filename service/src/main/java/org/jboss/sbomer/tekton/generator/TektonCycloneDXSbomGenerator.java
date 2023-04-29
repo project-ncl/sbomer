@@ -20,33 +20,19 @@ package org.jboss.sbomer.tekton.generator;
 import static org.jboss.sbomer.core.enums.GeneratorImplementation.CYCLONEDX;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.json.Json;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.generator.Generator;
 import org.jboss.sbomer.generator.SbomGenerator;
-import org.jboss.sbomer.tekton.AbstractTektonTaskRunner;
 
 /**
  * Implementation responsible for running the Maven CycloneDX generator.
  */
 @Generator(CYCLONEDX)
 @ApplicationScoped
-public class TektonCycloneDXSbomGenerator extends AbstractTektonTaskRunner implements SbomGenerator {
-
-    @ConfigProperty(name = "sbomer.cyclonedx.default-version")
-    String cyclonedxDefaultVersion;
-
-    @ConfigProperty(name = "sbomer.cyclonedx.additional-args")
-    String cyclonedxAdditionalArgs;
+public class TektonCycloneDXSbomGenerator extends AbstractGeneratorTektonRunner implements SbomGenerator {
 
     @Override
-    public void generate(Long sbomId) {
-        var config = Json.createObjectBuilder()
-                .add("version", cyclonedxDefaultVersion)
-                .add("additional-args", cyclonedxAdditionalArgs)
-                .build();
-
-        runTektonTask("sbomer-generate-cyclonedx", sbomId, config);
+    public void generate(Long sbomId, String version, String args) {
+        runTektonTask("sbomer-generate-cyclonedx", sbomId, CYCLONEDX, version, args);
     }
 }

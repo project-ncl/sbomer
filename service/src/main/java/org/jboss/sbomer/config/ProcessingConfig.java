@@ -15,34 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.tekton.processor;
+package org.jboss.sbomer.config;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.Json;
 
-import org.jboss.sbomer.config.ProcessingConfig;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
-import org.jboss.sbomer.processor.Processor;
-import org.jboss.sbomer.processor.SbomProcessor;
-import org.jboss.sbomer.tekton.AbstractTektonTaskRunner;
+
+import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithName;
 
 /**
- * Implementation responsible for running the default processor.
+ * @author Marek Goldmann
  */
-@Processor(ProcessorImplementation.DEFAULT)
 @ApplicationScoped
-
-public class TektonDefaultSbomProcessor extends AbstractTektonTaskRunner implements SbomProcessor {
-
-    @Inject
-    ProcessingConfig processingConfig;
-
-    @Override
-    public void process(Long sbomId) {
-
-        var config = Json.createObjectBuilder().add("processors", processingConfig.processorsCommand()).build();
-
-        runTektonTask("sbomer-process", sbomId, config);
+@ConfigMapping(prefix = "sbomer.processing")
+public interface ProcessingConfig {
+    public interface ProcessorConfig {
+        ProcessorImplementation name();
     }
+
+    @WithName("enabled")
+    boolean isEnabled();
+
+    List<ProcessorConfig> defaultProcessors();
+
+    default String processorsCommand() {
+        return defaultProcessors().stream().map(c -> c.name().toString()).collect(Collectors.joining(" "));
+    }
+
 }

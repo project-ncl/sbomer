@@ -36,6 +36,8 @@ import javax.validation.Validator;
 import javax.ws.rs.NotFoundException;
 
 import org.jboss.pnc.common.concurrent.Sequence;
+import org.jboss.sbomer.config.GenerationConfig;
+import org.jboss.sbomer.config.ProcessingConfig;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.enums.SbomType;
@@ -72,6 +74,12 @@ public class SbomService {
     Instance<SbomProcessor> processors;
 
     @Inject
+    GenerationConfig generationConfig;
+
+    @Inject
+    ProcessingConfig processingConfig;
+
+    @Inject
     Validator validator;
 
     /**
@@ -86,6 +94,11 @@ public class SbomService {
      */
     @Transactional
     public Sbom generate(String buildId, GeneratorImplementation generator) {
+        if (!generationConfig.isEnabled()) {
+            throw new ApplicationException(
+                    "GEneration is disabled in the configuration, skipping generation for PNC Build '{}'",
+                    buildId);
+        }
 
         try {
             // Return in case we have it generated already
@@ -116,6 +129,12 @@ public class SbomService {
      */
     @Transactional
     public Sbom process(Sbom sbom, ProcessorImplementation processor) {
+        if (!processingConfig.isEnabled()) {
+            throw new ApplicationException(
+                    "Processing is disabled in the configuration, skipping processing for SBOM '{}'",
+                    sbom.getId());
+        }
+
         log.debug("Preparing to process SBOM id '{}' with '{}' processor", sbom.getId(), processor);
 
         // Create the child object

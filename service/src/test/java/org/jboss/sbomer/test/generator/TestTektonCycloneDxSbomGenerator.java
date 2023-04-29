@@ -55,12 +55,6 @@ public class TestTektonCycloneDxSbomGenerator {
     @Inject
     Instance<SbomGenerator> generators;
 
-    @ConfigProperty(name = "sbomer.cyclonedx.default-version")
-    String cyclonedxDefaultVersion;
-
-    @ConfigProperty(name = "sbomer.cyclonedx.additional-args")
-    String cyclonedxAdditionalArgs;
-
     SbomGenerator generator;
 
     @InjectMock(convertScopes = true)
@@ -96,8 +90,8 @@ public class TestTektonCycloneDxSbomGenerator {
                 JsonNode config = mapper.readTree(taskRun.getSpec().getParams().get(1).getValue().getStringVal());
                 String version = config.get("version").asText().toString();
                 String additionalArgs = config.get("additional-args").asText().toString();
-                assertEquals(cyclonedxDefaultVersion, version);
-                assertEquals(cyclonedxAdditionalArgs, additionalArgs);
+                assertEquals("2.7.8", version);
+                assertEquals("--batch-mode --no-transfer-progress --quiet", additionalArgs);
             } catch (JsonProcessingException e) {
                 fail("Should not have thrown a parse error when processing the config object");
             }

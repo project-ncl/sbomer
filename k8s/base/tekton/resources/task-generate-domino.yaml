@@ -65,6 +65,6 @@ spec:
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
 
-        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate --build-id=$(params.id) maven domino --domino-version=$TOOL_VERSION --target=$(workspaces.data.path)/source --settings=~/settings.xml
+        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v generate --sbom-id=$(params.id) maven domino --domino-version=$TOOL_VERSION --target=$(workspaces.data.path)/source --settings=~/settings.xml
   workspaces:
     - name: data

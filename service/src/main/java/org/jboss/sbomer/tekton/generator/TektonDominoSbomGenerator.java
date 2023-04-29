@@ -20,34 +20,20 @@ package org.jboss.sbomer.tekton.generator;
 import static org.jboss.sbomer.core.enums.GeneratorImplementation.DOMINO;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.json.Json;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.generator.Generator;
 import org.jboss.sbomer.generator.SbomGenerator;
-import org.jboss.sbomer.tekton.AbstractTektonTaskRunner;
 
 /**
  * Implementation responsible for running the Domino SBOM generator.
  */
 @Generator(DOMINO)
 @ApplicationScoped
-public class TektonDominoSbomGenerator extends AbstractTektonTaskRunner implements SbomGenerator {
-
-    @ConfigProperty(name = "sbomer.domino.default-version")
-    String dominoDefaultVersion;
-
-    @ConfigProperty(name = "sbomer.domino.additional-args")
-    String dominoAdditionalArgs;
+public class TektonDominoSbomGenerator extends AbstractGeneratorTektonRunner implements SbomGenerator {
 
     @Override
-    public void generate(Long sbomId) throws ApplicationException {
-        var config = Json.createObjectBuilder()
-                .add("version", dominoDefaultVersion)
-                .add("additional-args", dominoAdditionalArgs)
-                .build();
-        runTektonTask("sbomer-generate-domino", sbomId, config);
+    public void generate(Long sbomId, String version, String args) {
+        runTektonTask("sbomer-generate-domino", sbomId, DOMINO, version, args);
     }
 
 }
