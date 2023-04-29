@@ -27,7 +27,7 @@ import org.jboss.sbomer.tekton.AbstractTektonTaskRunner;
 
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 
-public abstract class AbstractGeneratorTektonRunner extends AbstractTektonTaskRunner {
+public abstract class AbstractGeneratorTektonTaskRunner extends AbstractTektonTaskRunner {
 
     @Inject
     GenerationConfig generationConfig;

@@ -33,7 +33,7 @@ import org.jboss.sbomer.tekton.AbstractTektonTaskRunner;
 @Processor(ProcessorImplementation.DEFAULT)
 @ApplicationScoped
 
-public class TektonDefaultSbomProcessor extends AbstractTektonTaskRunner implements SbomProcessor {
+public class TektonSbomProcessor extends AbstractTektonTaskRunner implements SbomProcessor {
 
     @Inject
     ProcessingConfig processingConfig;

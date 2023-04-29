@@ -29,7 +29,7 @@ import org.jboss.sbomer.generator.SbomGenerator;
  */
 @Generator(CYCLONEDX)
 @ApplicationScoped
-public class TektonCycloneDXSbomGenerator extends AbstractGeneratorTektonRunner implements SbomGenerator {
+public class TektonCycloneDXSbomGenerator extends AbstractGeneratorTektonTaskRunner implements SbomGenerator {
 
     @Override
     public void generate(Long sbomId, String version, String args) {

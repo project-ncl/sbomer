@@ -29,7 +29,7 @@ import org.jboss.sbomer.generator.SbomGenerator;
  */
 @Generator(DOMINO)
 @ApplicationScoped
-public class TektonDominoSbomGenerator extends AbstractGeneratorTektonRunner implements SbomGenerator {
+public class TektonDominoSbomGenerator extends AbstractGeneratorTektonTaskRunner implements SbomGenerator {
 
     @Override
     public void generate(Long sbomId, String version, String args) {
