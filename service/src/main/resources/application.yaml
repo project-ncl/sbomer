@@ -43,7 +43,7 @@ sbomer:
       # Global filter on the UMB support. If disabled -- all features below will be disabled as well.
       enabled: true
       consumer:
-        enabled: false
+        enabled: true
         topic: "${CONSUMER_TOPIC}"
         # Defines which UMB messages received should result in SBOM generation. Accepted values are:
         # * all -- every message will result in SBOM generation
