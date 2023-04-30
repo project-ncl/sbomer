@@ -27,26 +27,31 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ApiException extends ApplicationException {
+public class ClientException extends ApplicationException {
     int code = 400;
     List<String> errors;
     String errorId;
 
-    public ApiException(int code, String message, Object... params) {
+    public ClientException(String message, Object... params) {
+        super(message, params);
+        this.errorId = UUID.randomUUID().toString();
+    }
+
+    public ClientException(int code, String message, Object... params) {
         super(message, params);
         this.code = code;
         this.errorId = UUID.randomUUID().toString();
     }
 
-    public ApiException(int code, String message, List<String> errors, Object... params) {
+    public ClientException(int code, String message, List<String> errors, Object... params) {
         super(message, params);
         this.code = code;
         this.errors = errors;
         this.errorId = UUID.randomUUID().toString();
     }
 
-    public static ApiException fromResponse(int code, ErrorResponse error) {
-        ApiException ex = new ApiException(code, error.getMessage(), error.getErrors());
+    public static ClientException fromResponse(int code, ErrorResponse error) {
+        ClientException ex = new ClientException(code, error.getMessage(), error.getErrors());
         ex.setErrorId(error.getErrorId());
 
         return ex;

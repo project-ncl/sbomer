@@ -49,7 +49,7 @@ sbomer:
         topic: "${PRODUCER_TOPIC}"
 
   generation:
-    enabled: true # TODO: not used yet
+    enabled: true
     default-generator: cyclonedx
     generators:
       domino:
@@ -60,7 +60,8 @@ sbomer:
         default-args: "--batch-mode --no-transfer-progress --quiet"
 
   processing:
-    enabled: true # TODO: not used yet
+    enabled: true
+    auto-process: true
     # List of default processors that will be run on every generated SBOM
     default-processors:
       - name: "default"
@@ -79,7 +80,7 @@ sbomer:
         url: jdbc:postgresql://localhost:5432/sbomer
     hibernate-orm:
       database:
-        generation: update
+        generation: drop-and-create
       log:
         sql: true
     smallrye-openapi:

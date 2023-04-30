@@ -43,6 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 public class TestSBOMService {
 
     @Inject
+    TestSbomRepository testSbomRepository;
+
+    @Inject
     SbomService sbomService;
 
     private static final String INITIAL_BUILD_ID = "ARYT3LBXDVYAC";

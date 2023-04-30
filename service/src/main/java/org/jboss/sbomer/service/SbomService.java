@@ -26,28 +26,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import javax.ws.rs.NotFoundException;
 
 import org.jboss.pnc.common.concurrent.Sequence;
-import org.jboss.sbomer.config.GenerationConfig;
 import org.jboss.sbomer.config.ProcessingConfig;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
-import org.jboss.sbomer.core.enums.SbomType;
-import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.ClientException;
+import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
-import org.jboss.sbomer.generator.Generator.GeneratorLiteral;
-import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.processor.Processor.ProcessorLiteral;
-import org.jboss.sbomer.processor.SbomProcessor;
 import org.jboss.sbomer.rest.RestUtils;
 import org.jboss.sbomer.rest.dto.Page;
 
@@ -65,91 +55,11 @@ public class SbomService {
     @Inject
     SbomRepository sbomRepository;
 
-    @Any
-    @Inject
-    Instance<SbomGenerator> generators;
-
-    @Any
-    @Inject
-    Instance<SbomProcessor> processors;
-
-    @Inject
-    GenerationConfig generationConfig;
-
     @Inject
     ProcessingConfig processingConfig;
 
     @Inject
     Validator validator;
-
-    /**
-     * Runs the generation of SBOM using the available implementation of the generator.
-     *
-     * Generation is done in an asynchronous way. The returned object is a handle which will let the client to retrieve
-     * the SBOM content once the generation is finished.
-     *
-     * @param buildId The PNC build ID for which the generation should be performed.
-     * @param generator The selected generator implementation, see {@link GeneratorImplementation}
-     * @return Returns a {@link Sbom} object that will represent the generated CycloneDX sbom.
-     */
-    @Transactional
-    public Sbom generate(String buildId, GeneratorImplementation generator) {
-        if (!generationConfig.isEnabled()) {
-            throw new ApplicationException(
-                    "GEneration is disabled in the configuration, skipping generation for PNC Build '{}'",
-                    buildId);
-        }
-
-        try {
-            // Return in case we have it generated already
-            return sbomRepository.getSbom(buildId, generator, null);
-        } catch (NoResultException ex) {
-            // Ignored
-        }
-
-        Sbom sbom = new Sbom();
-        sbom.setType(SbomType.BUILD_TIME); // TODO Is it always the case?
-        sbom.setBuildId(buildId);
-        sbom.setGenerator(generator);
-
-        // Store it in database
-        sbom = save(sbom);
-
-        // Schedule the generation
-        generators.select(GeneratorLiteral.of(generator)).get().generate(sbom.getId());
-
-        return sbom;
-    }
-
-    /**
-     * Performs processing of the SBOM identified by the ID using selected processor.
-     *
-     * @param sbomId SBOM identifier being a {@link Long}
-     * @param processor Selected {@link ProcessorImplementation}
-     */
-    @Transactional
-    public Sbom process(Sbom sbom, ProcessorImplementation processor) {
-        if (!processingConfig.isEnabled()) {
-            throw new ApplicationException(
-                    "Processing is disabled in the configuration, skipping processing for SBOM '{}'",
-                    sbom.getId());
-        }
-
-        log.debug("Preparing to process SBOM id '{}' with '{}' processor", sbom.getId(), processor);
-
-        // Create the child object
-        Sbom child = sbom.giveBirth();
-
-        child.setProcessor(processor);
-
-        // Store the child in database
-        child = save(child);
-
-        // Schedule processing
-        processors.select(ProcessorLiteral.of(processor)).get().process(child.getId());
-
-        return child;
-    }
 
     /**
      * Get list of {@link Sbom}s in a paginated way.
@@ -253,6 +163,20 @@ public class SbomService {
     /**
      * Returns {@link Sbom} for the specified identifier.
      *
+     * @param sbomId As {@link String}.
+     * @return The {@link Sbom} object.
+     */
+    public Sbom get(String sbomId) {
+        try {
+            return get(Long.valueOf(sbomId));
+        } catch (NumberFormatException e) {
+            throw new ClientException("Invalid SBOM id provided: '{}', a number was expected", sbomId);
+        }
+    }
+
+    /**
+     * Returns {@link Sbom} for the specified identifier.
+     *
      * @param sbomId
      * @return The {@link Sbom} object.
      */
@@ -274,7 +198,7 @@ public class SbomService {
         Sbom sbom = sbomRepository.findById(sbomId);
 
         if (sbom == null) {
-            throw new ApplicationException("Could not find SBOM with ID '{}'", sbomId);
+            throw new NotFoundException("Could not find SBOM with ID '{}'", sbomId);
         }
 
         // Update the SBOM field

@@ -72,7 +72,7 @@ public class RedHatProductProcessCommandTest {
         sbom.setBuildId("NOTEXISTING");
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-            command.doProcess(sbom);
+            command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
         });
 
         assertEquals(
@@ -108,7 +108,7 @@ public class RedHatProductProcessCommandTest {
         sbom.setBuildId("MISSINGBUILDCONFIG");
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-            command.doProcess(sbom);
+            command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
         });
 
         assertEquals(
@@ -121,7 +121,7 @@ public class RedHatProductProcessCommandTest {
         Sbom sbom = generateSbom();
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-            command.doProcess(sbom);
+            command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
         });
 
         assertEquals("Could not find mapping for the PNC Product Version '1.0' (id: 179)", ex.getMessage());
@@ -132,7 +132,7 @@ public class RedHatProductProcessCommandTest {
     void shouldProcess() throws Exception {
         Sbom sbom = generateSbom();
         sbom.setBuildId("QUARKUS");
-        Bom bom = command.doProcess(sbom);
+        Bom bom = command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
 
         assertTrue(
                 SbomUtils.hasProperty(
@@ -180,7 +180,7 @@ public class RedHatProductProcessCommandTest {
         sbom.setBuildId("MISSINGPRODUCTVERSION");
 
         ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-            command.doProcess(sbom);
+            command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
         });
 
         assertEquals(

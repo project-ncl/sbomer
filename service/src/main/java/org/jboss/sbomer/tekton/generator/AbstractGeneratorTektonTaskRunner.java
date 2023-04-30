@@ -29,7 +29,7 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 
 /**
  * Specialized class for simplifying running Tekton Tasks related to SBOM generation.
- * 
+ *
  * @author Marek Goldmann
  */
 public abstract class AbstractGeneratorTektonTaskRunner extends AbstractTektonTaskRunner {
@@ -41,7 +41,7 @@ public abstract class AbstractGeneratorTektonTaskRunner extends AbstractTektonTa
      * <p>
      * Specialized Task Runner for generators.
      * </p>
-     * 
+     *
      * @param tektonTaskName The name of the Tekton Task to run.
      * @param sbomId The SBOM identifier to run the Task for.
      * @param generator The {@link GeneratorImplementation}

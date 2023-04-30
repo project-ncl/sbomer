@@ -26,7 +26,7 @@ import org.jboss.sbomer.generator.SbomGenerator;
 
 /**
  * Implementation responsible for running the Domino SBOM generator.
- * 
+ *
  * @author Marek Goldmann
  */
 @Generator(DOMINO)

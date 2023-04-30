@@ -27,7 +27,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.cli.client.SBOMerClient;
 import org.jboss.sbomer.cli.model.Sbom;
-import org.jboss.sbomer.core.errors.ApiException;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.common.QuarkusTestResource;
@@ -46,12 +46,12 @@ public class SBOMerClientTest {
         Sbom sbom = client.getById("123");
         assertNotNull(sbom);
         assertEquals(123, sbom.getId());
-        assertEquals("BUILD123", sbom.getBuildId());
+        assertEquals("QUARKUS", sbom.getBuildId());
     }
 
     @Test
     void testNotFoundSbom() {
-        ApiException ex = assertThrows(ApiException.class, () -> {
+        ClientException ex = assertThrows(ClientException.class, () -> {
             client.getById("1234");
         });
 

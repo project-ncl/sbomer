@@ -19,7 +19,7 @@ package org.jboss.sbomer.core.errors;
 
 import java.util.List;
 
-public class ValidationException extends ApiException {
+public class ValidationException extends ClientException {
 
     public ValidationException(String message, List<String> errors, Object... params) {
         super(422, message, errors, params);

@@ -17,10 +17,6 @@
  */
 package org.jboss.sbomer.cli.model;
 
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
-import org.jboss.sbomer.core.enums.SbomType;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.Builder;
@@ -38,8 +34,5 @@ public class Sbom {
     private Long id;
     private String buildId;
     private JsonNode sbom;
-    private GeneratorImplementation generator;
-    private ProcessorImplementation processor;
-    private SbomType type;
     private Sbom parentSbom;
 }

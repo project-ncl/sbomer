@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.rest.errors;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
@@ -28,42 +26,21 @@ import javax.ws.rs.ext.Provider;
 
 import org.jboss.sbomer.core.errors.ErrorResponse;
 
-import com.fasterxml.jackson.core.JsonParseException;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Provider
 @Slf4j
-public class SbomerExceptionMapper implements ExceptionMapper<Throwable> {
+public class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
     @Override
-    public Response toResponse(Throwable ex) {
-        int status = 500;
-        String message = "An unexpected error occurred";
-        List<String> errors = null;
-
-        if (ex instanceof WebApplicationException) {
-            WebApplicationException wex = (WebApplicationException) ex;
-
-            status = wex.getResponse().getStatus();
-            message = wex.getResponse().getStatusInfo().getReasonPhrase();
-
-            // if (wex.getCause() instanceof JsonParseException) {
-            // // status = 400;
-            // // message = "An error occurred while parsing the request";
-            // errors = Collections.singletonList(((JsonParseException) wex.getCause()).getOriginalMessage());
-            // }
-        }
-
+    public Response toResponse(WebApplicationException ex) {
         ErrorResponse error = ErrorResponse.builder()
                 .errorId(UUID.randomUUID().toString())
-                .message(message)
-                .errors(errors)
+                .message(ex.getResponse().getStatusInfo().getReasonPhrase())
                 .build();
 
         log.error(error.toString(), ex);
 
-        return Response.status(status).entity(error).build();
+        return Response.status(ex.getResponse().getStatus()).entity(error).build();
     }
-
 }

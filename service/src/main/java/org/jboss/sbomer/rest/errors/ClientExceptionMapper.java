@@ -21,17 +21,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.jboss.sbomer.core.errors.ApiException;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Provider
 @Slf4j
-public class SbomerApiExceptionMapper implements ExceptionMapper<ApiException> {
+public class ClientExceptionMapper implements ExceptionMapper<ClientException> {
 
     @Override
-    public Response toResponse(ApiException ex) {
+    public Response toResponse(ClientException ex) {
         ErrorResponse error = ErrorResponse.builder()
                 .errorId(ex.getErrorId())
                 .message(ex.getMessage())

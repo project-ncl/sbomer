@@ -51,7 +51,7 @@ spec:
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
         
-        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v process $PROCESSORS --sbom-id=$(params.id)
+        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v process --sbom-id=$(params.id) $PROCESSORS
   workspaces:
     - name: data
       description: Main workspace

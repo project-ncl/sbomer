@@ -24,7 +24,7 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper;
-import org.jboss.sbomer.core.errors.ApiException;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 
@@ -36,7 +36,7 @@ public class ClientExceptionMapper implements ResponseExceptionMapper<Throwable>
     ObjectMapper objectMapper;
 
     @Override
-    public ApiException toThrowable(Response response) {
+    public ClientException toThrowable(Response response) {
 
         ErrorResponse error = null;
 
@@ -48,7 +48,7 @@ public class ClientExceptionMapper implements ResponseExceptionMapper<Throwable>
                     e);
         }
 
-        return ApiException.fromResponse(response.getStatus(), error);
+        return ClientException.fromResponse(response.getStatus(), error);
     }
 
 }

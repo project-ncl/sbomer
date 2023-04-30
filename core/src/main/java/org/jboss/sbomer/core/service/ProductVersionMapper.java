@@ -24,11 +24,9 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.service.ProductVersionMapper.Mapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.runtime.Startup;
 import lombok.Data;
 import lombok.Getter;
 

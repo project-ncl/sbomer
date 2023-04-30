@@ -35,6 +35,7 @@ import org.jboss.logmanager.LogContext;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.model.Sbom;
+import org.jboss.sbomer.service.ProcessingService;
 import org.jboss.sbomer.service.SbomRepository;
 import org.jboss.sbomer.test.utils.InMemoryLogHandler;
 import org.junit.jupiter.api.AfterEach;
@@ -60,6 +61,9 @@ public class TaskRunStatusHandlerTest {
 
     @InjectMock
     SbomRepository sbomRepository;
+
+    @InjectMock
+    ProcessingService processingService;
 
     @BeforeEach
     void beforeEach() {
@@ -255,6 +259,7 @@ public class TaskRunStatusHandlerTest {
         statusHandler.updateStatus("123456", SbomStatus.READY);
         statusHandler.updateStatus("123456", SbomStatus.READY);
 
+        Mockito.verify(processingService, times(1)).process(sbom);
         Mockito.verify(sbomRepository, times(2)).findById(123456l);
         Mockito.verify(sbomRepository, times(2)).saveSbom(sbom);
 

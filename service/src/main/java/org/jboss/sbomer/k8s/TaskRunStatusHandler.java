@@ -28,10 +28,14 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.gradle.internal.impldep.com.google.common.base.Objects;
+import org.jboss.sbomer.config.ProcessingConfig;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.model.Sbom;
+import org.jboss.sbomer.service.ProcessingService;
 import org.jboss.sbomer.service.SbomRepository;
+import org.jboss.sbomer.service.SbomService;
 
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
@@ -43,6 +47,8 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Handles updates of status for the {@link Sbom} resources based on the {@link TaskRun} updates.
+ *
+ * @author Marek Goldmann
  */
 @ApplicationScoped
 @Slf4j
@@ -52,7 +58,16 @@ public class TaskRunStatusHandler {
     TektonClient tektonClient;
 
     @Inject
+    SbomService sbomService;
+
+    @Inject
     SbomRepository sbomRepository;
+
+    @Inject
+    ProcessingConfig processingConfig;
+
+    @Inject
+    ProcessingService processingService;
 
     SharedIndexInformer<TaskRun> taskRunInformer;
 
@@ -143,9 +158,14 @@ public class TaskRunStatusHandler {
         // Update status
         statusCache.put(sbomId, status);
         // Save the resource
-        sbomRepository.saveSbom(sbom);
+        sbom = sbomRepository.saveSbom(sbom);
 
         log.info("Updated Sbom id '{}' with status: '{}'", sbomId, status);
+
+        if (Objects.equal(status, SbomStatus.READY) && sbom.isBase() && processingConfig.isEnabled()
+                && processingConfig.shouldAutoProcess()) {
+            processingService.process(sbom);
+        }
 
     }
 

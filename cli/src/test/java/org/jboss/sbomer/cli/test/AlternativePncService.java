@@ -54,7 +54,7 @@ public class AlternativePncService extends PncService {
     public BuildConfiguration getBuildConfig(String buildConfigId) {
         return BuildConfiguration.builder()
                 .id("BCID")
-                .productVersion(ProductVersionRef.refBuilder().id("377").version("1.0").build())
+                .productVersion(ProductVersionRef.refBuilder().id("382").version("1.0").build())
                 .build();
     }
 

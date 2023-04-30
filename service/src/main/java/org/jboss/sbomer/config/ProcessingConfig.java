@@ -18,13 +18,15 @@
 package org.jboss.sbomer.config;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.processor.ProcessingExecConfig;
+import org.jboss.sbomer.processor.ProcessingExecConfig.ProcessorExec;
 
 import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 
 /**
@@ -37,13 +39,43 @@ public interface ProcessingConfig {
         ProcessorImplementation name();
     }
 
+    /**
+     * Whether the processing feature should be enabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    @WithDefault("true")
     @WithName("enabled")
     boolean isEnabled();
 
+    /**
+     * Whether the default configured processors should be run automatically for any base SBOM generated.
+     *
+     * @return {@code true} if processing should be run automatically, {@code false} otherwise
+     */
+    @WithDefault("true")
+    @WithName("auto-process")
+    boolean shouldAutoProcess();
+
+    /**
+     * List of configured default processors.
+     *
+     * @return
+     */
     List<ProcessorConfig> defaultProcessors();
 
-    default String processorsCommand() {
-        return defaultProcessors().stream().map(c -> c.name().toString()).collect(Collectors.joining(" "));
+    /**
+     * Creates a {@link ProcessingExecConfig} out of the configured default processors.
+     *
+     * @return The {@link ProcessingExecConfig} object.
+     */
+    default ProcessingExecConfig defaultExecConfig() {
+        return ProcessingExecConfig.builder()
+                .processors(
+                        defaultProcessors().stream()
+                                .map(p -> ProcessorExec.builder().processor(p.name()).build())
+                                .toList())
+                .build();
     }
 
 }

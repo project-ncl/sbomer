@@ -53,11 +53,7 @@ public class PncServiceTest {
 
     @Test
     void testFetchNonExistingArtifact() throws Exception {
-        ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-            service.getArtifact("purlnonexisting");
-        });
-
-        assertEquals("Artifact with purl 'purlnonexisting' was not found in PNC", ex.getMessage());
+        assertNull(service.getArtifact("purlnonexisting"));
     }
 
     @Test

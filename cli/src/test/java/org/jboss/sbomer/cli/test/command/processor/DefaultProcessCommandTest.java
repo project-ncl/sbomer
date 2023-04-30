@@ -142,7 +142,7 @@ public class DefaultProcessCommandTest {
             assertEquals(2, component.getProperties().size());
         }
 
-        Bom bom = command.doProcess(sbom);
+        Bom bom = command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
 
         for (String purl : componentPurls) {
             Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(purl, bom);
@@ -200,7 +200,8 @@ public class DefaultProcessCommandTest {
 
         Mockito.when(pncService.getArtifact(specialPurl)).thenReturn(artifact);
 
-        Bom bom = command.doProcess(generateSbom());
+        Sbom sbom = generateSbom();
+        Bom bom = command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
 
         Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(specialPurl, bom);
         assertTrue(componentOpt.isPresent());
