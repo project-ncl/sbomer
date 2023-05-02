@@ -33,6 +33,7 @@ resources:
 patchesStrategicMerge:
   #- patches/sa.yaml
   - patches/db.yaml
+  - patches/cache.yaml
 patches:
   - target:
       kind: Deployment
@@ -40,6 +41,14 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PNC_SERVICE_HOST
+          value: "orch-stage.psi.redhat.com"
   - target:
       kind: Deployment
       name: sbomer

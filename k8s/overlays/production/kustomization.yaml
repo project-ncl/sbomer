@@ -27,6 +27,18 @@ bases:
   - ../staging
 patchesStrategicMerge:
   - patches/route.yaml
+  - patches/service.yaml
+  - patches/cache.yaml
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PNC_SERVICE_HOST
+          value: "orch.psi.redhat.com"
+
 # List of images used in production
 # TODO: Currently happily using :latest tag but this will be changed in the future
 images:

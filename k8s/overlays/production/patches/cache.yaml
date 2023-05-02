@@ -20,37 +20,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sbomer-cache
-  labels:
-    app.kubernetes.io/component: "cache"
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: "cache"
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/component: "cache"
     spec:
-      serviceAccountName: sbomer-sa
       containers:
-        - image: sbomer-cache
-          name: sbomer-cache
-          imagePullPolicy: IfNotPresent
+        - name: sbomer-cache
           env:
             - name: PNC_SERVICE_HOST
-              value: orch.psi.redhat.com
-          ports:
-            - containerPort: 7070
-              name: http
-              protocol: TCP
-          volumeMounts:
-            - mountPath: "/var/www/cache"
-              name: sbomer-cache
+              $patch: delete
 
-
-      restartPolicy: Always
-      volumes:
-        - name: sbomer-cache
-          persistentVolumeClaim:
-            claimName: sbomer-cache
