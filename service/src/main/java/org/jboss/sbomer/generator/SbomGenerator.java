@@ -18,16 +18,38 @@
 package org.jboss.sbomer.generator;
 
 /**
- * High-level interaction with the SBOM generator.
+ * SBOM generator interface.
  *
+ * @author Marek Goldmann
  */
 public interface SbomGenerator {
 
     /**
-     * Generates the SBOM in CycloneDX format for a PNC build identified by the buildId
+     * Generates the SBOM in CycloneDX format referenced by the SBOM sbomId.
      *
-     * @param buildId PNC build id
+     * @param sbomId SBOM identifier.
      */
-    public void generate(Long sbomId);
+    default public void generate(Long sbomId) {
+        generate(sbomId, null, null);
+    }
+
+    /**
+     * Generates the SBOM in CycloneDX format referenced by the SBOM sbomId.
+     *
+     * @param sbomId SBOM identifier.
+     * @param generatorVersion Generator version.
+     */
+    default public void generate(Long sbomId, String generatorVersion) {
+        generate(sbomId, generatorVersion, null);
+    }
+
+    /**
+     * Generates the SBOM in CycloneDX format referenced by the SBOM sbomId.
+     *
+     * @param sbomId SBOM identifier.
+     * @param generatorVersion Generator version.
+     * @param generatorArgs Generator arguments.
+     */
+    public void generate(Long sbomId, String generatorVersion, String generatorArgs);
 
 }

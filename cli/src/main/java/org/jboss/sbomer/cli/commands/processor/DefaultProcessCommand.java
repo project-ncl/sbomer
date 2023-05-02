@@ -42,9 +42,7 @@ import picocli.CommandLine.Command;
 public class DefaultProcessCommand extends AbstractProcessCommand {
 
     @Override
-    public Bom doProcess(Sbom sbom) {
-        Bom bom = getBom(sbom);
-
+    public Bom doProcess(Sbom sbom, Bom bom) {
         log.info("Applying {} processing...", getImplementationType());
 
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
@@ -72,16 +70,23 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
 
         log.info("Component with Red Hat version found, purl: {}", component.getPurl());
 
+        SbomUtils.setPublisher(component);
+        SbomUtils.setSupplier(component);
+        SbomUtils.addMrrc(component);
+
         Artifact artifact = pncService.getArtifact(component.getPurl());
+
+        if (artifact == null) {
+            log.warn(
+                    "Artifact with purl '{}' was not found in PNC, skipping processing for this artifact",
+                    component.getPurl());
+            return;
+        }
 
         log.debug(
                 "Starting processing of component '{}' with PNC artifact '{}'...",
                 component.getPurl(),
                 artifact.getId());
-
-        SbomUtils.setPublisher(component);
-        SbomUtils.setSupplier(component);
-        SbomUtils.addMrrc(component);
 
         // Add build-related information, if we found a build in PNC
         if (artifact.getBuild() != null) {

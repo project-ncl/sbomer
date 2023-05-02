@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.core.errors;
 
-public class NotFoundException extends ApiException {
+public class NotFoundException extends ClientException {
 
     public NotFoundException(String message, Object... params) {
         super(404, message, params);

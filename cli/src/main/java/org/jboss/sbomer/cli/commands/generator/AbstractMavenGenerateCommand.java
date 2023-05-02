@@ -51,6 +51,8 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
         // First, fetch the SBOM metadata
         Sbom sbom = sbomerClient.getById(parent.getParent().getSbomMixin().getSbomId());
 
+        log.info("Starting generation for PNC Build '{}'", sbom.getBuildId());
+
         // Fetch build information
         Build build = pncService.getBuild(sbom.getBuildId());
 

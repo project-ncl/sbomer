@@ -29,6 +29,14 @@ import javax.inject.Qualifier;
 
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 
+/**
+ * <p>
+ * {@link Generator} annotation that can be used to differentiate between SBOM generator implementation.
+ * </p>
+ * <p>
+ * Available implementations are listed in the {@link GeneratorImplementation} enum.
+ * </p>
+ */
 @Qualifier
 @Retention(RUNTIME)
 @Target({ FIELD, TYPE })

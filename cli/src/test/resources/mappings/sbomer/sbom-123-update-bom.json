@@ -7,11 +7,11 @@
     "status": 200,
     "jsonBody": {
       "id": 123,
-      "buildId": "BUILD123",
+      "buildId": "QUARKUS",
       "sbom": {},
       "parentSbom": {
         "id": 111,
-        "buildId": "BUILD111",
+        "buildId": "QUARKUS",
         "sbom": {}
       }
     },

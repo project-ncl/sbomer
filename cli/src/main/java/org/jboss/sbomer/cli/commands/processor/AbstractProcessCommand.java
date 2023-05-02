@@ -17,12 +17,15 @@
  */
 package org.jboss.sbomer.cli.commands.processor;
 
+import org.checkerframework.checker.units.qual.s;
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.commands.AbstractCommand;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.utils.SbomUtils;
+
+import com.fasterxml.jackson.databind.node.NullNode;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -52,11 +55,11 @@ public abstract class AbstractProcessCommand extends AbstractCommand {
         // In case the SBOM is null, it means that this is an initial processing of the SBOM and because of this, the
         // relevant CycloneDX Bom is available in the parent SBOM only. Future processing will be done on the actual
         // object, because the BOM will be populated.
-        if (sbom.getSbom() == null) {
-            // log.debug("BOM missing, processing base BOM");
-            processedBom = doProcess(sbom.getParentSbom());
+        if (sbom.getSbom() == null || sbom.getSbom() instanceof NullNode) {
+            log.debug("BOM missing, processing base BOM");
+            processedBom = doProcess(sbom, getBom(sbom.getParentSbom()));
         } else {
-            processedBom = doProcess(sbom);
+            processedBom = doProcess(sbom, getBom(sbom));
         }
 
         log.debug("{} processor finished", getImplementationType());
@@ -80,5 +83,5 @@ public abstract class AbstractProcessCommand extends AbstractCommand {
 
     public abstract ProcessorImplementation getImplementationType();
 
-    public abstract Bom doProcess(Sbom bom);
+    public abstract Bom doProcess(Sbom sbom, Bom bom);
 }

@@ -44,7 +44,7 @@ import org.jboss.sbomer.features.umb.JmsUtils;
 import org.jboss.sbomer.features.umb.UmbConfig;
 import org.jboss.sbomer.features.umb.UmbConfig.UmbConsumerTrigger;
 import org.jboss.sbomer.features.umb.consumer.model.PncBuildNotificationMessageBody;
-import org.jboss.sbomer.service.SbomService;
+import org.jboss.sbomer.service.GenerationService;
 
 import io.quarkus.arc.Unremovable;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +59,7 @@ public class PncMessageParser implements Runnable {
     private AtomicInteger receivedMessages = new AtomicInteger(0);
 
     @Inject
-    SbomService sbomService;
+    GenerationService generationService;
 
     @Inject
     PncService pncService;
@@ -158,14 +158,20 @@ public class PncMessageParser implements Runnable {
                                 continue;
                             }
 
-                            sbomService.generate(msgBody.getBuild().getId(), GeneratorImplementation.DOMINO);
+                            // TODO: Milestone 1
+                            // We support only generation of products that we list in the product mapping.
+                            generationService.generate(
+                                    msgBody.getBuild().getId(),
+                                    GeneratorImplementation.DOMINO,
+                                    "0.0.88",
+                                    "--include-non-managed --exclude-parent-poms --warn-on-missing-scm");
 
                         } else {
                             log.info(
                                     "Triggering the automated SBOM generation for build {} ...",
                                     msgBody.getBuild().getId());
 
-                            sbomService.generate(msgBody.getBuild().getId(), GeneratorImplementation.CYCLONEDX);
+                            generationService.generate(msgBody.getBuild().getId(), GeneratorImplementation.CYCLONEDX);
                         }
                     }
                 } catch (JMSException | IOException e) {

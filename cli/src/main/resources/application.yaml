@@ -31,12 +31,16 @@ quarkus:
     "sbomer":
       url: "${SBOMER_SERVICE_URL:http://localhost:8080}"
 
+  log:
+    level: INFO
+    category:
+      "org.jboss.sbomer":
+        level: DEBUG
+
 "%dev":
   quarkus:
     log:
       level: INFO
-      console:
-        format: "%m%n"
       category:
         "io.quarkus.kubernetes":
           level: DEBUG
@@ -47,8 +51,6 @@ quarkus:
   quarkus:
     log:
       level: INFO
-      console:
-        format: "%m%n"
       category:
         "org.jboss.sbomer":
           level: DEBUG

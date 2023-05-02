@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.cli;
 
-import org.jboss.sbomer.core.errors.ApiException;
+import org.jboss.sbomer.core.errors.ClientException;
 
 import picocli.CommandLine;
 import picocli.CommandLine.IExecutionExceptionHandler;
@@ -35,8 +35,8 @@ public class ExceptionHandler implements IExecutionExceptionHandler {
         cmd.getErr().println(cmd.getColorScheme().errorText(ex.getMessage()));
         cmd.getErr().println();
 
-        if (ex instanceof ApiException) {
-            ApiException apiEx = (ApiException) ex;
+        if (ex instanceof ClientException) {
+            ClientException apiEx = (ClientException) ex;
 
             cmd.getErr().println(cmd.getColorScheme().errorText((apiEx.getErrorId())));
             cmd.getErr().println();

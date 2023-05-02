@@ -31,7 +31,7 @@ CREATE TABLE sbom (
   type character varying(255)  NOT NULL,
   parent_sbom_id bigint  NULL,
   CONSTRAINT sbom_pkey PRIMARY KEY (id),
-  CONSTRAINT uq_sbom_buildid_generator_processor UNIQUE (build_id, generator, processor),
+  CONSTRAINT uq_sbom_buildid_generator UNIQUE (build_id, generator, processor),
   CONSTRAINT fk_sbom_parent_sbom FOREIGN KEY (parent_sbom_id) REFERENCES sbom(id)
 );
 

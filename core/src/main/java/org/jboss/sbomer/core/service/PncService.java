@@ -176,7 +176,7 @@ public class PncService {
      * Fetch information about the PNC {@link Artifact} identified by the particular purl.
      *
      * @param purl
-     * @return
+     * @return The {@link Artifact} object or {@code null} if it cannot be found.
      */
     public Artifact getArtifact(String purl) {
         log.debug("Fetching artifact from PNC for purl '{}'", purl);
@@ -186,7 +186,8 @@ public class PncService {
             RemoteCollection<Artifact> artifacts = artifactClient
                     .getAll(null, null, null, Optional.empty(), Optional.of(artifactQuery));
             if (artifacts.size() == 0) {
-                throw new ApplicationException("Artifact with purl '{}' was not found in PNC", purl);
+                log.debug("Artifact with purl '{}' was not found in PNC", purl);
+                return null;
             } else if (artifacts.size() > 1) {
                 throw new IllegalStateException("There should exist only one artifact with purl " + purl);
             }

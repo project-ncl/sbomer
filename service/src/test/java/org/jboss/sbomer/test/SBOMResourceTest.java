@@ -20,20 +20,19 @@ package org.jboss.sbomer.test;
 import static io.restassured.RestAssured.given;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.Instant;
 
-import org.cyclonedx.model.Bom;
 import org.hamcrest.CoreMatchers;
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.core.utils.UrlUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.dto.Page;
+import org.jboss.sbomer.service.GenerationService;
 import org.jboss.sbomer.service.SbomService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -42,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.http.ContentType;
 
@@ -49,8 +49,11 @@ import io.restassured.http.ContentType;
 @WithKubernetesTestServer
 public class SBOMResourceTest {
 
-    @InjectMock
+    @InjectSpy
     SbomService sbomService;
+
+    @InjectMock
+    GenerationService generationService;
 
     @Test
     public void testExistenceOfSbomsEndpoint() {
@@ -71,7 +74,7 @@ public class SBOMResourceTest {
                 .request("GET", "/api/v1alpha1/sboms/5644785")
                 .then()
                 .statusCode(404)
-                .body("message", CoreMatchers.is("Sbom with id '5644785' not found"))
+                .body("message", CoreMatchers.is("SBOM with id '5644785' not found"))
                 .and()
                 .body("errorId", CoreMatchers.isA(String.class));
     }
@@ -82,7 +85,7 @@ public class SBOMResourceTest {
         sbom.setBuildId("AAAABBBB");
         sbom.setId(12345L);
 
-        Mockito.when(sbomService.get(12345l)).thenReturn(sbom);
+        Mockito.when(sbomService.get("12345")).thenReturn(sbom);
 
         given().when()
                 .contentType(ContentType.JSON)
@@ -103,7 +106,7 @@ public class SBOMResourceTest {
         String bomJson = TestResources.asString("sboms/base.json");
         sbom.setSbom(new ObjectMapper().readTree(bomJson));
 
-        Mockito.when(sbomService.get(12345l)).thenReturn(sbom);
+        Mockito.when(sbomService.get("12345")).thenReturn(sbom);
 
         given().when()
                 .contentType(ContentType.JSON)
@@ -131,6 +134,7 @@ public class SBOMResourceTest {
     }
 
     @Test
+    @Disabled("Endpoints disabled for now")
     public void testGetBomOfBaseSbomByBuildId() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid-parent.json");
         JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
@@ -156,25 +160,21 @@ public class SBOMResourceTest {
     }
 
     @Test
+    // @Disabled("Endpoints disabled for now")
     public void ensureValidLicense() throws IOException {
 
-        Bom bom = SbomUtils.fromPath(Paths.get("src", "test", "resources", "sboms", "base.json"));
-
         Sbom sbom = new Sbom();
-        sbom.setBuildId("ARYT3LBXDVYIII");
-        sbom.setId(416640206274228224L);
-        sbom.setType(SbomType.BUILD_TIME);
-        sbom.setGenerationTime(Instant.now());
-        sbom.setSbom(SbomUtils.toJsonNode(bom));
-        sbom.setRootPurl(
-                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom");
-        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+        sbom.setBuildId("AAAABBBB");
+        sbom.setId(12345L);
 
-        Mockito.when(sbomService.getBaseSbomByBuildId("ARYT3LBXDVYIII")).thenReturn(sbom);
+        String bomJson = TestResources.asString("sboms/base.json");
+        sbom.setSbom(new ObjectMapper().readTree(bomJson));
+
+        Mockito.when(sbomService.get("12345")).thenReturn(sbom);
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/build/ARYT3LBXDVYIII/base/bom")
+                .request("GET", "/api/v1alpha1/sboms/12345/bom")
                 .then()
                 .statusCode(200)
                 .body("metadata.component.name", CoreMatchers.equalTo("microprofile-graphql-parent"))
@@ -185,6 +185,7 @@ public class SBOMResourceTest {
     }
 
     @Test
+    @Disabled("Endpoint disabled for now")
     public void testGetBomOfBaseSbomByRootPurl() throws IOException {
         String bom = TestResources.asString("sboms/sbom-valid-parent.json");
         JsonNode sbomJson = JsonUtils.fromJson(bom, JsonNode.class);
@@ -225,7 +226,7 @@ public class SBOMResourceTest {
         sbom.setGenerationTime(Instant.now());
         sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
 
-        Mockito.when(sbomService.generate("AABBCC", GeneratorImplementation.CYCLONEDX)).thenReturn(sbom);
+        Mockito.when(generationService.generate("AABBCC", GeneratorImplementation.CYCLONEDX)).thenReturn(sbom);
 
         given().when()
                 .contentType(ContentType.JSON)

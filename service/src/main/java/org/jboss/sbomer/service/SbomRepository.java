@@ -21,24 +21,25 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.model.Sbom;
 
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import io.quarkus.panache.common.Parameters;
 
 @ApplicationScoped
 public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
 
-    public Sbom getSbom(String buildId, GeneratorImplementation generator, ProcessorImplementation processor) {
-        if (processor == null) {
-            return find("#" + Sbom.FIND_BASE_BY_BUILDID_GENERATOR, buildId, generator).singleResult();
-        }
-        return find("#" + Sbom.FIND_BY_BUILDID_GENERATOR_PROCESSOR, buildId, generator, processor).singleResult();
+    public Sbom getSbom(String buildId, GeneratorImplementation generator) {
+        return find(
+                "select s from Sbom s where s.buildId = :buildId and s.generator = :generator and s.processors is empty",
+                Parameters.with("buildId", buildId).and("generator", generator)).singleResult();
     }
 
     public Sbom getBaseSbomByBuildId(String buildId) {
-        return find("#" + Sbom.FIND_BASE_BY_BUILDID, buildId).singleResult();
+        return find(
+                "select s from Sbom s where s.buildId = :buildId and s.processors is empty",
+                Parameters.with("buildId", buildId)).singleResult();
     }
 
     public Sbom getEnrichedSbomByBuildId(String buildId) {

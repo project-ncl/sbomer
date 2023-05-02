@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.SbomRepository;
 import org.jboss.sbomer.test.utils.QuarkusTransactionalTest;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -96,7 +98,7 @@ public class TestSbomRepository {
         enrichedSBOM.setGenerationTime(Instant.now());
         enrichedSBOM.setSbom(SbomUtils.toJsonNode(bom));
         enrichedSBOM.setGenerator(parentSbom.getGenerator());
-        enrichedSBOM.setProcessor(ProcessorImplementation.DEFAULT);
+        enrichedSBOM.setProcessors(Arrays.asList(ProcessorImplementation.DEFAULT));
         enrichedSBOM.setParentSbom(parentSbom);
         return enrichedSBOM;
     }
@@ -112,23 +114,24 @@ public class TestSbomRepository {
 
     @Test
     public void testNonNullRootComponents() {
-        Sbom baseSBOM = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, null);
+        Sbom baseSBOM = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX);
         assertNotNull(baseSBOM.getRootPurl());
         assertEquals(
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
                 baseSBOM.getRootPurl());
 
-        Sbom enrichedSbom = sbomRepository
-                .getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, ProcessorImplementation.DEFAULT);
-        assertNotNull(enrichedSbom.getRootPurl());
-        assertEquals(
-                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
-                enrichedSbom.getRootPurl());
+        // TODO
+        // Sbom enrichedSbom = sbomRepository
+        // .getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, ProcessorImplementation.DEFAULT);
+        // assertNotNull(enrichedSbom.getRootPurl());
+        // assertEquals(
+        // "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
+        // enrichedSbom.getRootPurl());
     }
 
     @Test
     public void testGetBaseSbom() throws JsonProcessingException, JsonMappingException {
-        Sbom baseSBOM = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, null);
+        Sbom baseSBOM = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX);
         Bom bom = baseSBOM.getCycloneDxBom();
 
         assertEquals(416640206274228224L, baseSBOM.getId());
@@ -161,7 +164,7 @@ public class TestSbomRepository {
         assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
         assertEquals(GeneratorImplementation.CYCLONEDX, sbom.getGenerator());
         assertEquals(SbomType.BUILD_TIME, sbom.getType());
-        assertNull(sbom.getProcessor());
+        assertEquals(0, sbom.getProcessors().size());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
         assertEquals("microprofile-graphql-spec", firstComponent.getName());
@@ -180,15 +183,17 @@ public class TestSbomRepository {
     }
 
     @Test
+    @Disabled("Use case doesn't exist yet")
     public void testGetEnrichedSbom() throws JsonProcessingException, JsonMappingException {
-        Sbom enrichedSbom = sbomRepository
-                .getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, ProcessorImplementation.DEFAULT);
+        Sbom enrichedSbom = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX);
+        // Sbom enrichedSbom = sbomRepository
+        // .getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, ProcessorImplementation.DEFAULT);
         Bom bom = enrichedSbom.getCycloneDxBom();
 
         assertEquals(416640206274228225L, enrichedSbom.getId());
         assertEquals("ARYT3LBXDVYAC", enrichedSbom.getBuildId());
         assertEquals(GeneratorImplementation.CYCLONEDX, enrichedSbom.getGenerator());
-        assertEquals(ProcessorImplementation.DEFAULT, enrichedSbom.getProcessor());
+        assertEquals(Arrays.asList(ProcessorImplementation.DEFAULT), enrichedSbom.getProcessors());
         assertEquals(SbomType.BUILD_TIME, enrichedSbom.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
@@ -213,7 +218,7 @@ public class TestSbomRepository {
         assertEquals("ARYT3LBXDVYAC", parentSBOM.getBuildId());
         assertEquals(GeneratorImplementation.CYCLONEDX, parentSBOM.getGenerator());
         assertEquals(SbomType.BUILD_TIME, parentSBOM.getType());
-        assertNull(parentSBOM.getProcessor());
+        assertNull(parentSBOM.getProcessors());
         assertEquals("CycloneDX", parentBom.getBomFormat());
         Component firstParentComponent = parentBom.getComponents().get(0);
         assertEquals("microprofile-graphql-spec", firstParentComponent.getName());

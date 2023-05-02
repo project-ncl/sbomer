@@ -20,19 +20,17 @@ package org.jboss.sbomer.cli.test.command.processor;
 import java.util.Set;
 
 import org.jboss.sbomer.cli.test.AlternativePncService;
-import org.jboss.sbomer.cli.test.command.processor.MultipleProcessorTest.CustomPncServiceProfile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
-import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.main.Launch;
 import io.quarkus.test.junit.main.LaunchResult;
 import io.quarkus.test.junit.main.QuarkusMainTest;
 
 @QuarkusMainTest
-@TestProfile(CustomPncServiceProfile.class)
-public class MultipleProcessorTest {
+// @TestProfile(CustomPncServiceProfile.class)
+public class MultipleProcessorIntegrationTest {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {
         @Override
         public Set<Class<?>> getEnabledAlternatives() {
@@ -40,9 +38,21 @@ public class MultipleProcessorTest {
         }
     }
 
+    /**
+     * <p>
+     * Tests integration between PNC, SBOMer API and the CLI execution.
+     * </p>
+     *
+     * <p>
+     * Does use WireMock for binding things together.
+     * </p>
+     *
+     * @param result
+     * @throws Exception
+     */
     @Test
     @DisplayName("Should allow for running multiple processors")
-    @Launch(value = { "-v", "process", "--sbom-id", "123", "default", "redhat-product" })
+    @Launch(value = { "-v", "process", "--sbom-id", "123-to-process", "default", "redhat-product" })
     void testMultipleProcessors(LaunchResult result) throws Exception {
 
     }

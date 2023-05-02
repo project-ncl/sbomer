@@ -20,7 +20,6 @@ package org.jboss.sbomer.tekton;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.jboss.sbomer.core.utils.Constants;
@@ -39,10 +38,6 @@ public abstract class AbstractTektonTaskRunner {
 
     @Inject
     TektonClient tektonClient;
-
-    protected TaskRun runTektonTask(final String tektonTaskName, final Long id) {
-        return runTektonTask(tektonTaskName, id, Json.createObjectBuilder().build());
-    }
 
     /**
      * Runs specific {@link Task}.

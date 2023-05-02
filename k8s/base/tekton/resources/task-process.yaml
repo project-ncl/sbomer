@@ -30,7 +30,7 @@ spec:
       description: |
         Additional parameters that instrument the processor. Currently unused.
       default: |
-        {"processor": "default"}
+        {"processors": "default"}
   steps:
     - name: process
       image: sbomer-generator
@@ -47,11 +47,11 @@ spec:
         set -e
         
         echo '$(params.config)' | tee config.json
-        PROCESSOR=$(cat config.json | jq --raw-output '.processor')
+        PROCESSORS=$(cat config.json | jq --raw-output '.processors')
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
         
-        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v process $PROCESSOR --sbom-id=$(params.id)
+        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v process --sbom-id=$(params.id) $PROCESSORS
   workspaces:
     - name: data
       description: Main workspace

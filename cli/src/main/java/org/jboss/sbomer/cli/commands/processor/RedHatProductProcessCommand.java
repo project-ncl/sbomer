@@ -78,9 +78,7 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
     }
 
     @Override
-    public Bom doProcess(Sbom sbom) {
-        Bom bom = getBom(sbom);
-
+    public Bom doProcess(Sbom sbom, Bom bom) {
         ProductVersionRef productVersion = pncService.getProductVersion(sbom.getBuildId());
 
         if (productVersion == null) {

@@ -92,6 +92,8 @@ public class DominoMavenGenerateCommand extends AbstractMavenGenerateCommand {
                 "--include-non-managed",
                 "--warn-on-missing-scm");
 
+        log.debug(processBuilder.command().toString());
+
         if (parent.getSettingsXmlPath() != null) {
             log.debug(
                     "Using provided Maven settings.xml configuration file located at '{}'",
@@ -120,7 +122,16 @@ public class DominoMavenGenerateCommand extends AbstractMavenGenerateCommand {
             throw new ApplicationException("SBOM generation failed, see logs above");
         }
 
-        Path sbomPath = Path.of(parent.getParent().getTargetDir().toAbsolutePath().toString(), "bom.json");
+        Path sbomPath = Path.of(parent.getParent().getTargetDir().toAbsolutePath().toString(), "quarkus-bom-bom.json"); // TODO:
+                                                                                                                        // Hardcoded,
+                                                                                                                        // milestone
+                                                                                                                        // 1.
+                                                                                                                        // Domino's
+                                                                                                                        // --output-file
+                                                                                                                        // is
+                                                                                                                        // not
+                                                                                                                        // deterministic
+                                                                                                                        // now.
 
         log.info("Generation finished, SBOM available at: '{}'", sbomPath);
 
