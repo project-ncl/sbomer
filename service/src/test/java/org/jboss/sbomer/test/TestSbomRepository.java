@@ -98,7 +98,7 @@ public class TestSbomRepository {
         enrichedSBOM.setGenerationTime(Instant.now());
         enrichedSBOM.setSbom(SbomUtils.toJsonNode(bom));
         enrichedSBOM.setGenerator(parentSbom.getGenerator());
-        enrichedSBOM.setProcessors(Arrays.asList(ProcessorImplementation.DEFAULT));
+        enrichedSBOM.setProcessors(Arrays.asList(ProcessorImplementation.DEFAULT).stream().collect(Collectors.toSet()));
         enrichedSBOM.setParentSbom(parentSbom);
         return enrichedSBOM;
     }

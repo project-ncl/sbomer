@@ -18,6 +18,8 @@
 package org.jboss.sbomer.service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -79,10 +81,10 @@ public class ProcessingService extends AbstractTektonTaskRunner {
             execConfig = processingConfig.defaultExecConfig();
         }
 
-        List<ProcessorImplementation> processors = execConfig.getProcessors()
+        Set<ProcessorImplementation> processors = execConfig.getProcessors()
                 .stream()
                 .map(p -> p.getProcessor())
-                .toList();
+                .collect(Collectors.toSet());
 
         log.debug("Preparing to process SBOM id '{}' with configured processors: {}", sbom.getId(), processors);
 
