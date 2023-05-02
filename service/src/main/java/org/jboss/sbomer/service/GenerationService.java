@@ -93,7 +93,7 @@ public class GenerationService {
         sbom = sbomService.save(sbom);
 
         // Schedule the generation
-        generators.select(GeneratorLiteral.of(generator)).get().generate(sbom.getId());
+        generators.select(GeneratorLiteral.of(generator)).get().generate(sbom.getId(), generatorVersion, generatorArgs);
 
         return sbom;
     }
