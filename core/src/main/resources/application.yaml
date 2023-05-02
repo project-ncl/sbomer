@@ -18,11 +18,12 @@
 
 sbomer:
   pnc:
-    api-url: "${SBOMER_CACHE_SERVICE_URL:orch.psi.redhat.com}"
+    api-url: "${SBOMER_CACHE_SERVICE_URL: ${PNC_SERVICE_HOST | "orch.psi.redhat.com"}}"
 
 "%dev":
   sbomer:
-    pnc-api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
+    pnc:
+      api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
 
 "%test":
   sbomer:
