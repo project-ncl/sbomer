@@ -21,6 +21,7 @@ import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -75,7 +76,13 @@ import lombok.ToString;
 @Entity
 @TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 @ToString
-@Table(name = "sbom", indexes = { @Index(name = "idx_sbom_buildid", columnList = "build_id") })
+@Table(
+        name = "sbom",
+        indexes = { @Index(name = "idx_sbom_buildid", columnList = "build_id"),
+                @Index(name = "idx_sbom_rootpurl", columnList = "root_purl"),
+                @Index(name = "idx_sbom_generator", columnList = "generator"),
+                @Index(name = "idx_sbom_type", columnList = "type"),
+                @Index(name = "idx_sbom_status", columnList = "status") })
 @NamedQueries({ @NamedQuery(name = Sbom.FIND_ALL_BY_BUILDID, query = "FROM Sbom WHERE buildId = ?1"),
         @NamedQuery(
                 name = Sbom.FIND_BASE_BY_BUILDID_GENERATOR,
@@ -135,12 +142,13 @@ public class Sbom extends PanacheEntityBase {
     @NotNull(message = "Generator is required")
     private GeneratorImplementation generator;
 
-    @Column(name = "processors", nullable = true, updatable = false)
-    @ElementCollection(targetClass = ProcessorImplementation.class)
+    @Column(name = "processors", nullable = false, updatable = false)
+    @ElementCollection(targetClass = ProcessorImplementation.class, fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
     @CollectionTable(
             name = "sbom_processors",
             joinColumns = @JoinColumn(name = "sbom_id", foreignKey = @ForeignKey(name = "fk_processor_sbom")))
-    private List<ProcessorImplementation> processors;
+    private Set<ProcessorImplementation> processors;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
