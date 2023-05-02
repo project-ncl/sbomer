@@ -47,7 +47,11 @@ spec:
           volumeMounts:
             - mountPath: "/var/www/cache"
               name: sbomer-cache
-
+          command:
+            - /bin/bash
+          args:
+            - -c
+            - envsubst '$${PNC_SERVICE_HOST}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
 
       restartPolicy: Always
       volumes:
