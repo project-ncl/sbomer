@@ -163,9 +163,11 @@ public class PncMessageParser implements Runnable {
 
                             // Use the generator in the mapping if specified, otherwise ude the default (CYCLONEDX)
                             GeneratorImplementation generator = GeneratorImplementation.CYCLONEDX;
-                            try {
-                                generator = GeneratorImplementation.valueOf(mapping.getGenerator());
-                            } catch (IllegalArgumentException exc) {
+                            if (!Strings.isEmpty(mapping.getGenerator())) {
+                                try {
+                                    generator = GeneratorImplementation.valueOf(mapping.getGenerator());
+                                } catch (IllegalArgumentException exc) {
+                                }
                             }
 
                             log.info(
