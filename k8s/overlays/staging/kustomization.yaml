@@ -34,6 +34,7 @@ patchesStrategicMerge:
   #- patches/sa.yaml
   - patches/db.yaml
   - patches/cache.yaml
+  - patches/tekton/cm.yaml
 patches:
   - target:
       kind: Deployment

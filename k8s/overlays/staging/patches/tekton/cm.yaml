@@ -21,5 +21,4 @@ kind: ConfigMap
 metadata:
   name: sbomer-tekton
 data:
-    SBOMER_SERVICE_URL: ""
-    PNC_SERVICE_HOST: "orch.psi.redhat.com"
+    PNC_SERVICE_HOST: "orch-stage.psi.redhat.com"
