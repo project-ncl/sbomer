@@ -1,5 +1,6 @@
 {
   "382": {
+    "generator": "DOMINO",
     "errata": {
       "productName": "RHBQ",
       "productVersion": "RHEL-8-RHBQ-2.13",

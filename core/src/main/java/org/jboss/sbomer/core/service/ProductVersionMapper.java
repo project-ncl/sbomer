@@ -52,6 +52,7 @@ public class ProductVersionMapper {
 
     @Data
     public static class ProductVersionMapping {
+        String generator;
         ErrataMapping errata;
     }
 

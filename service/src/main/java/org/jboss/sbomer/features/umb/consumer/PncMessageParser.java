@@ -160,12 +160,32 @@ public class PncMessageParser implements Runnable {
 
                             // TODO: Milestone 1
                             // We support only generation of products that we list in the product mapping.
-                            generationService.generate(
-                                    msgBody.getBuild().getId(),
-                                    GeneratorImplementation.DOMINO,
-                                    "0.0.88",
-                                    "--include-non-managed --exclude-parent-poms --warn-on-missing-scm");
 
+                            // Use the generator in the mapping if specified, otherwise ude the default (CYCLONEDX)
+                            GeneratorImplementation generator = GeneratorImplementation.CYCLONEDX;
+                            try {
+                                generator = GeneratorImplementation.valueOf(mapping.getGenerator());
+                            } catch (IllegalArgumentException exc) {
+                            }
+
+                            log.info(
+                                    "Detected {} as the required generator from the PNC Product Version mapping",
+                                    generator);
+
+                            switch (generator) {
+                                case DOMINO: {
+                                    generationService.generate(
+                                            msgBody.getBuild().getId(),
+                                            GeneratorImplementation.DOMINO,
+                                            "0.0.88",
+                                            "--include-non-managed --exclude-parent-poms --warn-on-missing-scm");
+                                    break;
+                                }
+                                default: {
+                                    generationService
+                                            .generate(msgBody.getBuild().getId(), GeneratorImplementation.CYCLONEDX);
+                                }
+                            }
                         } else {
                             log.info(
                                     "Triggering the automated SBOM generation for build {} ...",
