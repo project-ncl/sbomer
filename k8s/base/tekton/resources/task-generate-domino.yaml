@@ -56,6 +56,11 @@ spec:
             configMapKeyRef:
               name: sbomer-tekton
               key: PNC_SERVICE_HOST
+        - name: SBOMER_PRODUCT_MAPPING_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: sbomer-tekton
+              key: SBOMER_PRODUCT_MAPPING_ENV
       script: |
         #!/usr/bin/env bash
 

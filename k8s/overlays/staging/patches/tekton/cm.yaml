@@ -22,3 +22,4 @@ metadata:
   name: sbomer-tekton
 data:
     PNC_SERVICE_HOST: "orch-stage.psi.redhat.com"
+    SBOMER_PRODUCT_MAPPING_ENV: "staging"

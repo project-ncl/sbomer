@@ -23,3 +23,4 @@ metadata:
 data:
     SBOMER_SERVICE_URL: ""
     PNC_SERVICE_HOST: "orch.psi.redhat.com"
+    SBOMER_PRODUCT_MAPPING_ENV: "production"
