@@ -132,6 +132,20 @@ public class DominoMavenGenerateCommand extends AbstractMavenGenerateCommand {
                                                                                                                         // not
                                                                                                                         // deterministic
                                                                                                                         // now.
+                                                                                                                        // If
+                                                                                                                        // it
+                                                                                                                        // does
+                                                                                                                        // not
+                                                                                                                        // exist,
+                                                                                                                        // default
+                                                                                                                        // to
+                                                                                                                        // the
+                                                                                                                        // bom.json
+                                                                                                                        // file
+
+        if (!Files.exists(sbomPath)) {
+            sbomPath = Path.of(parent.getParent().getTargetDir().toAbsolutePath().toString(), "bom.json");
+        }
 
         log.info("Generation finished, SBOM available at: '{}'", sbomPath);
 
