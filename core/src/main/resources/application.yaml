@@ -19,6 +19,8 @@
 sbomer:
   pnc:
     api-url: "${SBOMER_CACHE_SERVICE_URL: ${PNC_SERVICE_HOST | orch.psi.redhat.com}}"
+    product-mapping:
+      environment: "${SBOMER_PRODUCT_MAPPING_ENV:production}"
 
 "%dev":
   sbomer:

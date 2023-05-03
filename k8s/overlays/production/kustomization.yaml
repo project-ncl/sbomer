@@ -38,6 +38,15 @@ patches:
         value:
           name: PNC_SERVICE_HOST
           value: "orch.psi.redhat.com"
+  - target:
+      kind: Deployment
+      name: sbomer
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SBOMER_PRODUCT_MAPPING_ENV
+          value: "production"
 
 # List of images used in production
 # TODO: Currently happily using :latest tag but this will be changed in the future

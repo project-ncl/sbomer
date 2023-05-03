@@ -23,6 +23,7 @@ import java.util.HashMap;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +39,9 @@ import lombok.Getter;
  */
 @ApplicationScoped
 public class ProductVersionMapper {
+
+    @ConfigProperty(name = "sbomer.pnc.product-mapping.environment")
+    String mappingEnvironment;
 
     @Data
     public static class ErrataMapping {
@@ -67,8 +71,9 @@ public class ProductVersionMapper {
     @PostConstruct
     void init() {
         try {
-            mapping = new ObjectMapper()
-                    .readValue(getClass().getClassLoader().getResourceAsStream("product-mapping.json"), Mapping.class);
+            mapping = new ObjectMapper().readValue(
+                    getClass().getClassLoader().getResourceAsStream(mappingEnvironment + "/product-mapping.json"),
+                    Mapping.class);
         } catch (IOException e) {
             throw new ApplicationException("Could not read product mappings", e);
         }

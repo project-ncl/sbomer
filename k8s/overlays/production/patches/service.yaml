@@ -28,4 +28,5 @@ spec:
           env:
             - name: PNC_SERVICE_HOST
               $patch: delete
-
+            - name: SBOMER_PRODUCT_MAPPING_ENV
+              $patch: delete

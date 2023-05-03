@@ -1,0 +1,9 @@
+{
+  "416": {
+    "errata": {
+      "productName": "RHTESTPRODUCT",
+      "productVersion": "RHEL-8-RHTESTPRODUCT-1.1",
+      "productVariant": "8Base-RHTESTPRODUCT-1.1"
+    }
+  }
+}

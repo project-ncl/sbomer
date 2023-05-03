@@ -144,6 +144,11 @@ patches:
             secretKeyRef:
               name: sbomer-secrets
               key: datasource.connection
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SBOMER_PRODUCT_MAPPING_ENV
+          value: "staging"
 
   - target:
       kind: StatefulSet
