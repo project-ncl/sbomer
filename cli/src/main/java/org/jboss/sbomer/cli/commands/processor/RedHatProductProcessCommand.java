@@ -32,6 +32,10 @@ import org.jboss.sbomer.core.utils.SbomUtils;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 
+import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+
 /**
  * <p>
  * Processor to add the Red Hat Product information to the main {@link Component} within the {@link Bom}.
@@ -43,10 +47,6 @@ import picocli.CommandLine.Command;
         name = "redhat-product",
         description = "Process the SBOM with Red Hat product enrichment")
 public class RedHatProductProcessCommand extends AbstractProcessCommand {
-
-    public final static String PROPERTY_ERRATA_PRODUCT_NAME = "errata-tool-product-name";
-    public final static String PROPERTY_ERRATA_PRODUCT_VERSION = "errata-tool-product-version";
-    public final static String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
 
     @Inject
     ProductVersionMapper productVersionMapper;

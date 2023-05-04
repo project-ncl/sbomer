@@ -36,6 +36,7 @@ quarkus:
         level: DEBUG
 
 sbomer:
+  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
   # See documentation about features and feature flags
   features:
     umb:
@@ -45,8 +46,10 @@ sbomer:
         topic: "${CONSUMER_TOPIC}"
         trigger: product
       producer:
-        enabled: false
+        enabled: true
         topic: "${PRODUCER_TOPIC}"
+        retries: 15
+        max-back-off: 30
 
   generation:
     enabled: true

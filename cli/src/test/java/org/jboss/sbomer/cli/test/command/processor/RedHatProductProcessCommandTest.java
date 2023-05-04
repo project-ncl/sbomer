@@ -43,6 +43,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 
+import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+
 @QuarkusTest
 @QuarkusTestResource(PncWireMock.class)
 public class RedHatProductProcessCommandTest {
@@ -87,18 +91,9 @@ public class RedHatProductProcessCommandTest {
 
         Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
 
-        assertFalse(
-                SbomUtils.hasProperty(
-                        bom.getMetadata().getComponent(),
-                        RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_NAME));
-        assertFalse(
-                SbomUtils.hasProperty(
-                        bom.getMetadata().getComponent(),
-                        RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_VERSION));
-        assertFalse(
-                SbomUtils.hasProperty(
-                        bom.getMetadata().getComponent(),
-                        RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_VARIANT));
+        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
+        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
+        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
     }
 
     @Test
@@ -134,32 +129,21 @@ public class RedHatProductProcessCommandTest {
         sbom.setBuildId("QUARKUS");
         Bom bom = command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
 
-        assertTrue(
-                SbomUtils.hasProperty(
-                        bom.getMetadata().getComponent(),
-                        RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_NAME));
-        assertTrue(
-                SbomUtils.hasProperty(
-                        bom.getMetadata().getComponent(),
-                        RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_VERSION));
-        assertTrue(
-                SbomUtils.hasProperty(
-                        bom.getMetadata().getComponent(),
-                        RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_VARIANT));
+        assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
+        assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
+        assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
 
         assertEquals(
                 "RHBQ",
                 SbomUtils
-                        .findPropertyWithNameInComponent(
-                                RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_NAME,
-                                bom.getMetadata().getComponent())
+                        .findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, bom.getMetadata().getComponent())
                         .get()
                         .getValue());
         assertEquals(
                 "RHEL-8-RHBQ-2.13",
                 SbomUtils
                         .findPropertyWithNameInComponent(
-                                RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_VERSION,
+                                PROPERTY_ERRATA_PRODUCT_VERSION,
                                 bom.getMetadata().getComponent())
                         .get()
                         .getValue());
@@ -167,7 +151,7 @@ public class RedHatProductProcessCommandTest {
                 "8Base-RHBQ-2.13",
                 SbomUtils
                         .findPropertyWithNameInComponent(
-                                RedHatProductProcessCommand.PROPERTY_ERRATA_PRODUCT_VARIANT,
+                                PROPERTY_ERRATA_PRODUCT_VARIANT,
                                 bom.getMetadata().getComponent())
                         .get()
                         .getValue());

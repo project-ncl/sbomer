@@ -47,6 +47,18 @@ patches:
         value:
           name: SBOMER_PRODUCT_MAPPING_ENV
           value: "production"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SBOMER_ROUTE_HOST
+          value: "sbomer.apps.ocp-c1.prod.psi.redhat.com"
+  - target:
+      kind: Route
+    patch: |-
+      - op: replace
+        path: /spec/host
+        value: "sbomer.apps.ocp-c1.prod.psi.redhat.com"
+
 
 # List of images used in production
 # TODO: Currently happily using :latest tag but this will be changed in the future

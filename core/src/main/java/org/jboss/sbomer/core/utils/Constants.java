@@ -38,6 +38,10 @@ public class Constants {
     public static final String SUPPLIER_URL = "https://www.redhat.com";
     public static final String MRRC_URL = "https://maven.repository.redhat.com/ga/";
 
+    public final static String PROPERTY_ERRATA_PRODUCT_NAME = "errata-tool-product-name";
+    public final static String PROPERTY_ERRATA_PRODUCT_VERSION = "errata-tool-product-version";
+    public final static String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
+
     /**
      * The Service Account used to run the TaskRun.
      */
