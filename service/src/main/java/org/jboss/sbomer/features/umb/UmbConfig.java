@@ -68,6 +68,21 @@ public interface UmbConfig {
          * The topic that should be used to send messages to.
          */
         Optional<String> topic();
+
+        /**
+         * The number of retries when sending notification via UMB
+         *
+         */
+        @WithDefault("15")
+        int retries();
+
+        /**
+         * The maximum number of seconds to back-off the retry
+         *
+         */
+        @WithDefault("30")
+        int maxBackOff();
+
     }
 
     @WithDefault("true")
