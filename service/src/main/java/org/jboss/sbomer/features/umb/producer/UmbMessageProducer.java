@@ -45,6 +45,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UmbMessageProducer implements MessageProducer {
 
+    public static final String MESSAGE_HEADER_PURL_KEY = "purl";
+    public static final String MESSAGE_HEADER_BUILD_ID_KEY = Constants.SBOM_RED_HAT_BUILD_ID;
+    public static final String MESSAGE_HEADER_SBOM_ID_KEY = "sbom-id";
+    public static final String MESSAGE_HEADER_PRODUCER_KEY = "producer";
+    public static final String MESSAGE_HEADER_TYPE_KEY = "type";
+
     @ConfigProperty(name = "quarkus.qpid-jms.url")
     String amqpConnection;
 
@@ -89,10 +95,11 @@ public class UmbMessageProducer implements MessageProducer {
     @Override
     public void sendToTopic(GenerationFinishedMessageBody message) {
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("purl", message.getPurl());
-        headers.put(Constants.SBOM_RED_HAT_BUILD_ID, message.getBuild().getId());
-        headers.put("producer", "PNC Sbomer");
-        headers.put("type", "GenerationFinishedMessage");
+        headers.put(MESSAGE_HEADER_PURL_KEY, message.getPurl());
+        headers.put(MESSAGE_HEADER_BUILD_ID_KEY, message.getBuild().getId());
+        headers.put(MESSAGE_HEADER_SBOM_ID_KEY, message.getSbom().getId());
+        headers.put(MESSAGE_HEADER_PRODUCER_KEY, "PNC SBOMer");
+        headers.put(MESSAGE_HEADER_TYPE_KEY, "GenerationFinishedMessage");
         sendMessageWithRetries(message.toJson(), headers, umbConfig.producer().retries());
     }
 

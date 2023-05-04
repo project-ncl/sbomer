@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service;
+package org.jboss.sbomer.features.umb.producer;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -26,14 +26,13 @@ import org.cyclonedx.model.Property;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.features.umb.UmbConfig;
-import org.jboss.sbomer.features.umb.producer.GenerationFinishedMessageBodyValidator;
-import org.jboss.sbomer.features.umb.producer.UmbMessageProducer;
 import org.jboss.sbomer.features.umb.producer.model.Build;
 import org.jboss.sbomer.features.umb.producer.model.GenerationFinishedMessageBody;
 import org.jboss.sbomer.features.umb.producer.model.ProductConfig;
 import org.jboss.sbomer.features.umb.producer.model.Sbom;
 import org.jboss.sbomer.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.features.umb.producer.model.Sbom.BomFormat;
+import org.jboss.sbomer.service.SbomRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
@@ -90,27 +89,27 @@ public class NotificationService {
         try {
             sbomIdLong = Long.valueOf(sbomId);
         } catch (NumberFormatException nfe) {
-            log.error("Could not parse to long the Sbom id '{}' provided", sbomId);
+            log.error("Could not parse to long the SBOM id '{}' provided", sbomId);
             return;
         }
 
         org.jboss.sbomer.model.Sbom sbom = sbomRepository.findById(sbomIdLong);
 
         if (sbom == null) {
-            log.warn("Could not find Sbom id '{}', skipping sending UMB notification", sbomId);
+            log.warn("Could not find SBOM id '{}', skipping sending UMB notification", sbomId);
             return;
         }
 
         org.cyclonedx.model.Bom bom = fromJsonNode(sbom.getSbom());
         if (bom == null) {
-            log.warn("Could not find a valid bom for Sbom id '{}', skipping sending UMB notification", sbom.getId());
+            log.warn("Could not find a valid bom for SBOM id '{}', skipping sending UMB notification", sbom.getId());
             return;
         }
 
         Component component = bom.getMetadata().getComponent();
         if (component == null) {
             log.warn(
-                    "Could not find root metadata component for Sbom id '{}', skipping sending UMB notification",
+                    "Could not find root metadata component for SBOM id '{}', skipping sending UMB notification",
                     sbom.getId());
             return;
         }
@@ -132,7 +131,7 @@ public class NotificationService {
             bomFormat = BomFormat.valueOf(bom.getBomFormat().toUpperCase());
         } catch (IllegalArgumentException exc) {
             log.warn(
-                    "Could not find compatible bom format for Sbom id '{}', found '{}', skipping sending UMB notification",
+                    "Could not find compatible bom format for SBOM id '{}', found '{}', skipping sending UMB notification",
                     sbom.getId(),
                     bom.getBomFormat());
         }
