@@ -150,6 +150,11 @@ patches:
         value:
           name: SBOMER_PRODUCT_MAPPING_ENV
           value: "staging"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SBOMER_ROUTE_HOST
+          value: "sbomer-stage.apps.ocp-c1.prod.psi.redhat.com"
 
   - target:
       kind: StatefulSet
@@ -164,6 +169,12 @@ patches:
         path: /spec/steps/0/imagePullPolicy
         value: Always
 
+  - target:
+      kind: Route
+    patch: |-
+      - op: replace
+        path: /spec/host
+        value: "sbomer-stage.apps.ocp-c1.prod.psi.redhat.com"
 
 # List of images used in staging
 # TODO: Currently happily using :latest tag but this will be changed in the future

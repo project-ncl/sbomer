@@ -23,7 +23,7 @@ metadata:
   labels:
     app.kubernetes.io/component: service
 spec:
-  host: sbomer-stage.apps.ocp-c1.prod.psi.redhat.com
+  host: ${SBOMER_ROUTE_HOST}
   to:
     kind: Service
     name: sbomer

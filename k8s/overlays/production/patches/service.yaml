@@ -30,3 +30,5 @@ spec:
               $patch: delete
             - name: SBOMER_PRODUCT_MAPPING_ENV
               $patch: delete
+            - name: SBOMER_ROUTE_HOST
+              $patch: delete
