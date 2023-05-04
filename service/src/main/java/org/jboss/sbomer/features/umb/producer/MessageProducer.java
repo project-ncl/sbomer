@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.features.umb.producer;
 
-import java.util.Map;
-
 import org.jboss.sbomer.features.umb.producer.model.GenerationFinishedMessageBody;
 
 import io.quarkus.runtime.ShutdownEvent;
@@ -33,7 +31,5 @@ public interface MessageProducer {
     String getMessageSenderId();
 
     void sendToTopic(GenerationFinishedMessageBody message);
-
-    void sendToTopic(GenerationFinishedMessageBody message, Map<String, String> headers);
 
 }

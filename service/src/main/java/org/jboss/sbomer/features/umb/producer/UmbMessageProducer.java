@@ -18,6 +18,7 @@
 package org.jboss.sbomer.features.umb.producer;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -30,6 +31,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.features.umb.UmbConfig;
 import org.jboss.sbomer.features.umb.producer.model.GenerationFinishedMessageBody;
 
@@ -86,11 +88,11 @@ public class UmbMessageProducer implements MessageProducer {
 
     @Override
     public void sendToTopic(GenerationFinishedMessageBody message) {
-        sendMessageWithRetries(message.toJson(), Collections.EMPTY_MAP, umbConfig.producer().retries());
-    }
-
-    @Override
-    public void sendToTopic(GenerationFinishedMessageBody message, Map<String, String> headers) {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("purl", message.getPurl());
+        headers.put(Constants.SBOM_RED_HAT_BUILD_ID, message.getBuild().getId());
+        headers.put("producer", "PNC Sbomer");
+        headers.put("type", "GenerationFinishedMessage");
         sendMessageWithRetries(message.toJson(), headers, umbConfig.producer().retries());
     }
 
@@ -128,7 +130,6 @@ public class UmbMessageProducer implements MessageProducer {
         TextMessage textMessage;
         try {
             textMessage = session.createTextMessage(message);
-            textMessage.setStringProperty("producer", "SBOMER");
         } catch (JMSException e) {
             log.error("Unable to create textMessage.");
             throw new RuntimeException("Unable to create textMessage.", e);
