@@ -45,8 +45,8 @@ import lombok.extern.slf4j.Slf4j;
 public class UmbMessageProducer implements MessageProducer {
 
     public static final String MESSAGE_HEADER_PURL_KEY = "purl";
-    public static final String MESSAGE_HEADER_BUILD_ID_KEY = Constants.SBOM_RED_HAT_BUILD_ID;
-    public static final String MESSAGE_HEADER_SBOM_ID_KEY = "sbom-id";
+    public static final String MESSAGE_HEADER_BUILD_ID_KEY = "pnc_build_id";
+    public static final String MESSAGE_HEADER_SBOM_ID_KEY = "sbom_id";
     public static final String MESSAGE_HEADER_PRODUCER_KEY = "producer";
     public static final String MESSAGE_HEADER_TYPE_KEY = "type";
 
