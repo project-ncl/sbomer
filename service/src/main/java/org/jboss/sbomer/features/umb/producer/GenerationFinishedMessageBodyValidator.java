@@ -19,12 +19,14 @@
 package org.jboss.sbomer.features.umb.producer;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.features.umb.producer.model.GenerationFinishedMessageBody;
@@ -40,7 +42,11 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@ApplicationScoped
 public class GenerationFinishedMessageBodyValidator {
+
+    public GenerationFinishedMessageBodyValidator() {
+    }
 
     @Data
     @Builder
@@ -71,12 +77,13 @@ public class GenerationFinishedMessageBodyValidator {
      *
      * @return
      */
-    public static ValidationResult validate(GenerationFinishedMessageBody messageBody) {
+    public ValidationResult validate(GenerationFinishedMessageBody messageBody) {
         String messageStr = messageBody.toJson();
         String schema;
 
         try {
-            schema = Files.readString(Paths.get("src", "main", "resources", "message-success-schema.json"));
+            InputStream is = getClass().getClassLoader().getResourceAsStream("message-success-schema.json");
+            schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the UMB message schema", e);
         }

@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 
+import javax.inject.Inject;
+
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.features.umb.producer.GenerationFinishedMessageBodyValidator;
 import org.jboss.sbomer.features.umb.producer.GenerationFinishedMessageBodyValidator.ValidationResult;
@@ -37,7 +39,13 @@ import org.jboss.sbomer.features.umb.producer.model.Sbom.Bom;
 import org.jboss.sbomer.features.umb.producer.model.Sbom.BomFormat;
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.junit.QuarkusTest;
+
+@QuarkusTest
 public class GenerationFinishedMessageBodyTest {
+
+    @Inject
+    GenerationFinishedMessageBodyValidator validator;
 
     private GenerationFinishedMessageBody genValidMessageBody() {
         return GenerationFinishedMessageBody.builder()
@@ -74,7 +82,7 @@ public class GenerationFinishedMessageBodyTest {
     @Test
     void testValidityOfEmptyObject() {
         GenerationFinishedMessageBody message = GenerationFinishedMessageBody.builder().build();
-        ValidationResult result = GenerationFinishedMessageBodyValidator.validate(message);
+        ValidationResult result = validator.validate(message);
 
         assertEquals(4, result.getErrors().size());
         assertFalse(result.isValid());
@@ -92,7 +100,7 @@ public class GenerationFinishedMessageBodyTest {
     @Test
     void testJustWithPurl() {
         GenerationFinishedMessageBody message = GenerationFinishedMessageBody.builder().purl("as").build();
-        ValidationResult result = GenerationFinishedMessageBodyValidator.validate(message);
+        ValidationResult result = validator.validate(message);
 
         assertEquals(3, result.getErrors().size());
         assertFalse(result.isValid());
@@ -108,7 +116,7 @@ public class GenerationFinishedMessageBodyTest {
     @Test
     void testValid() {
         GenerationFinishedMessageBody message = genValidMessageBody();
-        ValidationResult result = GenerationFinishedMessageBodyValidator.validate(message);
+        ValidationResult result = validator.validate(message);
 
         assertEquals(Collections.emptyList(), result.getErrors());
         assertTrue(result.isValid());
@@ -119,7 +127,7 @@ public class GenerationFinishedMessageBodyTest {
         GenerationFinishedMessageBody message = genValidMessageBody();
         message.getProductConfig().getErrataTool().setProductVersion(null);
 
-        ValidationResult result = GenerationFinishedMessageBodyValidator.validate(message);
+        ValidationResult result = validator.validate(message);
 
         assertEquals(3, result.getErrors().size());
         assertFalse(result.isValid());
@@ -137,7 +145,7 @@ public class GenerationFinishedMessageBodyTest {
         GenerationFinishedMessageBody message = genValidMessageBody();
         message.getSbom().setLink(null);
 
-        ValidationResult result = GenerationFinishedMessageBodyValidator.validate(message);
+        ValidationResult result = validator.validate(message);
 
         assertEquals(2, result.getErrors().size());
         assertFalse(result.isValid());
