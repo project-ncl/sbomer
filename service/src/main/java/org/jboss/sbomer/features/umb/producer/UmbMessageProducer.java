@@ -30,7 +30,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.features.umb.UmbConfig;
 import org.jboss.sbomer.features.umb.producer.model.GenerationFinishedMessageBody;
 
@@ -107,7 +106,7 @@ public class UmbMessageProducer implements MessageProducer {
         javax.jms.MessageProducer messageProducer = null;
         try {
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            messageProducer = session.createProducer(session.createQueue(umbConfig.producer().topic().get()));
+            messageProducer = session.createProducer(session.createTopic(umbConfig.producer().topic().get()));
             sendMessage(message, headers, session, messageProducer);
         } catch (Exception e) {
             if (retries <= 1) {
