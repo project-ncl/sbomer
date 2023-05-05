@@ -65,6 +65,9 @@ public class NotificationService {
     @Inject
     UmbMessageProducer messageProducer;
 
+    @Inject
+    GenerationFinishedMessageBodyValidator validator;
+
     public void notifyCompleted(String sbomId) {
 
         if (!umbConfig.isEnabled()) {
@@ -112,7 +115,7 @@ public class NotificationService {
         }
 
         GenerationFinishedMessageBody msg = createGenerationFinishedMessage(sbom, bom);
-        if (GenerationFinishedMessageBodyValidator.validate(msg).isValid()) {
+        if (validator.validate(msg).isValid()) {
             messageProducer.sendToTopic(msg);
         }
     }
