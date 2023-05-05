@@ -24,7 +24,6 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.features.umb.UmbConfig;
 import org.jboss.sbomer.features.umb.producer.model.Build;
 import org.jboss.sbomer.features.umb.producer.model.GenerationFinishedMessageBody;
@@ -35,11 +34,9 @@ import org.jboss.sbomer.features.umb.producer.model.Sbom.BomFormat;
 import org.jboss.sbomer.service.SbomRepository;
 
 import lombok.extern.slf4j.Slf4j;
-import java.util.List;
 import java.util.Optional;
 
 import static org.jboss.sbomer.core.utils.SbomUtils.findPropertyWithNameInComponent;
-import static org.jboss.sbomer.core.utils.SbomUtils.hasProperty;
 import static org.jboss.sbomer.core.utils.SbomUtils.getExternalReferences;
 import static org.jboss.sbomer.core.utils.SbomUtils.fromJsonNode;
 import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
@@ -50,7 +47,7 @@ import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 /**
  * Service implementation responsible for the notification of completed SBOMs.
  *
- * @author Marek Goldmann
+ * @author Andrea Vibelli
  */
 @ApplicationScoped
 @Slf4j
