@@ -32,6 +32,7 @@ import org.gradle.internal.impldep.com.google.common.base.Objects;
 import org.jboss.sbomer.config.ProcessingConfig;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.utils.Constants;
+import org.jboss.sbomer.features.umb.producer.NotificationService;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.ProcessingService;
 import org.jboss.sbomer.service.SbomRepository;
@@ -68,6 +69,9 @@ public class TaskRunStatusHandler {
 
     @Inject
     ProcessingService processingService;
+
+    @Inject
+    NotificationService notificationService;
 
     SharedIndexInformer<TaskRun> taskRunInformer;
 
@@ -167,6 +171,10 @@ public class TaskRunStatusHandler {
             processingService.process(sbom);
         }
 
+        // We want to notify about enriched SBOMs only
+        if (Objects.equal(status, SbomStatus.READY) && !sbom.isBase()) {
+            notificationService.notifyCompleted(String.valueOf(sbom.getId()));
+        }
     }
 
     protected SbomStatus toStatus(TaskRun taskRun) {
