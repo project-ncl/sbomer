@@ -126,6 +126,6 @@ sbomer:
         enabled: true
         consumer:
           enabled: true
-          topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"
+          topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.builds"
         producer:
           enabled: false
