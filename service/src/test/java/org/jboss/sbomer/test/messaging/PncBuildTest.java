@@ -73,7 +73,7 @@ public class PncBuildTest {
         try (JMSContext context = connectionFactory.createContext(JMSContext.AUTO_ACKNOWLEDGE)) {
             TextMessage txgMsg = preparePNCBuildMsg(context);
             context.createProducer()
-                    .send(context.createQueue("Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.>"), txgMsg);
+                    .send(context.createQueue("Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.builds"), txgMsg);
         }
     }
 
