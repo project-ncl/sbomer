@@ -15,24 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.enums;
+package org.jboss.sbomer.core.config;
 
-import java.util.Arrays;
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
-import lombok.Getter;
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.WRAPPER_OBJECT)
+@JsonSubTypes({ @JsonSubTypes.Type(value = RedHatProductProcessorConfig.class) })
+public abstract class ProcessorConfig {
 
-@Getter
-public enum ProcessorImplementation {
-    DEFAULT("default"), REDHAT_PRODUCT("redhat-product");
-
-    String slug;
-
-    ProcessorImplementation(String slug) {
-        this.slug = slug;
-    }
-
-    public static Optional<ProcessorImplementation> get(String slug) {
-        return Arrays.stream(ProcessorImplementation.values()).filter(impl -> impl.slug.equals(slug)).findFirst();
-    }
 }

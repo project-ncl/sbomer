@@ -25,21 +25,8 @@ spec:
     - name: id
       type: string
       description: "The PNC build ID"
-    # TODO: Currently that JSON is not really easy to work with in a Bash script, but this will change once we move to a proper CLI.
     - name: config
       type: string
-      description: |
-        Additional parameters that instrument the CycloneDX plugin in th JSON format:
-
-        Currently only following keys are supported:
-
-          * additional-args:    Additional arguments passed to the Domino CLI invocation
-
-        Example (and default):
-
-        {"version": "0.0.84", "additional-args": "--include-non-managed"}
-      default: |
-        {"version": "0.0.84", "additional-args": "--include-non-managed"}
     # TODO: See the task-generate-cyclonedx.yaml file for more information about structured parameters
   steps:
     - name: generate
@@ -77,7 +64,9 @@ spec:
 
         sdk use maven 3.9
 
+        echo "Configuration:"
         echo '$(params.config)' | tee config.json
+
         TOOL_VERSION=$(cat config.json | jq --raw-output '.version')
 
         [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"

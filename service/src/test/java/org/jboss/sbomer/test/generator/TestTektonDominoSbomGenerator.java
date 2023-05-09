@@ -27,7 +27,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.jboss.sbomer.config.GenerationConfig;
 import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.tekton.generator.TektonDominoSbomGenerator;

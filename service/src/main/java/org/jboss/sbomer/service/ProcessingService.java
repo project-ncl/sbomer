@@ -59,7 +59,7 @@ public class ProcessingService extends AbstractTektonTaskRunner {
      * Performs processing of the SBOM identified by the ID using selected processing configuration.
      *
      * @param sbomId SBOM identifier being a {@link Long}
-     * @param ProcessingExecConfig Configuration for the execution of processing
+     * @param GenerationExecConfig Configuration for the execution of processing
      */
     @Transactional
     public Sbom process(Sbom sbom, ProcessingExecConfig execConfig) {

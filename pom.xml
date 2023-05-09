@@ -218,6 +218,7 @@
                         <exclude>.m2/**</exclude>
                         <exclude>mvnw**</exclude>
                         <exclude>**/secret*.txt</exclude>
+                        <exclude>**/src/test/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

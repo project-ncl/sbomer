@@ -16,7 +16,17 @@
 # limitations under the License.
 #
 
+microprofile:
+  rest:
+    client:
+      disable:
+        default:
+          mapper: true
+
 quarkus:
+  rest-client:
+    "gerrit":
+      url: "https://code.engineering.redhat.com"
   swagger-ui:
     always-include: true
     path: /api
@@ -75,7 +85,7 @@ sbomer:
         default-args: "--include-non-managed"
       cyclonedx:
         default-version: "2.7.8"
-        default-args: "--batch-mode --no-transfer-progress --quiet"
+        default-args: "--batch-mode"
 
   processing:
     enabled: true

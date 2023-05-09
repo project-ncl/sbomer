@@ -91,7 +91,7 @@ public class TestTektonCycloneDxSbomGenerator {
                 String version = config.get("version").asText().toString();
                 String additionalArgs = config.get("additional-args").asText().toString();
                 assertEquals("2.7.8", version);
-                assertEquals("--batch-mode --no-transfer-progress --quiet", additionalArgs);
+                assertEquals("--batch-mode", additionalArgs);
             } catch (JsonProcessingException e) {
                 fail("Should not have thrown a parse error when processing the config object");
             }

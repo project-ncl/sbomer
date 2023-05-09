@@ -15,24 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.enums;
+package org.jboss.sbomer.generator;
 
-import java.util.Arrays;
-import java.util.Optional;
+import lombok.Builder;
+import lombok.Data;
 
-import lombok.Getter;
+/**
+ * A runtime execution configuration for a particular processing execution.
+ *
+ * @author Marek Goldmann
+ */
+@Data
+@Builder
+public class GenerationExecConfig {
 
-@Getter
-public enum ProcessorImplementation {
-    DEFAULT("default"), REDHAT_PRODUCT("redhat-product");
-
-    String slug;
-
-    ProcessorImplementation(String slug) {
-        this.slug = slug;
-    }
-
-    public static Optional<ProcessorImplementation> get(String slug) {
-        return Arrays.stream(ProcessorImplementation.values()).filter(impl -> impl.slug.equals(slug)).findFirst();
-    }
 }
