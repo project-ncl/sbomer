@@ -29,6 +29,7 @@ patchesStrategicMerge:
   - patches/route.yaml
   - patches/service.yaml
   - patches/cache.yaml
+  - patches/tekton/cm.yaml
 patches:
   - target:
       kind: Deployment
@@ -42,6 +43,19 @@ patches:
       kind: Deployment
       name: sbomer
     patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: KEYSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sbomer-secrets
+              key: pnc-sbomer.password
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: JAVA_TOOL_OPTIONS
+          value: "-Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12"
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
