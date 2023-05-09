@@ -31,6 +31,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
+import org.apache.qpid.jms.provider.exceptions.ProviderConnectionRemotelyClosedException;
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
@@ -206,7 +207,12 @@ public class PncMessageParser implements Runnable {
 
             }
         } catch (Exception e) {
-            log.error("Something wrong happened in the PNCMessageParser", e);
+            Throwable cause = getRootCause(e);
+            if (ProviderConnectionRemotelyClosedException.class.equals(cause.getClass())) {
+                log.warn("The JMS connection was remotely closed, will be handled with the reconnection.");
+            } else {
+                log.error("Something wrong happened in the PNCMessageParser", e);
+            }
         }
 
         connected.set(false);
@@ -249,6 +255,14 @@ public class PncMessageParser implements Runnable {
         }
 
         return false;
+    }
+
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable cause = throwable.getCause();
+        while (cause != null && cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause;
     }
 
 }

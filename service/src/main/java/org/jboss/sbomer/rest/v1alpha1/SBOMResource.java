@@ -217,27 +217,28 @@ public class SBOMResource {
     // return sbomService.listAllSbomsWithBuildId(buildId);
     // }
 
-    // @GET
-    // @Path("/build/{buildId}/base")
-    // @Operation(summary = "Get the base SBOM related to a PNC build")
-    // @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    // @APIResponses({
-    // @APIResponse(
-    // responseCode = "200",
-    // description = "The base SBOM",
-    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-    // @APIResponse(
-    // responseCode = "404",
-    // description = "Requested base SBOM could not be found",
-    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-    // @APIResponse(
-    // responseCode = "500",
-    // description = "Internal server error",
-    // content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
-    // public Sbom getBaseSbomWithPncBuildId(@PathParam("buildId") String buildId) {
+    // TODO extend the endpoint with a query string, to handle base and enriched flavours of sbom to retrieve
+    @GET
+    @Path("/build/{buildId}")
+    @Operation(summary = "Get the base SBOM related to a PNC build")
+    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The base SBOM",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested base SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Sbom getBaseSbomWithPncBuildId(@PathParam("buildId") String buildId) {
 
-    // return sbomService.getBaseSbomByBuildId(buildId);
-    // }
+        return sbomService.getBaseSbomByBuildId(buildId);
+    }
 
     // @GET
     // @Path("/build/{buildId}/base/bom")

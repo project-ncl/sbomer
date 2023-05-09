@@ -57,4 +57,14 @@ public interface SBOMerClient {
     @GET
     @Path("/{id}")
     Sbom getById(@PathParam("id") String id);
+
+    /**
+     * Retrieves the base SBOM based on the build ID.
+     *
+     * @param buildId
+     * @return {@link Sbom}
+     */
+    @GET
+    @Path("/build/{buildId}")
+    Sbom getBaseSbomWithPncBuildId(@PathParam("buildId") String buildId);
 }

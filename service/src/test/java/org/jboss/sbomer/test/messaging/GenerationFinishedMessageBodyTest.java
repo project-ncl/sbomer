@@ -40,8 +40,10 @@ import org.jboss.sbomer.features.umb.producer.model.Sbom.BomFormat;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 
 @QuarkusTest
+@WithKubernetesTestServer
 public class GenerationFinishedMessageBodyTest {
 
     @Inject

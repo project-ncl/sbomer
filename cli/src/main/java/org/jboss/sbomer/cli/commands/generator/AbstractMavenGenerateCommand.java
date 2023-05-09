@@ -29,11 +29,13 @@ import org.cyclonedx.model.Bom;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.commands.AbstractCommand;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -61,25 +63,55 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
             return CommandLine.ExitCode.SOFTWARE;
         }
 
-        // Clone the source code related to the build
-        doClone(build.getScmUrl(), build.getScmTag(), parent.getParent().getTargetDir(), parent.getParent().isForce());
+        // Filter only valid Pnc builds
+        if (!isValidBuild(build)) {
+            log.error(
+                    "Build is not valid! Needs to be a FINISHED build of type MVN with status SUCCESS or NO_REBUILD_REQUIRED");
+            return CommandLine.ExitCode.SOFTWARE;
+        }
 
-        // Generate the SBOM
-        Path bomPath = generate();
+        // Get the correct scm information for builds which have either SUCCESS or NO_REBUILD_REQUIRED status
+        String scmUrl = build.getScmUrl();
+        String scmTag = build.getScmTag();
+        String originalBuildId = null;
+        Bom bom = null;
+        if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
+            scmUrl = build.getNoRebuildCause().getScmUrl();
+            scmTag = build.getNoRebuildCause().getScmTag();
+            originalBuildId = build.getNoRebuildCause().getId();
 
-        log.info(
-                "Preparing to update SBOM id: '{}' (PNC build '{}') with generated SBOM content from path '{}'...",
-                sbom.getId(),
-                sbom.getBuildId(),
-                bomPath);
-
-        log.debug("Reading generated SBOM from '{}' path", bomPath);
-
-        // Read the file
-        Bom bom = SbomUtils.fromPath(bomPath);
+            try {
+                Sbom originalSbom = sbomerClient.getBaseSbomWithPncBuildId(originalBuildId);
+                bom = SbomUtils.fromJsonNode(originalSbom.getSbom());
+            } catch (NotFoundException nfe) {
+                log.warn(
+                        "Could not find original SBOM for PNC build '{}', will regenerate the SBOM...",
+                        originalBuildId);
+            }
+        }
 
         if (bom == null) {
-            throw new ApplicationException("Could parse the generated SBOM from '{}' path", bomPath.toString());
+
+            // Clone the source code related to the build
+            doClone(scmUrl, scmTag, parent.getParent().getTargetDir(), parent.getParent().isForce());
+
+            // Generate the SBOM
+            Path bomPath = generate();
+
+            log.info(
+                    "Preparing to update SBOM id: '{}' (PNC build '{}') with generated SBOM content from path '{}'...",
+                    sbom.getId(),
+                    sbom.getBuildId(),
+                    bomPath);
+
+            log.debug("Reading generated SBOM from '{}' path", bomPath);
+
+            // Read the file
+            bom = SbomUtils.fromPath(bomPath);
+
+            if (bom == null) {
+                throw new ApplicationException("Could parse the generated SBOM from '{}' path", bomPath.toString());
+            }
         }
 
         log.info("Uploading generated CycloneDX BOM...");
@@ -183,5 +215,15 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
         }
 
         return size.get() / 1024;
+    }
+
+    private boolean isValidBuild(Build build) {
+        if (!build.getTemporaryBuild() && org.jboss.pnc.enums.BuildProgress.FINISHED.equals(build.getProgress())
+                && (org.jboss.pnc.enums.BuildStatus.SUCCESS.equals(build.getStatus())
+                        || org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus()))
+                && org.jboss.pnc.enums.BuildType.MVN.equals(build.getBuildConfigRevision().getBuildType())) {
+            return true;
+        }
+        return false;
     }
 }
