@@ -15,24 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.enums;
+package org.jboss.sbomer.core.config;
 
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.Map;
 
-import lombok.Getter;
+import org.jboss.sbomer.core.enums.ProcessorImplementation;
 
-@Getter
-public enum ProcessorImplementation {
-    DEFAULT("default"), REDHAT_PRODUCT("redhat-product");
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-    String slug;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
-    ProcessorImplementation(String slug) {
-        this.slug = slug;
-    }
+/**
+ * Product configuration.
+ *
+ * @author Marek Goldmann
+ */
+@Data
+@Builder
+@Jacksonized
+public class ProductConfig {
+    /**
+     * Processors configuration.
+     */
+    @JsonDeserialize(using = ProcessorsDeserializer.class)
+    Map<ProcessorImplementation, ProcessorConfig> processors;
 
-    public static Optional<ProcessorImplementation> get(String slug) {
-        return Arrays.stream(ProcessorImplementation.values()).filter(impl -> impl.slug.equals(slug)).findFirst();
-    }
+    /**
+     * Generator configuration.
+     */
+    GeneratorConfig generator;
 }

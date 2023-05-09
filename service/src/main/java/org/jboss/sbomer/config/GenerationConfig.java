@@ -24,7 +24,6 @@ import javax.enterprise.context.ApplicationScoped;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 
 import io.smallrye.config.ConfigMapping;
-import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 
 /**

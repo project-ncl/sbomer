@@ -27,7 +27,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.jboss.sbomer.config.GenerationConfig;
 import org.jboss.sbomer.core.utils.Constants;
 import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.tekton.generator.TektonDominoSbomGenerator;
@@ -91,7 +90,7 @@ public class TestTektonDominoSbomGenerator {
                 String version = config.get("version").asText().toString();
                 String additionalArgs = config.get("additional-args").asText().toString();
                 assertEquals("0.0.88", version);
-                assertEquals("--include-non-managed", additionalArgs);
+                assertEquals("--include-non-managed --warn-on-missing-scm", additionalArgs);
             } catch (JsonProcessingException e) {
                 fail("Should not have thrown a parse error when processing the config object");
             }

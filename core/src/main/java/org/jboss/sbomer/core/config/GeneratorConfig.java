@@ -15,24 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.enums;
+package org.jboss.sbomer.core.config;
 
-import java.util.Arrays;
-import java.util.Optional;
+import org.jboss.sbomer.core.enums.GeneratorImplementation;
 
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
-@Getter
-public enum ProcessorImplementation {
-    DEFAULT("default"), REDHAT_PRODUCT("redhat-product");
-
-    String slug;
-
-    ProcessorImplementation(String slug) {
-        this.slug = slug;
-    }
-
-    public static Optional<ProcessorImplementation> get(String slug) {
-        return Arrays.stream(ProcessorImplementation.values()).filter(impl -> impl.slug.equals(slug)).findFirst();
-    }
+/**
+ * Configuration of the generator tool.
+ */
+@Data
+@Builder
+@Jacksonized
+public class GeneratorConfig {
+    /**
+     * The selected generator.
+     */
+    GeneratorImplementation type;
+    /**
+     * Optional custom arguments that should be passed to the generator.
+     */
+    String customArgs;
+    /**
+     * Generator tool version that should be used.
+     */
+    String version;
 }
