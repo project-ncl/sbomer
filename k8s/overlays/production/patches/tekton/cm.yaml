@@ -16,23 +16,10 @@
 # limitations under the License.
 #
 
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: sbomer
-spec:
-  template:
-    spec:
-      containers:
-        - name: sbomer
-          env:
-            - name: PNC_SERVICE_HOST
-              $patch: delete
-            - name: SBOMER_PRODUCT_MAPPING_ENV
-              $patch: delete
-            - name: SBOMER_ROUTE_HOST
-              $patch: delete
-            - name: KEYSTORE_PASSWORD
-              $patch: delete
-            - name: JAVA_TOOL_OPTIONS
-              $patch: delete
+  name: sbomer-tekton
+data:
+    PNC_SERVICE_HOST: "orch.psi.redhat.com"
+    SBOMER_PRODUCT_MAPPING_ENV: "production"
