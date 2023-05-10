@@ -23,10 +23,11 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.cli.model.Sbom;
+import org.jboss.sbomer.core.config.ProductConfig;
+import org.jboss.sbomer.core.config.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.service.ProductVersionMapper;
-import org.jboss.sbomer.core.service.ProductVersionMapper.ProductVersionMapping;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +88,7 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
                     sbom.getBuildId());
         }
 
-        ProductVersionMapping mapping = productVersionMapper.getMapping().get(productVersion.getId());
+        ProductConfig mapping = productVersionMapper.getMapping().get(productVersion.getId());
 
         if (mapping == null) {
             throw new ApplicationException(
@@ -98,9 +99,12 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
 
         Component component = bom.getMetadata().getComponent();
 
-        addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_NAME, mapping.getErrata().getProductName());
-        addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_VERSION, mapping.getErrata().getProductVersion());
-        addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_VARIANT, mapping.getErrata().getProductVariant());
+        RedHatProductProcessorConfig config = (RedHatProductProcessorConfig) mapping.getProcessors()
+                .get(ProcessorImplementation.REDHAT_PRODUCT);
+
+        addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_NAME, config.getErrata().getProductName());
+        addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_VERSION, config.getErrata().getProductVersion());
+        addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_VARIANT, config.getErrata().getProductVariant());
 
         return bom;
     }

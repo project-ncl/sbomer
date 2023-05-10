@@ -37,10 +37,10 @@ import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.sbomer.core.config.ProductConfig;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.service.PncService;
 import org.jboss.sbomer.core.service.ProductVersionMapper;
-import org.jboss.sbomer.core.service.ProductVersionMapper.ProductVersionMapping;
 import org.jboss.sbomer.features.umb.JmsUtils;
 import org.jboss.sbomer.features.umb.UmbConfig;
 import org.jboss.sbomer.features.umb.UmbConfig.UmbConsumerTrigger;
@@ -148,8 +148,7 @@ public class PncMessageParser implements Runnable {
                                 continue;
                             }
 
-                            ProductVersionMapping mapping = productVersionMapper.getMapping()
-                                    .get(productVersion.getId());
+                            ProductConfig mapping = productVersionMapper.getMapping().get(productVersion.getId());
 
                             if (mapping == null) {
                                 log.warn(
@@ -164,9 +163,10 @@ public class PncMessageParser implements Runnable {
 
                             // Use the generator in the mapping if specified, otherwise ude the default (CYCLONEDX)
                             GeneratorImplementation generator = GeneratorImplementation.CYCLONEDX;
-                            if (!Strings.isEmpty(mapping.getGenerator())) {
+
+                            if (mapping.getGenerator() != null) {
                                 try {
-                                    generator = GeneratorImplementation.valueOf(mapping.getGenerator());
+                                    generator = mapping.getGenerator().getType();
                                 } catch (IllegalArgumentException exc) {
                                 }
                             }

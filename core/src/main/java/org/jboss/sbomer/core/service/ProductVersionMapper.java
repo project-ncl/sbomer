@@ -19,16 +19,17 @@ package org.jboss.sbomer.core.service;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.sbomer.core.config.ProductConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.Data;
 import lombok.Getter;
 
 /**
@@ -43,20 +44,7 @@ public class ProductVersionMapper {
     @ConfigProperty(name = "sbomer.pnc.product-mapping.environment")
     String mappingEnvironment;
 
-    @Data
-    public static class ErrataMapping {
-        String productName;
-        String productVersion;
-        String ProductVariant;
-    }
-
-    @Data
-    public static class ProductVersionMapping {
-        String generator;
-        ErrataMapping errata;
-    }
-
-    public static class Mapping extends HashMap<String, ProductVersionMapping> {
+    public static class Mapping extends HashMap<String, ProductConfig> {
 
     }
 
@@ -67,7 +55,7 @@ public class ProductVersionMapper {
      * </p>
      */
     @Getter
-    Mapping mapping;
+    Map<String, ProductConfig> mapping;
 
     @PostConstruct
     void init() {

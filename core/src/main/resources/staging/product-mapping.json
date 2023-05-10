@@ -1,17 +1,27 @@
 {
   "416": {
-    "errata": {
-      "productName": "RHTESTPRODUCT",
-      "productVersion": "RHEL-8-RHTESTPRODUCT-1.1",
-      "productVariant": "8Base-RHTESTPRODUCT-1.1"
+    "processors": {
+      "redhat-product": {
+        "errata": {
+          "productName": "RHTESTPRODUCT",
+          "productVersion": "RHEL-8-RHTESTPRODUCT-1.1",
+          "productVariant": "8Base-RHTESTPRODUCT-1.1"
+        }
+      }
     }
   },
   "417": {
-    "generator": "DOMINO",
-    "errata": {
-      "productName": "RHBQ",
-      "productVersion": "RHEL-8-RHBQ-2.13",
-      "productVariant": "8Base-RHBQ-2.13"
+    "generator": {
+      "type": "DOMINO"
+    },
+    "processors": {
+      "redhat-product": {
+        "errata": {
+          "productName": "RHBQ",
+          "productVersion": "RHEL-8-RHBQ-2.13",
+          "productVariant": "8Base-RHBQ-2.13"
+        }
+      }
     }
   }
 }
