@@ -34,6 +34,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -164,6 +165,12 @@ public class Sbom extends PanacheEntityBase {
     @CycloneDxBom
     @ToString.Exclude
     private JsonNode sbom;
+
+    @JsonIgnore
+    @Lob
+    @Type(type = "org.hibernate.type.TextType")
+    @Column(name = "task_run_msg")
+    private String taskRunMsg;
 
     /**
      * Creates a child of the current {@link Sbom} resource with status set to {@link SbomStatus#NEW}.
