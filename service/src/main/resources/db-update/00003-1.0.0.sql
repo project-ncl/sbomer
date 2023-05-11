@@ -21,4 +21,6 @@ BEGIN transaction;
 
 ALTER TABLE sbom ADD COLUMN status_msg text;
 
+INSERT INTO db_version(version, creation_time) VALUES ('00003', now());
+
 COMMIT;
