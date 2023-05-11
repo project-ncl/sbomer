@@ -167,7 +167,7 @@ public class TaskRunStatusHandler {
         // Update resource
         sbom.setStatus(status);
         // Update the task run message
-        sbom.setTaskRunMsg(taskRunFinalMsg);
+        sbom.setStatusMessage(taskRunFinalMsg);
         // Update status
         statusCache.put(sbomId, status);
         // Save the resource

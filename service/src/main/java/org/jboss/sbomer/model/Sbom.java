@@ -169,8 +169,8 @@ public class Sbom extends PanacheEntityBase {
     @JsonIgnore
     @Lob
     @Type(type = "org.hibernate.type.TextType")
-    @Column(name = "task_run_msg")
-    private String taskRunMsg;
+    @Column(name = "status_msg")
+    private String statusMessage;
 
     /**
      * Creates a child of the current {@link Sbom} resource with status set to {@link SbomStatus#NEW}.

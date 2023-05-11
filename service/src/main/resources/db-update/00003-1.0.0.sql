@@ -19,6 +19,6 @@
 
 BEGIN transaction;
 
-ALTER TABLE sbom ADD COLUMN task_run_msg text;
+ALTER TABLE sbom ADD COLUMN status_msg text;
 
 COMMIT;
