@@ -18,10 +18,12 @@
 package org.jboss.sbomer.test.k8s;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.k8s.TaskRunStatusHandler;
 
+import io.fabric8.knative.internal.pkg.apis.Condition;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 
 public class TaskRunStatusHandlerUnderTesting extends TaskRunStatusHandler {
@@ -36,13 +38,23 @@ public class TaskRunStatusHandlerUnderTesting extends TaskRunStatusHandler {
     }
 
     @Override
-    public SbomStatus toStatus(TaskRun taskRun) {
-        return super.toStatus(taskRun);
+    public SbomStatus toStatus(String taskRunStatus) {
+        return super.toStatus(taskRunStatus);
     }
 
     @Override
-    public void updateStatus(String sbomId, SbomStatus status) {
-        super.updateStatus(sbomId, status);
+    public void updateStatus(String sbomId, SbomStatus status, String taskRunFinalMsg) {
+        super.updateStatus(sbomId, status, taskRunFinalMsg);
+    }
+
+    @Override
+    protected void handleTaskRunUpdate(TaskRun taskRun) {
+        super.handleTaskRunUpdate(taskRun);
+    }
+
+    @Override
+    public Optional<Condition> findLastCondition(TaskRun taskRun) {
+        return super.findLastCondition(taskRun);
     }
 
 }

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
@@ -166,7 +167,7 @@ public class TaskRunStatusHandlerTest {
                                 .build())
                 .build();
 
-        SbomStatus status = statusHandler.toStatus(taskRun);
+        SbomStatus status = statusHandler.toStatus(statusHandler.findLastCondition(taskRun).get().getStatus());
 
         assertEquals(status, SbomStatus.READY);
     }
@@ -181,7 +182,7 @@ public class TaskRunStatusHandlerTest {
                                 .build())
                 .build();
 
-        SbomStatus status = statusHandler.toStatus(taskRun);
+        SbomStatus status = statusHandler.toStatus(statusHandler.findLastCondition(taskRun).get().getStatus());
 
         assertEquals(status, SbomStatus.IN_PROGRESS);
     }
@@ -196,7 +197,7 @@ public class TaskRunStatusHandlerTest {
                                 .build())
                 .build();
 
-        SbomStatus status = statusHandler.toStatus(taskRun);
+        SbomStatus status = statusHandler.toStatus(statusHandler.findLastCondition(taskRun).get().getStatus());
 
         assertEquals(status, SbomStatus.FAILED);
     }
@@ -212,7 +213,7 @@ public class TaskRunStatusHandlerTest {
                                 .build())
                 .build();
 
-        SbomStatus status = statusHandler.toStatus(taskRun);
+        SbomStatus status = statusHandler.toStatus(statusHandler.findLastCondition(taskRun).get().getStatus());
 
         assertNull(status);
         assertThat(
@@ -230,7 +231,7 @@ public class TaskRunStatusHandlerTest {
         Mockito.when(sbomRepository.findById(123456l)).thenReturn(sbom);
         Mockito.when(sbomRepository.saveSbom(sbom)).thenReturn(sbom);
 
-        statusHandler.updateStatus("123456", SbomStatus.FAILED);
+        statusHandler.updateStatus("123456", SbomStatus.FAILED, null);
 
         Mockito.verify(sbomRepository, times(1)).findById(123456l);
         Mockito.verify(sbomRepository, times(1)).saveSbom(sbom);
@@ -252,12 +253,12 @@ public class TaskRunStatusHandlerTest {
         Mockito.when(sbomRepository.saveSbom(sbom)).thenReturn(sbom);
 
         // For more updates received with the same status we fetch and update the resource only once!
-        statusHandler.updateStatus("123456", SbomStatus.IN_PROGRESS);
-        statusHandler.updateStatus("123456", SbomStatus.IN_PROGRESS);
-        statusHandler.updateStatus("123456", SbomStatus.IN_PROGRESS);
-        statusHandler.updateStatus("123456", SbomStatus.IN_PROGRESS);
-        statusHandler.updateStatus("123456", SbomStatus.READY);
-        statusHandler.updateStatus("123456", SbomStatus.READY);
+        statusHandler.updateStatus("123456", SbomStatus.IN_PROGRESS, null);
+        statusHandler.updateStatus("123456", SbomStatus.IN_PROGRESS, null);
+        statusHandler.updateStatus("123456", SbomStatus.IN_PROGRESS, null);
+        statusHandler.updateStatus("123456", SbomStatus.IN_PROGRESS, null);
+        statusHandler.updateStatus("123456", SbomStatus.READY, null);
+        statusHandler.updateStatus("123456", SbomStatus.READY, null);
 
         Mockito.verify(processingService, times(1)).process(sbom);
         Mockito.verify(sbomRepository, times(2)).findById(123456l);
@@ -267,5 +268,122 @@ public class TaskRunStatusHandlerTest {
         assertEquals(SbomStatus.READY, statusHandler.getStatusCache().get("123456"));
         assertEquals(SbomStatus.READY, sbom.getStatus());
         assertThat(logHandler.getMessages(), CoreMatchers.hasItems("Updated Sbom id '123456' with status: 'READY'"));
+    }
+
+    @Test
+    void testTaskRunWithCompletedDeletion() {
+        Sbom sbom = new Sbom();
+
+        assertTrue(statusHandler.getStatusCache().isEmpty());
+        assertEquals(sbom.getStatus(), SbomStatus.NEW);
+
+        Mockito.when(sbomRepository.findById(13131313l)).thenReturn(sbom);
+        Mockito.when(sbomRepository.saveSbom(sbom)).thenReturn(sbom);
+
+        TaskRun inProgressTaskRun = new TaskRunBuilder().withNewMetadata()
+                .withName("someothername")
+                .withLabels(
+                        Map.of(
+                                Constants.TEKTON_LABEL_NAME_APP_PART_OF,
+                                Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
+                                Constants.TEKTON_LABEL_SBOM_ID,
+                                "13131313"))
+                .endMetadata()
+                .withStatus(
+                        new TaskRunStatusBuilder().withConditions(new ConditionBuilder().withStatus("Unknown").build())
+                                .build())
+                .build();
+
+        statusHandler.handleTaskRunUpdate(inProgressTaskRun);
+
+        Mockito.verify(sbomRepository, times(1)).findById(13131313l);
+        Mockito.verify(sbomRepository, times(1)).saveSbom(sbom);
+
+        assertEquals(1, statusHandler.getStatusCache().size());
+        assertEquals(SbomStatus.IN_PROGRESS, statusHandler.getStatusCache().get("13131313"));
+        assertEquals(SbomStatus.IN_PROGRESS, sbom.getStatus());
+        assertThat(
+                logHandler.getMessages(),
+                CoreMatchers.hasItems("Updated Sbom id '13131313' with status: 'IN_PROGRESS'"));
+
+        TaskRun readyTaskRun = new TaskRunBuilder(inProgressTaskRun).editStatus()
+                .withCompletionTime(String.valueOf(LocalDateTime.now()))
+                .withConditions(
+                        new ConditionBuilder().withStatus("True")
+                                .withLastTransitionTime(String.valueOf(LocalDateTime.now()))
+                                .build())
+                .endStatus()
+                .build();
+
+        statusHandler.handleTaskRunUpdate(readyTaskRun);
+
+        Mockito.verify(processingService, times(1)).process(sbom);
+        Mockito.verify(sbomRepository, times(2)).findById(13131313l);
+        Mockito.verify(sbomRepository, times(2)).saveSbom(sbom);
+
+        assertEquals(1, statusHandler.getStatusCache().size());
+        assertEquals(SbomStatus.READY, statusHandler.getStatusCache().get("13131313"));
+        assertEquals(SbomStatus.READY, sbom.getStatus());
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("Updated Sbom id '13131313' with status: 'READY'"));
+
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("TaskRun 'someothername' completed successfully."));
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("Deleting taskRun 'someothername'..."));
+    }
+
+    @Test
+    void testTaskRunWithRetries() {
+        Sbom sbom = new Sbom();
+
+        assertTrue(statusHandler.getStatusCache().isEmpty());
+        assertEquals(sbom.getStatus(), SbomStatus.NEW);
+
+        Mockito.when(sbomRepository.findById(17171717l)).thenReturn(sbom);
+        Mockito.when(sbomRepository.saveSbom(sbom)).thenReturn(sbom);
+
+        TaskRun inProgressTaskRun = new TaskRunBuilder().withNewMetadata()
+                .withName("somefunnyname")
+                .withLabels(
+                        Map.of(
+                                Constants.TEKTON_LABEL_NAME_APP_PART_OF,
+                                Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
+                                Constants.TEKTON_LABEL_SBOM_ID,
+                                "17171717"))
+                .endMetadata()
+                .withStatus(
+                        new TaskRunStatusBuilder().withConditions(new ConditionBuilder().withStatus("Unknown").build())
+                                .build())
+                .build();
+
+        statusHandler.handleTaskRunUpdate(inProgressTaskRun);
+
+        assertEquals(1, statusHandler.getStatusCache().size());
+        assertEquals(SbomStatus.IN_PROGRESS, statusHandler.getStatusCache().get("17171717"));
+        assertEquals(SbomStatus.IN_PROGRESS, sbom.getStatus());
+        assertThat(
+                logHandler.getMessages(),
+                CoreMatchers.hasItems("Updated Sbom id '17171717' with status: 'IN_PROGRESS'"));
+
+        TaskRun failedTaskRun = new TaskRunBuilder(inProgressTaskRun).editStatus()
+                .withCompletionTime(String.valueOf(LocalDateTime.now()))
+                .withConditions(
+                        new ConditionBuilder().withStatus("False")
+                                .withLastTransitionTime(String.valueOf(LocalDateTime.now()))
+                                .build())
+                .endStatus()
+                .build();
+
+        statusHandler.handleTaskRunUpdate(failedTaskRun);
+
+        assertEquals(1, statusHandler.getStatusCache().size());
+        assertEquals(SbomStatus.FAILED, statusHandler.getStatusCache().get("17171717"));
+        assertEquals(SbomStatus.FAILED, sbom.getStatus());
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("Updated Sbom id '17171717' with status: 'FAILED'"));
+
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("TaskRun 'somefunnyname' completed with failure."));
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("Retrying failed taskRun 'somefunnyname'..."));
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("Deleting taskRun 'somefunnyname'..."));
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("Creating new taskRun 'somefunnyname-retry-1'..."));
+        assertThat(logHandler.getMessages(), CoreMatchers.hasItems("Updated Sbom id '17171717' with status: 'FAILED'"));
+
     }
 }

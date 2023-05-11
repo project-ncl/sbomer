@@ -50,6 +50,11 @@ sbomer:
         topic: "${PRODUCER_TOPIC}"
         retries: 15
         max-back-off: 30
+    taskruns:
+      cleanup-successful: true
+      retries:
+        enabled: true
+        max-retries: 10
 
   generation:
     enabled: true

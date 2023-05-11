@@ -19,6 +19,7 @@ package org.jboss.sbomer.features;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.sbomer.features.umb.TaskRunsConfig;
 import org.jboss.sbomer.features.umb.UmbConfig;
 
 import io.smallrye.config.ConfigMapping;
@@ -31,4 +32,6 @@ import io.smallrye.config.ConfigMapping;
 public interface FeatureConfig {
 
     UmbConfig umb();
+
+    TaskRunsConfig taskruns();
 }
