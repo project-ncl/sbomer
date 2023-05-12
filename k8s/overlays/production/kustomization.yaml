@@ -66,6 +66,12 @@ patches:
         value:
           name: SBOMER_ROUTE_HOST
           value: "sbomer.apps.ocp-c1.prod.psi.redhat.com"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: INDY_REPOSITORY_URL
+          value: "https://indy.psi.redhat.com/api/content/maven/group/static/"
+
   - target:
       kind: Route
     patch: |-

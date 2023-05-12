@@ -95,7 +95,7 @@
         <repository>
           <id>indy</id>
           <name>Red Hat internal repository</name>
-          <url>https://indy.psi.redhat.com/api/content/maven/group/static/</url>
+          <url>${env.INDY_REPOSITORY_URL}</url>
           <layout>default</layout>
           <releases>
             <enabled>true</enabled>

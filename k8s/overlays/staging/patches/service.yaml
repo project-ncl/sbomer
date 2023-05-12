@@ -26,15 +26,5 @@ spec:
       containers:
         - name: sbomer
           env:
-            - name: PNC_SERVICE_HOST
-              $patch: delete
-            - name: SBOMER_PRODUCT_MAPPING_ENV
-              $patch: delete
-            - name: SBOMER_ROUTE_HOST
-              $patch: delete
-            - name: KEYSTORE_PASSWORD
-              $patch: delete
-            - name: JAVA_TOOL_OPTIONS
-              $patch: delete
             - name: INDY_REPOSITORY_URL
               $patch: delete
