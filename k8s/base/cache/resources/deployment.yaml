@@ -40,6 +40,8 @@ spec:
           env:
             - name: PNC_SERVICE_HOST
               value: orch.psi.redhat.com
+            - name: INDY_REPOSITORY_HOST
+              value: indy.psi.redhat.com
           ports:
             - containerPort: 7070
               name: http
@@ -51,7 +53,7 @@ spec:
             - /bin/bash
           args:
             - -c
-            - envsubst '$${PNC_SERVICE_HOST}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
+            - envsubst '$${PNC_SERVICE_HOST} $${INDY_REPOSITORY_HOST}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
 
       restartPolicy: Always
       volumes:

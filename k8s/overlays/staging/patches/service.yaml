@@ -26,5 +26,5 @@ spec:
       containers:
         - name: sbomer
           env:
-            - name: INDY_REPOSITORY_URL
+            - name: INDY_REPOSITORY_HOST
               $patch: delete

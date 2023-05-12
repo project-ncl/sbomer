@@ -86,7 +86,7 @@ http {
         location /maven/indy-static/ {
             proxy_cache maven;
 
-            proxy_pass http://indy.psi.redhat.com/api/content/maven/group/static/;
+            proxy_pass http://${INDY_REPOSITORY_HOST}/api/content/maven/group/static/;
             
         }
     }

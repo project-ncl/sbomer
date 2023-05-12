@@ -51,6 +51,11 @@ patches:
         value:
           name: PNC_SERVICE_HOST
           value: "orch-stage.psi.redhat.com"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: INDY_REPOSITORY_HOST
+          value: "indy-stage.psi.redhat.com"
   - target:
       kind: Deployment
       name: sbomer
@@ -156,12 +161,6 @@ patches:
         value:
           name: SBOMER_ROUTE_HOST
           value: "sbomer-stage.apps.ocp-c1.prod.psi.redhat.com"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: INDY_REPOSITORY_URL
-          value: "https://indy-stage.psi.redhat.com/api/content/maven/group/static/"
-
 
   - target:
       kind: StatefulSet

@@ -57,8 +57,8 @@ spec:
                   key: QUARKUS_PROFILE
             - name: SBOMER_CACHE_SERVICE_URL
               value: "$(SBOMER_CACHE_SERVICE_HOST):$(SBOMER_CACHE_SERVICE_PORT)/pnc/orch"
-            - name: INDY_REPOSITORY_URL
-              value: "https://indy.psi.redhat.com/api/content/maven/group/static/"
+            - name: INDY_REPOSITORY_HOST
+              value: "indy.psi.redhat.com"
           ports:
             - containerPort: 8080
               name: http

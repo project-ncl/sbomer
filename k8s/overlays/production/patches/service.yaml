@@ -36,5 +36,5 @@ spec:
               $patch: delete
             - name: JAVA_TOOL_OPTIONS
               $patch: delete
-            - name: INDY_REPOSITORY_URL
+            - name: INDY_REPOSITORY_HOST
               $patch: delete

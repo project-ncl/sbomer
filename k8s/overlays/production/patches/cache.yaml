@@ -28,4 +28,6 @@ spec:
           env:
             - name: PNC_SERVICE_HOST
               $patch: delete
+            - name: INDY_REPOSITORY_HOST
+              $patch: delete
 
