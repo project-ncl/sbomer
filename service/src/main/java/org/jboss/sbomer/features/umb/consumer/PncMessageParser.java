@@ -180,7 +180,7 @@ public class PncMessageParser implements Runnable {
                                     generationService.generate(
                                             msgBody.getBuild().getId(),
                                             GeneratorImplementation.DOMINO,
-                                            "0.0.88",
+                                            "0.0.89",
                                             "--include-non-managed --exclude-parent-poms --warn-on-missing-scm");
                                     break;
                                 }
