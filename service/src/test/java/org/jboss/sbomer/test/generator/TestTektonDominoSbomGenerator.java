@@ -90,7 +90,7 @@ public class TestTektonDominoSbomGenerator {
                 JsonNode config = mapper.readTree(taskRun.getSpec().getParams().get(1).getValue().getStringVal());
                 String version = config.get("version").asText().toString();
                 String additionalArgs = config.get("additional-args").asText().toString();
-                assertEquals("0.0.88", version);
+                assertEquals("0.0.89", version);
                 assertEquals("--include-non-managed", additionalArgs);
             } catch (JsonProcessingException e) {
                 fail("Should not have thrown a parse error when processing the config object");
