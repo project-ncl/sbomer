@@ -90,7 +90,8 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
             pagParams.setPageIndex(0);
             pagParams.setPageSize(1);
             String rsqlQuery = "query=buildId=eq=" + originalBuildId
-                    + "%3Bgenerator=isnull=false%3Bprocessors=isnull=true";
+                    + ";generator=isnull=false;processors=isnull=true";
+
             log.info("Searching SBOMs with rsqlQuery: {}", rsqlQuery);
 
             Page<Sbom> sboms = sbomerClient.searchSboms(pagParams, rsqlQuery);

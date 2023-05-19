@@ -77,7 +77,7 @@ public class SBOMResource {
             name = "query",
             description = "A RSQL query to search the SBOMs",
             examples = {
-                    @ExampleObject(name = "Find all SBOMs with provided buildId", value = "buildId==eq=ABCDEFGHIJKLM"),
+                    @ExampleObject(name = "Find all SBOMs with provided buildId", value = "buildId=eq=ABCDEFGHIJKLM"),
                     @ExampleObject(
                             name = "Find all SBOMs with provided purl",
                             value = "rootPurl=eq='pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00270?type=jar'") })
