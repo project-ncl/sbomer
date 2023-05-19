@@ -18,16 +18,11 @@
 package org.jboss.sbomer.service;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -67,18 +62,6 @@ public class SbomService {
 
     public Page<Sbom> searchByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery) {
         return sbomRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery);
-    }
-
-    /**
-     * Get base {@link Sbom} for a given PNC build ID.
-     */
-    public Sbom getBaseSbomByBuildId(String buildId) {
-        log.info("Getting base SBOM with buildId: {}", buildId);
-        try {
-            return sbomRepository.getBaseSbomByBuildId(buildId);
-        } catch (NoResultException nre) {
-            throw new NotFoundException("Base SBOM for build id " + buildId + " not found.");
-        }
     }
 
     /**

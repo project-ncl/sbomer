@@ -25,13 +25,11 @@ import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
 
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.rsql.RSQLProducer;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
-import io.quarkus.panache.common.Parameters;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
@@ -91,19 +89,6 @@ public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
 
         CriteriaQuery<Long> query = rsqlProducer.getCountCriteriaQuery(Sbom.class, rsqlQuery);
         return getEntityManager().createQuery(query).getSingleResult();
-    }
-
-    public Sbom getSbom(String buildId, GeneratorImplementation generator) {
-
-        return find(
-                "select s from Sbom s where s.buildId = :buildId and s.generator = :generator and s.processors is empty",
-                Parameters.with("buildId", buildId).and("generator", generator)).singleResult();
-    }
-
-    public Sbom getBaseSbomByBuildId(String buildId) {
-        return find(
-                "select s from Sbom s where s.buildId = :buildId and s.processors is empty",
-                Parameters.with("buildId", buildId)).singleResult();
     }
 
     @Transactional

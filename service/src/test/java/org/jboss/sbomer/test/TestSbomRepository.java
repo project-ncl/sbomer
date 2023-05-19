@@ -114,7 +114,9 @@ public class TestSbomRepository {
 
     @Test
     public void testNonNullRootComponents() {
-        Sbom baseSBOM = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX);
+        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC;generator==CYCLONEDX;processors=isnull=true";
+        Sbom baseSBOM = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
+
         assertNotNull(baseSBOM.getRootPurl());
         assertEquals(
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
@@ -131,7 +133,8 @@ public class TestSbomRepository {
 
     @Test
     public void testGetBaseSbom() throws JsonProcessingException, JsonMappingException {
-        Sbom baseSBOM = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX);
+        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC;generator==CYCLONEDX;processors=isnull=true";
+        Sbom baseSBOM = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
         Bom bom = baseSBOM.getCycloneDxBom();
 
         assertEquals(416640206274228224L, baseSBOM.getId());
@@ -185,7 +188,8 @@ public class TestSbomRepository {
     @Test
     @Disabled("Use case doesn't exist yet")
     public void testGetEnrichedSbom() throws JsonProcessingException, JsonMappingException {
-        Sbom enrichedSbom = sbomRepository.getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX);
+        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC;generator==CYCLONEDX;processors=isnull=true";
+        Sbom enrichedSbom = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
         // Sbom enrichedSbom = sbomRepository
         // .getSbom("ARYT3LBXDVYAC", GeneratorImplementation.CYCLONEDX, ProcessorImplementation.DEFAULT);
         Bom bom = enrichedSbom.getCycloneDxBom();
