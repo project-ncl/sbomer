@@ -89,8 +89,7 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
             PaginationParameters pagParams = new PaginationParameters();
             pagParams.setPageIndex(0);
             pagParams.setPageSize(1);
-            String rsqlQuery = "query=buildId=eq=" + originalBuildId
-                    + ";generator=isnull=false;processors=isnull=true";
+            String rsqlQuery = "buildId=eq=" + originalBuildId + ";generator=isnull=false;processors=isnull=true";
 
             log.info("Searching SBOMs with rsqlQuery: {}", rsqlQuery);
 
