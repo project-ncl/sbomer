@@ -28,8 +28,8 @@ import javax.inject.Inject;
 
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.SbomType;
+import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.rest.dto.Page;
 import org.jboss.sbomer.service.SbomService;
 import org.junit.jupiter.api.Test;
 

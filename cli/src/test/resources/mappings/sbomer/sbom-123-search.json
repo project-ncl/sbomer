@@ -1,0 +1,130 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/api/v1beta1/sboms?pageSize=1&pageIndex=0&query=id%3D%3D123"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "pageIndex": 0,
+      "pageSize": 1,
+      "totalPages": 1,
+      "totalHits": 1,
+      "content": [
+        {
+          "id": 123,
+          "buildId": "QUARKUS",
+          "sbom": {
+            "bomFormat": "CycloneDX",
+            "specVersion": "1.4",
+            "serialNumber": "urn:uuid:eb82ff17-f196-4539-8efa-cc98049ef4b4",
+            "version": 1,
+            "metadata": {
+              "component": {
+                "publisher": "The Apache Software Foundation",
+                "group": "org.apache.logging.log4j",
+                "name": "log4j",
+                "version": "2.19.0.redhat-00001",
+                "description": "Apache Log4j 2",
+                "licenses": [
+                  {
+                    "license": {
+                      "id": "Apache-2.0"
+                    }
+                  }
+                ],
+                "purl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
+                "externalReferences": [
+                  {
+                    "type": "website",
+                    "url": "https://logging.apache.org/log4j/2.x/"
+                  },
+                  {
+                    "type": "build-system",
+                    "url": "https://github.com/apache/logging-log4j2/actions"
+                  },
+                  {
+                    "type": "distribution",
+                    "url": "https://logging.apache.org/log4j/2.x/download.html"
+                  },
+                  {
+                    "type": "issue-tracker",
+                    "url": "https://issues.apache.org/jira/browse/LOG4J2"
+                  },
+                  {
+                    "type": "mailing-list",
+                    "url": "https://lists.apache.org/list.html?log4j-user@logging.apache.org"
+                  },
+                  {
+                    "type": "vcs",
+                    "url": "https://gitbox.apache.org/repos/asf?p=logging-log4j2.git"
+                  }
+                ],
+                "type": "library",
+                "bom-ref": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom"
+              }
+            }
+          },
+          "parentSbom": {
+            "id": 111,
+            "buildId": "QUARKUS",
+            "sbom": {
+              "bomFormat": "CycloneDX",
+              "specVersion": "1.4",
+              "serialNumber": "urn:uuid:eb82ff17-f196-4539-8efa-cc98049ef4b4",
+              "version": 1,
+              "metadata": {
+                "component": {
+                  "publisher": "The Apache Software Foundation",
+                  "group": "org.apache.logging.log4j",
+                  "name": "log4j",
+                  "version": "2.19.0.redhat-00001",
+                  "description": "Apache Log4j 2",
+                  "licenses": [
+                    {
+                      "license": {
+                        "id": "Apache-2.0"
+                      }
+                    }
+                  ],
+                  "purl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
+                  "externalReferences": [
+                    {
+                      "type": "website",
+                      "url": "https://logging.apache.org/log4j/2.x/"
+                    },
+                    {
+                      "type": "build-system",
+                      "url": "https://github.com/apache/logging-log4j2/actions"
+                    },
+                    {
+                      "type": "distribution",
+                      "url": "https://logging.apache.org/log4j/2.x/download.html"
+                    },
+                    {
+                      "type": "issue-tracker",
+                      "url": "https://issues.apache.org/jira/browse/LOG4J2"
+                    },
+                    {
+                      "type": "mailing-list",
+                      "url": "https://lists.apache.org/list.html?log4j-user@logging.apache.org"
+                    },
+                    {
+                      "type": "vcs",
+                      "url": "https://gitbox.apache.org/repos/asf?p=logging-log4j2.git"
+                    }
+                  ],
+                  "type": "library",
+                  "bom-ref": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

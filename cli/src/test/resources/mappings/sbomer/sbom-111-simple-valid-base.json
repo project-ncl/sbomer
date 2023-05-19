@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha1/sboms/111"
+    "url": "/api/v1beta1/sboms/111"
   },
   "response": {
     "status": 200,
