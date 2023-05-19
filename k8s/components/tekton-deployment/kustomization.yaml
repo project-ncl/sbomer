@@ -16,25 +16,9 @@
 # limitations under the License.
 #
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: sbomer
-spec:
-  template:
-    spec:
-      containers:
-        - name: sbomer
-          env:
-            - name: PNC_SERVICE_HOST
-              $patch: delete
-            - name: SBOMER_PRODUCT_MAPPING_ENV
-              $patch: delete
-            - name: SBOMER_ROUTE_HOST
-              $patch: delete
-            - name: KEYSTORE_PASSWORD
-              $patch: delete
-            - name: JAVA_TOOL_OPTIONS
-              $patch: delete
-            - name: INDY_REPOSITORY_HOST
-              $patch: delete
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  # This is in sync with OpenShift Pipelines 1.8.x which is deployed in our stage and production environments
+  # We need to ensure that it works in development as well.
+  - https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.37.5/release.yaml
