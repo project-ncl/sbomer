@@ -65,8 +65,8 @@ secretGenerator:
   - name: sbomer-postgres
     literals:
       - POSTGRESQL_DATABASE=sbomer
-      - POSTGRESQL_PASSWORD=sbomer
-      - POSTGRESQL_USER=sbomer
+      - POSTGRESQL_PASSWORD=password
+      - POSTGRESQL_USER=username
 generatorOptions:
   disableNameSuffixHash: true
 images:

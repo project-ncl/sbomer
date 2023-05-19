@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.rest.dto;
+package org.jboss.sbomer.core.service.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

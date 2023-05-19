@@ -23,7 +23,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.cyclonedx.model.Bom;
 import org.eclipse.jgit.api.Git;
@@ -31,11 +35,13 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.jboss.sbomer.cli.commands.AbstractCommand;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -80,10 +86,17 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
             scmTag = build.getNoRebuildCause().getScmTag();
             originalBuildId = build.getNoRebuildCause().getId();
 
-            try {
-                Sbom originalSbom = sbomerClient.getBaseSbomWithPncBuildId(originalBuildId);
-                bom = SbomUtils.fromJsonNode(originalSbom.getSbom());
-            } catch (NotFoundException nfe) {
+            PaginationParameters pagParams = new PaginationParameters();
+            pagParams.setPageIndex(0);
+            pagParams.setPageSize(1);
+            String rsqlQuery = "query=buildId=eq=" + originalBuildId
+                    + "%3Bgenerator=isnull=false%3Bprocessors=isnull=true";
+            log.info("Searching SBOMs with rsqlQuery: {}", rsqlQuery);
+
+            Page<Sbom> sboms = sbomerClient.searchSboms(pagParams, rsqlQuery);
+            if (sboms.getContent().size() > 0) {
+                bom = SbomUtils.fromJsonNode(sboms.getContent().iterator().next().getSbom());
+            } else {
                 log.warn(
                         "Could not find original SBOM for PNC build '{}', will regenerate the SBOM...",
                         originalBuildId);

@@ -41,7 +41,7 @@ curl https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1a
 To request an SBOM generation we need to pass the PNC build id:
 
 ```bash
-curl -v -X POST https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/[PNC_BUILD_ID]
+curl -v -X POST https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/generate/build/[PNC_BUILD_ID]
 ```
 
 Please note that we currently do not provide a reference in the returned message. This will be improved.
@@ -51,5 +51,5 @@ Please note that we currently do not provide a reference in the returned message
 Once the SBOM is generated it becomes available at:
 
 ```bash
-curl https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/[PNC_BUILD_ID]
+curl https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms?query=buildId=eq=[PNC_BUILD_ID]
 ```

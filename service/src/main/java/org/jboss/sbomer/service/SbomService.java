@@ -18,16 +18,11 @@
 package org.jboss.sbomer.service;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -37,9 +32,9 @@ import org.jboss.sbomer.config.ProcessingConfig;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
+import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.RestUtils;
-import org.jboss.sbomer.rest.dto.Page;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -61,103 +56,12 @@ public class SbomService {
     @Inject
     Validator validator;
 
-    /**
-     * Get list of {@link Sbom}s in a paginated way.
-     */
-    // TODO: Should we return Page here?
-    public Page<Sbom> list(int pageIndex, int pageSize) {
-        log.debug("Getting list of all base SBOMS with pageIndex: {}, pageSize: {}", pageIndex, pageSize);
-
-        List<Sbom> collection = sbomRepository.findAll().page(pageIndex, pageSize).list();
-        int totalPages = sbomRepository.findAll().page(io.quarkus.panache.common.Page.ofSize(pageSize)).pageCount();
-        long totalHits = sbomRepository.findAll().count();
-        List<Sbom> content = Optional.ofNullable(collection)
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
-                .collect(Collectors.toList());
-
-        return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
+    public List<Sbom> searchByQuery(String rsqlQuery) {
+        return sbomRepository.searchByQuery(rsqlQuery);
     }
 
-    /**
-     * Get list of {@link Sbom}s for a given PNC build ID.
-     */
-    public List<Sbom> listAllSbomsWithBuildId(String buildId) {
-        log.debug("Getting list of all SBOMS with buildId: {}", buildId);
-
-        List<Sbom> collection = sbomRepository.getAllSbomWithBuildIdQuery(buildId).list();
-        return Optional.ofNullable(collection)
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get list of {@link Sbom}s for a given PNC build ID in a paginated way.
-     */
-    // TODO: Should we return Page here?
-    public Page<Sbom> list(String buildId, int pageIndex, int pageSize) {
-        log.debug("Getting list of all SBOMS with buildId: {}", buildId);
-
-        List<Sbom> collection = sbomRepository.getAllSbomWithBuildIdQuery(buildId).page(pageIndex, pageSize).list();
-        int totalPages = sbomRepository.getAllSbomWithBuildIdQuery(buildId)
-                .page(io.quarkus.panache.common.Page.ofSize(pageSize))
-                .pageCount();
-        long totalHits = sbomRepository.getAllSbomWithBuildIdQuery(buildId).count();
-        List<Sbom> content = Optional.ofNullable(collection)
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
-                .collect(Collectors.toList());
-
-        return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
-    }
-
-    /**
-     * Get base {@link Sbom} for a given PNC build ID.
-     */
-    public Sbom getBaseSbomByBuildId(String buildId) {
-        log.info("Getting base SBOM with buildId: {}", buildId);
-        try {
-            return sbomRepository.getBaseSbomByBuildId(buildId);
-        } catch (NoResultException nre) {
-            throw new NotFoundException("Base SBOM for build id " + buildId + " not found.");
-        }
-    }
-
-    /**
-     * Get enriched {@link Sbom} for a given PNC build ID.
-     */
-    public Sbom getEnrichedSbomByBuildId(String buildId) {
-        log.info("Getting enriched SBOM with buildId: {}", buildId);
-        try {
-            return sbomRepository.getEnrichedSbomByBuildId(buildId);
-        } catch (NoResultException nre) {
-            throw new NotFoundException("Enriched SBOM for build id " + buildId + " not found.");
-        }
-    }
-
-    /**
-     * Get base {@link Sbom} for a given root purl.
-     */
-    public Sbom getBaseSbomByRootPurl(String rootPurl) {
-        log.info("Getting base SBOM with root purl: {}", rootPurl);
-        try {
-            return sbomRepository.getBaseSbomByRootPurl(rootPurl);
-        } catch (NoResultException nre) {
-            throw new NotFoundException("Base SBOM for root purl " + rootPurl + " not found.");
-        }
-    }
-
-    /**
-     * Get enriched {@link Sbom} for a given root purl.
-     */
-    public Sbom getEnrichedSbomByRootPurl(String rootPurl) {
-        log.info("Getting enriched SBOM with root purl: {}", rootPurl);
-        try {
-            return sbomRepository.getEnrichedSbomByRootPurl(rootPurl);
-        } catch (NoResultException nre) {
-            throw new NotFoundException("Enriched SBOM for root purl " + rootPurl + " not found.");
-        }
+    public Page<Sbom> searchByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery) {
+        return sbomRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery);
     }
 
     /**

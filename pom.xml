@@ -59,6 +59,8 @@
         <version.pnc-api>2.4.3</version.pnc-api>
         <version.quarkus-jgit>2.3.1</version.quarkus-jgit>
         <version.tekton-client>0.6.0</version.tekton-client>
+        <version.rsql-parser>2.1.0</version.rsql-parser>
+        <version.rsql-jpa>2.0.2</version.rsql-jpa>
         <quarkus.qpid.jms.group-id>${quarkus.platform.group-id}</quarkus.qpid.jms.group-id>
         <quarkus.qpid.jms.version>${quarkus.platform.version}</quarkus.qpid.jms.version>
         <quarkus-test-artemis-version>2.0.3</quarkus-test-artemis-version>

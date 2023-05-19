@@ -20,7 +20,6 @@ package org.jboss.sbomer.model;
 import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CollectionTable;
@@ -36,8 +35,6 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -84,34 +81,7 @@ import lombok.ToString;
                 @Index(name = "idx_sbom_generator", columnList = "generator"),
                 @Index(name = "idx_sbom_type", columnList = "type"),
                 @Index(name = "idx_sbom_status", columnList = "status") })
-@NamedQueries({ @NamedQuery(name = Sbom.FIND_ALL_BY_BUILDID, query = "FROM Sbom WHERE buildId = ?1"),
-        @NamedQuery(
-                name = Sbom.FIND_BASE_BY_BUILDID_GENERATOR,
-                query = "FROM Sbom  WHERE buildId = ?1 AND generator = ?2 and processor IS NULL"),
-        @NamedQuery(
-                name = Sbom.FIND_BY_BUILDID_GENERATOR_PROCESSOR,
-                query = "FROM Sbom WHERE buildId = ?1 AND generator = ?2 AND processor = ?3"),
-        @NamedQuery(
-                name = Sbom.FIND_BASE_BY_BUILDID,
-                query = "FROM Sbom WHERE buildId = ?1 AND generator IS NOT NULL and processor IS NULL"),
-        @NamedQuery(
-                name = Sbom.FIND_ENRICHED_BY_BUILDID,
-                query = "FROM Sbom WHERE buildId = ?1 AND generator IS NOT NULL AND processor IS NOT NULL"),
-        @NamedQuery(
-                name = Sbom.FIND_BASE_BY_ROOT_PURL,
-                query = "FROM Sbom WHERE rootPurl = ?1 AND generator IS NOT NULL and processor IS NULL"),
-        @NamedQuery(
-                name = Sbom.FIND_ENRICHED_BY_ROOT_PURL,
-                query = "FROM Sbom WHERE rootPurl = ?1 AND generator IS NOT NULL AND processor IS NOT NULL") })
 public class Sbom extends PanacheEntityBase {
-
-    public static final String FIND_ALL_BY_BUILDID = "Sbom.findAllByBuildId";
-    public static final String FIND_BASE_BY_BUILDID_GENERATOR = "Sbom.findBaseByBuildIdGenerator";
-    public static final String FIND_BY_BUILDID_GENERATOR_PROCESSOR = "Sbom.findByBuildIdGeneratorProcessor";
-    public static final String FIND_BASE_BY_BUILDID = "Sbom.findBaseByBuildId";
-    public static final String FIND_ENRICHED_BY_BUILDID = "Sbom.findEnrichedByBuildId";
-    public static final String FIND_BASE_BY_ROOT_PURL = "Sbom.findBaseByRootPurl";
-    public static final String FIND_ENRICHED_BY_ROOT_PURL = "Sbom.findEnrichedByRootPurl";
 
     @Id
     @Column(nullable = false, updatable = false)

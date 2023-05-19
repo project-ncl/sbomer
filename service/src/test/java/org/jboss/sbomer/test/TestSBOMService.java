@@ -22,14 +22,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.enums.SbomType;
+import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.rest.dto.Page;
 import org.jboss.sbomer.service.SbomService;
 import org.junit.jupiter.api.Test;
 
@@ -53,8 +55,9 @@ public class TestSBOMService {
     @Test
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
-        Sbom baseSBOM = sbomService.getBaseSbomByBuildId(INITIAL_BUILD_ID);
-        assertNotNull(baseSBOM);
+        String rsqlQuery = "buildId=eq=" + INITIAL_BUILD_ID + ";processors=isnull=true";
+        Collection<Sbom> sboms = sbomService.searchByQueryPaginated(0, 1, rsqlQuery).getContent();
+        assertTrue(sboms.size() > 0);
     }
 
     @Test
@@ -68,7 +71,7 @@ public class TestSBOMService {
 
         sbomService.save(dummySbom);
 
-        Page<Sbom> page = sbomService.list(0, 50);
+        Page<Sbom> page = sbomService.searchByQueryPaginated(0, 50, null);
         assertEquals(0, page.getPageIndex());
         assertEquals(50, page.getPageSize());
         assertTrue(page.getTotalHits() > 0);

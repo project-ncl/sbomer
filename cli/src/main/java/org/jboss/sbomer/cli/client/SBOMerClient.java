@@ -18,16 +18,22 @@
 package org.jboss.sbomer.cli.client;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.validation.Valid;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.jboss.sbomer.cli.model.Sbom;
+import org.jboss.sbomer.core.service.rest.Page;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -59,12 +65,14 @@ public interface SBOMerClient {
     Sbom getById(@PathParam("id") String id);
 
     /**
-     * Retrieves the base SBOM based on the build ID.
+     * Search the base SBOM based on the build ID via RSQL search and pagination.
      *
-     * @param buildId
-     * @return {@link Sbom}
+     * @param paginationParams
+     * @param rsqlQuery
+     * @return {@link Response}
      */
     @GET
-    @Path("/build/{buildId}")
-    Sbom getBaseSbomWithPncBuildId(@PathParam("buildId") String buildId);
+    Page<Sbom> searchSboms(
+            @Valid @BeanParam PaginationParameters paginationParams,
+            @QueryParam("query") String rsqlQuery);
 }

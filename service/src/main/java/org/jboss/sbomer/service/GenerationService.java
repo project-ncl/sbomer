@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -24,13 +26,17 @@ import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 
+import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.jboss.sbomer.config.GenerationConfig;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.generator.Generator.GeneratorLiteral;
 import org.jboss.sbomer.generator.SbomGenerator;
 import org.jboss.sbomer.model.Sbom;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service implementation responsible for generating SBOMs.
@@ -38,6 +44,7 @@ import org.jboss.sbomer.model.Sbom;
  * @author Marek Goldmann
  */
 @ApplicationScoped
+@Slf4j
 public class GenerationService {
 
     @Inject
@@ -77,11 +84,36 @@ public class GenerationService {
                     buildId);
         }
 
-        try {
-            // Return in case we have it generated already
-            return sbomRepository.getSbom(buildId, generator);
-        } catch (NoResultException ex) {
-            // Ignored
+        // Retrieve any base sbom for this build
+        String rsqlQuery = "buildId=eq=" + buildId + ";generator=isnull=false;processors=isnull=true";
+        List<Sbom> sboms = sbomRepository.searchByQuery(0, 1, rsqlQuery);
+        if (sboms.size() > 0) {
+            Sbom sbom = sboms.get(0);
+            if (sbom.getStatus() == SbomStatus.READY) {
+                if (sbom.getGenerator() == generator) {
+                    log.info(
+                            "An Sbom has been already generated for build: {} with generator: {}",
+                            buildId,
+                            sbom.getGenerator());
+                } else {
+                    log.info(
+                            "An Sbom has been already generated for build: {} but with a different generator: {}",
+                            buildId,
+                            sbom.getGenerator());
+                }
+            } else if (sbom.getStatus() == SbomStatus.IN_PROGRESS || sbom.getStatus() == SbomStatus.NEW) {
+                log.info(
+                        "An Sbom is already being generated for build: {} with generator: {}",
+                        buildId,
+                        sbom.getGenerator());
+            } else if (sbom.getStatus() == SbomStatus.FAILED) {
+                log.info(
+                        "An Sbom generation was already attempted for build: {} with generator: {} but FAILED with error: {}",
+                        buildId,
+                        sbom.getGenerator(),
+                        sbom.getStatusMessage());
+            }
+            return sbom;
         }
 
         Sbom sbom = new Sbom();
