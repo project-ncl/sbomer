@@ -17,20 +17,84 @@
  */
 package org.jboss.sbomer.service;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
 
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.model.Sbom;
+import org.jboss.sbomer.rest.rsql.RSQLProducer;
 
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Parameters;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
+@Slf4j
 public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
 
+    @Inject
+    RSQLProducer<Sbom> rsqlProducer;
+
+    public Page<Sbom> searchByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery) {
+        log.debug(
+                "Getting list of all base SBOMS with pageIndex: {}, pageSize: {}, rsqlQuery: {}",
+                pageIndex,
+                pageSize,
+                rsqlQuery);
+
+        List<Sbom> content = searchByQuery(pageIndex, pageSize, rsqlQuery);
+        Long totalHits = countByQuery(rsqlQuery);
+
+        log.debug("Found content: {}, totalHits: {}", content, totalHits);
+
+        int totalPages = 0;
+
+        if (totalHits == 0) {
+            totalPages = 1; // a single page of zero results
+        } else {
+            totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
+        }
+
+        return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
+    }
+
+    public List<Sbom> searchByQuery(String rsqlQuery) {
+
+        CriteriaQuery<Sbom> query = rsqlProducer.getCriteriaQuery(Sbom.class, rsqlQuery);
+        List<Sbom> resultList = getEntityManager().createQuery(query).getResultList();
+        if (resultList == null || resultList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return resultList;
+    }
+
+    public List<Sbom> searchByQuery(int pageIndex, int pageSize, String rsqlQuery) {
+
+        CriteriaQuery<Sbom> query = rsqlProducer.getCriteriaQuery(Sbom.class, rsqlQuery);
+        List<Sbom> resultList = getEntityManager().createQuery(query)
+                .setFirstResult(pageIndex * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+        if (resultList == null || resultList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return resultList;
+    }
+
+    public Long countByQuery(String rsqlQuery) {
+
+        CriteriaQuery<Long> query = rsqlProducer.getCountCriteriaQuery(Sbom.class, rsqlQuery);
+        return getEntityManager().createQuery(query).getSingleResult();
+    }
+
     public Sbom getSbom(String buildId, GeneratorImplementation generator) {
+
         return find(
                 "select s from Sbom s where s.buildId = :buildId and s.generator = :generator and s.processors is empty",
                 Parameters.with("buildId", buildId).and("generator", generator)).singleResult();
@@ -40,22 +104,6 @@ public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
         return find(
                 "select s from Sbom s where s.buildId = :buildId and s.processors is empty",
                 Parameters.with("buildId", buildId)).singleResult();
-    }
-
-    public Sbom getEnrichedSbomByBuildId(String buildId) {
-        return find("#" + Sbom.FIND_ENRICHED_BY_BUILDID, buildId).singleResult();
-    }
-
-    public Sbom getBaseSbomByRootPurl(String purl) {
-        return find("#" + Sbom.FIND_BASE_BY_ROOT_PURL, purl).singleResult();
-    }
-
-    public Sbom getEnrichedSbomByRootPurl(String purl) {
-        return find("#" + Sbom.FIND_ENRICHED_BY_ROOT_PURL, purl).singleResult();
-    }
-
-    public PanacheQuery<Sbom> getAllSbomWithBuildIdQuery(String buildId) {
-        return find("#" + Sbom.FIND_ALL_BY_BUILDID, buildId);
     }
 
     @Transactional

@@ -137,6 +137,16 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>cz.jirutka.rsql</groupId>
+      <artifactId>rsql-parser</artifactId>
+      <version>${version.rsql-parser}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.tennaito</groupId>
+      <artifactId>rsql-jpa</artifactId>
+      <version>${version.rsql-jpa}</version>
+    </dependency>
+    <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>

@@ -23,11 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.jboss.sbomer.cli.client.SBOMerClient;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.core.errors.ClientException;
+import org.jboss.sbomer.core.service.rest.Page;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.common.QuarkusTestResource;
@@ -60,5 +63,18 @@ public class SBOMerClientTest {
         assertEquals("cc015e2c-e4e7-11ed-b5ea-0242ac120002", ex.getErrorId());
         assertNull(ex.getErrors());
 
+    }
+
+    @Test
+    void testSearchSbom() {
+
+        PaginationParameters pagParams = new PaginationParameters();
+        pagParams.setPageIndex(0);
+        pagParams.setPageSize(1);
+        String rsqlQuery = "id==123";
+        Page<Sbom> sboms = client.searchSboms(pagParams, rsqlQuery);
+
+        assertNotNull(sboms);
+        assertEquals(123, sboms.getContent().iterator().next().getId());
     }
 }
