@@ -24,97 +24,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
-  - ../../base/core
-  - ../../base/cache
-  - ../../base/tekton
-  - ../../base/service
-resources:
-  - service/route.yaml
+  - ../targets/ocp
 patchesStrategicMerge:
-  #- patches/sa.yaml
-  - patches/db.yaml
-  - patches/cache.yaml
-  - patches/service.yaml
   - patches/tekton/cm.yaml
+  - patches/sbomer-cache-deployment.yaml
 patches:
-  - target:
-      kind: Deployment
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/imagePullPolicy
-        value: Always
-  - target:
-      kind: Deployment
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: PNC_SERVICE_HOST
-          value: "orch-stage.psi.redhat.com"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: INDY_REPOSITORY_HOST
-          value: "indy-stage.psi.redhat.com"
   - target:
       kind: Deployment
       name: sbomer
     patch: |-
-      - op: add
-        path: /spec/template/spec/volumes/-
-        value:
-          name: sbomer-volume-secrets
-          secret:
-            defaultMode: 420
-            secretName: sbomer-secrets
-      - op: add
-        path: /spec/template/spec/containers/0/volumeMounts/-
-        value:
-          name: sbomer-volume-secrets
-          mountPath: /mnt/secrets-sbomer
-          readOnly: true
-      - op: add
-        path: /spec/template/spec/volumes/-
-        value:
-          name: sbomer-certs-volume
-          persistentVolumeClaim:
-            claimName: sbomer-ca-trust-certificate
-      - op: add
-        path: /spec/template/spec/containers/0/volumeMounts/-
-        value:
-          name: sbomer-certs-volume
-          mountPath: /etc/pki/ca-trust/source/anchors
-          subPath: ca-trust/source/anchors
-      - op: add
-        path: /spec/template/spec/containers/0/volumeMounts/-
-        value:
-          name: sbomer-certs-volume
-          mountPath: /etc/pki/ca-trust/extracted
-          subPath: ca-trust/extracted
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: CONSUMER_TOPIC
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: consumer.topic
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: PRODUCER_TOPIC
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: producer.topic
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: UMB_BROKER_URL
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: qpid-jms.url
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
@@ -131,29 +49,6 @@ patches:
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
-          name: QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE
-          value: "1"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: QUARKUS_DATASOURCE_JDBC_MIN_SIZE
-          value: "0"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: QUARKUS_DATASOURCE_JDBC_MAX_SIZE
-          value: "20"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: QUARKUS_DATASOURCE_JDBC_URL
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: datasource.connection
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
           name: SBOMER_PRODUCT_MAPPING_ENV
           value: "staging"
       - op: add
@@ -161,20 +56,6 @@ patches:
         value:
           name: SBOMER_ROUTE_HOST
           value: "sbomer-stage.apps.ocp-c1.prod.psi.redhat.com"
-
-  - target:
-      kind: StatefulSet
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/imagePullPolicy
-        value: Always
-  - target:
-      kind: Task
-    patch: |-
-      - op: replace
-        path: /spec/steps/0/imagePullPolicy
-        value: Always
-
   - target:
       kind: Route
     patch: |-

@@ -24,26 +24,24 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
-  - ../staging
+  - ../targets/ocp
 patchesStrategicMerge:
-  - patches/route.yaml
-  - patches/service.yaml
-  - patches/cache.yaml
   - patches/tekton/cm.yaml
 patches:
-  - target:
-      kind: Deployment
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: PNC_SERVICE_HOST
-          value: "orch.psi.redhat.com"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: INDY_REPOSITORY_HOST
-          value: "indy.psi.redhat.com"
+  # - target:
+  #     kind: Deployment
+  #     name: sbomer-cache
+  #   patch: |-
+  #     - op: add
+  #       path: /spec/template/spec/containers/0/env/-
+  #       value:
+  #         name: PNC_SERVICE_HOST
+  #         value: "orch.psi.redhat.com"
+  #     - op: add
+  #       path: /spec/template/spec/containers/0/env/-
+  #       value:
+  #         name: INDY_REPOSITORY_HOST
+  #         value: "indy.psi.redhat.com"
   - target:
       kind: Deployment
       name: sbomer

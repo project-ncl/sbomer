@@ -16,11 +16,17 @@
 # limitations under the License.
 #
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - resources/deployment.yaml
-  - resources/service.yaml
-  - resources/cm.yaml
-transformers:
-  - resources/labels.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sbomer-cache
+spec:
+  template:
+    spec:
+      containers:
+        - name: sbomer-cache
+          env:
+            - name: PNC_SERVICE_HOST
+              value: "orch-stage.psi.redhat.com"
+            - name: INDY_REPOSITORY_HOST
+              value: "indy-stage.psi.redhat.com"

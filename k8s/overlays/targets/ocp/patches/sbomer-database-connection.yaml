@@ -19,15 +19,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sbomer-cache
+  name: sbomer
 spec:
   template:
     spec:
       containers:
-        - name: sbomer-cache
+        - name: sbomer
           env:
-            - name: PNC_SERVICE_HOST
-              $patch: delete
-            - name: INDY_REPOSITORY_HOST
-              $patch: delete
-
+            - name: QUARKUS_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-secrets
+                  key: datasource.user
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-secrets
+                  key: datasource.password
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: null
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-secrets
+                  key: datasource.connection

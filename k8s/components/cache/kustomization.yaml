@@ -16,9 +16,11 @@
 # limitations under the License.
 #
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
 resources:
-  - resources/rbac.yaml
+  - resources/deployment.yaml
+  - resources/service.yaml
+  - resources/pvc.yaml
 transformers:
   - resources/labels.yaml
