@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "url": "/api/v1beta1/sboms/123/bom"
+    "url": "/api/v1alpha1/sboms/123/bom"
   },
   "response": {
     "status": 200,

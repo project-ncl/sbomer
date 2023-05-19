@@ -61,24 +61,6 @@ public class SbomService {
     @Inject
     Validator validator;
 
-    /**
-     * Get list of {@link Sbom}s in a paginated way.
-     */
-    // TODO: Should we return Page here?
-    public Page<Sbom> list(int pageIndex, int pageSize) {
-        log.debug("Getting list of all base SBOMS with pageIndex: {}, pageSize: {}", pageIndex, pageSize);
-
-        List<Sbom> collection = sbomRepository.findAll().page(pageIndex, pageSize).list();
-        int totalPages = sbomRepository.findAll().page(io.quarkus.panache.common.Page.ofSize(pageSize)).pageCount();
-        long totalHits = sbomRepository.findAll().count();
-        List<Sbom> content = Optional.ofNullable(collection)
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
-                .collect(Collectors.toList());
-
-        return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
-    }
-
     public List<Sbom> searchByQuery(String rsqlQuery) {
         return sbomRepository.searchByQuery(rsqlQuery);
     }

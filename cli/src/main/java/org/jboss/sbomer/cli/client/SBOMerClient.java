@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 @ApplicationScoped
 @RegisterRestClient(configKey = "sbomer")
 @RegisterProvider(ClientExceptionMapper.class)
-@Path("/api/v1beta1/sboms")
+@Path("/api/v1alpha1/sboms")
 @Produces("application/json")
 @Consumes("application/json")
 public interface SBOMerClient {

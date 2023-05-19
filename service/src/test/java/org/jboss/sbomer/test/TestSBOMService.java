@@ -68,7 +68,7 @@ public class TestSBOMService {
 
         sbomService.save(dummySbom);
 
-        Page<Sbom> page = sbomService.list(0, 50);
+        Page<Sbom> page = sbomService.searchByQueryPaginated(0, 50, null);
         assertEquals(0, page.getPageIndex());
         assertEquals(50, page.getPageSize());
         assertTrue(page.getTotalHits() > 0);

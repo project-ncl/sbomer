@@ -16,11 +16,11 @@ Ready to view OpenAPI resources are available currently in the staging environme
 
 ### API versioning
 
-The API is versioned. Current version is `v1beta1` and it is available at `/api/v1beta1` context path. 
+The API is versioned. Current version is `v1alpha1` and it is available at `/api/v1alpha1` context path. 
 
 > :warning: **WIP**
 >
-> Please note that `v1beta1` has a meaning :) We may change it without a notice.
+> Please note that `v1alpha1` has a meaning :) We may change it without a notice.
 
 ## Authentication and authorization
 
@@ -33,7 +33,7 @@ Currently there is no authentication or authorization required to use this servi
 Please note that the return is a list of SBOMs in a paginated way.
 
 ```bash
-curl https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1beta1/sboms
+curl https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms
 ```
 
 ### Requesting SBOM generation
@@ -41,7 +41,7 @@ curl https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1b
 To request an SBOM generation we need to pass the PNC build id:
 
 ```bash
-curl -v -X POST https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1beta1/sboms/generate/build/[PNC_BUILD_ID]
+curl -v -X POST https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/generate/build/[PNC_BUILD_ID]
 ```
 
 Please note that we currently do not provide a reference in the returned message. This will be improved.
@@ -51,5 +51,5 @@ Please note that we currently do not provide a reference in the returned message
 Once the SBOM is generated it becomes available at:
 
 ```bash
-curl https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1beta1/sboms?query=buildId=eq=[PNC_BUILD_ID]
+curl https://sbomer-pct-security-tooling.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms?query=buildId=eq=[PNC_BUILD_ID]
 ```

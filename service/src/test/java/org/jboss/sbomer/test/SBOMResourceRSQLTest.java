@@ -63,7 +63,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeLarge
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeLarge
                                 + "&query=buildId=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
@@ -88,7 +88,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeLarge
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeLarge
                                 + "&query=buildId=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
@@ -117,7 +117,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeTiny
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeTiny
                                 + "&query=buildId=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
@@ -171,7 +171,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize + "&query=id==12345")
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize + "&query=id==12345")
                 .then()
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem(12345))
@@ -182,7 +182,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=buildId==AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
@@ -194,7 +194,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=buildId=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
@@ -206,7 +206,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=rootPurl=='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'")
                 .then()
                 .statusCode(200)
@@ -218,7 +218,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=type==BUILD_TIME")
                 .then()
                 .statusCode(200)
@@ -230,7 +230,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=status==IN_PROGRESS")
                 .then()
                 .statusCode(200)
@@ -242,7 +242,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=generator==CYCLONEDX")
                 .then()
                 .statusCode(200)
@@ -254,7 +254,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=statusMessage=='all went well'")
                 .then()
                 .statusCode(200)
@@ -266,7 +266,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=statusMessage=='all*'")
                 .then()
                 .statusCode(200)
@@ -278,7 +278,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=statusMessage=='*went*'")
                 .then()
                 .statusCode(200)
@@ -306,7 +306,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=rootPurl=isnull=false")
                 .then()
                 .statusCode(200)
@@ -317,7 +317,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=type=isnull=false")
                 .then()
                 .statusCode(200)
@@ -329,7 +329,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=generator=isnull=false")
                 .then()
                 .statusCode(200)
@@ -340,7 +340,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=processors=isnull=false")
                 .then()
                 .statusCode(200)
@@ -373,7 +373,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=rootPurl=isnull=true")
                 .then()
                 .statusCode(200)
@@ -385,7 +385,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=type=isnull=true")
                 .then()
                 .statusCode(200)
@@ -397,7 +397,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=generator=isnull=true")
                 .then()
                 .statusCode(200)
@@ -409,7 +409,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=processors=isnull=true")
                 .then()
                 .statusCode(200)
@@ -425,7 +425,7 @@ public class SBOMResourceRSQLTest {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1beta1/sboms?query=sbom==null")
+                .request("GET", "/api/v1alpha1/sboms?query=sbom==null")
                 .then()
                 .statusCode(400)
                 .body(CoreMatchers.equalTo(msg));
@@ -488,7 +488,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=buildId=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
@@ -502,7 +502,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=buildId=eq=AWI7P3EJ23YAA;generator=isnull=false")
                 .then()
                 .statusCode(200)
@@ -516,7 +516,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=buildId=eq=AWI7P3EJ23YAA;generator=isnull=false;processors=isnull=true")
                 .then()
                 .statusCode(200)
@@ -530,7 +530,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=buildId=eq=AWI7P3EJ23YAA;generator=isnull=false;processors=isnull=false")
                 .then()
                 .statusCode(200)
@@ -544,7 +544,7 @@ public class SBOMResourceRSQLTest {
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
-                        "/api/v1beta1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
                                 + "&query=rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'")
                 .then()
                 .statusCode(200)

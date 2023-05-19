@@ -43,7 +43,7 @@ import io.restassured.http.ContentType;
 
 @QuarkusTest
 @WithKubernetesTestServer
-public class SBOMResourceV1Alpha1Test {
+public class SBOMResourceTest {
 
     @InjectSpy
     SbomService sbomService;
@@ -53,13 +53,13 @@ public class SBOMResourceV1Alpha1Test {
 
     @Test
     public void testExistenceOfSbomsEndpoint() {
-        Mockito.when(sbomService.list(0, 50)).thenReturn(new Page<>());
+        Mockito.when(sbomService.searchByQueryPaginated(0, 50, null)).thenReturn(new Page<>());
         given().when().get("/api/v1alpha1/sboms").then().statusCode(200);
     }
 
     @Test
     public void testListSbomsPageParams() {
-        Mockito.when(sbomService.list(1, 20)).thenReturn(new Page<>());
+        Mockito.when(sbomService.searchByQueryPaginated(1, 20, null)).thenReturn(new Page<>());
         given().when().get("/api/v1alpha1/sboms?pageIndex=1&pageSize=20").then().statusCode(200);
     }
 
@@ -130,7 +130,6 @@ public class SBOMResourceV1Alpha1Test {
     }
 
     @Test
-    // @Disabled("Endpoints disabled for now")
     public void ensureValidLicense() throws IOException {
 
         Sbom sbom = new Sbom();
@@ -185,4 +184,5 @@ public class SBOMResourceV1Alpha1Test {
                 .and()
                 .body("processor", CoreMatchers.nullValue());
     }
+
 }
