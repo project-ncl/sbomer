@@ -35,6 +35,13 @@ spec:
     - name: process
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2000Mi
+        requests:
+          cpu: 500m
+          memory: 1000Mi
       env:
         - name: SBOMER_SERVICE_URL
           valueFrom:
