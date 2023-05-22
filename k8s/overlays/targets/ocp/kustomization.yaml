@@ -74,6 +74,19 @@ patches:
           persistentVolumeClaim:
             claimName: sbomer-ca-trust-certificate
       - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: volume-thread-dump
+          persistentVolumeClaim:
+            claimName: pnc-threaddump
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: volume-thread-heap-dump-script
+          configMap:
+            defaultMode: 360
+            name: pnc-thread-heap-dump
+      - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:
           name: sbomer-certs-volume
@@ -85,6 +98,16 @@ patches:
           name: sbomer-certs-volume
           mountPath: /etc/pki/ca-trust/extracted
           subPath: ca-trust/extracted
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: volume-thread-dump
+          mountPath: /mnt/thread-dump
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: volume-thread-heap-dump-script
+          mountPath: /mnt/thread-heap-dump-script
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
