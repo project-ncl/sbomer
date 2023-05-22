@@ -58,7 +58,7 @@ patches:
         path: /spec/template/spec/containers/0/env/-
         value:
           name: JAVA_TOOL_OPTIONS
-          value: "-Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12"
+          value: "-Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12 -XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap-dump.hprof -XX:OnOutOfMemoryError=python /mnt/thread-heap-dump-script/thread_heap_dump_email.py"
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
@@ -69,6 +69,15 @@ patches:
         value:
           name: SBOMER_ROUTE_HOST
           value: "sbomer.apps.ocp-c1.prod.psi.redhat.com"
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 1000m
+            memory: 2000Mi
+          limits:
+            cpu: 1000m
+            memory: 2000Mi
 
   - target:
       kind: Route
