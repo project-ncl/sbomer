@@ -76,8 +76,9 @@ public class CycloneDXPluginMavenGenerateCommand extends AbstractMavenGenerateCo
         log.info("Working directory: '{}'", parent.getParent().getTargetDir());
         processBuilder.directory(parent.getParent().getTargetDir().toFile());
 
-        log.info("Starting SBOM generation using the CycloneDX Maven plugin...");
-
+        log.info(
+                "Starting SBOM generation using the CycloneDX Maven plugin with command: '{}' ...",
+                processBuilder.command().toString());
         Process process = null;
 
         try {

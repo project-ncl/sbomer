@@ -100,6 +100,8 @@ public class UmbMessageConsumer implements MessageConsumer {
 
     @Override
     public void destroy(@Observes ShutdownEvent ev) {
+        log.info("Closing connection: {}", amqpConnection);
+
         pncMessageParser.setShouldRun(false);
         scheduler.shutdown();
     }

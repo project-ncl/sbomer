@@ -68,7 +68,7 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
             return;
         }
 
-        log.info("Component with Red Hat version found, purl: {}", component.getPurl());
+        log.debug("Component with Red Hat version found, purl: {}", component.getPurl());
 
         SbomUtils.setPublisher(component);
         SbomUtils.setSupplier(component);
@@ -83,8 +83,8 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
             return;
         }
 
-        log.debug(
-                "Starting processing of component '{}' with PNC artifact '{}'...",
+        log.info(
+                "Starting processing of Red Hat component '{}' with PNC artifact '{}'...",
                 component.getPurl(),
                 artifact.getId());
 

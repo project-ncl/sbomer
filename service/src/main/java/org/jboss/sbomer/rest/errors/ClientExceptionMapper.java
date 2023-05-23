@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.rest.errors;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -34,12 +35,13 @@ public class ClientExceptionMapper implements ExceptionMapper<ClientException> {
     public Response toResponse(ClientException ex) {
         ErrorResponse error = ErrorResponse.builder()
                 .errorId(ex.getErrorId())
+                .errorType(ex.getClass().getSimpleName())
                 .message(ex.getMessage())
                 .errors(ex.getErrors())
                 .build();
 
         log.error(error.toString(), ex);
 
-        return Response.status(ex.getCode()).entity(error).build();
+        return Response.status(ex.getCode()).entity(error).type(MediaType.APPLICATION_JSON).build();
     }
 }

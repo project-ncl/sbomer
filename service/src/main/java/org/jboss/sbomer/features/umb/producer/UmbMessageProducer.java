@@ -172,6 +172,8 @@ public class UmbMessageProducer implements MessageProducer {
     }
 
     private void initConnection() {
+        log.info("Initializing connection: {}", amqpConnection);
+
         try {
             connection = cf.createConnection();
             log.info("JMS client ID {}.", connection.getClientID());
@@ -181,6 +183,8 @@ public class UmbMessageProducer implements MessageProducer {
     }
 
     private void closeConnection() {
+        log.info("Closing connection: {}", amqpConnection);
+
         if (connection != null) {
             try {
                 connection.close();
