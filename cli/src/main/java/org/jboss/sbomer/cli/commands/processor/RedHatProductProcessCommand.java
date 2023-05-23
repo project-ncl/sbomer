@@ -62,7 +62,7 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
      */
     private void addPropertyIfMissing(Component component, String property, String value) {
         if (!SbomUtils.hasProperty(component, property)) {
-            log.debug("Adding {} property with value: {}", property, value);
+            log.info("Adding {} property with value: {}", property, value);
             SbomUtils.addProperty(component, property, value);
         } else {
             log.debug(

@@ -344,8 +344,12 @@ public class TaskRunStatusHandler {
     }
 
     void onStop(@Observes ShutdownEvent ev) {
+        log.info("Stopping handler for TaskRun status updates...");
+
         if (taskRunInformer != null) {
             taskRunInformer.stop();
         }
+
+        log.info("Handler stopped!");
     }
 }

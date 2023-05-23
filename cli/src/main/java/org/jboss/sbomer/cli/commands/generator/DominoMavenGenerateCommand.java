@@ -74,8 +74,6 @@ public class DominoMavenGenerateCommand extends AbstractMavenGenerateCommand {
             throw new ApplicationException("Domino could not be found on path '{}'", dominoPath.toAbsolutePath());
         }
 
-        log.info("Using Domino: '{}'", dominoPath.toAbsolutePath());
-
         ProcessBuilder processBuilder = new ProcessBuilder().redirectOutput(Redirect.INHERIT)
                 .redirectError(Redirect.INHERIT);
         processBuilder.command(
@@ -92,8 +90,6 @@ public class DominoMavenGenerateCommand extends AbstractMavenGenerateCommand {
                 "--include-non-managed",
                 "--warn-on-missing-scm");
 
-        log.debug(processBuilder.command().toString());
-
         if (parent.getSettingsXmlPath() != null) {
             log.debug(
                     "Using provided Maven settings.xml configuration file located at '{}'",
@@ -101,6 +97,11 @@ public class DominoMavenGenerateCommand extends AbstractMavenGenerateCommand {
             processBuilder.command().add("-s");
             processBuilder.command().add(parent.getSettingsXmlPath().toString());
         }
+
+        log.info(
+                "Starting SBOM generation using Domino '{}' with command: '{}'",
+                dominoPath.toAbsolutePath(),
+                processBuilder.command().toString());
 
         Process process = null;
 

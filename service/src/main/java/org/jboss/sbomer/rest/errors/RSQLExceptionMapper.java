@@ -19,28 +19,31 @@ package org.jboss.sbomer.rest.errors;
 
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.jboss.sbomer.core.errors.ErrorResponse;
 
+import cz.jirutka.rsql.parser.RSQLParserException;
 import lombok.extern.slf4j.Slf4j;
 
 @Provider
 @Slf4j
-public class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
+public class RSQLExceptionMapper implements ExceptionMapper<RSQLParserException> {
 
     @Override
-    public Response toResponse(WebApplicationException ex) {
+    public Response toResponse(RSQLParserException e) {
+        Response.StatusType status = Response.Status.BAD_REQUEST;
         ErrorResponse error = ErrorResponse.builder()
                 .errorId(UUID.randomUUID().toString())
-                .message(ex.getResponse().getStatusInfo().getReasonPhrase())
+                .errorType(e.getClass().getSimpleName())
+                .message(e.getMessage())
                 .build();
 
-        log.error(error.toString(), ex);
+        log.error(error.toString(), e);
 
-        return Response.status(ex.getResponse().getStatus()).entity(error).build();
+        return Response.status(status).entity(error).type(MediaType.APPLICATION_JSON).build();
     }
 }

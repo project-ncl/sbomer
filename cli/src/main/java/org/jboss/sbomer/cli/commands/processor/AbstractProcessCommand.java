@@ -41,14 +41,14 @@ public abstract class AbstractProcessCommand extends AbstractCommand {
 
     @Override
     public Integer call() throws Exception {
-        log.debug("Fetching SBOM with id '{}' from SBOMer...", parent.getSbomMixin().getSbomId());
+        log.info("Fetching SBOM with id '{}' from SBOMer...", parent.getSbomMixin().getSbomId());
         Sbom sbom = sbomerClient.getById(parent.getSbomMixin().getSbomId());
 
         if (sbom.getParentSbom() == null) {
             throw new ApplicationException("Requested SBOM (id: '{}') does not have a parent SBOM", sbom.getId());
         }
 
-        log.debug("Starting {} processor", getImplementationType());
+        log.info("Starting {} processor", getImplementationType());
 
         Bom processedBom;
 

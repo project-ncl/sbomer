@@ -37,6 +37,7 @@ import lombok.ToString;
 @ToString
 public class ErrorResponse {
     String errorId;
+    String errorType;
     String message;
     List<String> errors;
 }
