@@ -22,6 +22,7 @@ import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -52,7 +53,10 @@ public interface SBOMerClient {
      */
     @POST
     @Path("/{id}/bom")
-    String updateSbom(@PathParam("id") String sbomId, JsonNode bom);
+    String updateSbom(
+            @HeaderParam("log-process-context") String processContext,
+            @PathParam("id") String sbomId,
+            JsonNode bom);
 
     /**
      * Retrieves SBOM based on the ID.
@@ -62,7 +66,7 @@ public interface SBOMerClient {
      */
     @GET
     @Path("/{id}")
-    Sbom getById(@PathParam("id") String id);
+    Sbom getById(@HeaderParam("log-process-context") String processContext, @PathParam("id") String id);
 
     /**
      * Search the base SBOM based on the build ID via RSQL search and pagination.
@@ -73,6 +77,7 @@ public interface SBOMerClient {
      */
     @GET
     Page<Sbom> searchSboms(
+            @HeaderParam("log-process-context") String processContext,
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery);
 }

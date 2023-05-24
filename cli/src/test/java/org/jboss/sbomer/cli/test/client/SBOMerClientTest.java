@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import javax.inject.Inject;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
@@ -46,7 +45,7 @@ public class SBOMerClientTest {
 
     @Test
     void testGetValidSbom() {
-        Sbom sbom = client.getById("123");
+        Sbom sbom = client.getById("123", "123");
         assertNotNull(sbom);
         assertEquals(123, sbom.getId());
         assertEquals("QUARKUS", sbom.getBuildId());
@@ -55,7 +54,7 @@ public class SBOMerClientTest {
     @Test
     void testNotFoundSbom() {
         ClientException ex = assertThrows(ClientException.class, () -> {
-            client.getById("1234");
+            client.getById("1234", "1234");
         });
 
         assertEquals(404, ex.getCode());
@@ -72,7 +71,7 @@ public class SBOMerClientTest {
         pagParams.setPageIndex(0);
         pagParams.setPageSize(1);
         String rsqlQuery = "id==123";
-        Page<Sbom> sboms = client.searchSboms(pagParams, rsqlQuery);
+        Page<Sbom> sboms = client.searchSboms("123", pagParams, rsqlQuery);
 
         assertNotNull(sboms);
         assertEquals(123, sboms.getContent().iterator().next().getId());
