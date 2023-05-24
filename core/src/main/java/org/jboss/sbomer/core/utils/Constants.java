@@ -53,6 +53,11 @@ public class Constants {
     public static String TEKTON_LABEL_SBOM_ID = "sbomer.jboss.org/sbom-id";
 
     /**
+     * The label name that identifies the particular Sbom build id.
+     */
+    public static String TEKTON_LABEL_SBOM_BUILD_ID = "sbomer.jboss.org/sbom-build-id";
+
+    /**
      * Default Kubernetes label: app.kubernetes.io/part-of
      */
     public static String TEKTON_LABEL_NAME_APP_PART_OF = "app.kubernetes.io/part-of";

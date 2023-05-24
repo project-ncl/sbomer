@@ -34,7 +34,7 @@ import org.jboss.sbomer.generator.SbomGenerator;
 public class TektonCycloneDXSbomGenerator extends AbstractGeneratorTektonTaskRunner implements SbomGenerator {
 
     @Override
-    public void generate(Long sbomId, String generatorVersion, String generatorArgs) {
-        runTektonTask("sbomer-generate-cyclonedx", sbomId, CYCLONEDX, generatorVersion, generatorArgs);
+    public void generate(Long sbomId, String buildId, String generatorVersion, String generatorArgs) {
+        runTektonTask("sbomer-generate-cyclonedx", sbomId, buildId, CYCLONEDX, generatorVersion, generatorArgs);
     }
 }

@@ -28,28 +28,31 @@ public interface SbomGenerator {
      * Generates the SBOM in CycloneDX format referenced by the SBOM sbomId.
      *
      * @param sbomId SBOM identifier.
+     * @param buildId The build identifier.
      */
-    default public void generate(Long sbomId) {
-        generate(sbomId, null, null);
+    default public void generate(Long sbomId, String buildId) {
+        generate(sbomId, buildId, null, null);
     }
 
     /**
      * Generates the SBOM in CycloneDX format referenced by the SBOM sbomId.
      *
      * @param sbomId SBOM identifier.
+     * @param buildId The build identifier.
      * @param generatorVersion Generator version.
      */
-    default public void generate(Long sbomId, String generatorVersion) {
-        generate(sbomId, generatorVersion, null);
+    default public void generate(Long sbomId, String buildId, String generatorVersion) {
+        generate(sbomId, buildId, generatorVersion, null);
     }
 
     /**
      * Generates the SBOM in CycloneDX format referenced by the SBOM sbomId.
      *
      * @param sbomId SBOM identifier.
+     * @param buildId The build identifier.
      * @param generatorVersion Generator version.
      * @param generatorArgs Generator arguments.
      */
-    public void generate(Long sbomId, String generatorVersion, String generatorArgs);
+    public void generate(Long sbomId, String buildId, String generatorVersion, String generatorArgs);
 
 }

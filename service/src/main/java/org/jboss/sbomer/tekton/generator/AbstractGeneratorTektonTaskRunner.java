@@ -44,6 +44,7 @@ public abstract class AbstractGeneratorTektonTaskRunner extends AbstractTektonTa
      *
      * @param tektonTaskName The name of the Tekton Task to run.
      * @param sbomId The SBOM identifier to run the Task for.
+     * @param buildId The build identifier to run the Task for.
      * @param generator The {@link GeneratorImplementation}
      * @param generatorVersion Version of the generator, can be {@code null} if default version should be used, see
      *        {@link GenerationConfig}.
@@ -54,6 +55,7 @@ public abstract class AbstractGeneratorTektonTaskRunner extends AbstractTektonTa
     protected TaskRun runTektonTask(
             String tektonTaskName,
             Long sbomId,
+            String buildId,
             GeneratorImplementation generator,
             String generatorVersion,
             String generatorArgs) {
@@ -65,6 +67,6 @@ public abstract class AbstractGeneratorTektonTaskRunner extends AbstractTektonTa
                 .add("additional-args", generatorConfig.args(generatorArgs))
                 .build();
 
-        return runTektonTask(tektonTaskName, sbomId, config);
+        return runTektonTask(tektonTaskName, sbomId, buildId, config);
     }
 }

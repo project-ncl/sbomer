@@ -33,6 +33,7 @@ import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.config.ProcessingConfig;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.utils.Constants;
+import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.features.umb.TaskRunsConfig;
 import org.jboss.sbomer.features.umb.producer.NotificationService;
 import org.jboss.sbomer.model.Sbom;
@@ -205,30 +206,42 @@ public class TaskRunStatusHandler {
     }
 
     protected void handleTaskRunUpdate(TaskRun taskRun) {
-        if (!isUpdateable(taskRun)) {
-            return;
+        try {
+            String buildId = taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_BUILD_ID);
+            String sbomId = taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_ID);
+            // make sure there is no build context
+            MDCUtils.removeContext();
+            MDCUtils.addBuildContext(buildId);
+            MDCUtils.addProcessContext(String.valueOf(sbomId));
+
+            if (!isUpdateable(taskRun)) {
+                return;
+            }
+
+            // In case of unavailable conditions we don't do the update
+            Optional<Condition> lastCondition = findLastCondition(taskRun);
+            if (!lastCondition.isPresent()) {
+                return;
+            }
+
+            // In case of an unknown status (it shouldn't happen!) we don't do the update
+            SbomStatus status = toStatus(lastCondition.get().getStatus());
+            if (status == null) {
+                return;
+            }
+
+            // Get the final message in case the task run is completed
+            String taskRunFinalMsg = getTaskRunFinalMessage(taskRun, lastCondition.get());
+
+            // Update the Sbom status
+            updateStatus(sbomId, status, taskRunFinalMsg);
+
+            // Handle the taskRun if completed
+            handleTaskRunCompleted(taskRun);
+        } finally {
+            MDCUtils.removeContext();
         }
 
-        // In case of unavailable conditions we don't do the update
-        Optional<Condition> lastCondition = findLastCondition(taskRun);
-        if (!lastCondition.isPresent()) {
-            return;
-        }
-
-        // In case of an unknown status (it shouldn't happen!) we don't do the update
-        SbomStatus status = toStatus(lastCondition.get().getStatus());
-        if (status == null) {
-            return;
-        }
-
-        // Get the final message in case the task run is completed
-        String taskRunFinalMsg = getTaskRunFinalMessage(taskRun, lastCondition.get());
-
-        // Update the Sbom status
-        updateStatus(taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_ID), status, taskRunFinalMsg);
-
-        // Handle the taskRun if completed
-        handleTaskRunCompleted(taskRun);
     }
 
     protected void handleTaskRunCompleted(TaskRun taskRun) {

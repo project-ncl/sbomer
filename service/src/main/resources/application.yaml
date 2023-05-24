@@ -34,6 +34,10 @@ quarkus:
     category:
       "org.jboss.sbomer":
         level: DEBUG
+      "com.github.tennaito.rsql":
+        level: WARN
+    console:
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
 
 sbomer:
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"

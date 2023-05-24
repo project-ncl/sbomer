@@ -17,12 +17,12 @@
  */
 package org.jboss.sbomer.cli.commands.processor;
 
-import org.checkerframework.checker.units.qual.s;
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.commands.AbstractCommand;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -41,34 +41,50 @@ public abstract class AbstractProcessCommand extends AbstractCommand {
 
     @Override
     public Integer call() throws Exception {
-        log.info("Fetching SBOM with id '{}' from SBOMer...", parent.getSbomMixin().getSbomId());
-        Sbom sbom = sbomerClient.getById(parent.getSbomMixin().getSbomId());
+        try {
+            String sbomId = parent.getSbomMixin().getSbomId();
 
-        if (sbom.getParentSbom() == null) {
-            throw new ApplicationException("Requested SBOM (id: '{}') does not have a parent SBOM", sbom.getId());
+            // make sure there is no context
+            MDCUtils.removeContext();
+            MDCUtils.addProcessContext(sbomId);
+
+            log.info("Fetching SBOM with id '{}' from SBOMer...", sbomId);
+            Sbom sbom = sbomerClient.getById(sbomId, sbomId);
+
+            MDCUtils.addBuildContext(sbom.getBuildId());
+
+            if (sbom.getParentSbom() == null) {
+                throw new ApplicationException("Requested SBOM (id: '{}') does not have a parent SBOM", sbom.getId());
+            }
+
+            log.info("Starting {} processor", getImplementationType());
+
+            Bom processedBom;
+
+            // In case the SBOM is null, it means that this is an initial processing of the SBOM and because of this,
+            // the
+            // relevant CycloneDX Bom is available in the parent SBOM only. Future processing will be done on the actual
+            // object, because the BOM will be populated.
+            if (sbom.getSbom() == null || sbom.getSbom() instanceof NullNode) {
+                log.debug("BOM missing, processing base BOM");
+                processedBom = doProcess(sbom, getBom(sbom.getParentSbom()));
+            } else {
+                processedBom = doProcess(sbom, getBom(sbom));
+            }
+
+            log.debug("{} processor finished", getImplementationType());
+
+            sbomerClient.updateSbom(
+                    String.valueOf(sbom.getId()),
+                    String.valueOf(sbom.getId()),
+                    SbomUtils.toJsonNode(processedBom));
+
+            log.info("SBOM with id '{}' updated!", sbom.getId());
+
+            return CommandLine.ExitCode.OK;
+        } finally {
+            MDCUtils.removeContext();
         }
-
-        log.info("Starting {} processor", getImplementationType());
-
-        Bom processedBom;
-
-        // In case the SBOM is null, it means that this is an initial processing of the SBOM and because of this, the
-        // relevant CycloneDX Bom is available in the parent SBOM only. Future processing will be done on the actual
-        // object, because the BOM will be populated.
-        if (sbom.getSbom() == null || sbom.getSbom() instanceof NullNode) {
-            log.debug("BOM missing, processing base BOM");
-            processedBom = doProcess(sbom, getBom(sbom.getParentSbom()));
-        } else {
-            processedBom = doProcess(sbom, getBom(sbom));
-        }
-
-        log.debug("{} processor finished", getImplementationType());
-
-        sbomerClient.updateSbom(String.valueOf(sbom.getId()), SbomUtils.toJsonNode(processedBom));
-
-        log.info("SBOM with id '{}' updated!", sbom.getId());
-
-        return CommandLine.ExitCode.OK;
     }
 
     protected Bom getBom(Sbom sbom) {

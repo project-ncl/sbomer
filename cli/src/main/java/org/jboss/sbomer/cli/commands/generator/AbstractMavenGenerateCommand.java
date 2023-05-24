@@ -23,25 +23,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.cyclonedx.model.Bom;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
 import org.jboss.sbomer.cli.commands.AbstractCommand;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.service.rest.Page;
+import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -56,84 +51,99 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
 
     @Override
     public Integer call() throws Exception {
-        // First, fetch the SBOM metadata
-        Sbom sbom = sbomerClient.getById(parent.getParent().getSbomMixin().getSbomId());
 
-        log.info("Starting generation for PNC Build '{}'", sbom.getBuildId());
+        try {
+            String sbomId = parent.getParent().getSbomMixin().getSbomId();
 
-        // Fetch build information
-        Build build = pncService.getBuild(sbom.getBuildId());
+            // make sure there is no context
+            MDCUtils.removeContext();
+            MDCUtils.addProcessContext(sbomId);
 
-        if (build == null) {
-            log.error("Could not fetch the PNC build with id '{}'", sbom.getBuildId());
-            return CommandLine.ExitCode.SOFTWARE;
-        }
+            // First, fetch the SBOM metadata
+            Sbom sbom = sbomerClient.getById(sbomId, sbomId);
 
-        // Filter only valid Pnc builds
-        if (!isValidBuild(build)) {
-            log.error(
-                    "Build is not valid! Needs to be a FINISHED build of type MVN with status SUCCESS or NO_REBUILD_REQUIRED");
-            return CommandLine.ExitCode.SOFTWARE;
-        }
+            // make sure there is no context
+            MDCUtils.addBuildContext(sbom.getBuildId());
 
-        // Get the correct scm information for builds which have either SUCCESS or NO_REBUILD_REQUIRED status
-        String scmUrl = build.getScmUrl();
-        String scmTag = build.getScmTag();
-        String originalBuildId = null;
-        Bom bom = null;
-        if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
-            scmUrl = build.getNoRebuildCause().getScmUrl();
-            scmTag = build.getNoRebuildCause().getScmTag();
-            originalBuildId = build.getNoRebuildCause().getId();
+            log.info("Starting generation for PNC Build '{}'", sbom.getBuildId());
 
-            PaginationParameters pagParams = new PaginationParameters();
-            pagParams.setPageIndex(0);
-            pagParams.setPageSize(1);
-            String rsqlQuery = "buildId=eq=" + originalBuildId + ";generator=isnull=false;processors=isnull=true";
+            // Fetch build information
+            Build build = pncService.getBuild(sbom.getBuildId());
 
-            log.info("Searching SBOMs with rsqlQuery: {}", rsqlQuery);
-
-            Page<Sbom> sboms = sbomerClient.searchSboms(pagParams, rsqlQuery);
-            if (sboms.getContent().size() > 0) {
-                bom = SbomUtils.fromJsonNode(sboms.getContent().iterator().next().getSbom());
-            } else {
-                log.warn(
-                        "Could not find original SBOM for PNC build '{}', will regenerate the SBOM...",
-                        originalBuildId);
+            if (build == null) {
+                log.error("Could not fetch the PNC build with id '{}'", sbom.getBuildId());
+                return CommandLine.ExitCode.SOFTWARE;
             }
-        }
 
-        if (bom == null) {
+            // Filter only valid Pnc builds
+            if (!isValidBuild(build)) {
+                log.error(
+                        "Build is not valid! Needs to be a FINISHED build of type MVN with status SUCCESS or NO_REBUILD_REQUIRED");
+                return CommandLine.ExitCode.SOFTWARE;
+            }
 
-            // Clone the source code related to the build
-            doClone(scmUrl, scmTag, parent.getParent().getTargetDir(), parent.getParent().isForce());
+            // Get the correct scm information for builds which have either SUCCESS or NO_REBUILD_REQUIRED status
+            String scmUrl = build.getScmUrl();
+            String scmTag = build.getScmTag();
+            String originalBuildId = null;
+            Bom bom = null;
+            if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
+                scmUrl = build.getNoRebuildCause().getScmUrl();
+                scmTag = build.getNoRebuildCause().getScmTag();
+                originalBuildId = build.getNoRebuildCause().getId();
 
-            // Generate the SBOM
-            Path bomPath = generate();
+                PaginationParameters pagParams = new PaginationParameters();
+                pagParams.setPageIndex(0);
+                pagParams.setPageSize(1);
+                String rsqlQuery = "buildId=eq=" + originalBuildId + ";generator=isnull=false;processors=isnull=true";
 
-            log.info(
-                    "Preparing to update SBOM id: '{}' (PNC build '{}') with generated SBOM content from path '{}'...",
-                    sbom.getId(),
-                    sbom.getBuildId(),
-                    bomPath);
+                log.info("Searching SBOMs with rsqlQuery: {}", rsqlQuery);
 
-            log.debug("Reading generated SBOM from '{}' path", bomPath);
-
-            // Read the file
-            bom = SbomUtils.fromPath(bomPath);
+                Page<Sbom> sboms = sbomerClient.searchSboms(String.valueOf(sbom.getId()), pagParams, rsqlQuery);
+                if (sboms.getContent().size() > 0) {
+                    bom = SbomUtils.fromJsonNode(sboms.getContent().iterator().next().getSbom());
+                } else {
+                    log.warn(
+                            "Could not find original SBOM for PNC build '{}', will regenerate the SBOM...",
+                            originalBuildId);
+                }
+            }
 
             if (bom == null) {
-                throw new ApplicationException("Could parse the generated SBOM from '{}' path", bomPath.toString());
+
+                // Clone the source code related to the build
+                doClone(scmUrl, scmTag, parent.getParent().getTargetDir(), parent.getParent().isForce());
+
+                // Generate the SBOM
+                Path bomPath = generate();
+
+                log.info(
+                        "Preparing to update SBOM id: '{}' (PNC build '{}') with generated SBOM content from path '{}'...",
+                        sbom.getId(),
+                        sbom.getBuildId(),
+                        bomPath);
+
+                log.debug("Reading generated SBOM from '{}' path", bomPath);
+
+                // Read the file
+                bom = SbomUtils.fromPath(bomPath);
+
+                if (bom == null) {
+                    throw new ApplicationException("Could parse the generated SBOM from '{}' path", bomPath.toString());
+                }
             }
+
+            log.info("Uploading generated CycloneDX BOM...");
+
+            sbomerClient
+                    .updateSbom(String.valueOf(sbom.getId()), String.valueOf(sbom.getId()), SbomUtils.toJsonNode(bom));
+
+            log.info("SBOM '{}' updated with generated BOM!", sbom.getId());
+
+            return CommandLine.ExitCode.OK;
+        } finally {
+            MDCUtils.removeContext();
         }
-
-        log.info("Uploading generated CycloneDX BOM...");
-
-        sbomerClient.updateSbom(String.valueOf(sbom.getId()), SbomUtils.toJsonNode(bom));
-
-        log.info("SBOM '{}' updated with generated BOM!", sbom.getId());
-
-        return CommandLine.ExitCode.OK;
     }
 
     protected abstract GeneratorImplementation getGeneratorType();

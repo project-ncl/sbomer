@@ -30,6 +30,7 @@ import org.jboss.sbomer.core.enums.ProcessorImplementation;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
+import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.processor.ProcessingExecConfig;
 import org.jboss.sbomer.tekton.AbstractTektonTaskRunner;
@@ -62,45 +63,52 @@ public class ProcessingService extends AbstractTektonTaskRunner {
      */
     @Transactional
     public Sbom process(Sbom sbom, ProcessingExecConfig execConfig) {
-        if (!processingConfig.isEnabled()) {
-            throw new ApplicationException(
-                    "Processing is disabled in the configuration, skipping processing for SBOM '{}'",
-                    sbom.getId());
+
+        try {
+            MDCUtils.addBuildContext(sbom.getBuildId());
+            MDCUtils.addProcessContext(String.valueOf(sbom.getId()));
+            if (!processingConfig.isEnabled()) {
+                throw new ApplicationException(
+                        "Processing is disabled in the configuration, skipping processing for SBOM '{}'",
+                        sbom.getId());
+            }
+
+            if (sbom.getStatus() != SbomStatus.READY) {
+                throw new ClientException(
+                        "SBOM with id '{}' is not ready yet, current status: {}",
+                        sbom.getId(),
+                        sbom.getStatus());
+            }
+
+            // Default processing config needs to be established
+            if (execConfig == null) {
+                execConfig = processingConfig.defaultExecConfig();
+            }
+
+            Set<ProcessorImplementation> processors = execConfig.getProcessors()
+                    .stream()
+                    .map(p -> p.getProcessor())
+                    .collect(Collectors.toSet());
+
+            log.debug("Preparing to process SBOM id '{}' with configured processors: {}", sbom.getId(), processors);
+
+            // Create the child object
+            Sbom child = sbom.giveBirth();
+
+            child.setProcessors(processors);
+
+            // Store the child in database
+            child = sbomService.save(child);
+
+            // Schedule processing
+            var config = Json.createObjectBuilder().add("processors", execConfig.processorsCommand()).build();
+
+            runTektonTask("sbomer-process", child.getId(), child.getBuildId(), config);
+
+            return child;
+        } finally {
+            MDCUtils.removeContext();
         }
-
-        if (sbom.getStatus() != SbomStatus.READY) {
-            throw new ClientException(
-                    "SBOM with id '{}' is not ready yet, current status: {}",
-                    sbom.getId(),
-                    sbom.getStatus());
-        }
-
-        // Default processing config needs to be established
-        if (execConfig == null) {
-            execConfig = processingConfig.defaultExecConfig();
-        }
-
-        Set<ProcessorImplementation> processors = execConfig.getProcessors()
-                .stream()
-                .map(p -> p.getProcessor())
-                .collect(Collectors.toSet());
-
-        log.debug("Preparing to process SBOM id '{}' with configured processors: {}", sbom.getId(), processors);
-
-        // Create the child object
-        Sbom child = sbom.giveBirth();
-
-        child.setProcessors(processors);
-
-        // Store the child in database
-        child = sbomService.save(child);
-
-        // Schedule processing
-        var config = Json.createObjectBuilder().add("processors", execConfig.processorsCommand()).build();
-
-        runTektonTask("sbomer-process", child.getId(), config);
-
-        return child;
     }
 
     /**

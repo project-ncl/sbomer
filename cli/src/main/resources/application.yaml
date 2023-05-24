@@ -36,6 +36,8 @@ quarkus:
     category:
       "org.jboss.sbomer":
         level: DEBUG
+    console:
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
 
 "%dev":
   quarkus:

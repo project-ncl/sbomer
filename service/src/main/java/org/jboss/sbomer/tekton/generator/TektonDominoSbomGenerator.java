@@ -34,8 +34,8 @@ import org.jboss.sbomer.generator.SbomGenerator;
 public class TektonDominoSbomGenerator extends AbstractGeneratorTektonTaskRunner implements SbomGenerator {
 
     @Override
-    public void generate(Long sbomId, String version, String args) {
-        runTektonTask("sbomer-generate-domino", sbomId, DOMINO, version, args);
+    public void generate(Long sbomId, String buildId, String version, String args) {
+        runTektonTask("sbomer-generate-domino", sbomId, buildId, DOMINO, version, args);
     }
 
 }

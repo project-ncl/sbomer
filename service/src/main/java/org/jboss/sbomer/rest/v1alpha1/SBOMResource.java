@@ -45,6 +45,7 @@ import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.service.rest.Page;
+import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.service.GenerationService;
@@ -287,22 +288,28 @@ public class SBOMResource {
     public Response generate(@PathParam("buildId") String buildId, @QueryParam("generator") String generator)
             throws Exception {
 
-        GeneratorImplementation gen = GeneratorImplementation.CYCLONEDX;
+        try {
+            MDCUtils.addBuildContext(buildId);
 
-        if (!Strings.isEmpty(generator)) {
-            try {
-                gen = GeneratorImplementation.valueOf(generator);
-            } catch (IllegalArgumentException iae) {
-                throw new ClientException(
-                        Status.BAD_REQUEST.getStatusCode(),
-                        "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use `CYCLONEDX`",
-                        iae);
+            GeneratorImplementation gen = GeneratorImplementation.CYCLONEDX;
+
+            if (!Strings.isEmpty(generator)) {
+                try {
+                    gen = GeneratorImplementation.valueOf(generator);
+                } catch (IllegalArgumentException iae) {
+                    throw new ClientException(
+                            Status.BAD_REQUEST.getStatusCode(),
+                            "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use `CYCLONEDX`",
+                            iae);
+                }
             }
+
+            Sbom sbom = generationService.generate(buildId, gen);
+
+            return Response.status(Status.ACCEPTED).entity(sbom).build();
+        } finally {
+            MDCUtils.removeBuildContext();
         }
-
-        Sbom sbom = generationService.generate(buildId, gen);
-
-        return Response.status(Status.ACCEPTED).entity(sbom).build();
     }
 
     @POST
@@ -328,10 +335,15 @@ public class SBOMResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
     public Response processEnrichmentOfBaseSbom(@PathParam("id") final String sbomId) throws Exception {
 
-        Sbom sbom = doGetBomById(sbomId);
-        sbom = processingService.process(sbom);
+        try {
+            Sbom sbom = doGetBomById(sbomId);
+            MDCUtils.addBuildContext(sbom.getBuildId());
+            sbom = processingService.process(sbom);
 
-        return Response.status(Status.ACCEPTED).entity(sbom).build();
+            return Response.status(Status.ACCEPTED).entity(sbom).build();
+        } finally {
+            MDCUtils.removeBuildContext();
+        }
     }
 
 }
