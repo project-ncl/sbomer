@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 
 import org.jboss.sbomer.core.utils.Constants;
+import org.jboss.sbomer.core.utils.MDCUtils;
 
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
@@ -47,37 +48,55 @@ public abstract class AbstractTektonTaskRunner {
      * @param config Additional configuration passed as a {@link JsonObject}.
      * @return A {@link TaskRun} object representing the execution.
      */
-    protected TaskRun runTektonTask(final String tektonTaskName, final Long id, final JsonObject config) {
-        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
-                .withGenerateName(toTaskRunNamePrefix(tektonTaskName, String.valueOf(id)))
-                .withLabels(
-                        Map.of(
-                                Constants.TEKTON_LABEL_NAME_APP_PART_OF,
-                                Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
-                                Constants.TEKTON_LABEL_SBOM_ID,
-                                String.valueOf(id)))
-                .endMetadata()
-                .withNewSpec()
-                .withServiceAccountName(Constants.TEKTON_SERVICE_ACCOUNT_NAME)
-                .withNewTaskRef()
-                .withName(tektonTaskName)
-                .endTaskRef()
-                .withNewPodTemplate()
-                .withSecurityContext(
-                        new PodSecurityContextBuilder().withFsGroup(65532l)
-                                .withRunAsNonRoot()
-                                .withRunAsUser(65532l)
-                                .build())
-                .endPodTemplate()
-                .withParams(
-                        new Param("id", new ArrayOrString(String.valueOf(id))),
-                        new Param("config", new ArrayOrString(config.toString())))
-                .withWorkspaces(
-                        new WorkspaceBindingBuilder().withName("data").withEmptyDir(new EmptyDirVolumeSource()).build())
-                .endSpec()
-                .build();
+    protected TaskRun runTektonTask(
+            final String tektonTaskName,
+            final Long id,
+            final String buildId,
+            final JsonObject config) {
 
-        return tektonClient.v1beta1().taskRuns().resource(taskRun).createOrReplace();
+        try {
+            // make sure there is no context
+            MDCUtils.removeContext();
+            MDCUtils.addBuildContext(buildId);
+            MDCUtils.addProcessContext(String.valueOf(id));
+
+            TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
+                    .withGenerateName(toTaskRunNamePrefix(tektonTaskName, String.valueOf(id)))
+                    .withLabels(
+                            Map.of(
+                                    Constants.TEKTON_LABEL_NAME_APP_PART_OF,
+                                    Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
+                                    Constants.TEKTON_LABEL_SBOM_ID,
+                                    String.valueOf(id),
+                                    Constants.TEKTON_LABEL_SBOM_BUILD_ID,
+                                    buildId))
+                    .endMetadata()
+                    .withNewSpec()
+                    .withServiceAccountName(Constants.TEKTON_SERVICE_ACCOUNT_NAME)
+                    .withNewTaskRef()
+                    .withName(tektonTaskName)
+                    .endTaskRef()
+                    .withNewPodTemplate()
+                    .withSecurityContext(
+                            new PodSecurityContextBuilder().withFsGroup(65532l)
+                                    .withRunAsNonRoot()
+                                    .withRunAsUser(65532l)
+                                    .build())
+                    .endPodTemplate()
+                    .withParams(
+                            new Param("id", new ArrayOrString(String.valueOf(id))),
+                            new Param("config", new ArrayOrString(config.toString())))
+                    .withWorkspaces(
+                            new WorkspaceBindingBuilder().withName("data")
+                                    .withEmptyDir(new EmptyDirVolumeSource())
+                                    .build())
+                    .endSpec()
+                    .build();
+
+            return tektonClient.v1beta1().taskRuns().resource(taskRun).createOrReplace();
+        } finally {
+            MDCUtils.removeContext();
+        }
     }
 
     /**

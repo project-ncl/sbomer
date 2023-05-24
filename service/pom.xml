@@ -93,7 +93,12 @@
     <dependency>
       <groupId>org.jboss.pnc</groupId>
       <artifactId>rest-client</artifactId>
-      <version>${version.pnc-api}</version>
+      <version>${version.pnc-rest}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.pnc</groupId>
+      <artifactId>pnc-common</artifactId>
+      <version>${version.pnc-common}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

@@ -91,7 +91,9 @@ public class TaskRunStatusHandlerTest {
                                 Constants.TEKTON_LABEL_NAME_APP_PART_OF,
                                 Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
                                 Constants.TEKTON_LABEL_SBOM_ID,
-                                "123456"))
+                                "123456",
+                                Constants.TEKTON_LABEL_SBOM_BUILD_ID,
+                                "AABBCCDD"))
                 .endMetadata()
                 .build();
         assertFalse(statusHandler.isUpdateable(taskRun));
@@ -109,7 +111,9 @@ public class TaskRunStatusHandlerTest {
                                 Constants.TEKTON_LABEL_NAME_APP_PART_OF,
                                 Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
                                 Constants.TEKTON_LABEL_SBOM_ID,
-                                "123456"))
+                                "123456",
+                                Constants.TEKTON_LABEL_SBOM_BUILD_ID,
+                                "AABBCCDD"))
                 .endMetadata()
                 .withStatus(new TaskRunStatusBuilder().build())
                 .build();
@@ -128,7 +132,9 @@ public class TaskRunStatusHandlerTest {
                                 Constants.TEKTON_LABEL_NAME_APP_PART_OF,
                                 Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
                                 Constants.TEKTON_LABEL_SBOM_ID,
-                                "123456"))
+                                "123456",
+                                Constants.TEKTON_LABEL_SBOM_BUILD_ID,
+                                "AABBCCDD"))
                 .endMetadata()
                 .withStatus(new TaskRunStatusBuilder().withConditions(Collections.emptyList()).build())
                 .build();
@@ -147,7 +153,9 @@ public class TaskRunStatusHandlerTest {
                                 Constants.TEKTON_LABEL_NAME_APP_PART_OF,
                                 Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
                                 Constants.TEKTON_LABEL_SBOM_ID,
-                                "123456"))
+                                "123456",
+                                Constants.TEKTON_LABEL_SBOM_BUILD_ID,
+                                "AABBCCDD"))
                 .endMetadata()
                 .withStatus(
                         new TaskRunStatusBuilder().withConditions(new ConditionBuilder().withStatus("True").build())
@@ -287,7 +295,9 @@ public class TaskRunStatusHandlerTest {
                                 Constants.TEKTON_LABEL_NAME_APP_PART_OF,
                                 Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
                                 Constants.TEKTON_LABEL_SBOM_ID,
-                                "13131313"))
+                                "13131313",
+                                Constants.TEKTON_LABEL_SBOM_BUILD_ID,
+                                "EEFFGGHH"))
                 .endMetadata()
                 .withStatus(
                         new TaskRunStatusBuilder().withConditions(new ConditionBuilder().withStatus("Unknown").build())
@@ -347,7 +357,9 @@ public class TaskRunStatusHandlerTest {
                                 Constants.TEKTON_LABEL_NAME_APP_PART_OF,
                                 Constants.TEKTON_LABEL_VALUE_APP_PART_OF,
                                 Constants.TEKTON_LABEL_SBOM_ID,
-                                "17171717"))
+                                "17171717",
+                                Constants.TEKTON_LABEL_SBOM_BUILD_ID,
+                                "JJKKLLMM"))
                 .endMetadata()
                 .withStatus(
                         new TaskRunStatusBuilder().withConditions(new ConditionBuilder().withStatus("Unknown").build())

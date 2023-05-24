@@ -77,7 +77,7 @@ public class TestTektonCycloneDxSbomGenerator {
         Mockito.when(v1beta1.taskRuns()).thenReturn(taskRuns);
         Mockito.when(tektonClient.v1beta1()).thenReturn(v1beta1);
 
-        generator.generate(12345l);
+        generator.generate(12345l, "AABBCCDD");
 
         Mockito.verify(tektonClient.v1beta1().taskRuns(), Mockito.times(1)).resource(argThat(taskRun -> {
             assertNotNull(taskRun);
@@ -85,6 +85,7 @@ public class TestTektonCycloneDxSbomGenerator {
             assertEquals("sbomer-generate-cyclonedx", taskRun.getSpec().getTaskRef().getName());
             assertEquals("sbomer-sa", taskRun.getSpec().getServiceAccountName());
             assertEquals("12345", taskRun.getSpec().getParams().get(0).getValue().getStringVal());
+
             try {
                 JsonNode config = mapper.readTree(taskRun.getSpec().getParams().get(1).getValue().getStringVal());
                 String version = config.get("version").asText().toString();
@@ -97,6 +98,7 @@ public class TestTektonCycloneDxSbomGenerator {
 
             assertEquals("sbomer", taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_NAME_APP_PART_OF));
             assertEquals("12345", taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_ID));
+            assertEquals("AABBCCDD", taskRun.getMetadata().getLabels().get(Constants.TEKTON_LABEL_SBOM_BUILD_ID));
             assertEquals(1, taskRun.getSpec().getWorkspaces().size());
             assertEquals("data", taskRun.getSpec().getWorkspaces().get(0).getName());
             return true;

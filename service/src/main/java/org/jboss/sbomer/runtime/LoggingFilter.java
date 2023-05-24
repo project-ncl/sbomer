@@ -18,6 +18,8 @@
 package org.jboss.sbomer.runtime;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -26,6 +28,10 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
+
+import org.jboss.pnc.api.constants.MDCKeys;
+import org.jboss.pnc.common.log.MDCUtils;
+import org.slf4j.MDC;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,6 +49,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         requestContext.setProperty(REQUEST_EXECUTION_START, System.currentTimeMillis());
+        MDCUtils.setMDCFromRequestContext(requestContext);
 
         UriInfo uriInfo = requestContext.getUriInfo();
         Request request = requestContext.getRequest();
@@ -68,7 +75,11 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
             took = Long.toString(System.currentTimeMillis() - startTime);
         }
 
-        log.info("Completed {}, took: {}ms.", requestContext.getUriInfo().getPath(), took);
+        try (MDC.MDCCloseable mdcTook = MDC.putCloseable(MDCKeys.REQUEST_TOOK, took);
+                MDC.MDCCloseable mdcStatus = MDC
+                        .putCloseable(MDCKeys.RESPONSE_STATUS, Integer.toString(responseContext.getStatus()));) {
+            log.info("Completed {}, took: {}ms.", requestContext.getUriInfo().getPath(), took);
+        }
     }
 
 }
