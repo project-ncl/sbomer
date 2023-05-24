@@ -62,19 +62,19 @@ public class CustomizedJpaPredicateVisitor<T> extends AbstractJpaVisitor<Predica
 
     @Override
     public Predicate visit(AndNode node, EntityManager em) {
-        log.info("visit: AndNode {}", node);
+        log.trace("visit: AndNode {}", node);
         return customizedPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
     }
 
     @Override
     public Predicate visit(OrNode node, EntityManager em) {
-        log.info("visit: OrNode {}", node);
+        log.trace("visit: OrNode {}", node);
         return customizedPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
     }
 
     @Override
     public Predicate visit(ComparisonNode node, EntityManager em) {
-        log.info("visit: ComparisonNode {}", node);
+        log.trace("visit: ComparisonNode {}", node);
         return customizedPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
     }
 

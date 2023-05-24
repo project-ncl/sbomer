@@ -45,7 +45,7 @@ public class CustomPredicateBuilder<T> {
             Class<T> entity,
             EntityManager manager,
             BuilderTools misc) {
-        log.info("Creating Predicate for: {}", node);
+        log.debug("Creating Predicate for: {}", node);
 
         if (node instanceof LogicalNode) {
             return createPredicate((LogicalNode) node, root, entity, manager, misc);
@@ -64,13 +64,13 @@ public class CustomPredicateBuilder<T> {
             Class<T> entity,
             EntityManager entityManager,
             BuilderTools misc) {
-        log.info("Creating Predicate for logical node: {}", logical);
+        log.debug("Creating Predicate for logical node: {}", logical);
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
         List<Predicate> predicates = new ArrayList<Predicate>();
 
-        log.info("Creating Predicates from all children nodes.");
+        log.debug("Creating Predicates from all children nodes.");
         for (Node node : logical.getChildren()) {
             predicates.add(createPredicate(node, root, entity, entityManager, misc));
         }
@@ -122,7 +122,7 @@ public class CustomPredicateBuilder<T> {
                 && (Enum.class.isAssignableFrom(propertyPath.getJavaType())
                         || propertyPath instanceof PluralAttributePath)) {
 
-            log.info(
+            log.debug(
                     "Detected type {} for selector {} with custom comparison operator {}. Delegating to custom PredicateBuilderStrategy!",
                     propertyPath.getJavaType(),
                     comparison.getSelector(),
