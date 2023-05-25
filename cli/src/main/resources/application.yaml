@@ -48,6 +48,10 @@ quarkus:
           level: DEBUG
         "org.jboss.sbomer":
           level: DEBUG
+      json:
+        console:
+          enable: false
+
 
 "%test":
   quarkus:
@@ -56,3 +60,6 @@ quarkus:
       category:
         "org.jboss.sbomer":
           level: DEBUG
+      json:
+        console:
+          enable: false

@@ -66,6 +66,8 @@
         <quarkus.qpid.jms.group-id>${quarkus.platform.group-id}</quarkus.qpid.jms.group-id>
         <quarkus.qpid.jms.version>${quarkus.platform.version}</quarkus.qpid.jms.version>
         <quarkus-test-artemis-version>2.0.3</quarkus-test-artemis-version>
+        <quarkus-logging-json.version>3.0.0</quarkus-logging-json.version>
+
     </properties>
 
     <dependencyManagement>
