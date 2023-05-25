@@ -38,8 +38,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.quarkus</groupId>
+      <groupId>io.quarkiverse.loggingjson</groupId>
       <artifactId>quarkus-logging-json</artifactId>
+      <version>${quarkus-logging-json.version}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
