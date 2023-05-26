@@ -13,5 +13,12 @@
       "productVersion": "RHEL-8-RHBQ-2.13",
       "productVariant": "8Base-RHBQ-2.13"
     }
+  },
+  "436": {
+    "errata": {
+      "productName": "Migration Toolkit for Runtimes",
+      "productVersion": "RHEL-8-MTR-1",
+      "productVariant": "8Base-MTR-1"
+    }
   }
 }
