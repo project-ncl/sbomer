@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.cli.test;
 
+import java.util.Optional;
+
 import javax.enterprise.inject.Alternative;
 import javax.inject.Singleton;
 
@@ -59,7 +61,7 @@ public class AlternativePncService extends PncService {
     }
 
     @Override
-    public Artifact getArtifact(String purl) {
+    public Artifact getArtifact(String purl, Optional<String> sha256) {
         return Artifact.builder()
                 .id("AA1122")
                 .md5("md5")

@@ -20,9 +20,12 @@ package org.jboss.sbomer.cli.commands.processor;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
 import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 
+import java.util.Optional;
+
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Hash;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.model.Sbom;
@@ -74,7 +77,8 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         SbomUtils.setSupplier(component);
         SbomUtils.addMrrc(component);
 
-        Artifact artifact = pncService.getArtifact(component.getPurl());
+        Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA3_256);
+        Artifact artifact = pncService.getArtifact(component.getPurl(), sha256);
 
         if (artifact == null) {
             log.warn(

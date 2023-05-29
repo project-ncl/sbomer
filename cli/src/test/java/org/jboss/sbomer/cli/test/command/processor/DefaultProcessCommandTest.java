@@ -128,7 +128,7 @@ public class DefaultProcessCommandTest {
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-tck@1.1.0.redhat-00008?type=jar" };
 
         for (String purl : componentPurls) {
-            Mockito.when(pncService.getArtifact(purl)).thenReturn(generateArtifact(purl));
+            Mockito.when(pncService.getArtifact(purl, Optional.empty())).thenReturn(generateArtifact(purl));
         }
 
         Sbom sbom = generateSbom();
@@ -184,7 +184,7 @@ public class DefaultProcessCommandTest {
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-tck@1.1.0.redhat-00008?type=jar" };
 
         for (String purl : componentPurls) {
-            Mockito.when(pncService.getArtifact(purl)).thenReturn(generateArtifact(purl));
+            Mockito.when(pncService.getArtifact(purl, Optional.empty())).thenReturn(generateArtifact(purl));
         }
 
         String specialPurl = "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar";
@@ -198,7 +198,7 @@ public class DefaultProcessCommandTest {
                 .originUrl("originurl")
                 .build();
 
-        Mockito.when(pncService.getArtifact(specialPurl)).thenReturn(artifact);
+        Mockito.when(pncService.getArtifact(specialPurl, Optional.of("sha256"))).thenReturn(artifact);
 
         Sbom sbom = generateSbom();
         Bom bom = command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
