@@ -205,7 +205,15 @@ public class PncService {
                 // In case of provided sha256, filter all artifacts
                 List<Artifact> filteredArtifacts = artifacts.getAll()
                         .stream()
+                        .peek(
+                                a -> log.info(
+                                        "Filtering the retrieved artifact having purl: '{}', id: {}, sha256: '{}' by the SBOM detected sha256: '{}'",
+                                        a.getPurl(),
+                                        a.getId(),
+                                        a.getSha256(),
+                                        sha256.get()))
                         .filter(a -> a.getSha256().equals(sha256.get()))
+                        .peek(a -> log.info("Artifact with id: {} matched.", a.getId()))
                         .collect(Collectors.toList());
 
                 if (filteredArtifacts.size() == 0) {
@@ -213,6 +221,7 @@ public class PncService {
                             "No matching artifact found with purl " + purl + " and sha256 " + sha256.get());
                 }
                 // Return first one matching (to handle duplicates in PNC)
+                log.info("Returning the first matching artifact with id: {}", filteredArtifacts.get(0).getId());
                 return filteredArtifacts.get(0);
             }
             // Only one matching artifact was found, all good
