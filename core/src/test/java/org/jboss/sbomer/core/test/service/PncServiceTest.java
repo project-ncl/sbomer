@@ -21,13 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.ProductVersionRef;
-import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.service.PncService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.common.QuarkusTestResource;
@@ -45,15 +45,16 @@ public class PncServiceTest {
     @Test
     void testFetchArtifact() throws Exception {
         log.info("testFetchArtifact ...");
-        Artifact fromPNC = service
-                .getArtifact("pkg:maven/org.jboss.logging/commons-logging-jboss-logging@1.0.0.Final-redhat-1?type=jar");
+        Artifact fromPNC = service.getArtifact(
+                "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@1.0.0.Final-redhat-1?type=jar",
+                Optional.empty());
         assertNotNull(fromPNC);
         assertEquals("312123", fromPNC.getId());
     }
 
     @Test
     void testFetchNonExistingArtifact() throws Exception {
-        assertNull(service.getArtifact("purlnonexisting"));
+        assertNull(service.getArtifact("purlnonexisting", Optional.empty()));
     }
 
     @Test
@@ -69,4 +70,40 @@ public class PncServiceTest {
         assertEquals("179", productVersionRef.getId());
         assertEquals("1.0", productVersionRef.getVersion());
     }
+
+    @Test
+    void testFetchDuplicatedArtifactNoSha256() throws Exception {
+        log.info("testFetchDuplicatedArtifact ...");
+        String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
+        try {
+            service.getArtifact(purl, Optional.empty());
+        } catch (IllegalStateException ise) {
+            assertEquals(
+                    "No sha256 was provided, and there should exist only one artifact with purl " + purl,
+                    ise.getMessage());
+        }
+    }
+
+    @Test
+    void testFetchDuplicatedArtifactMatchingSha256() throws Exception {
+        log.info("testFetchDuplicatedArtifactMatchingSha256 ...");
+        String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
+        String sha256 = "cccc";
+        Artifact fromPNC = service.getArtifact(purl, Optional.of(sha256));
+        assertNotNull(fromPNC);
+        assertEquals("412123", fromPNC.getId());
+    }
+
+    @Test
+    void testFetchDuplicatedArtifactNonMatchingSha256() throws Exception {
+        log.info("testFetchDuplicatedArtifactNonMatchingSha256 ...");
+        String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
+        String sha256 = "xxxx";
+        try {
+            service.getArtifact(purl, Optional.of(sha256));
+        } catch (IllegalStateException ise) {
+            assertEquals("No matching artifact found with purl " + purl + " and sha256 " + sha256, ise.getMessage());
+        }
+    }
+
 }

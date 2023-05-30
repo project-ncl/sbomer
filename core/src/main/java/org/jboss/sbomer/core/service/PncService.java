@@ -17,7 +17,10 @@
  */
 package org.jboss.sbomer.core.service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -173,15 +176,20 @@ public class PncService {
     }
 
     /**
-     * Fetch information about the PNC {@link Artifact} identified by the particular purl.
+     * Fetch information about the PNC {@link Artifact} identified by the particular purl and sha256 if available.
      *
+     * @param sha256
      * @param purl
      * @return The {@link Artifact} object or {@code null} if it cannot be found.
      */
-    public Artifact getArtifact(String purl) {
-        log.debug("Fetching artifact from PNC for purl '{}'", purl);
+    public Artifact getArtifact(String purl, Optional<String> sha256) {
+        log.debug(
+                "Fetching artifact from PNC for purl '{}' and sha256 '{}'",
+                purl,
+                sha256.isPresent() ? sha256.get() : null);
 
         try {
+            // Fetch all artifacts via purl (always available)
             String artifactQuery = "purl==\"" + purl + "\"";
             RemoteCollection<Artifact> artifacts = artifactClient
                     .getAll(null, null, null, Optional.empty(), Optional.of(artifactQuery));
@@ -189,8 +197,34 @@ public class PncService {
                 log.debug("Artifact with purl '{}' was not found in PNC", purl);
                 return null;
             } else if (artifacts.size() > 1) {
-                throw new IllegalStateException("There should exist only one artifact with purl " + purl);
+                // In case of multiple matches by purl, if no sha256 is provided, return error
+                if (sha256.isEmpty()) {
+                    throw new IllegalStateException(
+                            "No sha256 was provided, and there should exist only one artifact with purl " + purl);
+                }
+                // In case of provided sha256, filter all artifacts
+                List<Artifact> filteredArtifacts = artifacts.getAll()
+                        .stream()
+                        .peek(
+                                a -> log.info(
+                                        "Filtering the retrieved artifact having purl: '{}', id: {}, sha256: '{}' by the SBOM detected sha256: '{}'",
+                                        a.getPurl(),
+                                        a.getId(),
+                                        a.getSha256(),
+                                        sha256.get()))
+                        .filter(a -> a.getSha256().equals(sha256.get()))
+                        .peek(a -> log.info("Artifact with id: {} matched.", a.getId()))
+                        .collect(Collectors.toList());
+
+                if (filteredArtifacts.size() == 0) {
+                    throw new IllegalStateException(
+                            "No matching artifact found with purl " + purl + " and sha256 " + sha256.get());
+                }
+                // Return first one matching (to handle duplicates in PNC)
+                log.info("Returning the first matching artifact with id: {}", filteredArtifacts.get(0).getId());
+                return filteredArtifacts.get(0);
             }
+            // Only one matching artifact was found, all good
             return artifacts.iterator().next();
         } catch (RemoteResourceNotFoundException ex) {
             throw new ApplicationException("Artifact with purl '{}' was not found in PNC", purl, ex);

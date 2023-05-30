@@ -65,6 +65,17 @@ public class SbomUtils {
                 .count() > 0;
     }
 
+    public static Optional<String> getHash(Component component, Algorithm algorithm) {
+        if (component.getHashes() == null) {
+            return Optional.empty();
+        }
+        return component.getHashes()
+                .stream()
+                .filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))
+                .map(h -> h.getValue())
+                .findFirst();
+    }
+
     public static void addProperty(Component component, String key, String value) {
         log.debug("addProperty {}: {}", key, value);
         List<Property> properties = new ArrayList<Property>();
