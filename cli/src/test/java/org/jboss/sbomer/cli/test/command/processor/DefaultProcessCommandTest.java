@@ -31,6 +31,7 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.ExternalReference.Type;
 import org.hamcrest.CoreMatchers;
 import org.jboss.pnc.dto.Artifact;
@@ -85,12 +86,12 @@ public class DefaultProcessCommandTest {
                 .build();
     }
 
-    private Artifact generateArtifact(String purl) {
+    private Artifact generateArtifact(String purl, String sha256) {
         return Artifact.builder()
                 .id("AA1122")
                 .md5("md5")
                 .sha1("sha1")
-                .sha256("sha256")
+                .sha256(sha256)
                 .purl(purl)
                 .publicUrl("artifactpublicurl")
                 .originUrl("originurl")
@@ -127,19 +128,19 @@ public class DefaultProcessCommandTest {
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-api@1.1.0.redhat-00008?type=jar",
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-tck@1.1.0.redhat-00008?type=jar" };
 
-        for (String purl : componentPurls) {
-            Mockito.when(pncService.getArtifact(purl, Optional.empty())).thenReturn(generateArtifact(purl));
-        }
-
         Sbom sbom = generateSbom();
+        Bom baseBom = SbomUtils.fromJsonNode(sbom.getSbom());
 
         for (String purl : componentPurls) {
-            Optional<Component> componentOpt = SbomUtils
-                    .findComponentWithPurl(purl, SbomUtils.fromJsonNode(sbom.getSbom()));
+            Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(purl, baseBom);
             assertTrue(componentOpt.isPresent());
             Component component = componentOpt.get();
 
             assertEquals(2, component.getProperties().size());
+
+            Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
+            String sha = sha256.isPresent() ? sha256.get() : null;
+            Mockito.when(pncService.getArtifact(purl, sha256)).thenReturn(generateArtifact(purl, sha));
         }
 
         Bom bom = command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
@@ -183,8 +184,13 @@ public class DefaultProcessCommandTest {
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-api@1.1.0.redhat-00008?type=jar",
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-tck@1.1.0.redhat-00008?type=jar" };
 
-        for (String purl : componentPurls) {
-            Mockito.when(pncService.getArtifact(purl, Optional.empty())).thenReturn(generateArtifact(purl));
+        String[] sha256s = { "75efe10bfb9d1e96c320ab9ca9daddc2aebfcc9d017be651f60cb41ed100f23f",
+                "8e23987f69b896c23e3b724cd7512a9b39a2ee6f53dc9ba1774acfe0994a95e3",
+                "98b67e15e3fe39e4f8721bdcfda99f19e570426d8960f73f8d5fe1414ff2fab3" };
+
+        for (int i = 0; i < 3; i++) {
+            Mockito.when(pncService.getArtifact(componentPurls[i], Optional.of(sha256s[i])))
+                    .thenReturn(generateArtifact(componentPurls[i], sha256s[i]));
         }
 
         String specialPurl = "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?type=jar";
@@ -192,13 +198,17 @@ public class DefaultProcessCommandTest {
                 .id("AA1122")
                 .md5("md5")
                 .sha1("sha1")
-                .sha256("sha256")
+                .sha256("122dd093db60b5fafcb428b28569aa72993e2a2c63d3d87b7dcc076bdebd8a71")
                 .purl(specialPurl)
                 .publicUrl("artifactpublicurl")
                 .originUrl("originurl")
                 .build();
 
-        Mockito.when(pncService.getArtifact(specialPurl, Optional.of("sha256"))).thenReturn(artifact);
+        Mockito.when(
+                pncService.getArtifact(
+                        specialPurl,
+                        Optional.of("122dd093db60b5fafcb428b28569aa72993e2a2c63d3d87b7dcc076bdebd8a71")))
+                .thenReturn(artifact);
 
         Sbom sbom = generateSbom();
         Bom bom = command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
@@ -223,12 +233,6 @@ public class DefaultProcessCommandTest {
         // It should contain only a single, default entry which is not enriched
         assertEquals(1, systems.size());
         assertEquals("https://builds.apache.org/", systems.get(0));
-
-        List<String> vcss = getExternalReferences(component, Type.BUILD_SYSTEM);
-
-        // It should contain only a single, default entry which is not enriched
-        assertEquals(1, vcss.size());
-        assertEquals("https://builds.apache.org/", vcss.get(0));
 
         assertEquals(0, getExternalReferences(component, Type.BUILD_META).size());
     }
