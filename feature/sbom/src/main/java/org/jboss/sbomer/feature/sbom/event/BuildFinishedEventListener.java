@@ -31,19 +31,19 @@ import io.quarkus.runtime.StartupEvent;
 @ApplicationScoped
 public class BuildFinishedEventListener {
 
-	@Inject
-	KubernetesClient kubernetesClient;
+    @Inject
+    KubernetesClient kubernetesClient;
 
-	public void init(@Observes StartupEvent ev) {
-		// TODO how to make these querable? add more labels?
-		GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata()
-				.endMetadata()
-				.withBuildId("AABBCC")
-				.withStatus(SbomGenerationStatus.NEW)
-				.build();
+    public void init(@Observes StartupEvent ev) {
+        // TODO how to make these querable? add more labels?
+        GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata()
+                .endMetadata()
+                .withBuildId("AABBCC")
+                .withStatus(SbomGenerationStatus.NEW)
+                .build();
 
-		// ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
+        // ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
 
-		// System.out.println(cm);
-	}
+        // System.out.println(cm);
+    }
 }

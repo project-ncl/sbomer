@@ -34,7 +34,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
  * This is a convenience model class. It is basically a {@link ConfigMap}, just with additional features to make it work
  * in the SBOM generation context better.
  * </p>
- * 
+ *
  * <p>
  * Following labels are expect to be present on the {@link ConfigMap} resource in order for it to be used as
  * {@link GenerationRequest}.
@@ -45,10 +45,10 @@ import io.fabric8.kubernetes.model.annotation.Version;
  * <li>{@code sbomer.jboss.org/generation-request}</li>
  * </ul>
  * </p>
- * 
+ *
  * <p>
  * Additionally following labels can be added:
- * 
+ *
  * <ul>
  * <li>{@code sbomer.jboss.org/sbom-build-id} -- the identifier of the build for which the generation is triggered</li>
  * </ul>
@@ -59,50 +59,50 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Group("")
 public class GenerationRequest extends ConfigMap {
 
-	public static final String KEY_BUILD_ID = "build-id";
-	public static final String KEY_STATUS = "status";
+    public static final String KEY_BUILD_ID = "build-id";
+    public static final String KEY_STATUS = "status";
 
-	public GenerationRequest() {
-		super();
-	}
+    public GenerationRequest() {
+        super();
+    }
 
-	public GenerationRequest(
-			String apiVersion,
-			Map<String, String> binaryData,
-			Map<String, String> data,
-			Boolean immutable,
-			String kind,
-			ObjectMeta metadata) {
-		super(apiVersion, binaryData, data, immutable, kind, metadata);
-	}
+    public GenerationRequest(
+            String apiVersion,
+            Map<String, String> binaryData,
+            Map<String, String> data,
+            Boolean immutable,
+            String kind,
+            ObjectMeta metadata) {
+        super(apiVersion, binaryData, data, immutable, kind, metadata);
+    }
 
-	@JsonIgnore
-	public String getBuildId() {
-		return getData().get(KEY_BUILD_ID);
-	}
+    @JsonIgnore
+    public String getBuildId() {
+        return getData().get(KEY_BUILD_ID);
+    }
 
-	public void setBuildId(String buildId) {
-		getData().put(KEY_BUILD_ID, buildId);
-	}
+    public void setBuildId(String buildId) {
+        getData().put(KEY_BUILD_ID, buildId);
+    }
 
-	public SbomGenerationStatus getStatus() {
-		String statusStr = getData().get(KEY_STATUS);
+    public SbomGenerationStatus getStatus() {
+        String statusStr = getData().get(KEY_STATUS);
 
-		if (statusStr == null) {
-			return null;
-		}
+        if (statusStr == null) {
+            return null;
+        }
 
-		return SbomGenerationStatus.valueOf(statusStr);
-	}
+        return SbomGenerationStatus.valueOf(statusStr);
+    }
 
-	public void setStatus(SbomGenerationStatus status) {
-		getData().put(KEY_STATUS, status.name());
-		getMetadata().getLabels().put(Labels.LABEL_PHASE, status.name());
-	}
+    public void setStatus(SbomGenerationStatus status) {
+        getData().put(KEY_STATUS, status.name());
+        getMetadata().getLabels().put(Labels.LABEL_PHASE, status.name());
+    }
 
-	@JsonIgnore
-	public String dependentResourceName(SbomGenerationPhase phase) {
-		return this.getMetadata().getName() + "-" + phase.ordinal() + "-" + phase.name().toLowerCase();
-	}
+    @JsonIgnore
+    public String dependentResourceName(SbomGenerationPhase phase) {
+        return this.getMetadata().getName() + "-" + phase.ordinal() + "-" + phase.name().toLowerCase();
+    }
 
 }

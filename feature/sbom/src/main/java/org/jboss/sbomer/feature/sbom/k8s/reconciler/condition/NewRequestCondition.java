@@ -25,13 +25,13 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 
 public class NewRequestCondition implements Condition<TaskRun, GenerationRequest> {
 
-	@Override
-	public boolean isMet(GenerationRequest primary, TaskRun secondary, Context<GenerationRequest> context) {
-		if (primary.getStatus() != null && !primary.getStatus().isFinal()) {
-			return true;
-		}
+    @Override
+    public boolean isMet(GenerationRequest primary, TaskRun secondary, Context<GenerationRequest> context) {
+        if (primary.getStatus() != null && !primary.getStatus().isFinal()) {
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
 }

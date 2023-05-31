@@ -28,13 +28,13 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 
 public class InitFinishedCondition implements Condition<TaskRun, GenerationRequest> {
 
-	@Override
-	public boolean isMet(GenerationRequest primary, TaskRun secondary, Context<GenerationRequest> context) {
-		if (Objects.equals(primary.getStatus(), SbomGenerationStatus.INITIALIZED)) {
-			return true;
-		}
+    @Override
+    public boolean isMet(GenerationRequest primary, TaskRun secondary, Context<GenerationRequest> context) {
+        if (Objects.equals(primary.getStatus(), SbomGenerationStatus.INITIALIZED)) {
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
 }
