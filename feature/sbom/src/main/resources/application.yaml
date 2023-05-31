@@ -28,7 +28,19 @@ quarkus:
         level: WARN
     json:
       pretty-print: true
-      # console:
-      #   enable: false
-    console:
-      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+
+"%dev":
+  quarkus:
+    log:
+      json:
+        console:
+          enable: false
+      console:
+        format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+
+"%test":
+  quarkus:
+    log:
+      json:
+        console:
+          enable: false
