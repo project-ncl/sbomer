@@ -23,86 +23,23 @@
   xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <name>SBOMer SBOM feature</name>
+  <name>SBOMer SBOM Feature Parent</name>
 
   <parent>
     <groupId>org.jboss.sbomer</groupId>
-    <artifactId>sbomer-feature</artifactId>
+    <artifactId>sbomer-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <groupId>org.jboss.sbomer</groupId>
   <artifactId>sbomer-feature-sbom</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.jboss.sbomer</groupId>
-      <artifactId>sbomer-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-config-yaml</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkiverse.operatorsdk</groupId>
-      <artifactId>quarkus-operator-sdk</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkiverse.tektonclient</groupId>
-      <artifactId>quarkus-tekton-client</artifactId>
-      <version>${version.tekton-client}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>${version.lombok}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-junit5</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-junit5-mockito</artifactId>
-      <scope>test</scope>
-    </dependency>
+  <modules>
+    <module>cli</module>
+    <module>k8s</module>
+  </modules>
 
-  </dependencies>
-
-  <build>
-    <finalName>sbomer-service</finalName>
-    <plugins>
-      <plugin>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
-  <profiles>
-    <profile>
-      <id>native</id>
-      <activation>
-        <property>
-          <name>native</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${failsafe-plugin.version}</version>
-          </plugin>
-        </plugins>
-      </build>
-      <properties>
-        <quarkus.package.type>native</quarkus.package.type>
-      </properties>
-    </profile>
-  </profiles>
 </project>
