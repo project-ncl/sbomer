@@ -53,6 +53,9 @@ case "$BUILDER" in
 podman)
   BUILD_SCRIPT=("podman")
   ;;
+docker)
+  BUILD_SCRIPT=("docker")
+  ;;
 minikube)
   BUILD_SCRIPT=("minikube" "-p" "sbomer" "image")
   ;;
