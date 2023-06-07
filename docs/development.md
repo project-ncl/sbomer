@@ -134,6 +134,10 @@ There are available scripts that help with building all images:
 
   Uses local Podman to build all images.
 
+- `hack/build-images-docker.sh`
+
+  Uses local Docker to build all images.
+
 - `hack/build-images-minikube.sh`
 
   Build images inside of the Minikube environment. This is very useful in case of the `local` development environment
