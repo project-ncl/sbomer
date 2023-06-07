@@ -44,10 +44,10 @@ public class CycloneDXPluginMavenGenerateCommand extends AbstractMavenGenerateCo
     }
 
     @Override
-    protected Path generate() {
+    protected Path generate(String buildCmdOptions) {
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
         processBuilder.command(
-                "mvn",
+                buildCmdOptions,
                 String.format("org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom", version),
                 "-DoutputFormat=json",
                 "-DoutputName=bom");

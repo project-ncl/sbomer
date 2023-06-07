@@ -38,6 +38,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.core.utils.SbomUtils;
+import org.jboss.sbomer.core.utils.maven.MavenCommandLineParser;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
@@ -114,8 +115,23 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
                 // Clone the source code related to the build
                 doClone(scmUrl, scmTag, parent.getParent().getTargetDir(), parent.getParent().isForce());
 
+                // In case the original build command script contains profiles, projects list or system properties
+                // definitions,
+                // get them as a best effort and pass them to the SBOM generation to try to resolve the same dependency
+                // tree.
+                String buildCmdOptions = "mvn";
+                try {
+                    MavenCommandLineParser lineParser = MavenCommandLineParser.build()
+                            .launder(build.getBuildConfigRevision().getBuildScript());
+                    buildCmdOptions = lineParser.getRebuiltMvnCommandScript();
+                } catch (IllegalArgumentException exc) {
+                    log.error(
+                            "Could not launder the provided build command script! Using the default build command",
+                            exc);
+                }
+
                 // Generate the SBOM
-                Path bomPath = generate();
+                Path bomPath = generate(buildCmdOptions);
 
                 log.info(
                         "Preparing to update SBOM id: '{}' (PNC build '{}') with generated SBOM content from path '{}'...",
@@ -148,7 +164,7 @@ public abstract class AbstractMavenGenerateCommand extends AbstractCommand {
 
     protected abstract GeneratorImplementation getGeneratorType();
 
-    protected abstract Path generate();
+    protected abstract Path generate(String buildCmdOptions);
 
     protected void doClone(String url, String tag, Path path, boolean force) {
         log.info("Cloning '{}' repository and '{}' tag...", url, tag);
