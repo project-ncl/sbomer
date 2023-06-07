@@ -61,7 +61,7 @@ public class DominoMavenGenerateCommand extends AbstractMavenGenerateCommand {
     }
 
     @Override
-    protected Path generate() {
+    protected Path generate(String buildCmdOptions) {
         Path dominoPath = dominoDir;
 
         if (dominoVersion != null) {
