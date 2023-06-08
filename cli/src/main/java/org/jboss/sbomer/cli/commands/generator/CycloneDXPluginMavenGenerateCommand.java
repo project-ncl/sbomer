@@ -19,6 +19,7 @@ package org.jboss.sbomer.cli.commands.generator;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -46,11 +47,12 @@ public class CycloneDXPluginMavenGenerateCommand extends AbstractMavenGenerateCo
     @Override
     protected Path generate(String buildCmdOptions) {
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
-        processBuilder.command(
-                buildCmdOptions,
-                String.format("org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom", version),
-                "-DoutputFormat=json",
-                "-DoutputName=bom");
+        // Split the build command to be passed to the ProcessBuilder
+        List.of(buildCmdOptions.split("\\s+")).stream().forEach(processBuilder.command()::add);
+        processBuilder.command()
+                .add(String.format("org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom", version));
+        processBuilder.command().add("-DoutputFormat=json");
+        processBuilder.command().add("-DoutputName=bom");
 
         // This is ignored currently, see https://github.com/CycloneDX/cyclonedx-maven-plugin/pull/321
         // Leaving it here so we can decide what to do in the future
