@@ -1,7 +1,7 @@
 FROM registry.access.redhat.com/ubi9@sha256:4ea5966341930537784fd14b19073fb2af58d11b302332bb5dc445e0851b286d
 
 RUN INSTALL_PKGS="jq unzip zip git" && \
-    dnf -y --nodocs --setopt=install_weak_deps=0 install $INSTALL_PKGS && \
+    dnf --disableplugin=subscription-manager -y --nodocs --setopt=install_weak_deps=0 install $INSTALL_PKGS && \
     dnf clean all && \
     rm -rf /var/cache/* /var/log/dnf* /var/log/yum.*
 
