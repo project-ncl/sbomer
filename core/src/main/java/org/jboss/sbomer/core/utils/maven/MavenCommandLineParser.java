@@ -52,7 +52,7 @@ import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.PROJECTS_OPT
 public class MavenCommandLineParser {
 
     // In case system properties are something like -DnpmArgs="--strict-ssl=false --noproxy=${noproxy}", do not split
-    private static final String SPLIT_BY_SPACE_HONORING_QUOTES = " (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
+    public static final String SPLIT_BY_SPACE_HONORING_QUOTES = "\\s+(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
 
     @ToString.Exclude
     private CommandLineParser parser;
