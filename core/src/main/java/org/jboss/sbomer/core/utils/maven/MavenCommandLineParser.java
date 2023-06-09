@@ -52,7 +52,8 @@ import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.PROJECTS_OPT
 public class MavenCommandLineParser {
 
     // In case system properties are something like -DnpmArgs="--strict-ssl=false --noproxy=${noproxy}", do not split
-    public static final String SPLIT_BY_SPACE_HONORING_QUOTES = "\\s+(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
+    public static final String SPLIT_BY_SPACE_HONORING_DOUBLE_QUOTES = "\\s+(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
+    public static final String SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES = "\\s+(?=(?:[^'\"]*['\"][^'\"]*['\"])*[^'\"]*$)";
 
     @ToString.Exclude
     private CommandLineParser parser;
@@ -111,7 +112,8 @@ public class MavenCommandLineParser {
             fullCommandScript = fullCmdScript;
             extractedMvnCommandScript = extractMavenCommand(fullCommandScript);
 
-            String[] tokens = extractedMvnCommandScript.split(SPLIT_BY_SPACE_HONORING_QUOTES);
+            String[] tokens = extractedMvnCommandScript.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES);
+
             CommandLine cmd = parser.parse(cmdOptions, tokens);
 
             if (cmd.hasOption(PROFILES_OPTION)) {
@@ -176,7 +178,14 @@ public class MavenCommandLineParser {
         if (projects.size() == 0) {
             return "";
         }
-        return "-" + PROJECTS_OPTION + " " + projects.stream().collect(Collectors.joining(","));
+
+        String projectList = projects.stream().collect(Collectors.joining(","));
+        // Remove single and double quotes if the string starts and ends with them
+        projectList = projectList.replaceAll("^['\"]|['\"]$", "").trim();
+        // Finally remove all spaces inside the string
+        projectList = projectList.replaceAll("\\s+", "");
+
+        return "-" + PROJECTS_OPTION + " " + projectList;
     }
 
     private String rebuildNoArgsCmd() {

@@ -85,7 +85,7 @@ public class MavenCommandLineParserTest {
         assertEquals(0, lineParser.getProfiles().size());
         assertEquals(10, lineParser.getProperties().size());
         assertEquals(1, lineParser.getProjects().size());
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-pl '!tests,!tests/wildfly-dist'"));
+        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-pl !tests,!tests/wildfly-dist"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DskipTests"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Ddownstream=mtr"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dwebpack.environment=production "));

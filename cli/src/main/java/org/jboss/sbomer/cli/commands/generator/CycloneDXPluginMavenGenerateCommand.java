@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import static org.jboss.sbomer.core.utils.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_QUOTES;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES;
 
 @Slf4j
 @Command(
@@ -48,10 +48,13 @@ public class CycloneDXPluginMavenGenerateCommand extends AbstractMavenGenerateCo
 
     @Override
     protected Path generate(String buildCmdOptions) {
+
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
         // Split the build command to be passed to the ProcessBuilder, without separating the options surrounded by
         // quotes
-        List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_QUOTES)).stream().forEach(processBuilder.command()::add);
+        List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
+                .stream()
+                .forEach(processBuilder.command()::add);
         processBuilder.command()
                 .add(String.format("org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom", version));
         processBuilder.command().add("-DoutputFormat=json");
