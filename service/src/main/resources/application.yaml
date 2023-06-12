@@ -41,6 +41,8 @@ quarkus:
   oidc:
     auth-server-url: https://keycloak-host/auth/realms/my-realm
     client-id: pnc-sbomer
+    credentials:
+      secret: secret
     tls:
       verification: none
     keycloak:
