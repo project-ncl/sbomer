@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jboss.org/sbomer/config.json",
+  "title": "SBOMeruser configuration file",
+  "description": "User-provided configuration file to instruct SBOM generation",
+  "type": "object",
+  "$defs": {
+    "processor-default": {
+      "$id": "/schemas/processors/default",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "default"
+        }
+      }
+    },
+    "processor-redhat-product": {
+      "$id": "/schemas/processors/redhat-product",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "redhat-product"
+        },
+        "errata": {
+          "description": "Product information from Errata Tool",
+          "type": "object",
+          "properties": {
+            "productName": {
+              "description": "Errata Tool product name",
+              "type": "string"
+            },
+            "productVersion": {
+              "description": "Errata Tool product version",
+              "type": "string"
+            },
+            "productVariant": {
+              "description": "Errata Tool product variant",
+              "type": "string"
+            }
+          },
+          "required": ["productName", "productVersion", "productVariant"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["errata"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "apiVersion": {
+      "description": "Version of the configuration file",
+      "enum": ["sbomer.jboss.org/v1alpha1"]
+    },
+    "buildId": {
+      "description": "PNC build identifier",
+      "type": "string"
+    },
+    "products": {
+      "description": "List of product configurations",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "generator": {
+            "description": "Generator configuration",
+            "type": "object",
+            "properties": {
+              "buildId": {
+                "description": "The PNC build identifier",
+                "type": "string"
+              },
+              "type": {
+                "description": "Type of generator",
+                "enum": ["maven-cyclonedx", "maven-domino"]
+              },
+              "args": {
+                "description": "Optional custom arguments that are passed to the generator",
+                "type": "string"
+              },
+              "version": {
+                "description": "Version of the generator",
+                "type": "string"
+              }
+            },
+            "required": ["type"],
+            "additionalProperties": false
+          },
+          "processors": {
+            "type": "array",
+            "prefixItems": [
+              { "$ref": "#/$defs/processor-default" },
+              { "$ref": "#/$defs/processor-redhat-product" }
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["products"],
+  "additionalProperties": false
+}

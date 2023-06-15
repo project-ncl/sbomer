@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import com.fasterxml.jackson.core.JacksonException;
@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *
  * @author Marek Goldmann
  */
-public class ProcessorsDeserializer extends StdDeserializer<Map<ProcessorImplementation, ProcessorConfig>> {
+public class ProcessorsDeserializer extends StdDeserializer<Map<ProcessorType, ProcessorConfig>> {
 
     public ProcessorsDeserializer() {
         this(null);
@@ -49,7 +49,7 @@ public class ProcessorsDeserializer extends StdDeserializer<Map<ProcessorImpleme
     }
 
     @Override
-    public Map<ProcessorImplementation, ProcessorConfig> deserialize(JsonParser p, DeserializationContext ctxt)
+    public Map<ProcessorType, ProcessorConfig> deserialize(JsonParser p, DeserializationContext ctxt)
             throws IOException, JacksonException {
 
         JsonNode node = p.getCodec().readTree(p);
@@ -58,7 +58,7 @@ public class ProcessorsDeserializer extends StdDeserializer<Map<ProcessorImpleme
             throw new ApplicationException("Invalid format of processors, a map expected");
         }
 
-        Map<ProcessorImplementation, ProcessorConfig> processors = new HashMap<>();
+        Map<ProcessorType, ProcessorConfig> processors = new HashMap<>();
         var om = new ObjectMapper();
 
         ((ObjectNode) node).fields().forEachRemaining(entry -> {
@@ -68,7 +68,7 @@ public class ProcessorsDeserializer extends StdDeserializer<Map<ProcessorImpleme
                         entry.getKey());
             }
 
-            Optional<ProcessorImplementation> processorImplementation = ProcessorImplementation.get(entry.getKey());
+            Optional<ProcessorType> processorImplementation = ProcessorType.get(entry.getKey());
 
             if (processorImplementation.isEmpty()) {
                 throw new ApplicationException("Processor implementation: '{}' is not valid", entry.getKey());

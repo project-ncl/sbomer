@@ -30,6 +30,8 @@ quarkus:
   rest-client:
     "sbomer":
       url: "${SBOMER_SERVICE_URL:http://localhost:8080}"
+    "gerrit":
+      url: "https://code.engineering.redhat.com"
 
   log:
     level: INFO
@@ -38,6 +40,9 @@ quarkus:
         level: DEBUG
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+      stderr: true
+    json:
+      pretty-print: true
 
 "%dev":
   quarkus:
@@ -51,7 +56,6 @@ quarkus:
       json:
         console:
           enable: false
-
 
 "%test":
   quarkus:

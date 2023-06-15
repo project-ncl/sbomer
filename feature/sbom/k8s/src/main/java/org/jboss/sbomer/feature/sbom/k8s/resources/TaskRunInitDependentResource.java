@@ -17,13 +17,22 @@
  */
 package org.jboss.sbomer.feature.sbom.k8s.resources;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.feature.sbom.k8s.model.SbomGenerationPhase;
 
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.ParamSpecBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.StepBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.TaskResultBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -34,6 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 @KubernetesDependent(resourceDiscriminator = InitResourceDiscriminator.class)
 @Slf4j
 public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentResource<TaskRun, GenerationRequest> {
+
+    public static final String RESULT_NAME = "config";
+    public static final String PARAM_BUILD_ID_NAME = "build-id";
 
     TaskRunInitDependentResource() {
         super(TaskRun.class);
@@ -55,6 +67,8 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
      */
     @Override
     protected TaskRun desired(GenerationRequest generationRequest, Context<GenerationRequest> context) {
+        MDCUtils.addBuildContext(generationRequest.getBuildId());
+
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}'",
                 SbomGenerationPhase.INIT,
@@ -65,8 +79,17 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
         labels.put(Labels.LABEL_BUILD_ID, generationRequest.getBuildId());
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.INIT.name().toLowerCase());
 
+        String script;
+
+        try {
+            InputStream is = getClass().getClassLoader().getResourceAsStream("tekton/init.sh");
+            script = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new ApplicationException("Could not read the configuration file schema", e);
+        }
+
         return new TaskRunBuilder().withNewMetadata()
-                .withNamespace("default") // TODO!
+                .withNamespace(generationRequest.getMetadata().getNamespace())
                 .withLabels(labels)
                 .withName(generationRequest.dependentResourceName(SbomGenerationPhase.INIT))
                 .withOwnerReferences(
@@ -76,17 +99,32 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                                 .withUid(generationRequest.getMetadata().getUid())
                                 .build())
                 .endMetadata()
+
                 .withNewSpec()
+                .withParams(
+                        new ParamBuilder().withName(PARAM_BUILD_ID_NAME)
+                                .withNewValue(generationRequest.getBuildId())
+                                .build())
                 .withNewTaskSpec()
+                .withParams(
+                        new ParamSpecBuilder().withName(PARAM_BUILD_ID_NAME)
+                                .withDescription("PNC build identifier")
+                                .build())
+                .withResults(
+                        new TaskResultBuilder().withName(RESULT_NAME).withDescription("Runtime configuration").build())
                 .withSteps(
-                        new StepBuilder().withName("hello")
-                                .withImage("alpine")
-                                .withScript("#!/bin/sh\necho \"Hello World\"")
+                        new StepBuilder().withName("initialize")
+                                .withImage("localhost/sbomer-generator:latest")
+                                .withImagePullPolicy("IfNotPresent")
+                                .withNewResources()
+                                .withLimits(Map.of("cpu", new Quantity("500m"), "memory", new Quantity("500Mi")))
+                                .withRequests(Map.of("cpu", new Quantity("200m"), "memory", new Quantity("200Mi")))
+                                .endResources()
+                                .withScript(script)
                                 .build())
                 .endTaskSpec()
                 .endSpec()
                 .build();
 
     }
-
 }

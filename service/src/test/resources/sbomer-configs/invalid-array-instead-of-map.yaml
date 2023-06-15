@@ -1,5 +1,0 @@
-products:
-  - processors:
-      - doesntexist:
-         customArgs: "--config-file as"
-         version: "1.1"

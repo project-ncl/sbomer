@@ -38,7 +38,7 @@ public class BuildFinishedEventListener {
         // TODO how to make these querable? add more labels?
         GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata()
                 .endMetadata()
-                .withBuildId("AABBCC")
+                .withBuildId("AYL6AOH4DRQAA")
                 .withStatus(SbomGenerationStatus.NEW)
                 .build();
 

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorType;
 
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +37,7 @@ public class ProcessingExecConfig {
     @Data
     @Builder
     public static class ProcessorExec {
-        ProcessorImplementation processor;
+        ProcessorType processor;
         String version;
         @Builder.Default
         String args = "";

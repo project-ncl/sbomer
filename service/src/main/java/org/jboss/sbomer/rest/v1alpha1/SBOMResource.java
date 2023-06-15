@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.rest.v1alpha1;
 
+import static org.jboss.sbomer.rest.UserRoles.SYSTEM_USER;
+
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
@@ -42,24 +44,18 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.service.GenerationService;
-import org.jboss.sbomer.service.ProcessingService;
 import org.jboss.sbomer.service.SbomService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
-
-import static org.jboss.sbomer.rest.UserRoles.SYSTEM_USER;
 
 @Path("/api/v1alpha1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -67,16 +63,11 @@ import static org.jboss.sbomer.rest.UserRoles.SYSTEM_USER;
 @ApplicationScoped
 @Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1alpha1, with RSQL capabilities")
 @PermitAll
+// TODO: move to SBOM feature
 public class SBOMResource {
 
     @Inject
     SbomService sbomService;
-
-    @Inject
-    GenerationService generationService;
-
-    @Inject
-    ProcessingService processingService;
 
     @GET
     @Operation(summary = "List SBOMs", description = "List paginated SBOMs using RSQL advanced search.")
@@ -273,84 +264,87 @@ public class SBOMResource {
     // @Operation(summary = "Get the enriched SBOM content related to a root component purl")
     // -------------------------------------------------------------------------------
 
-    @POST
-    @Operation(
-            summary = "Generate a base SBOM based on the PNC build",
-            description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
-    @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    @Parameter(
-            name = "generator",
-            description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are `DOMINO`, `CYCLONEDX`",
-            example = "CYCLONEDX")
-    @Path("/generate/build/{buildId}")
-    @APIResponses({ @APIResponse(
-            responseCode = "202",
-            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response generate(@PathParam("buildId") String buildId, @QueryParam("generator") String generator)
-            throws Exception {
+    // TODO: disabled until moved to sbomer feature and made it possible to create the generation request
+    // @POST
+    // @Operation(
+    // summary = "Generate a base SBOM based on the PNC build",
+    // description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
+    // @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    // @Parameter(
+    // name = "generator",
+    // description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are
+    // `DOMINO`, `CYCLONEDX`",
+    // example = "CYCLONEDX")
+    // @Path("/generate/build/{buildId}")
+    // @APIResponses({ @APIResponse(
+    // responseCode = "202",
+    // description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It
+    // does execute the generation behind the scenes.",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    // @APIResponse(
+    // responseCode = "500",
+    // description = "Internal server error",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    // public Response generate(@PathParam("buildId") String buildId, @QueryParam("generator") String generator)
+    // throws Exception {
 
-        try {
-            MDCUtils.addBuildContext(buildId);
+    // try {
+    // MDCUtils.addBuildContext(buildId);
 
-            GeneratorImplementation gen = GeneratorImplementation.CYCLONEDX;
+    // GeneratorType gen = GeneratorType.MAVEN_CYCLONEDX;
 
-            if (!Strings.isEmpty(generator)) {
-                try {
-                    gen = GeneratorImplementation.valueOf(generator);
-                } catch (IllegalArgumentException iae) {
-                    throw new ClientException(
-                            Status.BAD_REQUEST.getStatusCode(),
-                            "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use `CYCLONEDX`",
-                            iae);
-                }
-            }
+    // if (!Strings.isEmpty(generator)) {
+    // try {
+    // gen = GeneratorType.valueOf(generator);
+    // } catch (IllegalArgumentException iae) {
+    // throw new ClientException(
+    // Status.BAD_REQUEST.getStatusCode(),
+    // "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use
+    // `CYCLONEDX`",
+    // iae);
+    // }
+    // }
 
-            Sbom sbom = generationService.generate(buildId, gen);
+    // Sbom sbom = generationService.generate(buildId, gen);
 
-            return Response.status(Status.ACCEPTED).entity(sbom).build();
-        } finally {
-            MDCUtils.removeBuildContext();
-        }
-    }
+    // return Response.status(Status.ACCEPTED).entity(sbom).build();
+    // } finally {
+    // MDCUtils.removeBuildContext();
+    // }
+    // }
 
-    @POST
-    @Operation(summary = "Process selected SBOM", description = "Process selected SBOM using default processors")
-    @Parameter(name = "id", description = "The SBOM identifier")
-    @Path("/{id}/process")
-    @APIResponses({
-            @APIResponse(
-                    responseCode = "202",
-                    description = "The SBOM enrichment process was accepted.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
-                    responseCode = "400",
-                    description = "Could not parse provided arguments",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
-                    responseCode = "404",
-                    description = "Requested SBOM could not be found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
-    public Response processEnrichmentOfBaseSbom(@PathParam("id") final String sbomId) throws Exception {
+    // @POST
+    // @Operation(summary = "Process selected SBOM", description = "Process selected SBOM using default processors")
+    // @Parameter(name = "id", description = "The SBOM identifier")
+    // @Path("/{id}/process")
+    // @APIResponses({ @APIResponse(
+    // responseCode = "202",
+    // description = "The SBOM enrichment process was accepted.",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    // @APIResponse(
+    // responseCode = "400",
+    // description = "Could not parse provided arguments",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    // @APIResponse(
+    // responseCode = "404",
+    // description = "Requested SBOM could not be found",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    // @APIResponse(
+    // responseCode = "500",
+    // description = "Internal server error",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    // public Response processEnrichmentOfBaseSbom(@PathParam("id") final String sbomId) throws Exception {
 
-        try {
-            Sbom sbom = doGetBomById(sbomId);
-            MDCUtils.addBuildContext(sbom.getBuildId());
-            sbom = processingService.process(sbom);
+    // try {
+    // Sbom sbom = doGetBomById(sbomId);
+    // MDCUtils.addBuildContext(sbom.getBuildId());
+    // sbom = processingService.process(sbom);
 
-            return Response.status(Status.ACCEPTED).entity(sbom).build();
-        } finally {
-            MDCUtils.removeBuildContext();
-        }
-    }
+    // return Response.status(Status.ACCEPTED).entity(sbom).build();
+    // } finally {
+    // MDCUtils.removeBuildContext();
+    // }
+    // }
 
     @DELETE
     @Path("/{id}")

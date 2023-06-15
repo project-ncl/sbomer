@@ -61,6 +61,7 @@ public class GenerationRequest extends ConfigMap {
 
     public static final String KEY_BUILD_ID = "build-id";
     public static final String KEY_STATUS = "status";
+    public static final String KEY_CONFIG = "config";
 
     public GenerationRequest() {
         super();
@@ -83,6 +84,15 @@ public class GenerationRequest extends ConfigMap {
 
     public void setBuildId(String buildId) {
         getData().put(KEY_BUILD_ID, buildId);
+    }
+
+    @JsonIgnore
+    public String getConfig() {
+        return getData().get(KEY_CONFIG);
+    }
+
+    public void setConfig(String config) {
+        getData().put(KEY_CONFIG, config);
     }
 
     public SbomGenerationStatus getStatus() {

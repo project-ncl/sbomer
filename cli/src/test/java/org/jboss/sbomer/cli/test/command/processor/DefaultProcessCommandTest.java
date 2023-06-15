@@ -40,7 +40,7 @@ import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.sbomer.cli.commands.processor.DefaultProcessCommand;
 import org.jboss.sbomer.cli.model.Sbom;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.service.PncService;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.core.utils.SbomUtils;
@@ -114,7 +114,7 @@ public class DefaultProcessCommandTest {
     @Test
     void shouldReturnCorrectImplementationType() {
         log.info("test: shouldReturnCorrectImplementationType");
-        assertEquals(ProcessorImplementation.DEFAULT, command.getImplementationType());
+        assertEquals(ProcessorType.DEFAULT, command.getImplementationType());
     }
 
     @Test

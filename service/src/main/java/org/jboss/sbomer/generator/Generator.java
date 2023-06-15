@@ -27,38 +27,38 @@ import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.GeneratorType;
 
 /**
  * <p>
  * {@link Generator} annotation that can be used to differentiate between SBOM generator implementation.
  * </p>
  * <p>
- * Available implementations are listed in the {@link GeneratorImplementation} enum.
+ * Available implementations are listed in the {@link GeneratorType} enum.
  * </p>
  */
 @Qualifier
 @Retention(RUNTIME)
 @Target({ FIELD, TYPE })
 public @interface Generator {
-    public GeneratorImplementation value();
+    public GeneratorType value();
 
     @SuppressWarnings("all")
     public final class GeneratorLiteral extends AnnotationLiteral<Generator> implements Generator {
         private static final long serialVersionUID = 1L;
 
-        private final GeneratorImplementation value;
+        private final GeneratorType value;
 
-        public static GeneratorLiteral of(GeneratorImplementation value) {
+        public static GeneratorLiteral of(GeneratorType value) {
             return new GeneratorLiteral(value);
         }
 
-        private GeneratorLiteral(GeneratorImplementation value) {
+        private GeneratorLiteral(GeneratorType value) {
             this.value = value;
         }
 
         @Override
-        public GeneratorImplementation value() {
+        public GeneratorType value() {
             return value;
         }
     }

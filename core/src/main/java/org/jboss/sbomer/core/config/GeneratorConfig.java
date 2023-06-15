@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.core.config;
 
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.GeneratorType;
 
 import lombok.Builder;
 import lombok.Data;
@@ -33,7 +33,7 @@ public class GeneratorConfig {
     /**
      * The selected generator.
      */
-    GeneratorImplementation type;
+    GeneratorType type;
     /**
      * Optional custom arguments that should be passed to the generator.
      */

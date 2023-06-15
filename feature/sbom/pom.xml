@@ -38,6 +38,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>core</module>
     <module>cli</module>
     <module>k8s</module>
   </modules>

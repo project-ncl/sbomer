@@ -1,0 +1,5 @@
+products:
+  - processors:
+      - doesntexist:
+         args: "--config-file as"
+         version: "1.1"

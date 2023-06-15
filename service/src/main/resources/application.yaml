@@ -78,12 +78,12 @@ sbomer:
 
   generation:
     enabled: true
-    default-generator: cyclonedx
+    default-generator: maven-cyclonedx
     generators:
-      domino:
+      maven-domino:
         default-version: "0.0.89"
         default-args: "--include-non-managed"
-      cyclonedx:
+      maven-cyclonedx:
         default-version: "2.7.8"
         default-args: "--batch-mode"
 

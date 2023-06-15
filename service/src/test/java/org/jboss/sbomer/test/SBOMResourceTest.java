@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.time.Instant;
 
 import org.hamcrest.CoreMatchers;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.GeneratorType;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.core.test.TestResources;
@@ -165,9 +165,9 @@ public class SBOMResourceTest {
         sbom.setId(416640206274228224L);
         sbom.setType(SbomType.BUILD_TIME);
         sbom.setGenerationTime(Instant.now());
-        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+        sbom.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
 
-        Mockito.when(generationService.generate("AABBCC", GeneratorImplementation.CYCLONEDX)).thenReturn(sbom);
+        Mockito.when(generationService.generate("AABBCC", GeneratorType.MAVEN_CYCLONEDX)).thenReturn(sbom);
 
         given().when()
                 .contentType(ContentType.JSON)

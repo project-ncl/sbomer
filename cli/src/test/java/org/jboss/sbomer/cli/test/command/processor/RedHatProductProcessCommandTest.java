@@ -29,7 +29,7 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.commands.processor.RedHatProductProcessCommand;
 import org.jboss.sbomer.cli.model.Sbom;
 import org.jboss.sbomer.cli.test.PncWireMock;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.core.utils.SbomUtils;
@@ -67,7 +67,7 @@ public class RedHatProductProcessCommandTest {
 
     @Test
     void shouldReturnCorrectImplementationType() {
-        assertEquals(ProcessorImplementation.REDHAT_PRODUCT, command.getImplementationType());
+        assertEquals(ProcessorType.REDHAT_PRODUCT, command.getImplementationType());
     }
 
     @Test

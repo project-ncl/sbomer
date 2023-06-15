@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Labels used by Tekton resources within the SBOM feature.
+ */
 public class Labels {
     public static final String LABEL_PHASE = "sbomer.jboss.org/phase";
     public static final String LABEL_BUILD_ID = "sbomer.jboss.org/build-id";

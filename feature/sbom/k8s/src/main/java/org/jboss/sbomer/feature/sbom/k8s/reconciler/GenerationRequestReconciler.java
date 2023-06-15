@@ -19,22 +19,36 @@ package org.jboss.sbomer.feature.sbom.k8s.reconciler;
 
 import static org.jboss.sbomer.feature.sbom.k8s.reconciler.GenerationRequestReconciler.EVENT_SOURCE_NAME;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.utils.MDCUtils;
+import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
+import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 import org.jboss.sbomer.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.feature.sbom.k8s.reconciler.condition.InitFinishedCondition;
-import org.jboss.sbomer.feature.sbom.k8s.reconciler.condition.NewRequestCondition;
+import org.jboss.sbomer.feature.sbom.k8s.reconciler.condition.NewOrFailedRequestCondition;
 import org.jboss.sbomer.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.feature.sbom.k8s.resources.TaskRunInitDependentResource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
+import io.fabric8.tekton.pipeline.v1beta1.TaskRunResult;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
+import io.javaoperatorsdk.operator.api.reconciler.Constants;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
@@ -64,14 +78,14 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @ControllerConfiguration(
-        namespaces = { "default" }, // TODO config!
         labelSelector = Labels.LABEL_SELECTOR,
+        namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
         dependents = {
                 @Dependent(
                         name = "init",
                         type = TaskRunInitDependentResource.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME,
-                        reconcilePrecondition = NewRequestCondition.class,
+                        reconcilePrecondition = NewOrFailedRequestCondition.class,
                         readyPostcondition = InitFinishedCondition.class),
                 @Dependent(
                         type = TaskRunGenerateDependentResource.class,
@@ -83,10 +97,22 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
     public static final String EVENT_SOURCE_NAME = "GenerationRequestEventSource";
 
+    List<TaskRunGenerateDependentResource> generations = new ArrayList<>();
+
+    public GenerationRequestReconciler() {
+
+    }
+
+    @Inject
+    ConfigReader configReader;
+
     @Override
     public UpdateControl<GenerationRequest> reconcile(
             GenerationRequest generationRequest,
             Context<GenerationRequest> context) throws Exception {
+
+        MDCUtils.removeContext();
+        MDCUtils.addBuildContext(generationRequest.getBuildId());
 
         // Fetch any secondary resources (Tekton TaskRuns) that are related to the primary resource (GenerationRequest)
         // There may be between 0 and to 2 TaskRuns related to the GenerationRequest
@@ -180,6 +206,10 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             case "Unknown":
                 return SbomGenerationStatus.INITIALIZING;
             case "True":
+                log.info("Initialization finished");
+
+                handleConfigResult(generationRequest, taskRun);
+
                 // TODO: fetch result (runtime configuration) and store it
                 return SbomGenerationStatus.INITIALIZED;
             case "False":
@@ -189,6 +219,59 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         }
 
         return null;
+    }
+
+    private Config handleConfigResult(GenerationRequest generationRequest, TaskRun taskRun) {
+        log.debug("Handling result of the initialization task");
+
+        if (taskRun.getStatus() == null) {
+            throw new ApplicationException(
+                    "TaskRun '{}' does not have status sub-resource despite it is expected",
+                    taskRun.getMetadata().getName());
+
+        }
+
+        if (taskRun.getStatus().getTaskResults() == null || taskRun.getStatus().getTaskResults().isEmpty()) {
+            throw new ApplicationException(
+                    "TaskRun '{}' does not have any results despite it is expected to have one",
+                    taskRun.getMetadata().getName());
+        }
+
+        Optional<TaskRunResult> configResult = taskRun.getStatus()
+                .getTaskResults()
+                .stream()
+                .filter(result -> Objects.equals(result.getName(), TaskRunInitDependentResource.RESULT_NAME))
+                .findFirst();
+
+        if (configResult.isEmpty()) {
+            throw new ApplicationException(
+                    "Could not find the '{}' result within the TaskRun '{}'",
+                    TaskRunInitDependentResource.RESULT_NAME,
+                    taskRun.getMetadata().getName());
+        }
+
+        String configVal = configResult.get().getValue().getStringVal();
+        Config config;
+
+        try {
+            config = configReader.getYamlObjectMapper().readValue(configVal.getBytes(), Config.class);
+        } catch (IOException e) {
+            throw new ApplicationException(
+                    "Could not parse the '{}' result within the TaskRun '{}': {}",
+                    TaskRunInitDependentResource.RESULT_NAME,
+                    taskRun.getMetadata().getName(),
+                    configVal);
+        }
+
+        log.debug("Runtime config from TaskRun '{}' parsed: {}", taskRun.getMetadata().getName(), config);
+
+        try {
+            generationRequest.setConfig(configReader.getYamlObjectMapper().writeValueAsString(config));
+        } catch (JsonProcessingException e) {
+            log.error("Unable to serialize product configuration", e);
+        }
+
+        return config;
     }
 
     private SbomGenerationStatus handleGenerateTaskRunUpdate(GenerationRequest generationRequest, TaskRun taskRun) {
@@ -202,7 +285,6 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
                 // TODO: get failure reason
                 // TODO for how long should we leave failed requests? when to do cleanup?
                 return SbomGenerationStatus.FAILED;
-
         }
 
         return null;
@@ -211,7 +293,9 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
     @Override
     public Map<String, EventSource> prepareEventSources(EventSourceContext<GenerationRequest> context) {
         InformerEventSource<TaskRun, GenerationRequest> ies = new InformerEventSource<>(
-                InformerConfiguration.from(TaskRun.class, context).build(),
+                InformerConfiguration.from(TaskRun.class, context)
+                        .withNamespacesInheritedFromController(context)
+                        .build(),
                 context);
 
         return Map.of(EVENT_SOURCE_NAME, ies);

@@ -1,7 +1,0 @@
-# Single product with generator configuration override.
-# Product configuration will be fetched from PNC, and if not available, no generation will be performed.
-products:
-  - generator:
-      type: DOMINO
-      customArgs: "--config-file .domino/quarkus-bom-config.json"
-      version: "0.0.88"

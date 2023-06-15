@@ -49,8 +49,8 @@ import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.GeneratorType;
+import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.utils.SbomUtils;
@@ -111,15 +111,15 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "generator", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Generator is required")
-    private GeneratorImplementation generator;
+    private GeneratorType generator;
 
     @Column(name = "processors", nullable = false, updatable = false)
-    @ElementCollection(targetClass = ProcessorImplementation.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = ProcessorType.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(
             name = "sbom_processors",
             joinColumns = @JoinColumn(name = "sbom_id", foreignKey = @ForeignKey(name = "fk_processor_sbom")))
-    private Set<ProcessorImplementation> processors;
+    private Set<ProcessorType> processors;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(

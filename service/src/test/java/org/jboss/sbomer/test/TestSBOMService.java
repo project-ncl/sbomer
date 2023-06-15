@@ -28,7 +28,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.GeneratorType;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.model.Sbom;
@@ -66,7 +66,7 @@ public class TestSBOMService {
 
         Sbom dummySbom = new Sbom();
         dummySbom.setBuildId(INITIAL_BUILD_ID);
-        dummySbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+        dummySbom.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
         dummySbom.setType(SbomType.BUILD_TIME);
 
         sbomService.save(dummySbom);

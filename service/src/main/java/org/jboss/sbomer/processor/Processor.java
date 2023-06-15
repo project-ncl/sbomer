@@ -27,30 +27,30 @@ import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorType;
 
 @Qualifier
 @Retention(RUNTIME)
 @Target({ FIELD, TYPE })
 public @interface Processor {
-    public ProcessorImplementation value();
+    public ProcessorType value();
 
     @SuppressWarnings("all")
     public final class ProcessorLiteral extends AnnotationLiteral<Processor> implements Processor {
         private static final long serialVersionUID = 1L;
 
-        private final ProcessorImplementation value;
+        private final ProcessorType value;
 
-        public static ProcessorLiteral of(ProcessorImplementation value) {
+        public static ProcessorLiteral of(ProcessorType value) {
             return new ProcessorLiteral(value);
         }
 
-        private ProcessorLiteral(ProcessorImplementation value) {
+        private ProcessorLiteral(ProcessorType value) {
             this.value = value;
         }
 
         @Override
-        public ProcessorImplementation value() {
+        public ProcessorType value() {
             return value;
         }
     }

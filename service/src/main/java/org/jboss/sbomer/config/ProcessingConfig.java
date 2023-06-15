@@ -21,7 +21,7 @@ import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.processor.ProcessingExecConfig;
 import org.jboss.sbomer.processor.ProcessingExecConfig.ProcessorExec;
 
@@ -36,7 +36,7 @@ import io.smallrye.config.WithName;
 @ConfigMapping(prefix = "sbomer.processing")
 public interface ProcessingConfig {
     public interface ProcessorConfig {
-        ProcessorImplementation name();
+        ProcessorType name();
     }
 
     /**

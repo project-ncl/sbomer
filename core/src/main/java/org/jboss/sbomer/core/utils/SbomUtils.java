@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.core.utils;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -43,7 +44,9 @@ import org.jboss.pnc.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SbomUtils {
 
@@ -224,6 +227,17 @@ public class SbomUtils {
         } catch (ParseException e) {
             log.error(e.getMessage(), e);
             return null;
+        }
+    }
+
+    public static void toPath(Bom bom, Path path) {
+        try {
+            new ObjectMapper().writeValue(path.toFile(), SbomUtils.toJsonNode(bom));
+
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
         }
     }
 

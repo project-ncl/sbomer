@@ -16,31 +16,14 @@
 # limitations under the License.
 #
 
+microprofile:
+  rest:
+    client:
+      disable:
+        default:
+          mapper: true
+
 quarkus:
-  log:
-    level: INFO
-    category:
-      "org.jboss.sbomer.feature.sbom.cli":
-        level: DEBUG
-      # "io.javaoperatorsdk.operator":
-      #   level: DEBUG
-      "com.github.tennaito.rsql":
-        level: WARN
-    json:
-      pretty-print: true
-
-"%dev":
-  quarkus:
-    log:
-      json:
-        console:
-          enable: false
-      console:
-        format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
-
-"%test":
-  quarkus:
-    log:
-      json:
-        console:
-          enable: false
+  rest-client:
+    "gerrit":
+      url: "https://code.engineering.redhat.com" # TODO: parametrize it

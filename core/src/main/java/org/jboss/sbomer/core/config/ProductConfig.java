@@ -19,7 +19,7 @@ package org.jboss.sbomer.core.config;
 
 import java.util.Map;
 
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.ProcessorType;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -40,7 +40,7 @@ public class ProductConfig {
      * Processors configuration.
      */
     @JsonDeserialize(using = ProcessorsDeserializer.class)
-    Map<ProcessorImplementation, ProcessorConfig> processors;
+    Map<ProcessorType, ProcessorConfig> processors;
 
     /**
      * Generator configuration.

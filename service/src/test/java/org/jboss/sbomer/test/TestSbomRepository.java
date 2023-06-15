@@ -39,8 +39,8 @@ import javax.validation.Validator;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.GeneratorType;
+import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.utils.SbomUtils;
@@ -82,7 +82,7 @@ public class TestSbomRepository {
         parentSBOM.setType(SbomType.BUILD_TIME);
         parentSBOM.setGenerationTime(Instant.now());
         parentSBOM.setSbom(SbomUtils.toJsonNode(bom));
-        parentSBOM.setGenerator(GeneratorImplementation.CYCLONEDX);
+        parentSBOM.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
         parentSBOM.setParentSbom(null);
         return parentSBOM;
     }
@@ -99,7 +99,7 @@ public class TestSbomRepository {
         enrichedSBOM.setGenerationTime(Instant.now());
         enrichedSBOM.setSbom(SbomUtils.toJsonNode(bom));
         enrichedSBOM.setGenerator(parentSbom.getGenerator());
-        enrichedSBOM.setProcessors(Arrays.asList(ProcessorImplementation.DEFAULT).stream().collect(Collectors.toSet()));
+        enrichedSBOM.setProcessors(Arrays.asList(ProcessorType.DEFAULT).stream().collect(Collectors.toSet()));
         enrichedSBOM.setParentSbom(parentSbom);
         return enrichedSBOM;
     }
@@ -140,7 +140,7 @@ public class TestSbomRepository {
 
         assertEquals(416640206274228224L, baseSBOM.getId());
         assertEquals("ARYT3LBXDVYAC", baseSBOM.getBuildId());
-        assertEquals(GeneratorImplementation.CYCLONEDX, baseSBOM.getGenerator());
+        assertEquals(GeneratorType.MAVEN_CYCLONEDX, baseSBOM.getGenerator());
         assertEquals(SbomType.BUILD_TIME, baseSBOM.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
@@ -166,7 +166,7 @@ public class TestSbomRepository {
 
         assertEquals(416640206274228224L, sbom.getId());
         assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
-        assertEquals(GeneratorImplementation.CYCLONEDX, sbom.getGenerator());
+        assertEquals(GeneratorType.MAVEN_CYCLONEDX, sbom.getGenerator());
         assertEquals(SbomType.BUILD_TIME, sbom.getType());
         assertEquals(0, sbom.getProcessors().size());
         assertEquals("CycloneDX", bom.getBomFormat());
@@ -222,8 +222,8 @@ public class TestSbomRepository {
 
         assertEquals(416640206274228225L, enrichedSbom.getId());
         assertEquals("ARYT3LBXDVYAC", enrichedSbom.getBuildId());
-        assertEquals(GeneratorImplementation.CYCLONEDX, enrichedSbom.getGenerator());
-        assertEquals(Arrays.asList(ProcessorImplementation.DEFAULT), enrichedSbom.getProcessors());
+        assertEquals(GeneratorType.MAVEN_CYCLONEDX, enrichedSbom.getGenerator());
+        assertEquals(Arrays.asList(ProcessorType.DEFAULT), enrichedSbom.getProcessors());
         assertEquals(SbomType.BUILD_TIME, enrichedSbom.getType());
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
@@ -246,7 +246,7 @@ public class TestSbomRepository {
 
         assertEquals(416640206274228224L, parentSBOM.getId());
         assertEquals("ARYT3LBXDVYAC", parentSBOM.getBuildId());
-        assertEquals(GeneratorImplementation.CYCLONEDX, parentSBOM.getGenerator());
+        assertEquals(GeneratorType.MAVEN_CYCLONEDX, parentSBOM.getGenerator());
         assertEquals(SbomType.BUILD_TIME, parentSBOM.getType());
         assertNull(parentSBOM.getProcessors());
         assertEquals("CycloneDX", parentBom.getBomFormat());

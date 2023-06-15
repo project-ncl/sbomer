@@ -36,7 +36,7 @@ quarkus:
         console:
           enable: false
       console:
-        format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+        format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
 
 "%test":
   quarkus:

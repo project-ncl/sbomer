@@ -39,6 +39,11 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.sbomer</groupId>
+      <artifactId>sbomer-feature-sbom-cli</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.sbomer</groupId>
       <artifactId>sbomer-core</artifactId>
       <version>${project.version}</version>
     </dependency>

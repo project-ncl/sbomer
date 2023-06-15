@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.hamcrest.CoreMatchers;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
-import org.jboss.sbomer.core.enums.ProcessorImplementation;
+import org.jboss.sbomer.core.enums.GeneratorType;
+import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.service.rest.Page;
@@ -449,8 +449,7 @@ public class SBOMResourceRSQLTest {
         enriched.setGenerator(base.getGenerator());
         enriched.setParentSbom(base);
         enriched.setProcessors(
-                new HashSet<ProcessorImplementation>(
-                        Arrays.asList(ProcessorImplementation.DEFAULT, ProcessorImplementation.REDHAT_PRODUCT)));
+                new HashSet<ProcessorType>(Arrays.asList(ProcessorType.DEFAULT, ProcessorType.REDHAT_PRODUCT)));
         enriched.setRootPurl(base.getRootPurl());
         enriched.setStatus(SbomStatus.READY);
         enriched.setType(base.getType());
@@ -577,13 +576,12 @@ public class SBOMResourceRSQLTest {
         sbom.setId(12345L);
         sbom.setBuildId("AWI7P3EJ23YAA");
         sbom.setRootPurl("pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom");
-        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+        sbom.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
         sbom.setStatus(SbomStatus.IN_PROGRESS);
         sbom.setStatusMessage("all went well");
         sbom.setType(SbomType.BUILD_TIME);
         sbom.setProcessors(
-                new HashSet<ProcessorImplementation>(
-                        Arrays.asList(ProcessorImplementation.DEFAULT, ProcessorImplementation.REDHAT_PRODUCT)));
+                new HashSet<ProcessorType>(Arrays.asList(ProcessorType.DEFAULT, ProcessorType.REDHAT_PRODUCT)));
         return sbom;
     }
 
@@ -592,13 +590,12 @@ public class SBOMResourceRSQLTest {
         sbom.setId(54321L);
         sbom.setBuildId("AWI7P3EJ23YAA");
         sbom.setRootPurl("pkg:maven/org.apache.logging.log4j/log4j@2.119.0.redhat-00001?type=pom");
-        sbom.setGenerator(GeneratorImplementation.CYCLONEDX);
+        sbom.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
         sbom.setStatus(SbomStatus.IN_PROGRESS);
         sbom.setStatusMessage("all went well, again");
         sbom.setType(SbomType.BUILD_TIME);
         sbom.setProcessors(
-                new HashSet<ProcessorImplementation>(
-                        Arrays.asList(ProcessorImplementation.DEFAULT, ProcessorImplementation.REDHAT_PRODUCT)));
+                new HashSet<ProcessorType>(Arrays.asList(ProcessorType.DEFAULT, ProcessorType.REDHAT_PRODUCT)));
         return sbom;
     }
 

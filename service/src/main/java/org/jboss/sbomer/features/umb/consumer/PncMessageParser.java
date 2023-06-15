@@ -37,15 +37,15 @@ import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.ProductVersionRef;
-import org.jboss.sbomer.core.enums.GeneratorImplementation;
+import org.jboss.sbomer.core.enums.GeneratorType;
 import org.jboss.sbomer.core.service.PncService;
-import org.jboss.sbomer.core.service.ProductVersionMapper;
-import org.jboss.sbomer.core.service.ProductVersionMapper.ProductVersionMapping;
+import org.jboss.sbomer.feature.sbom.core.config.DefaultGenerationConfig;
+import org.jboss.sbomer.feature.sbom.core.config.ProductVersionMapper;
+import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 import org.jboss.sbomer.features.umb.JmsUtils;
 import org.jboss.sbomer.features.umb.UmbConfig;
 import org.jboss.sbomer.features.umb.UmbConfig.UmbConsumerTrigger;
 import org.jboss.sbomer.features.umb.consumer.model.PncBuildNotificationMessageBody;
-import org.jboss.sbomer.service.GenerationService;
 
 import io.quarkus.arc.Unremovable;
 import lombok.extern.slf4j.Slf4j;
@@ -53,14 +53,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Unremovable
 @ApplicationScoped
+// TODO: Move to sbom feature
 public class PncMessageParser implements Runnable {
 
     private AtomicBoolean shouldRun = new AtomicBoolean(false);
     private AtomicBoolean connected = new AtomicBoolean(false);
     private AtomicInteger receivedMessages = new AtomicInteger(0);
-
-    @Inject
-    GenerationService generationService;
 
     @Inject
     PncService pncService;
@@ -73,6 +71,9 @@ public class PncMessageParser implements Runnable {
 
     @Inject
     ProductVersionMapper productVersionMapper;
+
+    @Inject
+    DefaultGenerationConfig defaultGenerationConfig;
 
     private Message lastMessage;
 
@@ -148,10 +149,9 @@ public class PncMessageParser implements Runnable {
                                 continue;
                             }
 
-                            ProductVersionMapping mapping = productVersionMapper.getMapping()
-                                    .get(productVersion.getId());
+                            Config config = productVersionMapper.getMapping().get(productVersion.getId());
 
-                            if (mapping == null) {
+                            if (config == null) {
                                 log.warn(
                                         "Could not find mapping for the PNC Product Version '{}' (id: {}), skipping SBOM generation",
                                         productVersion.getVersion(),
@@ -163,38 +163,43 @@ public class PncMessageParser implements Runnable {
                             // We support only generation of products that we list in the product mapping.
 
                             // Use the generator in the mapping if specified, otherwise ude the default (CYCLONEDX)
-                            GeneratorImplementation generator = GeneratorImplementation.CYCLONEDX;
-                            if (!Strings.isEmpty(mapping.getGenerator())) {
-                                try {
-                                    generator = GeneratorImplementation.valueOf(mapping.getGenerator());
-                                } catch (IllegalArgumentException exc) {
-                                }
-                            }
+                            GeneratorType generator = defaultGenerationConfig.defaultGenerator();
 
-                            log.info(
-                                    "Detected {} as the required generator from the PNC Product Version mapping",
-                                    generator);
+                            // config.getProducts().get(0).getGenerator().getType()
 
-                            switch (generator) {
-                                case DOMINO: {
-                                    generationService.generate(
-                                            msgBody.getBuild().getId(),
-                                            GeneratorImplementation.DOMINO,
-                                            "0.0.89",
-                                            "--include-non-managed --exclude-parent-poms --warn-on-missing-scm");
-                                    break;
-                                }
-                                default: {
-                                    generationService
-                                            .generate(msgBody.getBuild().getId(), GeneratorImplementation.CYCLONEDX);
-                                }
-                            }
+                            // if (!Strings.isEmpty(config.getGenerator())) {
+                            // try {
+                            // generator = GeneratorImplementation.valueOf(config.getGenerator());
+                            // } catch (IllegalArgumentException exc) {
+                            // }
+                            // }
+
+                            // TODO: Create generationrequest
+
+                            // log.info(
+                            // "Detected {} as the required generator from the PNC Product Version mapping",
+                            // generator);
+
+                            // switch (generator) {
+                            // case MAVEN_DOMINO: {
+                            // generationService.generate(
+                            // msgBody.getBuild().getId(),
+                            // GeneratorType.MAVEN_DOMINO,
+                            // "0.0.89",
+                            // "--include-non-managed --exclude-parent-poms --warn-on-missing-scm");
+                            // break;
+                            // }
+                            // default: {
+                            // generationService
+                            // .generate(msgBody.getBuild().getId(), GeneratorType.MAVEN_CYCLONEDX);
+                            // }
+                            // }
                         } else {
                             log.info(
                                     "Triggering the automated SBOM generation for build {} ...",
                                     msgBody.getBuild().getId());
 
-                            generationService.generate(msgBody.getBuild().getId(), GeneratorImplementation.CYCLONEDX);
+                            // generationService.generate(msgBody.getBuild().getId(), GeneratorType.MAVEN_CYCLONEDX);
                         }
                     }
                 } catch (JMSException | IOException e) {

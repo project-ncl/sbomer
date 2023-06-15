@@ -17,26 +17,40 @@
  */
 package org.jboss.sbomer.cli;
 
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 import javax.inject.Inject;
 
-import org.jboss.sbomer.cli.commands.generator.GenerateCommand;
-import org.jboss.sbomer.cli.commands.processor.ProcessCommand;
+import org.jboss.sbomer.core.cli.FeatureTopCommand;
 
+import io.quarkus.arc.All;
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
+import picocli.CommandLine.ExecutionException;
+import picocli.CommandLine.Help;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.ParseResult;
+import picocli.CommandLine.RunAll;
 import picocli.CommandLine.ScopeType;
 
+@Slf4j
 @QuarkusMain
-@CommandLine.Command(
-        name = "sbomer",
-        mixinStandardHelpOptions = true,
-        subcommands = { GenerateCommand.class, ProcessCommand.class })
+@CommandLine.Command(name = "sbomer", mixinStandardHelpOptions = true)
 public class CLI implements QuarkusApplication {
     @Inject
     CommandLine.IFactory factory;
+
+    @All
+    @Inject
+    List<FeatureTopCommand> featureCommands;
 
     @Getter
     @Option(names = { "-v", "--verbose" }, scope = ScopeType.INHERIT)
@@ -44,7 +58,72 @@ public class CLI implements QuarkusApplication {
 
     @Override
     public int run(String... args) throws Exception {
-        return new CommandLine(this, factory).setExecutionExceptionHandler(new ExceptionHandler()).execute(args);
+        CommandLine commandLine = new CommandLine(this, factory).setExecutionExceptionHandler(new ExceptionHandler())
+                .setCaseInsensitiveEnumValuesAllowed(true)
+                .setExecutionStrategy(new RunOnlyCallable())
+                .setCommandName("sbomerctl");
+
+        featureCommands.forEach(cmd -> {
+            log.debug("Registering '{}' subcommand", cmd.getClass().getName());
+            commandLine.addSubcommand(cmd);
+        });
+
+        return commandLine.execute(args);
+    }
+
+    public static class RunOnlyCallable extends RunAll {
+        @Override
+        protected List<Object> handle(ParseResult parseResult) throws ExecutionException {
+            return returnResultOrExit(recursivelyExecuteUserObject(parseResult, new ArrayList<Object>()));
+        }
+
+        private void runIfCallable(CommandLine parsed, List<Object> result) {
+            Object command = parsed.getCommand();
+
+            if (command instanceof Callable) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Callable<Object> callable = (Callable<Object>) command;
+                    Object executionResult = callable.call();
+                    parsed.setExecutionResult(executionResult);
+                    result.add(executionResult);
+
+                } catch (ParameterException ex) {
+                    throw ex;
+                } catch (ExecutionException ex) {
+                    throw ex;
+                } catch (Exception ex) {
+                    throw new ExecutionException(parsed, "Error while calling command (" + parsed + "): " + ex, ex);
+                }
+            }
+        }
+
+        private List<Object> recursivelyExecuteUserObject(ParseResult parseResult, List<Object> result)
+                throws ExecutionException {
+            CommandLine parsed = parseResult.commandSpec().commandLine();
+
+            runIfCallable(parsed, result);
+
+            for (ParseResult pr : parseResult.subcommands()) {
+                recursivelyExecuteUserObject(pr, result);
+            }
+            return result;
+        }
+
+        @Override
+        public List<Object> handleParseResult(List<CommandLine> parsedCommands, PrintStream out, Help.Ansi ansi) {
+            if (CommandLine.printHelpIfRequested(parsedCommands, out, err(), ansi)) {
+                return returnResultOrExit(Collections.emptyList());
+            }
+
+            List<Object> result = new ArrayList<Object>();
+
+            for (CommandLine parsed : parsedCommands) {
+                runIfCallable(parsed, result);
+
+            }
+            return returnResultOrExit(result);
+        }
     }
 
 }
