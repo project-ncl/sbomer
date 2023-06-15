@@ -81,19 +81,11 @@ patches:
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
-          name: quarkus.oidc.auth-server-url
+          name: QUARKUS_OIDC_AUTH_SERVER_URL
           valueFrom:
             secretKeyRef:
               name: sbomer-secrets
               key: auth-server-url.txt
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: quarkus.oidc.credentials.secret
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: auth-token.txt
 
   - target:
       kind: Route
