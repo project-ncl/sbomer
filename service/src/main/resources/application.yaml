@@ -38,6 +38,16 @@ quarkus:
         level: WARN
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+  oidc:
+    auth-server-url: https://keycloak-host/auth/realms/my-realm
+    client-id: pnc-sbomer
+    credentials:
+      secret: secret
+    tls:
+      verification: none
+    keycloak:
+      policy-enforcer:
+        enable: false
 
 sbomer:
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
@@ -105,7 +115,9 @@ sbomer:
       json:
         console:
           enable: false
-
+    oidc:
+      auth-server-url: https://keycloak-host/auth/realms/my-realm
+      client-id: pnc-sbomer
   sbomer:
     api-url: "http://localhost:8080/api/v1alpha1/"
     features:
@@ -131,6 +143,8 @@ sbomer:
       url: amqp://localhost:5672
       username: ""
       password: ""
+    oidc:
+      enabled: false
     log:
       json:
         console:
