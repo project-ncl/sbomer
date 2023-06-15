@@ -25,6 +25,8 @@ import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
 
+import org.jboss.sbomer.core.enums.SbomStatus;
+import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.model.Sbom;
 import org.jboss.sbomer.rest.rsql.RSQLProducer;
@@ -89,6 +91,28 @@ public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
 
         CriteriaQuery<Long> query = rsqlProducer.getCountCriteriaQuery(Sbom.class, rsqlQuery);
         return getEntityManager().createQuery(query).getSingleResult();
+    }
+
+    @Transactional
+    public void deleteByBuildId(String buildId) {
+
+        // Do not delete SBOMs which are being processed
+        String query = "FROM Sbom WHERE buildId = :buildId AND status <> :status";
+        List<Sbom> sboms = getEntityManager().createQuery(query, Sbom.class)
+                .setParameter("buildId", buildId)
+                .setParameter("status", SbomStatus.IN_PROGRESS)
+                .getResultList();
+
+        if (sboms == null) {
+            throw new NotFoundException("Could not find any final SBOM with buildId '{}'", buildId);
+        }
+
+        sboms.stream().forEach(s -> {
+            // Remove all elements from the processors collection
+            s.getProcessors().clear();
+            getEntityManager().remove(s);
+            getEntityManager().flush();
+        });
     }
 
     @Transactional

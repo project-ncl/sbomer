@@ -17,11 +17,14 @@
  */
 package org.jboss.sbomer.rest.v1alpha1;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -56,11 +59,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 
+import static org.jboss.sbomer.rest.UserRoles.SYSTEM_USER;
+
 @Path("/api/v1alpha1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 @Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1alpha1, with RSQL capabilities")
+@PermitAll
 public class SBOMResource {
 
     @Inject
@@ -341,6 +347,71 @@ public class SBOMResource {
             sbom = processingService.process(sbom);
 
             return Response.status(Status.ACCEPTED).entity(sbom).build();
+        } finally {
+            MDCUtils.removeBuildContext();
+        }
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @RolesAllowed(SYSTEM_USER)
+    @Operation(summary = "Delete SBOM specified by id", description = "Delete the specified SBOM from the database")
+    @Parameter(name = "id", description = "The SBOM identifier")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Could not parse provided arguments",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response deleteSbom(@PathParam("id") final String id) {
+        Long sbomId = null;
+
+        try {
+            sbomId = Long.valueOf(id);
+        } catch (NumberFormatException e) {
+            throw new ClientException(400, "Invalid SBOM id provided: '{}', a number was expected", sbomId);
+        }
+
+        try {
+            MDCUtils.addProcessContext(id);
+            sbomService.deleteSbom(sbomId);
+
+            return Response.ok().build();
+        } finally {
+            MDCUtils.removeProcessContext();
+        }
+    }
+
+    @DELETE
+    @Path("build/{buildId}")
+    @RolesAllowed(SYSTEM_USER)
+    @Operation(
+            summary = "Delete all SBOMs having the build Id",
+            description = "Delete the specified SBOMs with given build Id from the database")
+    @Parameter(name = "buildId", description = "The SBOM build Id")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response deleteSbomWithBuildId(@PathParam("buildId") final String buildId) {
+        try {
+            MDCUtils.addBuildContext(buildId);
+
+            sbomService.deleteSbomWithBuildId(buildId);
+
+            return Response.ok().build();
         } finally {
             MDCUtils.removeBuildContext();
         }

@@ -46,6 +46,8 @@ import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.parsers.JsonParser;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -122,6 +124,7 @@ public class Sbom extends PanacheEntityBase {
     private Set<ProcessorImplementation> processors;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @Cascade(CascadeType.ALL)
     @JoinColumn(
             name = "parent_sbom_id",
             foreignKey = @ForeignKey(name = "fk_sbom_parent_sbom"),
