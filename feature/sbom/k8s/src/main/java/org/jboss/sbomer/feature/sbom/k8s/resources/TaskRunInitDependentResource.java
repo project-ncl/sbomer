@@ -114,7 +114,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                         new TaskResultBuilder().withName(RESULT_NAME).withDescription("Runtime configuration").build())
                 .withSteps(
                         new StepBuilder().withName("initialize")
-                                .withImage("localhost/sbomer-generator:latest")
+                                .withImage("localhost/sbomer-generator:latest") // TODO: configure
                                 .withImagePullPolicy("IfNotPresent")
                                 .withNewResources()
                                 .withRequests(Map.of("cpu", new Quantity("200m"), "memory", new Quantity("300Mi")))

@@ -189,7 +189,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                                                                 .endConfigMapKeyRef()
                                                                 .build())
                                                 .build())
-                                .withImage("localhost/sbomer-generator:latest")
+                                .withImage("localhost/sbomer-generator:latest")  // TODO: configure
                                 .withImagePullPolicy("IfNotPresent")
                                 .withNewResources()
                                 .withRequests(Map.of("cpu", new Quantity("200m"), "memory", new Quantity("300Mi")))
