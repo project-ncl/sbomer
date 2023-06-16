@@ -33,12 +33,12 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.jboss.pnc.dto.Build;
-import org.jboss.sbomer.core.enums.GeneratorType;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.service.PncService;
 import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.feature.sbom.cli.command.mixin.GeneratorToolMixin;
 import org.jboss.sbomer.feature.sbom.core.config.DefaultGenerationConfig;
+import org.jboss.sbomer.feature.sbom.core.enums.GeneratorType;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

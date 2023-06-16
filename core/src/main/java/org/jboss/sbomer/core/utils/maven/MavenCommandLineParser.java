@@ -17,34 +17,30 @@
  */
 package org.jboss.sbomer.core.utils.maven;
 
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.PROFILES_OPTION;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.PROJECTS_OPTION;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.SYSTEM_PROPERTIES_OPTION;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addIgnorableOptions;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addIneffectiveOptions;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addNoArgsOptions;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addProfilesOptions;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addProjectsOptions;
+import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addSystemPropertyOptions;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addIgnorableOptions;
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addIneffectiveOptions;
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addNoArgsOptions;
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addSystemPropertyOptions;
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addProfilesOptions;
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.addProjectsOptions;
-
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.PROFILES_OPTION;
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.SYSTEM_PROPERTIES_OPTION;
-import static org.jboss.sbomer.core.utils.maven.MavenCommandOptions.PROJECTS_OPTION;
 
 @Getter
 @Slf4j

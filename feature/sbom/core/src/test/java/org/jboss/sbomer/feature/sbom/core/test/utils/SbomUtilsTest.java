@@ -26,8 +26,8 @@ import java.nio.file.Paths;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.feature.sbom.core.model.Sbom;
+import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

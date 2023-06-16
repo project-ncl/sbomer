@@ -15,35 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.config;
+package org.jboss.sbomer.feature.sbom.core.enums;
 
-import java.util.Map;
-
-import org.jboss.sbomer.core.enums.ProcessorType;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.jackson.Jacksonized;
-
-/**
- * Product configuration.
- *
- * @author Marek Goldmann
- */
-@Data
-@Builder
-@Jacksonized
-public class ProductConfig {
-    /**
-     * Processors configuration.
-     */
-    @JsonDeserialize(using = ProcessorsDeserializer.class)
-    Map<ProcessorType, ProcessorConfig> processors;
-
-    /**
-     * Generator configuration.
-     */
-    GeneratorConfig generator;
+public enum SbomType {
+    BUILD_TIME, PRODUCT_RELEASE;
 }

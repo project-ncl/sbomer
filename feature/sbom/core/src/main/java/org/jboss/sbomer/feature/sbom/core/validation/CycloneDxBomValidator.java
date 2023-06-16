@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.feature.sbom.core.validation;
 
-import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
+import static org.jboss.sbomer.feature.sbom.core.utils.SbomUtils.schemaVersion;
 
 import java.io.IOException;
 import java.util.Collections;

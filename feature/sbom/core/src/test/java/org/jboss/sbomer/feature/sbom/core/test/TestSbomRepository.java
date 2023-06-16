@@ -39,14 +39,14 @@ import javax.validation.Validator;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.jboss.sbomer.core.enums.GeneratorType;
-import org.jboss.sbomer.core.enums.ProcessorType;
-import org.jboss.sbomer.core.enums.SbomStatus;
-import org.jboss.sbomer.core.enums.SbomType;
-import org.jboss.sbomer.core.utils.SbomUtils;
+import org.jboss.sbomer.feature.sbom.core.enums.GeneratorType;
+import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
+import org.jboss.sbomer.feature.sbom.core.enums.SbomStatus;
+import org.jboss.sbomer.feature.sbom.core.enums.SbomType;
 import org.jboss.sbomer.feature.sbom.core.model.Sbom;
 import org.jboss.sbomer.feature.sbom.core.service.SbomRepository;
 import org.jboss.sbomer.feature.sbom.core.test.utils.QuarkusTransactionalTest;
+import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

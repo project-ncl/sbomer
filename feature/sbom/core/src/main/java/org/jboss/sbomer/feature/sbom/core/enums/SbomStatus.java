@@ -15,16 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.enums;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package org.jboss.sbomer.feature.sbom.core.enums;
 
 /**
- * Tool used to build the product from source code.
- *
- * @author Marek Goldmann
+ * Enum representing the status of the Sbom.
  */
-public enum BuildTool {
-    @JsonProperty("maven")
-    MAVEN;
+public enum SbomStatus {
+    NEW, IN_PROGRESS, FAILED, READY;
 }

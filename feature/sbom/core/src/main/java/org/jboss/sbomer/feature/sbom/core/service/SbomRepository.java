@@ -25,9 +25,9 @@ import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
 
-import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.service.rest.Page;
+import org.jboss.sbomer.feature.sbom.core.enums.SbomStatus;
 import org.jboss.sbomer.feature.sbom.core.model.Sbom;
 import org.jboss.sbomer.feature.sbom.core.rest.rsql.RSQLProducer;
 

@@ -19,7 +19,7 @@ package org.jboss.sbomer.feature.sbom.core.config.runtime;
 
 import java.util.List;
 
-import org.jboss.sbomer.core.enums.ProcessorType;
+import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;

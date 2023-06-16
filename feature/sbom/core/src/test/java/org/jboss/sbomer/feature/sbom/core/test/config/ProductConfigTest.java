@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.jboss.sbomer.core.enums.GeneratorType;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.ProductConfig;
+import org.jboss.sbomer.feature.sbom.core.enums.GeneratorType;
 import org.junit.jupiter.api.Test;
 
 public class ProductConfigTest {

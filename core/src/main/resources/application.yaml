@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+# TODO where to move it?
 sbomer:
   pnc:
     api-url: "${SBOMER_CACHE_SERVICE_URL:${PNC_SERVICE_HOST:orch.psi.redhat.com}}"

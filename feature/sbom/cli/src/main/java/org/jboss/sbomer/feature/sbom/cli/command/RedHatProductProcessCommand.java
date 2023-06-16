@@ -17,17 +17,17 @@
  */
 package org.jboss.sbomer.feature.sbom.cli.command;
 
-import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
-import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
-import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
 
 import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.service.PncService;
-import org.jboss.sbomer.core.utils.SbomUtils;
+import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
+import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;

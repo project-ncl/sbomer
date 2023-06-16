@@ -17,13 +17,13 @@
  */
 package org.jboss.sbomer.feature.sbom.core.features.umb.producer;
 
-import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
-import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
-import static org.jboss.sbomer.core.utils.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
-import static org.jboss.sbomer.core.utils.SbomUtils.findPropertyWithNameInComponent;
-import static org.jboss.sbomer.core.utils.SbomUtils.fromJsonNode;
-import static org.jboss.sbomer.core.utils.SbomUtils.getExternalReferences;
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+import static org.jboss.sbomer.feature.sbom.core.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.feature.sbom.core.utils.SbomUtils.findPropertyWithNameInComponent;
+import static org.jboss.sbomer.feature.sbom.core.utils.SbomUtils.fromJsonNode;
+import static org.jboss.sbomer.feature.sbom.core.utils.SbomUtils.getExternalReferences;
 
 import java.util.Optional;
 

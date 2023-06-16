@@ -27,9 +27,9 @@ import java.util.Iterator;
 
 import javax.inject.Inject;
 
-import org.jboss.sbomer.core.enums.GeneratorType;
-import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.service.rest.Page;
+import org.jboss.sbomer.feature.sbom.core.enums.GeneratorType;
+import org.jboss.sbomer.feature.sbom.core.enums.SbomType;
 import org.jboss.sbomer.feature.sbom.core.model.Sbom;
 import org.jboss.sbomer.feature.sbom.core.service.SbomService;
 import org.junit.jupiter.api.Test;

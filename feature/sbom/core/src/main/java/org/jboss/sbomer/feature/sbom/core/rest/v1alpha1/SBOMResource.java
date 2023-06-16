@@ -49,9 +49,9 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.core.utils.MDCUtils;
-import org.jboss.sbomer.core.utils.SbomUtils;
 import org.jboss.sbomer.feature.sbom.core.model.Sbom;
 import org.jboss.sbomer.feature.sbom.core.service.SbomService;
+import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

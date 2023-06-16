@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.feature.sbom.core.model;
 
-import static org.jboss.sbomer.core.utils.SbomUtils.schemaVersion;
+import static org.jboss.sbomer.feature.sbom.core.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
 import java.util.Set;
@@ -49,11 +49,11 @@ import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.jboss.sbomer.core.enums.GeneratorType;
-import org.jboss.sbomer.core.enums.ProcessorType;
-import org.jboss.sbomer.core.enums.SbomStatus;
-import org.jboss.sbomer.core.enums.SbomType;
-import org.jboss.sbomer.core.utils.SbomUtils;
+import org.jboss.sbomer.feature.sbom.core.enums.GeneratorType;
+import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
+import org.jboss.sbomer.feature.sbom.core.enums.SbomStatus;
+import org.jboss.sbomer.feature.sbom.core.enums.SbomType;
+import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 import org.jboss.sbomer.feature.sbom.core.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

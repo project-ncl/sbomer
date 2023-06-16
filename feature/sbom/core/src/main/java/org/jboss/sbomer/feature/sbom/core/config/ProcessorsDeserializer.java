@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.ProcessorConfig;
+import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;

@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.sbomer.core.enums.GeneratorType;
+import org.jboss.sbomer.feature.sbom.core.enums.GeneratorType;
 
 import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;

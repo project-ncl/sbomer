@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.feature.sbom.core.config.runtime;
 
-import org.jboss.sbomer.core.enums.GeneratorType;
+import org.jboss.sbomer.feature.sbom.core.enums.GeneratorType;
 
 import lombok.Builder;
 import lombok.Data;

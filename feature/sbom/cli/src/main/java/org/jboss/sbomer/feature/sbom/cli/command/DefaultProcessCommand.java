@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.feature.sbom.cli.command;
 
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_BUILD_ID;
-import static org.jboss.sbomer.core.utils.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.feature.sbom.core.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.feature.sbom.core.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 
 import java.util.Optional;
 
@@ -30,10 +30,10 @@ import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
-import org.jboss.sbomer.core.enums.ProcessorType;
 import org.jboss.sbomer.core.service.PncService;
-import org.jboss.sbomer.core.utils.RhVersionPattern;
-import org.jboss.sbomer.core.utils.SbomUtils;
+import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
+import org.jboss.sbomer.feature.sbom.core.utils.RhVersionPattern;
+import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
