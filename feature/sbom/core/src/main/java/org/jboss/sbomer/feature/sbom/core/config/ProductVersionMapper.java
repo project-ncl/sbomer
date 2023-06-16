@@ -64,7 +64,7 @@ public class ProductVersionMapper {
             mapping = configReader.getYamlObjectMapper()
                     .readValue(
                             getClass().getClassLoader()
-                                    .getResourceAsStream(mappingEnvironment + "/product-mapping.yaml"),
+                                    .getResourceAsStream("mapping/" + mappingEnvironment + "/product-mapping.yaml"),
                             Mapping.class);
         } catch (IOException e) {
             throw new ApplicationException("Could not read product mappings", e);

@@ -30,7 +30,7 @@ public abstract class AbstractMavenGenerateCommand extends AbstractGenerateComma
             names = { "-s", "--settings" },
             description = "Path to Maven settings.xml file that should be used for this run instead of the default one",
             converter = PathConverter.class,
-            defaultValue = "${env:SBOMER_SBOM_SETTINGS_XML_PATH}",
+            defaultValue = "${env:SBOMER_MAVEN_SETTINGS_XML_PATH}",
             scope = ScopeType.INHERIT)
     Path settingsXmlPath;
 

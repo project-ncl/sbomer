@@ -54,23 +54,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-validator</artifactId>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-scheduler</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-hibernate-orm-panache</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.amqphub.quarkus</groupId>
-      <artifactId>quarkus-qpid-jms</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkiverse.hibernatetypes</groupId>
-      <artifactId>quarkus-hibernate-types</artifactId>
-      <version>${version.hibernatetypes}</version>
-    </dependency>
+    </dependency> -->
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-rest-client-jackson</artifactId>
@@ -86,33 +74,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>cz.jirutka.rsql</groupId>
-      <artifactId>rsql-parser</artifactId>
-      <version>${version.rsql-parser}</version>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.pnc</groupId>
       <artifactId>pnc-common</artifactId>
       <version>${version.pnc-common}</version>
     </dependency>
     <dependency>
-      <groupId>com.github.tennaito</groupId>
-      <artifactId>rsql-jpa</artifactId>
-      <version>${version.rsql-jpa}</version>
-    </dependency>
-    <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-jdbc-h2</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-test-h2</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -125,22 +93,6 @@
       <artifactId>quarkus-junit5-mockito</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-test-kubernetes-client</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkiverse.artemis</groupId>
-      <artifactId>quarkus-test-artemis</artifactId>
-      <version>${quarkus-test-artemis-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-panache-mock</artifactId>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 
 

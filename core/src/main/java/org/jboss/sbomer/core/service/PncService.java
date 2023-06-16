@@ -156,12 +156,16 @@ public class PncService {
             return null;
         }
 
+        log.debug("Build: {}", build);
+
         BuildConfiguration buildConfig = getBuildConfig(build.getBuildConfigRevision().getId());
 
         if (buildConfig == null) {
             log.warn("BuildConfig related to the SBOM could not be found in PNC, interrupting processing");
             return null;
         }
+
+        log.debug("BuildConfig: {}", buildConfig);
 
         ProductVersionRef productVersion = buildConfig.getProductVersion();
 
@@ -170,6 +174,8 @@ public class PncService {
                     "BuildConfig related to the SBOM does not provide product version information, interrupting processing");
             return null;
         }
+
+        log.debug("ProductVersion: {}", productVersion);
 
         return productVersion;
     }

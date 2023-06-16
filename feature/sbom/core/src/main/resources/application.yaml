@@ -16,23 +16,28 @@
 # limitations under the License.
 #
 
+microprofile:
+  rest:
+    client:
+      disable:
+        default:
+          mapper: true
+
 quarkus:
-  rest-client:
-    "gerrit":
-      url: "https://code.engineering.redhat.com" # TODO: parametrize it
   log:
     level: INFO
     category:
-      "org.jboss.sbomer.feature.sbom.cli":
+      "org.jboss.sbomer.feature.sbom":
         level: DEBUG
-      # "io.javaoperatorsdk.operator":
-      #   level: DEBUG
-      "com.github.tennaito.rsql":
-        level: WARN
     json:
       pretty-print: true
+    console:
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
 
 sbomer:
+  pnc:
+    product-mapping:
+      environment: "${SBOMER_PRODUCT_MAPPING_ENV:production}"
   generation:
     enabled: true
     default-generator: maven-cyclonedx
@@ -51,18 +56,22 @@ sbomer:
     default-processors:
       - name: "default"
       - name: "redhat-product"
-
 "%dev":
   quarkus:
+    devservices:
+      enabled: false
+    # class-loading:
+    #  parent-first-artifacts: io.quarkus:quarkus-bootstrap-maven-resolver
+
     log:
       json:
         console:
           enable: false
-      console:
-        format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
 
 "%test":
   quarkus:
+    devservices:
+      enabled: false
     log:
       json:
         console:

@@ -44,17 +44,14 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
     @Option(
             names = { "--domino-dir" },
             description = "Directory where the Domino tool can be found. Default: ${DEFAULT-VALUE}",
+            defaultValue = "${env:SBOMER_DOMINO_DIR}",
             converter = PathConverter.class)
     Path dominoDir;
 
     private Path getDominoPath() {
         if (dominoDir == null) {
-            dominoDir = PathConverter.homeExpanded(System.getenv("DOMINO_DIR"));
-        }
-
-        if (dominoDir == null) {
             throw new ApplicationException(
-                    "Directory containing the Domino tool was not provided, please use the --domino-dir option or set it via DOMINO_DIR environment variable");
+                    "Directory containing the Domino tool was not provided, please use the --domino-dir option or set it via SBOMER_DOMINO_DIR environment variable");
         }
 
         Path dominoPath = dominoDir;

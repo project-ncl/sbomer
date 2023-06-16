@@ -18,10 +18,9 @@
 package org.jboss.sbomer.feature.sbom.core.test.generator;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 
 @QuarkusTest
-@WithKubernetesTestServer
+// @WithKubernetesTestServer
 public class TestTektonCycloneDxSbomGenerator {
     // @Any
     // @Inject

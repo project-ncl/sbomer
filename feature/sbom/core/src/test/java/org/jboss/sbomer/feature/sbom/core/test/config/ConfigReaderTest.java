@@ -34,8 +34,8 @@ import javax.ws.rs.NotFoundException;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.feature.sbom.core.client.GitilesClient;
 import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
-import org.jboss.sbomer.feature.sbom.core.rest.GitilesClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

@@ -17,16 +17,14 @@
  */
 package org.jboss.sbomer.feature.sbom.core.test.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.feature.sbom.core.model.Sbom;
 import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -82,15 +80,6 @@ public class SbomUtilsTest {
             JsonNode license = licenses.get(0);
             assertNotNull(license);
             assertEquals("Apache-2.0", license.get("license").get("id").asText());
-        }
-    }
-
-    @Nested
-    class SbomTest {
-        @Test
-        void shouldNotFailWithEmptyBom() {
-            Sbom sbom = new Sbom();
-            assertNull(sbom.getCycloneDxBom());
         }
     }
 
