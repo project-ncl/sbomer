@@ -120,6 +120,35 @@ public class SbomService {
     }
 
     /**
+     * Delete the SBOM from the database.
+     *
+     * @param sbomId The {@link Sbom} id to delete from the database.
+     */
+    @Transactional
+    public void deleteSbom(Long sbomId) {
+        log.info("Deleting SBOM: {}", sbomId);
+
+        // Update the SBOM field
+        boolean deleted = sbomRepository.deleteById(sbomId);
+        if (!deleted) {
+            throw new NotFoundException("Could not find SBOM with ID '{}'", sbomId);
+        }
+    }
+
+    /**
+     * Delete the SBOM from the database.
+     *
+     * @param sbomId The {@link Sbom} id to delete from the database.
+     */
+    @Transactional
+    public void deleteSbomWithBuildId(String buildId) {
+        log.info("Deleting SBOMs with buildId: {}", buildId);
+
+        // Update the SBOM field
+        sbomRepository.deleteByBuildId(buildId);
+    }
+
+    /**
      * Persists given {@link Sbom} in the database.
      *
      * @param sbom The {@link Sbom} resource to store in database.

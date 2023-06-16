@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -183,6 +184,31 @@ public class TestSbomRepository {
                             .collect(Collectors.joining("\n\t")));
             fail("Validation errors on the baseSBOM entity should be empty!");
         }
+    }
+
+    @Test
+    public void testDeleteSboms() throws Exception {
+
+        String buildId = "ACACACACACAC";
+
+        Sbom parentSBOM = createParentSBOM();
+        parentSBOM.setId(13L);
+        parentSBOM.setBuildId(buildId);
+        parentSBOM = sbomRepository.saveSbom(parentSBOM);
+
+        Sbom enrichedSBOM = createEnrichedSBOM(parentSBOM);
+        enrichedSBOM.setId(1300L);
+        enrichedSBOM.setBuildId(buildId);
+        sbomRepository.saveSbom(enrichedSBOM);
+
+        String rsqlQuery = "buildId=eq=" + buildId;
+        List<Sbom> sbomsAfterInsert = sbomRepository.searchByQuery(0, 10, rsqlQuery);
+        assertEquals(2, sbomsAfterInsert.size());
+
+        sbomRepository.deleteByBuildId(buildId);
+
+        List<Sbom> sbomsAfterDelete = sbomRepository.searchByQuery(0, 10, rsqlQuery);
+        assertEquals(0, sbomsAfterDelete.size());
     }
 
     @Test
