@@ -28,7 +28,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.jboss.pnc.common.concurrent.Sequence;
-import org.jboss.sbomer.config.ProcessingConfig;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
@@ -49,9 +48,6 @@ public class SbomService {
 
     @Inject
     SbomRepository sbomRepository;
-
-    @Inject
-    ProcessingConfig processingConfig;
 
     @Inject
     Validator validator;

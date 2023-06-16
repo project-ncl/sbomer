@@ -41,6 +41,7 @@
     <module>core</module>
     <module>cli</module>
     <module>k8s</module>
+    <module>rest</module>
   </modules>
 
 </project>
