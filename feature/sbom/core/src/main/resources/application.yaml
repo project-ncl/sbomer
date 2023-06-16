@@ -33,6 +33,9 @@ quarkus:
       pretty-print: true
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+  rest-client:
+    "gerrit":
+      url: "https://code.engineering.redhat.com"
 
 sbomer:
   pnc:

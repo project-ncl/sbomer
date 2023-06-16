@@ -1,0 +1,80 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/builds/MISSINGPRODUCTVERSION"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "MISSINGPRODUCTVERSION",
+      "submitTime": "2022-06-02T07:42:23.244Z",
+      "startTime": "2022-06-02T07:42:25.767Z",
+      "endTime": "2022-06-02T07:45:46.390Z",
+      "progress": "FINISHED",
+      "status": "SUCCESS",
+      "buildContentId": "build-ARYT3LBXDVYAC",
+      "temporaryBuild": false,
+      "alignmentPreference": null,
+      "scmUrl": "https://code.engineering.redhat.com/gerrit/eclipse/microprofile-graphql.git",
+      "scmRevision": "08ad125da45653137814201b4d8527a1abba1e98",
+      "scmTag": "1.1.0.redhat-00008",
+      "buildOutputChecksum": "29f641f9dd0bccf99bb8321b23a986c4",
+      "lastUpdateTime": "2022-06-02T07:45:46.834Z",
+      "project": {
+        "id": "89",
+        "name": "microprofile",
+        "description": null,
+        "issueTrackerUrl": null,
+        "projectUrl": null,
+        "engineeringTeam": null,
+        "technicalLeader": null
+      },
+      "scmRepository": {
+        "id": "1069",
+        "internalUrl": "git+ssh://code.engineering.redhat.com/eclipse/microprofile-graphql.git",
+        "externalUrl": "https://github.com/eclipse/microprofile-graphql.git",
+        "preBuildSyncEnabled": true
+      },
+      "environment": {
+        "id": "264",
+        "name": "OpenJDK 1.8; Mvn 3.6.3",
+        "description": "OpenJDK 1.8; Mvn 3.6.3 [builder-rhel-7-j8-mvn3.6.3:1.0.4]",
+        "systemImageRepositoryUrl": "quay.io/rh-newcastle",
+        "systemImageId": "builder-rhel-7-j8-mvn3.6.3:1.0.4",
+        "attributes": {
+          "JDK": "1.8.0",
+          "MAVEN": "3.6.3",
+          "OS": "Linux",
+          "DEPRECATION_REPLACEMENT": "475"
+        },
+        "systemImageType": "DOCKER_IMAGE",
+        "deprecated": true,
+        "hidden": false
+      },
+      "attributes": {
+        "BREW_BUILD_VERSION": "1.1.0.redhat-00008",
+        "BUILD_OUTPUT_OK": "false",
+        "BREW_BUILD_NAME": "org.eclipse.microprofile.graphql:microprofile-graphql-parent"
+      },
+      "user": { "id": "1005", "username": "varjain" },
+      "buildConfigRevision": {
+        "id": "MISSINGPRODUCTVERSION",
+        "rev": 2560859,
+        "name": "microprofile-graphql-1.1.0",
+        "buildScript": "mvn clean deploy -B dependency:tree -DskipTests -Drat.skip -Dasciidoctor.skip -Dformatter.skip -Dimpsort.skip -Dcheckstyle.skip -Prelease -Dmaven.javadoc.skip -Dgpg.skip",
+        "scmRevision": "1.1.0",
+        "creationTime": "2021-09-15T11:26:52.852Z",
+        "modificationTime": "2021-09-15T12:06:04.819Z",
+        "buildType": "MVN",
+        "defaultAlignmentParams": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true",
+        "brewPullActive": false
+      },
+      "productMilestone": null,
+      "groupBuild": null,
+      "noRebuildCause": null
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

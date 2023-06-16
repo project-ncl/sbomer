@@ -38,6 +38,7 @@
     <modules>
         <module>core</module>
         <module>cli</module>
+        <module>operator</module>
         <module>feature</module>
     </modules>
 

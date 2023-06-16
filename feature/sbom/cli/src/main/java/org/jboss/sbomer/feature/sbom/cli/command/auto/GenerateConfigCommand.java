@@ -142,7 +142,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
     }
 
     private Config mappingConfig() {
-        log.debug("Attempting to fetch configuration from mapping");
+        log.debug("Attempting to fetch configuration from SBOMer internal mapping");
 
         ProductVersionRef productVersion = pncService.getProductVersion(buildId);
 
@@ -155,11 +155,13 @@ public class GenerateConfigCommand implements Callable<Integer> {
         Config config = productVersionMapper.getMapping().get(productVersion.getId());
 
         if (config == null) {
-            log.debug("Configuration not found in mapping");
+            log.debug(
+                    "Configuration not found SBOMer internal mapping for product version: {}",
+                    productVersion.getId());
             return null;
         }
 
-        log.debug("Configuration found in mapping");
+        log.debug("Configuration found in SBOMer internal mapping");
 
         return config;
     }

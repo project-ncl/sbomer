@@ -18,13 +18,7 @@
 
 quarkus:
   banner:
-    enabled: false
-
-  rest-client:
-    # "sbomer":
-    #   url: "${SBOMER_SERVICE_URL:http://localhost:8080}"
-    "gerrit":
-      url: "https://code.engineering.redhat.com"
+    path: banner.txt
 
   log:
     level: INFO

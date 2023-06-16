@@ -1,0 +1,69 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/build-configs/6216"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "6216",
+      "name": "microprofile-graphql-1.1.0",
+      "description": null,
+      "buildScript": "mvn clean deploy -B dependency:tree -DskipTests -Drat.skip -Dasciidoctor.skip -Dformatter.skip -Dimpsort.skip -Dcheckstyle.skip -Prelease -Dmaven.javadoc.skip -Dgpg.skip",
+      "scmRevision": "1.1.0",
+      "creationTime": "2021-09-15T11:26:52.852Z",
+      "modificationTime": "2021-09-15T12:06:04.819Z",
+      "buildType": "MVN",
+      "defaultAlignmentParams": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true",
+      "brewPullActive": false,
+      "scmRepository": {
+        "id": "1069",
+        "internalUrl": "git+ssh://code.engineering.redhat.com/eclipse/microprofile-graphql.git",
+        "externalUrl": "https://github.com/eclipse/microprofile-graphql.git",
+        "preBuildSyncEnabled": true
+      },
+      "project": {
+        "id": "89",
+        "name": "microprofile",
+        "description": null,
+        "issueTrackerUrl": null,
+        "projectUrl": null,
+        "engineeringTeam": null,
+        "technicalLeader": null
+      },
+      "environment": {
+        "id": "264",
+        "name": "OpenJDK 1.8; Mvn 3.6.3",
+        "description": "OpenJDK 1.8; Mvn 3.6.3 [builder-rhel-7-j8-mvn3.6.3:1.0.4]",
+        "systemImageRepositoryUrl": "quay.io/rh-newcastle",
+        "systemImageId": "builder-rhel-7-j8-mvn3.6.3:1.0.4",
+        "attributes": {
+          "JDK": "1.8.0",
+          "MAVEN": "3.6.3",
+          "OS": "Linux",
+          "DEPRECATION_REPLACEMENT": "475"
+        },
+        "systemImageType": "DOCKER_IMAGE",
+        "deprecated": true,
+        "hidden": false
+      },
+      "dependencies": {},
+      "productVersion": {
+        "id": "179",
+        "version": "1.0",
+        "attributes": { "BREW_TAG_PREFIX": "mp-srye-1.0-pnc" }
+      },
+      "groupConfigs": {
+        "860": { "id": "860", "name": "MicroProfile and SmallRye.Quarkus" }
+      },
+      "parameters": {
+        "ALIGNMENT_PARAMETERS": "-DgroovyScripts=https://gitlab.cee.redhat.com/middleware/build-configurations/raw/master/microprofile/common/manifests.groovy,https://gitlab.cee.redhat.com/middleware/build-configurations/raw/master/microprofile/common/no-spec-pdf-html.groovy -Prelease"
+      },
+      "creationUser": { "id": "38", "username": "pgallagh" },
+      "modificationUser": { "id": "38", "username": "pgallagh" }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
