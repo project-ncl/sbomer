@@ -37,20 +37,4 @@ public class AutoCommand {
     @Spec
     CommandSpec spec;
 
-    // @Override
-    // public Integer call() throws Exception {
-    // String subcommands = spec.commandLine()
-    // .getSubcommands()
-    // .values()
-    // .stream()
-    // .map(cl -> cl.getCommandName())
-    // .distinct()
-    // .collect(Collectors.joining(", "));
-
-    // throw new ParameterException(
-    // spec.commandLine(),
-    // "No subcommand provided, available subcommands: " + subcommands);
-
-    // }
-
 }

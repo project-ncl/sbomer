@@ -29,8 +29,10 @@ export SBOMER_SBOM_SETTINGS_XML_PATH="/workdir/settings.xml"
 
 source /workdir/.sdkman/bin/sdkman-init.sh
 
+export MAVEN_OPTS="-Xms256m -Xmx512m"
+
 echo "Storing configuration in the $CONFIG_PATH file"
 echo "$(params.config)" | tee $CONFIG_PATH
 
 echo "Running generation..."
-exec /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v sbom auto generate --config $CONFIG_PATH --index "$(params.index)"
+exec /workdir/.sdkman/candidates/java/17/bin/java -Xms256m -Xmx512m -jar ./generator/quarkus-run.jar -v sbom auto generate --config $CONFIG_PATH --index "$(params.index)"

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -76,7 +75,7 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
     }
 
     @Override
-    public void generate() {
+    public Path doGenerate() {
         Path dominoPath = getDominoPath();
 
         DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig
@@ -87,6 +86,8 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
 
         processBuilder.command(
                 "java",
+                "-Xms256m",
+                "-Xmx512m",
                 // Workaround for Domino trying to parse what it shouldn't parse
                 "-Dquarkus.args=\"\"",
                 "-jar",
@@ -167,14 +168,7 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
             sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "bom.json");
         }
 
-        try {
-            Files.copy(sbomPath, parent.getOutput(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new ApplicationException(
-                    "Could not move the generated SBOM to target location: '{}'",
-                    parent.getOutput().toAbsolutePath());
-        }
-
+        return sbomPath;
     }
 
 }

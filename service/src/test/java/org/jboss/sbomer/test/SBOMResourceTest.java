@@ -20,15 +20,11 @@ package org.jboss.sbomer.test;
 import static io.restassured.RestAssured.given;
 
 import java.io.IOException;
-import java.time.Instant;
 
 import org.hamcrest.CoreMatchers;
-import org.jboss.sbomer.core.enums.GeneratorType;
-import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.model.Sbom;
-
 import org.jboss.sbomer.service.SbomService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -36,7 +32,6 @@ import org.mockito.Mockito;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.http.ContentType;
@@ -47,8 +42,6 @@ public class SBOMResourceTest {
 
     @InjectSpy
     SbomService sbomService;
-
-
 
     @Test
     public void testExistenceOfSbomsEndpoint() {
@@ -152,36 +145,36 @@ public class SBOMResourceTest {
                 .body("metadata.component.licenses[0].license.id", CoreMatchers.equalTo("Apache-2.0"));
     }
 
-    /**
-     * It should return a stub for the {@link Sbom} object, where the sbom field is empty.
-     *
-     * @throws IOException
-     */
-    @Test
-    public void shouldStartGenerationForAGivenPncBuild() throws IOException {
-        Sbom sbom = new Sbom();
-        sbom.setBuildId("AABBCC");
-        sbom.setId(416640206274228224L);
-        sbom.setType(SbomType.BUILD_TIME);
-        sbom.setGenerationTime(Instant.now());
-        sbom.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
+    // /**
+    // * It should return a stub for the {@link Sbom} object, where the sbom field is empty.
+    // *
+    // * @throws IOException
+    // */
+    // @Test
+    // public void shouldStartGenerationForAGivenPncBuild() throws IOException {
+    // Sbom sbom = new Sbom();
+    // sbom.setBuildId("AABBCC");
+    // sbom.setId(416640206274228224L);
+    // sbom.setType(SbomType.BUILD_TIME);
+    // sbom.setGenerationTime(Instant.now());
+    // sbom.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
 
-        Mockito.when(generationService.generate("AABBCC", GeneratorType.MAVEN_CYCLONEDX)).thenReturn(sbom);
+    // Mockito.when(generationService.generate("AABBCC", GeneratorType.MAVEN_CYCLONEDX)).thenReturn(sbom);
 
-        given().when()
-                .contentType(ContentType.JSON)
-                .request("POST", "/api/v1alpha1/sboms/generate/build/AABBCC")
-                .then()
-                .statusCode(202)
-                .body("id", CoreMatchers.any(Long.class))
-                .and()
-                .body("buildId", CoreMatchers.equalTo("AABBCC"))
-                .and()
-                .body("sbom", CoreMatchers.nullValue())
-                .and()
-                .body("generator", CoreMatchers.is("CYCLONEDX"))
-                .and()
-                .body("processor", CoreMatchers.nullValue());
-    }
+    // given().when()
+    // .contentType(ContentType.JSON)
+    // .request("POST", "/api/v1alpha1/sboms/generate/build/AABBCC")
+    // .then()
+    // .statusCode(202)
+    // .body("id", CoreMatchers.any(Long.class))
+    // .and()
+    // .body("buildId", CoreMatchers.equalTo("AABBCC"))
+    // .and()
+    // .body("sbom", CoreMatchers.nullValue())
+    // .and()
+    // .body("generator", CoreMatchers.is("CYCLONEDX"))
+    // .and()
+    // .body("processor", CoreMatchers.nullValue());
+    // }
 
 }

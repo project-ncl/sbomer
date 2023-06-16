@@ -27,7 +27,8 @@ function install_sdk() {
 }
 
 function install_java() {
-  for java_version in 8.0.362 11.0.18 17.0.6; do
+  # 8.0.362 11.0.18
+  for java_version in 17.0.7; do
     sdk install java ${java_version}-tem
     sdk install java ${java_version%%.*} "$(sdk home java ${java_version}-tem)"
     sdk use java ${java_version}-tem
@@ -44,7 +45,7 @@ function install_java() {
 }
 
 function install_maven() {
-  for mvn_version in 3.6.3 3.8.8 3.9.1; do
+  for mvn_version in 3.6.3 3.8.8 3.9.2; do
     sdk install maven ${mvn_version}
     sdk install maven ${mvn_version%.*} "$(sdk home maven ${mvn_version})"
   done

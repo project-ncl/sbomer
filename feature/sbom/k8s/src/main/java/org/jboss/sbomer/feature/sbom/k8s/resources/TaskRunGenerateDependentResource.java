@@ -192,8 +192,9 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                                 .withImage("localhost/sbomer-generator:latest")
                                 .withImagePullPolicy("IfNotPresent")
                                 .withNewResources()
-                                .withLimits(Map.of("cpu", new Quantity("500m"), "memory", new Quantity("500Mi")))
-                                .withRequests(Map.of("cpu", new Quantity("200m"), "memory", new Quantity("200Mi")))
+                                .withRequests(Map.of("cpu", new Quantity("200m"), "memory", new Quantity("300Mi")))
+                                .withLimits(Map.of("cpu", new Quantity("500m"), "memory", new Quantity("1024Mi")))
+
                                 .endResources()
                                 .withScript(script)
                                 .build())

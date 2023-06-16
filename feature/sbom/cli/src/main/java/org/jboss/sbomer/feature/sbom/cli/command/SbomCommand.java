@@ -39,20 +39,4 @@ public class SbomCommand implements FeatureTopCommand {
 
     @Inject
     CommandLine.IFactory factory;
-
-    // @Override
-    // public Integer call() throws Exception {
-    // return 0;
-    // // String subcommands = spec.commandLine()
-    // // .getSubcommands()
-    // // .values()
-    // // .stream()
-    // // .map(cl -> cl.getCommandName())
-    // // .distinct()
-    // // .collect(Collectors.joining(", "));
-
-    // // throw new ParameterException(
-    // // spec.commandLine(),
-    // // "No subcommand provided, available subcommands: " + subcommands);
-    // }
 }

@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.feature.sbom.cli.command;
 
-import java.util.concurrent.Callable;
-
 import lombok.Getter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;

@@ -411,4 +411,135 @@ public class SBOMResource {
         }
     }
 
+    // Deprecated endpoints:
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/build/{buildId}") --> OLD
+    // @Operation(summary = "Get all SBOMs related to a PNC build")
+
+    // ==> Use "/api/v1alpha1/sboms?query=buildId==eq={buildId}"
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/build/{buildId}")
+    // @Operation(summary = "Get the base SBOM related to a PNC build")
+
+    // ==> Use "/api/v1alpha1/sboms?query=buildId=eq={buildId};generator=isnull=false;processors=isnull=true"
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/build/{buildId}/enriched")
+    // @Operation(summary = "Get the enriched SBOM related to a PNC build")
+
+    // ==> Use "/api/v1alpha1/sboms?query=buildId=eq={buildId};generator=isnull=false;processors=isnull=false"
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/purl/{rootPurl}/base")
+    // @Operation(summary = "Get the base SBOM related to a root component purl")
+
+    // ==> Use "/api/v1alpha1/sboms?query=rootPurl=eq='{rootPurl}';generator=isnull=false;processors=isnull=true"
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/purl/{rootPurl}/enriched")
+    // @Operation(summary = "Get the enriched SBOM related to a root component purl")
+
+    // ==> Use "/api/v1alpha1/sboms?query=rootPurl=eq='{rootPurl}';generator=isnull=false;processors=isnull=false"
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/build/{buildId}/base/bom")
+    // @Operation(summary = "Get the base SBOM content related to a PNC build")
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/build/{buildId}/enriched/bom")
+    // @Operation(summary = "Get the enriched SBOM content related to a PNC build")
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/purl/{rootPurl}/base/bom")
+    // @Operation(summary = "Get the base SBOM content related to a root component purl")
+    // -------------------------------------------------------------------------------
+    // @GET
+    // @Path("/purl/{rootPurl}/enriched/bom")
+    // @Operation(summary = "Get the enriched SBOM content related to a root component purl")
+    // -------------------------------------------------------------------------------
+
+    // TODO: disabled until moved to sbomer feature and made it possible to create the generation request
+    // @POST
+    // @Operation(
+    // summary = "Generate a base SBOM based on the PNC build",
+    // description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
+    // @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    // @Parameter(
+    // name = "generator",
+    // description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are
+    // `DOMINO`, `CYCLONEDX`",
+    // example = "CYCLONEDX")
+    // @Path("/generate/build/{buildId}")
+    // @APIResponses({ @APIResponse(
+    // responseCode = "202",
+    // description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does
+    // execute the generation behind the scenes.",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    // @APIResponse(
+    // responseCode = "500",
+    // description = "Internal server error",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    // public Response generate(@PathParam("buildId") String buildId, @QueryParam("generator") String generator)
+    // throws Exception {
+
+    // try {
+    // MDCUtils.addBuildContext(buildId);
+
+    // GeneratorType gen = GeneratorType.MAVEN_CYCLONEDX;
+
+    // if (!Strings.isEmpty(generator)) {
+    // try {
+    // gen = GeneratorType.valueOf(generator);
+    // } catch (IllegalArgumentException iae) {
+    // throw new ClientException(
+    // Status.BAD_REQUEST.getStatusCode(),
+    // "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use
+    // `CYCLONEDX`",
+    // iae);
+    // }
+    // }
+
+    // Sbom sbom = generationService.generate(buildId, gen);
+
+    // return Response.status(Status.ACCEPTED).entity(sbom).build();
+    // } finally {
+    // MDCUtils.removeBuildContext();
+    // }
+    // }
+
+    // @POST
+    // @Operation(summary = "Process selected SBOM", description = "Process selected SBOM using default processors")
+    // @Parameter(name = "id", description = "The SBOM identifier")
+    // @Path("/{id}/process")
+    // @APIResponses({ @APIResponse(
+    // responseCode = "202",
+    // description = "The SBOM enrichment process was accepted.",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    // @APIResponse(
+    // responseCode = "400",
+    // description = "Could not parse provided arguments",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    // @APIResponse(
+    // responseCode = "404",
+    // description = "Requested SBOM could not be found",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    // @APIResponse(
+    // responseCode = "500",
+    // description = "Internal server error",
+    // content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    // public Response processEnrichmentOfBaseSbom(@PathParam("id") final String sbomId) throws Exception {
+
+    // try {
+    // Sbom sbom = doGetBomById(sbomId);
+    // MDCUtils.addBuildContext(sbom.getBuildId());
+    // sbom = processingService.process(sbom);
+
+    // return Response.status(Status.ACCEPTED).entity(sbom).build();
+    // } finally {
+    // MDCUtils.removeBuildContext();
+    // }
+    // }
+
 }

@@ -29,13 +29,11 @@ import org.jboss.sbomer.core.enums.SbomStatus;
 import org.jboss.sbomer.core.enums.SbomType;
 import org.jboss.sbomer.core.service.rest.Page;
 import org.jboss.sbomer.model.Sbom;
-import org.jboss.sbomer.service.GenerationService;
 import org.jboss.sbomer.service.SbomService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.http.ContentType;
@@ -47,8 +45,8 @@ public class SBOMResourceRSQLTest {
     @InjectSpy
     SbomService sbomService;
 
-    @InjectMock
-    GenerationService generationService;
+    // @InjectMock
+    // GenerationService generationService;
 
     @Test
     public void testRSQLSearchPagination() {

@@ -41,7 +41,7 @@ import picocli.CommandLine.Command;
 public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand {
 
     @Override
-    public void generate() {
+    public Path doGenerate() {
         DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig
                 .forGenerator(GeneratorType.MAVEN_CYCLONEDX);
 
@@ -104,13 +104,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
 
         Path sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "target", "bom.json");
 
-        try {
-            Files.copy(sbomPath, parent.getOutput(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new ApplicationException(
-                    "Could not move the generated SBOM to target location: '{}'",
-                    parent.getOutput().toAbsolutePath());
-        }
+        return sbomPath;
     }
 
 }

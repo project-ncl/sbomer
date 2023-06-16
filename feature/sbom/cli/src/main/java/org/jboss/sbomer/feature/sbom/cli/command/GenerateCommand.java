@@ -64,11 +64,4 @@ public class GenerateCommand {
             converter = PathConverter.class,
             scope = ScopeType.INHERIT)
     Path output;
-
-    // @Override
-    // public Integer call() throws Exception {
-    // return 0;
-
-    // }
-
 }

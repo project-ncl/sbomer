@@ -26,17 +26,16 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.feature.sbom.cli.command.PathConverter;
 import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.ProductConfig;
 
 import lombok.extern.slf4j.Slf4j;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.RunAll;
 import picocli.CommandLine.Spec;
 
 @Slf4j
@@ -94,6 +93,10 @@ public class GenerateCommand implements Callable<Integer> {
 
         log.debug("Configuration read successfully: {}", config);
 
+        // Make sure there is no context
+        MDCUtils.removeContext();
+        MDCUtils.addBuildContext(config.getBuildId());
+
         if (index != null) {
 
             if (index < 0) {
@@ -150,13 +153,7 @@ public class GenerateCommand implements Callable<Integer> {
 
         log.info("Running: '{}'", cmd);
 
-        // System.out.println(spec.commandLine().setExecutionStrategy(new RunAll()));
-
-        // new CommandLine(new org.jboss.sbomer.feature.sbom.cli.command.GenerateCommand())
-        // .setExecutionStrategy(new RunAll())
-        // .execute(command.toArray(new String[command.size()]));
-
-        // // Execute the generation
+        // Execute the generation
         if (spec.root().commandLine().execute(command.toArray(new String[command.size()])) != 0) {
             throw new ApplicationException("Command '{}' failed, see logs above", cmd);
         }

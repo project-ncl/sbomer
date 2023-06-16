@@ -47,16 +47,7 @@ public abstract class AbstractProcessCommand implements Callable<Integer> {
         try {
             // make sure there is no context
             MDCUtils.removeContext();
-            // MDCUtils.addProcessContext(sbomId); // TODO
-
             MDCUtils.addBuildContext(parent.getParent().getParent().getBuildId());
-
-            // sbomerClient.updateSbom(
-            // String.valueOf(sbom.getId()),
-            // String.valueOf(sbom.getId()),
-            // SbomUtils.toJsonNode(processedBom));
-
-            // log.info("SBOM with id '{}' updated!", sbom.getId());
 
             Bom bom = SbomUtils.fromPath(parent.getParent().getParent().getOutput());
 

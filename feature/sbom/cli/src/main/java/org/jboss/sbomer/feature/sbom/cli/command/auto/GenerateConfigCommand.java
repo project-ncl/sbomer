@@ -32,6 +32,7 @@ import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.service.PncService;
+import org.jboss.sbomer.core.utils.MDCUtils;
 import org.jboss.sbomer.feature.sbom.cli.command.PathConverter;
 import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
 import org.jboss.sbomer.feature.sbom.core.config.DefaultGenerationConfig;
@@ -94,6 +95,10 @@ public class GenerateConfigCommand implements Callable<Integer> {
     ProductVersionMapper productVersionMapper;
 
     private Config productConfig() {
+        // Make sure there is no context
+        MDCUtils.removeContext();
+        MDCUtils.addBuildContext(buildId);
+
         log.info("Obtaining runtime configuration for build '{}'", buildId);
 
         // 1. Find if we can obtain the configuration from the file, if not found

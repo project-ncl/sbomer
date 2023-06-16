@@ -17,44 +17,35 @@
  */
 package org.jboss.sbomer.test.k8s;
 
-import java.util.Map;
-import java.util.Optional;
+public class TaskRunStatusHandlerUnderTesting { // extends TaskRunStatusHandler {
 
-import org.jboss.sbomer.core.enums.SbomStatus;
-import org.jboss.sbomer.k8s.TaskRunStatusHandler;
+    // Map<String, SbomStatus> getStatusCache() {
+    // return this.statusCache;
+    // }
 
-import io.fabric8.knative.internal.pkg.apis.Condition;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
+    // @Override
+    // public boolean isUpdateable(TaskRun taskRun) {
+    // return super.isUpdateable(taskRun);
+    // }
 
-public class TaskRunStatusHandlerUnderTesting extends TaskRunStatusHandler {
+    // @Override
+    // public SbomStatus toStatus(String taskRunStatus) {
+    // return super.toStatus(taskRunStatus);
+    // }
 
-    Map<String, SbomStatus> getStatusCache() {
-        return this.statusCache;
-    }
+    // @Override
+    // public void updateStatus(String sbomId, SbomStatus status, String taskRunFinalMsg) {
+    // super.updateStatus(sbomId, status, taskRunFinalMsg);
+    // }
 
-    @Override
-    public boolean isUpdateable(TaskRun taskRun) {
-        return super.isUpdateable(taskRun);
-    }
+    // @Override
+    // protected void handleTaskRunUpdate(TaskRun taskRun) {
+    // super.handleTaskRunUpdate(taskRun);
+    // }
 
-    @Override
-    public SbomStatus toStatus(String taskRunStatus) {
-        return super.toStatus(taskRunStatus);
-    }
-
-    @Override
-    public void updateStatus(String sbomId, SbomStatus status, String taskRunFinalMsg) {
-        super.updateStatus(sbomId, status, taskRunFinalMsg);
-    }
-
-    @Override
-    protected void handleTaskRunUpdate(TaskRun taskRun) {
-        super.handleTaskRunUpdate(taskRun);
-    }
-
-    @Override
-    public Optional<Condition> findLastCondition(TaskRun taskRun) {
-        return super.findLastCondition(taskRun);
-    }
+    // @Override
+    // public Optional<Condition> findLastCondition(TaskRun taskRun) {
+    // return super.findLastCondition(taskRun);
+    // }
 
 }

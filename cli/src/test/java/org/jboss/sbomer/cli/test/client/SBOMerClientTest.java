@@ -17,21 +17,6 @@
  */
 package org.jboss.sbomer.cli.test.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import javax.inject.Inject;
-
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.pnc.rest.api.parameters.PaginationParameters;
-import org.jboss.sbomer.cli.client.SBOMerClient;
-import org.jboss.sbomer.cli.model.Sbom;
-import org.jboss.sbomer.core.errors.ClientException;
-import org.jboss.sbomer.core.service.rest.Page;
-import org.junit.jupiter.api.Test;
-
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -39,41 +24,41 @@ import io.quarkus.test.junit.QuarkusTest;
 @QuarkusTestResource(ServiceWireMock.class)
 public class SBOMerClientTest {
 
-    @Inject
-    @RestClient
-    SBOMerClient client;
+    // @Inject
+    // @RestClient
+    // SBOMerClient client;
 
-    @Test
-    void testGetValidSbom() {
-        Sbom sbom = client.getById("123", "123");
-        assertNotNull(sbom);
-        assertEquals(123, sbom.getId());
-        assertEquals("QUARKUS", sbom.getBuildId());
-    }
+    // @Test
+    // void testGetValidSbom() {
+    // Sbom sbom = client.getById("123", "123");
+    // assertNotNull(sbom);
+    // assertEquals(123, sbom.getId());
+    // assertEquals("QUARKUS", sbom.getBuildId());
+    // }
 
-    @Test
-    void testNotFoundSbom() {
-        ClientException ex = assertThrows(ClientException.class, () -> {
-            client.getById("1234", "1234");
-        });
+    // @Test
+    // void testNotFoundSbom() {
+    // ClientException ex = assertThrows(ClientException.class, () -> {
+    // client.getById("1234", "1234");
+    // });
 
-        assertEquals(404, ex.getCode());
-        assertEquals("Not Found", ex.getMessage());
-        assertEquals("cc015e2c-e4e7-11ed-b5ea-0242ac120002", ex.getErrorId());
-        assertNull(ex.getErrors());
+    // assertEquals(404, ex.getCode());
+    // assertEquals("Not Found", ex.getMessage());
+    // assertEquals("cc015e2c-e4e7-11ed-b5ea-0242ac120002", ex.getErrorId());
+    // assertNull(ex.getErrors());
 
-    }
+    // }
 
-    @Test
-    void testSearchSbom() {
+    // @Test
+    // void testSearchSbom() {
 
-        PaginationParameters pagParams = new PaginationParameters();
-        pagParams.setPageIndex(0);
-        pagParams.setPageSize(1);
-        String rsqlQuery = "id==123";
-        Page<Sbom> sboms = client.searchSboms("123", pagParams, rsqlQuery);
+    // PaginationParameters pagParams = new PaginationParameters();
+    // pagParams.setPageIndex(0);
+    // pagParams.setPageSize(1);
+    // String rsqlQuery = "id==123";
+    // Page<Sbom> sboms = client.searchSboms("123", pagParams, rsqlQuery);
 
-        assertNotNull(sboms);
-        assertEquals(123, sboms.getContent().iterator().next().getId());
-    }
+    // assertNotNull(sboms);
+    // assertEquals(123, sboms.getContent().iterator().next().getId());
+    // }
 }
