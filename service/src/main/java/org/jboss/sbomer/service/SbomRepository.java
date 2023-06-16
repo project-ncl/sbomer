@@ -19,6 +19,8 @@ package org.jboss.sbomer.service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -107,12 +109,24 @@ public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
             throw new NotFoundException("Could not find any final SBOM with buildId '{}'", buildId);
         }
 
-        sboms.stream().forEach(s -> {
-            // Remove all elements from the processors collection
-            s.getProcessors().clear();
+        sboms.stream().filter(s -> s.getParentSbom() != null).forEach(s -> {
+            if (s.getProcessors() != null) {
+                s.getProcessors().clear();
+            }
+
             getEntityManager().remove(s);
             getEntityManager().flush();
         });
+
+        sboms.stream().filter(s -> s.getParentSbom() == null).forEach(s -> {
+            if (s.getProcessors() != null) {
+                s.getProcessors().clear();
+            }
+
+            getEntityManager().remove(s);
+            getEntityManager().flush();
+        });
+
     }
 
     @Transactional
