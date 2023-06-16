@@ -68,7 +68,7 @@ patches:
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
-          name: QUARKUS_OIDC_AUTH_SERVER_URL
+          name: AUTH_SERVER_URL
           valueFrom:
             secretKeyRef:
               name: sbomer-secrets
