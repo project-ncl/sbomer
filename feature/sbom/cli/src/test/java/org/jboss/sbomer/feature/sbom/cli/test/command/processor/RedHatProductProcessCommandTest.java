@@ -15,9 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.command.processor;
+package org.jboss.sbomer.feature.sbom.cli.test.command.processor;
 
-import org.jboss.sbomer.cli.test.PncWireMock;
+import org.jboss.sbomer.feature.sbom.cli.test.PncWireMock;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;

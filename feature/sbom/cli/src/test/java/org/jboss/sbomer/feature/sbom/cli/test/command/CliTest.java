@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.command;
+package org.jboss.sbomer.feature.sbom.cli.test.command;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 

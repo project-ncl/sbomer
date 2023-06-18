@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.command.processor;
+package org.jboss.sbomer.feature.sbom.cli.test.command.processor;
 
 import java.util.Set;
 
-import org.jboss.sbomer.cli.test.AlternativePncService;
+import org.jboss.sbomer.feature.sbom.cli.test.AlternativePncService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

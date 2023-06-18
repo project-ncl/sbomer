@@ -56,15 +56,6 @@
       <artifactId>quarkus-picocli</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-rest-client-jackson</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkiverse.jgit</groupId>
-      <artifactId>quarkus-jgit</artifactId>
-      <version>${version.quarkus-jgit}</version>
-    </dependency>
-    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>${version.lombok}</version>
@@ -80,16 +71,10 @@
       <artifactId>quarkus-junit5-mockito</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock</artifactId>
-      <version>3.0.0-beta-7</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
-    <finalName>sbomer</finalName>
+    <finalName>sbomerctl</finalName>
     <plugins>
       <plugin>
         <groupId>io.quarkus</groupId>

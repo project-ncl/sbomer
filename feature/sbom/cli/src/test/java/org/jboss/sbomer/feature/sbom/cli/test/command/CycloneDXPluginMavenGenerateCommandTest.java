@@ -15,12 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.command;
+package org.jboss.sbomer.feature.sbom.cli.test.command;
 
 import java.util.Set;
 
-import org.jboss.sbomer.cli.test.AlternativePncService;
-import org.jboss.sbomer.cli.test.command.CycloneDXPluginMavenGenerateCommandTest.CustomPncServiceProfile;
+import org.jboss.sbomer.feature.sbom.cli.test.AlternativePncService;
+import org.jboss.sbomer.feature.sbom.cli.test.command.CycloneDXPluginMavenGenerateCommandTest.CustomPncServiceProfile;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.client;
+package org.jboss.sbomer.feature.sbom.cli.test;
 
 import java.util.Collections;
 import java.util.Map;
@@ -24,16 +24,17 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
-public class ServiceWireMock implements QuarkusTestResourceLifecycleManager {
+public class PncWireMock implements QuarkusTestResourceLifecycleManager {
 
     private WireMockServer wireMockServer;
 
     @Override
     public Map<String, String> start() {
-        wireMockServer = new WireMockServer(12377);
+        wireMockServer = new WireMockServer(12388);
         wireMockServer.start();
+        System.out.println(wireMockServer.baseUrl());
 
-        return Collections.singletonMap("quarkus.rest-client.sbomer.url", wireMockServer.baseUrl());
+        return Collections.singletonMap("sbomer.pnc.api-url", wireMockServer.baseUrl().substring(7));
     }
 
     @Override
