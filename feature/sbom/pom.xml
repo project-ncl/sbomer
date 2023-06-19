@@ -39,7 +39,6 @@
 
   <modules>
     <module>core</module>
-    <module>cli</module>
     <module>k8s</module>
     <module>service</module>
   </modules>

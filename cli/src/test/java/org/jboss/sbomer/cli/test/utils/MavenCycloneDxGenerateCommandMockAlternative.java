@@ -6,8 +6,8 @@ import java.nio.file.Path;
 
 import javax.enterprise.inject.Alternative;
 
-import org.jboss.sbomer.feature.sbom.cli.command.MavenCycloneDxGenerateCommand;
-import org.jboss.sbomer.feature.sbom.cli.command.ProcessCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.MavenCycloneDxGenerateCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.ProcessCommand;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
