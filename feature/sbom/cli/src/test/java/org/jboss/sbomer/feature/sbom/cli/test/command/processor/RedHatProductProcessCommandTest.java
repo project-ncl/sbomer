@@ -91,40 +91,39 @@ public class RedHatProductProcessCommandTest {
         assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
     }
 
-
     // @Test
     // @DisplayName("Should run the processor successfully")
     // void shouldProcess() throws Exception {
-    //     // Sbom sbom = generateSbom();
-    //     // sbom.setBuildId("QUARKUS");
-    //     Bom bom = command.doProcess(generateBom());
+    // // Sbom sbom = generateSbom();
+    // // sbom.setBuildId("QUARKUS");
+    // Bom bom = command.doProcess(generateBom());
 
-    //     assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
-    //     assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
-    //     assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
+    // assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
+    // assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
+    // assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
 
-    //     assertEquals(
-    //             "RHBQ",
-    //             SbomUtils
-    //                     .findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, bom.getMetadata().getComponent())
-    //                     .get()
-    //                     .getValue());
-    //     assertEquals(
-    //             "RHEL-8-RHBQ-2.13",
-    //             SbomUtils
-    //                     .findPropertyWithNameInComponent(
-    //                             PROPERTY_ERRATA_PRODUCT_VERSION,
-    //                             bom.getMetadata().getComponent())
-    //                     .get()
-    //                     .getValue());
-    //     assertEquals(
-    //             "8Base-RHBQ-2.13",
-    //             SbomUtils
-    //                     .findPropertyWithNameInComponent(
-    //                             PROPERTY_ERRATA_PRODUCT_VARIANT,
-    //                             bom.getMetadata().getComponent())
-    //                     .get()
-    //                     .getValue());
+    // assertEquals(
+    // "RHBQ",
+    // SbomUtils
+    // .findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, bom.getMetadata().getComponent())
+    // .get()
+    // .getValue());
+    // assertEquals(
+    // "RHEL-8-RHBQ-2.13",
+    // SbomUtils
+    // .findPropertyWithNameInComponent(
+    // PROPERTY_ERRATA_PRODUCT_VERSION,
+    // bom.getMetadata().getComponent())
+    // .get()
+    // .getValue());
+    // assertEquals(
+    // "8Base-RHBQ-2.13",
+    // SbomUtils
+    // .findPropertyWithNameInComponent(
+    // PROPERTY_ERRATA_PRODUCT_VARIANT,
+    // bom.getMetadata().getComponent())
+    // .get()
+    // .getValue());
     // }
 
     // @Test
