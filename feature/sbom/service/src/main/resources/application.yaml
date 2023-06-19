@@ -53,13 +53,6 @@ quarkus:
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
 
-  oidc:
-    auth-server-url: "${AUTH_SERVER_URL}"
-    connection-delay: 30S
-    connection-retry-count: 10
-    client-id: pnc-sbomer
-    tls:
-      verification: none
 
 sbomer:
   features:
@@ -147,8 +140,6 @@ sbomer:
       url: amqp://localhost:5672
       username: ""
       password: ""
-    oidc:
-      enabled: false
     log:
       json:
         console:

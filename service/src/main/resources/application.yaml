@@ -20,21 +20,38 @@ quarkus:
   banner:
     path: banner.txt
 
-  log:
-    level: INFO
-    category:
-      "org.jboss.sbomer":
-        level: DEBUG
-    console:
-      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
-      stderr: true
-    json:
-      pretty-print: true
+  oidc:
+    auth-server-url: "${AUTH_SERVER_URL}"
+    connection-delay: 30S
+    connection-retry-count: 10
+    client-id: pnc-sbomer
+    tls:
+      verification: none
 
-  operator-sdk:
-    crd:
-      generate: false
-      apply: false
+  # operator-sdk:
+  #   crd:
+  #     generate-all: false
+  #     generate: false
+  #     apply: false
+  #     validate: false
+
+  # log:
+  #   level: INFO
+  #   category:
+  #     "org.jboss.sbomer":
+  #       level: DEBUG
+  #   console:
+  #     format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+  #     stderr: true
+  #   json:
+  #     pretty-print: true
+
+  # operator-sdk:
+  #   crd:
+  #     generate-all: false
+  #     generate: false
+  #     apply: false
+  #     validate: false
 
 "%dev":
   quarkus:
@@ -48,7 +65,8 @@ quarkus:
       json:
         console:
           enable: false
-
+    oidc:
+      enabled: false
 "%test":
   quarkus:
     log:
@@ -59,3 +77,5 @@ quarkus:
       json:
         console:
           enable: false
+    oidc:
+      enabled: false

@@ -38,7 +38,7 @@
     <modules>
         <module>core</module>
         <module>cli</module>
-        <module>operator</module>
+        <module>service</module>
         <module>feature</module>
     </modules>
 

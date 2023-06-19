@@ -29,9 +29,16 @@ quarkus:
     json:
       pretty-print: true
 
-    kubernetes-client:
-      devservices:
-        enabled: false
+  operator-sdk:
+    crd:
+      generate-all: false
+      generate: false
+      apply: false
+      validate: false
+
+    # kubernetes-client:
+    #   devservices:
+    #     enabled: false
         
 
 "%dev":

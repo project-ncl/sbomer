@@ -16,14 +16,4 @@
 # limitations under the License.
 #
 
-microprofile:
-  rest:
-    client:
-      disable:
-        default:
-          mapper: true
 
-quarkus:
-  rest-client:
-    "gerrit":
-      url: "https://code.engineering.redhat.com" # TODO: parametrize it
