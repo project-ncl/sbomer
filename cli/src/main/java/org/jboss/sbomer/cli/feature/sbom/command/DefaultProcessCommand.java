@@ -31,8 +31,8 @@ import org.cyclonedx.model.Hash;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
+import org.jboss.sbomer.cli.feature.sbom.utils.RhVersionPattern;
 import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
-import org.jboss.sbomer.feature.sbom.core.utils.RhVersionPattern;
 import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
