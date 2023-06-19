@@ -22,11 +22,13 @@ import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.utils.ObjectMapperProvider;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Getter;
 
@@ -42,8 +44,7 @@ public class ProductVersionMapper {
     @ConfigProperty(name = "sbomer.pnc.product-mapping.environment")
     String mappingEnvironment;
 
-    @Inject
-    ConfigReader configReader;
+    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     public static class Mapping extends HashMap<String, Config> {
 
@@ -61,11 +62,10 @@ public class ProductVersionMapper {
     @PostConstruct
     void init() {
         try {
-            mapping = configReader.getYamlObjectMapper()
-                    .readValue(
-                            getClass().getClassLoader()
-                                    .getResourceAsStream("mapping/" + mappingEnvironment + "/product-mapping.yaml"),
-                            Mapping.class);
+            mapping = objectMapper.readValue(
+                    getClass().getClassLoader()
+                            .getResourceAsStream("mapping/" + mappingEnvironment + "/product-mapping.yaml"),
+                    Mapping.class);
         } catch (IOException e) {
             throw new ApplicationException("Could not read product mappings", e);
         }

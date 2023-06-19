@@ -28,13 +28,13 @@ import javax.inject.Inject;
 
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.utils.MDCUtils;
-import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
 import org.jboss.sbomer.feature.sbom.core.config.DefaultGenerationConfig;
 import org.jboss.sbomer.feature.sbom.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.feature.sbom.core.config.DefaultProcessingConfig;

@@ -23,14 +23,14 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.utils.MDCUtils;
-import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
+import org.jboss.sbomer.core.utils.ObjectMapperProvider;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.ProductConfig;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -72,8 +72,7 @@ public class GenerateCommand implements Callable<Integer> {
     @Spec
     CommandSpec spec;
 
-    @Inject
-    ConfigReader configReader;
+    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     @Override
     public Integer call() throws Exception {
@@ -88,8 +87,7 @@ public class GenerateCommand implements Callable<Integer> {
         }
 
         // It is able to read both: JSON and YAML config files
-        Config config = configReader.getYamlObjectMapper()
-                .readValue(configPath.toAbsolutePath().toFile(), Config.class);
+        Config config = objectMapper.readValue(configPath.toAbsolutePath().toFile(), Config.class);
 
         log.debug("Configuration read successfully: {}", config);
 

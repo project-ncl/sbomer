@@ -27,11 +27,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.utils.MDCUtils;
-import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
+import org.jboss.sbomer.core.utils.ObjectMapperProvider;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 import org.jboss.sbomer.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -43,6 +41,7 @@ import org.jboss.sbomer.feature.sbom.k8s.resources.TaskRunGenerateDependentResou
 import org.jboss.sbomer.feature.sbom.k8s.resources.TaskRunInitDependentResource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunResult;
@@ -103,8 +102,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
     }
 
-    @Inject
-    ConfigReader configReader;
+    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     @Override
     public UpdateControl<GenerationRequest> reconcile(
@@ -254,7 +252,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         Config config;
 
         try {
-            config = configReader.getYamlObjectMapper().readValue(configVal.getBytes(), Config.class);
+            config = objectMapper.readValue(configVal.getBytes(), Config.class);
         } catch (IOException e) {
             throw new ApplicationException(
                     "Could not parse the '{}' result within the TaskRun '{}': {}",
@@ -266,7 +264,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         log.debug("Runtime config from TaskRun '{}' parsed: {}", taskRun.getMetadata().getName(), config);
 
         try {
-            generationRequest.setConfig(configReader.getYamlObjectMapper().writeValueAsString(config));
+            generationRequest.setConfig(objectMapper.writeValueAsString(config));
         } catch (JsonProcessingException e) {
             log.error("Unable to serialize product configuration", e);
         }

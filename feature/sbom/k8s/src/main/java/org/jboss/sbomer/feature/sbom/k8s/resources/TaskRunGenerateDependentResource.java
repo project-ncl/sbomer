@@ -25,16 +25,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.utils.MDCUtils;
-import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
+import org.jboss.sbomer.core.utils.ObjectMapperProvider;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 import org.jboss.sbomer.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.feature.sbom.k8s.model.SbomGenerationPhase;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.EnvVarSourceBuilder;
@@ -67,8 +66,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
      */
     public static final String PARAM_COMMAND_INDEX_NAME = "index";
 
-    @Inject
-    ConfigReader configReader;
+    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     TaskRunGenerateDependentResource() {
         super(TaskRun.class);
@@ -85,7 +83,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
         Config config;
 
         try {
-            config = configReader.getYamlObjectMapper().readValue(primary.getConfig().getBytes(), Config.class);
+            config = objectMapper.readValue(primary.getConfig().getBytes(), Config.class);
         } catch (IOException e) {
             throw new ApplicationException(
                     "Unable to parse configuration from GenerationRequest '{}': {}",
@@ -130,7 +128,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
         String configStr;
 
         try {
-            configStr = configReader.getYamlObjectMapper().writeValueAsString(config);
+            configStr = objectMapper.writeValueAsString(config);
         } catch (JsonProcessingException e) {
             throw new ApplicationException("Could not serialize runtime configuration into YAML", e);
         }
@@ -189,7 +187,8 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                                                                 .endConfigMapKeyRef()
                                                                 .build())
                                                 .build())
-                                .withImage("localhost/sbomer-generator:latest") // TODO: configure
+                                .withImage("localhost/sbomer-generator:latest") // TODO:
+                                                                                // configure
                                 .withImagePullPolicy("IfNotPresent")
                                 .withNewResources()
                                 .withRequests(Map.of("cpu", new Quantity("200m"), "memory", new Quantity("300Mi")))

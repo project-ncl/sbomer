@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.feature.sbom.core.config;
+package org.jboss.sbomer.cli.feature.sbom;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -28,16 +28,13 @@ import javax.ws.rs.NotFoundException;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
+import org.jboss.sbomer.cli.feature.sbom.client.GitilesClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
-import org.jboss.sbomer.feature.sbom.core.client.GitilesClient;
+import org.jboss.sbomer.core.utils.ObjectMapperProvider;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -52,17 +49,10 @@ public class ConfigReader {
     GitilesClient gitilesClient;
 
     @Getter
-    ObjectMapper yamlObjectMapper = new ObjectMapper(
-            new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                    .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)
-                    .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR))
-            .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
-            .setSerializationInclusion(Include.NON_NULL);
+    ObjectMapper yamlObjectMapper = ObjectMapperProvider.yaml();
 
     @Getter
-    ObjectMapper jsonObjectMapper = new ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
-            .setSerializationInclusion(Include.NON_NULL);
+    ObjectMapper jsonObjectMapper = ObjectMapperProvider.json();
 
     public Config getConfig(Build build) {
         Pattern pattern = Pattern.compile("gerrit/(.*)\\.git$");

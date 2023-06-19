@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.feature.sbom.core.test.config;
+package org.jboss.sbomer.cli.test.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,9 +33,9 @@ import javax.ws.rs.NotFoundException;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
+import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
+import org.jboss.sbomer.cli.feature.sbom.client.GitilesClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.feature.sbom.core.client.GitilesClient;
-import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
 import org.jboss.sbomer.feature.sbom.core.config.runtime.ProductConfig;
 import org.junit.jupiter.api.Test;
