@@ -97,8 +97,8 @@ sbomer:
 
 "%dev":
   quarkus:
-    devservices:
-      enabled: false
+    # devservices:
+    #   enabled: false
     # class-loading:
     #  parent-first-artifacts: io.quarkus:quarkus-bootstrap-maven-resolver
     datasource:
@@ -136,8 +136,8 @@ sbomer:
 
 "%test":
   quarkus:
-    devservices:
-      enabled: false
+    # devservices:
+    #   enabled: false
     datasource:
       db-kind: h2
       jdbc:

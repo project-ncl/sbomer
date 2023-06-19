@@ -208,6 +208,7 @@
                         <exclude>.license-header.txt</exclude>
                         <exclude>.sdkmanrc</exclude>
                         <exclude>.dockerignore</exclude>
+                        <exclude>**/banner.txt</exclude>
                         <exclude>**/README</exclude>
                         <exclude>**/LICENSE.txt</exclude>
                         <exclude>**/Dockerfile**</exclude>

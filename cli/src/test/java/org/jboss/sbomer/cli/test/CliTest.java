@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.feature.sbom.cli.test.command;
+package org.jboss.sbomer.cli.test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -33,9 +33,8 @@ public class CliTest {
     @DisplayName("Should run the command without any options and print help")
     @Launch(exitCode = 2)
     void shouldPrintUsageOnWrongCommand(LaunchResult result) throws Exception {
-        assertThat(result.getErrorStream(), Matchers.hasItem("Usage: sbomer [-hvV] [COMMAND]"));
-        assertThat(result.getErrorStream(), Matchers.hasItem("  generate, g  Generate SBOM from source code"));
-        assertThat(result.getErrorStream(), Matchers.hasItem("  process, p   Process SBOM using selected processor"));
+        assertThat(result.getErrorStream(), Matchers.hasItem("Usage: sbomerctl [-hvV] [COMMAND]"));
+        assertThat(result.getErrorStream(), Matchers.hasItem("  sbom, s  SBOM generation"));
     }
 
 }

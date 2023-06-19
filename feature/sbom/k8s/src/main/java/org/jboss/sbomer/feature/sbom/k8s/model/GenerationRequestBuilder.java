@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.feature.sbom.k8s.model;
 
+import java.util.Optional;
+
 import io.fabric8.kubernetes.api.builder.VisitableBuilder;
 
 public class GenerationRequestBuilder extends GenerationRequestFluentImpl<GenerationRequestBuilder>
@@ -25,7 +27,9 @@ public class GenerationRequestBuilder extends GenerationRequestFluentImpl<Genera
     @Override
     public GenerationRequest build() {
         addToData(GenerationRequest.KEY_BUILD_ID, getBuildId());
-        addToData(GenerationRequest.KEY_STATUS, getStatus().name());
+        addToData(
+                GenerationRequest.KEY_STATUS,
+                Optional.ofNullable(getStatus()).orElse(SbomGenerationStatus.NEW).name());
 
         GenerationRequest buildable = new GenerationRequest(
                 getApiVersion(),

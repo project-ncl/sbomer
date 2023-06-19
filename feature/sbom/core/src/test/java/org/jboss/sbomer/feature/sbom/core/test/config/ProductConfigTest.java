@@ -30,6 +30,7 @@ public class ProductConfigTest {
 
         assertEquals(
                 List.of(
+                        "-v",
                         "sbom",
                         "generate",
                         "--build-id",

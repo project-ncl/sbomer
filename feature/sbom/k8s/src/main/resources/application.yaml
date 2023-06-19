@@ -29,6 +29,11 @@ quarkus:
     json:
       pretty-print: true
 
+    kubernetes-client:
+      devservices:
+        enabled: false
+        
+
 "%dev":
   quarkus:
     log:
@@ -44,3 +49,4 @@ quarkus:
       json:
         console:
           enable: false
+
