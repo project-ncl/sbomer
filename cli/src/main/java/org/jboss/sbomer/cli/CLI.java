@@ -25,8 +25,6 @@ import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
-import org.jboss.sbomer.core.cli.FeatureTopCommand;
-
 import io.quarkus.arc.All;
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;

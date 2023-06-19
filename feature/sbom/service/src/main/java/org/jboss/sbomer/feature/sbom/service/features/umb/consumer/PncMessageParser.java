@@ -61,7 +61,7 @@ public class PncMessageParser implements Runnable {
     private AtomicInteger receivedMessages = new AtomicInteger(0);
 
     @Inject
-    PncService pncService;
+    PncService ;
 
     @Inject
     UmbConfig config;

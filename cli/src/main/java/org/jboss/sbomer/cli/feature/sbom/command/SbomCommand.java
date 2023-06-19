@@ -19,7 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import javax.inject.Inject;
 
-import org.jboss.sbomer.core.cli.FeatureTopCommand;
+import org.jboss.sbomer.cli.FeatureTopCommand;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;

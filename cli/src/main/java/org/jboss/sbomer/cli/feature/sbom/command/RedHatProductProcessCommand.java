@@ -25,7 +25,7 @@ import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.jboss.sbomer.core.service.PncService;
+import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
 import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 

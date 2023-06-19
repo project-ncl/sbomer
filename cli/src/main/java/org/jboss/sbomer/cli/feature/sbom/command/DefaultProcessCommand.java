@@ -30,7 +30,7 @@ import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
-import org.jboss.sbomer.core.service.PncService;
+import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
 import org.jboss.sbomer.feature.sbom.core.utils.RhVersionPattern;
 import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;

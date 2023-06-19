@@ -29,7 +29,7 @@ import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.SCMRepository;
-import org.jboss.sbomer.core.service.PncService;
+import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 
 @Alternative
 @Singleton

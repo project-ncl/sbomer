@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.test.service;
+package org.jboss.sbomer.cli.test.feature.sbom.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,7 +27,8 @@ import javax.inject.Inject;
 
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.ProductVersionRef;
-import org.jboss.sbomer.core.service.PncService;
+import org.jboss.sbomer.cli.feature.sbom.service.PncService;
+import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.common.QuarkusTestResource;
