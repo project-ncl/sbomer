@@ -1,5 +1,5 @@
 products:
   - processors:
-      redhat-product:
+      - type: redhat-product
         dummy: 111
         version: "1.1"

@@ -1,5 +1,5 @@
 products:
   - processors:
-      doesntexist:
-        customArgs: "--config-file as"
+      - type: doesntexist
+        args: "--config-file as"
         version: "1.1"

@@ -3,7 +3,7 @@
 apiVersion: sbomer.jboss.org/v1alpha1
 products:
   - processors:
-      redhat-product:
+      - type: redhat-product
         errata:
           productName: "RHBQ"
           productVersion: "RHEL-8-RHBQ-2.13"

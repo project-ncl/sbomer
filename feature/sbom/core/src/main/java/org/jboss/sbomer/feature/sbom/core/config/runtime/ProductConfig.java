@@ -66,7 +66,7 @@ public class ProductConfig {
         command.add("--build-id");
         command.add(config.getBuildId());
 
-        // // TODO: Make this somewhat static
+        // TODO: Make this somewhat static
         command.add(generator.getType().toString().toLowerCase().replace("_", "-"));
 
         if (generator.getVersion() != null) {

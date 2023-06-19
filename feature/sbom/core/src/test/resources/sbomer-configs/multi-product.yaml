@@ -3,22 +3,22 @@
 apiVersion: sbomer.jboss.org/v1alpha1
 products:
   - processors:
-      redhat-product:
+      - type: redhat-product
         errata:
           productName: "CCCDDD"
           productVersion: "CCDD"
           productVariant: "CD"
     generator:
-      type: DOMINO
-      custom: "--config-file .domino/cccddd.json"
+      type: maven-domino
+      args: "--config-file .domino/cccddd.json"
       version: "0.0.88"
 
   - processors:
-      redhat-product:
+      - type: redhat-product
         errata:
           productName: "AAABBB"
           productVersion: "AABB"
           productVariant: "AB"
     generator:
-      type: DOMINO
-      custom: "--config-file .domino/aaabbb.json"
+      type: maven-domino
+      args: "--config-file .domino/aaabbb.json"

@@ -36,6 +36,8 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.feature.sbom.core.client.GitilesClient;
 import org.jboss.sbomer.feature.sbom.core.config.ConfigReader;
+import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
+import org.jboss.sbomer.feature.sbom.core.config.runtime.ProductConfig;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -45,7 +47,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 
 @QuarkusTest
-// @WithKubernetesTestServer
 public class ConfigReaderTest {
 
     @Inject
@@ -106,28 +107,7 @@ public class ConfigReaderTest {
 
         assertEquals("Could not read configuration file", ex.getMessage());
         assertEquals(
-                "Processor implementation: 'doesntexist' is not valid",
-                ((JsonMappingException) ex.getCause()).getOriginalMessage());
-    }
-
-    @Test
-    void testInvalidProcessorConfig() throws IOException {
-        Mockito.when(
-                gitilesClient.fetchFile(
-                        "eclipse/microprofile-graphql",
-                        "refs/tags/1.1.0.redhat-00008",
-                        ".sbomer/config.yaml"))
-                .thenReturn(
-                        new String(
-                                Base64.getEncoder().encode(getTestConfigAsBytes("invalid-array-instead-of-map.yaml"))));
-
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            configReader.getConfig(build);
-        });
-
-        assertEquals("Could not read configuration file", ex.getMessage());
-        assertEquals(
-                "Invalid format of processors, a map expected",
+                "Could not resolve type id 'doesntexist' as a subtype of `org.jboss.sbomer.feature.sbom.core.config.runtime.ProcessorConfig`: known type ids = [default, redhat-product] (for POJO property 'processors')",
                 ((JsonMappingException) ex.getCause()).getOriginalMessage());
     }
 
@@ -160,5 +140,25 @@ public class ConfigReaderTest {
                         new String(Base64.getEncoder().encode(getTestConfigAsBytes("single-errata-override.yaml"))));
 
         assertNotNull(configReader.getConfig(build));
+    }
+
+    @Test
+    void testOnlyGeneratorOverride() throws IOException {
+        Mockito.when(
+                gitilesClient.fetchFile(
+                        "eclipse/microprofile-graphql",
+                        "refs/tags/1.1.0.redhat-00008",
+                        ".sbomer/config.yaml"))
+                .thenReturn(
+                        new String(Base64.getEncoder().encode(getTestConfigAsBytes("single-generator-override.yaml"))));
+
+        Config config = configReader.getConfig(build);
+
+        assertNotNull(config);
+        assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
+
+        ProductConfig productConfig = config.getProducts().get(0);
+        assertEquals(0, productConfig.getProcessors().size());
+        assertEquals("0.0.88", productConfig.getGenerator().getVersion());
     }
 }
