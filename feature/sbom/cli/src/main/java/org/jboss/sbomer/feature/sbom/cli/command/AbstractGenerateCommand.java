@@ -216,6 +216,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         return size.get() / 1024;
     }
 
+    // TODO: Move check for Maven build into Maven command
     private boolean isValidBuild(Build build) {
         if (!build.getTemporaryBuild() && org.jboss.pnc.enums.BuildProgress.FINISHED.equals(build.getProgress())
                 && (org.jboss.pnc.enums.BuildStatus.SUCCESS.equals(build.getStatus())

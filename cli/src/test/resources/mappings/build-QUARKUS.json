@@ -8,8 +8,14 @@
     "jsonBody": {
       "id": "QUARKUS",
       "buildConfigRevision": {
-        "id": "QUARKUS"
-      }
+        "id": "QUARKUS",
+        "buildType": "MVN"
+      },
+      "temporaryBuild": false,
+      "progress": "FINISHED",
+      "status": "SUCCESS",
+      "scmUrl": "https://c.r.com/gerrit/project/name.git",
+      "scmTag": "a-tag"
     },
     "headers": {
       "Content-Type": "application/json"

@@ -17,7 +17,31 @@
  */
 package org.jboss.sbomer.feature.sbom.cli.test.command.processor;
 
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+import static org.jboss.sbomer.feature.sbom.core.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+
+import javax.inject.Inject;
+
+import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.feature.sbom.cli.command.RedHatProductProcessCommand;
 import org.jboss.sbomer.feature.sbom.cli.test.PncWireMock;
+import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
+import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -25,33 +49,31 @@ import io.quarkus.test.junit.QuarkusTest;
 @QuarkusTest
 @QuarkusTestResource(PncWireMock.class)
 public class RedHatProductProcessCommandTest {
-    // @Inject
-    // RedHatProductProcessCommand command;
+    @Inject
+    RedHatProductProcessCommand command;
 
-    // @Inject
-    // ObjectMapper objectMapper;
+    @Inject
+    ObjectMapper objectMapper;
 
-    // private JsonNode generateBom() throws IOException {
-    // String bomJson = TestResources.asString("sboms/sbom-valid.json");
-    // return objectMapper.readTree(bomJson);
-    // }
+    private JsonNode generateBom() throws IOException {
+        String bomJson = TestResources.asString("sboms/sbom-valid.json");
+        return objectMapper.readTree(bomJson);
+    }
 
-    // private Sbom generateSbom() throws IOException {
-    // return Sbom.builder().buildId("ARYT3LBXDVYAC").sbom(generateBom()).id(123456l).build();
-    // }
+    @Test
+    void shouldReturnCorrectImplementationType() {
+        assertEquals(ProcessorType.REDHAT_PRODUCT, command.getImplementationType());
+    }
 
-    // @Test
-    // void shouldReturnCorrectImplementationType() {
-    // assertEquals(ProcessorType.REDHAT_PRODUCT, command.getImplementationType());
-    // }
-
+    // TODO: This deosn't make sense after refactoring, but maybe it could be a base for some other test, leaving for
+    // now
     // @Test
     // void shouldStopProcessingIfTheBuildIsNotFound() throws Exception {
-    // Sbom sbom = generateSbom();
+    // //Sbom sbom = generateSbom();
     // sbom.setBuildId("NOTEXISTING");
 
     // ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-    // command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
+    // command.doProcess(SbomUtils.fromJsonNode(generateBom()));
     // });
 
     // assertEquals(
@@ -60,77 +82,49 @@ public class RedHatProductProcessCommandTest {
 
     // }
 
-    // @Test
-    // void generatedSbomShouldNotHaveProductMetadata() throws IOException {
-    // Sbom sbom = generateSbom();
+    @Test
+    void generatedSbomShouldNotHaveProductMetadata() throws IOException {
+        Bom bom = SbomUtils.fromJsonNode(generateBom());
 
-    // Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
+        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
+        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
+        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
+    }
 
-    // assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
-    // assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
-    // assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
-    // }
-
-    // @Test
-    // // TODO: Add tests for logs
-    // void shouldStopWhenBuildConfigIsNotFound() throws Exception {
-    // Sbom sbom = generateSbom();
-    // sbom.setBuildId("MISSINGBUILDCONFIG");
-
-    // ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-    // command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
-    // });
-
-    // assertEquals(
-    // "Could not obtain PNC Product Version information for the 'MISSINGBUILDCONFIG' PNC build, interrupting
-    // processing",
-    // ex.getMessage());
-    // }
-
-    // @Test
-    // void shouldFailOnMissingMapping() throws Exception {
-    // Sbom sbom = generateSbom();
-
-    // ApplicationException ex = Assertions.assertThrows(ApplicationException.class, () -> {
-    // command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
-    // });
-
-    // assertEquals("Could not find mapping for the PNC Product Version '1.0' (id: 179)", ex.getMessage());
-    // }
 
     // @Test
     // @DisplayName("Should run the processor successfully")
     // void shouldProcess() throws Exception {
-    // Sbom sbom = generateSbom();
-    // sbom.setBuildId("QUARKUS");
-    // Bom bom = command.doProcess(sbom, SbomUtils.fromJsonNode(sbom.getSbom()));
+    //     // Sbom sbom = generateSbom();
+    //     // sbom.setBuildId("QUARKUS");
+    //     Bom bom = command.doProcess(generateBom());
 
-    // assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
-    // assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
-    // assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
+    //     assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
+    //     assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
+    //     assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
 
-    // assertEquals(
-    // "RHBQ",
-    // SbomUtils
-    // .findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, bom.getMetadata().getComponent())
-    // .get()
-    // .getValue());
-    // assertEquals(
-    // "RHEL-8-RHBQ-2.13",
-    // SbomUtils
-    // .findPropertyWithNameInComponent(
-    // PROPERTY_ERRATA_PRODUCT_VERSION,
-    // bom.getMetadata().getComponent())
-    // .get()
-    // .getValue());
-    // assertEquals(
-    // "8Base-RHBQ-2.13",
-    // SbomUtils
-    // .findPropertyWithNameInComponent(
-    // PROPERTY_ERRATA_PRODUCT_VARIANT,
-    // bom.getMetadata().getComponent())
-    // .get()
-    // .getValue());
+    //     assertEquals(
+    //             "RHBQ",
+    //             SbomUtils
+    //                     .findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, bom.getMetadata().getComponent())
+    //                     .get()
+    //                     .getValue());
+    //     assertEquals(
+    //             "RHEL-8-RHBQ-2.13",
+    //             SbomUtils
+    //                     .findPropertyWithNameInComponent(
+    //                             PROPERTY_ERRATA_PRODUCT_VERSION,
+    //                             bom.getMetadata().getComponent())
+    //                     .get()
+    //                     .getValue());
+    //     assertEquals(
+    //             "8Base-RHBQ-2.13",
+    //             SbomUtils
+    //                     .findPropertyWithNameInComponent(
+    //                             PROPERTY_ERRATA_PRODUCT_VARIANT,
+    //                             bom.getMetadata().getComponent())
+    //                     .get()
+    //                     .getValue());
     // }
 
     // @Test

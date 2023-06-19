@@ -9,7 +9,8 @@
       "id": "QUARKUS",
       "buildConfigRevision": {
         "id": "QUARKUS"
-      }
+      },
+      "temporaryBuild": false
     },
     "headers": {
       "Content-Type": "application/json"

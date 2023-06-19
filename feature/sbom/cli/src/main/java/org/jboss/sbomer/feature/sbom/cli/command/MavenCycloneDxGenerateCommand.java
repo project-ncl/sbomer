@@ -39,7 +39,7 @@ import picocli.CommandLine.Command;
 public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand {
 
     @Override
-    public Path doGenerate() {
+    protected Path doGenerate() {
         DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig
                 .forGenerator(GeneratorType.MAVEN_CYCLONEDX);
 
