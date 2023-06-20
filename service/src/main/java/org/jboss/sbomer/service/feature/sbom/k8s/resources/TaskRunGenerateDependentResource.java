@@ -18,12 +18,12 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbomer.config.runtime.Config;
@@ -35,13 +35,10 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.kubernetes.api.model.EnvVarBuilder;
-import io.fabric8.kubernetes.api.model.EnvVarSourceBuilder;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
-import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.tekton.client.TektonClient;
 import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamSpecBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.StepBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.TaskRefBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -56,7 +53,6 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
         implements BulkDependentResource<TaskRun, GenerationRequest> {
 
     public static final String PHASE_GENERATE = "generate";
-    public static final String PARAM_BUILD_ID_NAME = "build-id";
     /**
      * Parameter holding the configuration for a given build.
      */
@@ -67,6 +63,9 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     public static final String PARAM_COMMAND_INDEX_NAME = "index";
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+
+    @Inject
+    TektonClient tektonClient;
 
     TaskRunGenerateDependentResource() {
         super(TaskRun.class);
@@ -98,7 +97,6 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
         }
 
         return taskRuns;
-
     }
 
     private TaskRun desired(
@@ -115,15 +113,6 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
 
         labels.put(Labels.LABEL_BUILD_ID, generationRequest.getBuildId());
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
-
-        String script;
-
-        try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream("tekton/generate.sh");
-            script = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new ApplicationException("Could not read the configuration file schema", e);
-        }
 
         String configStr;
 
@@ -150,54 +139,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                         new ParamBuilder().withName(PARAM_COMMAND_INDEX_NAME)
                                 .withNewValue(String.valueOf(index))
                                 .build())
-                .withNewTaskSpec()
-                .withParams(
-                        new ParamSpecBuilder().withName(PARAM_COMMAND_CONFIG_NAME)
-                                .withDescription("Runtime generation configuration")
-                                .withType("string")
-                                .build(),
-                        new ParamSpecBuilder().withName(PARAM_COMMAND_INDEX_NAME)
-                                .withDescription("Index to select which product should the SBOM be generated for")
-                                .withType("string")
-                                .build())
-                .withSteps(
-                        new StepBuilder().withName("generate")
-                                .withEnv(
-                                        new EnvVarBuilder().withName("SBOMER_SERVICE_URL")
-                                                .withValueFrom(
-                                                        new EnvVarSourceBuilder().withNewConfigMapKeyRef()
-                                                                .withName("sbomer-tekton")
-                                                                .withKey("SBOMER_SERVICE_URL")
-                                                                .endConfigMapKeyRef()
-                                                                .build())
-                                                .build(),
-                                        new EnvVarBuilder().withName("PNC_SERVICE_HOST")
-                                                .withValueFrom(
-                                                        new EnvVarSourceBuilder().withNewConfigMapKeyRef()
-                                                                .withName("sbomer-tekton")
-                                                                .withKey("PNC_SERVICE_HOST")
-                                                                .endConfigMapKeyRef()
-                                                                .build())
-                                                .build(),
-                                        new EnvVarBuilder().withName("SBOMER_PRODUCT_MAPPING_ENV")
-                                                .withValueFrom(
-                                                        new EnvVarSourceBuilder().withNewConfigMapKeyRef()
-                                                                .withName("sbomer-tekton")
-                                                                .withKey("SBOMER_PRODUCT_MAPPING_ENV")
-                                                                .endConfigMapKeyRef()
-                                                                .build())
-                                                .build())
-                                .withImage("localhost/sbomer-generator:latest") // TODO:
-                                                                                // configure
-                                .withImagePullPolicy("IfNotPresent")
-                                .withNewResources()
-                                .withRequests(Map.of("cpu", new Quantity("200m"), "memory", new Quantity("300Mi")))
-                                .withLimits(Map.of("cpu", new Quantity("500m"), "memory", new Quantity("1024Mi")))
-
-                                .endResources()
-                                .withScript(script)
-                                .build())
-                .endTaskSpec()
+                .withTaskRef(new TaskRefBuilder().withName("sbomer-generate").build())
                 .endSpec()
                 .build();
 

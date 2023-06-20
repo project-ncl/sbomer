@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
@@ -79,11 +78,14 @@ public class ConfigReader {
 
         try {
             base64Config = gitilesClient.fetchFile(repository, "refs/tags/" + build.getScmTag(), CONFIG_PATH);
-        } catch (NotFoundException nfe) {
+        } catch (Exception e) {
+
             log.debug(
-                    "SBOMer configuration file not found in the '{}' repository with '{}' tag, ignoring",
+                    "SBOMer configuration file could not be retrieved in the '{}' repository with '{}' tag, ignoring",
                     repository,
-                    build.getScmTag());
+                    build.getScmTag(),
+                    e);
+
             return null;
         }
 

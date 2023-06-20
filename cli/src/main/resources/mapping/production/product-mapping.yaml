@@ -37,15 +37,16 @@
       generator:
         type: maven-domino
         args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm"
-    - generator:
-        type: maven-domino
-        args: "--config-file .domino/manifest/quarkus-camel-bom-config.json --warn-on-missing-scm"
-    - generator:
-        type: maven-domino
-        args: "--config-file .domino/manifest/quarkus-optaplanner-bom-bom.json --warn-on-missing-scm"
-    - generator:
-        type: maven-domino
-        args: "--config-file .domino/manifest/quarkus-qpid-jms-bom-bom.json --warn-on-missing-scm"
+    # TODO: Enable these when we know what are the Errata Tool coordinates
+    # - generator:
+    #     type: maven-domino
+    #     args: "--config-file .domino/manifest/quarkus-camel-bom-config.json --warn-on-missing-scm"
+    # - generator:
+    #     type: maven-domino
+    #     args: "--config-file .domino/manifest/quarkus-optaplanner-bom-bom.json --warn-on-missing-scm"
+    # - generator:
+    #     type: maven-domino
+    #     args: "--config-file .domino/manifest/quarkus-qpid-jms-bom-bom.json --warn-on-missing-scm"
 "436":
   products:
     - processors:

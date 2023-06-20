@@ -112,25 +112,25 @@ public class GenerateCommand implements Callable<Integer> {
 
             log.info("Running SBOM generation for product with index '{}'", index);
 
-            generateSbom(config, config.getProducts().get(index));
+            generateSbom(config, config.getProducts().get(index), index);
         } else {
             log.debug(
                     "Generating SBOMs for all {} products defined in the runtime configuration",
                     config.getProducts().size());
 
-            config.getProducts().forEach(product -> {
-                generateSbom(config, product);
-            });
+            for (int i = 0; i < config.getProducts().size(); i++) {
+                generateSbom(config, config.getProducts().get(i), i);
+            }
         }
 
         return 0;
     }
 
-    private void generateSbom(Config config, ProductConfig product) {
+    private void generateSbom(Config config, ProductConfig product, int i) {
         log.debug("Product: '{}'", product.toString());
 
         List<String> command = product.generateCommand(config);
-        Path outputDir = Path.of(workdir.toAbsolutePath().toString(), "product" + "-" + index);
+        Path outputDir = Path.of(workdir.toAbsolutePath().toString(), "product" + "-" + i);
 
         command.add("--workdir");
         command.add(outputDir.toAbsolutePath().toString());

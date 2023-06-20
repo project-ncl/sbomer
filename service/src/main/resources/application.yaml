@@ -64,6 +64,8 @@ quarkus:
       validate: false
 
 sbomer:
+  images:
+    generator: localhost/sbomer-generator:latest
   features:
     umb:
       enabled: true

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errors;
+package org.jboss.sbomer.cli.feature.sbom.client;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

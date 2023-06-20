@@ -19,29 +19,26 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: sbomer-process
+  name: sbomer-generate
 spec:
   params:
-    - name: id
-      type: string
-      description: "The SBOM ID"
     - name: config
       type: string
-      description: |
-        Additional parameters that instrument the processor. Currently unused.
-      default: |
-        {"processors": "default"}
+      description: "Runtime generation configuration"
+    - name: index
+      type: string
+      description: "Index to select which product should the SBOM be generated for"
   steps:
-    - name: process
+    - name: generate
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       resources:
         limits:
           cpu: 1000m
-          memory: 2000Mi
-        requests:
-          cpu: 500m
           memory: 1000Mi
+        requests:
+          cpu: 200m
+          memory: 300Mi
       env:
         - name: SBOMER_SERVICE_URL
           valueFrom:
@@ -62,13 +59,21 @@ spec:
         #!/usr/bin/env bash
 
         set -e
-        
-        echo '$(params.config)' | tee config.json
-        PROCESSORS=$(cat config.json | jq --raw-output '.processors')
+        set -x
+        set -o pipefail
 
-        [[ -z "${SBOMER_SERVICE_URL}" ]] && SBOMER_SERVICE_URL="http://${SBOMER_SERVICE_HOST}:${SBOMER_SERVICE_PORT}"
-        
-        /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v process --sbom-id=$(params.id) $PROCESSORS
-  workspaces:
-    - name: data
-      description: Main workspace
+        CONFIG_PATH="/workdir/config.yaml"
+
+        # Set the path to Maven settings.xml file so that ict can be used by the generator
+        export SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml"
+
+        source /workdir/.sdkman/bin/sdkman-init.sh
+
+        export MAVEN_OPTS="-Xms256m -Xmx512m"
+
+        echo "Storing configuration in the $CONFIG_PATH file"
+        echo "$(params.config)" | tee $CONFIG_PATH
+
+        echo "Running generation..."
+        exec /workdir/.sdkman/candidates/java/17/bin/java -Xms256m -Xmx512m -jar ./generator/quarkus-run.jar -v sbom auto generate --config $CONFIG_PATH --index "$(params.index)"
+

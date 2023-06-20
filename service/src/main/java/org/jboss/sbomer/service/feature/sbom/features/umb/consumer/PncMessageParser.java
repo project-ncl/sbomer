@@ -36,12 +36,16 @@ import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
-import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.service.feature.sbom.features.umb.JmsUtils;
 import org.jboss.sbomer.service.feature.sbom.features.umb.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.UmbConfig.UmbConsumerTrigger;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.arc.Unremovable;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,20 +58,14 @@ public class PncMessageParser implements Runnable {
     private AtomicBoolean connected = new AtomicBoolean(false);
     private AtomicInteger receivedMessages = new AtomicInteger(0);
 
-    // @Inject
-    // PncService pncService;
-
     @Inject
     UmbConfig config;
 
     @Inject
     ConnectionFactory cf;
 
-    // @Inject
-    // ProductVersionMapper productVersionMapper;
-
-    // @Inject
-    // DefaultGenerationConfig defaultGenerationConfig;
+    @Inject
+    KubernetesClient kubernetesClient;
 
     private Message lastMessage;
 
@@ -132,71 +130,21 @@ public class PncMessageParser implements Runnable {
                     }
 
                     if (isSuccessfulPersistentBuild(msgBody)) {
-                        // Check whether it is a product-related build
-                        if (Objects.equals(config.consumer().trigger(), UmbConsumerTrigger.PRODUCT)) {
-                            // TODO
-                            ProductVersionRef productVersion = null; // =
-                                                                     // pncService.getProductVersion(msgBody.getBuild().getId());
+                        // TODO: Check whether it is a product-related build?
 
-                            if (productVersion == null) {
-                                log.warn(
-                                        "The UMB consumer configuration is set to PRODUCT, skipping SBOM generation for PNC Build '{}' because it is not related to a Product",
-                                        msgBody.getBuild().getId());
-                                continue;
-                            }
+                        log.info(
+                                "Triggering the automated SBOM generation for build {} ...",
+                                msgBody.getBuild().getId());
 
-                            // Config config = productVersionMapper.getMapping().get(productVersion.getId());
+                        GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata()
+                                .endMetadata()
+                                .withBuildId(msgBody.getBuild().getId())
+                                .withStatus(SbomGenerationStatus.NEW)
+                                .build();
 
-                            if (config == null) {
-                                log.warn(
-                                        "Could not find mapping for the PNC Product Version '{}' (id: {}), skipping SBOM generation",
-                                        productVersion.getVersion(),
-                                        productVersion.getId());
-                                continue;
-                            }
+                        ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
 
-                            // TODO: Milestone 1
-                            // We support only generation of products that we list in the product mapping.
-
-                            // Use the generator in the mapping if specified, otherwise ude the default (CYCLONEDX)
-                            // GeneratorType generator = defaultGenerationConfig.defaultGenerator();
-
-                            // config.getProducts().get(0).getGenerator().getType()
-
-                            // if (!Strings.isEmpty(config.getGenerator())) {
-                            // try {
-                            // generator = GeneratorImplementation.valueOf(config.getGenerator());
-                            // } catch (IllegalArgumentException exc) {
-                            // }
-                            // }
-
-                            // TODO: Create generationrequest
-
-                            // log.info(
-                            // "Detected {} as the required generator from the PNC Product Version mapping",
-                            // generator);
-
-                            // switch (generator) {
-                            // case MAVEN_DOMINO: {
-                            // generationService.generate(
-                            // msgBody.getBuild().getId(),
-                            // GeneratorType.MAVEN_DOMINO,
-                            // "0.0.89",
-                            // "--include-non-managed --exclude-parent-poms --warn-on-missing-scm");
-                            // break;
-                            // }
-                            // default: {
-                            // generationService
-                            // .generate(msgBody.getBuild().getId(), GeneratorType.MAVEN_CYCLONEDX);
-                            // }
-                            // }
-                        } else {
-                            log.info(
-                                    "Triggering the automated SBOM generation for build {} ...",
-                                    msgBody.getBuild().getId());
-
-                            // generationService.generate(msgBody.getBuild().getId(), GeneratorType.MAVEN_CYCLONEDX);
-                        }
+                        log.info("Request created: {}", cm.getMetadata().getName());
                     }
                 } catch (JMSException | IOException e) {
                     log.error(

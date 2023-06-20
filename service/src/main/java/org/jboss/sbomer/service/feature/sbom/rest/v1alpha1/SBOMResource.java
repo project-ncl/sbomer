@@ -49,6 +49,9 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbomer.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbomer.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -56,6 +59,8 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.client.KubernetesClient;
 
 @Path("/api/v1alpha1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -67,6 +72,9 @@ public class SBOMResource {
 
     @Inject
     SbomService sbomService;
+
+    @Inject
+    KubernetesClient kubernetesClient;
 
     @GET
     @Operation(summary = "List SBOMs", description = "List paginated SBOMs using RSQL advanced search.")
@@ -460,53 +468,61 @@ public class SBOMResource {
     // -------------------------------------------------------------------------------
 
     // TODO: disabled until moved to sbomer feature and made it possible to create the generation request
-    // @POST
-    // @Operation(
-    // summary = "Generate a base SBOM based on the PNC build",
-    // description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
-    // @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    // @Parameter(
-    // name = "generator",
-    // description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are
-    // `DOMINO`, `CYCLONEDX`",
-    // example = "CYCLONEDX")
-    // @Path("/generate/build/{buildId}")
-    // @APIResponses({ @APIResponse(
-    // responseCode = "202",
-    // description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does
-    // execute the generation behind the scenes.",
-    // content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-    // @APIResponse(
-    // responseCode = "500",
-    // description = "Internal server error",
-    // content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    // public Response generate(@PathParam("buildId") String buildId, @QueryParam("generator") String generator)
-    // throws Exception {
+    @POST
+    @Operation(
+            summary = "Generate a base SBOM based on the PNC build",
+            description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
+    @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Parameter(
+            name = "generator",
+            description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are `DOMINO`, `CYCLONEDX`",
+            example = "CYCLONEDX")
+    @Path("/generate/build/{buildId}")
+    @APIResponses({ @APIResponse(
+            responseCode = "202",
+            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
 
-    // try {
-    // MDCUtils.addBuildContext(buildId);
+    public Response generate(@PathParam("buildId") String buildId, @QueryParam("generator") String generator)
+            throws Exception {
 
-    // GeneratorType gen = GeneratorType.MAVEN_CYCLONEDX;
+        try {
+            MDCUtils.addBuildContext(buildId);
 
-    // if (!Strings.isEmpty(generator)) {
-    // try {
-    // gen = GeneratorType.valueOf(generator);
-    // } catch (IllegalArgumentException iae) {
-    // throw new ClientException(
-    // Status.BAD_REQUEST.getStatusCode(),
-    // "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use
-    // `CYCLONEDX`",
-    // iae);
-    // }
-    // }
+            // GeneratorType gen = GeneratorType.MAVEN_CYCLONEDX;
 
-    // Sbom sbom = generationService.generate(buildId, gen);
+            // if (!Strings.isEmpty(generator)) {
+            // try {
+            // gen = GeneratorType.valueOf(generator);
+            // } catch (IllegalArgumentException iae) {
+            // throw new ClientException(
+            // Status.BAD_REQUEST.getStatusCode(),
+            // "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use
+            // `CYCLONEDX`",
+            // iae);
+            // }
+            // }
 
-    // return Response.status(Status.ACCEPTED).entity(sbom).build();
-    // } finally {
-    // MDCUtils.removeBuildContext();
-    // }
-    // }
+            // Sbom sbom = generationService.generate(buildId, gen);
+
+            GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata()
+                    .endMetadata()
+                    .withBuildId(buildId)
+                    .withStatus(SbomGenerationStatus.NEW)
+                    .build();
+
+            ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
+
+            // TODO: Add proper status
+            return Response.status(Status.ACCEPTED).build();
+        } finally {
+            MDCUtils.removeBuildContext();
+        }
+    }
 
     // @POST
     // @Operation(summary = "Process selected SBOM", description = "Process selected SBOM using default processors")
