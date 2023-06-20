@@ -37,6 +37,30 @@ quarkus:
     json:
       pretty-print: true
 
+sbomer:
+  pnc:
+    api-url: "${SBOMER_CACHE_SERVICE_URL:${PNC_SERVICE_HOST:orch.psi.redhat.com}}"
+    product-mapping:
+      environment: "${SBOMER_PRODUCT_MAPPING_ENV:production}"
+  generation:
+    enabled: true
+    default-generator: maven-cyclonedx
+    generators:
+      maven-domino:
+        default-version: "0.0.90"
+        default-args: "--include-non-managed --warn-on-missing-scm"
+      maven-cyclonedx:
+        default-version: "2.7.9"
+        default-args: "--batch-mode"
+
+  processing:
+    enabled: true
+    auto-process: true
+    # List of default processors that will be run on every generated SBOM
+    default-processors:
+      - name: "default"
+      - name: "redhat-product"
+
 "%dev":
   quarkus:
     log:
@@ -50,6 +74,10 @@ quarkus:
         console:
           enable: false
 
+  sbomer:
+    pnc:
+      api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
+
 "%test":
   quarkus:
     log:
@@ -60,3 +88,7 @@ quarkus:
       json:
         console:
           enable: false
+
+  sbomer:
+    pnc:
+      api-url: "localhost/pnc/orch"

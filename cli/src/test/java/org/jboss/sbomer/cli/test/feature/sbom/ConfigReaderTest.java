@@ -36,8 +36,8 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.client.GitilesClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
-import org.jboss.sbomer.feature.sbom.core.config.runtime.ProductConfig;
+import org.jboss.sbomer.core.features.sbomer.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbomer.config.runtime.ProductConfig;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -107,7 +107,7 @@ public class ConfigReaderTest {
 
         assertEquals("Could not read configuration file", ex.getMessage());
         assertEquals(
-                "Could not resolve type id 'doesntexist' as a subtype of `org.jboss.sbomer.feature.sbom.core.config.runtime.ProcessorConfig`: known type ids = [default, redhat-product] (for POJO property 'processors')",
+                "Could not resolve type id 'doesntexist' as a subtype of `org.jboss.sbomer.core.features.sbomer.config.runtime.ProcessorConfig`: known type ids = [default, redhat-product] (for POJO property 'processors')",
                 ((JsonMappingException) ex.getCause()).getOriginalMessage());
     }
 

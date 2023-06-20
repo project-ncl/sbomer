@@ -22,9 +22,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.feature.sbom.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
-import org.jboss.sbomer.feature.sbom.core.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbomer.enums.GeneratorType;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;

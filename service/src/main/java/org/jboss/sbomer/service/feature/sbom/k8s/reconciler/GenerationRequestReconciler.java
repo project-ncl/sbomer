@@ -28,9 +28,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.utils.MDCUtils;
-import org.jboss.sbomer.core.utils.ObjectMapperProvider;
-import org.jboss.sbomer.feature.sbom.core.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbomer.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbomer.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbomer.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;

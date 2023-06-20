@@ -23,9 +23,9 @@ import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
-import org.jboss.sbomer.core.utils.MDCUtils;
-import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
-import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
+import org.jboss.sbomer.core.features.sbomer.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbomer.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbomer.utils.SbomUtils;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

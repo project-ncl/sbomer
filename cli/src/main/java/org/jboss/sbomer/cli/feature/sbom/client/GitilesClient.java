@@ -25,7 +25,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 /**
@@ -33,7 +32,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
  */
 @ApplicationScoped
 @RegisterRestClient(configKey = "gerrit")
-@RegisterProvider(ClientExceptionMapper.class)
+// @RegisterProvider(ClientExceptionMapper.class)
 @Path("/gerrit/plugins/gitiles")
 public interface GitilesClient {
     /**

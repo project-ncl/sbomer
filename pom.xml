@@ -39,7 +39,6 @@
         <module>core</module>
         <module>cli</module>
         <module>service</module>
-        <module>feature</module>
     </modules>
 
     <properties>

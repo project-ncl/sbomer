@@ -34,6 +34,20 @@ quarkus:
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
 
+  swagger-ui:
+    always-include: true
+    path: /api
+
+  datasource:
+    db-kind: postgresql
+  smallrye-openapi:
+    info-title: SBOMer service
+  hibernate-orm:
+    database:
+      generation: update
+  qpid-jms:
+    url: "${UMB_BROKER_URL}"
+
   oidc:
     auth-server-url: "${AUTH_SERVER_URL}"
     connection-delay: 30S
@@ -49,8 +63,58 @@ quarkus:
       apply: false
       validate: false
 
+sbomer:
+  features:
+    umb:
+      enabled: true
+      consumer:
+        enabled: true
+        topic: "${CONSUMER_TOPIC}"
+        trigger: product
+      producer:
+        enabled: true
+        topic: "${PRODUCER_TOPIC}"
+        retries: 15
+        max-back-off: 30
+  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
+  # generation:
+  #   enabled: true
+  #   default-generator: maven-cyclonedx
+  #   generators:
+  #     maven-domino:
+  #       default-version: "0.0.90"
+  #       default-args: "--include-non-managed --warn-on-missing-scm"
+  #     maven-cyclonedx:
+  #       default-version: "2.7.9"
+  #       default-args: "--batch-mode"
+
+  # processing:
+  #   enabled: true
+  #   auto-process: true
+  #   # List of default processors that will be run on every generated SBOM
+  #   default-processors:
+  #     - name: "default"
+  #     - name: "redhat-product"
+
 "%dev":
   quarkus:
+    datasource:
+      username: username
+      password: password
+      jdbc:
+        url: jdbc:postgresql://localhost:5432/sbomer
+    hibernate-orm:
+      database:
+        generation: drop-and-create
+      log:
+        sql: true
+    smallrye-openapi:
+      info-title: SBOMer service (development)
+    qpid-jms:
+      url: amqp://localhost:5672
+      username: ""
+      password: ""
+
     log:
       level: INFO
       category:
@@ -63,8 +127,31 @@ quarkus:
           enable: false
     oidc:
       enabled: false
+
+  sbomer:
+    api-url: "http://localhost:8080/api/v1alpha1/"
+    features:
+      umb:
+        enabled: false
+        consumer:
+          enabled: false
+        producer:
+          enabled: false
+
 "%test":
   quarkus:
+    datasource:
+      db-kind: h2
+      jdbc:
+        url: jdbc:h2:mem:default;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:init.sql'
+    hibernate-orm:
+      database:
+        generation: drop-and-create
+    qpid-jms:
+      url: amqp://localhost:5672
+      username: ""
+      password: ""
+
     log:
       level: INFO
       category:
@@ -75,3 +162,14 @@ quarkus:
           enable: false
     oidc:
       enabled: false
+
+  sbomer:
+    api-url: "http://localhost:8080/api/v1alpha1/"
+    features:
+      umb:
+        enabled: true
+        consumer:
+          enabled: true
+          topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.builds"
+        producer:
+          enabled: false

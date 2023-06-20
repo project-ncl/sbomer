@@ -39,9 +39,9 @@ import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.sbomer.cli.feature.sbom.command.DefaultProcessCommand;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
+import org.jboss.sbomer.core.features.sbomer.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbomer.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
-import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

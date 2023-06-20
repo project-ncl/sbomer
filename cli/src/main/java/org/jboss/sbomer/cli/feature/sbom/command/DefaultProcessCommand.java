@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
-import static org.jboss.sbomer.feature.sbom.core.Constants.SBOM_RED_HAT_BUILD_ID;
-import static org.jboss.sbomer.feature.sbom.core.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.core.features.sbomer.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbomer.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 
 import java.util.Optional;
 
@@ -32,8 +32,8 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.cli.feature.sbom.utils.RhVersionPattern;
-import org.jboss.sbomer.feature.sbom.core.enums.ProcessorType;
-import org.jboss.sbomer.feature.sbom.core.utils.SbomUtils;
+import org.jboss.sbomer.core.features.sbomer.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbomer.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;

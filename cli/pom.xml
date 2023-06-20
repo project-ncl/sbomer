@@ -39,17 +39,16 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.sbomer</groupId>
-      <artifactId>sbomer-feature-sbom-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.sbomer</groupId>
       <artifactId>sbomer-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-config-yaml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest-client-jackson</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
