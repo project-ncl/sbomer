@@ -15,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.utils.maven;
+package org.jboss.sbomer.core.features.sbom.utils.maven;
 
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.PROFILES_OPTION;
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.PROJECTS_OPTION;
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.SYSTEM_PROPERTIES_OPTION;
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.addIgnorableOptions;
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.addIneffectiveOptions;
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.addNoArgsOptions;
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.addProfilesOptions;
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.addProjectsOptions;
-import static org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandOptions.addSystemPropertyOptions;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.PROFILES_OPTION;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.PROJECTS_OPTION;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.SYSTEM_PROPERTIES_OPTION;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.addIgnorableOptions;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.addIneffectiveOptions;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.addNoArgsOptions;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.addProfilesOptions;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.addProjectsOptions;
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandOptions.addSystemPropertyOptions;
 
 import java.util.ArrayList;
 import java.util.List;

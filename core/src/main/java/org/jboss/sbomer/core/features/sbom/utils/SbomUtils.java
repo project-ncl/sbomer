@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.utils;
+package org.jboss.sbomer.core.features.sbom.utils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -41,7 +41,7 @@ import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.common.Strings;
-import org.jboss.sbomer.core.features.sbomer.Constants;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

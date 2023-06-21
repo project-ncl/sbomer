@@ -15,17 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.enums;
+package org.jboss.sbomer.core.features.sbom.enums;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Supported generator implementations.
- *
- * @author Marek Goldmann
- */
-public enum GeneratorType {
-    @JsonProperty("maven-cyclonedx")
-    MAVEN_CYCLONEDX, @JsonProperty("maven-domino")
-    MAVEN_DOMINO;
+import lombok.Getter;
+
+@Getter
+public enum ProcessorType {
+    // TODO: Make it prettier!
+    @JsonProperty("default")
+    DEFAULT("default"), @JsonProperty("redhat-product")
+    REDHAT_PRODUCT("redhat-product");
+
+    @Getter
+    String slug;
+
+    ProcessorType(String slug) {
+        this.slug = slug;
+    }
+
+    public static Optional<ProcessorType> get(String slug) {
+        return Arrays.stream(ProcessorType.values()).filter(impl -> impl.slug.equals(slug)).findFirst();
+    }
 }

@@ -38,11 +38,11 @@ import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbomer.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbomer.config.runtime.DefaultProcessorConfig;
-import org.jboss.sbomer.core.features.sbomer.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbomer.config.runtime.ProductConfig;
-import org.jboss.sbomer.core.features.sbomer.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

@@ -26,7 +26,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
 
 import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.core.features.sbomer.enums.SbomStatus;
+import org.jboss.sbomer.core.features.sbom.enums.SbomStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.rest.rsql.RSQLProducer;

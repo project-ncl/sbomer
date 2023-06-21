@@ -37,8 +37,8 @@ import org.jboss.sbomer.cli.feature.sbom.command.mixin.GeneratorToolMixin;
 import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbomer.enums.GeneratorType;
-import org.jboss.sbomer.core.features.sbomer.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.core.test.utils;
 
-import org.jboss.sbomer.core.features.sbomer.utils.maven.MavenCommandLineParser;
+import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Test;
 

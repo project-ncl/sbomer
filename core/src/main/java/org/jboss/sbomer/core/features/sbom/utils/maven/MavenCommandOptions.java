@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.utils.maven;
+package org.jboss.sbomer.core.features.sbom.utils.maven;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;

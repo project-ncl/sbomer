@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.util.Map;
 
-import org.jboss.sbomer.core.features.sbomer.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 

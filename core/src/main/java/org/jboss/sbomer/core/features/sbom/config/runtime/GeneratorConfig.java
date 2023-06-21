@@ -15,26 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.config.runtime;
+package org.jboss.sbomer.core.features.sbom.config.runtime;
 
-import java.util.List;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
-import org.jboss.sbomer.core.features.sbomer.enums.ProcessorType;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-
+import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.PROPERTY, property = "type")
-@JsonSubTypes({ @JsonSubTypes.Type(value = DefaultProcessorConfig.class),
-        @JsonSubTypes.Type(value = RedHatProductProcessorConfig.class) })
+/**
+ * Configuration of the generator tool.
+ */
 @Data
-public abstract class ProcessorConfig {
-    ProcessorType type;
+@Builder
+@Jacksonized
+public class GeneratorConfig {
+    /**
+     * The selected generator.
+     */
+    GeneratorType type;
+    /**
+     * Optional custom arguments that should be passed to the generator.
+     */
+    String args;
+    /**
+     * Generator tool version that should be used.
+     */
+    String version;
 
-    @JsonIgnore
-    public abstract List<String> toCommand();
 }

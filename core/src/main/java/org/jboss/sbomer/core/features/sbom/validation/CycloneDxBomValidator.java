@@ -15,46 +15,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.validation;
+package org.jboss.sbomer.core.features.sbom.validation;
+
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import org.cyclonedx.exception.ParseException;
+import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 
-public class ArtifactJsonPropertyValidator implements ConstraintValidator<ArtifactJsonProperty, JsonNode> {
+public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
 
-    private ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+    List<String> errors = Collections.emptyList();
 
     @Override
     public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
         if (value == null) {
-            context.unwrap(HibernateConstraintValidatorContext.class)
-                    .addMessageParameter("errors", "missing artifact property");
-            return false;
+            return true;
         }
 
+        List<ParseException> exceptions = Collections.emptyList();
+
         try {
-            if (value instanceof ObjectNode) {
-                mapper.readTree(((ObjectNode) value).asText());
-            } else {
-                mapper.readTree(((TextNode) value).toString());
+            exceptions = new JsonParser().validate(
+                    value.isTextual() ? value.textValue().getBytes() : value.toString().getBytes(),
+                    schemaVersion());
+
+            if (exceptions.isEmpty()) {
+                return true;
             }
 
         } catch (IOException e) {
-            context.unwrap(HibernateConstraintValidatorContext.class)
-                    .addMessageParameter("errors", "unable to parse object");
+            setPayload(context, Collections.singletonList("sbom: unable to parse as CycloneDX format"));
+
             return false;
         }
-        return true;
+
+        setPayload(context, exceptions.stream().map(cv -> "sbom" + cv.getMessage().substring(1)).toList());
+
+        return false;
+    }
+
+    private void setPayload(ConstraintValidatorContext context, List<String> errors) {
+        context.unwrap(HibernateConstraintValidatorContext.class).withDynamicPayload(errors);
     }
 
 }

@@ -23,10 +23,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.hamcrest.CoreMatchers;
-import org.jboss.sbomer.core.features.sbomer.enums.GeneratorType;
-import org.jboss.sbomer.core.features.sbomer.enums.ProcessorType;
-import org.jboss.sbomer.core.features.sbomer.enums.SbomStatus;
-import org.jboss.sbomer.core.features.sbomer.enums.SbomType;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.enums.SbomStatus;
+import org.jboss.sbomer.core.features.sbom.enums.SbomType;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;

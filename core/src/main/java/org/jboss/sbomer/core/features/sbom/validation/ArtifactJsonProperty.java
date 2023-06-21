@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.validation;
+package org.jboss.sbomer.core.features.sbom.validation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

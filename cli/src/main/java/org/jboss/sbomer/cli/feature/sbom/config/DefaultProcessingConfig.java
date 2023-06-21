@@ -21,7 +21,7 @@ import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.sbomer.core.features.sbomer.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;

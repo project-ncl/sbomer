@@ -15,39 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.config.runtime;
-
-import java.util.List;
+package org.jboss.sbomer.core.features.sbom.config.runtime;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * SBOMer configuration file for a particular PNC build. This class represents the configuration file that can be added
- * at the {@code .sbomer/config.yaml} path in the source code repository used to build the project.
- *
- * @author Marek Goldmann
+ * Errata Tool configuration.
  */
 @Data
 @Builder
 @Jacksonized
-public class Config {
-
+public class ErrataConfig {
     /**
-     * The API version of the configuration file. In case of breaking changes this value will be used to detect the
-     * correct (de)serializer.
+     * Product name in the Errata Tool.
      */
-    @Builder.Default
-    String apiVersion = "sbomer.jboss.org/v1alpha1";
-
+    String productName;
     /**
-     * Build identifier within PNC.
+     * Product version in the Errata Tool.
      */
-    String buildId;
-
+    String productVersion;
     /**
-     * List of configuration entries for products.
+     * Product variant in the Errata Tool.
      */
-    List<ProductConfig> products;
+    String productVariant;
 }

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.enums;
+package org.jboss.sbomer.core.features.sbom.enums;
 
 /**
  * Enum representing the status of the Sbom.

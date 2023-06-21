@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.model;
 
-import static org.jboss.sbomer.core.features.sbomer.utils.SbomUtils.schemaVersion;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
 import java.util.Set;
@@ -49,12 +49,12 @@ import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.jboss.sbomer.core.features.sbomer.enums.GeneratorType;
-import org.jboss.sbomer.core.features.sbomer.enums.ProcessorType;
-import org.jboss.sbomer.core.features.sbomer.enums.SbomStatus;
-import org.jboss.sbomer.core.features.sbomer.enums.SbomType;
-import org.jboss.sbomer.core.features.sbomer.utils.SbomUtils;
-import org.jboss.sbomer.core.features.sbomer.validation.CycloneDxBom;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.enums.SbomStatus;
+import org.jboss.sbomer.core.features.sbom.enums.SbomType;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -102,16 +102,16 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "type", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Type not specified")
-    private SbomType type;
+    private SbomType type; // TODO: dump
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private SbomStatus status = SbomStatus.NEW;
+    private SbomStatus status = SbomStatus.NEW; // TODO: dump
 
     @Column(name = "generator", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Generator is required")
-    private GeneratorType generator;
+    private GeneratorType generator; // TODO: dump?
 
     @Column(name = "processors", nullable = false, updatable = false)
     @ElementCollection(targetClass = ProcessorType.class, fetch = FetchType.EAGER)
@@ -119,7 +119,7 @@ public class Sbom extends PanacheEntityBase {
     @CollectionTable(
             name = "sbom_processors",
             joinColumns = @JoinColumn(name = "sbom_id", foreignKey = @ForeignKey(name = "fk_processor_sbom")))
-    private Set<ProcessorType> processors;
+    private Set<ProcessorType> processors; // TODO: dump?
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
@@ -128,7 +128,7 @@ public class Sbom extends PanacheEntityBase {
             nullable = true,
             updatable = false)
     @ToString.Exclude
-    private Sbom parentSbom;
+    private Sbom parentSbom; // TODO: dump
 
     @Type(type = JsonTypes.JSON_BIN)
     @Column(name = "sbom", columnDefinition = JsonTypes.JSON_BIN)
@@ -147,7 +147,7 @@ public class Sbom extends PanacheEntityBase {
      *
      * @return New {@link Sbom} resource which parent is set to the current one.
      */
-    public Sbom giveBirth() {
+    public Sbom giveBirth() { // TODO: dump
         Sbom child = new Sbom();
         child.setBuildId(this.getBuildId());
         child.setGenerator(this.getGenerator());
@@ -203,7 +203,7 @@ public class Sbom extends PanacheEntityBase {
     }
 
     @JsonIgnore
-    public boolean isBase() {
+    public boolean isBase() { // TODO: dump
         if (parentSbom == null) {
             return true;
         }

@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jboss.sbomer.core.features.sbomer.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;

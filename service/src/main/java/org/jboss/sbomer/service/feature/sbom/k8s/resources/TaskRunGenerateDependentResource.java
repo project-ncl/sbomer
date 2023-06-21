@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbomer.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbomer.utils.MDCUtils;
-import org.jboss.sbomer.core.features.sbomer.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 

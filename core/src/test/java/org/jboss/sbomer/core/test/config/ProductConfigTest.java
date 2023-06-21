@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.jboss.sbomer.core.features.sbomer.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbomer.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbomer.config.runtime.ProductConfig;
-import org.jboss.sbomer.core.features.sbomer.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.junit.jupiter.api.Test;
 
 public class ProductConfigTest {

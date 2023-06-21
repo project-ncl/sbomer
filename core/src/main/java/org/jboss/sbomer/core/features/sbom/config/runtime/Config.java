@@ -15,32 +15,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.config.runtime;
+package org.jboss.sbomer.core.features.sbom.config.runtime;
 
-import org.jboss.sbomer.core.features.sbomer.enums.GeneratorType;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * Configuration of the generator tool.
+ * SBOMer configuration file for a particular PNC build. This class represents the configuration file that can be added
+ * at the {@code .sbomer/config.yaml} path in the source code repository used to build the project.
+ *
+ * @author Marek Goldmann
  */
 @Data
 @Builder
 @Jacksonized
-public class GeneratorConfig {
-    /**
-     * The selected generator.
-     */
-    GeneratorType type;
-    /**
-     * Optional custom arguments that should be passed to the generator.
-     */
-    String args;
-    /**
-     * Generator tool version that should be used.
-     */
-    String version;
+public class Config {
 
+    /**
+     * The API version of the configuration file. In case of breaking changes this value will be used to detect the
+     * correct (de)serializer.
+     */
+    @Builder.Default
+    String apiVersion = "sbomer.jboss.org/v1alpha1";
+
+    /**
+     * Build identifier within PNC.
+     */
+    String buildId;
+
+    /**
+     * List of configuration entries for products.
+     */
+    List<ProductConfig> products;
 }

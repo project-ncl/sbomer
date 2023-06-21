@@ -25,8 +25,8 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbomer.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbomer.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

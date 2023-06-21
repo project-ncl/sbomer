@@ -15,29 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbomer.config.runtime;
+package org.jboss.sbomer.core.features.sbom.config.runtime;
 
-import lombok.Builder;
+import java.util.List;
+
+import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+
 import lombok.Data;
-import lombok.extern.jackson.Jacksonized;
 
-/**
- * Errata Tool configuration.
- */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.PROPERTY, property = "type")
+@JsonSubTypes({ @JsonSubTypes.Type(value = DefaultProcessorConfig.class),
+        @JsonSubTypes.Type(value = RedHatProductProcessorConfig.class) })
 @Data
-@Builder
-@Jacksonized
-public class ErrataConfig {
-    /**
-     * Product name in the Errata Tool.
-     */
-    String productName;
-    /**
-     * Product version in the Errata Tool.
-     */
-    String productVersion;
-    /**
-     * Product variant in the Errata Tool.
-     */
-    String productVariant;
+public abstract class ProcessorConfig {
+    ProcessorType type;
+
+    @JsonIgnore
+    public abstract List<String> toCommand();
 }

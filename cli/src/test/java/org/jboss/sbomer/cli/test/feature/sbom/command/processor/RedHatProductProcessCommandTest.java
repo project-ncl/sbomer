@@ -17,9 +17,9 @@
  */
 package org.jboss.sbomer.cli.test.feature.sbom.command.processor;
 
-import static org.jboss.sbomer.core.features.sbomer.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
-import static org.jboss.sbomer.core.features.sbomer.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
-import static org.jboss.sbomer.core.features.sbomer.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -30,8 +30,8 @@ import javax.inject.Inject;
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.command.RedHatProductProcessCommand;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
-import org.jboss.sbomer.core.features.sbomer.enums.ProcessorType;
-import org.jboss.sbomer.core.features.sbomer.utils.SbomUtils;
+import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Test;
 
