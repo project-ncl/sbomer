@@ -27,8 +27,6 @@ import java.util.Iterator;
 
 import javax.inject.Inject;
 
-import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
-import org.jboss.sbomer.core.features.sbom.enums.SbomType;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -54,7 +52,7 @@ public class TestSBOMService {
     @Test
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
-        String rsqlQuery = "buildId=eq=" + INITIAL_BUILD_ID + ";processors=isnull=true";
+        String rsqlQuery = "buildId=eq=" + INITIAL_BUILD_ID;
         Collection<Sbom> sboms = sbomService.searchByQueryPaginated(0, 1, rsqlQuery).getContent();
         assertTrue(sboms.size() > 0);
     }
@@ -65,8 +63,6 @@ public class TestSBOMService {
 
         Sbom dummySbom = new Sbom();
         dummySbom.setBuildId(INITIAL_BUILD_ID);
-        dummySbom.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
-        dummySbom.setType(SbomType.BUILD_TIME);
 
         sbomService.save(dummySbom);
 

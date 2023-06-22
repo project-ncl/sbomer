@@ -20,26 +20,16 @@ package org.jboss.sbomer.service.feature.sbom.model;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
-import java.util.Set;
-
-import javax.persistence.CollectionTable;
+import java.util.List;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.exception.ParseException;
@@ -49,10 +39,9 @@ import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
-import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
-import org.jboss.sbomer.core.features.sbom.enums.SbomStatus;
-import org.jboss.sbomer.core.features.sbom.enums.SbomType;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
 
@@ -77,15 +66,12 @@ import lombok.ToString;
 @Table(
         name = "sbom",
         indexes = { @Index(name = "idx_sbom_buildid", columnList = "build_id"),
-                @Index(name = "idx_sbom_rootpurl", columnList = "root_purl"),
-                @Index(name = "idx_sbom_generator", columnList = "generator"),
-                @Index(name = "idx_sbom_type", columnList = "type"),
-                @Index(name = "idx_sbom_status", columnList = "status") })
+                @Index(name = "idx_sbom_rootpurl", columnList = "root_purl") })
 public class Sbom extends PanacheEntityBase {
 
     @Id
     @Column(nullable = false, updatable = false)
-    private Long id;
+    private String id;
 
     @Column(name = "build_id", nullable = false, updatable = false)
     @NotBlank(message = "Build identifier missing")
@@ -94,41 +80,8 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "root_purl")
     private String rootPurl;
 
-    // TODO: rename this field? Is it covering the creation of the entity, started generation process time or finished
-    // generation time?
-    @Column(name = "generation_time", nullable = false, updatable = false)
-    private Instant generationTime;
-
-    @Column(name = "type", nullable = false, updatable = false)
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "Type not specified")
-    private SbomType type; // TODO: dump
-
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private SbomStatus status = SbomStatus.NEW; // TODO: dump
-
-    @Column(name = "generator", nullable = false, updatable = false)
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "Generator is required")
-    private GeneratorType generator; // TODO: dump?
-
-    @Column(name = "processors", nullable = false, updatable = false)
-    @ElementCollection(targetClass = ProcessorType.class, fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(
-            name = "sbom_processors",
-            joinColumns = @JoinColumn(name = "sbom_id", foreignKey = @ForeignKey(name = "fk_processor_sbom")))
-    private Set<ProcessorType> processors; // TODO: dump?
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(
-            name = "parent_sbom_id",
-            foreignKey = @ForeignKey(name = "fk_sbom_parent_sbom"),
-            nullable = true,
-            updatable = false)
-    @ToString.Exclude
-    private Sbom parentSbom; // TODO: dump
+    @Column(name = "creation_time", nullable = false, updatable = false)
+    private Instant creationTime;
 
     @Type(type = JsonTypes.JSON_BIN)
     @Column(name = "sbom", columnDefinition = JsonTypes.JSON_BIN)
@@ -136,27 +89,16 @@ public class Sbom extends PanacheEntityBase {
     @ToString.Exclude
     private JsonNode sbom;
 
+    @Type(type = JsonTypes.JSON_BIN)
+    @Column(name = "config", columnDefinition = JsonTypes.JSON_BIN)
+    @ToString.Exclude
+    private JsonNode config;
+
     @JsonIgnore
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     @Column(name = "status_msg")
     private String statusMessage;
-
-    /**
-     * Creates a child of the current {@link Sbom} resource with status set to {@link SbomStatus#NEW}.
-     *
-     * @return New {@link Sbom} resource which parent is set to the current one.
-     */
-    public Sbom giveBirth() { // TODO: dump
-        Sbom child = new Sbom();
-        child.setBuildId(this.getBuildId());
-        child.setGenerator(this.getGenerator());
-        child.setProcessors(this.getProcessors());
-        child.setType(this.getType());
-        child.setParentSbom(this);
-
-        return child;
-    }
 
     /**
      * Returns the generated SBOM as the CycloneDX {@link Bom} object.
@@ -186,12 +128,21 @@ public class Sbom extends PanacheEntityBase {
     }
 
     /**
+     * Returns the config {@link Config}.
+     *
+     * In case the runtime config is not available or parsable, returns <code>null</code>.
+     *
+     * @return The {@link Config} object
+     */
+    @JsonIgnore
+    public Config getConfig() {
+        return SbomUtils.fromJsonConfig(config);
+    }
+
+    /**
      * Updates the purl for the object based on the SBOM content, if provided.
      *
      */
-    @JsonIgnore
-    @PrePersist
-    @PreUpdate
     private void setupRootPurl() {
         Bom bom = getCycloneDxBom();
 
@@ -202,12 +153,15 @@ public class Sbom extends PanacheEntityBase {
         }
     }
 
-    @JsonIgnore
-    public boolean isBase() { // TODO: dump
-        if (parentSbom == null) {
-            return true;
-        }
-
-        return false;
+    @PrePersist
+    public void prePersist() {
+        creationTime = Instant.now();
+        setupRootPurl();
     }
+
+    @PreUpdate
+    public void preUpdate() {
+        setupRootPurl();
+    }
+
 }

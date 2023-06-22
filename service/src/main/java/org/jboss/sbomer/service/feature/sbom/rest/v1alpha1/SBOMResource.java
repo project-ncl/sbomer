@@ -45,7 +45,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.pnc.rest.api.parameters.PaginationParameters;
-import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -189,10 +188,6 @@ public class SBOMResource {
                     description = "The SBOM was successfully saved",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @APIResponse(
-                    responseCode = "400",
-                    description = "Could not parse provided arguments",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
                     responseCode = "422",
                     description = "Provided SBOM couldn't be saved because of validation failures",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)),
@@ -202,15 +197,7 @@ public class SBOMResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
     @Path("{id}/bom")
     public Response updateSbom(@PathParam("id") String sbomId, final JsonNode bom) {
-        Long id = null;
-
-        try {
-            id = Long.valueOf(sbomId);
-        } catch (NumberFormatException e) {
-            throw new ClientException(400, "Invalid SBOM id provided: '{}', a number was expected", sbomId);
-        }
-
-        Sbom sbom = sbomService.updateBom(id, bom);
+        Sbom sbom = sbomService.updateBom(sbomId, bom);
         return Response.status(Status.OK).entity(sbom).build();
     }
 
@@ -362,10 +349,6 @@ public class SBOMResource {
     @Parameter(name = "id", description = "The SBOM identifier")
     @APIResponses({
             @APIResponse(
-                    responseCode = "400",
-                    description = "Could not parse provided arguments",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
                     responseCode = "404",
                     description = "Requested SBOM could not be found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)),
@@ -374,17 +357,10 @@ public class SBOMResource {
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Response deleteSbom(@PathParam("id") final String id) {
-        Long sbomId = null;
-
-        try {
-            sbomId = Long.valueOf(id);
-        } catch (NumberFormatException e) {
-            throw new ClientException(400, "Invalid SBOM id provided: '{}', a number was expected", sbomId);
-        }
 
         try {
             MDCUtils.addProcessContext(id);
-            sbomService.deleteSbom(sbomId);
+            sbomService.deleteSbom(id);
 
             return Response.ok().build();
         } finally {

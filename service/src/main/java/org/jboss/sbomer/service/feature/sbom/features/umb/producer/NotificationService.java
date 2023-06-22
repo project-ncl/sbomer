@@ -86,15 +86,7 @@ public class NotificationService {
             return;
         }
 
-        Long sbomIdLong = null;
-        try {
-            sbomIdLong = Long.valueOf(sbomId);
-        } catch (NumberFormatException nfe) {
-            log.error("Could not parse to long the SBOM id '{}' provided", sbomId);
-            return;
-        }
-
-        org.jboss.sbomer.service.feature.sbom.model.Sbom sbom = sbomRepository.findById(sbomIdLong);
+        org.jboss.sbomer.service.feature.sbom.model.Sbom sbom = sbomRepository.findById(sbomId);
 
         if (sbom == null) {
             log.warn("Could not find SBOM id '{}', skipping sending UMB notification", sbomId);

@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -27,10 +26,9 @@ import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import org.jboss.pnc.common.concurrent.Sequence;
-import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
+import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.rest.RestUtils;
@@ -67,20 +65,6 @@ public class SbomService {
      * @return The {@link Sbom} object.
      */
     public Sbom get(String sbomId) {
-        try {
-            return get(Long.valueOf(sbomId));
-        } catch (NumberFormatException e) {
-            throw new ClientException("Invalid SBOM id provided: '{}', a number was expected", sbomId);
-        }
-    }
-
-    /**
-     * Returns {@link Sbom} for the specified identifier.
-     *
-     * @param sbomId
-     * @return The {@link Sbom} object.
-     */
-    public Sbom get(Long sbomId) {
         return sbomRepository.findById(sbomId);
     }
 
@@ -94,7 +78,7 @@ public class SbomService {
      * @return Updated {@link Sbom} resource.
      */
     @Transactional
-    public Sbom updateBom(Long sbomId, JsonNode bom) {
+    public Sbom updateBom(String sbomId, JsonNode bom) {
         Sbom sbom = sbomRepository.findById(sbomId);
 
         if (sbom == null) {
@@ -121,7 +105,7 @@ public class SbomService {
      * @param sbomId The {@link Sbom} id to delete from the database.
      */
     @Transactional
-    public void deleteSbom(Long sbomId) {
+    public void deleteSbom(String sbomId) {
         log.info("Deleting SBOM: {}", sbomId);
 
         // Update the SBOM field
@@ -154,8 +138,7 @@ public class SbomService {
     public Sbom save(Sbom sbom) {
         log.debug("Preparing for storing SBOM: {}", sbom.toString());
 
-        sbom.setGenerationTime(Instant.now());
-        sbom.setId(Sequence.nextId());
+        sbom.setId(RandomStringIdGenerator.generate());
 
         validate(sbom);
 
