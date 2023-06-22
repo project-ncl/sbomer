@@ -39,6 +39,7 @@ import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -68,7 +69,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
      *
      * @return a {@link Path} to the generated BOM file.
      */
-    protected abstract Path doGenerate();
+    protected abstract Path doGenerate(String buildCmdOptions);
 
     @Override
     public Integer call() throws Exception {
@@ -94,12 +95,30 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         // Get the correct scm information for builds which have either SUCCESS or NO_REBUILD_REQUIRED status
         String scmUrl = build.getScmUrl();
         String scmTag = build.getScmTag();
+        if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
+            // TODO IMPROVEMENT: this is not reusing the already generated SBOMs as before, we should get the SBOM from
+            // the original build.
+            scmUrl = build.getNoRebuildCause().getScmUrl();
+            scmTag = build.getNoRebuildCause().getScmTag();
+        }
 
         // Clone the source code related to the build
         doClone(scmUrl, scmTag, parent.getWorkdir(), parent.isForce());
 
+        // In case the original build command script contains profiles, projects list or system properties
+        // definitions, get them as a best effort and pass them to the SBOM generation to try to resolve the same
+        // dependency tree.
+        String buildCmdOptions = "mvn";
+        try {
+            MavenCommandLineParser lineParser = MavenCommandLineParser.build()
+                    .launder(build.getBuildConfigRevision().getBuildScript());
+            buildCmdOptions = lineParser.getRebuiltMvnCommandScript();
+        } catch (IllegalArgumentException exc) {
+            log.error("Could not launder the provided build command script! Using the default build command", exc);
+        }
+
         // Generate the SBOM
-        Path sbomPath = doGenerate();
+        Path sbomPath = doGenerate(buildCmdOptions);
 
         try {
             Files.copy(sbomPath, parent.getOutput(), StandardCopyOption.REPLACE_EXISTING);

@@ -9,7 +9,8 @@
       "id": "QUARKUS",
       "buildConfigRevision": {
         "id": "QUARKUS",
-        "buildType": "MVN"
+        "buildType": "MVN",
+        "buildScript": "mvn -DskipTests clean deploy"
       },
       "temporaryBuild": false,
       "progress": "FINISHED",

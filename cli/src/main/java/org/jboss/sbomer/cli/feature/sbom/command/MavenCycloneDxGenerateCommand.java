@@ -20,6 +20,7 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig.DefaultGeneratorConfig;
@@ -28,6 +29,8 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
+
+import static org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES;
 
 @Slf4j
 @Command(
@@ -39,19 +42,24 @@ import picocli.CommandLine.Command;
 public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand {
 
     @Override
-    protected Path doGenerate() {
+    protected Path doGenerate(String buildCmdOptions) {
         DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig
                 .forGenerator(GeneratorType.MAVEN_CYCLONEDX);
 
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
 
-        processBuilder.command(
-                "mvn",
-                String.format(
-                        "org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom",
-                        toolVersion(GeneratorType.MAVEN_CYCLONEDX)),
-                "-DoutputFormat=json",
-                "-DoutputName=bom");
+        // Split the build command to be passed to the ProcessBuilder, without separating the options surrounded by
+        // quotes
+        List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
+                .stream()
+                .forEach(processBuilder.command()::add);
+        processBuilder.command()
+                .add(
+                        String.format(
+                                "org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom",
+                                toolVersion(GeneratorType.MAVEN_CYCLONEDX)));
+        processBuilder.command().add("-DoutputFormat=json");
+        processBuilder.command().add("-DoutputName=bom");
 
         // This is ignored currently, see https://github.com/CycloneDX/cyclonedx-maven-plugin/pull/321
         // Leaving it here so we can decide what to do in the future

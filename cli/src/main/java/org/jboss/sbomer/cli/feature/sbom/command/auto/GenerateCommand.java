@@ -77,13 +77,16 @@ public class GenerateCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
 
-        if (configPath != null) {
-            log.info("Reading configuration file from '{}'", configPath.toAbsolutePath());
+        if (configPath == null) {
+            log.info("Configuration path is null, cannot do any generation.");
+            return 2;
+        }
 
-            if (!Files.exists(configPath)) {
-                log.info("Configuration file '{}' does not exist", configPath.toAbsolutePath());
-                return 2;
-            }
+        log.info("Reading configuration file from '{}'", configPath.toAbsolutePath());
+
+        if (!Files.exists(configPath)) {
+            log.info("Configuration file '{}' does not exist", configPath.toAbsolutePath());
+            return 2;
         }
 
         // It is able to read both: JSON and YAML config files

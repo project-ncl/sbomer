@@ -72,7 +72,7 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
     }
 
     @Override
-    public Path doGenerate() {
+    public Path doGenerate(String buildCmdOptions) {
         Path dominoPath = getDominoPath();
 
         DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig
