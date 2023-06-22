@@ -10,12 +10,9 @@ import javax.persistence.Table;
 import javax.transaction.Transactional;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.TypeDef;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
-import io.quarkiverse.hibernate.types.json.JsonBinaryType;
-import io.quarkiverse.hibernate.types.json.JsonTypes;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -28,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 @ToString
 @Table(
 		name = "sbom_generation_request",
@@ -67,10 +63,10 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
 			sbomGenerationRequest = new SbomGenerationRequest();
 			sbomGenerationRequest.setId(generationRequest.getId());
+			sbomGenerationRequest.setBuildId(generationRequest.getBuildId());
 		}
 
 		// Finally sync the SbomGenerationRequest entity with the GenerationRequest.
-		sbomGenerationRequest.setBuildId(generationRequest.getBuildId());
 		sbomGenerationRequest.setStatus(generationRequest.getStatus());
 
 		// Store it in the database
