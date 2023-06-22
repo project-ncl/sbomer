@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> extends ConfigMapFluentImpl<A>
         implements GenerationRequestFluent<A> {
 
+    private String id;
     private String buildId;
     private SbomGenerationStatus status;
 
@@ -48,6 +49,16 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
 
     public String getBuildId() {
         return buildId;
+    }
+
+    @Override
+    public A withId(String id) {
+        this.id = id;
+        return (A) this;
+    }
+
+    public String getId() {
+        return id;
     }
 
     @Override

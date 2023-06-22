@@ -78,6 +78,10 @@ sbomer:
         topic: "${PRODUCER_TOPIC}"
         retries: 15
         max-back-off: 30
+
+  sbom:
+    sbom-dir: "${SBOMER_SBOM_DIR}"
+
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
   # generation:
   #   enabled: true

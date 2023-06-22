@@ -59,6 +59,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Group("")
 public class GenerationRequest extends ConfigMap {
 
+    public static final String KEY_ID = "id";
     public static final String KEY_BUILD_ID = "build-id";
     public static final String KEY_STATUS = "status";
     public static final String KEY_CONFIG = "config";
@@ -75,6 +76,15 @@ public class GenerationRequest extends ConfigMap {
             String kind,
             ObjectMeta metadata) {
         super(apiVersion, binaryData, data, immutable, kind, metadata);
+    }
+
+    @JsonIgnore
+    public String getId() {
+        return getData().get(KEY_ID);
+    }
+
+    public void setId(String id) {
+        getData().put(KEY_ID, id);
     }
 
     @JsonIgnore

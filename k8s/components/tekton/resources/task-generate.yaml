@@ -74,6 +74,11 @@ spec:
         echo "Storing configuration in the $CONFIG_PATH file"
         echo "$(params.config)" | tee $CONFIG_PATH
 
-        echo "Running generation..."
-        exec /workdir/.sdkman/candidates/java/17/bin/java -Xms256m -Xmx512m -jar ./generator/quarkus-run.jar -v sbom auto generate --config $CONFIG_PATH --index "$(params.index)"
+        mkdir -p $(workspaces.data.path)/$(context.taskRun.name)
+        cd $(workspaces.data.path)/$(context.taskRun.name)
 
+        echo "Running generation..."
+        exec /workdir/.sdkman/candidates/java/17/bin/java -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config $CONFIG_PATH --index "$(params.index)"
+  workspaces:
+    - name: data
+      description: Workspace used to store the generated SBOMs
