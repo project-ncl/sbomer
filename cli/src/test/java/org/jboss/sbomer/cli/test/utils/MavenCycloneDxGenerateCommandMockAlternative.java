@@ -28,7 +28,7 @@ public class MavenCycloneDxGenerateCommandMockAlternative extends MavenCycloneDx
     }
 
     @Override
-    protected Path doGenerate() {
+    protected Path doGenerate(String buildCmdOptions) {
 
         try {
             Files.copy(getClass().getClassLoader().getResourceAsStream("boms/plain.json"), getParent().getOutput());
