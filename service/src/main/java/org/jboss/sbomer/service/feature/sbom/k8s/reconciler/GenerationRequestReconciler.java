@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationRequestReconciler.EVENT_SOURCE_NAME;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +28,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+import org.cyclonedx.model.Bom;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -39,6 +46,8 @@ import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.NewOrFaile
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -102,9 +111,16 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
     }
 
+    @ConfigProperty(name = "sbomer.sbom.sbom-dir")
+    String sbomDir;
+
+    @Inject
+    SbomRepository sbomRepository;
+
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     @Override
+    @Transactional
     public UpdateControl<GenerationRequest> reconcile(
             GenerationRequest generationRequest,
             Context<GenerationRequest> context) throws Exception {
@@ -113,10 +129,11 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         MDCUtils.addBuildContext(generationRequest.getBuildId());
 
         // Fetch any secondary resources (Tekton TaskRuns) that are related to the primary resource (GenerationRequest)
-        // There may be between 0 and to 2 TaskRuns related to the GenerationRequest
+        // There may be between 0 or more TaskRuns related to the GenerationRequest:
+        // 0 In case these were not created yet,
+        // 1 in case the initiation tasks is only running
+        // 2 or more in case the generation is running
         Set<TaskRun> secondaryResources = context.getSecondaryResources(TaskRun.class);
-
-        SbomGenerationStatus currentStatus = generationRequest.getStatus();
 
         // Fetch latest TaskRun in the workflow and use this information to handle the change.
         // Any TaskRuns that are run earlier the workflow are ignored, because these have finished already.
@@ -137,7 +154,12 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             return UpdateControl.noUpdate();
         }
 
+        SbomGenerationStatus currentStatus = generationRequest.getStatus();
+
         log.debug("Desired status: '{}', current status: '{}'", desiredStatus, currentStatus);
+
+        // Always ensure that the DB entity is in sync with the
+        SbomGenerationRequest.sync(generationRequest);
 
         // If the desired status is newer than what we already have update the GenerationRequest with it.
         if (currentStatus == null || currentStatus.isOlderThan(desiredStatus)) {
@@ -150,11 +172,9 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
             generationRequest.setStatus(desiredStatus);
 
-            return UpdateControl.updateResource(generationRequest);
-
         }
 
-        return UpdateControl.noUpdate();
+        return UpdateControl.updateResource(generationRequest);
     }
 
     private SbomGenerationStatus handleRelatedTaskRunUpdate(GenerationRequest generationRequest, TaskRun taskRun) {
@@ -277,8 +297,43 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             case "Unknown":
                 return SbomGenerationStatus.GENERATING;
             case "True":
+
+                // TODO: first query the DB to see whether the enity is already created
+
+                Config config;
+
+                try {
+                    config = objectMapper.readValue(generationRequest.getConfig().getBytes(), Config.class);
+                } catch (IOException e) {
+                    log.error(
+                            "Could not parse configuration stored in GenerationRequest '{}' which was supposed to be successful, failing the request instead",
+                            generationRequest.getMetadata().getName(),
+                            e);
+
+                    return SbomGenerationStatus.FAILED;
+                }
+
+                log.info(
+                        "Reading all generated SBOMs for the GenerationRequest '{}'",
+                        generationRequest.getMetadata().getName());
+
+                for (int i = 0; i < config.getProducts().size(); i++) {
+                    log.info("Reading SBOM for index '{}'", i);
+
+                    Path sbomPath = Path.of(
+                            sbomDir,
+                            generationRequest.getMetadata().getName(),
+                            generationRequest.getMetadata().getName() + "-1-generate-" + i,
+                            "bom.json");
+
+                    Bom bom = SbomUtils.fromPath(sbomPath);
+                }
+
+                // TODO: Remove the GenerationRequest CM
+
                 // TODO: handle SBOM entity creation
                 return SbomGenerationStatus.FINISHED;
+
             case "False":
                 // TODO: get failure reason
                 // TODO for how long should we leave failed requests? when to do cleanup?

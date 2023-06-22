@@ -53,14 +53,15 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1alpha1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -68,6 +69,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 @ApplicationScoped
 @Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1alpha1, with RSQL capabilities")
 @PermitAll
+@Slf4j
 public class SBOMResource {
 
     @Inject
@@ -467,16 +469,11 @@ public class SBOMResource {
     // @Operation(summary = "Get the enriched SBOM content related to a root component purl")
     // -------------------------------------------------------------------------------
 
-    // TODO: disabled until moved to sbomer feature and made it possible to create the generation request
     @POST
     @Operation(
-            summary = "Generate a base SBOM based on the PNC build",
+            summary = "Generate SBOM based on the PNC build",
             description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
     @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    @Parameter(
-            name = "generator",
-            description = "Generator to use to generate the SBOM. If not specified, CycloneDX will be used. Options are `DOMINO`, `CYCLONEDX`",
-            example = "CYCLONEDX")
     @Path("/generate/build/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "202",
@@ -487,27 +484,13 @@ public class SBOMResource {
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
 
-    public Response generate(@PathParam("buildId") String buildId, @QueryParam("generator") String generator)
-            throws Exception {
+    public Response generate(@PathParam("buildId") String buildId) throws Exception {
 
         try {
             MDCUtils.addBuildContext(buildId);
 
-            // GeneratorType gen = GeneratorType.MAVEN_CYCLONEDX;
-
-            // if (!Strings.isEmpty(generator)) {
-            // try {
-            // gen = GeneratorType.valueOf(generator);
-            // } catch (IllegalArgumentException iae) {
-            // throw new ClientException(
-            // Status.BAD_REQUEST.getStatusCode(),
-            // "The specified generator does not exist, allowed values are `CYCLONEDX` or `DOMINO`. Leave empty to use
-            // `CYCLONEDX`",
-            // iae);
-            // }
-            // }
-
-            // Sbom sbom = generationService.generate(buildId, gen);
+            log.info("New generation request for build id '{}'", buildId);
+            log.debug("Creating GenerationRequest Kubernetes resource");
 
             GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata()
                     .endMetadata()
@@ -515,13 +498,81 @@ public class SBOMResource {
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
-            ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
+            kubernetesClient.configMaps().resource(req).create();
 
-            // TODO: Add proper status
-            return Response.status(Status.ACCEPTED).build();
+            log.debug("GenerationRequest Kubernetes resource '{}' created for build '{}'", req.getId(), buildId);
+
+            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+
+            return Response.status(Status.ACCEPTED).entity(sbomGenerationRequest).build();
         } finally {
             MDCUtils.removeBuildContext();
         }
+    }
+
+    @GET
+    @Path("/requests")
+    @Operation(
+            summary = "List SBOM generation requests",
+            description = "Paginated list of SBOM generation requests using RSQL advanced search.")
+    @Parameter(
+            name = "query",
+            description = "A RSQL query to search the generation requests",
+            examples = { @ExampleObject(
+                    name = "Find all SBOM generation requests with provided buildId",
+                    value = "buildId=eq=ABCDEFGHIJKLM") })
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "List of SBOM generation requests in the system for a specified RSQL query.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Failed while parsing the provided RSQL string, please verify the correct syntax.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response searchGenerationRequests(
+            @Valid @BeanParam PaginationParameters paginationParams,
+            @QueryParam("query") String rsqlQuery) {
+
+        // TODO: Add support fot pagination and rsql
+        return Response.status(Status.OK).entity(SbomGenerationRequest.listAll()).build();
+    }
+
+    @GET
+    @Path("/requests/{id}")
+    @Operation(
+            summary = "Get specific SBOM generation request",
+            description = "Get specific SBOM generation request with the provided ID.")
+    @Parameter(name = "id", description = "SBOM generation request identifier", example = "88CA2291D4014C6")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The generation request",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Could not parse provided arguments",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested generation request could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Response getGenerationRequestById(@PathParam("id") String id) {
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.findById(id);
+
+        if (sbomGenerationRequest == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        return Response.status(Status.OK).entity(sbomGenerationRequest).build();
     }
 
     // @POST

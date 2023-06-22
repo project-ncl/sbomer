@@ -44,6 +44,9 @@ components:
   - ../../components/database
   - ../../components/tekton-deployment
   - ../../components/tekton
+resources:
+  - resources/pv.yaml
+  - resources/pvc.yaml
 secretGenerator:
   - name: sbomer-postgres
     literals:

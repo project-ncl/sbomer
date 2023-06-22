@@ -59,6 +59,9 @@ components:
   - ../../components/tekton-deployment
   - ../../components/tekton
   - ../../components/service
+resources:
+  - resources/pv.yaml
+  - resources/pvc.yaml
 patchesStrategicMerge:
   - patches/cm.yaml
 secretGenerator:

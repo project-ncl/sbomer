@@ -36,11 +36,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.tekton.client.TektonClient;
 import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRefBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.dependent.BulkDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependent;
@@ -63,6 +66,9 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     public static final String PARAM_COMMAND_INDEX_NAME = "index";
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+
+    @Inject
+    KubernetesClient kubernetesClient;
 
     @Inject
     TektonClient tektonClient;
@@ -140,6 +146,13 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                                 .withNewValue(String.valueOf(index))
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName("sbomer-generate").build())
+                .withWorkspaces(
+                        new WorkspaceBindingBuilder().withSubPath(generationRequest.getMetadata().getName())
+                                .withName("data")
+                                .withPersistentVolumeClaim(
+                                        new PersistentVolumeClaimVolumeSourceBuilder().withClaimName("sbomer-sboms")
+                                                .build())
+                                .build())
                 .endSpec()
                 .build();
 
