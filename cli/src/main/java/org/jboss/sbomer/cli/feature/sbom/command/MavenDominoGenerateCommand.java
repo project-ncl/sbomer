@@ -41,6 +41,8 @@ import picocli.CommandLine.Option;
         subcommandsRepeatable = true)
 public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
 
+    private static final String BOM_FILE_NAME = "bom.json";
+
     @Option(
             names = { "--domino-dir" },
             description = "Directory where the Domino tool can be found. Default: ${DEFAULT-VALUE}",
@@ -92,7 +94,7 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
                 "from-maven",
                 "report",
                 String.format("--project-dir=%s", parent.getWorkdir().toAbsolutePath().toString()),
-                String.format("--output-file=%s/bom.json", parent.getWorkdir().toAbsolutePath().toString()),
+                String.format("--output-file=%s", BOM_FILE_NAME),
                 "--manifest");
 
         log.info("Working directory: '{}'", parent.getWorkdir());
@@ -140,32 +142,6 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
             throw new ApplicationException("SBOM generation failed, see logs above");
         }
 
-        Path sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "quarkus-bom-bom.json"); // TODO:
-                                                                                                          // Hardcoded,
-                                                                                                          // milestone
-                                                                                                          // 1.
-                                                                                                          // Domino's
-                                                                                                          // --output-file
-                                                                                                          // is
-                                                                                                          // not
-                                                                                                          // deterministic
-                                                                                                          // now.
-                                                                                                          // If
-                                                                                                          // it
-                                                                                                          // does
-                                                                                                          // not
-                                                                                                          // exist,
-                                                                                                          // default
-                                                                                                          // to
-                                                                                                          // the
-                                                                                                          // bom.json
-                                                                                                          // file
-
-        if (!Files.exists(sbomPath)) {
-            sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "bom.json");
-        }
-
-        return sbomPath;
+        return Path.of(getParent().getWorkdir().toAbsolutePath().toString(), BOM_FILE_NAME);
     }
-
 }
