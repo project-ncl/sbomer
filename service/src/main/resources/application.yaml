@@ -49,7 +49,6 @@ quarkus:
     url: "${UMB_BROKER_URL}"
 
   oidc:
-    auth-server-url: "${AUTH_SERVER_URL}"
     connection-delay: 30S
     connection-retry-count: 10
     client-id: pnc-sbomer
