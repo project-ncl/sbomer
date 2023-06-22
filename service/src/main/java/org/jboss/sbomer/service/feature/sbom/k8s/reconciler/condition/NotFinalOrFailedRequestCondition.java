@@ -29,7 +29,7 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class NewOrFailedRequestCondition implements Condition<TaskRun, GenerationRequest> {
+public class NotFinalOrFailedRequestCondition implements Condition<TaskRun, GenerationRequest> {
 
     @Override
     public boolean isMet(GenerationRequest primary, TaskRun secondary, Context<GenerationRequest> context) {
@@ -47,11 +47,7 @@ public class NewOrFailedRequestCondition implements Condition<TaskRun, Generatio
             }
         });
 
-        if (shouldProceed.get()) {
-            return true;
-        }
-
-        return true;
+        return shouldProceed.get();
     }
 
     /**

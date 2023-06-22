@@ -42,7 +42,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.InitFinishedCondition;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.NewOrFailedRequestCondition;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.NotFinalOrFailedRequestCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
@@ -93,7 +93,7 @@ import lombok.extern.slf4j.Slf4j;
                         name = "init",
                         type = TaskRunInitDependentResource.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME,
-                        reconcilePrecondition = NewOrFailedRequestCondition.class,
+                        reconcilePrecondition = NotFinalOrFailedRequestCondition.class,
                         readyPostcondition = InitFinishedCondition.class),
                 @Dependent(
                         type = TaskRunGenerateDependentResource.class,
@@ -231,6 +231,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
                 // TODO: fetch result (runtime configuration) and store it
                 return SbomGenerationStatus.INITIALIZED;
             case "False":
+                // TODO: Retry?
                 // TODO: get failure reason
                 // TODO for how long should we leave failed requests? when to do cleanup?
                 return SbomGenerationStatus.FAILED;
@@ -335,6 +336,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
                 return SbomGenerationStatus.FINISHED;
 
             case "False":
+                // TODO: Retry?
                 // TODO: get failure reason
                 // TODO for how long should we leave failed requests? when to do cleanup?
                 return SbomGenerationStatus.FAILED;
