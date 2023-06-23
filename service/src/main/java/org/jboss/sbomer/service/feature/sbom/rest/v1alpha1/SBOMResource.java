@@ -468,7 +468,7 @@ public class SBOMResource {
             log.info("New generation request for build id '{}'", buildId);
             log.debug("Creating GenerationRequest Kubernetes resource");
 
-            GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata()
+            GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata(buildId)
                     .endMetadata()
                     .withBuildId(buildId)
                     .withStatus(SbomGenerationStatus.NEW)

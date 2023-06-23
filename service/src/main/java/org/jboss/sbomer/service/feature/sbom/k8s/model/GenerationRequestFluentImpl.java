@@ -32,13 +32,11 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
     private SbomGenerationStatus status;
 
     @Override
-    public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata() {
-
+    public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata(String buildId) {
         return withNewMetadataLike(
-                new ObjectMetaBuilder().withGenerateName("sbomer-sbom-request-")
+                new ObjectMetaBuilder().withName("sbom-request-" + buildId.toLowerCase())
                         .withLabels(Labels.defaultLabelsToMap())
                         .build());
-
     }
 
     @Override

@@ -136,7 +136,8 @@ public class PncMessageParser implements Runnable {
                                 "Triggering the automated SBOM generation for build {} ...",
                                 msgBody.getBuild().getId());
 
-                        GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata()
+                        GenerationRequest req = new GenerationRequestBuilder()
+                                .withNewDefaultMetadata(msgBody.getBuild().getId())
                                 .endMetadata()
                                 .withBuildId(msgBody.getBuild().getId())
                                 .withStatus(SbomGenerationStatus.NEW)

@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.model;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
-import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -49,8 +49,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -65,6 +68,9 @@ import lombok.ToString;
         name = "sbom",
         indexes = { @Index(name = "idx_sbom_buildid", columnList = "build_id"),
                 @Index(name = "idx_sbom_rootpurl", columnList = "root_purl") })
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(setterPrefix = "with")
 public class Sbom extends PanacheEntityBase {
 
     @Id
