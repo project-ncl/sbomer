@@ -40,10 +40,10 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ErrataConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
-import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
@@ -77,7 +77,7 @@ public class TestSbomRepository {
                 .version("0.0.90")
                 .build();
 
-        DefaultProcessorConfig defaultProcessorConfig = new DefaultProcessorConfig();
+        DefaultProcessorConfig defaultProcessorConfig = DefaultProcessorConfig.builder().build();
         RedHatProductProcessorConfig redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
                 .errata(
                         ErrataConfig.builder()
@@ -161,15 +161,23 @@ public class TestSbomRepository {
 
         assertEquals("416640206274228224", sbom.getId());
         assertEquals("ARYT3LBXDVYAC", sbom.getConfig().getBuildId());
-        assertEquals(
-                GeneratorType.MAVEN_CYCLONEDX,
-                sbom.getConfig().getProducts().iterator().next().getGenerator().getType());
-        assertEquals(
-                "--include-non-managed --warn-on-missing-scm",
-                sbom.getConfig().getProducts().iterator().next().getGenerator().getArgs());
-        assertEquals("0.0.90", sbom.getConfig().getProducts().iterator().next().getGenerator().getVersion());
 
-        assertEquals(2, sbom.getConfig().getProducts().iterator().next().getProcessors().size());
+        GeneratorConfig generatorConfig = sbom.getConfig().getProducts().iterator().next().getGenerator();
+        List<ProcessorConfig> processorConfigs = sbom.getConfig().getProducts().iterator().next().getProcessors();
+        assertEquals(GeneratorType.MAVEN_CYCLONEDX, generatorConfig.getType());
+        assertEquals("--include-non-managed --warn-on-missing-scm", generatorConfig.getArgs());
+        assertEquals("0.0.90", generatorConfig.getVersion());
+
+        assertEquals(2, processorConfigs.size());
+
+        DefaultProcessorConfig defaultProcessorConfig = (DefaultProcessorConfig) processorConfigs.get(0);
+        assertEquals(List.of("default"), defaultProcessorConfig.toCommand());
+
+        RedHatProductProcessorConfig redHatProductProcessorConfig = (RedHatProductProcessorConfig) processorConfigs
+                .get(1);
+        assertEquals("CCCDDD", redHatProductProcessorConfig.getErrata().getProductName());
+        assertEquals("CCDD", redHatProductProcessorConfig.getErrata().getProductVersion());
+        assertEquals("CD", redHatProductProcessorConfig.getErrata().getProductVariant());
     }
 
     @Test
