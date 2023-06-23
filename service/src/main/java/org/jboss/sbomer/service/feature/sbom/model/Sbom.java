@@ -40,8 +40,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
 
@@ -124,7 +122,6 @@ public class Sbom extends PanacheEntityBase {
         }
 
         return bom;
-
     }
 
     /**
