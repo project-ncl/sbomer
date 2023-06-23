@@ -26,7 +26,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
 
 import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.core.features.sbom.enums.SbomStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.rest.rsql.RSQLProducer;
@@ -36,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j
-public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
+public class SbomRepository implements PanacheRepositoryBase<Sbom, String> {
 
     @Inject
     RSQLProducer<Sbom> rsqlProducer;
@@ -93,38 +92,24 @@ public class SbomRepository implements PanacheRepositoryBase<Sbom, Long> {
         return getEntityManager().createQuery(query).getSingleResult();
     }
 
+    // TODO: probably not needed now
     @Transactional
     public void deleteByBuildId(String buildId) {
 
         // Do not delete SBOMs which are being processed
-        String query = "FROM Sbom WHERE buildId = :buildId AND status <> :status";
+        String query = "FROM Sbom WHERE buildId = :buildId";
         List<Sbom> sboms = getEntityManager().createQuery(query, Sbom.class)
                 .setParameter("buildId", buildId)
-                .setParameter("status", SbomStatus.IN_PROGRESS)
                 .getResultList();
 
         if (sboms == null) {
             throw new NotFoundException("Could not find any final SBOM with buildId '{}'", buildId);
         }
 
-        sboms.stream().filter(s -> s.getParentSbom() != null).forEach(s -> {
-            if (s.getProcessors() != null) {
-                s.getProcessors().clear();
-            }
-
+        sboms.stream().forEach(s -> {
             getEntityManager().remove(s);
             getEntityManager().flush();
         });
-
-        sboms.stream().filter(s -> s.getParentSbom() == null).forEach(s -> {
-            if (s.getProcessors() != null) {
-                s.getProcessors().clear();
-            }
-
-            getEntityManager().remove(s);
-            getEntityManager().flush();
-        });
-
     }
 
     @Transactional

@@ -71,7 +71,7 @@ public class SBOMResourceTest {
     public void testGetSbomById() throws IOException {
         Sbom sbom = new Sbom();
         sbom.setBuildId("AAAABBBB");
-        sbom.setId(12345L);
+        sbom.setId("12345");
 
         Mockito.when(sbomService.get("12345")).thenReturn(sbom);
 
@@ -80,7 +80,7 @@ public class SBOMResourceTest {
                 .request("GET", "/api/v1alpha1/sboms/12345")
                 .then()
                 .statusCode(200)
-                .body("id", CoreMatchers.equalTo(12345))
+                .body("id", CoreMatchers.equalTo("12345"))
                 .and()
                 .body("buildId", CoreMatchers.equalTo("AAAABBBB"));
     }
@@ -89,9 +89,9 @@ public class SBOMResourceTest {
     public void testGetBomById() throws IOException {
         Sbom sbom = new Sbom();
         sbom.setBuildId("AAAABBBB");
-        sbom.setId(12345L);
+        sbom.setId("12345");
 
-        String bomJson = TestResources.asString("sboms/base.json");
+        String bomJson = TestResources.asString("sboms/complete_sbom.json");
         sbom.setSbom(new ObjectMapper().readTree(bomJson));
 
         Mockito.when(sbomService.get("12345")).thenReturn(sbom);
@@ -115,8 +115,8 @@ public class SBOMResourceTest {
                 .contentType(ContentType.JSON)
                 .request("GET", "/api/v1alpha1/sboms/fgETHHG4785")
                 .then()
-                .statusCode(400)
-                .body("message", CoreMatchers.is("Invalid SBOM id provided: 'fgETHHG4785', a number was expected"))
+                .statusCode(404)
+                .body("message", CoreMatchers.is("SBOM with id 'fgETHHG4785' not found"))
                 .and()
                 .body("errorId", CoreMatchers.isA(String.class));
     }
@@ -126,9 +126,9 @@ public class SBOMResourceTest {
 
         Sbom sbom = new Sbom();
         sbom.setBuildId("AAAABBBB");
-        sbom.setId(12345L);
+        sbom.setId("12345");
 
-        String bomJson = TestResources.asString("sboms/base.json");
+        String bomJson = TestResources.asString("sboms/complete_sbom.json");
         sbom.setSbom(new ObjectMapper().readTree(bomJson));
 
         Mockito.when(sbomService.get("12345")).thenReturn(sbom);

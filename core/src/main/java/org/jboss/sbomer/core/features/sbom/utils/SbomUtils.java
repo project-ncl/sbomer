@@ -42,6 +42,7 @@ import org.cyclonedx.model.Property;
 import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.features.sbom.Constants;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -249,5 +250,45 @@ public class SbomUtils {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    /**
+     * Converts the {@link JsonNode} into a runtime Config {@link Config} object.
+     *
+     * @param jsonNode The {@link JsonNode} to convert.
+     * @return The converted {@link Config} or <code>null</code> in case of troubles in converting it.
+     */
+    public static Config fromJsonConfig(JsonNode jsonNode) {
+        if (jsonNode == null) {
+            return null;
+        }
+
+        try {
+            byte[] content = jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes();
+            return ObjectMapperProvider.json().readValue(content, Config.class);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Converts the given config {@link Config} into a {@link JsonNode} object.
+     *
+     * @param bom The config {@link Config} to convert
+     * @return {@link JsonNode} representation of the {@link Bom}.
+     */
+    public static JsonNode toJsonNode(Config config) {
+
+        try {
+            String configuration = ObjectMapperProvider.json()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(config);
+            return ObjectMapperProvider.json().readTree(configuration);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+
     }
 }
