@@ -34,8 +34,8 @@ quarkus:
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
       stderr: true
-    json:
-      pretty-print: true
+      json:
+        pretty-print: true
 
 sbomer:
   pnc:
@@ -70,9 +70,8 @@ sbomer:
           level: DEBUG
         "org.jboss.sbomer":
           level: DEBUG
-      json:
-        console:
-          enable: false
+      console:
+        json: false
 
   sbomer:
     pnc:
@@ -85,9 +84,8 @@ sbomer:
       category:
         "org.jboss.sbomer":
           level: DEBUG
-      json:
-        console:
-          enable: false
+      console:
+        json: false
 
   sbomer:
     pnc:
