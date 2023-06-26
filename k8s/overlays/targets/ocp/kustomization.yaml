@@ -31,6 +31,7 @@ patchesStrategicMerge:
   - patches/sa.yaml
 resources:
   - resources/route.yaml
+  - resources/pvc.yaml
 patches:
   - target:
       kind: Task
