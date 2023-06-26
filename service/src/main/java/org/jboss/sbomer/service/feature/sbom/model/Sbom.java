@@ -21,11 +21,15 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -39,7 +43,6 @@ import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
 
@@ -93,10 +96,11 @@ public class Sbom extends PanacheEntityBase {
     @ToString.Exclude
     private JsonNode sbom;
 
-    @Type(type = JsonTypes.JSON_BIN)
-    @Column(name = "config", columnDefinition = JsonTypes.JSON_BIN)
-    @ToString.Exclude
-    private JsonNode config;
+    @Column(name = "config_index")
+    private Integer configIndex;
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private SbomGenerationRequest generationRequest;
 
     @JsonIgnore
     @Lob
@@ -128,18 +132,6 @@ public class Sbom extends PanacheEntityBase {
         }
 
         return bom;
-    }
-
-    /**
-     * Returns the config {@link Config}.
-     *
-     * In case the runtime config is not available or parsable, returns <code>null</code>.
-     *
-     * @return The {@link Config} object
-     */
-    @JsonIgnore
-    public Config getConfig() {
-        return SbomUtils.fromJsonConfig(config);
     }
 
     /**

@@ -264,8 +264,10 @@ public class SbomUtils {
         }
 
         try {
-            byte[] content = jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes();
-            return ObjectMapperProvider.json().readValue(content, Config.class);
+            return ObjectMapperProvider.json()
+                    .readValue(
+                            jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes(),
+                            Config.class);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -275,8 +277,8 @@ public class SbomUtils {
     /**
      * Converts the given config {@link Config} into a {@link JsonNode} object.
      *
-     * @param bom The config {@link Config} to convert
-     * @return {@link JsonNode} representation of the {@link Bom}.
+     * @param config The config {@link Config} to convert
+     * @return {@link JsonNode} representation of the {@link Config}.
      */
     public static JsonNode toJsonNode(Config config) {
 

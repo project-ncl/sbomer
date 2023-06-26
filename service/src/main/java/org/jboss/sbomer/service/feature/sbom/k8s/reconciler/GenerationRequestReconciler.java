@@ -22,6 +22,7 @@ import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationReq
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,12 +47,15 @@ import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.NotFinalOr
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
+import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunResult;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
@@ -117,7 +121,249 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
     @Inject
     SbomRepository sbomRepository;
 
+    @Inject
+    KubernetesClient kubernetesClient;
+
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+
+    /**
+     * <p>
+     * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#INITIALIZING} or
+     * {@link SbomGenerationStatus#INITIALIZED} if it was really fast :)
+     * </p>
+     *
+     * <p>
+     * For the {@link SbomGenerationStatus#NEW} state we don't need to do anything, just wait.
+     * </p>
+     *
+     * @param generationRequest
+     * @param secondaryResources
+     * @return Action to take on the {@link GenerationRequest} resource.
+     */
+    private UpdateControl<GenerationRequest> reconcileNew(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+        TaskRun initTaskRun = initTaskRun(secondaryResources);
+
+        if (initTaskRun == null) {
+            return UpdateControl.noUpdate();
+        }
+
+        if (isFinished(initTaskRun)) {
+            if (isSuccessfull(initTaskRun)) {
+                generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
+                setConfig(generationRequest, initTaskRun);
+            } else {
+                generationRequest.setStatus(SbomGenerationStatus.FAILED);
+            }
+        } else {
+            generationRequest.setStatus(SbomGenerationStatus.INITIALIZING);
+        }
+
+        return UpdateControl.updateResource(generationRequest);
+    }
+
+    /**
+     * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#INITIALIZED}
+     *
+     * @param secondaryResources
+     * @param generationRequest
+     *
+     * @return
+     */
+    private UpdateControl<GenerationRequest> reconcileInitializing(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+
+        TaskRun initTaskRun = initTaskRun(secondaryResources);
+
+        if (isFinished(initTaskRun)) {
+            if (isSuccessfull(initTaskRun)) {
+                generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
+                setConfig(generationRequest, initTaskRun);
+            } else {
+                generationRequest.setStatus(SbomGenerationStatus.FAILED);
+            }
+        } else {
+            return UpdateControl.noUpdate();
+        }
+
+        return UpdateControl.updateResource(generationRequest);
+    }
+
+    /**
+     * Possible next statuses: {@link SbomGenerationStatus#GENERATING}
+     *
+     * @param secondaryResources
+     * @param generationRequest
+     *
+     * @return
+     */
+    private UpdateControl<GenerationRequest> reconcileInitialized(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+
+        Set<TaskRun> generateTaskRuns = generateTaskRuns(secondaryResources);
+
+        if (generateTaskRuns.isEmpty()) {
+            return UpdateControl.noUpdate();
+        }
+
+        generationRequest.setStatus(SbomGenerationStatus.GENERATING);
+        return UpdateControl.updateResource(generationRequest);
+    }
+
+    /**
+     * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#FINISHED}
+     *
+     * @param secondaryResources
+     * @param generationRequest
+     *
+     * @return
+     */
+    private UpdateControl<GenerationRequest> reconcileGenerating(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+
+        Set<TaskRun> generateTaskRuns = generateTaskRuns(secondaryResources);
+
+        for (TaskRun taskRun : generateTaskRuns) {
+            Boolean successfull = isSuccessfull(taskRun);
+
+            if (Objects.isNull(successfull)) {
+                return UpdateControl.noUpdate();
+            }
+
+            if (Objects.equals(successfull, false)) {
+                generationRequest.setStatus(SbomGenerationStatus.FAILED);
+                return UpdateControl.updateResource(generationRequest);
+            }
+        }
+
+        storeSbom(generationRequest);
+
+        generationRequest.setStatus(SbomGenerationStatus.FINISHED);
+        return UpdateControl.updateResource(generationRequest);
+    }
+
+    /**
+     * Final success status.
+     *
+     * @param secondaryResources
+     * @param generationRequest
+     *
+     * @return
+     */
+    private UpdateControl<GenerationRequest> reconcileFinished(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+
+        // At this point al the work is finished and we can clean up the GenerationRequest Kubernetes resource.
+        kubernetesClient.configMaps().withName(generationRequest.getMetadata().getName()).delete();
+
+        return UpdateControl.noUpdate();
+    }
+
+    /**
+     * Final failed status.
+     *
+     * @param secondaryResources
+     * @param generationRequest
+     *
+     * @return
+     */
+    private UpdateControl<GenerationRequest> reconcileFailed(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+
+        return UpdateControl.noUpdate();
+    }
+
+    /**
+     * Returns a set of generation-related {@link TaskRun}s from the give {@link TaskRun} {@link Set}.
+     *
+     * @param taskRuns
+     * @return The {@link Set} containing {@link TaskRun} or empty set if not found.
+     */
+    private Set<TaskRun> generateTaskRuns(Set<TaskRun> taskRuns) {
+        Set<TaskRun> generates = new HashSet<>();
+
+        generates.addAll(taskRuns.stream().filter(tr -> {
+            if (Objects.equals(
+                    tr.getMetadata().getLabels().get(Labels.LABEL_PHASE),
+                    SbomGenerationPhase.GENERATE.name().toLowerCase())) {
+                return true;
+            }
+
+            return false;
+        }).toList());
+
+        return generates;
+    }
+
+    /**
+     * Returns the initialization {@link TaskRun} from the give {@link TaskRun} {@link Set}.
+     *
+     * @param taskRuns
+     * @return The {@link TaskRun} or {@code null} if not found.
+     */
+    private TaskRun initTaskRun(Set<TaskRun> taskRuns) {
+        Optional<TaskRun> taskRun = taskRuns.stream().filter(tr -> {
+            if (Objects.equals(
+                    tr.getMetadata().getLabels().get(Labels.LABEL_PHASE),
+                    SbomGenerationPhase.INIT.name().toLowerCase())) {
+                return true;
+            }
+
+            return false;
+        }).findFirst();
+
+        return taskRun.orElse(null);
+    }
+
+    /**
+     * Checks whether given {@link TaskRun} has finished successfully.
+     *
+     * @param taskRun The {@link TaskRun} to check
+     * @return {@code true} if the {@link TaskRun} finished successfully, {@code false} otherwise or {@code null} in
+     *         case it is still in progress.
+     */
+    private Boolean isSuccessfull(TaskRun taskRun) {
+        if (!isFinished(taskRun)) {
+            log.trace("TaskRun '{}' still in progress", taskRun.getMetadata().getName());
+            return null;
+        }
+
+        if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
+                && taskRun.getStatus().getConditions().size() > 0
+                && Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")) {
+            log.trace("TaskRun '{}' finished successfully", taskRun.getMetadata().getName());
+            return true;
+        }
+
+        log.trace("TaskRun '{}' failed", taskRun.getMetadata().getName());
+        return false;
+    }
+
+    /**
+     * Checks whether given {@link TaskRun} has finished or not.
+     *
+     * @param taskRun The {@link TaskRun} to check
+     * @return {@code true} if the {@link TaskRun} finished, {@code false} otherwise
+     */
+    private boolean isFinished(TaskRun taskRun) {
+        if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
+                && taskRun.getStatus().getConditions().size() > 0
+                && (Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")
+                        || Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "False"))) {
+
+            log.trace("TaskRun '{}' finished", taskRun.getMetadata().getName());
+            return true;
+        }
+
+        log.trace("TaskRun '{}' still running", taskRun.getMetadata().getName());
+        return false;
+    }
 
     @Override
     @Transactional
@@ -128,6 +374,13 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         MDCUtils.removeContext();
         MDCUtils.addBuildContext(generationRequest.getBuildId());
 
+        // No status set set, it should be "NEW", let's do it.
+        // "NEW" starts everything.
+        if (Objects.isNull(generationRequest.getStatus())) {
+            generationRequest.setStatus(SbomGenerationStatus.NEW);
+            return UpdateControl.updateResource(generationRequest);
+        }
+
         // Fetch any secondary resources (Tekton TaskRuns) that are related to the primary resource (GenerationRequest)
         // There may be between 0 or more TaskRuns related to the GenerationRequest:
         // 0 In case these were not created yet,
@@ -135,112 +388,89 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         // 2 or more in case the generation is running
         Set<TaskRun> secondaryResources = context.getSecondaryResources(TaskRun.class);
 
-        // Fetch latest TaskRun in the workflow and use this information to handle the change.
-        // Any TaskRuns that are run earlier the workflow are ignored, because these have finished already.
-        Optional<TaskRun> taskRunOpt = secondaryResources.stream()
-                .sorted((i1, i2) -> i2.getMetadata().getName().compareTo(i1.getMetadata().getName()))
-                .findFirst();
-
-        // In case there is no TaskRun found, no update needed.
-        if (taskRunOpt.isEmpty()) {
-            return UpdateControl.noUpdate();
-        }
-
-        // Handle the related TaskRun and reflect it in the GenerationRequest status.
-        SbomGenerationStatus desiredStatus = handleRelatedTaskRunUpdate(generationRequest, taskRunOpt.get());
-
-        // No update needed (yet)
-        if (desiredStatus == null) {
-            return UpdateControl.noUpdate();
-        }
-
-        SbomGenerationStatus currentStatus = generationRequest.getStatus();
-
-        log.debug("Desired status: '{}', current status: '{}'", desiredStatus, currentStatus);
-
-        // Always ensure that the DB entity is in sync with the
-        SbomGenerationRequest.sync(generationRequest);
-
-        // If the desired status is newer than what we already have update the GenerationRequest with it.
-        if (currentStatus == null || currentStatus.isOlderThan(desiredStatus)) {
-
-            log.info(
-                    "Updating status of GenerationRequest '{}': from '{}' to '{}'",
-                    generationRequest.getMetadata().getName(),
-                    currentStatus,
-                    desiredStatus);
-
-            generationRequest.setStatus(desiredStatus);
-
-        }
-
-        return UpdateControl.updateResource(generationRequest);
-    }
-
-    private SbomGenerationStatus handleRelatedTaskRunUpdate(GenerationRequest generationRequest, TaskRun taskRun) {
-
-        // No status subresource yet, wait.
-        if (taskRun.getStatus() == null) {
-            return null;
-        }
+        UpdateControl<GenerationRequest> action = null;
 
         log.debug(
-                "Handling TaskRun: '{}' related to GenerationRequest '{}' from",
-                taskRun.getMetadata().getName(),
+                "Handling update for GenerationRequest '{}', current status: '{}'",
+                generationRequest.getMetadata().getName(),
+                generationRequest.getStatus());
+
+        switch (generationRequest.getStatus()) {
+            case NEW:
+                action = reconcileNew(generationRequest, secondaryResources);
+                break;
+            case INITIALIZING:
+                action = reconcileInitializing(generationRequest, secondaryResources);
+                break;
+            case INITIALIZED:
+                action = reconcileInitialized(generationRequest, secondaryResources);
+                break;
+            case GENERATING:
+                action = reconcileGenerating(generationRequest, secondaryResources);
+                break;
+            case FINISHED:
+                action = reconcileFinished(generationRequest, secondaryResources);
+                break;
+            case FAILED:
+                action = reconcileFailed(generationRequest, secondaryResources);
+                break;
+            default:
+                break;
+        }
+
+        // This would be unexpected.
+        if (action == null) {
+            log.error(
+                    "Unknown status received: '{}'' for GenerationRequest '{}",
+                    generationRequest.getStatus(),
+                    generationRequest.getMetadata().getName());
+            return UpdateControl.noUpdate();
+        }
+
+        // In case resource gets an update, update th DB entity as well
+        if (action.isUpdateResource()) {
+            SbomGenerationRequest.sync(generationRequest);
+        }
+
+        return action;
+    }
+
+    private void storeSbom(GenerationRequest generationRequest) {
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
+
+        log.info(
+                "Reading all generated SBOMs for the GenerationRequest '{}'",
                 generationRequest.getMetadata().getName());
 
-        String phaseLabelValue = taskRun.getMetadata().getLabels().get(Labels.LABEL_PHASE);
+        Config config = SbomUtils.fromJsonConfig(sbomGenerationRequest.getConfig());
 
-        if (phaseLabelValue == null) {
-            log.error(
-                    "The TaskRun '{}' does not have the expected label '{}' set",
-                    taskRun.getMetadata().getName(),
-                    Labels.LABEL_PHASE);
+        for (int i = 0; i < config.getProducts().size(); i++) {
+            log.info("Reading SBOM for index '{}'", i);
 
-            return SbomGenerationStatus.FAILED;
+            Path sbomPath = Path.of(
+                    sbomDir,
+                    generationRequest.getMetadata().getName(),
+                    generationRequest.getMetadata().getName() + "-1-generate-" + i,
+                    "bom.json"); // TODO: should not be hardcoded
+
+            // Read the generated SBOM JSON file
+            Bom bom = SbomUtils.fromPath(sbomPath);
+
+            // Create the Sbom entity
+            Sbom sbom = Sbom.builder()
+                    .withId(RandomStringIdGenerator.generate())
+                    .withBuildId(generationRequest.getBuildId())
+                    .withSbom(SbomUtils.toJsonNode(bom))
+                    .withGenerationRequest(sbomGenerationRequest)
+                    .withConfigIndex(i)
+                    .build();
+
+            // And store it in the database
+            sbomRepository.saveSbom(sbom);
         }
-
-        SbomGenerationPhase phase = SbomGenerationPhase.valueOf(phaseLabelValue.toUpperCase());
-
-        log.debug(
-                "Handling GenerationRequest '{}' TaskRun '{}' update for phase '{}' ",
-                generationRequest.getMetadata().getName(),
-                taskRun.getMetadata().getName(),
-                phase);
-
-        switch (phase) {
-            case INIT:
-                return handleInitTaskRunUpdate(generationRequest, taskRun);
-            case GENERATE:
-                return handleGenerateTaskRunUpdate(generationRequest, taskRun);
-
-        }
-
-        return null;
     }
 
-    private SbomGenerationStatus handleInitTaskRunUpdate(GenerationRequest generationRequest, TaskRun taskRun) {
-        switch (taskRun.getStatus().getConditions().get(0).getStatus()) {
-            case "Unknown":
-                return SbomGenerationStatus.INITIALIZING;
-            case "True":
-                log.info("Initialization finished");
-
-                handleConfigResult(generationRequest, taskRun);
-
-                // TODO: fetch result (runtime configuration) and store it
-                return SbomGenerationStatus.INITIALIZED;
-            case "False":
-                // TODO: Retry?
-                // TODO: get failure reason
-                // TODO for how long should we leave failed requests? when to do cleanup?
-                return SbomGenerationStatus.FAILED;
-        }
-
-        return null;
-    }
-
-    private Config handleConfigResult(GenerationRequest generationRequest, TaskRun taskRun) {
+    private Config setConfig(GenerationRequest generationRequest, TaskRun taskRun) {
         log.debug("Handling result of the initialization task");
 
         if (taskRun.getStatus() == null) {
@@ -293,58 +523,6 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         return config;
     }
 
-    private SbomGenerationStatus handleGenerateTaskRunUpdate(GenerationRequest generationRequest, TaskRun taskRun) {
-        switch (taskRun.getStatus().getConditions().get(0).getStatus()) {
-            case "Unknown":
-                return SbomGenerationStatus.GENERATING;
-            case "True":
-
-                // TODO: first query the DB to see whether the enity is already created
-
-                Config config;
-
-                try {
-                    config = objectMapper.readValue(generationRequest.getConfig().getBytes(), Config.class);
-                } catch (IOException e) {
-                    log.error(
-                            "Could not parse configuration stored in GenerationRequest '{}' which was supposed to be successful, failing the request instead",
-                            generationRequest.getMetadata().getName(),
-                            e);
-
-                    return SbomGenerationStatus.FAILED;
-                }
-
-                log.info(
-                        "Reading all generated SBOMs for the GenerationRequest '{}'",
-                        generationRequest.getMetadata().getName());
-
-                for (int i = 0; i < config.getProducts().size(); i++) {
-                    log.info("Reading SBOM for index '{}'", i);
-
-                    Path sbomPath = Path.of(
-                            sbomDir,
-                            generationRequest.getMetadata().getName(),
-                            generationRequest.getMetadata().getName() + "-1-generate-" + i,
-                            "bom.json");
-
-                    Bom bom = SbomUtils.fromPath(sbomPath);
-                }
-
-                // TODO: Remove the GenerationRequest CM
-
-                // TODO: handle SBOM entity creation
-                return SbomGenerationStatus.FINISHED;
-
-            case "False":
-                // TODO: Retry?
-                // TODO: get failure reason
-                // TODO for how long should we leave failed requests? when to do cleanup?
-                return SbomGenerationStatus.FAILED;
-        }
-
-        return null;
-    }
-
     @Override
     public Map<String, EventSource> prepareEventSources(EventSourceContext<GenerationRequest> context) {
         InformerEventSource<TaskRun, GenerationRequest> ies = new InformerEventSource<>(
@@ -358,8 +536,8 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
     @Override
     public DeleteControl cleanup(GenerationRequest resource, Context<GenerationRequest> context) {
-        log.debug("Removed!");
-
+        log.debug("GenerationRequest '{}' was removed from the system", resource.getMetadata().getName());
         return DeleteControl.defaultDelete();
     }
+
 }

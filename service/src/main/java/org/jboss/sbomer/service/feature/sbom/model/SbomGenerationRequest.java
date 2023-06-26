@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.model;
 
+import java.io.IOException;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -27,19 +29,34 @@ import javax.persistence.Table;
 import javax.transaction.Transactional;
 
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.jboss.resteasy.spi.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.quarkiverse.hibernate.types.json.JsonBinaryType;
+import io.quarkiverse.hibernate.types.json.JsonTypes;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+@JsonInclude(Include.NON_NULL)
 @DynamicUpdate
-@Getter
-@Setter
+@Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @ToString
@@ -48,6 +65,10 @@ import lombok.extern.slf4j.Slf4j;
         indexes = { @Index(name = "idx_request_buildid", columnList = "build_id"),
                 @Index(name = "idx_request_status", columnList = "status") })
 @Slf4j
+@NoArgsConstructor
+@AllArgsConstructor
+@TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
+@Builder(setterPrefix = "with")
 public class SbomGenerationRequest extends PanacheEntityBase {
 
     @Id
@@ -60,6 +81,22 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
     @Column(name = "build_id", nullable = false, updatable = false)
     String buildId;
+    @Type(type = JsonTypes.JSON_BIN)
+    @Column(name = "config", columnDefinition = JsonTypes.JSON_BIN)
+    @ToString.Exclude
+    private JsonNode config;
+
+    /**
+     * Returns the config {@link Config}.
+     *
+     * In case the runtime config is not available or parsable, returns <code>null</code>.
+     *
+     * @return The {@link Config} object
+     */
+    @JsonIgnore
+    public Config getConfiguration() {
+        return SbomUtils.fromJsonConfig(config);
+    }
 
     /**
      * Method to sync the {@link GenerationRequest} Kubernetes resource with the {@link SbomGenerationRequest} entity in
@@ -78,13 +115,26 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                     "Could not find SbomGenerationRequest entity in the database for id '{}', creating new one",
                     generationRequest.getId());
 
-            sbomGenerationRequest = new SbomGenerationRequest();
-            sbomGenerationRequest.setId(generationRequest.getId());
-            sbomGenerationRequest.setBuildId(generationRequest.getBuildId());
+            sbomGenerationRequest = SbomGenerationRequest.builder()
+                    .withId(generationRequest.getId())
+                    .withBuildId(generationRequest.getBuildId())
+                    .build();
         }
 
         // Finally sync the SbomGenerationRequest entity with the GenerationRequest.
         sbomGenerationRequest.setStatus(generationRequest.getStatus());
+
+        // Update config, if available
+        if (generationRequest.getConfig() != null) {
+            try {
+                sbomGenerationRequest.setConfig(
+                        SbomUtils.toJsonNode(
+                                ObjectMapperProvider.yaml()
+                                        .readValue(generationRequest.getConfig().getBytes(), Config.class)));
+            } catch (IOException e) {
+                throw new ApplicationException("Could not convert configuration to store in the database", e);
+            }
+        }
 
         // Store it in the database
         sbomGenerationRequest.persistAndFlush();

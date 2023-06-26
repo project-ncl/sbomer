@@ -34,8 +34,6 @@ quarkus:
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
       stderr: true
-      json:
-        pretty-print: true
 
 sbomer:
   pnc:

@@ -34,7 +34,7 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
     @Override
     public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata(String buildId) {
         return withNewMetadataLike(
-                new ObjectMetaBuilder().withName("sbom-request-" + buildId.toLowerCase())
+                new ObjectMetaBuilder().withGenerateName("sbom-request-" + buildId.toLowerCase() + "-")
                         .withLabels(Labels.defaultLabelsToMap())
                         .build());
     }

@@ -45,7 +45,9 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.junit.jupiter.api.Test;
 
@@ -103,12 +105,19 @@ public class TestSbomRepository {
         Bom bom = SbomUtils.fromPath(sbomPath("complete_sbom.json"));
         Config runtimeConfig = createRuntimeConfig(buildId);
 
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
+                .withConfig(SbomUtils.toJsonNode(runtimeConfig))
+                .withId("AASSBB")
+                .withBuildId(buildId)
+                .withStatus(SbomGenerationStatus.FINISHED)
+                .build();
+
         // Not setting rootPurl, as it will be set by PrePersist
         Sbom sbom = new Sbom();
         sbom.setBuildId(buildId);
         sbom.setId("416640206274228224");
         sbom.setSbom(SbomUtils.toJsonNode(bom));
-        sbom.setConfig(SbomUtils.toJsonNode(runtimeConfig));
+        sbom.setGenerationRequest(generationRequest);
         return sbom;
     }
 
@@ -160,10 +169,20 @@ public class TestSbomRepository {
         Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
 
         assertEquals("416640206274228224", sbom.getId());
-        assertEquals("ARYT3LBXDVYAC", sbom.getConfig().getBuildId());
+        assertEquals("ARYT3LBXDVYAC", sbom.getGenerationRequest().getConfiguration().getBuildId());
 
-        GeneratorConfig generatorConfig = sbom.getConfig().getProducts().iterator().next().getGenerator();
-        List<ProcessorConfig> processorConfigs = sbom.getConfig().getProducts().iterator().next().getProcessors();
+        GeneratorConfig generatorConfig = sbom.getGenerationRequest()
+                .getConfiguration()
+                .getProducts()
+                .iterator()
+                .next()
+                .getGenerator();
+        List<ProcessorConfig> processorConfigs = sbom.getGenerationRequest()
+                .getConfiguration()
+                .getProducts()
+                .iterator()
+                .next()
+                .getProcessors();
         assertEquals(GeneratorType.MAVEN_CYCLONEDX, generatorConfig.getType());
         assertEquals("--include-non-managed --warn-on-missing-scm", generatorConfig.getArgs());
         assertEquals("0.0.90", generatorConfig.getVersion());
@@ -190,13 +209,21 @@ public class TestSbomRepository {
 
     @Test
     public void testDeleteSboms() throws Exception {
-
         String buildId = "ACACACACACAC";
+        Config runtimeConfig = createRuntimeConfig(buildId);
 
-        Sbom parentSBOM = createSBOM();
-        parentSBOM.setId("13");
-        parentSBOM.setBuildId(buildId);
-        parentSBOM = sbomRepository.saveSbom(parentSBOM);
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
+                .withConfig(SbomUtils.toJsonNode(runtimeConfig))
+                .withId("AASSBBDD")
+                .withBuildId(buildId)
+                .withStatus(SbomGenerationStatus.FINISHED)
+                .build();
+
+        Sbom sbom = createSBOM();
+        sbom.setId("13");
+        sbom.setBuildId(buildId);
+        sbom.setGenerationRequest(generationRequest);
+        sbom = sbomRepository.saveSbom(sbom);
 
         String rsqlQuery = "buildId=eq=" + buildId;
         List<Sbom> sbomsAfterInsert = sbomRepository.searchByQuery(0, 10, rsqlQuery);
