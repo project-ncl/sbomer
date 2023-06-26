@@ -8,6 +8,7 @@
     "jsonBody": {
       "content": [
         {
+          "id": "123",
           "artifactQuality": "NEW",
           "build": null,
           "buildCategory": "STANDARD",

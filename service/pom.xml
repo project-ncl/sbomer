@@ -33,10 +33,14 @@
   </parent>
 
   <groupId>org.jboss.sbomer</groupId>
-  <artifactId>sbomer-service</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <artifactId>sbomer-service</artifactId>
 
   <dependencies>
+    <dependency>
+      <groupId>io.quarkiverse.operatorsdk</groupId>
+      <artifactId>quarkus-operator-sdk</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.jboss.sbomer</groupId>
       <artifactId>sbomer-core</artifactId>
@@ -87,6 +91,10 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-scheduler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-logging-json</artifactId>
     </dependency>
     <dependency>
       <groupId>org.amqphub.quarkus</groupId>
@@ -162,6 +170,11 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

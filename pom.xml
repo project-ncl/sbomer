@@ -68,11 +68,18 @@
         <quarkus.qpid.jms.version>${quarkus.platform.version}</quarkus.qpid.jms.version>
         <quarkus-test-artemis-version>2.0.3</quarkus-test-artemis-version>
         <quarkus-logging-json.version>3.0.0</quarkus-logging-json.version>
-
+        <quarkus-operator-sdk-version>5.1.4</quarkus-operator-sdk-version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.quarkiverse.operatorsdk</groupId>
+                <artifactId>quarkus-operator-sdk-bom</artifactId>
+                <version>${quarkus-operator-sdk-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
@@ -86,7 +93,7 @@
                 <version>${quarkus.qpid.jms.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-              </dependency>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -200,6 +207,7 @@
                         <exclude>.license-header.txt</exclude>
                         <exclude>.sdkmanrc</exclude>
                         <exclude>.dockerignore</exclude>
+                        <exclude>**/banner.txt</exclude>
                         <exclude>**/README</exclude>
                         <exclude>**/LICENSE.txt</exclude>
                         <exclude>**/Dockerfile**</exclude>
@@ -210,6 +218,7 @@
                         <exclude>.m2/**</exclude>
                         <exclude>mvnw**</exclude>
                         <exclude>**/secret*.txt</exclude>
+                        <exclude>**/src/test/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

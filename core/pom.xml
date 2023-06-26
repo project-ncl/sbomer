@@ -43,26 +43,16 @@
       <version>${version.commons-cli}</version>
     </dependency>
     <dependency>
-      <groupId>io.quarkiverse.loggingjson</groupId>
-      <artifactId>quarkus-logging-json</artifactId>
-      <version>${quarkus-logging-json.version}</version>
-    </dependency>
-    <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-arc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-config-yaml</artifactId>
+      <artifactId>quarkus-hibernate-validator</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-bootstrap-app-model</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.pnc</groupId>
-      <artifactId>common</artifactId>
-      <version>${version.pnc-rest}</version>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.pnc</groupId>
@@ -70,14 +60,13 @@
       <version>${version.pnc-rest}</version>
     </dependency>
     <dependency>
-      <groupId>org.jboss.pnc</groupId>
-      <artifactId>pnc-api</artifactId>
-      <version>${version.pnc-api}</version>
-    </dependency>
-    <dependency>
       <groupId>org.cyclonedx</groupId>
       <artifactId>cyclonedx-core-java</artifactId>
       <version>${version.cyclonedx}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-json-schema</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -95,13 +84,8 @@
       <version>${version.lombok}</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock</artifactId>
-      <version>3.0.0-beta-7</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>

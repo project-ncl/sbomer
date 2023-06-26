@@ -22,4 +22,4 @@ set -e
 
 # Starts the opinionated Minikube 'sbomer' profile.
 
-exec minikube start -p sbomer
+exec minikube start --kubernetes-version=v1.24.12 -p sbomer

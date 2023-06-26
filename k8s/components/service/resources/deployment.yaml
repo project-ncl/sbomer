@@ -38,6 +38,8 @@ spec:
           name: sbomer
           imagePullPolicy: IfNotPresent
           env:
+            - name: SBOMER_SBOM_DIR
+              value: "/data"
             - name: QUARKUS_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -63,5 +65,10 @@ spec:
             - containerPort: 8080
               name: http
               protocol: TCP
-          volumeMounts: []
-      volumes: []
+          volumeMounts:
+            - mountPath: /data
+              name: sbomer-sboms
+      volumes:
+        - name: sbomer-sboms
+          persistentVolumeClaim:
+            claimName: sbomer-sboms

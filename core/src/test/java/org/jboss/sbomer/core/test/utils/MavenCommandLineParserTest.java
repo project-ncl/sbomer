@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.core.test.utils;
 
+import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.core.utils.maven.MavenCommandLineParser;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;

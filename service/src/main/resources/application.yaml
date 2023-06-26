@@ -17,9 +17,25 @@
 #
 
 quarkus:
+  banner:
+    path: banner.txt
+
+  log:
+    level: INFO
+    category:
+      "org.jboss.sbomer":
+        level: DEBUG
+      # "io.javaoperatorsdk.operator":
+      #   level: DEBUG
+      "com.github.tennaito.rsql":
+        level: WARN
+    console:
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+
   swagger-ui:
     always-include: true
     path: /api
+
   datasource:
     db-kind: postgresql
   smallrye-openapi:
@@ -29,15 +45,7 @@ quarkus:
       generation: update
   qpid-jms:
     url: "${UMB_BROKER_URL}"
-  log:
-    level: INFO
-    category:
-      "org.jboss.sbomer":
-        level: DEBUG
-      "com.github.tennaito.rsql":
-        level: WARN
-    console:
-      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+
   oidc:
     connection-delay: 30S
     connection-retry-count: 10
@@ -45,9 +53,16 @@ quarkus:
     tls:
       verification: none
 
+  operator-sdk:
+    crd:
+      generate-all: false
+      generate: false
+      apply: false
+      validate: false
+
 sbomer:
-  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
-  # See documentation about features and feature flags
+  images:
+    generator: localhost/sbomer-generator:latest
   features:
     umb:
       enabled: true
@@ -60,37 +75,32 @@ sbomer:
         topic: "${PRODUCER_TOPIC}"
         retries: 15
         max-back-off: 30
-    taskruns:
-      cleanup-successful: true
-      retries:
-        enabled: true
-        max-retries: 10
 
-  generation:
-    enabled: true
-    default-generator: cyclonedx
-    generators:
-      domino:
-        default-version: "0.0.89"
-        default-args: "--include-non-managed"
-      cyclonedx:
-        default-version: "2.7.8"
-        default-args: "--batch-mode --no-transfer-progress --quiet"
+  sbom:
+    sbom-dir: "${SBOMER_SBOM_DIR}"
 
-  processing:
-    enabled: true
-    auto-process: true
-    # List of default processors that will be run on every generated SBOM
-    default-processors:
-      - name: "default"
-      - name: "redhat-product"
+  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
+  # generation:
+  #   enabled: true
+  #   default-generator: maven-cyclonedx
+  #   generators:
+  #     maven-domino:
+  #       default-version: "0.0.90"
+  #       default-args: "--include-non-managed --warn-on-missing-scm"
+  #     maven-cyclonedx:
+  #       default-version: "2.7.9"
+  #       default-args: "--batch-mode"
+
+  # processing:
+  #   enabled: true
+  #   auto-process: true
+  #   # List of default processors that will be run on every generated SBOM
+  #   default-processors:
+  #     - name: "default"
+  #     - name: "redhat-product"
 
 "%dev":
   quarkus:
-    devservices:
-      enabled: false
-    # class-loading:
-    #  parent-first-artifacts: io.quarkus:quarkus-bootstrap-maven-resolver
     datasource:
       username: username
       password: password
@@ -107,10 +117,16 @@ sbomer:
       url: amqp://localhost:5672
       username: ""
       password: ""
+
     log:
-      json:
-        console:
-          enable: false
+      level: INFO
+      category:
+        "io.quarkus.kubernetes":
+          level: DEBUG
+        "org.jboss.sbomer":
+          level: DEBUG
+      console:
+        json: false
     oidc:
       enabled: false
 
@@ -126,8 +142,6 @@ sbomer:
 
 "%test":
   quarkus:
-    devservices:
-      enabled: false
     datasource:
       db-kind: h2
       jdbc:
@@ -139,14 +153,23 @@ sbomer:
       url: amqp://localhost:5672
       username: ""
       password: ""
+
+    log:
+      level: INFO
+      category:
+        "org.jboss.sbomer":
+          level: DEBUG
+      console:
+        json: false
     oidc:
       enabled: false
-    log:
-      json:
-        console:
-          enable: false
+
+    operator-sdk:
+      start-operator: false
 
   sbomer:
+    sbom:
+      sbom-dir: "/tmp/sbomer"
     api-url: "http://localhost:8080/api/v1alpha1/"
     features:
       umb:

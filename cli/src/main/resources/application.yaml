@@ -16,20 +16,15 @@
 # limitations under the License.
 #
 
-microprofile:
-  rest:
-    client:
-      disable:
-        default:
-          mapper: true
-
 quarkus:
   banner:
     enabled: false
 
   rest-client:
-    "sbomer":
-      url: "${SBOMER_SERVICE_URL:http://localhost:8080}"
+    # "sbomer":
+    #   url: "${SBOMER_SERVICE_URL:http://localhost:8080}"
+    "gerrit":
+      url: "https://code.engineering.redhat.com"
 
   log:
     level: INFO
@@ -38,6 +33,31 @@ quarkus:
         level: DEBUG
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+      stderr: true
+
+sbomer:
+  pnc:
+    api-url: "${SBOMER_CACHE_SERVICE_URL:${PNC_SERVICE_HOST:orch.psi.redhat.com}}"
+    product-mapping:
+      environment: "${SBOMER_PRODUCT_MAPPING_ENV:production}"
+  generation:
+    enabled: true
+    default-generator: maven-cyclonedx
+    generators:
+      maven-domino:
+        default-version: "0.0.90"
+        default-args: "--include-non-managed --warn-on-missing-scm"
+      maven-cyclonedx:
+        default-version: "2.7.9"
+        default-args: "--batch-mode"
+
+  processing:
+    enabled: true
+    auto-process: true
+    # List of default processors that will be run on every generated SBOM
+    default-processors:
+      - name: "default"
+      - name: "redhat-product"
 
 "%dev":
   quarkus:
@@ -48,10 +68,12 @@ quarkus:
           level: DEBUG
         "org.jboss.sbomer":
           level: DEBUG
-      json:
-        console:
-          enable: false
+      console:
+        json: false
 
+  sbomer:
+    pnc:
+      api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
 
 "%test":
   quarkus:
@@ -60,6 +82,9 @@ quarkus:
       category:
         "org.jboss.sbomer":
           level: DEBUG
-      json:
-        console:
-          enable: false
+      console:
+        json: false
+
+  sbomer:
+    pnc:
+      api-url: "localhost/pnc/orch"

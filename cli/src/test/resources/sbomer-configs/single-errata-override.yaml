@@ -1,0 +1,10 @@
+# Single product with errata configuration override.
+# Default configuration for the generator will be used.
+apiVersion: sbomer.jboss.org/v1alpha1
+products:
+  - processors:
+      - type: redhat-product
+        errata:
+          productName: "RHBQ"
+          productVersion: "RHEL-8-RHBQ-2.13"
+          productVariant: "8Base-RHBQ-2.13"
