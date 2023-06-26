@@ -140,6 +140,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                                 .build())
                 .endMetadata()
                 .withNewSpec()
+                .withServiceAccountName("sbomer-sa")
                 .withParams(
                         new ParamBuilder().withName(PARAM_COMMAND_CONFIG_NAME).withNewValue(configStr).build(),
                         new ParamBuilder().withName(PARAM_COMMAND_INDEX_NAME)

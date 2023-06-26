@@ -85,6 +85,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                 .endMetadata()
 
                 .withNewSpec()
+                .withServiceAccountName("sbomer-sa")
                 .withParams(
                         new ParamBuilder().withName(PARAM_BUILD_ID_NAME)
                                 .withNewValue(generationRequest.getBuildId())
