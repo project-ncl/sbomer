@@ -49,11 +49,13 @@ BEGIN transaction;
       creation_time timestamp without time zone NOT NULL,
       sbom jsonb NULL,     
       status_msg text NULL,
+      generationrequest_id character varying(50),
       CONSTRAINT sbom_pkey_ PRIMARY KEY (id)
     );
 
     CREATE INDEX idx_sbom_buildid ON sbom (build_id);
     CREATE INDEX idx_sbom_rootpurl ON sbom (root_purl);
+    CREATE INDEX idx_sbom_generationrequest ON sbom (generationrequest_id);
 
     CREATE TABLE sbom_generation_request (
       id character varying(50) NOT NULL,
@@ -66,7 +68,7 @@ BEGIN transaction;
     CREATE INDEX idx_request_buildid ON sbom_generation_request (build_id);
     CREATE INDEX idx_request_status ON sbom_generation_request (status);
 
-
+    ALTER TABLE sbom ADD CONSTRAINT fk_sbom_generationrequest FOREIGN KEY (generationrequest_id) REFERENCES sbom_generation_request(id);
 
     INSERT INTO db_version(version, creation_time) VALUES ('00004', now());
 
