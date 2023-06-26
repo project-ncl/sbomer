@@ -47,8 +47,7 @@ BEGIN transaction;
       build_id character varying(50) NOT NULL,
       root_purl character varying(255) NULL,
       creation_time timestamp without time zone NOT NULL,
-      sbom jsonb NULL,
-      config jsonb NULL,
+      sbom jsonb NULL,     
       status_msg text NULL,
       CONSTRAINT sbom_pkey_ PRIMARY KEY (id)
     );
@@ -59,6 +58,7 @@ BEGIN transaction;
     CREATE TABLE sbom_generation_request (
       id character varying(50) NOT NULL,
       build_id character varying(50) NOT NULL,
+      config jsonb NULL,
       status character varying(20) NOT NULL,
       CONSTRAINT sbom_generation_request_pkey PRIMARY KEY (id)
     );

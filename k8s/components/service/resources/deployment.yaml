@@ -38,7 +38,7 @@ spec:
           name: sbomer
           imagePullPolicy: IfNotPresent
           env:
-            - name: SBOMER_SBOM_SBOM_DIR
+            - name: SBOMER_SBOM_DIR
               value: "/data"
             - name: QUARKUS_DATASOURCE_USERNAME
               valueFrom:
