@@ -34,18 +34,20 @@ patches:
       name: sbomer
     patch: |-
       - op: add
+        path: /spec/template/metadata/annotations/-
+        value:
+          name: environment
+          value: stage
+      - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
           name: KEYSTORE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: nonprod-pnc-sbomer.password
+          value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/nonprod-pnc-sbomer.password)"
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
           name: JAVA_TOOL_OPTIONS
-          value: "-Djavax.net.ssl.keyStore=/mnt/secrets-sbomer/nonprod-pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12 -XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap-dump.hprof -XX:OnOutOfMemoryError='python /mnt/thread-heap-dump-script/thread_heap_dump_email.py'"
+          value: "-Djavax.net.ssl.keyStore=/mnt/secrets/nonprod-pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12 -XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap-dump.hprof -XX:OnOutOfMemoryError='python /mnt/thread-heap-dump-script/thread_heap_dump_email.py'"
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
@@ -65,14 +67,6 @@ patches:
           limits:
             cpu: 1000m
             memory: 2000Mi
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: QUARKUS_OIDC_AUTH_SERVER_URL
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: auth-server-url.txt
 
   - target:
       kind: Route

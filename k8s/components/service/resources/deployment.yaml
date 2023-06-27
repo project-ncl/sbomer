@@ -31,8 +31,11 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/component: "service"
+      annotations:
+        sbomer-secrets: sbomer-secrets
     spec:
       serviceAccountName: sbomer-sa
+      initContainers: []
       containers:
         - image: sbomer-service
           name: sbomer

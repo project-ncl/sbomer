@@ -31,7 +31,6 @@ patchesStrategicMerge:
   - patches/sa.yaml
 resources:
   - resources/route.yaml
-  - resources/pvc.yaml
 patches:
   - target:
       kind: Task
@@ -56,37 +55,56 @@ patches:
       name: sbomer
     patch: |-
       - op: add
-        path: /spec/template/spec/volumes/-
+        path: /spec/template/spec/initContainers/-
         value:
-          name: sbomer-volume-secrets
-          secret:
-            defaultMode: 420
-            secretName: sbomer-secrets
+          image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.0
+          name: get-vault-secrets
+          resources:
+            limits:
+              cpu: 0.2
+              memory: 200Mi
+            requests:
+              cpu: 0.2
+              memory: 200Mi
+          command:
+            - /bin/bash
+          args:
+            - -c
+            - cd /mnt/secrets;
+              pnc-vault-secrets dump $(SBOMER_SECRET_NAME)-$(APP_ENV);
+          env:
+            - name: VAULT_ADDR
+              valueFrom:
+                secretKeyRef:
+                  name: vault-connection-info
+                  key: vault-address
+            - name: VAULT_APP_ROLE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: vault-connection-info
+                  key: vault-app-role-id
+            - name: VAULT_APP_SECRET_ID
+              valueFrom:
+                secretKeyRef:
+                  name: vault-connection-info
+                  key: vault-app-secret-id
+            - name: SBOMER_SECRET_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['sbomer-secret']
+            - name: APP_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['environment']
+          volumeMounts:
+            - name: secrets-workdir
+              mountPath: /mnt/secrets
       - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:
-          name: sbomer-volume-secrets
-          mountPath: /mnt/secrets-sbomer
+          name: secrets-workdir
+          mountPath: /mnt/secrets
           readOnly: true
-      - op: add
-        path: /spec/template/spec/volumes/-
-        value:
-          name: sbomer-certs-volume
-          persistentVolumeClaim:
-            claimName: sbomer-ca-trust-certificate
-      - op: add
-        path: /spec/template/spec/volumes/-
-        value:
-          name: volume-thread-dump
-          persistentVolumeClaim:
-            claimName: pnc-threaddump
-      - op: add
-        path: /spec/template/spec/volumes/-
-        value:
-          name: volume-thread-heap-dump-script
-          configMap:
-            defaultMode: 360
-            name: pnc-thread-heap-dump
       - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:
@@ -110,29 +128,30 @@ patches:
           name: volume-thread-heap-dump-script
           mountPath: /mnt/thread-heap-dump-script
       - op: add
-        path: /spec/template/spec/containers/0/env/-
+        path: /spec/template/spec/volumes/-
         value:
-          name: CONSUMER_TOPIC
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: consumer.topic
+          name: secrets-workdir
+          emptyDir:
+            medium: Memory
       - op: add
-        path: /spec/template/spec/containers/0/env/-
+        path: /spec/template/spec/volumes/-
         value:
-          name: PRODUCER_TOPIC
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: producer.topic
+          name: sbomer-certs-volume
+          persistentVolumeClaim:
+            claimName: sbomer-ca-trust-certificate
       - op: add
-        path: /spec/template/spec/containers/0/env/-
+        path: /spec/template/spec/volumes/-
         value:
-          name: UMB_BROKER_URL
-          valueFrom:
-            secretKeyRef:
-              name: sbomer-secrets
-              key: qpid-jms.url
+          name: volume-thread-dump
+          persistentVolumeClaim:
+            claimName: pnc-threaddump
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: volume-thread-heap-dump-script
+          configMap:
+            defaultMode: 360
+            name: pnc-thread-heap-dump
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
@@ -148,3 +167,39 @@ patches:
         value:
           name: QUARKUS_DATASOURCE_JDBC_MAX_SIZE
           value: "20"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SBOMER_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['sbomer-secret']
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: APP_ENV
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['environment']
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: CONSUMER_TOPIC
+          value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/consumer.topic)"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PRODUCER_TOPIC
+          value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/producer.topic)"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: UMB_BROKER_URL
+          value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/qpid-jms.url)"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: QUARKUS_OIDC_AUTH_SERVER_URL
+          value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/auth-server-url.txt)"
+
+
