@@ -30,6 +30,7 @@ import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.rest.RestUtils;
 
@@ -48,14 +49,28 @@ public class SbomService {
     SbomRepository sbomRepository;
 
     @Inject
+    SbomGenerationRequestRepository sbomRequestRepository;
+
+    @Inject
     Validator validator;
 
-    public List<Sbom> searchByQuery(String rsqlQuery) {
+    public List<Sbom> searchSbomsByQuery(String rsqlQuery) {
         return sbomRepository.searchByQuery(rsqlQuery);
     }
 
-    public Page<Sbom> searchByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery) {
+    public Page<Sbom> searchSbomsByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery) {
         return sbomRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery);
+    }
+
+    public List<SbomGenerationRequest> searchSbomRequestsByQuery(String rsqlQuery) {
+        return sbomRequestRepository.searchByQuery(rsqlQuery);
+    }
+
+    public Page<SbomGenerationRequest> searchSbomRequestsByQueryPaginated(
+            int pageIndex,
+            int pageSize,
+            String rsqlQuery) {
+        return sbomRequestRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery);
     }
 
     /**
@@ -100,32 +115,15 @@ public class SbomService {
     }
 
     /**
-     * Delete the SBOM from the database.
+     * Delete the SBOM Generation Request and all its associated SBOMs from the database.
      *
-     * @param sbomId The {@link Sbom} id to delete from the database.
+     * @param id The {@link SbomGenerationRequest} id to delete from the database.
      */
     @Transactional
-    public void deleteSbom(String sbomId) {
-        log.info("Deleting SBOM: {}", sbomId);
+    public void deleteSbomRequest(String id) {
+        log.info("Deleting SBOM Generation Request: {}", id);
 
-        // Update the SBOM field
-        boolean deleted = sbomRepository.deleteById(sbomId);
-        if (!deleted) {
-            throw new NotFoundException("Could not find SBOM with ID '{}'", sbomId);
-        }
-    }
-
-    /**
-     * Delete the SBOM from the database.
-     *
-     * @param sbomId The {@link Sbom} id to delete from the database.
-     */
-    @Transactional
-    public void deleteSbomWithBuildId(String buildId) {
-        log.info("Deleting SBOMs with buildId: {}", buildId);
-
-        // Update the SBOM field
-        sbomRepository.deleteByBuildId(buildId);
+        sbomRequestRepository.deleteRequest(id);
     }
 
     /**

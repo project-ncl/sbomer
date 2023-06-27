@@ -20,19 +20,33 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
+import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+
+import io.quarkus.panache.common.Parameters;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
-public class SbomRepository extends RSQLBaseRepository<Sbom, String> {
+@Slf4j
+public class SbomGenerationRequestRepository extends RSQLBaseRepository<SbomGenerationRequest, String> {
 
     protected Class getEntityClass() {
-        return Sbom.class;
+        return SbomGenerationRequest.class;
     }
 
     @Transactional
-    public Sbom saveSbom(Sbom sbom) {
-        persistAndFlush(sbom);
-        return sbom;
+    public void deleteRequest(String id) {
+
+        log.info("Deleting SbomGenerationRequest with id: '{}' and all its associated Sboms", id);
+        SbomGenerationRequest request = findById(id);
+        if (request == null) {
+            throw new NotFoundException("Could not find any SBOM generation request with id '{}'", id);
+        }
+
+        Sbom.delete("generationRequest.id = :id", Parameters.with("id", id));
+        SbomGenerationRequest.delete("id = :id", Parameters.with("id", id));
+        flush();
     }
 
 }
