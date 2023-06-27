@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.model;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,6 +26,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.transaction.Transactional;
 
@@ -75,12 +77,16 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @Column(nullable = false, updatable = false)
     private String id;
 
+    @Column(name = "creation_time", nullable = false, updatable = false)
+    private Instant creationTime;
+
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     SbomGenerationStatus status;
 
     @Column(name = "build_id", nullable = false, updatable = false)
     String buildId;
+
     @Type(type = JsonTypes.JSON_BIN)
     @Column(name = "config", columnDefinition = JsonTypes.JSON_BIN)
     @ToString.Exclude
@@ -145,6 +151,11 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                 generationRequest.getMetadata().getName());
 
         return sbomGenerationRequest;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        creationTime = Instant.now();
     }
 
 }
