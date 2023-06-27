@@ -47,10 +47,8 @@ patches:
       name: sbomer
     patch: |-
       - op: add
-        path: /spec/template/metadata/annotations/-
-        value:
-          name: environment
-          value: prod
+        path: /spec/template/metadata/annotations/environment
+        value: prod
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
