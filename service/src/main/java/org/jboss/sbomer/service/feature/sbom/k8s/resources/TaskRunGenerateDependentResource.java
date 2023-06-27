@@ -119,6 +119,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
 
         labels.put(Labels.LABEL_BUILD_ID, generationRequest.getBuildId());
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
+        labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
         String configStr;
 
