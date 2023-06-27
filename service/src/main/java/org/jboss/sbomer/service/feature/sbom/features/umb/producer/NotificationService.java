@@ -25,6 +25,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.findPropertyWi
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.fromJsonNode;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -69,7 +70,7 @@ public class NotificationService {
     @Inject
     GenerationFinishedMessageBodyValidator validator;
 
-    public void notifyCompleted(String sbomId) {
+    public void notifyCompleted(List<org.jboss.sbomer.service.feature.sbom.model.Sbom> sboms) {
 
         if (!umbConfig.isEnabled()) {
             log.info("UMB feature disabled");
@@ -86,31 +87,32 @@ public class NotificationService {
             return;
         }
 
-        org.jboss.sbomer.service.feature.sbom.model.Sbom sbom = sbomRepository.findById(sbomId);
+        sboms.forEach(sbom -> {
+            org.cyclonedx.model.Bom bom = fromJsonNode(sbom.getSbom());
 
-        if (sbom == null) {
-            log.warn("Could not find SBOM id '{}', skipping sending UMB notification", sbomId);
-            return;
-        }
+            if (bom == null) {
+                log.warn(
+                        "Could not find a valid bom for SBOM id '{}', skipping sending UMB notification",
+                        sbom.getId());
+                return;
+            }
 
-        org.cyclonedx.model.Bom bom = fromJsonNode(sbom.getSbom());
-        if (bom == null) {
-            log.warn("Could not find a valid bom for SBOM id '{}', skipping sending UMB notification", sbom.getId());
-            return;
-        }
+            Component component = bom.getMetadata().getComponent();
 
-        Component component = bom.getMetadata().getComponent();
-        if (component == null) {
-            log.warn(
-                    "Could not find root metadata component for SBOM id '{}', skipping sending UMB notification",
-                    sbom.getId());
-            return;
-        }
+            if (component == null) {
+                log.warn(
+                        "Could not find root metadata component for SBOM id '{}', skipping sending UMB notification",
+                        sbom.getId());
+                return;
+            }
 
-        GenerationFinishedMessageBody msg = createGenerationFinishedMessage(sbom, bom);
-        if (validator.validate(msg).isValid()) {
-            messageProducer.sendToTopic(msg);
-        }
+            GenerationFinishedMessageBody msg = createGenerationFinishedMessage(sbom, bom);
+
+            if (validator.validate(msg).isValid()) {
+                messageProducer.sendToTopic(msg);
+            }
+        });
+
     }
 
     private GenerationFinishedMessageBody createGenerationFinishedMessage(
