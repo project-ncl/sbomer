@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j
-public class RSQLBaseRepository<T extends PanacheEntityBase, ID> implements PanacheRepositoryBase<T, ID> {
+public abstract class RSQLBaseRepository<T extends PanacheEntityBase, ID> implements PanacheRepositoryBase<T, ID> {
 
     @Inject
     RSQLProducer<T> rsqlProducer;
@@ -91,8 +91,6 @@ public class RSQLBaseRepository<T extends PanacheEntityBase, ID> implements Pana
         return getEntityManager().createQuery(query).getSingleResult();
     }
 
-    protected Class<T> getEntityClass() {
-        throw new IllegalStateException("Unable to determine the entity class.");
-    }
+    protected abstract Class<T> getEntityClass();
 
 }
