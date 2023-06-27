@@ -53,7 +53,7 @@ patches:
         path: /spec/template/spec/containers/0/env/-
         value:
           name: KEYSTORE_PASSWORD
-          value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer.password)"
+          value: '$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer.password)'
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:

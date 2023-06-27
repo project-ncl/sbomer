@@ -27,18 +27,10 @@ spec:
         - name: sbomer
           env:
             - name: QUARKUS_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: sbomer-secrets
-                  key: datasource.user
+              value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.user)"
+              valueFrom: null
             - name: QUARKUS_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: sbomer-secrets
-                  key: datasource.password
+              value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.password)"
+              valueFrom: null
             - name: QUARKUS_DATASOURCE_JDBC_URL
-              value: null
-              valueFrom:
-                secretKeyRef:
-                  name: sbomer-secrets
-                  key: datasource.connection
+              value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.connection)"
