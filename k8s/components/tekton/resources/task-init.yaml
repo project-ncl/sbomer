@@ -26,7 +26,7 @@ spec:
       type: string
       description: "PNC build identifier"
   steps:
-    - name: init
+    - name: generate
       image: sbomer-generator
       imagePullPolicy: IfNotPresent
       resources:
@@ -57,9 +57,8 @@ spec:
 
         set -e
         set -x
-        set -o pipefail
 
-        exec /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v sbom auto generate-config --build-id "$(params.build-id)" --format yaml | tee "$(results.config.path)"
+        exec /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v sbom auto generate-config --build-id "$(params.build-id)" --format yaml --target "$(results.config.path)"
   results:
     - name: "config"
       description: "Runtime configuration"

@@ -27,6 +27,8 @@ public interface GenerationRequestFluent<A extends GenerationRequestFluent<A>> e
 
     public A withStatus(SbomGenerationStatus status);
 
+    public A withReason(String reason);
+
     public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata(String buildId);
 
 }

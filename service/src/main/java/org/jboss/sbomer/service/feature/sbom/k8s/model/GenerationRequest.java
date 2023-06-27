@@ -62,6 +62,7 @@ public class GenerationRequest extends ConfigMap {
     public static final String KEY_ID = "id";
     public static final String KEY_BUILD_ID = "build-id";
     public static final String KEY_STATUS = "status";
+    public static final String KEY_REASON = "reason";
     public static final String KEY_CONFIG = "config";
 
     public GenerationRequest() {
@@ -105,6 +106,15 @@ public class GenerationRequest extends ConfigMap {
         getData().put(KEY_CONFIG, config);
     }
 
+    @JsonIgnore
+    public String getReason() {
+        return getData().get(KEY_REASON);
+    }
+
+    public void setReason(String reason) {
+        getData().put(KEY_REASON, reason);
+    }
+
     public SbomGenerationStatus getStatus() {
         String statusStr = getData().get(KEY_STATUS);
 
@@ -125,4 +135,8 @@ public class GenerationRequest extends ConfigMap {
         return this.getMetadata().getName() + "-" + phase.ordinal() + "-" + phase.name().toLowerCase();
     }
 
+    @JsonIgnore
+    public String getName() {
+        return getMetadata().getName();
+    }
 }

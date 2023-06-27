@@ -154,7 +154,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         }
 
         if (isFinished(initTaskRun)) {
-            if (isSuccessfull(initTaskRun)) {
+            if (isSuccessful(initTaskRun)) {
                 generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
                 setConfig(generationRequest, initTaskRun);
             } else {
@@ -182,11 +182,38 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         TaskRun initTaskRun = initTaskRun(secondaryResources);
 
         if (isFinished(initTaskRun)) {
-            if (isSuccessfull(initTaskRun)) {
+            if (isSuccessful(initTaskRun)) {
                 generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
                 setConfig(generationRequest, initTaskRun);
             } else {
+                StringBuilder sb = new StringBuilder("Configuration initialization failed. ");
+
+                if (initTaskRun.getStatus() != null && initTaskRun.getStatus().getSteps() != null
+                        && !initTaskRun.getStatus().getSteps().isEmpty()
+                        && initTaskRun.getStatus().getSteps().get(0).getTerminated() != null) {
+
+                    // At this point the config generation failed, let's try to provide more info on the failure
+                    switch (initTaskRun.getStatus().getSteps().get(0).getTerminated().getExitCode()) {
+                        case 2:
+                            sb.append("Configuration validation failed. ");
+                            break;
+                        case 3:
+                            sb.append("Could not find configuration. ");
+                            break;
+                        default:
+                            sb.append("Unexpected error occurred. ");
+                            break;
+                    }
+                } else {
+                    sb.append("System failure. ");
+                }
+
+                String reason = sb.append("See logs for more information.").toString();
+
+                log.warn("GenerationRequest '{}' failed. {}", generationRequest.getName(), reason);
+
                 generationRequest.setStatus(SbomGenerationStatus.FAILED);
+                generationRequest.setReason(reason);
             }
         } else {
             return UpdateControl.noUpdate();
@@ -232,13 +259,13 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         Set<TaskRun> generateTaskRuns = generateTaskRuns(secondaryResources);
 
         for (TaskRun taskRun : generateTaskRuns) {
-            Boolean successfull = isSuccessfull(taskRun);
+            Boolean successful = isSuccessful(taskRun);
 
-            if (Objects.isNull(successfull)) {
+            if (Objects.isNull(successful)) {
                 return UpdateControl.noUpdate();
             }
 
-            if (Objects.equals(successfull, false)) {
+            if (Objects.equals(successful, false)) {
                 generationRequest.setStatus(SbomGenerationStatus.FAILED);
                 return UpdateControl.updateResource(generationRequest);
             }
@@ -333,7 +360,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
      * @return {@code true} if the {@link TaskRun} finished successfully, {@code false} otherwise or {@code null} in
      *         case it is still in progress.
      */
-    private Boolean isSuccessfull(TaskRun taskRun) {
+    private Boolean isSuccessful(TaskRun taskRun) {
         if (!isFinished(taskRun)) {
             log.trace("TaskRun '{}' still in progress", taskRun.getMetadata().getName());
             return null;
