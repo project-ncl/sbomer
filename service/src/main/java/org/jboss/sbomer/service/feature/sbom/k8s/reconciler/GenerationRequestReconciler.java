@@ -39,6 +39,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -123,6 +124,9 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
     @Inject
     KubernetesClient kubernetesClient;
+
+    @Inject
+    NotificationService notificationService;
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
@@ -240,7 +244,8 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             }
         }
 
-        storeSbom(generationRequest);
+        List<Sbom> sboms = storeSboms(generationRequest);
+        notificationService.notifyCompleted(sboms);
 
         generationRequest.setStatus(SbomGenerationStatus.FINISHED);
         return UpdateControl.updateResource(generationRequest);
@@ -435,7 +440,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         return action;
     }
 
-    private void storeSbom(GenerationRequest generationRequest) {
+    private List<Sbom> storeSboms(GenerationRequest generationRequest) {
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
 
         log.info(
@@ -443,6 +448,8 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
                 generationRequest.getMetadata().getName());
 
         Config config = SbomUtils.fromJsonConfig(sbomGenerationRequest.getConfig());
+
+        List<Sbom> sboms = new ArrayList<>();
 
         for (int i = 0; i < config.getProducts().size(); i++) {
             log.info("Reading SBOM for index '{}'", i);
@@ -466,8 +473,10 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
                     .build();
 
             // And store it in the database
-            sbomRepository.saveSbom(sbom);
+            sboms.add(sbomRepository.saveSbom(sbom));
         }
+
+        return sboms;
     }
 
     private Config setConfig(GenerationRequest generationRequest, TaskRun taskRun) {
