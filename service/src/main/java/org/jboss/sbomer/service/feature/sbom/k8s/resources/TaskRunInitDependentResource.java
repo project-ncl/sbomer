@@ -71,6 +71,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
 
         labels.put(Labels.LABEL_BUILD_ID, generationRequest.getBuildId());
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.INIT.name().toLowerCase());
+        labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())

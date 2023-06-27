@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class Labels {
     public static final String LABEL_PHASE = "sbomer.jboss.org/phase";
     public static final String LABEL_BUILD_ID = "sbomer.jboss.org/build-id";
+    public static final String LABEL_GENERATION_REQUEST_ID = "sbomer.jboss.org/generation-request-id";
     public static final String LABEL_SELECTOR = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request";
 
     public static Map<String, String> defaultLabelsToMap() {
