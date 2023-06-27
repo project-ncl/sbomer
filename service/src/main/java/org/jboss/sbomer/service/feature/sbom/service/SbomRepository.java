@@ -17,99 +17,16 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
-import java.util.Collections;
-import java.util.List;
-
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
 
-import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.rest.Page;
-import org.jboss.sbomer.service.feature.sbom.rest.rsql.RSQLProducer;
-
-import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
-import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
-@Slf4j
-public class SbomRepository implements PanacheRepositoryBase<Sbom, String> {
+public class SbomRepository extends RSQLBaseRepository<Sbom, String> {
 
-    @Inject
-    RSQLProducer<Sbom> rsqlProducer;
-
-    public Page<Sbom> searchByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery) {
-        log.debug(
-                "Getting list of all base SBOMS with pageIndex: {}, pageSize: {}, rsqlQuery: {}",
-                pageIndex,
-                pageSize,
-                rsqlQuery);
-
-        List<Sbom> content = searchByQuery(pageIndex, pageSize, rsqlQuery);
-        Long totalHits = countByQuery(rsqlQuery);
-
-        log.debug("Found content: {}, totalHits: {}", content, totalHits);
-
-        int totalPages = 0;
-
-        if (totalHits == 0) {
-            totalPages = 1; // a single page of zero results
-        } else {
-            totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
-        }
-
-        return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, content);
-    }
-
-    public List<Sbom> searchByQuery(String rsqlQuery) {
-
-        CriteriaQuery<Sbom> query = rsqlProducer.getCriteriaQuery(Sbom.class, rsqlQuery);
-        List<Sbom> resultList = getEntityManager().createQuery(query).getResultList();
-        if (resultList == null || resultList.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return resultList;
-    }
-
-    public List<Sbom> searchByQuery(int pageIndex, int pageSize, String rsqlQuery) {
-
-        CriteriaQuery<Sbom> query = rsqlProducer.getCriteriaQuery(Sbom.class, rsqlQuery);
-        List<Sbom> resultList = getEntityManager().createQuery(query)
-                .setFirstResult(pageIndex * pageSize)
-                .setMaxResults(pageSize)
-                .getResultList();
-        if (resultList == null || resultList.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return resultList;
-    }
-
-    public Long countByQuery(String rsqlQuery) {
-
-        CriteriaQuery<Long> query = rsqlProducer.getCountCriteriaQuery(Sbom.class, rsqlQuery);
-        return getEntityManager().createQuery(query).getSingleResult();
-    }
-
-    // TODO: probably not needed now
-    @Transactional
-    public void deleteByBuildId(String buildId) {
-
-        // Do not delete SBOMs which are being processed
-        String query = "FROM Sbom WHERE buildId = :buildId";
-        List<Sbom> sboms = getEntityManager().createQuery(query, Sbom.class)
-                .setParameter("buildId", buildId)
-                .getResultList();
-
-        if (sboms == null) {
-            throw new NotFoundException("Could not find any final SBOM with buildId '{}'", buildId);
-        }
-
-        sboms.stream().forEach(s -> {
-            getEntityManager().remove(s);
-            getEntityManager().flush();
-        });
+    protected Class getEntityClass() {
+        return Sbom.class;
     }
 
     @Transactional

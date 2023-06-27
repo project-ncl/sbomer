@@ -19,28 +19,22 @@ package org.jboss.sbomer.service.test.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.cyclonedx.model.Bom;
-import org.cyclonedx.model.Component;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ErrataConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
@@ -48,25 +42,33 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.Page;
+import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
-import io.quarkus.logging.Log;
+import io.quarkus.panache.common.Parameters;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 
 @ApplicationScoped
 @QuarkusTransactionalTest
 @WithKubernetesTestServer
-public class TestSbomRepository {
+public class TestSbomGenerationRequestRepository {
 
     @Inject
     Validator validator;
 
     @Inject
     SbomRepository sbomRepository;
+
+    @Inject
+    SbomGenerationRequestRepository sbomGenerationRequestRepository;
+
+    final static String REQUEST_ID = "FFAASSBB";
+    final static String BUILD_ID = "RRYT3LBXDVYAC";
+
+    final static String REQUEST_ID_2_DELETE = "FFAASSBBDD";
+    final static String BUILD_ID_2_DELETE = "RRYT3LBXDVYACDD";
 
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "sboms", fileName);
@@ -101,20 +103,19 @@ public class TestSbomRepository {
     }
 
     private Sbom createSBOM() throws IOException {
-        String buildId = "ARYT3LBXDVYAC";
         Bom bom = SbomUtils.fromPath(sbomPath("complete_sbom.json"));
-        Config runtimeConfig = createRuntimeConfig(buildId);
+        Config runtimeConfig = createRuntimeConfig(BUILD_ID);
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withConfig(SbomUtils.toJsonNode(runtimeConfig))
-                .withId("AASSBB")
-                .withBuildId(buildId)
+                .withId(REQUEST_ID)
+                .withBuildId(BUILD_ID)
                 .withStatus(SbomGenerationStatus.FINISHED)
                 .build();
 
         // Not setting rootPurl, as it will be set by PrePersist
         Sbom sbom = new Sbom();
-        sbom.setBuildId(buildId);
+        sbom.setBuildId(BUILD_ID);
         sbom.setId("416640206274228224");
         sbom.setSbom(SbomUtils.toJsonNode(bom));
         sbom.setGenerationRequest(generationRequest);
@@ -128,83 +129,80 @@ public class TestSbomRepository {
     }
 
     @Test
-    public void testNonNullRootComponents() {
-        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
+    public void testRSQL() {
+        SbomGenerationRequest request = sbomGenerationRequestRepository.searchByQuery(0, 1, "buildId=eq=" + BUILD_ID)
+                .get(0);
 
-        assertNotNull(sbom.getRootPurl());
-        assertEquals(
-                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
-                sbom.getRootPurl());
+        assertNotNull(request);
+        assertNotNull(request.getCreationTime());
+        assertEquals(REQUEST_ID, request.getId());
+        assertEquals(BUILD_ID, request.getBuildId());
+
+        request = sbomGenerationRequestRepository.searchByQuery(0, 1, "buildId=eq=" + BUILD_ID).get(0);
+
+        assertNotNull(request);
+        assertEquals(REQUEST_ID, request.getId());
+        assertEquals(BUILD_ID, request.getBuildId());
+        assertEquals("FINISHED".toLowerCase(), request.getStatus().toName());
     }
 
     @Test
-    public void testValidBom() throws JsonProcessingException, JsonMappingException {
-        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
-        Bom bom = sbom.getCycloneDxBom();
+    public void testPagination() {
+        Page<SbomGenerationRequest> pagedRequest = sbomGenerationRequestRepository
+                .searchByQueryPaginated(0, 10, "buildId=eq=" + BUILD_ID);
 
-        assertEquals("416640206274228224", sbom.getId());
-        assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
-        assertEquals("CycloneDX", bom.getBomFormat());
-        Component firstComponent = bom.getComponents().get(0);
-        assertEquals("microprofile-graphql-spec", firstComponent.getName());
-        assertEquals(
-                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",
-                firstComponent.getPurl());
-
-        Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
-        if (!violations.isEmpty()) {
-            Log.error(
-                    "violations: " + violations.stream()
-                            .map(e -> e.getMessage().toString())
-                            .collect(Collectors.joining("\n\t")));
-            fail("Validation errors on the baseSBOM entity should be empty!");
-        }
+        assertNotNull(pagedRequest);
+        assertEquals(0, pagedRequest.getPageIndex());
+        assertEquals(10, pagedRequest.getPageSize());
+        assertEquals(1, pagedRequest.getTotalHits());
+        assertEquals(1, pagedRequest.getTotalPages());
+        assertEquals(1, pagedRequest.getContent().size());
+        SbomGenerationRequest request = pagedRequest.getContent().iterator().next();
+        assertNotNull(request.getCreationTime());
+        assertEquals(REQUEST_ID, request.getId());
+        assertEquals(BUILD_ID, request.getBuildId());
     }
 
     @Test
-    public void testValidConfiguration() throws JsonProcessingException, JsonMappingException {
-        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
+    public void testFindByIdSbomGenerationRequest() {
+        SbomGenerationRequest request = SbomGenerationRequest.findById(REQUEST_ID);
 
-        assertEquals("416640206274228224", sbom.getId());
-        assertEquals("ARYT3LBXDVYAC", sbom.getGenerationRequest().getConfiguration().getBuildId());
-
-        GeneratorConfig generatorConfig = sbom.getGenerationRequest()
-                .getConfiguration()
-                .getProducts()
-                .iterator()
-                .next()
-                .getGenerator();
-        List<ProcessorConfig> processorConfigs = sbom.getGenerationRequest()
-                .getConfiguration()
-                .getProducts()
-                .iterator()
-                .next()
-                .getProcessors();
-        assertEquals(GeneratorType.MAVEN_CYCLONEDX, generatorConfig.getType());
-        assertEquals("--include-non-managed --warn-on-missing-scm", generatorConfig.getArgs());
-        assertEquals("0.0.90", generatorConfig.getVersion());
-
-        assertEquals(2, processorConfigs.size());
-
-        DefaultProcessorConfig defaultProcessorConfig = (DefaultProcessorConfig) processorConfigs.get(0);
-        assertEquals(List.of("default"), defaultProcessorConfig.toCommand());
-
-        RedHatProductProcessorConfig redHatProductProcessorConfig = (RedHatProductProcessorConfig) processorConfigs
-                .get(1);
-        assertEquals("CCCDDD", redHatProductProcessorConfig.getErrata().getProductName());
-        assertEquals("CCDD", redHatProductProcessorConfig.getErrata().getProductVersion());
-        assertEquals("CD", redHatProductProcessorConfig.getErrata().getProductVariant());
+        assertEquals(REQUEST_ID, request.getId());
+        assertEquals(BUILD_ID, request.getBuildId());
     }
 
     @Test
-    public void testFindByIdSbom() {
-        Sbom sbom = sbomRepository.findById("416640206274228224");
+    public void testDeleteSbomGenerationRequest() throws Exception {
+        Config runtimeConfig = createRuntimeConfig(BUILD_ID_2_DELETE);
 
-        assertEquals("416640206274228224", sbom.getId());
-        assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
+                .withConfig(SbomUtils.toJsonNode(runtimeConfig))
+                .withId(REQUEST_ID_2_DELETE)
+                .withBuildId(BUILD_ID_2_DELETE)
+                .withStatus(SbomGenerationStatus.FINISHED)
+                .build();
+
+        Sbom sbom = createSBOM();
+        sbom.setId("13");
+        sbom.setBuildId(BUILD_ID_2_DELETE);
+        sbom.setGenerationRequest(generationRequest);
+        sbom = sbomRepository.saveSbom(sbom);
+
+        String rsqlQuery = "generationRequest.id=eq=" + REQUEST_ID_2_DELETE;
+        List<Sbom> sbomsAfterInsert = sbomRepository.searchByQuery(0, 10, rsqlQuery);
+        assertEquals(1, sbomsAfterInsert.size());
+
+        long beforeDeletion = SbomGenerationRequest.count("id = :id", Parameters.with("id", REQUEST_ID_2_DELETE));
+        assertEquals(1, beforeDeletion);
+
+        sbomGenerationRequestRepository.deleteRequest(REQUEST_ID_2_DELETE);
+
+        List<Sbom> sbomsAfterDelete = sbomRepository.searchByQuery(0, 10, rsqlQuery);
+        assertEquals(0, sbomsAfterDelete.size());
+
+        long afterDeletion = SbomGenerationRequest.count("id = :id", Parameters.with("id", REQUEST_ID_2_DELETE));
+        assertEquals(0, afterDeletion);
+
     }
 
 }

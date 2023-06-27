@@ -45,13 +45,13 @@ public class SBOMResourceTest {
 
     @Test
     public void testExistenceOfSbomsEndpoint() {
-        Mockito.when(sbomService.searchByQueryPaginated(0, 50, null)).thenReturn(new Page<>());
+        Mockito.when(sbomService.searchSbomsByQueryPaginated(0, 50, null)).thenReturn(new Page<>());
         given().when().get("/api/v1alpha1/sboms").then().statusCode(200);
     }
 
     @Test
     public void testListSbomsPageParams() {
-        Mockito.when(sbomService.searchByQueryPaginated(1, 20, null)).thenReturn(new Page<>());
+        Mockito.when(sbomService.searchSbomsByQueryPaginated(1, 20, null)).thenReturn(new Page<>());
         given().when().get("/api/v1alpha1/sboms?pageIndex=1&pageSize=20").then().statusCode(200);
     }
 
