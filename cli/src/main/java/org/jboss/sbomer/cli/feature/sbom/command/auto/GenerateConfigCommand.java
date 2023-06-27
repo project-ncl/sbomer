@@ -129,6 +129,12 @@ public class GenerateConfigCommand implements Callable<Integer> {
         log.debug("Attempting to fetch configuration from source code repository");
 
         Build build = pncService.getBuild(buildId);
+
+        if (build == null) {
+            log.warn("Could not retrieve PNC build '{}'", buildId);
+            return null;
+        }
+
         Config config = configReader.getConfig(build);
 
         if (config == null) {
