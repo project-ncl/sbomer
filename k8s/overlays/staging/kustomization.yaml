@@ -94,7 +94,7 @@ patches:
         path: /spec/template/spec/containers/0/env/-
         value:
           name: JAVA_TOOL_OPTIONS
-          value: "-Djavax.net.ssl.keyStore=/mnt/secrets/nonprod-pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12 -XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap-dump.hprof -XX:OnOutOfMemoryError='python /mnt/thread-heap-dump-script/thread_heap_dump_email.py'"
+          value: "-Djavax.net.ssl.keyStore=/mnt/secrets/sbomer-secrets-stage/nonprod-pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$(KEYSTORE_PASSWORD) -Djavax.net.ssl.keyStoreType=PKCS12 -XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap-dump.hprof -XX:OnOutOfMemoryError='python /mnt/thread-heap-dump-script/thread_heap_dump_email.py'"
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
