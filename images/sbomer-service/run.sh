@@ -17,12 +17,15 @@
 # limitations under the License.
 #
 
-
-set -x
 set -e
 
+if [ "${SCRIPT_DEBUG}" = "true" ] ; then
+    set -x
+    log_info "Script debugging is enabled, allowing bash commands and their arguments to be printed as they are executed"
+fi
+
 if [ -f "/mnt/secrets/env.sh" ]; then
-    cp /mnt/secrets/env.sh /deployments/run-env.sh
+    source /mnt/secrets/env.sh
 fi
 
 exec /usr/local/s2i/run
