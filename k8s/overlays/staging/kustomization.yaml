@@ -60,8 +60,6 @@ patches:
               echo "export QUARKUS_DATASOURCE_PASSWORD=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.password)\"" >> /mnt/secrets/env.sh;
               echo "export QUARKUS_DATASOURCE_JDBC_URL=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.connection)\"" >> /mnt/secrets/env.sh;
               echo "export KEYSTORE_PASSWORD=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/nonprod-pnc-sbomer.password)\"" >> /mnt/secrets/env.sh;
-              cat /mnt/secrets/env.sh;
-              ls -la /mnt/secrets/;
           env:
             - name: VAULT_ADDR
               valueFrom:
