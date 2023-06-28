@@ -44,7 +44,7 @@ quarkus:
     database:
       generation: update
   qpid-jms:
-    url: "${env.UMB_BROKER_URL}"
+    url: "${UMB_BROKER_URL}"
 
   oidc:
     connection-delay: 30S
@@ -68,11 +68,11 @@ sbomer:
       enabled: true
       consumer:
         enabled: true
-        topic: "${env.CONSUMER_TOPIC}"
+        topic: "${CONSUMER_TOPIC}"
         trigger: product
       producer:
         enabled: true
-        topic: "${env.PRODUCER_TOPIC}"
+        topic: "${PRODUCER_TOPIC}"
         retries: 15
         max-back-off: 30
 
