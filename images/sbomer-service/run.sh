@@ -28,7 +28,6 @@ if [ -f "/mnt/secrets/env.sh" ]; then
     source /mnt/secrets/env.sh
 fi
 
-KEYSTORE_PASSWORD="$(cat /mnt/secrets/$SBOMER_SECRET_NAME-$APP_ENV/$APP_ENV-pnc-sbomer.password)"
-export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.keyStore=/mnt/secrets/$SBOMER_SECRET_NAME-$APP_ENV/$APP_ENV-pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=$KEYSTORE_PASSWORD -Djavax.net.ssl.keyStoreType=PKCS12 -XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap-dump.hprof -XX:OnOutOfMemoryError='python /mnt/thread-heap-dump-script/thread_heap_dump_email.py'"
+export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.keyStore=/mnt/secrets/$SBOMER_SECRET_NAME-$APP_ENV/$APP_ENV-pnc-sbomer.pkcs12 -Djavax.net.ssl.keyStorePassword=\"$KEYSTORE_PASSWORD\" -Djavax.net.ssl.keyStoreType=PKCS12 -XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap-dump.hprof -XX:OnOutOfMemoryError='python /mnt/thread-heap-dump-script/thread_heap_dump_email.py'"
 
 exec /usr/local/s2i/run
