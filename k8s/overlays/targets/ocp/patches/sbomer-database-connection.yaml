@@ -27,10 +27,8 @@ spec:
         - name: sbomer
           env:
             - name: QUARKUS_DATASOURCE_USERNAME
-              value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.user)"
-              valueFrom: null
+              $patch: delete
             - name: QUARKUS_DATASOURCE_PASSWORD
-              value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.password)"
-              valueFrom: null
+              $patch: delete
             - name: QUARKUS_DATASOURCE_JDBC_URL
-              value: "$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.connection)"
+              $patch: delete
