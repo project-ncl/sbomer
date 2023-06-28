@@ -21,7 +21,7 @@ set -e
 
 if [ "${SCRIPT_DEBUG}" = "true" ] ; then
     set -x
-    log_info "Script debugging is enabled, allowing bash commands and their arguments to be printed as they are executed"
+    echo "Script debugging is enabled"
 fi
 
 if [ -f "/mnt/secrets/env.sh" ]; then
