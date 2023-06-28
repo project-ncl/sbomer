@@ -75,7 +75,7 @@
 #   accessed directly. (example: "foo.example.com,bar.example.com")
 #
 ###
-FROM registry.access.redhat.com/ubi8/openjdk-17:1.15
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.16
 
 ENV LANGUAGE='en_US:en'
 
@@ -88,7 +88,8 @@ COPY --chown=185 service/target/quarkus-app/quarkus/ /deployments/quarkus/
 
 # Source the file containing additional environment variables, if it exists
 RUN if [ -f /mnt/secrets/env.sh ]; then \
-      /bin/bash /mnt/secrets/env.sh; \
+      . /mnt/secrets/env.sh; \
+      printenv;
     fi
 
 EXPOSE 8080
