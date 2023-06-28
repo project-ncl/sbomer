@@ -64,14 +64,14 @@ patches:
             - -c
             - cd /mnt/secrets;
               pnc-vault-secrets dump $(SBOMER_SECRET_NAME)-$(APP_ENV);
-              echo 'export CONSUMER_TOPIC=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/consumer.topic)' >> /mnt/secrets/env.sh;
-              echo 'export PRODUCER_TOPIC=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/producer.topic)' >> /mnt/secrets/env.sh;
-              echo 'export UMB_BROKER_URL=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/qpid-jms.url)' >> /mnt/secrets/env.sh;
-              echo 'export QUARKUS_OIDC_AUTH_SERVER_URL=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/auth-server-url.txt)' >> /mnt/secrets/env.sh;
-              echo 'export QUARKUS_DATASOURCE_USERNAME=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.user)' >> /mnt/secrets/env.sh;
-              echo 'export QUARKUS_DATASOURCE_PASSWORD=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.password)' >> /mnt/secrets/env.sh;
-              echo 'export QUARKUS_DATASOURCE_JDBC_URL=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.connection)' >> /mnt/secrets/env.sh;
-              echo 'export KEYSTORE_PASSWORD=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer.password)' >> /mnt/secrets/env.sh;
+              echo "export CONSUMER_TOPIC=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/consumer.topic)" >> /mnt/secrets/env.sh;
+              echo "export PRODUCER_TOPIC=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/producer.topic)" >> /mnt/secrets/env.sh;
+              echo "export UMB_BROKER_URL=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/qpid-jms.url)" >> /mnt/secrets/env.sh;
+              echo "export QUARKUS_OIDC_AUTH_SERVER_URL=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/auth-server-url.txt)" >> /mnt/secrets/env.sh;
+              echo "export QUARKUS_DATASOURCE_USERNAME=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.user)" >> /mnt/secrets/env.sh;
+              echo "export QUARKUS_DATASOURCE_PASSWORD=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.password)" >> /mnt/secrets/env.sh;
+              echo "export QUARKUS_DATASOURCE_JDBC_URL=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.connection)" >> /mnt/secrets/env.sh;
+              echo "export KEYSTORE_PASSWORD=$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer.password)" >> /mnt/secrets/env.sh;
           env:
             - name: VAULT_ADDR
               valueFrom:
