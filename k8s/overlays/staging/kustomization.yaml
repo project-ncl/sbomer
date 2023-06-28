@@ -92,6 +92,9 @@ patches:
         path: /spec/template/metadata/annotations/environment
         value: stage
       - op: add
+        path: /spec/template/metadata/annotations/sbomer-secret
+        value: sbomer-secrets
+      - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
           name: SBOMER_PRODUCT_MAPPING_ENV
