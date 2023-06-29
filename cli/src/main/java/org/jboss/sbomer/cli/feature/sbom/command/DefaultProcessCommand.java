@@ -22,6 +22,7 @@ import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRON
 
 import java.util.Optional;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
@@ -44,6 +45,7 @@ import picocli.CommandLine.ParentCommand;
         mixinStandardHelpOptions = true,
         name = "default",
         description = "Process the SBOM with enrichments applied to known CycloneDX fields")
+@ApplicationScoped
 public class DefaultProcessCommand extends AbstractProcessCommand {
 
     @ParentCommand
