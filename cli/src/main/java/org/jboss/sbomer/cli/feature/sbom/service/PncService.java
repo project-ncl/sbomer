@@ -187,7 +187,7 @@ public class PncService {
      * @param purl
      * @return The {@link Artifact} object or {@code null} if it cannot be found.
      */
-    public Artifact getArtifact(String purl, Optional<String> sha256) {
+    public Artifact getArtifact(String buildId, String purl, Optional<String> sha256) {
         log.debug(
                 "Fetching artifact from PNC for purl '{}' and sha256 '{}'",
                 purl,
@@ -196,8 +196,8 @@ public class PncService {
         try {
             // Fetch all artifacts via purl (always available)
             String artifactQuery = "purl==\"" + purl + "\"";
-            RemoteCollection<Artifact> artifacts = artifactClient
-                    .getAll(null, null, null, Optional.empty(), Optional.of(artifactQuery));
+            RemoteCollection<Artifact> artifacts = buildClient
+                    .getDependencyArtifacts(buildId, Optional.empty(), Optional.of(artifactQuery));
             if (artifacts.size() == 0) {
                 log.debug("Artifact with purl '{}' was not found in PNC", purl);
                 return null;

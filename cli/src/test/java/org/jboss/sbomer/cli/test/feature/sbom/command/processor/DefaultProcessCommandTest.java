@@ -20,6 +20,9 @@ package org.jboss.sbomer.cli.test.feature.sbom.command.processor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +40,10 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.sbomer.cli.feature.sbom.command.AbstractMavenGenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.DefaultProcessCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.GenerateCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.ProcessCommand;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -50,12 +56,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @QuarkusTest
 public class DefaultProcessCommandTest {
-    @Inject
+    @InjectSpy
     DefaultProcessCommand command;
 
     @Inject
@@ -133,11 +140,12 @@ public class DefaultProcessCommandTest {
 
             Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
             String sha = sha256.isPresent() ? sha256.get() : null;
-            Mockito.when(pncService.getArtifact(purl, sha256)).thenReturn(generateArtifact(purl, sha));
+            Mockito.when(pncService.getArtifact("BBVVCC", purl, sha256)).thenReturn(generateArtifact(purl, sha));
         }
 
-        Bom bom = command.doProcess(SbomUtils.fromJsonNode(generateBom())); // ,
-                                                                            // SbomUtils.fromJsonNode(sbom.getSbom()));
+        stubBuildId();
+
+        Bom bom = command.doProcess(SbomUtils.fromJsonNode(generateBom()));
 
         for (String purl : componentPurls) {
             Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(purl, bom);
@@ -183,7 +191,7 @@ public class DefaultProcessCommandTest {
                 "98b67e15e3fe39e4f8721bdcfda99f19e570426d8960f73f8d5fe1414ff2fab3" };
 
         for (int i = 0; i < 3; i++) {
-            Mockito.when(pncService.getArtifact(componentPurls[i], Optional.of(sha256s[i])))
+            Mockito.when(pncService.getArtifact("BBVVCC", componentPurls[i], Optional.of(sha256s[i])))
                     .thenReturn(generateArtifact(componentPurls[i], sha256s[i]));
         }
 
@@ -200,9 +208,12 @@ public class DefaultProcessCommandTest {
 
         Mockito.when(
                 pncService.getArtifact(
+                        "BBVVCC",
                         specialPurl,
                         Optional.of("122dd093db60b5fafcb428b28569aa72993e2a2c63d3d87b7dcc076bdebd8a71")))
                 .thenReturn(artifact);
+
+        stubBuildId();
 
         Bom bom = command.doProcess(SbomUtils.fromJsonNode(generateBom()));
 
@@ -228,5 +239,18 @@ public class DefaultProcessCommandTest {
         assertEquals("https://builds.apache.org/", systems.get(0));
 
         assertEquals(0, getExternalReferences(component, ExternalReference.Type.BUILD_META).size());
+    }
+
+    private void stubBuildId() {
+        // OMG!
+        GenerateCommand mockGenerateCommand = mock(GenerateCommand.class);
+        when(mockGenerateCommand.getBuildId()).thenReturn("BBVVCC");
+        AbstractMavenGenerateCommand mockAbstractMavenGenerateCommand = mock(AbstractMavenGenerateCommand.class);
+
+        when(mockAbstractMavenGenerateCommand.getParent()).thenReturn(mockGenerateCommand);
+        ProcessCommand mockProcessCommand = mock(ProcessCommand.class);
+        when(mockProcessCommand.getParent()).thenReturn(mockAbstractMavenGenerateCommand);
+
+        doReturn(mockProcessCommand).when(command).getParent();
     }
 }

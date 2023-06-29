@@ -22,6 +22,7 @@ import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRON
 
 import java.util.Optional;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.cyclonedx.model.Bom;
@@ -44,6 +45,7 @@ import picocli.CommandLine.ParentCommand;
         mixinStandardHelpOptions = true,
         name = "default",
         description = "Process the SBOM with enrichments applied to known CycloneDX fields")
+@ApplicationScoped
 public class DefaultProcessCommand extends AbstractProcessCommand {
 
     @ParentCommand
@@ -70,7 +72,8 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         SbomUtils.addMrrc(component);
 
         Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
-        Artifact artifact = pncService.getArtifact(component.getPurl(), sha256);
+        Artifact artifact = pncService
+                .getArtifact(getParent().getParent().getParent().getBuildId(), component.getPurl(), sha256);
 
         if (artifact == null) {
             log.warn(

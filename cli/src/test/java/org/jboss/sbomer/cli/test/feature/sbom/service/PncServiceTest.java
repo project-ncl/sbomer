@@ -47,6 +47,7 @@ public class PncServiceTest {
     void testFetchArtifact() throws Exception {
         log.info("testFetchArtifact ...");
         Artifact fromPNC = service.getArtifact(
+                "AA",
                 "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@1.0.0.Final-redhat-1?type=jar",
                 Optional.empty());
         assertNotNull(fromPNC);
@@ -55,7 +56,7 @@ public class PncServiceTest {
 
     @Test
     void testFetchNonExistingArtifact() throws Exception {
-        assertNull(service.getArtifact("purlnonexisting", Optional.empty()));
+        assertNull(service.getArtifact("AA", "purlnonexisting", Optional.empty()));
     }
 
     @Test
@@ -77,7 +78,7 @@ public class PncServiceTest {
         log.info("testFetchDuplicatedArtifact ...");
         String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
         try {
-            service.getArtifact(purl, Optional.empty());
+            service.getArtifact("AA", purl, Optional.empty());
         } catch (IllegalStateException ise) {
             assertEquals(
                     "No sha256 was provided, and there should exist only one artifact with purl " + purl,
@@ -90,7 +91,7 @@ public class PncServiceTest {
         log.info("testFetchDuplicatedArtifactMatchingSha256 ...");
         String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
         String sha256 = "cccc";
-        Artifact fromPNC = service.getArtifact(purl, Optional.of(sha256));
+        Artifact fromPNC = service.getArtifact("AA", purl, Optional.of(sha256));
         assertNotNull(fromPNC);
         assertEquals("412123", fromPNC.getId());
     }
@@ -101,7 +102,7 @@ public class PncServiceTest {
         String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
         String sha256 = "xxxx";
         try {
-            service.getArtifact(purl, Optional.of(sha256));
+            service.getArtifact("AA", purl, Optional.of(sha256));
         } catch (IllegalStateException ise) {
             assertEquals("No matching artifact found with purl " + purl + " and sha256 " + sha256, ise.getMessage());
         }

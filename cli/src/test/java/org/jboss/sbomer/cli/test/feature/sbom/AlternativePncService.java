@@ -61,7 +61,7 @@ public class AlternativePncService extends PncService {
     }
 
     @Override
-    public Artifact getArtifact(String purl, Optional<String> sha256) {
+    public Artifact getArtifact(String buildId, String purl, Optional<String> sha256) {
         return Artifact.builder()
                 .id("AA1122")
                 .md5("md5")
