@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -48,6 +49,7 @@ import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -56,20 +58,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
-import io.quarkus.test.junit.mockito.InjectSpy;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @QuarkusTest
 public class DefaultProcessCommandTest {
-    @InjectSpy
-    DefaultProcessCommand command;
-
     @Inject
     ObjectMapper objectMapper;
 
     @InjectMock
     PncService pncService;
+
+    @Inject
+    DefaultProcessCommand command;
 
     private JsonNode generateBom() throws IOException {
         String bomJson = TestResources.asString("boms/valid.json");
@@ -143,9 +144,10 @@ public class DefaultProcessCommandTest {
             Mockito.when(pncService.getArtifact("BBVVCC", purl, sha256)).thenReturn(generateArtifact(purl, sha));
         }
 
-        stubBuildId();
+        DefaultProcessCommand spiedCommand = spy(command);
+        stubBuildId(spiedCommand);
 
-        Bom bom = command.doProcess(SbomUtils.fromJsonNode(generateBom()));
+        Bom bom = spiedCommand.doProcess(SbomUtils.fromJsonNode(generateBom()));
 
         for (String purl : componentPurls) {
             Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(purl, bom);
@@ -213,9 +215,10 @@ public class DefaultProcessCommandTest {
                         Optional.of("122dd093db60b5fafcb428b28569aa72993e2a2c63d3d87b7dcc076bdebd8a71")))
                 .thenReturn(artifact);
 
-        stubBuildId();
+        DefaultProcessCommand spiedCommand = spy(command);
+        stubBuildId(spiedCommand);
 
-        Bom bom = command.doProcess(SbomUtils.fromJsonNode(generateBom()));
+        Bom bom = spiedCommand.doProcess(SbomUtils.fromJsonNode(generateBom()));
 
         Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(specialPurl, bom);
         assertTrue(componentOpt.isPresent());
@@ -241,7 +244,7 @@ public class DefaultProcessCommandTest {
         assertEquals(0, getExternalReferences(component, ExternalReference.Type.BUILD_META).size());
     }
 
-    private void stubBuildId() {
+    private void stubBuildId(DefaultProcessCommand command) {
         // OMG!
         GenerateCommand mockGenerateCommand = mock(GenerateCommand.class);
         when(mockGenerateCommand.getBuildId()).thenReturn("BBVVCC");
