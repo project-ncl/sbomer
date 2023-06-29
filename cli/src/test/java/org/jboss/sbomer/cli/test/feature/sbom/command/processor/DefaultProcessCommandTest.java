@@ -56,15 +56,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
-import io.quarkus.test.junit.mockito.InjectSpy;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @QuarkusTest
 public class DefaultProcessCommandTest {
-    @InjectSpy
-    DefaultProcessCommand command;
-
     @Inject
     ObjectMapper objectMapper;
 
@@ -115,7 +111,7 @@ public class DefaultProcessCommandTest {
     @Test
     void shouldReturnCorrectImplementationType() {
         log.info("test: shouldReturnCorrectImplementationType");
-        assertEquals(ProcessorType.DEFAULT, command.getImplementationType());
+        assertEquals(ProcessorType.DEFAULT, new DefaultProcessCommand().getImplementationType());
     }
 
     @Test
@@ -143,7 +139,9 @@ public class DefaultProcessCommandTest {
             Mockito.when(pncService.getArtifact("BBVVCC", purl, sha256)).thenReturn(generateArtifact(purl, sha));
         }
 
-        stubBuildId();
+        DefaultProcessCommand command = new DefaultProcessCommand();
+
+        stubBuildId(command);
 
         Bom bom = command.doProcess(SbomUtils.fromJsonNode(generateBom()));
 
@@ -213,7 +211,9 @@ public class DefaultProcessCommandTest {
                         Optional.of("122dd093db60b5fafcb428b28569aa72993e2a2c63d3d87b7dcc076bdebd8a71")))
                 .thenReturn(artifact);
 
-        stubBuildId();
+        DefaultProcessCommand command = new DefaultProcessCommand();
+
+        stubBuildId(command);
 
         Bom bom = command.doProcess(SbomUtils.fromJsonNode(generateBom()));
 
@@ -241,7 +241,7 @@ public class DefaultProcessCommandTest {
         assertEquals(0, getExternalReferences(component, ExternalReference.Type.BUILD_META).size());
     }
 
-    private void stubBuildId() {
+    private void stubBuildId(DefaultProcessCommand command) {
         // OMG!
         GenerateCommand mockGenerateCommand = mock(GenerateCommand.class);
         when(mockGenerateCommand.getBuildId()).thenReturn("BBVVCC");
