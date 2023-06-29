@@ -34,6 +34,13 @@ BEGIN transaction;
     ALTER TABLE old_sbom_processors ENABLE TRIGGER ALL;
     ALTER TABLE old_sbom ENABLE TRIGGER ALL;
 
+    ALTER INDEX idx_sbom_buildid RENAME TO idx_oldsbom_buildid;
+    ALTER INDEX idx_sbom_generator RENAME TO idx_oldsbom_generator;
+    ALTER INDEX idx_sbom_rootpurl RENAME TO idx_oldsbom_rootpurl;
+    ALTER INDEX idx_sbom_status RENAME TO idx_oldsbom_status;
+    ALTER INDEX idx_sbom_type RENAME TO idx_oldsbom_type;
+    ALTER INDEX sbom_pkey RENAME TO oldsbom_pkey;
+
 COMMIT;
 
 ----------------------------------------------------------------
