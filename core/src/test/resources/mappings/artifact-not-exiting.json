@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/pnc-rest/v2/artifacts?pageSize=100&pageIndex=0&q=purl%3D%3D%22purlnonexisting%22"
+    "url": "/pnc-rest/v2/builds/ARYT3LBXDVYAC/artifacts/dependencies?pageSize=100&pageIndex=0&q=purl%3D%3D%22purlnonexisting%22"
   },
   "response": {
     "status": 200,

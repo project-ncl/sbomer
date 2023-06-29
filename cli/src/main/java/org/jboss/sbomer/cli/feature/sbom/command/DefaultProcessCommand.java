@@ -70,7 +70,8 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         SbomUtils.addMrrc(component);
 
         Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
-        Artifact artifact = pncService.getArtifact(component.getPurl(), sha256);
+        Artifact artifact = pncService
+                .getArtifact(getParent().getParent().getParent().getBuildId(), component.getPurl(), sha256);
 
         if (artifact == null) {
             log.warn(
