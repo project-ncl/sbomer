@@ -30,6 +30,7 @@ patchesStrategicMerge:
   - patches/service.yaml
   - patches/sa.yaml
 resources:
+  - resources/pvc.yaml
   - resources/route.yaml
 patches:
   - target:
