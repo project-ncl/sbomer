@@ -36,7 +36,7 @@ patches:
       - op: add
         path: /spec/template/spec/initContainers/-
         value:
-          image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.0
+          image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
           name: get-vault-secrets
           resources:
             limits:
