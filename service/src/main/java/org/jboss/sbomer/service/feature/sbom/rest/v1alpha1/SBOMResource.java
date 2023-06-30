@@ -248,11 +248,11 @@ public class SBOMResource {
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
+            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+
             kubernetesClient.configMaps().resource(req).create();
 
             log.debug("GenerationRequest Kubernetes resource '{}' created for build '{}'", req.getId(), buildId);
-
-            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
 
             return Response.status(Status.ACCEPTED).entity(sbomGenerationRequest).build();
         } finally {
