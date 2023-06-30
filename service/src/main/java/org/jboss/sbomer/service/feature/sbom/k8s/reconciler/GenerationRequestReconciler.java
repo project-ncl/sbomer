@@ -266,7 +266,37 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             }
 
             if (Objects.equals(successful, false)) {
+                StringBuilder sb = new StringBuilder("Generation failed. ");
+
+                if (taskRun.getStatus() != null && taskRun.getStatus().getSteps() != null
+                        && !taskRun.getStatus().getSteps().isEmpty()
+                        && taskRun.getStatus().getSteps().get(0).getTerminated() != null) {
+
+                    switch (taskRun.getStatus().getSteps().get(0).getTerminated().getExitCode()) {
+                        case 2:
+                            sb.append("Product configuration failure. ");
+                            break;
+                        case 3:
+                            sb.append("Incorrect product index. ");
+                            break;
+                        case 4:
+                            sb.append("An error occurred while generating the SBOM. ");
+                            break;
+                        default:
+                            sb.append("Unexpected error occurred. ");
+                            break;
+                    }
+                } else {
+                    sb.append("System failure. ");
+                }
+
+                String reason = sb.append("See logs for more information.").toString();
+
+                log.warn("GenerationRequest '{}' failed. {}", generationRequest.getName(), reason);
+
                 generationRequest.setStatus(SbomGenerationStatus.FAILED);
+                generationRequest.setReason(reason);
+
                 return UpdateControl.updateResource(generationRequest);
             }
         }
