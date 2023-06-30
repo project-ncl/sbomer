@@ -26,8 +26,10 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.OptimisticLockException;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.transaction.Transactional;
 
 import org.hibernate.annotations.DynamicUpdate;
@@ -92,6 +94,9 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @ToString.Exclude
     private JsonNode config;
 
+    @Version
+    public Long version;
+
     /**
      * Returns the config {@link Config}.
      *
@@ -113,6 +118,54 @@ public class SbomGenerationRequest extends PanacheEntityBase {
      */
     @Transactional
     public static SbomGenerationRequest sync(GenerationRequest generationRequest) {
+
+        SbomGenerationRequest sbomGenerationRequest = getOrCreateNew(generationRequest);
+
+        int maxRetries = 5;
+        int retryCount = 0;
+
+        while (retryCount < maxRetries) {
+            try {
+                // Store it in the database
+                sbomGenerationRequest.persistAndFlush();
+
+                log.debug(
+                        "SbomGenerationRequest '{}' synced with GenerationRequest '{}'",
+                        sbomGenerationRequest.getId(),
+                        generationRequest.getMetadata().getName());
+
+                // Return if the operation succeeds
+                return sbomGenerationRequest;
+
+            } catch (OptimisticLockException e) {
+
+                log.debug(
+                        "OptimisticLockException encountered for concurrent modification of GenerationRequest {}, attempt {} out of {} done.",
+                        generationRequest,
+                        (retryCount + 1),
+                        maxRetries);
+
+                retryCount++;
+
+                // Wait for a certain period before retrying
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        log.debug(
+                "Reached the maximum number of retries when trying to update GenerationRequest {}, giving up.",
+                generationRequest,
+                (retryCount + 1),
+                maxRetries);
+
+        // Return the latest entity in the DB
+        return SbomGenerationRequest.findById(generationRequest.getId());
+    }
+
+    private static SbomGenerationRequest getOrCreateNew(GenerationRequest generationRequest) {
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.findById(generationRequest.getId());
 
         // Create the entity if it's not there
@@ -141,15 +194,6 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                 throw new ApplicationException("Could not convert configuration to store in the database", e);
             }
         }
-
-        // Store it in the database
-        sbomGenerationRequest.persistAndFlush();
-
-        log.debug(
-                "SbomGenerationRequest '{}' synced with GenerationRequest '{}'",
-                sbomGenerationRequest.getId(),
-                generationRequest.getMetadata().getName());
-
         return sbomGenerationRequest;
     }
 
