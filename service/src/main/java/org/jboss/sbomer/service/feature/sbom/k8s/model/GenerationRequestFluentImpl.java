@@ -30,6 +30,7 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
     private String id;
     private String buildId;
     private SbomGenerationStatus status;
+    private String reason;
 
     @Override
     public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata(String buildId) {
@@ -67,6 +68,16 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
 
     public SbomGenerationStatus getStatus() {
         return status;
+    }
+
+    @Override
+    public A withReason(String reason) {
+        this.reason = reason;
+        return (A) this;
+    }
+
+    public String getReason() {
+        return reason;
     }
 
 }

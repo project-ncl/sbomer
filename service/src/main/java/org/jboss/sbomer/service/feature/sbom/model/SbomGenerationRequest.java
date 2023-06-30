@@ -92,6 +92,9 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @ToString.Exclude
     private JsonNode config;
 
+    @Column(name = "reason", nullable = true, updatable = true)
+    String reason;
+
     /**
      * Returns the config {@link Config}.
      *
@@ -129,6 +132,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
         // Finally sync the SbomGenerationRequest entity with the GenerationRequest.
         sbomGenerationRequest.setStatus(generationRequest.getStatus());
+        // And reason
+        sbomGenerationRequest.setReason(generationRequest.getReason());
 
         // Update config, if available
         if (generationRequest.getConfig() != null) {

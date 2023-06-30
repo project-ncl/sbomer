@@ -153,9 +153,8 @@ public class GenerateConfigCommand implements Callable<Integer> {
         ProductVersionRef productVersion = pncService.getProductVersion(buildId);
 
         if (productVersion == null) {
-            throw new ApplicationException(
-                    "Could not obtain PNC Product Version information for the '{}' PNC build, interrupting processing",
-                    buildId);
+            log.debug("Could not obtain PNC Product Version information for the '{}' PNC build", buildId);
+            return null;
         }
 
         Config config = productVersionMapper.getMapping().get(productVersion.getId());
@@ -214,8 +213,9 @@ public class GenerateConfigCommand implements Callable<Integer> {
     /**
      *
      *
-     * @return {@code 0} in case the config file was generated successfully, {@code 1} in case a general error occurred,
-     *         {@code 2} for user errors (like validation failures)
+     * @return {@code 0} in case the config file was generated successfully, {@code 1} in case a general error occurred
+     *         that is not covered by more specific exit code, {@code 2} when a config validation failure occurred,
+     *         {@code 3} when a base config could not be found
      */
     @Override
     public Integer call() throws Exception {
@@ -223,7 +223,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
         if (config == null) {
             log.error("Could not obtain product configuration for the '{}' build, exiting", buildId);
-            return 1;
+            return 3;
         }
 
         log.debug("RAW config: '{}'", config);
@@ -282,7 +282,6 @@ public class GenerateConfigCommand implements Callable<Integer> {
         }
 
         return 0;
-
     }
 
     /**
