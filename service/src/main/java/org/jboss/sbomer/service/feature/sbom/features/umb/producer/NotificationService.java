@@ -36,6 +36,7 @@ import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.service.feature.sbom.features.umb.UmbConfig;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.GenerationFinishedMessageBodyValidator.ValidationResult;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
@@ -108,8 +109,14 @@ public class NotificationService {
 
             GenerationFinishedMessageBody msg = createGenerationFinishedMessage(sbom, bom);
 
-            if (validator.validate(msg).isValid()) {
+            ValidationResult result = validator.validate(msg);
+            if (result.isValid()) {
+                log.info("GenerationFinishedMessage is valid, sending it to the topic!");
                 messageProducer.sendToTopic(msg);
+            } else {
+                log.warn(
+                        "GenerationFinishedMessage is NOT valid, NOT sending it to the topic! Validation errors: {}",
+                        String.join("; ", result.getErrors()));
             }
         });
 

@@ -199,6 +199,12 @@ public class PncService {
             RemoteCollection<Artifact> artifacts = buildClient
                     .getDependencyArtifacts(buildId, Optional.empty(), Optional.of(artifactQuery));
             if (artifacts.size() == 0) {
+                // If the artifact is not a dependency of the provided buildId, it might be a built artifact from the
+                // buildId
+                artifacts = buildClient.getBuiltArtifacts(buildId, Optional.empty(), Optional.of(artifactQuery));
+            }
+
+            if (artifacts.size() == 0) {
                 log.debug("Artifact with purl '{}' was not found in PNC", purl);
                 return null;
             } else if (artifacts.size() > 1) {
