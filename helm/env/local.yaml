@@ -15,17 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-kind: LabelTransformer
-apiVersion: builtin
-metadata:
-  name: labels
-labels:
-  app.kubernetes.io/managed-by: "pct"
-  app.kubernetes.io/name: "sbomer"
-  app.kubernetes.io/version: "0.0.1"
-fieldSpecs:
-  - path: metadata/labels
-    create: true
-  - path: spec/template/metadata/labels
-  - path: spec/selector/matchLabels
+  
+  image:
+    repository: localhost/sbomer-cache
+    tag: latest
+    pullPolicy: IfNotPresent

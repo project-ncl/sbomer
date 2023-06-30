@@ -16,18 +16,29 @@
 # limitations under the License.
 #
 
-apiVersion: v1
-kind: Service
-metadata:
-  name: sbomer-cache
-  labels:
-    app.kubernetes.io/component: "cache"
-spec:
-  selector:
-    app.kubernetes.io/component: "cache"
-  type: ClusterIP
-  ports:
-    - name: http
-      port: 7070
-      protocol: TCP
-      targetPort: 7070
+# Global configuration
+
+rbac:
+  # Specifies whether RBAC resources should be created
+  create: true
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+
+# Cache component
+cache:
+  # cache.storage is the size of the PVC where the cached data will be stored
+  storage: 5G
+
+  # cache.image is the cache component image
+  image:
+    repository: localhost/sbomer-cache
+    tag: latest
+    pullPolicy: IfNotPresent
+
+

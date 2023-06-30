@@ -19,28 +19,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sbomer-cache
-  labels:
-    app.kubernetes.io/component: "cache"
+  name: {{ .Release.Name }}-cache
+{{ include "sbomer.labels" (list . "cache") | indent 2 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/component: "cache"
+{{ include "sbomer.selector" (list . "cache") | indent 6 }}
   template:
     metadata:
-      labels:
-        app.kubernetes.io/component: "cache"
+{{ include "sbomer.labels" (list . "cache") | indent 6 }}
     spec:
-      serviceAccountName: sbomer-sa
+      serviceAccountName: "{{- template "sbomer.serviceAccountName" }}"
       containers:
-        - image: sbomer-cache
+        - image: {{ .Values.cache.image.repository }}:{{ .Values.cache.image.tag }}
           name: sbomer-cache
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.cache.image.pullPolicy }}
           env:
-            - name: PNC_SERVICE_HOST
+            - name: PNC_SERVICE_HOST # TODO
               value: orch.psi.redhat.com
-            - name: INDY_REPOSITORY_HOST
+            - name: INDY_REPOSITORY_HOST # TODO
               value: indy.psi.redhat.com
           ports:
             - containerPort: 7070
@@ -54,7 +52,6 @@ spec:
           args:
             - -c
             - envsubst '$${PNC_SERVICE_HOST} $${INDY_REPOSITORY_HOST}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
-
       restartPolicy: Always
       volumes:
         - name: sbomer-cache
