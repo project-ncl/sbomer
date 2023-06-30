@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command.auto;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -30,6 +31,8 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +77,12 @@ public class GenerateCommand implements Callable<Integer> {
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
+    /**
+     * @return {@code 0} in case the generation process finished successfully, {@code 1} in case a general error
+     *         occurred that is not covered by more specific exit code, {@code 2} when a problem related to
+     *         configuration file reading or parsing, {@code 3} when the index parameter is incorrect, {@code 4} when
+     *         generation process did not finish successfully
+     */
     @Override
     public Integer call() throws Exception {
 
@@ -90,7 +99,20 @@ public class GenerateCommand implements Callable<Integer> {
         }
 
         // It is able to read both: JSON and YAML config files
-        Config config = objectMapper.readValue(configPath.toAbsolutePath().toFile(), Config.class);
+        Config config;
+
+        try {
+            config = objectMapper.readValue(configPath.toAbsolutePath().toFile(), Config.class);
+        } catch (StreamReadException e) {
+            log.error("Unable to parse the configuration file", e);
+            return 2;
+        } catch (DatabindException e) {
+            log.error("Unable to deserialize the configuration file", e);
+            return 2;
+        } catch (IOException e) {
+            log.error("Unable to read configuration file", e);
+            return 2;
+        }
 
         log.debug("Configuration read successfully: {}", config);
 
@@ -102,7 +124,7 @@ public class GenerateCommand implements Callable<Integer> {
 
             if (index < 0) {
                 log.error("Provided index '{}' is lower than minimal required: 0", index);
-                return 2;
+                return 3;
             }
 
             if (index >= config.getProducts().size()) {
@@ -110,19 +132,29 @@ public class GenerateCommand implements Callable<Integer> {
                         "Provided index '{}' is out of the available range [0-{}]",
                         index,
                         config.getProducts().size() - 1);
-                return 2;
+                return 3;
             }
 
             log.info("Running SBOM generation for product with index '{}'", index);
 
-            generateSbom(config, config.getProducts().get(index), index);
+            try {
+                generateSbom(config, config.getProducts().get(index), index);
+            } catch (ApplicationException e) {
+                log.error("Generation process failed", e);
+                return 4;
+            }
         } else {
             log.debug(
                     "Generating SBOMs for all {} products defined in the runtime configuration",
                     config.getProducts().size());
 
             for (int i = 0; i < config.getProducts().size(); i++) {
-                generateSbom(config, config.getProducts().get(i), i);
+                try {
+                    generateSbom(config, config.getProducts().get(i), i);
+                } catch (ApplicationException e) {
+                    log.error("Generation process failed", e);
+                    return 4;
+                }
             }
         }
 
