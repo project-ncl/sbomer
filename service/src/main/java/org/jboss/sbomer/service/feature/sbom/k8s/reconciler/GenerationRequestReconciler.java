@@ -179,7 +179,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
      *
      * @return
      */
-    protected UpdateControl<GenerationRequest> reconcileInitializing(
+    private UpdateControl<GenerationRequest> reconcileInitializing(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
@@ -256,7 +256,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
      *
      * @return
      */
-    protected UpdateControl<GenerationRequest> reconcileGenerating(
+    private UpdateControl<GenerationRequest> reconcileGenerating(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
@@ -382,7 +382,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         return param.orElse(null);
     }
 
-    protected void storeAndNotify(GenerationRequest generationRequest) {
+    private void storeAndNotify(GenerationRequest generationRequest) {
         List<Sbom> sboms = storeSboms(generationRequest);
         notificationService.notifyCompleted(sboms);
     }
