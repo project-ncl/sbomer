@@ -366,7 +366,8 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
         }
 
-        storeAndNotify(generationRequest);
+        List<Sbom> sboms = storeSboms(generationRequest);
+        notificationService.notifyCompleted(sboms);
 
         generationRequest.setStatus(SbomGenerationStatus.FINISHED);
         return UpdateControl.updateResource(generationRequest);
@@ -380,11 +381,6 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
                 .findFirst();
 
         return param.orElse(null);
-    }
-
-    private void storeAndNotify(GenerationRequest generationRequest) {
-        List<Sbom> sboms = storeSboms(generationRequest);
-        notificationService.notifyCompleted(sboms);
     }
 
     /**
