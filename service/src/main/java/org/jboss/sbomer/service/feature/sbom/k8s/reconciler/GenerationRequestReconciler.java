@@ -23,11 +23,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -57,6 +59,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.tekton.client.TektonClient;
+import io.fabric8.tekton.pipeline.v1beta1.Param;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunResult;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
@@ -175,7 +179,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
      *
      * @return
      */
-    private UpdateControl<GenerationRequest> reconcileInitializing(
+    protected UpdateControl<GenerationRequest> reconcileInitializing(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
@@ -252,21 +256,69 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
      *
      * @return
      */
-    private UpdateControl<GenerationRequest> reconcileGenerating(
+    protected UpdateControl<GenerationRequest> reconcileGenerating(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
+        Config config = generationRequest.toConfig();
+
+        if (config == null) {
+            log.error(
+                    "Product configuration from GenerationRequest '{}' could not be read",
+                    generationRequest.getName());
+            generationRequest.setStatus(SbomGenerationStatus.FAILED);
+            generationRequest.setReason("Could not read product configuration");
+            return UpdateControl.updateResource(generationRequest);
+        }
+
         Set<TaskRun> generateTaskRuns = generateTaskRuns(secondaryResources);
 
-        for (TaskRun taskRun : generateTaskRuns) {
-            Boolean successful = isSuccessful(taskRun);
+        // This should not happen, because if we updated already the status to SbomGenerationStatus.GENERATING, then
+        // there was a TaskRun already. But it could be deleted manually(?). In such case we set the status to FAILED.
+        if (generateTaskRuns.isEmpty()) {
+            log.warn(
+                    "Marking GenerationRequest '{}' as failed: no generation TaskRuns were found, but at least one was expected.",
+                    generationRequest.getName());
 
-            if (Objects.isNull(successful)) {
-                return UpdateControl.noUpdate();
-            }
+            generationRequest.setStatus(SbomGenerationStatus.FAILED);
+            generationRequest.setReason(
+                    "Generation failed. Expected one or more running TaskRun related to generation. None found. See logs for more information.");
+            return UpdateControl.updateResource(generationRequest);
+        }
 
-            if (Objects.equals(successful, false)) {
-                StringBuilder sb = new StringBuilder("Generation failed. ");
+        log.debug(
+                "Found {} TaskRuns related to GenerationRequest '{}'",
+                generateTaskRuns.size(),
+                generationRequest.getName());
+
+        // Check for still running tasks
+        List<TaskRun> stillRunning = generateTaskRuns.stream().filter(tr -> isFinished(tr) == false).toList();
+
+        // If there are tasks that hasn't finished yet, we need to wait.
+        if (!stillRunning.isEmpty()) {
+            log.debug(
+                    "Skipping update of GenerationRequest '{}', because {} TaskRuns are still running: {}",
+                    generationRequest.getName(),
+                    stillRunning.size(),
+                    stillRunning.stream().map(tr -> tr.getMetadata().getName()).toArray());
+            return UpdateControl.noUpdate();
+        }
+
+        // Get list of failed TaskRuns
+        List<TaskRun> failedTaskRuns = generateTaskRuns.stream().filter(tr -> isSuccessful(tr) == false).toList();
+
+        // If there are failed TaskRuns
+        if (!failedTaskRuns.isEmpty()) {
+            StringBuilder sb = new StringBuilder("Generation failed. ");
+
+            for (TaskRun taskRun : failedTaskRuns) {
+                Param productIndexParam = getParamValue(taskRun, "index");
+
+                sb.append("Product with index '")
+                        .append(productIndexParam.getValue().getStringVal())
+                        .append("' (TaskRun '")
+                        .append(taskRun.getMetadata().getName())
+                        .append("') failed: ");
 
                 if (taskRun.getStatus() != null && taskRun.getStatus().getSteps() != null
                         && !taskRun.getStatus().getSteps().isEmpty()
@@ -274,38 +326,65 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
                     switch (taskRun.getStatus().getSteps().get(0).getTerminated().getExitCode()) {
                         case 2:
-                            sb.append("Product configuration failure. ");
+                            sb.append("product configuration failure. ");
                             break;
                         case 3:
-                            sb.append("Incorrect product index. ");
+                            Param param = getParamValue(taskRun, "index");
+
+                            if (param == null) {
+                                sb.append("could not find the 'index' parameter. ");
+                            } else {
+                                sb.append("invalid product index: ")
+                                        .append(productIndexParam.getValue().getStringVal())
+                                        .append(" (should be between 1 and ")
+                                        .append(config.getProducts().size())
+                                        .append("). ");
+                            }
+
                             break;
                         case 4:
-                            sb.append("An error occurred while generating the SBOM. ");
+                            sb.append("an error occurred while generating the SBOM. ");
                             break;
                         default:
-                            sb.append("Unexpected error occurred. ");
+                            sb.append("unexpected error occurred. ");
                             break;
                     }
                 } else {
-                    sb.append("System failure. ");
+                    sb.append("system failure. ");
                 }
 
-                String reason = sb.append("See logs for more information.").toString();
-
-                log.warn("GenerationRequest '{}' failed. {}", generationRequest.getName(), reason);
-
-                generationRequest.setStatus(SbomGenerationStatus.FAILED);
-                generationRequest.setReason(reason);
-
-                return UpdateControl.updateResource(generationRequest);
             }
+
+            String reason = sb.append("See logs for more information.").toString();
+
+            log.warn("Marking GenerationRequest '{}' as failed. Reason: {}", generationRequest.getName(), reason);
+
+            generationRequest.setStatus(SbomGenerationStatus.FAILED);
+            generationRequest.setReason(reason);
+
+            return UpdateControl.updateResource(generationRequest);
+
         }
 
-        List<Sbom> sboms = storeSboms(generationRequest);
-        notificationService.notifyCompleted(sboms);
+        storeAndNotify(generationRequest);
 
         generationRequest.setStatus(SbomGenerationStatus.FINISHED);
         return UpdateControl.updateResource(generationRequest);
+    }
+
+    private Param getParamValue(TaskRun taskRun, String paramName) {
+        Optional<Param> param = taskRun.getSpec()
+                .getParams()
+                .stream()
+                .filter(p -> p.getName().equals(paramName))
+                .findFirst();
+
+        return param.orElse(null);
+    }
+
+    protected void storeAndNotify(GenerationRequest generationRequest) {
+        List<Sbom> sboms = storeSboms(generationRequest);
+        notificationService.notifyCompleted(sboms);
     }
 
     /**
@@ -348,9 +427,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
      * @return The {@link Set} containing {@link TaskRun} or empty set if not found.
      */
     private Set<TaskRun> generateTaskRuns(Set<TaskRun> taskRuns) {
-        Set<TaskRun> generates = new HashSet<>();
-
-        generates.addAll(taskRuns.stream().filter(tr -> {
+        return taskRuns.stream().filter(tr -> {
             if (Objects.equals(
                     tr.getMetadata().getLabels().get(Labels.LABEL_PHASE),
                     SbomGenerationPhase.GENERATE.name().toLowerCase())) {
@@ -358,9 +435,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             }
 
             return false;
-        }).toList());
-
-        return generates;
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -491,14 +566,18 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
         // In case resource gets an update, update th DB entity as well
         if (action.isUpdateResource()) {
-            SbomGenerationRequest.sync(generationRequest);
+            sync(generationRequest);
         }
 
         return action;
     }
 
-    private List<Sbom> storeSboms(GenerationRequest generationRequest) {
-        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
+    protected SbomGenerationRequest sync(GenerationRequest generationRequest) {
+        return SbomGenerationRequest.sync(generationRequest);
+    }
+
+    protected List<Sbom> storeSboms(GenerationRequest generationRequest) {
+        SbomGenerationRequest sbomGenerationRequest = sync(generationRequest);
 
         log.info(
                 "Reading all generated SBOMs for the GenerationRequest '{}'",

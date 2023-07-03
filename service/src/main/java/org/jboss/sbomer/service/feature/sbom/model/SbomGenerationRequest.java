@@ -92,7 +92,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @ToString.Exclude
     private JsonNode config;
 
-    @Column(name = "reason", nullable = true, updatable = true)
+    @Column(name = "reason", nullable = true, updatable = true, length = 1024)
     String reason;
 
     /**

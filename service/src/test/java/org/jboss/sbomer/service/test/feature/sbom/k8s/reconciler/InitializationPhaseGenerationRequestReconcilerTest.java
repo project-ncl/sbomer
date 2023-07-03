@@ -15,22 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.k8s.model;
+package org.jboss.sbomer.service.test.feature.sbom.k8s.reconciler;
 
-import io.fabric8.kubernetes.api.model.ConfigMapFluent;
-
-public interface GenerationRequestFluent<A extends GenerationRequestFluent<A>> extends ConfigMapFluent<A> {
-
-    public A withId(String id);
-
-    public A withBuildId(String buildId);
-
-    public A withStatus(SbomGenerationStatus status);
-
-    public A withReason(String reason);
-
-    public A withConfig(String config);
-
-    public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata(String buildId);
+/**
+ * Class responsible for testing reconciliation workflow for the initialization phase.
+ */
+public class InitializationPhaseGenerationRequestReconcilerTest {
 
 }

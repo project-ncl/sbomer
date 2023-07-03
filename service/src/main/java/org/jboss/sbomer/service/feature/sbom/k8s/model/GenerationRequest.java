@@ -17,8 +17,11 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,6 +31,7 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.model.annotation.Group;
 import io.fabric8.kubernetes.model.annotation.Kind;
 import io.fabric8.kubernetes.model.annotation.Version;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -57,6 +61,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Kind("ConfigMap")
 @Version("v1")
 @Group("")
+@Slf4j
 public class GenerationRequest extends ConfigMap {
 
     public static final String KEY_ID = "id";
@@ -138,5 +143,19 @@ public class GenerationRequest extends ConfigMap {
     @JsonIgnore
     public String getName() {
         return getMetadata().getName();
+    }
+
+    @JsonIgnore
+    public Config toConfig() {
+        if (getConfig() == null) {
+            return null;
+        }
+
+        try {
+            return ObjectMapperProvider.yaml().readValue(getConfig().toString().getBytes(), Config.class);
+        } catch (IOException e) {
+            log.warn(e.getMessage(), e);
+            return null;
+        }
     }
 }
