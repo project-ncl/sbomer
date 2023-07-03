@@ -22,12 +22,12 @@ import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationReq
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -147,24 +147,27 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
     private UpdateControl<GenerationRequest> reconcileNew(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
-        TaskRun initTaskRun = initTaskRun(secondaryResources);
 
-        if (initTaskRun == null) {
-            return UpdateControl.noUpdate();
-        }
-
-        if (isFinished(initTaskRun)) {
-            if (isSuccessful(initTaskRun)) {
-                generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
-                setConfig(generationRequest, initTaskRun);
-            } else {
-                generationRequest.setStatus(SbomGenerationStatus.FAILED);
-            }
-        } else {
-            generationRequest.setStatus(SbomGenerationStatus.INITIALIZING);
-        }
-
-        return UpdateControl.updateResource(generationRequest);
+        return initTaskRun(secondaryResources)
+            .map(initTaskRun -> {
+                    if (isFinished(initTaskRun)) {
+                        isSuccessful(initTaskRun)
+                            .ifPresentOrElse(isSuccessful -> {
+                                    if (isSuccessful) {
+                                        generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
+                                        setConfig(generationRequest, initTaskRun);
+                                    } else {
+                                        generationRequest.setStatus(SbomGenerationStatus.FAILED);
+                                    }
+                                },
+                                () -> new IllegalStateException("Finished task should return non-empty value.")
+                            );
+                    } else {
+                        generationRequest.setStatus(SbomGenerationStatus.INITIALIZING);
+                    }
+                    return UpdateControl.updateResource(generationRequest);
+                })
+            .orElseGet(() -> UpdateControl.noUpdate());
     }
 
     /**
@@ -179,47 +182,53 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
-        TaskRun initTaskRun = initTaskRun(secondaryResources);
+        return initTaskRun(secondaryResources)
+            .map(initTaskRun -> {
+                    if (isFinished(initTaskRun)) {
+                        isSuccessful(initTaskRun)
+                            .ifPresentOrElse(isSuccessful -> {
+                                     if (isSuccessful) {
+                                         generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
+                                         setConfig(generationRequest, initTaskRun);
+                                     } else {
+                                         StringBuilder sb = new StringBuilder("Configuration initialization failed. ");
 
-        if (isFinished(initTaskRun)) {
-            if (isSuccessful(initTaskRun)) {
-                generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
-                setConfig(generationRequest, initTaskRun);
-            } else {
-                StringBuilder sb = new StringBuilder("Configuration initialization failed. ");
+                                         if (initTaskRun.getStatus() != null && initTaskRun.getStatus().getSteps() != null
+                                             && !initTaskRun.getStatus().getSteps().isEmpty()
+                                             && initTaskRun.getStatus().getSteps().get(0).getTerminated() != null) {
 
-                if (initTaskRun.getStatus() != null && initTaskRun.getStatus().getSteps() != null
-                        && !initTaskRun.getStatus().getSteps().isEmpty()
-                        && initTaskRun.getStatus().getSteps().get(0).getTerminated() != null) {
+                                             // At this point the config generation failed, let's try to provide more info on the failure
+                                             switch (initTaskRun.getStatus().getSteps().get(0).getTerminated().getExitCode()) {
+                                                 case 2:
+                                                     sb.append("Configuration validation failed. ");
+                                                     break;
+                                                 case 3:
+                                                     sb.append("Could not find configuration. ");
+                                                     break;
+                                                 default:
+                                                     sb.append("Unexpected error occurred. ");
+                                                     break;
+                                             }
+                                         } else {
+                                             sb.append("System failure. ");
+                                         }
 
-                    // At this point the config generation failed, let's try to provide more info on the failure
-                    switch (initTaskRun.getStatus().getSteps().get(0).getTerminated().getExitCode()) {
-                        case 2:
-                            sb.append("Configuration validation failed. ");
-                            break;
-                        case 3:
-                            sb.append("Could not find configuration. ");
-                            break;
-                        default:
-                            sb.append("Unexpected error occurred. ");
-                            break;
+                                         String reason = sb.append("See logs for more information.").toString();
+
+                                         log.warn("GenerationRequest '{}' failed. {}", generationRequest.getName(), reason);
+
+                                         generationRequest.setStatus(SbomGenerationStatus.FAILED);
+                                         generationRequest.setReason(reason);
+                                     }
+                                 },
+                                 () -> new IllegalStateException("Finished task should return non-empty value.")
+                            );
+                        return UpdateControl.updateResource(generationRequest);
+                    } else {
+                        return UpdateControl.<GenerationRequest>noUpdate();
                     }
-                } else {
-                    sb.append("System failure. ");
-                }
-
-                String reason = sb.append("See logs for more information.").toString();
-
-                log.warn("GenerationRequest '{}' failed. {}", generationRequest.getName(), reason);
-
-                generationRequest.setStatus(SbomGenerationStatus.FAILED);
-                generationRequest.setReason(reason);
-            }
-        } else {
-            return UpdateControl.noUpdate();
-        }
-
-        return UpdateControl.updateResource(generationRequest);
+                })
+            .orElseGet(() -> UpdateControl.noUpdate());
     }
 
     /**
@@ -259,13 +268,13 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         Set<TaskRun> generateTaskRuns = generateTaskRuns(secondaryResources);
 
         for (TaskRun taskRun : generateTaskRuns) {
-            Boolean successful = isSuccessful(taskRun);
+            Optional<Boolean> successful = isSuccessful(taskRun);
 
-            if (Objects.isNull(successful)) {
+            if (successful.isEmpty()) {
                 return UpdateControl.noUpdate();
             }
 
-            if (Objects.equals(successful, false)) {
+            if (Objects.equals(successful.get(), false)) {
                 generationRequest.setStatus(SbomGenerationStatus.FAILED);
                 return UpdateControl.updateResource(generationRequest);
             }
@@ -318,63 +327,54 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
      * @return The {@link Set} containing {@link TaskRun} or empty set if not found.
      */
     private Set<TaskRun> generateTaskRuns(Set<TaskRun> taskRuns) {
-        Set<TaskRun> generates = new HashSet<>();
-
-        generates.addAll(taskRuns.stream().filter(tr -> {
-            if (Objects.equals(
+        return taskRuns
+            .stream()
+            .filter(
+                tr -> Objects.equals(
                     tr.getMetadata().getLabels().get(Labels.LABEL_PHASE),
-                    SbomGenerationPhase.GENERATE.name().toLowerCase())) {
-                return true;
-            }
-
-            return false;
-        }).toList());
-
-        return generates;
+                    SbomGenerationPhase.GENERATE.name().toLowerCase())
+                )
+            .collect(Collectors.toSet());
     }
 
     /**
      * Returns the initialization {@link TaskRun} from the give {@link TaskRun} {@link Set}.
      *
      * @param taskRuns
-     * @return The {@link TaskRun} or {@code null} if not found.
+     * @return The {@code Optional} of {@link TaskRun} or an empty {@code Optional} if not found.
      */
-    private TaskRun initTaskRun(Set<TaskRun> taskRuns) {
-        Optional<TaskRun> taskRun = taskRuns.stream().filter(tr -> {
-            if (Objects.equals(
+    private Optional<TaskRun> initTaskRun(Set<TaskRun> taskRuns) {
+        return taskRuns
+            .stream()
+            .filter(
+                tr -> Objects.equals(
                     tr.getMetadata().getLabels().get(Labels.LABEL_PHASE),
-                    SbomGenerationPhase.INIT.name().toLowerCase())) {
-                return true;
-            }
-
-            return false;
-        }).findFirst();
-
-        return taskRun.orElse(null);
+                    SbomGenerationPhase.INIT.name().toLowerCase()))
+            .findFirst();
     }
 
     /**
      * Checks whether given {@link TaskRun} has finished successfully.
      *
      * @param taskRun The {@link TaskRun} to check
-     * @return {@code true} if the {@link TaskRun} finished successfully, {@code false} otherwise or {@code null} in
+     * @return {@code Optional} of {@code true} if the {@link TaskRun} finished successfully, {@code Optional} of {@code false} otherwise or an empty {@code Optional} in
      *         case it is still in progress.
      */
-    private Boolean isSuccessful(TaskRun taskRun) {
+    private Optional<Boolean> isSuccessful(TaskRun taskRun) {
         if (!isFinished(taskRun)) {
             log.trace("TaskRun '{}' still in progress", taskRun.getMetadata().getName());
-            return null;
+            return Optional.empty();
         }
 
         if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
                 && taskRun.getStatus().getConditions().size() > 0
                 && Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")) {
             log.trace("TaskRun '{}' finished successfully", taskRun.getMetadata().getName());
-            return true;
+            return Optional.of(true);
         }
 
         log.trace("TaskRun '{}' failed", taskRun.getMetadata().getName());
-        return false;
+        return Optional.of(false);
     }
 
     /**
@@ -420,44 +420,19 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         // 2 or more in case the generation is running
         Set<TaskRun> secondaryResources = context.getSecondaryResources(TaskRun.class);
 
-        UpdateControl<GenerationRequest> action = null;
-
         log.debug(
                 "Handling update for GenerationRequest '{}', current status: '{}'",
                 generationRequest.getMetadata().getName(),
                 generationRequest.getStatus());
 
-        switch (generationRequest.getStatus()) {
-            case NEW:
-                action = reconcileNew(generationRequest, secondaryResources);
-                break;
-            case INITIALIZING:
-                action = reconcileInitializing(generationRequest, secondaryResources);
-                break;
-            case INITIALIZED:
-                action = reconcileInitialized(generationRequest, secondaryResources);
-                break;
-            case GENERATING:
-                action = reconcileGenerating(generationRequest, secondaryResources);
-                break;
-            case FINISHED:
-                action = reconcileFinished(generationRequest, secondaryResources);
-                break;
-            case FAILED:
-                action = reconcileFailed(generationRequest, secondaryResources);
-                break;
-            default:
-                break;
-        }
-
-        // This would be unexpected.
-        if (action == null) {
-            log.error(
-                    "Unknown status received: '{}'' for GenerationRequest '{}",
-                    generationRequest.getStatus(),
-                    generationRequest.getMetadata().getName());
-            return UpdateControl.noUpdate();
-        }
+        UpdateControl<GenerationRequest> action = switch (generationRequest.getStatus()) {
+            case NEW -> reconcileNew(generationRequest, secondaryResources);
+            case INITIALIZING -> reconcileInitializing(generationRequest, secondaryResources);
+            case INITIALIZED -> reconcileInitialized(generationRequest, secondaryResources);
+            case GENERATING -> reconcileGenerating(generationRequest, secondaryResources);
+            case FINISHED -> reconcileFinished(generationRequest, secondaryResources);
+            case FAILED -> reconcileFailed(generationRequest, secondaryResources);
+        };
 
         // In case resource gets an update, update th DB entity as well
         if (action.isUpdateResource()) {
