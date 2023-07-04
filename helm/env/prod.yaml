@@ -1,0 +1,6 @@
+env: prod
+
+cache:
+  image:
+    repository: quay.io/rh-newcastle/sbomer-cache
+

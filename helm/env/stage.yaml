@@ -1,0 +1,5 @@
+env: stage
+
+cache:
+  image:
+    repository: quay.io/rh-newcastle-stage/sbomer-cache

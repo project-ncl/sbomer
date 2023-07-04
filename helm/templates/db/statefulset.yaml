@@ -1,0 +1,41 @@
+{{ if eq .Values.env "dev" }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-db
+{{ include "sbomer.labels" (list . "db") | indent 2 }}
+spec:
+  serviceName: {{ .Release.Name }}-db
+  selector:
+    matchLabels:
+{{ include "sbomer.selector" (list . "db") | indent 6 }}
+  template:
+    metadata:
+{{ include "sbomer.labels" (list . "db") | indent 6 }}
+    spec:
+      serviceAccountName: "{{- template "sbomer.serviceAccountName" }}"
+      containers:
+        - image: {{ .Values.db.image.repository }}:{{ .Values.db.image.tag }}
+          imagePullPolicy: {{ .Values.db.image.pullPolicy }}
+          name: postgres
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-db
+          resources:
+            limits:
+              cpu: 60m
+              memory: 512Mi
+            requests:
+              cpu: 30m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: {{ .Release.Name }}-db
+      volumes:
+        - name: {{ .Release.Name }}-db
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-db
+{{ end }}
