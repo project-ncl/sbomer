@@ -35,6 +35,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.jboss.resteasy.spi.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -83,6 +84,10 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     SbomGenerationStatus status;
+
+    @Column(name = "result", nullable = true, updatable = true)
+    @Enumerated(EnumType.STRING)
+    GenerationResult result;
 
     @Column(name = "build_id", nullable = false, updatable = false)
     String buildId;
@@ -135,6 +140,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         sbomGenerationRequest.setStatus(generationRequest.getStatus());
         // And reason
         sbomGenerationRequest.setReason(generationRequest.getReason());
+        // And result
+        sbomGenerationRequest.setResult(generationRequest.getResult());
 
         // Update config, if available
         if (generationRequest.getConfig() != null) {

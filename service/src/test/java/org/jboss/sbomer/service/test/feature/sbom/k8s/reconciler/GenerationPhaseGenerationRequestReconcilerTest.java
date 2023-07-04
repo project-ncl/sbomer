@@ -31,6 +31,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
@@ -90,6 +91,15 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
                 .build();
     }
 
+    private void setTaskRunExitCode(TaskRun taskRun, int exitCode) throws IOException {
+        taskRun.getStatus()
+                .getSteps()
+                .add(
+                        new StepStateBuilder()
+                                .withTerminated(new ContainerStateTerminatedBuilder().withExitCode(exitCode).build())
+                                .build());
+    }
+
     @SuppressWarnings("unchecked")
     private Context<GenerationRequest> mockContext(Set<TaskRun> secondaryResources) {
         Context<GenerationRequest> mockedContext = Mockito.mock(Context.class);
@@ -117,6 +127,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
         assertEquals(
                 "Generation failed. Expected one or more running TaskRun related to generation. None found. See logs for more information.",
                 updateControl.getResource().getReason());
+        assertEquals(GenerationResult.ERR_SYSTEM, updateControl.getResource().getResult());
     }
 
     @Test
@@ -234,6 +245,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
         assertEquals(
                 "Generation failed. Product with index '0' (TaskRun 'generation-task-run-0') failed: system failure. Product with index '1' (TaskRun 'generation-task-run-1') failed: system failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: system failure. Product with index '3' (TaskRun 'generation-task-run-3') failed: system failure. Product with index '4' (TaskRun 'generation-task-run-4') failed: system failure. See logs for more information.",
                 updateControl.getResource().getReason());
+        assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().getResult());
     }
 
     /**
@@ -249,12 +261,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
 
         TaskRun taskRun = dummyTaskRun();
         setTaskrunStatus(taskRun, "False");
-        taskRun.getStatus()
-                .getSteps()
-                .add(
-                        new StepStateBuilder()
-                                .withTerminated(new ContainerStateTerminatedBuilder().withExitCode(2).build())
-                                .build());
+        setTaskRunExitCode(taskRun, GenerationResult.ERR_CONFIG_INVALID.getCode());
         secondaryTaskRuns.add(taskRun);
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
@@ -264,6 +271,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
         assertEquals(
                 "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. See logs for more information.",
                 updateControl.getResource().getReason());
+        assertEquals(GenerationResult.ERR_CONFIG_INVALID, updateControl.getResource().getResult());
     }
 
     /**
@@ -279,12 +287,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
 
         TaskRun taskRun = dummyTaskRun(123);
         setTaskrunStatus(taskRun, "False");
-        taskRun.getStatus()
-                .getSteps()
-                .add(
-                        new StepStateBuilder()
-                                .withTerminated(new ContainerStateTerminatedBuilder().withExitCode(3).build())
-                                .build());
+        setTaskRunExitCode(taskRun, GenerationResult.ERR_INDEX_INVALID.getCode());
         secondaryTaskRuns.add(taskRun);
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
@@ -294,6 +297,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
         assertEquals(
                 "Generation failed. Product with index '123' (TaskRun 'generation-task-run-123') failed: invalid product index: 123 (should be between 1 and 2). See logs for more information.",
                 updateControl.getResource().getReason());
+        assertEquals(GenerationResult.ERR_INDEX_INVALID, updateControl.getResource().getResult());
     }
 
     /**
@@ -309,12 +313,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
 
         TaskRun taskRun = dummyTaskRun();
         setTaskrunStatus(taskRun, "False");
-        taskRun.getStatus()
-                .getSteps()
-                .add(
-                        new StepStateBuilder()
-                                .withTerminated(new ContainerStateTerminatedBuilder().withExitCode(4).build())
-                                .build());
+        setTaskRunExitCode(taskRun, GenerationResult.ERR_GENERATION.getCode());
         secondaryTaskRuns.add(taskRun);
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
@@ -324,6 +323,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
         assertEquals(
                 "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: an error occurred while generating the SBOM. See logs for more information.",
                 updateControl.getResource().getReason());
+        assertEquals(GenerationResult.ERR_GENERATION, updateControl.getResource().getResult());
     }
 
     /**
@@ -339,12 +339,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
 
         TaskRun taskRun = dummyTaskRun();
         setTaskrunStatus(taskRun, "False");
-        taskRun.getStatus()
-                .getSteps()
-                .add(
-                        new StepStateBuilder()
-                                .withTerminated(new ContainerStateTerminatedBuilder().withExitCode(1).build())
-                                .build());
+        setTaskRunExitCode(taskRun, GenerationResult.ERR_GENERAL.getCode());
         secondaryTaskRuns.add(taskRun);
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
@@ -352,7 +347,35 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
         assertEquals(
-                "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: unexpected error occurred. See logs for more information.",
+                "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: general error occurred. See logs for more information.",
                 updateControl.getResource().getReason());
+        assertEquals(GenerationResult.ERR_GENERAL, updateControl.getResource().getResult());
+    }
+
+    @Test
+    public void testFailedMultipleReasons() throws Exception {
+        GenerationRequest request = dummyGenerationRequest();
+
+        Set<TaskRun> secondaryTaskRuns = new HashSet<>();
+
+        TaskRun taskRun1 = dummyTaskRun(1);
+        setTaskrunStatus(taskRun1, "False");
+        setTaskRunExitCode(taskRun1, GenerationResult.ERR_CONFIG_INVALID.getCode());
+
+        TaskRun taskRun2 = dummyTaskRun(2);
+        setTaskrunStatus(taskRun2, "False");
+        setTaskRunExitCode(taskRun2, GenerationResult.ERR_INDEX_INVALID.getCode());
+
+        secondaryTaskRuns.add(taskRun1);
+        secondaryTaskRuns.add(taskRun2);
+
+        UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
+
+        assertTrue(updateControl.isUpdateResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertEquals(
+                "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: invalid product index: 2 (should be between 1 and 2). See logs for more information.",
+                updateControl.getResource().getReason());
+        assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().getResult());
     }
 }

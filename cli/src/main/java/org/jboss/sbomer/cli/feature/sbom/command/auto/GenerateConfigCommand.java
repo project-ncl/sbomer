@@ -42,6 +42,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -223,7 +224,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
         if (config == null) {
             log.error("Could not obtain product configuration for the '{}' build, exiting", buildId);
-            return 3;
+            return GenerationResult.ERR_CONFIG_MISSING.getCode();
         }
 
         log.debug("RAW config: '{}'", config);
@@ -254,7 +255,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
             result.getErrors().forEach(msg -> {
                 log.error(msg);
             });
-            return 2;
+            return GenerationResult.ERR_CONFIG_INVALID.getCode();
         }
 
         log.debug("Configuration is valid!");
@@ -281,7 +282,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
             System.out.println(configuration);
         }
 
-        return 0;
+        return GenerationResult.SUCCESS.getCode();
     }
 
     /**

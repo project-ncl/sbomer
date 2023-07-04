@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import io.fabric8.kubernetes.api.model.ConfigMapFluent;
@@ -32,6 +33,7 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
     private SbomGenerationStatus status;
     private String reason;
     private String config;
+    private GenerationResult result;
 
     @Override
     public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata(String buildId) {
@@ -89,5 +91,15 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
 
     public String getConfig() {
         return config;
+    }
+
+    @Override
+    public A withResult(GenerationResult result) {
+        this.result = result;
+        return (A) this;
+    }
+
+    public GenerationResult getResult() {
+        return result;
     }
 }

@@ -15,26 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.k8s.model;
+package org.jboss.sbomer.core.features.sbom.enums;
 
-import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import java.util.Arrays;
+import java.util.Optional;
 
-import io.fabric8.kubernetes.api.model.ConfigMapFluent;
+import lombok.Getter;
 
-public interface GenerationRequestFluent<A extends GenerationRequestFluent<A>> extends ConfigMapFluent<A> {
+public enum GenerationResult {
+    SUCCESS(0),
+    ERR_GENERAL(1),
+    ERR_CONFIG_INVALID(2),
+    ERR_CONFIG_MISSING(3),
+    ERR_INDEX_INVALID(4),
+    ERR_GENERATION(5),
+    ERR_SYSTEM(99),
+    ERR_MULTI(100);
 
-    public A withId(String id);
+    @Getter
+    int code;
 
-    public A withBuildId(String buildId);
+    GenerationResult(int code) {
+        this.code = code;
+    }
 
-    public A withStatus(SbomGenerationStatus status);
+    public static Optional<GenerationResult> fromCode(int code) {
+        return Arrays.stream(GenerationResult.values()).filter(r -> r.code == code).findFirst();
 
-    public A withReason(String reason);
-
-    public A withConfig(String config);
-
-    public A withResult(GenerationResult result);
-
-    public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata(String buildId);
-
+    }
 }

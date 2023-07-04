@@ -32,6 +32,7 @@ public class GenerationRequestBuilder extends GenerationRequestFluentImpl<Genera
         addToData(GenerationRequest.KEY_BUILD_ID, getBuildId());
         addToData(GenerationRequest.KEY_REASON, getReason());
         addToData(GenerationRequest.KEY_CONFIG, getConfig());
+        addToData(GenerationRequest.KEY_REASON, getReason());
         addToData(
                 GenerationRequest.KEY_STATUS,
                 Optional.ofNullable(getStatus()).orElse(SbomGenerationStatus.NEW).name());
