@@ -84,37 +84,6 @@ public class SbomService {
     }
 
     /**
-     * Persists changes to given {@link Sbom} in the database.
-     *
-     * The difference between the {@link SbomService#save(Sbom)} method is that this one is used for updating
-     * already-existing resources in the database.
-     *
-     * @param sbom The {@link Sbom} resource to store in database.
-     * @return Updated {@link Sbom} resource.
-     */
-    @Transactional
-    public Sbom updateBom(String sbomId, JsonNode bom) {
-        Sbom sbom = sbomRepository.findById(sbomId);
-
-        if (sbom == null) {
-            throw new NotFoundException("Could not find SBOM with ID '{}'", sbomId);
-        }
-
-        // Update the SBOM field
-        sbom.setSbom(bom);
-
-        log.debug("Updating SBOM: {}", sbom.toString());
-
-        validate(sbom);
-
-        sbom = sbomRepository.saveSbom(sbom);
-
-        log.debug("SBOM '{}' updated!", sbomId);
-
-        return sbom;
-    }
-
-    /**
      * Delete the SBOM Generation Request and all its associated SBOMs from the database.
      *
      * @param id The {@link SbomGenerationRequest} id to delete from the database.
