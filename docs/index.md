@@ -1,4 +1,5 @@
 # SBOMer Documentation
 
 - [Usage](usage.md)
-- [Development and Deployment](development-and-deployment.md)
+- [Development](development.md)
+- [Deployment](deployment.md)
