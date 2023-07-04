@@ -56,8 +56,6 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import cz.jirutka.rsql.parser.RSQLParserException;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import lombok.extern.slf4j.Slf4j;
@@ -177,36 +175,6 @@ public class SBOMResource {
     public Response getBomById(@PathParam("id") String sbomId) {
         Sbom sbom = doGetBomById(sbomId);
         return Response.status(Status.OK).entity(SbomUtils.toJsonNode(sbom.getCycloneDxBom())).build();
-    }
-
-    /**
-     * Update the Bom within the {@link Sbom} resource.
-     *
-     * @param sbom {@link Sbom}
-     * @return
-     */
-    @POST
-    @Operation(
-            summary = "Update Bom for specified SBOM",
-            description = "Save submitted SBOM. This endpoint expects a SBOM in the CycloneDX format encapsulated in the structure.")
-    @Parameter(name = "sbom", description = "The SBOM to save")
-    @APIResponses({
-            @APIResponse(
-                    responseCode = "200",
-                    description = "The SBOM was successfully saved",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
-                    responseCode = "422",
-                    description = "Provided SBOM couldn't be saved because of validation failures",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
-    @Path("{id}/bom")
-    public Response updateSbom(@PathParam("id") String sbomId, final JsonNode bom) {
-        Sbom sbom = sbomService.updateBom(sbomId, bom);
-        return Response.status(Status.OK).entity(sbom).build();
     }
 
     private Sbom doGetBomById(String sbomId) {
