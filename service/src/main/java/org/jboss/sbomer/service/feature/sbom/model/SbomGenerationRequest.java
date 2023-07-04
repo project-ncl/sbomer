@@ -92,7 +92,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @ToString.Exclude
     private JsonNode config;
 
-    @Column(name = "reason", nullable = true, updatable = true, length = 1024)
+    @Column(name = "reason", nullable = true, updatable = true)
+    @Type(type = "org.hibernate.type.TextType")
     String reason;
 
     /**
