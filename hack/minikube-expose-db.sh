@@ -22,4 +22,4 @@ set -e
 
 # Expose the postgresql database locally.
 
-exec kubectl port-forward services/sbomer-postgres 5432:5432
+exec kubectl port-forward services/sbomer-db 5432:5432
