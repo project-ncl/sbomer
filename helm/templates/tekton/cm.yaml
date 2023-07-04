@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-tekton
+{{ include "sbomer.labels" (list .) | indent 2 }}
+data:
+    PNC_SERVICE_HOST: "orch.psi.redhat.com"  # TODO: remove
+    SBOMER_PRODUCT_MAPPING_ENV: "production" # TODO: adjust

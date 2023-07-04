@@ -21,7 +21,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 components:
-  - ../../../components/tekton
   - ../../../components/service
 patchesStrategicMerge:
   - patches/sbomer-database-connection.yaml

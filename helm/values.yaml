@@ -13,6 +13,14 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
+# Tekton generator component
+generator:
+  # generator.image is the generator image used in the initialization and generation tasks
+  image:
+    repository: localhost/sbomer-generator
+    tag: latest
+    pullPolicy: IfNotPresent
+
 # Database component
 db:
   # db.storage is the size of the PVC where the cached data will be stored

@@ -40,20 +40,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 components:
   - ../../components/tekton-deployment
-  - ../../components/tekton
 resources:
   - resources/pv.yaml
   - resources/pvc.yaml
-secretGenerator:
-  - name: sbomer-postgres
-    literals:
-      - POSTGRESQL_DATABASE=sbomer
-      - POSTGRESQL_PASSWORD=password
-      - POSTGRESQL_USER=username
 generatorOptions:
   disableNameSuffixHash: true
-patchesStrategicMerge:
-  - patches/cm.yaml
 images:
   - name: sbomer-generator
     newName: localhost/sbomer-generator:latest
