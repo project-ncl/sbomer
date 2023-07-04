@@ -54,13 +54,19 @@ public class ConfigReader {
     ObjectMapper jsonObjectMapper = ObjectMapperProvider.json();
 
     public Config getConfig(Build build) {
+
+        String scmUrl = build.getScmUrl();
+        if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
+            scmUrl = build.getNoRebuildCause().getScmUrl();
+        }
+
         Pattern pattern = Pattern.compile("gerrit/(.*)\\.git$");
-        Matcher matcher = pattern.matcher(build.getScmUrl());
+        Matcher matcher = pattern.matcher(scmUrl);
 
         if (!matcher.find()) {
             throw new ClientException(
                     "Unable to determine the project from the SCM url: '{}' from PNC build '{}'",
-                    build.getScmUrl(),
+                    scmUrl,
                     build.getId());
         }
 
