@@ -165,6 +165,18 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             GenerationResult result,
             String reason) {
 
+        if (generationRequest.getStatus() != null) {
+            String label = switch (generationRequest.getStatus()) {
+                case INITIALIZING -> SbomGenerationPhase.INIT.name().toLowerCase();
+                case GENERATING -> SbomGenerationPhase.GENERATE.name().toLowerCase();
+                default -> null;
+            };
+
+            if (label != null) {
+                generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
+            }
+        }
+
         generationRequest.setStatus(status);
         generationRequest.setResult(result);
         generationRequest.setReason(reason);
