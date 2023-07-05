@@ -66,12 +66,12 @@ public class InitializationPhaseGenerationRequestReconcilerTest {
     @Inject
     GenerationRequestReconciler controller;
 
-    private GenerationRequest dummyInitializationRequest() throws IOException {
+    private GenerationRequest dummyInitializationRequest(SbomGenerationStatus status) throws IOException {
         return new GenerationRequestBuilder().withNewMetadata()
                 .withName("test")
                 .endMetadata()
                 .withBuildId("AABBCC")
-                .withStatus(SbomGenerationStatus.INITIALIZING)
+                .withStatus(status)
                 .build();
     }
 
@@ -120,8 +120,61 @@ public class InitializationPhaseGenerationRequestReconcilerTest {
     }
 
     @Test
+    void testCreated() throws Exception {
+        GenerationRequest request = dummyInitializationRequest(null);
+
+        // We have to do this here, because by default when we create the object programmatically, we set it to NEW
+        // always. But in case someone would create such object in Kubernetes, we would not have control over it hence
+        // we need to force the empty status.
+        request.getData().put(GenerationRequest.KEY_STATUS, null);
+        request.getMetadata().getLabels().remove(Labels.LABEL_STATUS);
+
+        assertNull(request.getMetadata().getLabels().get(Labels.LABEL_STATUS));
+
+        UpdateControl<GenerationRequest> updateControl = controller
+                .reconcile(request, mockContext(Collections.emptySet()));
+
+        assertTrue(updateControl.isUpdateResource());
+        assertEquals(SbomGenerationStatus.NEW, updateControl.getResource().getStatus());
+        assertNull(updateControl.getResource().getReason());
+        assertNull(updateControl.getResource().getResult());
+
+        assertEquals("NEW", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+    }
+
+    @Test
+    void testNewWithoutDependentResources() throws Exception {
+        GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.NEW);
+
+        UpdateControl<GenerationRequest> updateControl = controller
+                .reconcile(request, mockContext(Collections.emptySet()));
+
+        // We offload the work to Operator SDK here, so in case of NEW status, we don't do anything with it, just wait
+        // for TaskRuns to be initiated, the testNewWithDependentResources test covers that case.
+        assertTrue(updateControl.isNoUpdate());
+    }
+
+    @Test
+    void testNewWithDependentResources() throws Exception {
+        GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.NEW);
+
+        TaskRun taskRun = dummyTaskRun();
+
+        // Set the Task run status to reflect it being in "running" state
+        setTaskRunStatus(taskRun, "Unknown");
+
+        UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(Set.of(taskRun)));
+
+        assertTrue(updateControl.isUpdateResource());
+        assertEquals(SbomGenerationStatus.INITIALIZING, updateControl.getResource().getStatus());
+        assertNull(updateControl.getResource().getReason());
+        assertNull(updateControl.getResource().getResult());
+        assertEquals("INITIALIZING", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+    }
+
+    @Test
     void testMissingTaskRun() throws Exception {
-        GenerationRequest request = dummyInitializationRequest();
+        GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.INITIALIZING);
 
         UpdateControl<GenerationRequest> updateControl = controller
                 .reconcile(request, mockContext(Collections.emptySet()));
@@ -132,11 +185,13 @@ public class InitializationPhaseGenerationRequestReconcilerTest {
                 "Configuration initialization failed. Unable to find related TaskRun. See logs for more information.",
                 updateControl.getResource().getReason());
         assertEquals(GenerationResult.ERR_SYSTEM, updateControl.getResource().getResult());
+        assertEquals("FAILED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+        assertEquals("init", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_PHASE));
     }
 
     @Test
     void testSuccessful() throws Exception {
-        GenerationRequest request = dummyInitializationRequest();
+        GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.INITIALIZING);
 
         TaskRun taskRun = dummyTaskRun();
 
@@ -149,14 +204,15 @@ public class InitializationPhaseGenerationRequestReconcilerTest {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.INITIALIZED, updateControl.getResource().getStatus());
 
-        // For in-progress generation we don't ser reason nor result
+        // For in-progress generation we don't set reason nor result
         assertNull(updateControl.getResource().getReason());
         assertNull(updateControl.getResource().getResult());
+        assertEquals("INITIALIZED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
     }
 
     @Test
     void testInProgress() throws Exception {
-        GenerationRequest request = dummyInitializationRequest();
+        GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.INITIALIZING);
 
         TaskRun taskRun = dummyTaskRun();
 
@@ -175,7 +231,7 @@ public class InitializationPhaseGenerationRequestReconcilerTest {
             "3, ERR_CONFIG_MISSING, Configuration initialization failed. Could not find configuration. See logs for more information.",
             "99, ERR_SYSTEM, Configuration initialization failed. System error occurred. See logs for more information." })
     void testFailed(int exitCode, GenerationResult result, String reason) throws Exception {
-        GenerationRequest request = dummyInitializationRequest();
+        GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.INITIALIZING);
 
         TaskRun taskRun = dummyTaskRun();
 
@@ -188,5 +244,6 @@ public class InitializationPhaseGenerationRequestReconcilerTest {
         assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
         assertEquals(reason, updateControl.getResource().getReason());
         assertEquals(result, updateControl.getResource().getResult());
+        assertEquals("FAILED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
     }
 }

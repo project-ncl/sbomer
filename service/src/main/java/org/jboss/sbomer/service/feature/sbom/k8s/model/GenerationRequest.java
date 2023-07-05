@@ -159,7 +159,7 @@ public class GenerationRequest extends ConfigMap {
         }
 
         getData().put(KEY_STATUS, status.name());
-        getMetadata().getLabels().put(Labels.LABEL_PHASE, status.name());
+        getMetadata().getLabels().put(Labels.LABEL_STATUS, status.name());
     }
 
     @JsonIgnore
