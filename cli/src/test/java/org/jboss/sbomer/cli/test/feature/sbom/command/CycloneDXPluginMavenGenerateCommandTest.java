@@ -34,6 +34,7 @@ import io.quarkus.test.junit.main.QuarkusMainTest;
 @TestProfile(CustomPncServiceProfile.class)
 public class CycloneDXPluginMavenGenerateCommandTest {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {
+
         @Override
         public Set<Class<?>> getEnabledAlternatives() {
             return Set.of(AlternativePncService.class);

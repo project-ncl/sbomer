@@ -18,10 +18,14 @@
 package org.jboss.sbomer.service.test.feature.sbom.k8s.reconciler;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -29,10 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.service.feature.sbom.config.SbomConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -40,10 +46,12 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationRequestReconciler;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import io.fabric8.knative.internal.pkg.apis.ConditionBuilder;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminatedBuilder;
+import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import io.fabric8.tekton.pipeline.v1beta1.ArrayOrString;
 import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.StepStateBuilder;
@@ -52,20 +60,47 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunStatusBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.quarkus.test.Mock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.kubernetes.client.KubernetesTestServer;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 
 /**
  * Class responsible for testing reconciliation workflow for the generation phase.
  */
 @QuarkusTest
+@WithKubernetesTestServer
 public class GenerationPhaseGenerationRequestReconcilerTest {
+
+    @ApplicationScoped
+    @Mock
+    public static class MockedSbomConfig implements SbomConfig {
+
+        @Override
+        public String sbomDir() {
+            throw new UnsupportedOperationException("Unimplemented method 'sbomDir'");
+        }
+
+        @Override
+        public boolean cleanup() {
+            throw new UnsupportedOperationException("Unimplemented method 'cleanup'");
+        }
+
+    }
+
+    @InjectMock
+    SbomConfig sbomConfig;
 
     @Inject
     GenerationRequestReconciler controller;
 
+    @KubernetesTestServer
+    KubernetesServer mockServer;
+
     private GenerationRequest dummyGenerationRequest() throws IOException {
         return new GenerationRequestBuilder().withNewMetadata()
-                .withName("test")
+                .withName("test-generation-request")
                 .endMetadata()
                 .withBuildId("AABBCC")
                 .withStatus(SbomGenerationStatus.GENERATING)
@@ -377,5 +412,58 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
                 "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: invalid product index: 2 (should be between 1 and 2). See logs for more information.",
                 updateControl.getResource().getReason());
         assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().getResult());
+    }
+
+    @Test
+    public void testFailedWithCleanup(@TempDir Path tempDir) throws Exception {
+        when(sbomConfig.cleanup()).thenReturn(true);
+        when(sbomConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
+
+        // Let's create the expected path for the working directory and some content in it
+        Path newDirPath = Files
+                .createDirectory(Path.of(tempDir.toAbsolutePath().toString(), "test-generation-request"));
+        Path filePath = Path.of(newDirPath.toAbsolutePath().toString(), "file.txt");
+        Files.write(filePath, "This is file content".getBytes());
+
+        GenerationRequest request = dummyGenerationRequest();
+        request.setStatus(SbomGenerationStatus.FAILED);
+
+        UpdateControl<GenerationRequest> updateControl = controller
+                .reconcile(request, mockContext(Collections.emptySet()));
+
+        assertTrue(updateControl.isNoUpdate());
+
+        assertEquals("DELETE", mockServer.getLastRequest().getMethod());
+        assertEquals(
+                "/api/v1/namespaces/test/configmaps/test-generation-request",
+                mockServer.getLastRequest().getPath());
+
+        assertTrue(Files.exists(tempDir));
+        assertFalse(Files.exists(filePath));
+        assertFalse(Files.exists(newDirPath));
+    }
+
+    @Test
+    public void testFailedWithoutCleanup(@TempDir Path tempDir) throws Exception {
+        when(sbomConfig.cleanup()).thenReturn(false);
+        when(sbomConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
+
+        // Let's create the expected path for the working directory and some content in it
+        Path newDirPath = Files
+                .createDirectory(Path.of(tempDir.toAbsolutePath().toString(), "test-generation-request"));
+        Path filePath = Path.of(newDirPath.toAbsolutePath().toString(), "file.txt");
+        Files.write(filePath, "This is file content".getBytes());
+
+        GenerationRequest request = dummyGenerationRequest();
+        request.setStatus(SbomGenerationStatus.FAILED);
+
+        UpdateControl<GenerationRequest> updateControl = controller
+                .reconcile(request, mockContext(Collections.emptySet()));
+
+        assertTrue(updateControl.isNoUpdate());
+        assertNull(mockServer.getLastRequest());
+        assertTrue(Files.exists(tempDir));
+        assertTrue(Files.exists(filePath));
+        assertTrue(Files.exists(newDirPath));
     }
 }
