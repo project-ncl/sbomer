@@ -17,8 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,6 +33,7 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.model.annotation.Group;
 import io.fabric8.kubernetes.model.annotation.Kind;
 import io.fabric8.kubernetes.model.annotation.Version;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -57,12 +63,14 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Kind("ConfigMap")
 @Version("v1")
 @Group("")
+@Slf4j
 public class GenerationRequest extends ConfigMap {
 
     public static final String KEY_ID = "id";
     public static final String KEY_BUILD_ID = "build-id";
     public static final String KEY_STATUS = "status";
     public static final String KEY_REASON = "reason";
+    public static final String KEY_RESULT = "result";
     public static final String KEY_CONFIG = "config";
 
     public GenerationRequest() {
@@ -115,6 +123,26 @@ public class GenerationRequest extends ConfigMap {
         getData().put(KEY_REASON, reason);
     }
 
+    @JsonIgnore
+    public GenerationResult getResult() {
+        String resultStr = getData().get(KEY_RESULT);
+
+        if (resultStr == null) {
+            return null;
+        }
+
+        return GenerationResult.valueOf(resultStr);
+    }
+
+    public void setResult(GenerationResult result) {
+        if (result == null) {
+            return;
+        }
+
+        getData().put(KEY_RESULT, result.name());
+    }
+
+    @JsonIgnore
     public SbomGenerationStatus getStatus() {
         String statusStr = getData().get(KEY_STATUS);
 
@@ -126,6 +154,10 @@ public class GenerationRequest extends ConfigMap {
     }
 
     public void setStatus(SbomGenerationStatus status) {
+        if (status == null) {
+            return;
+        }
+
         getData().put(KEY_STATUS, status.name());
         getMetadata().getLabels().put(Labels.LABEL_PHASE, status.name());
     }
@@ -138,5 +170,19 @@ public class GenerationRequest extends ConfigMap {
     @JsonIgnore
     public String getName() {
         return getMetadata().getName();
+    }
+
+    @JsonIgnore
+    public Config toConfig() {
+        if (getConfig() == null) {
+            return null;
+        }
+
+        try {
+            return ObjectMapperProvider.yaml().readValue(getConfig().toString().getBytes(), Config.class);
+        } catch (IOException e) {
+            log.warn(e.getMessage(), e);
+            return null;
+        }
     }
 }

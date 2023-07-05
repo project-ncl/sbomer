@@ -1,0 +1,24 @@
+# Multi-product example where a single build (configuration) in PNC can build more than
+# one product.
+apiVersion: sbomer.jboss.org/v1alpha1
+products:
+  - processors:
+      - type: redhat-product
+        errata:
+          productName: "CCCDDD"
+          productVersion: "CCDD"
+          productVariant: "CD"
+    generator:
+      type: maven-domino
+      args: "--config-file .domino/cccddd.json"
+      version: "0.0.88"
+
+  - processors:
+      - type: redhat-product
+        errata:
+          productName: "AAABBB"
+          productVersion: "AABB"
+          productVariant: "AB"
+    generator:
+      type: maven-domino
+      args: "--config-file .domino/aaabbb.json"
