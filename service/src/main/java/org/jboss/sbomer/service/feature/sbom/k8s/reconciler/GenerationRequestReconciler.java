@@ -156,18 +156,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             return UpdateControl.noUpdate();
         }
 
-        if (isFinished(initTaskRun)) {
-            if (isSuccessful(initTaskRun)) {
-                generationRequest.setStatus(SbomGenerationStatus.INITIALIZED);
-                setConfig(generationRequest, initTaskRun);
-            } else {
-                generationRequest.setStatus(SbomGenerationStatus.FAILED);
-            }
-        } else {
-            generationRequest.setStatus(SbomGenerationStatus.INITIALIZING);
-        }
-
-        return UpdateControl.updateResource(generationRequest);
+        return updateRequest(generationRequest, SbomGenerationStatus.INITIALIZING, null, null);
     }
 
     private UpdateControl<GenerationRequest> updateRequest(
@@ -288,8 +277,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             return UpdateControl.noUpdate();
         }
 
-        generationRequest.setStatus(SbomGenerationStatus.GENERATING);
-        return UpdateControl.updateResource(generationRequest);
+        return updateRequest(generationRequest, SbomGenerationStatus.GENERATING, null, null);
     }
 
     /**
@@ -576,8 +564,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         // No status set set, it should be "NEW", let's do it.
         // "NEW" starts everything.
         if (Objects.isNull(generationRequest.getStatus())) {
-            generationRequest.setStatus(SbomGenerationStatus.NEW);
-            return UpdateControl.updateResource(generationRequest);
+            return updateRequest(generationRequest, SbomGenerationStatus.NEW, null, null);
         }
 
         // Fetch any secondary resources (Tekton TaskRuns) that are related to the primary resource (GenerationRequest)
