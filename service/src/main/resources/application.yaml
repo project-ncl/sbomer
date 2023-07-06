@@ -78,26 +78,12 @@ sbomer:
 
   sbom:
     sbom-dir: "${SBOMER_SBOM_DIR}"
+    # Defines whether resources related to a generation should be automatically removed from the system
+    # This includes removing the generation request kubernetes resource as well as any leftovers on the filesystem
+    # located in the sbomer.sbom-dir directory.
+    cleanup: true
 
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
-  # generation:
-  #   enabled: true
-  #   default-generator: maven-cyclonedx
-  #   generators:
-  #     maven-domino:
-  #       default-version: "0.0.90"
-  #       default-args: "--include-non-managed --warn-on-missing-scm"
-  #     maven-cyclonedx:
-  #       default-version: "2.7.9"
-  #       default-args: "--batch-mode"
-
-  # processing:
-  #   enabled: true
-  #   auto-process: true
-  #   # List of default processors that will be run on every generated SBOM
-  #   default-processors:
-  #     - name: "default"
-  #     - name: "redhat-product"
 
 "%dev":
   quarkus:
@@ -139,6 +125,8 @@ sbomer:
           enabled: false
         producer:
           enabled: false
+    sbom:
+      cleanup: false
 
 "%test":
   quarkus:

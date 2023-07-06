@@ -19,9 +19,12 @@ package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
 import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationRequestReconciler.EVENT_SOURCE_NAME;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +44,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.sbom.config.SbomConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -119,8 +123,8 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
     }
 
-    @ConfigProperty(name = "sbomer.sbom.sbom-dir")
-    String sbomDir;
+    @Inject
+    SbomConfig sbomConfig;
 
     @Inject
     SbomRepository sbomRepository;
@@ -462,7 +466,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             Set<TaskRun> secondaryResources) {
 
         // At this point al the work is finished and we can clean up the GenerationRequest Kubernetes resource.
-        kubernetesClient.configMaps().withName(generationRequest.getMetadata().getName()).delete();
+        cleanupFinishedGenerationRequest(generationRequest);
 
         return UpdateControl.noUpdate();
     }
@@ -478,6 +482,10 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
     private UpdateControl<GenerationRequest> reconcileFailed(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
+
+        // In case the generation request failed, we need to clean up resources so that these are not left forever.
+        // We have all the data elsewhere (logs, cause) so it's safe to do so.
+        cleanupFinishedGenerationRequest(generationRequest);
 
         return UpdateControl.noUpdate();
     }
@@ -498,6 +506,47 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
             return false;
         }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    /**
+     * Removes related to finished {@link GenerationRequest} and its instance as well.
+     *
+     * @param generationRequest
+     */
+    private void cleanupFinishedGenerationRequest(GenerationRequest generationRequest) {
+        if (!sbomConfig.cleanup()) {
+            log.debug(
+                    "The cleanup setting is set to false, skipping cleaning up finished GenerationRequest '{}'",
+                    generationRequest.getName());
+            return;
+        }
+
+        Path workdirPath = Path.of(sbomConfig.sbomDir(), generationRequest.getMetadata().getName());
+
+        log.debug(
+                "Removing '{}' path being the working directory for the finished '{}' GenerationRequest",
+                workdirPath.toAbsolutePath().toString(),
+                generationRequest.getName());
+
+        // It should, but...
+        if (Files.exists(workdirPath)) {
+            try {
+                Files.walk(workdirPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+            } catch (IOException e) {
+                log.error(
+                        "An error occurred while removing the '{}' directory",
+                        workdirPath.toAbsolutePath().toString(),
+                        e);
+            }
+        }
+
+        if (Files.exists(workdirPath)) {
+            log.warn("Directory '{}' still exists", workdirPath.toAbsolutePath().toString());
+        } else {
+            log.debug("Directory '{}' removed", workdirPath.toAbsolutePath().toString());
+        }
+
+        kubernetesClient.configMaps().withName(generationRequest.getMetadata().getName()).delete();
     }
 
     /**
@@ -652,7 +701,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             log.info("Reading SBOM for index '{}'", i);
 
             Path sbomPath = Path.of(
-                    sbomDir,
+                    sbomConfig.sbomDir(),
                     generationRequest.getMetadata().getName(),
                     generationRequest.getMetadata().getName() + "-1-generate-" + i,
                     "bom.json"); // TODO: should not be hardcoded
