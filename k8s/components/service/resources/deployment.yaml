@@ -68,6 +68,17 @@ spec:
             - containerPort: 8080
               name: http
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /q/health
+              port: 8080
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /q/health
+              port: 8080
+            failureThreshold: 60
+            periodSeconds: 5
           volumeMounts:
             - mountPath: /data
               name: sbomer-sboms
