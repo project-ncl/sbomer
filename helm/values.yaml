@@ -25,7 +25,6 @@ tekton-pipeline:
   featureFlags:
     disable-affinity-assistant: true
 
-
 # Database component
 db:
   # db.storage is the size of the PVC where the cached data will be stored
@@ -47,5 +46,12 @@ cache:
   # cache.image is the cache component image
   image:
     repository: localhost/sbomer-cache
+    tag: latest
+    pullPolicy: IfNotPresent
+
+service:
+  # service.image is the service component image
+  image:
+    repository: localhost/sbomer-service
     tag: latest
     pullPolicy: IfNotPresent

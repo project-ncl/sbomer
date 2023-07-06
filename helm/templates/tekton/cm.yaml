@@ -4,5 +4,10 @@ metadata:
   name: {{ .Release.Name }}-tekton
 {{ include "sbomer.labels" (list .) | indent 2 }}
 data:
+{{ if eq .Values.env "stage" }}
+    PNC_SERVICE_HOST: "orch-stage.psi.redhat.com"  # TODO: remove
+    SBOMER_PRODUCT_MAPPING_ENV: "staging" # TODO: adjust
+{{ else }}
     PNC_SERVICE_HOST: "orch.psi.redhat.com"  # TODO: remove
     SBOMER_PRODUCT_MAPPING_ENV: "production" # TODO: adjust
+{{ end }}

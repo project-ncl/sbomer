@@ -1,0 +1,180 @@
+{{ if ne .Values.env "dev" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-service
+{{ include "sbomer.labels" (list . "service") | indent 2 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+{{ include "sbomer.selector" (list . "service") | indent 6 }}
+  template:
+    metadata:
+{{ include "sbomer.labels" (list . "service") | indent 6 }}
+      annotations:
+        sbomer-secret: sbomer-secrets
+{{ if eq .Values.env "stage" }}
+        environment: stage
+{{ else }}
+        environment: prod
+{{ end }}
+    spec:
+      serviceAccountName: "{{- template "sbomer.serviceAccountName" }}"
+      initContainers:
+        - image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
+          name: get-vault-secrets
+          resources:
+            limits:
+              cpu: 0.2
+              memory: 200Mi
+            requests:
+              cpu: 0.2
+              memory: 200Mi
+          command:
+            - /bin/bash
+          args:
+            - -c
+            - cd /mnt/secrets;
+              pnc-vault-secrets dump $(SBOMER_SECRET_NAME)-$(APP_ENV);
+              echo "#!/bin/bash" >> /mnt/secrets/env.sh;
+              echo "export CONSUMER_TOPIC=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/consumer.topic)\"" >> /mnt/secrets/env.sh;
+              echo "export PRODUCER_TOPIC=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/producer.topic)\"" >> /mnt/secrets/env.sh;
+              echo "export UMB_BROKER_URL=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/qpid-jms.url)\"" >> /mnt/secrets/env.sh;
+              echo "export QUARKUS_OIDC_AUTH_SERVER_URL=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/auth-server-url.txt)\"" >> /mnt/secrets/env.sh;
+              echo "export QUARKUS_DATASOURCE_USERNAME=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.user)\"" >> /mnt/secrets/env.sh;
+              echo "export QUARKUS_DATASOURCE_PASSWORD=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.password)\"" >> /mnt/secrets/env.sh;
+              echo "export QUARKUS_DATASOURCE_JDBC_URL=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.connection)\"" >> /mnt/secrets/env.sh;
+              echo "export KEYSTORE_PASSWORD=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/${APP_ENV}-pnc-sbomer.password)\"" >> /mnt/secrets/env.sh;
+              source /mnt/secrets/env.sh;
+          env:
+            - name: VAULT_ADDR
+              valueFrom:
+                secretKeyRef:
+                  name: vault-connection-info
+                  key: vault-address
+            - name: VAULT_APP_ROLE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: vault-connection-info
+                  key: vault-app-role-id
+            - name: VAULT_APP_SECRET_ID
+              valueFrom:
+                secretKeyRef:
+                  name: vault-connection-info
+                  key: vault-app-secret-id
+            - name: SBOMER_SECRET_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['sbomer-secret']
+            - name: APP_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['environment']
+          volumeMounts:
+            - name: secrets-workdir
+              mountPath: /mnt/secrets
+      containers:
+        - image: {{ .Values.service.image.repository }}:{{ .Values.service.image.tag }}
+          name: sbomer
+          imagePullPolicy: {{ .Values.cache.image.pullPolicy }}
+          env:
+            - name: APP_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['environment']
+            - name: SBOMER_SECRET_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['sbomer-secret']
+            - name: QUARKUS_DATASOURCE_JDBC_MAX_SIZE
+              value: "20"
+            - name: QUARKUS_DATASOURCE_JDBC_MIN_SIZE
+              value: "0"
+            - name: QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE
+              value: "1"
+            - name: SBOMER_PRODUCT_MAPPING_ENV
+{{ if eq .Values.env "stage" }}
+              value: "staging"
+{{ else }}
+              value: "production"
+{{ end }}
+            - name: SBOMER_SBOM_DIR
+              value: "/data"
+            - name: QUARKUS_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-postgres
+                  key: POSTGRESQL_USER
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sbomer-postgres
+                  key: POSTGRESQL_PASSWORD
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: jdbc:postgresql://sbomer-postgres:5432/sbomer
+            - name: QUARKUS_PROFILE
+              valueFrom:
+                configMapKeyRef:
+                  name: sbomer-config
+                  key: QUARKUS_PROFILE
+            - name: SBOMER_CACHE_SERVICE_URL
+              value: "$(SBOMER_CACHE_SERVICE_HOST):$(SBOMER_CACHE_SERVICE_PORT)/pnc/orch"
+            - name: INDY_REPOSITORY_HOST
+              value: "indy.psi.redhat.com"
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /q/health
+              port: 8080
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /q/health
+              port: 8080
+            failureThreshold: 60
+            periodSeconds: 5
+          volumeMounts:
+            - mountPath: /data
+              name: sbomer-data
+            - mountPath: /mnt/secrets
+              name: secrets-workdir
+              readOnly: true
+            - name: sbomer-certs-volume
+              mountPath: /etc/pki/ca-trust/source/anchors
+              subPath: ca-trust/source/anchors
+            - name: sbomer-certs-volume
+              mountPath: /etc/pki/ca-trust/extracted
+              subPath: ca-trust/extracted
+            - name: volume-thread-dump
+              mountPath: /mnt/thread-dump
+            - name: volume-thread-heap-dump-script
+              mountPath: /mnt/thread-heap-dump-script
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 2000Mi
+            limits:
+              cpu: 1000m
+              memory: 2000Mi
+      volumes:
+        - name: sbomer-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-sboms
+        - name: secrets-workdir
+          emptyDir:
+            medium: Memory
+        - name: sbomer-certs-volume
+          persistentVolumeClaim:
+            claimName: sbomer-ca-trust-certificate
+        - name: volume-thread-dump
+          persistentVolumeClaim:
+            claimName: pnc-threaddump
+        - name: volume-thread-heap-dump-script
+          configMap:
+            defaultMode: 360
+            name: pnc-thread-heap-dump
+{{ end }}

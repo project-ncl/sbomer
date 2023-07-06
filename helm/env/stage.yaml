@@ -3,3 +3,17 @@ env: stage
 cache:
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-cache
+    tag: latest
+    pullPolicy: IfNotPresent
+
+service:
+  image:
+    repository: quay.io/rh-newcastle-stage/sbomer-service
+    tag: latest
+    pullPolicy: IfNotPresent
+
+generator:
+  image:
+    repository: quay.io/rh-newcastle-stage/sbomer-generator
+    tag: latest
+    pullPolicy: IfNotPresent
