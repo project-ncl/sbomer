@@ -21,6 +21,11 @@ generator:
     tag: latest
     pullPolicy: IfNotPresent
 
+tekton-pipeline:
+  featureFlags:
+    disable-affinity-assistant: true
+
+
 # Database component
 db:
   # db.storage is the size of the PVC where the cached data will be stored

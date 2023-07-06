@@ -60,14 +60,18 @@ type: kubernetes.io/dockerconfigjson
 
 Then apply it.
 
-## Deploying development overlay
+## Deploying Tekton
+
 
 ```
-kubectl apply -k k8s/overlays/development/
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.41.1/release.yaml
 ```
 
-Running above command for the first time may result in errors. Try again in a few seconds.
-Tekton needs to have time to boot.
+## Installing SBOMer using Helm
+
+```
+helm install sbomer ./helm/
+```
 
 ## Exposing the database
 
@@ -76,14 +80,6 @@ To make the service work we need to expose the database.
 
 ```
 ./hack/minikube-expose-db.sh
-```
-
-## Exposing the cache
-
-Similarly to the database we need to expose the cache, so that our local builds can perform faster (and we test the usage of th cache at the same time!).
-
-```
-./hack/minikube-expose-cache.sh
 ```
 
 ## Running service in development mode
