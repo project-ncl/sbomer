@@ -6,8 +6,8 @@ metadata:
 {{ include "sbomer.labels" (list . "db") | indent 2 }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - {{ .Values.db.storage.accessMode }}
   resources:
     requests:
-      storage: {{ .Values.db.storage }}
+      storage: {{ .Values.db.storage.size }}
 {{ end }}

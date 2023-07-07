@@ -1,15 +1,11 @@
-{{ if ne .Values.env "dev" }}
+{{ if .Values.service.route.enabled  }}
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: {{ .Release.Name }}
 {{ include "sbomer.labels" (list . "service") | indent 2 }}
 spec:
-{{ if eq .Values.env "stage" }}
-    host: "sbomer-stage.apps.ocp-c1.prod.psi.redhat.com"
-{{ else }}
-    host: "sbomer.apps.ocp-c1.prod.psi.redhat.com"
-{{ end }}
+  host: {{ .Values.service.route.host }}
   to:
     kind: Service
     name: {{ .Release.Name }}-service

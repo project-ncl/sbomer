@@ -1,5 +1,13 @@
 env: stage
 
+productMapping: stage
+
+pnc:
+  host: "orch-stage.psi.redhat.com" # TODO: remove it from here
+
+indy:
+  host: "indy-stage.psi.redhat.com" # TODO: remove it from here
+
 cache:
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-cache
@@ -7,6 +15,11 @@ cache:
     pullPolicy: IfNotPresent
 
 service:
+  route:
+    enabled: true
+    host: "sbomer-stage.apps.ocp-c1.prod.psi.redhat.com"
+  storage:
+    accessMode: ReadWriteMany
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-service
     tag: latest

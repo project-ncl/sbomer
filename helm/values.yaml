@@ -2,6 +2,8 @@
 
 env: dev
 
+productMapping: prod
+
 rbac:
   # Specifies whether RBAC resources should be created
   create: true
@@ -13,6 +15,12 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
+pnc:
+  host: "orch.psi.redhat.com" # TODO: remove it from here
+
+indy:
+  host: "indy.psi.redhat.com" # TODO: remove it from here
+
 # Tekton generator component
 generator:
   # generator.image is the generator image used in the initialization and generation tasks
@@ -21,16 +29,14 @@ generator:
     tag: latest
     pullPolicy: IfNotPresent
 
-tekton-pipeline:
-  featureFlags:
-    disable-affinity-assistant: true
-
 # Database component
 db:
   # db.storage is the size of the PVC where the cached data will be stored
   # This applied only to development environment. In staging and production
   # we use managed databases.
-  storage: 2G
+  storage:
+    size: 2Gi
+    accessMode: ReadWriteOnce
 
   # db.image is the Postgresql image
   image:
@@ -41,7 +47,9 @@ db:
 # Cache component
 cache:
   # cache.storage is the size of the PVC where the cached data will be stored
-  storage: 5G
+  storage:
+    size: 5Gi
+    accessMode: ReadWriteMany
 
   # cache.image is the cache component image
   image:
@@ -50,6 +58,19 @@ cache:
     pullPolicy: IfNotPresent
 
 service:
+  # service.route Controls the Route creation on OpenShift
+  route:
+    # Disabled by default, enabled only in OpenShift environments
+    enabled: false
+    # Placeholder for the route host
+    host: ""
+
+  # service.storage is the size of the PVC where the generated SBOMs will be stored until
+  # moved to the database
+  storage:
+    size: 5Gi
+    accessMode: ReadWriteOnce
+
   # service.image is the service component image
   image:
     repository: localhost/sbomer-service

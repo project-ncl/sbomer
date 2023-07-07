@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+{{ include "sbomer.labels" (list .) | indent 2 }}
+data:
+    PNC_SERVICE_HOST: {{ .Values.pnc.host }}
+    INDY_REPOSITORY_HOST: {{ .Values.indy.host }}
+    SBOMER_PRODUCT_MAPPING_ENV: {{ .Values.productMapping }}

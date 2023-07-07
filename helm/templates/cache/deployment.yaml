@@ -15,20 +15,19 @@ spec:
       serviceAccountName: "{{- template "sbomer.serviceAccountName" }}"
       containers:
         - image: {{ .Values.cache.image.repository }}:{{ .Values.cache.image.tag }}
-          name: sbomer-cache
+          name: {{ .Release.Name }}-cache
           imagePullPolicy: {{ .Values.cache.image.pullPolicy }}
           env:
-{{ if eq .Values.env "stage" }}
             - name: PNC_SERVICE_HOST
-              value: "orch-stage.psi.redhat.com"
-            # - name: INDY_REPOSITORY_HOST
-            #   value: "indy-stage.psi.redhat.com"
-{{ else }}
-            - name: PNC_SERVICE_HOST # TODO
-              value: orch.psi.redhat.com
-            # - name: INDY_REPOSITORY_HOST # TODO
-            #   value: indy.psi.redhat.com
-{{ end }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: PNC_SERVICE_HOST
+            - name: INDY_REPOSITORY_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: INDY_REPOSITORY_HOST
           ports:
             - containerPort: 7070
               name: http

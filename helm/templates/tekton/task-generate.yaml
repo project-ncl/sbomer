@@ -26,12 +26,12 @@ spec:
         - name: PNC_SERVICE_HOST
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-tekton
+              name: {{ .Release.Name }}-config
               key: PNC_SERVICE_HOST
         - name: SBOMER_PRODUCT_MAPPING_ENV
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-tekton
+              name: {{ .Release.Name }}-config
               key: SBOMER_PRODUCT_MAPPING_ENV
       script: |
         #!/usr/bin/env bash

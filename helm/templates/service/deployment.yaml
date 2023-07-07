@@ -14,11 +14,6 @@ spec:
 {{ include "sbomer.labels" (list . "service") | indent 6 }}
       annotations:
         sbomer-secret: sbomer-secrets
-{{ if eq .Values.env "stage" }}
-        environment: stage
-{{ else }}
-        environment: prod
-{{ end }}
     spec:
       serviceAccountName: "{{- template "sbomer.serviceAccountName" }}"
       initContainers:
@@ -68,21 +63,17 @@ spec:
                 fieldRef:
                   fieldPath: metadata.annotations['sbomer-secret']
             - name: APP_ENV
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations['environment']
+              value: {{ .Values.env }}
           volumeMounts:
             - name: secrets-workdir
               mountPath: /mnt/secrets
       containers:
         - image: {{ .Values.service.image.repository }}:{{ .Values.service.image.tag }}
-          name: sbomer
+          name: {{ .Release.Name }}-service
           imagePullPolicy: {{ .Values.cache.image.pullPolicy }}
           env:
             - name: APP_ENV
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations['environment']
+              value: {{ .Values.env }}
             - name: SBOMER_SECRET_NAME
               valueFrom:
                 fieldRef:
@@ -94,34 +85,14 @@ spec:
             - name: QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE
               value: "1"
             - name: SBOMER_PRODUCT_MAPPING_ENV
-{{ if eq .Values.env "stage" }}
-              value: "staging"
-{{ else }}
-              value: "production"
-{{ end }}
-            - name: SBOMER_SBOM_DIR
-              value: "/data"
-            - name: QUARKUS_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: sbomer-postgres
-                  key: POSTGRESQL_USER
-            - name: QUARKUS_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: sbomer-postgres
-                  key: POSTGRESQL_PASSWORD
-            - name: QUARKUS_DATASOURCE_JDBC_URL
-              value: jdbc:postgresql://sbomer-postgres:5432/sbomer
-            - name: QUARKUS_PROFILE
               valueFrom:
                 configMapKeyRef:
-                  name: sbomer-config
-                  key: QUARKUS_PROFILE
+                  name: {{ .Release.Name }}-config
+                  key: SBOMER_PRODUCT_MAPPING_ENV
+            - name: SBOMER_SBOM_DIR
+              value: "/data"
             - name: SBOMER_CACHE_SERVICE_URL
               value: "$(SBOMER_CACHE_SERVICE_HOST):$(SBOMER_CACHE_SERVICE_PORT)/pnc/orch"
-            - name: INDY_REPOSITORY_HOST
-              value: "indy.psi.redhat.com"
           ports:
             - containerPort: 8080
               name: http

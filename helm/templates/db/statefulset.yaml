@@ -17,7 +17,7 @@ spec:
       containers:
         - image: {{ .Values.db.image.repository }}:{{ .Values.db.image.tag }}
           imagePullPolicy: {{ .Values.db.image.pullPolicy }}
-          name: postgres
+          name: {{ .Release.Name }}-db
           ports:
             - containerPort: 5432
               protocol: TCP

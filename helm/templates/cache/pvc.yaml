@@ -6,7 +6,7 @@ metadata:
 {{ include "sbomer.labels" (list . "cache") | indent 2 }}
 spec:
   accessModes:
-    - ReadWriteMany
+    - {{ .Values.cache.storage.accessMode }}
   resources:
     requests:
-      storage: {{ .Values.cache.storage }}
+      storage: {{ .Values.cache.storage.size }}

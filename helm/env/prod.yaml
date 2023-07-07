@@ -7,6 +7,11 @@ cache:
     pullPolicy: Always
 
 service:
+  route: 
+    enabled: true
+    host: "sbomer.apps.ocp-c1.prod.psi.redhat.com"
+  storage:
+    accessMode: ReadWriteMany
   image:
     repository: quay.io/rh-newcastle/sbomer-service
     tag: latest

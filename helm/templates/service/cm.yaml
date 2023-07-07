@@ -1,9 +1,0 @@
-{{ if ne .Values.env "dev" }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-config
-{{ include "sbomer.labels" (list .) | indent 2 }}
-data:
-    QUARKUS_PROFILE: prod
-{{ end }}
