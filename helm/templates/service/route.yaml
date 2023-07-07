@@ -1,0 +1,18 @@
+{{ if .Values.service.route.enabled  }}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ .Release.Name }}
+{{ include "sbomer.labels" (list . "service") | indent 2 }}
+spec:
+  host: {{ .Values.service.route.host }}
+  to:
+    kind: Service
+    name: {{ .Release.Name }}-service
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+  wildcardPolicy: None
+{{ end }}

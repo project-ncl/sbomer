@@ -88,7 +88,7 @@ sbomer:
 "%dev":
   quarkus:
     datasource:
-      username: username
+      username: sbomer
       password: password
       jdbc:
         url: jdbc:postgresql://localhost:5432/sbomer
@@ -117,8 +117,6 @@ sbomer:
       enabled: false
 
   sbomer:
-    sbom:
-      sbom-dir: "/tmp/sbomer"
     api-url: "http://localhost:8080/api/v1alpha1/"
     features:
       umb:
@@ -128,6 +126,7 @@ sbomer:
         producer:
           enabled: false
     sbom:
+      sbom-dir: "/tmp/sbomer"
       cleanup: false
 
 "%test":

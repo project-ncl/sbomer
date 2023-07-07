@@ -1,0 +1,23 @@
+env: prod
+
+cache:
+  storage:
+    accessMode: ReadWriteMany
+  image:
+    repository: quay.io/rh-newcastle/sbomer-cache
+    tag: latest
+
+service:
+  route: 
+    enabled: true
+    host: "sbomer.apps.ocp-c1.prod.psi.redhat.com"
+  storage:
+    accessMode: ReadWriteMany
+  image:
+    repository: quay.io/rh-newcastle/sbomer-service
+    tag: latest
+
+generator:
+  image:
+    repository: quay.io/rh-newcastle/sbomer-generator
+    tag: latest

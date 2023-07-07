@@ -1,0 +1,62 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sbomer-generate
+{{ include "sbomer.labels" (list .) | indent 2 }}
+spec:
+  params:
+    - name: config
+      type: string
+      description: "Runtime generation configuration"
+    - name: index
+      type: string
+      description: "Index to select which product should the SBOM be generated for"
+  steps:
+    - name: generate
+      image: {{ .Values.generator.image.repository }}:{{ .Values.generator.image.tag }}
+      imagePullPolicy: {{ .Values.generator.image.pullPolicy }}
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 1000Mi
+        requests:
+          cpu: 200m
+          memory: 300Mi
+      env:
+        - name: PNC_SERVICE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: PNC_SERVICE_HOST
+        - name: SBOMER_PRODUCT_MAPPING_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: SBOMER_PRODUCT_MAPPING_ENV
+      script: |
+        #!/usr/bin/env bash
+
+        set -e
+        set -x
+        set -o pipefail
+
+        CONFIG_PATH="/workdir/config.yaml"
+
+        # Set the path to Maven settings.xml file so that ict can be used by the generator
+        export SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml"
+
+        source /workdir/.sdkman/bin/sdkman-init.sh
+
+        export MAVEN_OPTS="-Xms256m -Xmx512m"
+
+        echo "Storing configuration in the $CONFIG_PATH file"
+        echo "$(params.config)" | tee $CONFIG_PATH
+
+        mkdir -p $(workspaces.data.path)/$(context.taskRun.name)
+        cd $(workspaces.data.path)/$(context.taskRun.name)
+
+        echo "Running generation..."
+        exec /workdir/.sdkman/candidates/java/17/bin/java -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config $CONFIG_PATH --index "$(params.index)"
+  workspaces:
+    - name: data
+      description: Workspace used to store the generated SBOMs

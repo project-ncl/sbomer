@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-cache
+{{ include "sbomer.labels" (list . "cache") | indent 2 }}
+spec:
+  accessModes:
+    - {{ .Values.cache.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.cache.storage.size }}

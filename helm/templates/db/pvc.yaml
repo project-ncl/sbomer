@@ -1,0 +1,13 @@
+{{ if eq .Values.env "dev" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-db
+{{ include "sbomer.labels" (list . "db") | indent 2 }}
+spec:
+  accessModes:
+    - {{ .Values.db.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.db.storage.size }}
+{{ end }}

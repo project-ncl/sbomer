@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-sboms
+{{ include "sbomer.labels" (list . "service") | indent 2 }}
+spec:
+{{ if eq .Values.env "dev" }}
+  storageClassName: manual
+{{ end }}
+  accessModes:
+    - {{ .Values.service.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.service.storage.size }}
