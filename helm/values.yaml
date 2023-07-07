@@ -49,7 +49,7 @@ cache:
   # cache.storage is the size of the PVC where the cached data will be stored
   storage:
     size: 5Gi
-    accessMode: ReadWriteMany
+    accessMode: ReadWriteOnce
 
   # cache.image is the cache component image
   image:

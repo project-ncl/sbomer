@@ -9,6 +9,8 @@ indy:
   host: "indy-stage.psi.redhat.com" # TODO: remove it from here
 
 cache:
+  storage:
+    accessMode: ReadWriteMany
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-cache
     tag: latest
