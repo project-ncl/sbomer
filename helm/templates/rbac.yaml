@@ -31,4 +31,4 @@ roleRef:
   name: {{ .Release.Name }}
 subjects:
   - kind: ServiceAccount
-    name: {{ template "sbomer.serviceAccountName" . }}
+    name: {{ template "sbomer.serviceAccountName" }}

@@ -74,6 +74,8 @@ spec:
           env:
             - name: APP_ENV
               value: {{ .Values.env }}
+            - name: SBOMER_ROUTE_HOST
+              value: {{ .Values.service.route.host }}
             - name: SBOMER_SECRET_NAME
               valueFrom:
                 fieldRef:
