@@ -87,28 +87,23 @@ To make the service work we need to expose the database.
 To run the service you just need to run Quarkus in the development mode:
 
 ```
-./hack/run-dev.sh
+./hack/run-service-dev.sh
 ```
 
-Please note that the `-Dquarkus.http.host=0.0.0.0` is required, because we need to expose the REST API port
-so that the Tekton Task can reach it from inside of a Kubernetes cluster.
+The service will be available at: http://localhost:8080.
 
-If you are using Minikube with KVM driver, you may want to open the 8080/tcp port:
-
-```
-sudo firewall-cmd --zone=libvirt --add-port=8080/tcp --permanent --reload
-```
-
-### Accessing the SBOMer service
-
-You can forward the port to your local machine to access SBOMer service:
+## Mounting SBOM dir
 
 ```
-kubectl port-forward services/sbomer 8080:80
+minikube -p sbomer mount `pwd`:/tmp/something --uid=65532
 ```
 
-This makes it available at: http://localhost:8080.
+If you have troubles mounting the directory, it may be related for firewall, try this:
 
+```
+sudo firewall-cmd --permanent --zone=libvirt --add-rich-rule='rule family="ipv4" source address="192.168.39.0/24" accept'
+sudo firewall-cmd --reload
+```
 
 ## Tests
 
