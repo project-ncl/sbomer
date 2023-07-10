@@ -19,6 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.client.facade;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +76,7 @@ public class SBOMerClientFacade {
         } catch (JsonProcessingException e) {
             log.warn("Could not find existing successful SBOM Generation Requests for PNC build '{}'", buildId, e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public SbomGenerationRequest searchLastSuccessfulGeneration(String buildId) {
@@ -109,7 +110,7 @@ public class SBOMerClientFacade {
         } catch (JsonProcessingException e) {
             log.warn("Could not find SBOMs for Generation Request '{}'", requestId, e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public Sbom searchSbomsOfRequest(String requestId, int productIndex) {
