@@ -24,7 +24,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaQuery;
 
-import org.jboss.sbomer.service.feature.sbom.rest.Page;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.rest.rsql.RSQLProducer;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;

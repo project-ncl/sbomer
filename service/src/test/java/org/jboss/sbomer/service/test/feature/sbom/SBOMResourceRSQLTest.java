@@ -20,13 +20,10 @@ package org.jboss.sbomer.service.test.feature.sbom;
 import static io.restassured.RestAssured.given;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 import org.hamcrest.CoreMatchers;
-import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
-import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
