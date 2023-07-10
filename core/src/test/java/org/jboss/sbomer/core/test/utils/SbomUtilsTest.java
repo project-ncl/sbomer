@@ -19,11 +19,16 @@ package org.jboss.sbomer.core.test.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 
 import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.DisplayName;
@@ -80,6 +85,65 @@ public class SbomUtilsTest {
             JsonNode license = licenses.get(0);
             assertNotNull(license);
             assertEquals("Apache-2.0", license.get("license").get("id").asText());
+        }
+
+        @Test
+        void shouldRemoveErrataPropertiesFromBom() {
+            Bom bom = SbomUtils.fromPath(sbomPath("sbom_with_errata.json"));
+            assertNotNull(bom.getMetadata().getComponent());
+
+            assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME));
+            assertTrue(
+                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
+            assertTrue(
+                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
+
+            SbomUtils.removeErrataProperties(bom);
+
+            assertFalse(
+                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME));
+            assertFalse(
+                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
+            assertFalse(
+                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
+        }
+
+        @Test
+        void shouldRemoveErrataPropertiesFromJsonNode() {
+            Bom bom = SbomUtils.fromPath(sbomPath("sbom_with_errata.json"));
+            JsonNode jsonNode = SbomUtils.toJsonNode(bom);
+
+            JsonNode properties = jsonNode.get("metadata").get("component").get("properties");
+            assertNotNull(properties);
+            assertEquals(JsonNodeType.ARRAY, properties.getNodeType());
+
+            boolean foundErrataProductName = false;
+            boolean foundErrataProductVersion = false;
+            boolean foundErrataProductVariant = false;
+            for (JsonNode node : properties) {
+                if (node.has("name")) {
+                    String name = node.get("name").asText();
+                    if (Constants.PROPERTY_ERRATA_PRODUCT_NAME.equals(name)) {
+                        foundErrataProductName = true;
+                    }
+                    if (Constants.PROPERTY_ERRATA_PRODUCT_VERSION.equals(name)) {
+                        foundErrataProductVersion = true;
+                    }
+                    if (Constants.PROPERTY_ERRATA_PRODUCT_VARIANT.equals(name)) {
+                        foundErrataProductVariant = true;
+                    }
+                }
+            }
+
+            assertTrue(foundErrataProductName);
+            assertTrue(foundErrataProductVersion);
+            assertTrue(foundErrataProductVariant);
+            assertEquals(3, properties.size());
+
+            jsonNode = SbomUtils.removeErrataProperties(jsonNode);
+
+            properties = jsonNode.get("metadata").get("component").get("properties");
+            assertNull(properties);
         }
     }
 

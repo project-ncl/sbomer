@@ -56,8 +56,10 @@ public class ConfigReader {
     public Config getConfig(Build build) {
 
         String scmUrl = build.getScmUrl();
+        String scmTag = build.getScmTag();
         if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
             scmUrl = build.getNoRebuildCause().getScmUrl();
+            scmTag = build.getNoRebuildCause().getScmTag();
         }
 
         Pattern pattern = Pattern.compile("gerrit/(.*)\\.git$");
@@ -76,20 +78,16 @@ public class ConfigReader {
 
         String base64Config;
 
-        log.debug(
-                "Fetching file '{}' from the '{}' repository with tag '{}'",
-                CONFIG_PATH,
-                repository,
-                build.getScmTag());
+        log.debug("Fetching file '{}' from the '{}' repository with tag '{}'", CONFIG_PATH, repository, scmTag);
 
         try {
-            base64Config = gitilesClient.fetchFile(repository, "refs/tags/" + build.getScmTag(), CONFIG_PATH);
+            base64Config = gitilesClient.fetchFile(repository, "refs/tags/" + scmTag, CONFIG_PATH);
         } catch (Exception e) {
 
             log.debug(
                     "SBOMer configuration file could not be retrieved in the '{}' repository with '{}' tag, ignoring",
                     repository,
-                    build.getScmTag(),
+                    scmTag,
                     e);
 
             return null;

@@ -6,14 +6,12 @@
   "response": {
     "status": 200,
     "jsonBody": {
-      "id": 123,
+      "id": "123",
       "buildId": "QUARKUS",
-      "sbom": {},
-      "parentSbom": {
-        "id": 111,
-        "buildId": "QUARKUS",
-        "sbom": {}
-      }
+      "rootPurl": null,
+      "configIndex": 0,
+      "statusMessage": null,
+      "sbom": {}
     },
     "headers": {
       "Content-Type": "application/json"

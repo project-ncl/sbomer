@@ -22,9 +22,9 @@ import static io.restassured.RestAssured.given;
 import java.io.IOException;
 
 import org.hamcrest.CoreMatchers;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

@@ -24,6 +24,8 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -33,13 +35,22 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.jboss.pnc.dto.Build;
+import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
 import org.jboss.sbomer.cli.feature.sbom.command.mixin.GeneratorToolMixin;
 import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig;
+import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig.DefaultGeneratorConfig;
+import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
+import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +71,9 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     protected PncService pncService;
 
     @Inject
+    protected SBOMerClientFacade sbomerClientFacade;
+
+    @Inject
     DefaultGenerationConfig defaultGenerationConfig;
 
     /**
@@ -70,6 +84,38 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
      * @return a {@link Path} to the generated BOM file.
      */
     protected abstract Path doGenerate(String buildCmdOptions);
+
+    protected abstract GeneratorType generatorType();
+
+    protected String generatorArgs() {
+        DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig.forGenerator(generatorType());
+
+        if (generator.getArgs() == null) {
+            String defaultArgs = defaultGeneratorConfig.defaultArgs();
+            log.debug("Using default arguments for the {} execution: {}", generatorType(), defaultArgs);
+
+            return defaultArgs;
+        } else {
+            log.debug("Using provided arguments for the {} execution: {}", generatorType(), generator.getArgs());
+
+            return generator.getArgs();
+        }
+    }
+
+    protected String toolVersion() {
+        DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig.forGenerator(generatorType());
+
+        if (generator.getVersion() == null) {
+            String toolVersion = defaultGeneratorConfig.defaultVersion();
+            log.debug("Using default tool version for the {} generator: {}", generatorType(), toolVersion);
+
+            return toolVersion;
+        } else {
+            log.debug("Using provided version for the {} generator: {}", generatorType(), generator.getVersion());
+
+            return generator.getVersion();
+        }
+    }
 
     @Override
     public Integer call() throws Exception {
@@ -95,30 +141,128 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         // Get the correct scm information for builds which have either SUCCESS or NO_REBUILD_REQUIRED status
         String scmUrl = build.getScmUrl();
         String scmTag = build.getScmTag();
+
+        JsonNode bom = null;
+
         if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
-            // TODO IMPROVEMENT: this is not reusing the already generated SBOMs as before, we should get the SBOM from
-            // the original build.
+            // The source code details are inside the noRebuildCause build
             scmUrl = build.getNoRebuildCause().getScmUrl();
             scmTag = build.getNoRebuildCause().getScmTag();
+
+            // Let's see if there noRebuildCause build has been already generated.
+
+            // Find the last successful SbomGenerationRequest for this build
+            SbomGenerationRequest sbomRequest = sbomerClientFacade
+                    .searchLastSuccessfulGeneration(build.getNoRebuildCause().getId());
+            if (sbomRequest != null) {
+                try {
+                    // The workdir name has format "product-{index}". Extract the index
+                    String numericPart = parent.getWorkdir()
+                            .toAbsolutePath()
+                            .toString()
+                            .replaceAll(".*/[^-]*-(\\d+)$", "$1");
+                    Integer productIndex = Integer.parseInt(numericPart);
+
+                    // Get the runtime configuration related to the ProductConfig with the current index being processed
+                    // here
+                    List<ProductConfig> productConfigs = sbomRequest.getConfiguration().getProducts();
+                    if (productConfigs != null && productIndex >= 0 && productIndex < productConfigs.size()) {
+
+                        // Let's verify that the configuration provided to the generator is the same, otherwise do the
+                        // generation again
+                        ProductConfig productConfig = productConfigs.get(productIndex);
+
+                        String toolVersion = toolVersion();
+                        String generatorArgs = generatorArgs();
+                        GeneratorType type = generatorType();
+
+                        log.debug(
+                                "Comparing current toolVersion: '{}', generatorArgs: '{}', generatorType: '{}' with the values retrieved from the past generation in DB: toolVersion: '{}', generatorArgs: '{}', generatorType: '{}'...",
+                                toolVersion,
+                                generatorArgs,
+                                type,
+                                productConfig.getGenerator().getVersion(),
+                                productConfig.getGenerator().getArgs(),
+                                productConfig.getGenerator().getType());
+
+                        if (Objects.equals(productConfig.getGenerator().getVersion(), toolVersion())
+                                && Objects.equals(productConfig.getGenerator().getArgs(), generatorArgs())
+                                && Objects.equals(productConfig.getGenerator().getType(), generatorType())) {
+
+                            // Find the corresponding SBOM generated from the request for the product index
+                            Sbom sbom = sbomerClientFacade.searchSbomsOfRequest(sbomRequest.getId(), productIndex);
+                            if (sbom != null) {
+                                bom = sbom.getSbom();
+                                log.info(
+                                        "Found compatible generated SBOM with id: '{}' from generation request: '{}', from previous build '{}'. Reusing it!",
+                                        sbom.getId(),
+                                        sbom.getGenerationRequest().getId(),
+                                        sbom.getBuildId());
+                            }
+                        }
+                    } else {
+                        log.warn(
+                                "Could not find the runtime product config related to index '{}', will regenerate the SBOM...",
+                                productIndex);
+                    }
+                } catch (NumberFormatException ex) {
+                    log.warn(
+                            "Could not find extract product index from workDir path '{}', will regenerate the SBOM...",
+                            parent.getWorkdir().toAbsolutePath().toString());
+                }
+
+            } else {
+                log.warn(
+                        "Could not find existing successful SBOM Generation Requests for PNC build '{}', will regenerate the SBOM...",
+                        build.getNoRebuildCause().getId());
+            }
         }
 
-        // Clone the source code related to the build
-        doClone(scmUrl, scmTag, parent.getWorkdir(), parent.isForce());
+        Path sbomPath = null;
+        boolean isForce = parent.isForce();
 
-        // In case the original build command script contains profiles, projects list or system properties
-        // definitions, get them as a best effort and pass them to the SBOM generation to try to resolve the same
-        // dependency tree.
-        String buildCmdOptions = "mvn";
-        try {
-            MavenCommandLineParser lineParser = MavenCommandLineParser.build()
-                    .launder(build.getBuildConfigRevision().getBuildScript());
-            buildCmdOptions = lineParser.getRebuiltMvnCommandScript();
-        } catch (IllegalArgumentException exc) {
-            log.error("Could not launder the provided build command script! Using the default build command", exc);
+        if (bom != null) {
+            // I have retrieved an SBOM generated previously with the same configuration, I can reuse it!
+            sbomPath = parent.getWorkdir().resolve("_bom.json");
+            try {
+                if (!Files.exists(sbomPath)) {
+                    Files.createDirectories(parent.getWorkdir());
+                    Files.createFile(sbomPath);
+                    // At this point I have created the file and dir, so in case I have an error while saving the file
+                    // content below, I can tell the doClone to clean everything up
+                    isForce = true;
+                }
+                // Remove the Errata properties so that they can be changed if needed (override is not possible)
+                bom = SbomUtils.removeErrataProperties(bom);
+
+                // Write the JsonNode to the source file
+                ObjectMapperProvider.json().writeValue(sbomPath.toFile(), bom);
+            } catch (IOException e) {
+                sbomPath = null;
+                log.warn("Could not copy reused bom, will regenerate the SBOM...", e);
+            }
         }
 
-        // Generate the SBOM
-        Path sbomPath = doGenerate(buildCmdOptions);
+        if (sbomPath == null) {
+
+            // Clone the source code related to the build
+            doClone(scmUrl, scmTag, parent.getWorkdir(), isForce);
+
+            // In case the original build command script contains profiles, projects list or system properties
+            // definitions, get them as a best effort and pass them to the SBOM generation to try to resolve the same
+            // dependency tree.
+            String buildCmdOptions = "mvn";
+            try {
+                MavenCommandLineParser lineParser = MavenCommandLineParser.build()
+                        .launder(build.getBuildConfigRevision().getBuildScript());
+                buildCmdOptions = lineParser.getRebuiltMvnCommandScript();
+            } catch (IllegalArgumentException exc) {
+                log.error("Could not launder the provided build command script! Using the default build command", exc);
+            }
+
+            // Generate the SBOM
+            sbomPath = doGenerate(buildCmdOptions);
+        }
 
         try {
             Files.copy(sbomPath, parent.getOutput(), StandardCopyOption.REPLACE_EXISTING);
@@ -131,19 +275,6 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
 
         log.info("Generation finished, SBOM available at: '{}'", parent.getOutput().toFile().getAbsolutePath());
         return 0;
-    }
-
-    String toolVersion(GeneratorType type) {
-        String toolVersion = generator.getVersion();
-
-        if (toolVersion == null) {
-            toolVersion = defaultGenerationConfig.forGenerator(type).defaultVersion();
-            log.debug("Using default tool version for the {} generator: {}", type, toolVersion);
-        } else {
-            log.debug("Using provided version for the {} generator: {}", type, toolVersion);
-        }
-
-        return toolVersion;
     }
 
     protected void doClone(String url, String tag, Path path, boolean force) {

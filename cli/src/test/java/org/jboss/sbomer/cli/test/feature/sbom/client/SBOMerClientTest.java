@@ -17,6 +17,29 @@
  */
 package org.jboss.sbomer.cli.test.feature.sbom.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.pnc.rest.api.parameters.PaginationParameters;
+import org.jboss.sbomer.cli.feature.sbom.client.SBOMerClient;
+import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
+import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.core.errors.ErrorResponse;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -24,41 +47,101 @@ import io.quarkus.test.junit.QuarkusTest;
 @QuarkusTestResource(ServiceWireMock.class)
 public class SBOMerClientTest {
 
-    // @Inject
-    // @RestClient
-    // SBOMerClient client;
+    @Inject
+    @RestClient
+    SBOMerClient client;
 
-    // @Test
-    // void testGetValidSbom() {
-    // Sbom sbom = client.getById("123", "123");
-    // assertNotNull(sbom);
-    // assertEquals(123, sbom.getId());
-    // assertEquals("QUARKUS", sbom.getBuildId());
-    // }
+    @Test
+    void testGetValidSbom() {
+        Response response = client.getById("123", "123");
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        Sbom sbom = response.readEntity(Sbom.class);
+        assertNotNull(sbom);
+        assertEquals("123", sbom.getId());
+        assertEquals("QUARKUS", sbom.getBuildId());
+        assertNotNull(sbom.getGenerationRequest());
+        assertEquals("AABBCC", sbom.getGenerationRequest().getId());
+        assertEquals("QUARKUS", sbom.getGenerationRequest().getBuildId());
 
-    // @Test
-    // void testNotFoundSbom() {
-    // ClientException ex = assertThrows(ClientException.class, () -> {
-    // client.getById("1234", "1234");
-    // });
+    }
 
-    // assertEquals(404, ex.getCode());
-    // assertEquals("Not Found", ex.getMessage());
-    // assertEquals("cc015e2c-e4e7-11ed-b5ea-0242ac120002", ex.getErrorId());
-    // assertNull(ex.getErrors());
+    @Test
+    void testNotFoundSbom() {
+        Response response = client.getById("1234", "1234");
+        assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+        ErrorResponse errorResponse = (ErrorResponse) response.readEntity(ErrorResponse.class);
+        assertEquals("Not Found", errorResponse.getMessage());
+    }
 
-    // }
+    @Test
+    void testSearchSbom() {
+        PaginationParameters pagParams = new PaginationParameters();
+        pagParams.setPageIndex(0);
+        pagParams.setPageSize(1);
+        String rsqlQuery = "id==123";
+        Response response = client.searchSboms("123", pagParams, rsqlQuery);
+        String json = response.readEntity(String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
+        };
+        try {
+            Page<Sbom> sboms = objectMapper.readValue(json, typeReference);
+            assertNotNull(sboms);
+            assertEquals("123", sboms.getContent().iterator().next().getId());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().getBuildId());
+        } catch (JsonMappingException e) {
+            fail(e.getMessage());
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
 
-    // @Test
-    // void testSearchSbom() {
+    @Test
+    void testSearchSbomWithSuccessfulGenerations() {
+        PaginationParameters pagParams = new PaginationParameters();
+        pagParams.setPageIndex(0);
+        pagParams.setPageSize(20);
 
-    // PaginationParameters pagParams = new PaginationParameters();
-    // pagParams.setPageIndex(0);
-    // pagParams.setPageSize(1);
-    // String rsqlQuery = "id==123";
-    // Page<Sbom> sboms = client.searchSboms("123", pagParams, rsqlQuery);
+        String rsqlQuery = "buildId=eq=QUARKUS;generationRequest.buildId=eq=QUARKUS;generationRequest.status=eq=FINISHED;generationRequest.result=eq=SUCCESS";
+        Response response = client.searchSboms("QUARKUS", pagParams, rsqlQuery);
+        String json = response.readEntity(String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
+        };
+        try {
+            Page<Sbom> sboms = objectMapper.readValue(json, typeReference);
+            assertNotNull(sboms);
+            assertEquals("123", sboms.getContent().iterator().next().getId());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().getBuildId());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().getGenerationRequest().getBuildId());
 
-    // assertNotNull(sboms);
-    // assertEquals(123, sboms.getContent().iterator().next().getId());
-    // }
+        } catch (JsonMappingException e) {
+            fail(e.getMessage());
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    void testSearchSbomRequest() {
+        PaginationParameters pagParams = new PaginationParameters();
+        pagParams.setPageIndex(0);
+        pagParams.setPageSize(1);
+        String rsqlQuery = "id==AABBCC";
+        Response response = client.searchGenerationRequests("AABBCC", pagParams, rsqlQuery);
+        String json = response.readEntity(String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<Page<SbomGenerationRequest>>() {
+        };
+        try {
+            Page<SbomGenerationRequest> sbomRequests = objectMapper.readValue(json, typeReference);
+            assertNotNull(sbomRequests);
+            assertEquals("AABBCC", sbomRequests.getContent().iterator().next().getId());
+            assertEquals("QUARKUS", sbomRequests.getContent().iterator().next().getBuildId());
+        } catch (JsonMappingException e) {
+            fail(e.getMessage());
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
 }

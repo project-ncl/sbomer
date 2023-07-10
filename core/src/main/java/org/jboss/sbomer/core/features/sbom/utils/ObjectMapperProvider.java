@@ -20,8 +20,10 @@ package org.jboss.sbomer.core.features.sbom.utils;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ObjectMapperProvider {
 
@@ -32,7 +34,8 @@ public class ObjectMapperProvider {
             .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
             .setSerializationInclusion(Include.NON_NULL);
 
-    static ObjectMapper jsonObjectMapper = new ObjectMapper()
+    static ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
             .setSerializationInclusion(Include.NON_NULL);
 

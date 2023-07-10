@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
@@ -43,9 +42,6 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
 
     @Override
     protected Path doGenerate(String buildCmdOptions) {
-        DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig
-                .forGenerator(GeneratorType.MAVEN_CYCLONEDX);
-
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
 
         // Split the build command to be passed to the ProcessBuilder, without separating the options surrounded by
@@ -54,10 +50,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
                 .stream()
                 .forEach(processBuilder.command()::add);
         processBuilder.command()
-                .add(
-                        String.format(
-                                "org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom",
-                                toolVersion(GeneratorType.MAVEN_CYCLONEDX)));
+                .add(String.format("org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom", toolVersion()));
         processBuilder.command().add("-DoutputFormat=json");
         processBuilder.command().add("-DoutputName=bom");
 
@@ -71,16 +64,8 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
             processBuilder.command().add(settingsXmlPath.toString());
         }
 
-        if (generator.getArgs() == null) {
-            String defaultArgs = defaultGeneratorConfig.defaultArgs();
-
-            log.debug("Using default arguments for the Maven CycloneDX plugin execution: {}", defaultArgs);
-            processBuilder.command().addAll(Arrays.asList(defaultArgs.split(" ")));
-        } else {
-            log.debug("Using provided arguments for the Maven CycloneDX plugin execution: {}", generator.getArgs());
-
-            processBuilder.command().addAll(Arrays.asList(generator.getArgs().split(" ")));
-        }
+        String args = generatorArgs();
+        processBuilder.command().addAll(Arrays.asList(args.split(" ")));
 
         log.info("Working directory: '{}'", parent.getWorkdir());
         processBuilder.directory(parent.getWorkdir().toFile());
@@ -111,6 +96,11 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
         Path sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "target", "bom.json");
 
         return sbomPath;
+    }
+
+    @Override
+    protected GeneratorType generatorType() {
+        return GeneratorType.MAVEN_CYCLONEDX;
     }
 
 }

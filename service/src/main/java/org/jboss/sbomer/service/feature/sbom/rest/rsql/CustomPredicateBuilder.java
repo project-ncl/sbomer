@@ -23,6 +23,8 @@ import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.LogicalNode;
 import cz.jirutka.rsql.parser.ast.Node;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,9 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import org.hibernate.query.criteria.internal.path.PluralAttributePath;
+import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -107,26 +112,32 @@ public class CustomPredicateBuilder<T> {
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-
-        if (comparison.getSelector().equals("sbom")) {
+        if (startRoot.getJavaType().equals(Sbom.class) && comparison.getSelector().equals("sbom")) {
             String msg = "RSQL on field Sbom.sbom with type JsonNode is not supported!";
+            log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+
+        if (startRoot.getJavaType().equals(SbomGenerationRequest.class) && comparison.getSelector().equals("config")) {
+            String msg = "RSQL on field SbomGenerationRequest.config with type JsonNode is not supported!";
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
 
         Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, entityManager, misc);
 
-        // If the operator is a IS_NULL type and type is an Enum or a PluralAttributePath (from ElementCollection),
-        // delegate to our custom PredicateBuilderStrategy
-        if (RSQLProducerImpl.IS_NULL.equals(comparison.getOperator())
+        if ((RSQLProducerImpl.IS_NULL.equals(comparison.getOperator())
                 && (Enum.class.isAssignableFrom(propertyPath.getJavaType())
-                        || propertyPath instanceof PluralAttributePath)) {
+                        || propertyPath instanceof PluralAttributePath))
+                || (RSQLProducerImpl.IS_EQUAL.equals(comparison.getOperator())
+                        && Enum.class.isAssignableFrom(propertyPath.getJavaType())
+                        && propertyPath instanceof SingularAttributePath)) {
 
             log.debug(
-                    "Detected type {} for selector {} with custom comparison operator {}. Delegating to custom PredicateBuilderStrategy!",
+                    "Detected type '{}' for selector '{}' with custom comparison operator '{}'. Delegating to custom PredicateBuilderStrategy!",
                     propertyPath.getJavaType(),
                     comparison.getSelector(),
-                    RSQLProducerImpl.IS_NULL.getSymbol());
+                    comparison.getOperator().getSymbol());
             if (misc.getPredicateBuilder() != null) {
                 return misc.getPredicateBuilder().createPredicate(comparison, startRoot, entity, entityManager, misc);
             }
