@@ -62,6 +62,9 @@ Then apply it.
 
 ## Deploying Tekton
 
+Tekton deployment should be handled externally to the application deployment. This can be achieved by installing a
+particular Tekton release. To be as close as possible to the staging and production deployment we should use
+similar version of Tekton for development as deployed on the target environments.
 
 ```
 kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.41.1/release.yaml
@@ -70,7 +73,7 @@ kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previou
 ## Installing SBOMer using Helm
 
 ```
-helm install sbomer ./helm/
+helm upgrade --install sbomer ./helm
 ```
 
 ## Exposing the database
