@@ -69,25 +69,37 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         SbomUtils.setSupplier(component);
         SbomUtils.addMrrc(component);
 
-        Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
-        Artifact artifact = pncService
-                .getArtifact(getParent().getParent().getParent().getBuildId(), component.getPurl(), sha256);
+        // If the component has already both "pnc-build-id" and "pnc-environment-image", do not bother querying again
+        // PNC!
+        if (!SbomUtils.hasExternalReference(component, ExternalReference.Type.BUILD_SYSTEM, SBOM_RED_HAT_BUILD_ID)
+                || !SbomUtils.hasExternalReference(
+                        component,
+                        ExternalReference.Type.BUILD_META,
+                        SBOM_RED_HAT_ENVIRONMENT_IMAGE)) {
+            Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
+            Artifact artifact = pncService
+                    .getArtifact(getParent().getParent().getParent().getBuildId(), component.getPurl(), sha256);
 
-        if (artifact == null) {
-            log.warn(
-                    "Artifact with purl '{}' was not found in PNC, skipping processing for this artifact",
+            if (artifact == null) {
+                log.warn(
+                        "Artifact with purl '{}' was not found in PNC, skipping processing for this artifact",
+                        component.getPurl());
+                return;
+            }
+
+            log.info(
+                    "Starting processing of Red Hat component '{}' with PNC artifact '{}'...",
+                    component.getPurl(),
+                    artifact.getId());
+
+            // Add build-related information, if we found a build in PNC
+            if (artifact.getBuild() != null) {
+                processBuild(component, artifact.getBuild());
+            }
+        } else {
+            log.debug(
+                    "Component with purl '{}' is already enriched, skipping further processing for this component",
                     component.getPurl());
-            return;
-        }
-
-        log.info(
-                "Starting processing of Red Hat component '{}' with PNC artifact '{}'...",
-                component.getPurl(),
-                artifact.getId());
-
-        // Add build-related information, if we found a build in PNC
-        if (artifact.getBuild() != null) {
-            processBuild(component, artifact.getBuild());
         }
     }
 

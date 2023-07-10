@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -94,6 +95,18 @@ public class SbomUtils {
         component.setProperties(properties);
     }
 
+    public static void removeProperty(Component component, String name) {
+        if (component.getProperties() != null) {
+            Optional<Property> property = component.getProperties()
+                    .stream()
+                    .filter(p -> p.getName().equalsIgnoreCase(name))
+                    .findFirst();
+            if (property.isPresent()) {
+                component.getProperties().remove(property.get());
+            }
+        }
+    }
+
     public static Optional<Component> findComponentWithPurl(String purl, Bom bom) {
         return bom.getComponents().stream().filter(c -> c.getPurl().equals(purl)).findFirst();
     }
@@ -106,11 +119,29 @@ public class SbomUtils {
         return getExternalReferences(c, type).size() > 0;
     }
 
+    public static boolean hasExternalReference(Component c, ExternalReference.Type type, String comment) {
+        return getExternalReferences(c, type, comment).size() > 0;
+    }
+
     public static List<ExternalReference> getExternalReferences(Component c, ExternalReference.Type type) {
         List<ExternalReference> filteredExternalReferences = Optional.ofNullable(c.getExternalReferences())
                 .map(Collection::stream)
                 .orElseGet(Stream::empty)
                 .filter(ref -> ref.getType().equals(type))
+                .toList();
+
+        return filteredExternalReferences;
+    }
+
+    public static List<ExternalReference> getExternalReferences(
+            Component c,
+            ExternalReference.Type type,
+            String comment) {
+        List<ExternalReference> filteredExternalReferences = Optional.ofNullable(c.getExternalReferences())
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .filter(ref -> ref.getType().equals(type))
+                .filter(ref -> Objects.equals(ref.getComment(), comment))
                 .toList();
 
         return filteredExternalReferences;
@@ -291,6 +322,30 @@ public class SbomUtils {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
 
+    /**
+     * Given a raw {@link JsonNode}, converts it to a CycloneDX {@link Bom} object, and removes any Errata information
+     * from the root component properties.
+     *
+     * @param jsonNode The {@link JsonNode} to convert.
+     */
+    public static JsonNode removeErrataProperties(JsonNode jsonNode) {
+        Bom bom = fromJsonNode(jsonNode);
+        removeErrataProperties(bom);
+        return toJsonNode(bom);
+    }
+
+    /**
+     * Removes any Errata information from the provided CycloneDX {@link Bom} object.
+     *
+     * @param bom The {@link Bom} containing the root component to be cleaned up from its Errata properties.
+     */
+    public static void removeErrataProperties(Bom bom) {
+        if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
+            removeProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME);
+            removeProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VERSION);
+            removeProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT);
+        }
     }
 }

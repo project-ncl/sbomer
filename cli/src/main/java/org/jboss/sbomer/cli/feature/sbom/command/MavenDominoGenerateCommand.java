@@ -57,7 +57,7 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
         }
 
         Path dominoPath = dominoDir;
-        String version = toolVersion(GeneratorType.MAVEN_DOMINO);
+        String version = toolVersion();
 
         if (version != null) {
             dominoPath = dominoPath.resolve(String.format("domino-%s.jar", version));
@@ -70,15 +70,16 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
         }
 
         return dominoPath;
+    }
 
+    @Override
+    protected GeneratorType generatorType() {
+        return GeneratorType.MAVEN_DOMINO;
     }
 
     @Override
     public Path doGenerate(String buildCmdOptions) {
         Path dominoPath = getDominoPath();
-
-        DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig
-                .forGenerator(GeneratorType.MAVEN_DOMINO);
 
         ProcessBuilder processBuilder = new ProcessBuilder().redirectOutput(Redirect.INHERIT)
                 .redirectError(Redirect.INHERIT);
@@ -106,16 +107,8 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
             processBuilder.command().add(settingsXmlPath.toString());
         }
 
-        if (generator.getArgs() == null) {
-            String defaultArgs = defaultGeneratorConfig.defaultArgs();
-
-            log.debug("Using default arguments for the Domino execution: {}", defaultArgs);
-            processBuilder.command().addAll(Arrays.asList(defaultArgs.split(" ")));
-        } else {
-            log.debug("Using provided arguments for the Domino execution: {}", generator.getArgs());
-
-            processBuilder.command().addAll(Arrays.asList(generator.getArgs().split(" ")));
-        }
+        String args = generatorArgs();
+        processBuilder.command().addAll(Arrays.asList(args.split(" ")));
 
         log.info(
                 "Starting SBOM generation using Domino '{}' with command: '{}'",
@@ -144,4 +137,5 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
 
         return Path.of(getParent().getWorkdir().toAbsolutePath().toString(), BOM_FILE_NAME);
     }
+
 }

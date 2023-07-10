@@ -36,4 +36,5 @@ public class RhVersionPattern {
     public static String ensureNoRhSuffix(String version) {
         return RH_VERSION_SUFFIX_PATTERN.matcher(version).replaceFirst("");
     }
+
 }
