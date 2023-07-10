@@ -2,8 +2,6 @@
 
 Our deployment environments are maintained via Helm chart.
 
-See [deployment documentation](deployment.md) for more information about the procedure.
-
 ## Environments
 
 We can identify following deployment **environments**:
