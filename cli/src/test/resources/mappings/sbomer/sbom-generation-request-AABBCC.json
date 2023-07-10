@@ -1,0 +1,42 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/api/v1alpha1/sboms/requests/AABBCC"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "AABBCC",
+      "buildId": "QUARKUS",
+      "config": {
+        "buildId": "QUARKUS",
+        "products": [
+          {
+            "generator": {
+              "args": "--include-non-managed --warn-on-missing-scm",
+              "type": "maven-domino",
+              "version": "0.0.90"
+            },
+            "processors": [
+              {
+                "type": "default"
+              },
+              {
+                "type": "redhat-product",
+                "errata": {
+                  "productName": "RHBQ",
+                  "productVariant": "8Base-RHBQ-2.13",
+                  "productVersion": "RHEL-8-RHBQ-2.13"
+                }
+              }
+            ]
+          }
+        ],
+        "apiVersion": "sbomer.jboss.org/v1alpha1"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
