@@ -27,4 +27,4 @@ set -e
 #
 # See: minikube profile list
 
-exec minikube start -p sbomer --driver=kvm2 --cpus=4 --memory=4g --disk-size=20GB --kubernetes-version=v1.23.16 --embed-certs
+exec minikube start -p sbomer --driver=kvm2 --cpus=4 --memory=4g --disk-size=20GB --kubernetes-version=v1.24.12 --embed-certs

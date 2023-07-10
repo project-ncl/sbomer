@@ -1,17 +1,18 @@
-# Development and Deployment Environments 101
+# Deployment Environments
 
-## Environments and Profiles
+Our deployment environments are maintained via Helm chart.
+
+See [deployment documentation](deployment.md) for more information about the procedure.
+
+## Environments
 
 We can identify following deployment **environments**:
 
 - `development`
-- `local`
 - `staging`
 - `production`
 
-These strictly correlate to Kustomize overlays we have in the `k8s/overlays/` directory.
-
-Every environment requires a Kubernetes cluster. For example `development` and `local` can use Minikube.
+Every environment requires a Kubernetes cluster. For example `development` can use Minikube.
 We use OpenShift for `staging` and `development`.
 
 ### Development environment
@@ -22,19 +23,14 @@ even in debug mode while still being able to schedule and react on Tekton Pipeli
 
 :arrow_right: Please see the [development docs](development.md) on how to use it.
 
-### Local environment
-
-There is a difference between the `local` and `development` environment. In the `local` environment we run
-everything (including the service) inside a Kubernetes cluster. This environment can be used to quickly
-deploy everything into a _local_ Kubernetes cluster.
-
-
 ### Staging environment
 
 We deploy to staging on every push to the `main` branch.
 
-See [deployment documentation](deployment.md).
-
 ### Production environment
 
-TBD
+Production deployment is the mirror of staging deployment. Deployment to production is
+currently triggered manually, once a set of tests on the staging environment is performed
+and we are sure things are in correct state.
+
+We deploy to production daily.
