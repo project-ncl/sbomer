@@ -11,7 +11,7 @@ We can identify following deployment **environments**:
 - `production`
 
 Every environment requires a Kubernetes cluster. For example `development` can use Minikube.
-We use OpenShift for `staging` and `development`.
+We use OpenShift for `staging` and `production`.
 
 ### Development environment
 

@@ -33,6 +33,11 @@ spec:
             configMapKeyRef:
               name: {{ .Release.Name }}-config
               key: SBOMER_PRODUCT_MAPPING_ENV
+        - name: SBOMER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: SBOMER_SERVICE_URL
       script: |
         #!/usr/bin/env bash
 

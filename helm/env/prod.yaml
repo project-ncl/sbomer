@@ -8,9 +8,11 @@ cache:
     tag: latest
 
 service:
-  route: 
+  route:
     enabled: true
     host: "sbomer.apps.ocp-c1.prod.psi.redhat.com"
+  url: "https://sbomer.apps.ocp-c1.prod.psi.redhat.com"
+
   storage:
     accessMode: ReadWriteMany
   image:

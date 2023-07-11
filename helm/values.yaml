@@ -64,6 +64,7 @@ service:
     enabled: false
     # Placeholder for the route host
     host: ""
+  url: "http://192.168.39.1:8080"
 
   # service.storage is the size of the PVC where the generated SBOMs will be stored until
   # moved to the database
