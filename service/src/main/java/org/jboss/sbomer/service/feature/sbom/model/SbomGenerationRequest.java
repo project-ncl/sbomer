@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -72,6 +73,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 @Builder(setterPrefix = "with")
+@RegisterForReflection
 public class SbomGenerationRequest extends PanacheEntityBase {
 
     @Id
