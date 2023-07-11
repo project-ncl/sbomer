@@ -1,4 +1,15 @@
 {{/*
+Create the url of the service
+*/}}
+{{- define "sbomer.serviceUrl" -}}
+{{- if .Values.service.route.enabled -}}
+    "https://{{ .Values.service.route.host }}"
+{{- else -}}
+    http://192.168.39.1:8080
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "sbomer.serviceAccountName" -}}
