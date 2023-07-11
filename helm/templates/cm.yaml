@@ -7,4 +7,4 @@ data:
     PNC_SERVICE_HOST: {{ .Values.pnc.host }}
     INDY_REPOSITORY_HOST: {{ .Values.indy.host }}
     SBOMER_PRODUCT_MAPPING_ENV: {{ .Values.productMapping }}
-    SBOMER_SERVICE_URL: "{{- template "sbomer.serviceUrl" }}"
+    SBOMER_SERVICE_URL: {{ include "sbomer.serviceUrl" . }}
