@@ -28,30 +28,19 @@ import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
 import org.jboss.pnc.common.json.JsonUtils;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JmsUtils {
 
-    public static final ObjectMapper msgMapper = new ObjectMapper();
-
-    static {
-        msgMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        msgMapper.registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        msgMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        msgMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        msgMapper.disable(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS);
-    }
+    static ObjectMapper msgMapper = ObjectMapperProvider.json();
 
     public static PncBuildNotificationMessageBody getMsgBody(Message message) throws JMSException, IOException {
         if (message == null) {
