@@ -19,7 +19,7 @@
 package org.jboss.sbomer.service.feature.sbom.features.umb.producer.model;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.service.feature.sbom.features.umb.JmsUtils;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -69,7 +69,7 @@ public class GenerationFinishedMessageBody {
     @JsonIgnore
     public String toJson() {
         try {
-            return JmsUtils.msgMapper.writeValueAsString(this);
+            return ObjectMapperProvider.json().writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new ApplicationException("Could not serialize message body", e);
         }

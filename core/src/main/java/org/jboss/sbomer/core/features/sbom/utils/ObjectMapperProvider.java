@@ -18,6 +18,7 @@
 package org.jboss.sbomer.core.features.sbom.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -35,9 +36,13 @@ public class ObjectMapperProvider {
             .setSerializationInclusion(Include.NON_NULL);
 
     static ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+            .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
-            .setSerializationInclusion(Include.NON_NULL);
+            .setSerializationInclusion(Include.NON_NULL)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS);
 
     public static ObjectMapper yaml() {
         return yamlObjectMapper;

@@ -23,12 +23,15 @@ import lombok.Data;
 import java.util.Collection;
 import java.util.Collections;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 /**
  * Collection REST response.
  *
  */
 @Data
 @AllArgsConstructor
+@RegisterForReflection
 public class Page<T> {
 
     /**

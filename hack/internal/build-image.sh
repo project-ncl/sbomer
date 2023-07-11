@@ -37,6 +37,12 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
+# Handle the NATIVE env var
+# Don't build native container images by default
+if [ -z "$NATIVE" ]; then
+  NATIVE="no"
+fi
+
 # Handle the PUSH env var
 # Don't push by default
 if [ -z "$PUSH" ]; then
@@ -76,7 +82,13 @@ set -x
 
 pushd "$SCRIPT_DIR/../../" > /dev/null
 
-"${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "images/${IMAGE_SLUG}/Containerfile" .
+if [ "$NATIVE" = "yes" ]; then
+  CONTAINERFILE="Containerfile.native-micro"
+else
+  CONTAINERFILE="Containerfile"
+fi
+
+"${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "images/${IMAGE_SLUG}/${CONTAINERFILE}" .
 
 if [ "$PUSH" = "yes" ]; then
 "${BUILD_SCRIPT[@]}" tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_COMMIT"
