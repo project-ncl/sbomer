@@ -13,7 +13,7 @@ spec:
     metadata:
 {{ include "sbomer.labels" (list . "db") | indent 6 }}
     spec:
-      serviceAccountName: "{{- template "sbomer.serviceAccountName" }}"
+      serviceAccountName: {{ include "sbomer.serviceAccountName" . }}
       containers:
         - image: {{ .Values.db.image.repository }}:{{ .Values.db.image.tag }}
           imagePullPolicy: {{ .Values.db.image.pullPolicy }}
