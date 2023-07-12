@@ -8,3 +8,4 @@ data:
     INDY_REPOSITORY_HOST: {{ .Values.indy.host }}
     SBOMER_PRODUCT_MAPPING_ENV: {{ .Values.productMapping }}
     SBOMER_SERVICE_URL: {{ include "sbomer.serviceUrl" . }}
+    SBOMER_SA_NAME: {{ include "sbomer.serviceAccountName" . }}
