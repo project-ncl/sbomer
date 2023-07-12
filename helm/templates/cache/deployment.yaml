@@ -12,7 +12,7 @@ spec:
     metadata:
 {{ include "sbomer.labels" (list . "cache") | indent 6 }}
     spec:
-      serviceAccountName: "{{- template "sbomer.serviceAccountName" }}"
+      serviceAccountName: {{ include "sbomer.serviceAccountName" . }}
       containers:
         - image: {{ .Values.cache.image.repository }}:{{ .Values.cache.image.tag }}
           name: {{ .Release.Name }}-cache
