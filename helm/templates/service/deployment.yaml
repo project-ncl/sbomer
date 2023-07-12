@@ -91,6 +91,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Release.Name }}-config
                   key: SBOMER_PRODUCT_MAPPING_ENV
+            - name: SBOMER_SA_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: SBOMER_SA_NAME
             - name: SBOMER_SBOM_DIR
               value: "/data"
             - name: SBOMER_CACHE_SERVICE_URL

@@ -43,11 +43,6 @@ public class Constants {
     public final static String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
 
     /**
-     * The Service Account used to run the TaskRun.
-     */
-    public static String TEKTON_SERVICE_ACCOUNT_NAME = "sbomer-sa";
-
-    /**
      * The label name that identifies the particular Sbom resource.
      */
     public static String TEKTON_LABEL_SBOM_ID = "sbomer.jboss.org/sbom-id";

@@ -76,6 +76,8 @@ sbomer:
         retries: 15
         max-back-off: 30
 
+  tekton:
+    sa: "${SBOMER_SA_NAME:sbomer-sa}"
   sbom:
     sbom-dir: "${SBOMER_SBOM_DIR}"
     # Defines whether resources related to a generation should be automatically removed from the system

@@ -29,6 +29,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
@@ -66,6 +67,9 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     public static final String PARAM_COMMAND_INDEX_NAME = "index";
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+
+    @Inject
+    TektonConfig tektonConfig;
 
     @Inject
     KubernetesClient kubernetesClient;
@@ -141,7 +145,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                                 .build())
                 .endMetadata()
                 .withNewSpec()
-                .withServiceAccountName("sbomer-sa")
+                .withServiceAccountName(tektonConfig.sa())
                 .withParams(
                         new ParamBuilder().withName(PARAM_COMMAND_CONFIG_NAME).withNewValue(configStr).build(),
                         new ParamBuilder().withName(PARAM_COMMAND_INDEX_NAME)
