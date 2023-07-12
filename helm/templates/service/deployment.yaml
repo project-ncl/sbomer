@@ -15,7 +15,7 @@ spec:
       annotations:
         sbomer-secret: sbomer-secrets
     spec:
-      serviceAccountName: "{{- template "sbomer.serviceAccountName" }}"
+      serviceAccountName: {{ include "sbomer.serviceAccountName" . }}
       initContainers:
         - image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
           name: get-vault-secrets
