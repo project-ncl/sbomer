@@ -200,7 +200,7 @@ public class SBOMResource {
     @Operation(
             summary = "Generate SBOM based on the PNC build",
             description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
-    @Parameter(name = "id", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
     @Path("/generate/build/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "202",

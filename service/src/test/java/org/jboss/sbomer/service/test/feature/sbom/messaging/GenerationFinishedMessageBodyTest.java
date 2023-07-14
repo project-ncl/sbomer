@@ -27,14 +27,14 @@ import java.util.Collections;
 import javax.inject.Inject;
 
 import org.hamcrest.CoreMatchers;
+import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
+import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig.ErrataProductConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.GenerationFinishedMessageBodyValidator;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.GenerationFinishedMessageBodyValidator.ValidationResult;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.ProductConfig.ErrataProductConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.Bom;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.BomFormat;
 import org.junit.jupiter.api.Test;

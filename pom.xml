@@ -59,15 +59,14 @@
         <version.pnc-rest>2.4.3</version.pnc-rest>
         <version.pnc-api>2.4.5</version.pnc-api>
         <version.pnc-common>2.2.1</version.pnc-common>
-        <version.quarkus-jgit>2.3.1</version.quarkus-jgit>
-        <version.tekton-client>0.6.0</version.tekton-client>
+        <version.quarkus-jgit>2.3.2</version.quarkus-jgit>
+        <version.tekton-client>0.7.0</version.tekton-client>
         <version.rsql-parser>2.1.0</version.rsql-parser>
         <version.rsql-jpa>2.0.2</version.rsql-jpa>
         <version.commons-cli>1.4</version.commons-cli>
         <quarkus.qpid.jms.group-id>${quarkus.platform.group-id}</quarkus.qpid.jms.group-id>
         <quarkus.qpid.jms.version>${quarkus.platform.version}</quarkus.qpid.jms.version>
         <quarkus-test-artemis-version>2.0.3</quarkus-test-artemis-version>
-        <quarkus-logging-json.version>3.0.0</quarkus-logging-json.version>
         <quarkus-operator-sdk-version>5.1.4</quarkus-operator-sdk-version>
     </properties>
 
@@ -79,6 +78,12 @@
                 <version>${quarkus-operator-sdk-version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.quarkus</groupId>
+                        <artifactId>quarkus-kubernetes</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>${quarkus.platform.group-id}</groupId>

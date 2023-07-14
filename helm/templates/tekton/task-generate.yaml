@@ -23,21 +23,16 @@ spec:
           cpu: 200m
           memory: 300Mi
       env:
-        - name: PNC_SERVICE_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Release.Name }}-config
-              key: PNC_SERVICE_HOST
-        - name: SBOMER_PRODUCT_MAPPING_ENV
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Release.Name }}-config
-              key: SBOMER_PRODUCT_MAPPING_ENV
-        - name: SBOMER_SERVICE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Release.Name }}-config
-              key: SBOMER_SERVICE_URL
+        - name: SBOMER_HOST
+          value: {{ include "sbomer.serviceUrl" . }}
+        - name: SBOMER_PNC_HOST
+          value: {{ .Values.pnc.host }}
+        - name: SBOMER_GERRIT_HOST
+          value: {{ .Values.gerrit.host }}
+        - name: SBOMER_INDY_HOST
+          value: {{ .Values.indy.host }}
+        - name: SBOMER_PNC_PRODUCT_MAPPING
+          value: {{ include "sbomer.productMapping" . }}
       script: |
         #!/usr/bin/env bash
 

@@ -20,16 +20,12 @@ package org.jboss.sbomer.service.feature.sbom.config;
 import javax.enterprise.context.ApplicationScoped;
 
 import io.smallrye.config.ConfigMapping;
-import io.smallrye.config.WithDefault;
 
 /**
  * @author Marek Goldmann
  */
 @ApplicationScoped
-@ConfigMapping(prefix = "sbomer.sbom")
-public interface SbomConfig {
-    String sbomDir();
-
-    @WithDefault("true")
-    boolean cleanup();
+@ConfigMapping(prefix = "sbomer.controller")
+public interface ControllerConfig {
+    GenerationRequestControllerConfig generationRequest();
 }

@@ -36,9 +36,9 @@ import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
+import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
+import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig.UmbConsumerTrigger;
 import org.jboss.sbomer.service.feature.sbom.features.umb.JmsUtils;
-import org.jboss.sbomer.service.feature.sbom.features.umb.UmbConfig;
-import org.jboss.sbomer.service.feature.sbom.features.umb.UmbConfig.UmbConsumerTrigger;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
@@ -89,7 +89,7 @@ public class PncMessageParser implements Runnable {
             return;
         }
 
-        if (config.consumer().trigger() == UmbConsumerTrigger.NONE) {
+        if (config.consumer().trigger().isPresent() && config.consumer().trigger().get() == UmbConsumerTrigger.NONE) {
             log.warn("The UMB consumer configuration is set to NONE, all builds are skipped");
         }
 
@@ -122,7 +122,7 @@ public class PncMessageParser implements Runnable {
                         continue;
                     }
 
-                    if (Objects.equals(config.consumer().trigger(), UmbConsumerTrigger.NONE)) {
+                    if (Objects.equals(config.consumer().trigger().orElse(null), UmbConsumerTrigger.NONE)) {
                         log.warn(
                                 "The UMB consumer configuration is set to NONE, skipping SBOM generation for PNC Build '{}'",
                                 msgBody.getBuild().getId());

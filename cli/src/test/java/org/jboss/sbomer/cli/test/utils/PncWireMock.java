@@ -33,7 +33,7 @@ public class PncWireMock implements QuarkusTestResourceLifecycleManager {
         wireMockServer = new WireMockServer(12388);
         wireMockServer.start();
 
-        return Collections.singletonMap("sbomer.pnc.api-url", wireMockServer.baseUrl().substring(7));
+        return Collections.singletonMap("sbomer.pnc.host", wireMockServer.baseUrl().substring(7));
     }
 
     @Override

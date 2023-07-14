@@ -15,32 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.feature.sbom.client;
+package org.jboss.sbomer.service.feature.sbom.config.features;
 
-import java.util.Collections;
-import java.util.Map;
+import javax.enterprise.context.ApplicationScoped;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
+import io.smallrye.config.ConfigMapping;
 
-import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
+/**
+ * @author Marek Goldmann
+ */
+@ApplicationScoped
+@ConfigMapping(prefix = "sbomer.features")
+public interface FeatureConfig {
 
-public class ServiceWireMock implements QuarkusTestResourceLifecycleManager {
-
-    private WireMockServer wireMockServer;
-
-    @Override
-    public Map<String, String> start() {
-        wireMockServer = new WireMockServer(12377);
-        wireMockServer.start();
-
-        return Collections.singletonMap("sbomer.host", wireMockServer.baseUrl());
-    }
-
-    @Override
-    public void stop() {
-        if (wireMockServer != null) {
-            wireMockServer.stop();
-        }
-    }
-
+    UmbConfig umb();
 }

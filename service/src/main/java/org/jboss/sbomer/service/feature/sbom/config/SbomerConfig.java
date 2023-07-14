@@ -1,4 +1,3 @@
-
 /**
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
@@ -16,35 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.features.umb.producer.model;
+package org.jboss.sbomer.service.feature.sbom.config;
 
-import lombok.Builder;
-import lombok.Data;
+import javax.enterprise.context.ApplicationScoped;
+
+import io.smallrye.config.ConfigMapping;
 
 /**
- * <p>
- * Product pointer to which the Sbom is related.
- * </p>
- *
- *
- * <p>
- * This object can contain one or more entries that point to a product configuration. These can use different sources
- * for this information.
- * </p>
+ * @author Marek Goldmann
  */
-@Data
-@Builder
-public class ProductConfig {
-    @Data
-    @Builder
-    public static class ErrataProductConfig {
-        String productName;
-        String productVersion;
-        String productVariant;
-    }
+@ApplicationScoped
+@ConfigMapping(prefix = "sbomer")
+public interface SbomerConfig {
+    String apiUrl();
 
-    /**
-     * Product information stored in the Errata Tool.
-     */
-    ErrataProductConfig errataTool;
+    ControllerConfig controller();
+
+    TektonConfig tekton();
 }

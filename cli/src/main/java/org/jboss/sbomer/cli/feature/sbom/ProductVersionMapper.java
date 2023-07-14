@@ -19,6 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -41,8 +42,8 @@ import lombok.Getter;
 @ApplicationScoped
 public class ProductVersionMapper {
 
-    @ConfigProperty(name = "sbomer.pnc.product-mapping.environment")
-    String mappingEnvironment;
+    @ConfigProperty(name = "sbomer.pnc.product-mapping")
+    Optional<String> mappingEnvironment;
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
@@ -64,7 +65,8 @@ public class ProductVersionMapper {
         try {
             mapping = objectMapper.readValue(
                     getClass().getClassLoader()
-                            .getResourceAsStream("mapping/" + mappingEnvironment + "/product-mapping.yaml"),
+                            .getResourceAsStream(
+                                    "mapping/" + mappingEnvironment.orElse("prod") + "/product-mapping.yaml"),
                     Mapping.class);
         } catch (IOException e) {
             throw new ApplicationException("Could not read product mappings", e);

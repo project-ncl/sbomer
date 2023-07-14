@@ -80,26 +80,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.annotations['sbomer-secret']
-            - name: QUARKUS_DATASOURCE_JDBC_MAX_SIZE
-              value: "20"
-            - name: QUARKUS_DATASOURCE_JDBC_MIN_SIZE
-              value: "0"
-            - name: QUARKUS_DATASOURCE_JDBC_INITIAL_SIZE
-              value: "1"
-            - name: SBOMER_PRODUCT_MAPPING_ENV
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}-config
-                  key: SBOMER_PRODUCT_MAPPING_ENV
-            - name: SBOMER_SA_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}-config
-                  key: SBOMER_SA_NAME
             - name: SBOMER_SBOM_DIR
               value: "/data"
-            - name: SBOMER_CACHE_SERVICE_URL
-              value: "$(SBOMER_CACHE_SERVICE_HOST):$(SBOMER_CACHE_SERVICE_PORT)/pnc/orch"
+            - name: SBOMER_TEKTON_SA
+              value: {{ include "sbomer.serviceAccountName" . }}
           ports:
             - containerPort: 8080
               name: http

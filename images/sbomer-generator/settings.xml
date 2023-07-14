@@ -95,7 +95,7 @@
         <repository>
           <id>indy</id>
           <name>Red Hat internal repository</name>
-          <url>https://${env.INDY_REPOSITORY_HOST}/api/content/maven/group/static/</url>
+          <url>https://${env.SBOMER_INDY_HOST}/api/content/maven/group/static/</url>
           <layout>default</layout>
           <releases>
             <enabled>true</enabled>

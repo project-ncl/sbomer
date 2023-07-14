@@ -1,3 +1,4 @@
+
 /**
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
@@ -15,23 +16,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.features;
+package org.jboss.sbomer.service.feature.sbom.config.features;
 
-import javax.enterprise.context.ApplicationScoped;
-
-import org.jboss.sbomer.service.feature.sbom.features.umb.TaskRunsConfig;
-import org.jboss.sbomer.service.feature.sbom.features.umb.UmbConfig;
-
-import io.smallrye.config.ConfigMapping;
+import lombok.Builder;
+import lombok.Data;
 
 /**
- * @author Marek Goldmann
+ * <p>
+ * Product pointer to which the Sbom is related.
+ * </p>
+ *
+ *
+ * <p>
+ * This object can contain one or more entries that point to a product configuration. These can use different sources
+ * for this information.
+ * </p>
  */
-@ApplicationScoped
-@ConfigMapping(prefix = "sbomer.features")
-public interface FeatureConfig {
+@Data
+@Builder
+public class ProductConfig {
+    @Data
+    @Builder
+    public static class ErrataProductConfig {
+        String productName;
+        String productVersion;
+        String productVariant;
+    }
 
-    UmbConfig umb();
-
-    TaskRunsConfig taskruns();
+    /**
+     * Product information stored in the Errata Tool.
+     */
+    ErrataProductConfig errataTool;
 }

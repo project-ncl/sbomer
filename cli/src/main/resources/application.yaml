@@ -28,10 +28,10 @@ quarkus:
     enabled: false
 
   rest-client:
-    "sbomer":
-      url: "${SBOMER_SERVICE_URL:http://localhost:8080}"
     "gerrit":
-      url: "https://code.engineering.redhat.com"
+      url: "https://${sbomer.gerrit.host}"
+    "sbomer":
+      url: "${sbomer.host}"
 
   log:
     level: INFO
@@ -43,10 +43,18 @@ quarkus:
       stderr: true
 
 sbomer:
+  ## (required)
+  ## Hostname of the SBOMer service
+  host: http://localhost:8080
   pnc:
-    api-url: "${SBOMER_CACHE_SERVICE_URL:${PNC_SERVICE_HOST:orch.psi.redhat.com}}"
-    product-mapping:
-      environment: "${SBOMER_PRODUCT_MAPPING_ENV:prod}"
+    ## (required)
+    ## Hostname of the PNC service
+    # host:
+    ## Product mapping environment, by default production mapping will be used
+    product-mapping: "prod"
+  ## Gerrit configuration
+  # gerrit:
+  #   host:
   generation:
     enabled: true
     default-generator: maven-cyclonedx
@@ -69,29 +77,24 @@ sbomer:
 "%dev":
   quarkus:
     log:
-      level: INFO
       category:
         "io.quarkus.kubernetes":
           level: DEBUG
-        "org.jboss.sbomer":
-          level: DEBUG
       console:
-        json: false
+        json:
+          ~: false
 
   sbomer:
     pnc:
-      api-url: "${SBOMER_CACHE_SERVICE_URL:localhost:7070/pnc/orch}"
+      host: "localhost:7070/pnc/orch"
 
 "%test":
   quarkus:
     log:
-      level: INFO
-      category:
-        "org.jboss.sbomer":
-          level: DEBUG
       console:
-        json: false
+        json:
+          ~: false
 
   sbomer:
     pnc:
-      api-url: "localhost/pnc/orch"
+      host: "localhost:7070/pnc/orch"

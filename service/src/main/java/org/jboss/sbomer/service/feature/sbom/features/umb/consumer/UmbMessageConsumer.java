@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +31,7 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.sbomer.service.feature.sbom.features.umb.UmbConfig;
+import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
 import io.quarkus.arc.Unremovable;
@@ -63,7 +64,7 @@ public class UmbMessageConsumer implements MessageConsumer {
     }
 
     @ConfigProperty(name = "quarkus.qpid-jms.url")
-    String amqpConnection;
+    Optional<String> amqpConnection;
 
     @Inject
     UmbConfig umbConfig;

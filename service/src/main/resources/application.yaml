@@ -17,9 +17,15 @@
 #
 
 quarkus:
+  # Make the startup a bit nicer
   banner:
     path: banner.txt
 
+  # We don't use https://quarkus.io/guides/dev-services currently 
+  devservices:
+    enabled: false
+
+  # Default logging settings
   log:
     level: INFO
     category:
@@ -29,30 +35,49 @@ quarkus:
       #   level: DEBUG
       "com.github.tennaito.rsql":
         level: WARN
+      "io.quarkus.kubernetes.client":
+        level: INFO
     console:
+      # Enable console logging
+      enable: true
+      # Disable JSON logging for console by default
+      json:
+        ~: false
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+    file:
+      # Disable file logging
+      enable: false
+      # Disable JSON logging for files by default
+      json:
+        ~: false
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
 
+  # Configuration for API viewer under the api/ /endpoint.
+  smallrye-openapi:
+    info-title: SBOMer service
   swagger-ui:
     always-include: true
     path: /api
 
+  # https://quarkus.io/guides/jms
+  # qpid-jms:
+  #   url:
+
+  # Database configuration
   datasource:
     db-kind: postgresql
-  smallrye-openapi:
-    info-title: SBOMer service
+    jdbc:
+      max-size: 20
+      min-size: 0
+      initial-size: 1
+  # https://quarkus.io/guides/hibernate-orm
   hibernate-orm:
     database:
-      generation: update
-  qpid-jms:
-    url: "${UMB_BROKER_URL}"
-
-  oidc:
-    connection-delay: 30S
-    connection-retry-count: 10
-    client-id: pnc-sbomer
-    tls:
-      verification: none
-
+      # Just validate, do not do anything else
+      generation:
+        ~: validate
+  
+  # https://docs.quarkiverse.io/quarkus-operator-sdk/dev/index.html
   operator-sdk:
     crd:
       generate-all: false
@@ -60,113 +85,30 @@ quarkus:
       apply: false
       validate: false
 
+  ## https://quarkus.io/guides/security-oidc-configuration-properties-reference
+  ## OpenID Connect (OIDC) configuration
+  oidc:
+    enabled: false
+
 sbomer:
-  images:
-    generator: localhost/sbomer-generator:latest
   features:
     umb:
-      enabled: true
-      consumer:
-        enabled: true
-        topic: "${CONSUMER_TOPIC}"
-        trigger: product
-      producer:
-        enabled: true
-        topic: "${PRODUCER_TOPIC}"
-        retries: 15
-        max-back-off: 30
+      # Disable UMB feature entirely by default
+      enabled: false
 
+  # Tekton-related configuration
   tekton:
-    sa: "${SBOMER_SA_NAME:sbomer-sa}"
-  sbom:
-    sbom-dir: "${SBOMER_SBOM_DIR}"
-    # Defines whether resources related to a generation should be automatically removed from the system
-    # This includes removing the generation request kubernetes resource as well as any leftovers on the filesystem
-    # located in the sbomer.sbom-dir directory.
-    cleanup: true
 
-  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
+    # Name of the ServiceAccount used to run Tekton TaskRuns
+    sa: sbomer
+  
+  controller:
+    generation-request:
+      # # The directory where the content between TaskRuns (dependent resources) will be
+      # # shared with the controller.
+      # sbom-dir: "/data"
 
-"%dev":
-  quarkus:
-    datasource:
-      username: sbomer
-      password: password
-      jdbc:
-        url: jdbc:postgresql://localhost:5432/sbomer
-    hibernate-orm:
-      database:
-        generation: drop-and-create
-      log:
-        sql: true
-    smallrye-openapi:
-      info-title: SBOMer service (development)
-    qpid-jms:
-      url: amqp://localhost:5672
-      username: ""
-      password: ""
-
-    log:
-      level: INFO
-      category:
-        "io.quarkus.kubernetes":
-          level: DEBUG
-        "org.jboss.sbomer":
-          level: DEBUG
-      console:
-        json: false
-    oidc:
-      enabled: false
-
-  sbomer:
-    api-url: "http://localhost:8080/api/v1alpha1/"
-    features:
-      umb:
-        enabled: false
-        consumer:
-          enabled: false
-        producer:
-          enabled: false
-    sbom:
-      sbom-dir: "/tmp/sbomer"
+      # # Defines whether resources related to a generation should be automatically removed from the system
+      # # This includes removing the generation request kubernetes resource as well as any leftovers on the filesystem
+      # # located in the sbomer.sbom-dir directory.
       cleanup: false
-
-"%test":
-  quarkus:
-    datasource:
-      db-kind: h2
-      jdbc:
-        url: jdbc:h2:mem:default;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:init.sql'
-    hibernate-orm:
-      database:
-        generation: drop-and-create
-    qpid-jms:
-      url: amqp://localhost:5672
-      username: ""
-      password: ""
-
-    log:
-      level: INFO
-      category:
-        "org.jboss.sbomer":
-          level: DEBUG
-      console:
-        json: false
-    oidc:
-      enabled: false
-
-    operator-sdk:
-      start-operator: false
-
-  sbomer:
-    sbom:
-      sbom-dir: "/tmp/sbomer"
-    api-url: "http://localhost:8080/api/v1alpha1/"
-    features:
-      umb:
-        enabled: true
-        consumer:
-          enabled: true
-          topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.builds"
-        producer:
-          enabled: false

@@ -19,15 +19,9 @@ spec:
           imagePullPolicy: {{ .Values.cache.image.pullPolicy }}
           env:
             - name: PNC_SERVICE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}-config
-                  key: PNC_SERVICE_HOST
+              value: {{ .Values.pnc.host }}
             - name: INDY_REPOSITORY_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}-config
-                  key: INDY_REPOSITORY_HOST
+              value: {{ .Values.indy.host }}
           ports:
             - containerPort: 7070
               name: http
