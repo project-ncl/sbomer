@@ -92,7 +92,6 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
                 "-Dquarkus.args=\"\"",
                 "-jar",
                 dominoPath.toAbsolutePath().toString(),
-                "from-maven",
                 "report",
                 String.format("--project-dir=%s", parent.getWorkdir().toAbsolutePath().toString()),
                 String.format("--output-file=%s", BOM_FILE_NAME),
