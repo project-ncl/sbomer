@@ -54,23 +54,24 @@ public class SbomService {
     @Inject
     Validator validator;
 
-    public List<Sbom> searchSbomsByQuery(String rsqlQuery) {
-        return sbomRepository.searchByQuery(rsqlQuery);
+    public List<Sbom> searchSbomsByQuery(String rsqlQuery, String sort) {
+        return sbomRepository.searchByQuery(rsqlQuery, sort);
     }
 
-    public Page<Sbom> searchSbomsByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery) {
-        return sbomRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery);
+    public Page<Sbom> searchSbomsByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery, String sort) {
+        return sbomRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery, sort);
     }
 
-    public List<SbomGenerationRequest> searchSbomRequestsByQuery(String rsqlQuery) {
-        return sbomRequestRepository.searchByQuery(rsqlQuery);
+    public List<SbomGenerationRequest> searchSbomRequestsByQuery(String rsqlQuery, String sort) {
+        return sbomRequestRepository.searchByQuery(rsqlQuery, sort);
     }
 
     public Page<SbomGenerationRequest> searchSbomRequestsByQueryPaginated(
             int pageIndex,
             int pageSize,
-            String rsqlQuery) {
-        return sbomRequestRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery);
+            String rsqlQuery,
+            String sort) {
+        return sbomRequestRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery, sort);
     }
 
     /**

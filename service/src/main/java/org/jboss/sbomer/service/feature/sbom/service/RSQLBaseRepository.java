@@ -38,15 +38,16 @@ public abstract class RSQLBaseRepository<T extends PanacheEntityBase, ID> implem
     @Inject
     RSQLProducer<T> rsqlProducer;
 
-    public Page<T> searchByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery) {
+    public Page<T> searchByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery, String sort) {
         log.debug(
-                "Getting list of all {} with pageIndex: {}, pageSize: {}, rsqlQuery: {}",
+                "Getting list of all {} with pageIndex: {}, pageSize: {}, rsqlQuery: {}, sort: {}",
                 getEntityClass(),
                 pageIndex,
                 pageSize,
-                rsqlQuery);
+                rsqlQuery,
+                sort);
 
-        List<T> content = searchByQuery(pageIndex, pageSize, rsqlQuery);
+        List<T> content = searchByQuery(pageIndex, pageSize, rsqlQuery, sort);
         Long totalHits = countByQuery(rsqlQuery);
 
         log.debug("Found content: {}, totalHits: {}", content, totalHits);
@@ -62,9 +63,9 @@ public abstract class RSQLBaseRepository<T extends PanacheEntityBase, ID> implem
         return new Page<>(pageIndex, pageSize, totalPages, totalHits, content);
     }
 
-    public List<T> searchByQuery(String rsqlQuery) {
+    public List<T> searchByQuery(String rsqlQuery, String sort) {
 
-        CriteriaQuery<T> query = rsqlProducer.getCriteriaQuery(getEntityClass(), rsqlQuery);
+        CriteriaQuery<T> query = rsqlProducer.getCriteriaQuery(getEntityClass(), rsqlQuery, sort);
         List<T> resultList = getEntityManager().createQuery(query).getResultList();
         if (resultList == null || resultList.isEmpty()) {
             return Collections.emptyList();
@@ -72,9 +73,9 @@ public abstract class RSQLBaseRepository<T extends PanacheEntityBase, ID> implem
         return resultList;
     }
 
-    public List<T> searchByQuery(int pageIndex, int pageSize, String rsqlQuery) {
+    public List<T> searchByQuery(int pageIndex, int pageSize, String rsqlQuery, String sort) {
 
-        CriteriaQuery<T> query = rsqlProducer.getCriteriaQuery(getEntityClass(), rsqlQuery);
+        CriteriaQuery<T> query = rsqlProducer.getCriteriaQuery(getEntityClass(), rsqlQuery, sort);
         List<T> resultList = getEntityManager().createQuery(query)
                 .setFirstResult(pageIndex * pageSize)
                 .setMaxResults(pageSize)

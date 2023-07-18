@@ -130,7 +130,7 @@ public class TestSbomRepository {
     @Test
     public void testNonNullRootComponents() {
         String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
+        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery, null).get(0);
 
         assertNotNull(sbom.getRootPurl());
         assertEquals(
@@ -141,7 +141,7 @@ public class TestSbomRepository {
     @Test
     public void testValidBom() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
+        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery, null).get(0);
         Bom bom = sbom.getCycloneDxBom();
 
         assertEquals("416640206274228224", sbom.getId());
@@ -166,7 +166,7 @@ public class TestSbomRepository {
     @Test
     public void testValidConfiguration() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery).get(0);
+        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery, null).get(0);
 
         assertEquals("416640206274228224", sbom.getId());
         assertEquals("ARYT3LBXDVYAC", sbom.getGenerationRequest().getConfiguration().getBuildId());

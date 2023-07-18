@@ -53,7 +53,7 @@ public class TestSBOMService {
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
         String rsqlQuery = "buildId=eq=" + INITIAL_BUILD_ID;
-        Collection<Sbom> sboms = sbomService.searchSbomsByQueryPaginated(0, 1, rsqlQuery).getContent();
+        Collection<Sbom> sboms = sbomService.searchSbomsByQueryPaginated(0, 1, rsqlQuery, null).getContent();
         assertTrue(sboms.size() > 0);
     }
 
@@ -66,7 +66,7 @@ public class TestSBOMService {
 
         sbomService.save(dummySbom);
 
-        Page<Sbom> page = sbomService.searchSbomsByQueryPaginated(0, 50, null);
+        Page<Sbom> page = sbomService.searchSbomsByQueryPaginated(0, 50, null, null);
         assertEquals(0, page.getPageIndex());
         assertEquals(50, page.getPageSize());
         assertTrue(page.getTotalHits() > 0);
