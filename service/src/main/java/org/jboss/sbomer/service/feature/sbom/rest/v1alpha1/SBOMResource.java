@@ -77,7 +77,7 @@ public class SBOMResource {
 
     // RSQL Examples:
     // -------------------------------------------------------------------------------
-    // ==> "/api/v1alpha1/sboms?query=buildId==eq={buildId}"
+    // ==> "/api/v1alpha1/sboms?query=buildId==eq={buildId}&sort=id=asc="
     // ==> "/api/v1alpha1/sboms?query=rootPurl=eq='{rootPurl}'"
     // -------------------------------------------------------------------------------
 
@@ -91,6 +91,11 @@ public class SBOMResource {
                     @ExampleObject(
                             name = "Find all SBOMs with provided purl",
                             value = "rootPurl=eq='pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00270?type=jar'") })
+    @Parameter(
+            name = "sort",
+            description = "Optional RSQL sort",
+            examples = { @ExampleObject(name = "Order SBOMs by id in ascending order", value = "id=asc="),
+                    @ExampleObject(name = "Order SBOMs by creation time in descending order", value = "creationTime=desc=") })
     @APIResponses({
             @APIResponse(
                     responseCode = "200",
@@ -106,13 +111,15 @@ public class SBOMResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Response searchSboms(
             @Valid @BeanParam PaginationParameters paginationParams,
-            @QueryParam("query") String rsqlQuery) {
+            @QueryParam("query") String rsqlQuery,
+            @QueryParam("sort") String sort) {
 
         try {
             Page<Sbom> sboms = sbomService.searchSbomsByQueryPaginated(
                     paginationParams.getPageIndex(),
                     paginationParams.getPageSize(),
-                    rsqlQuery);
+                    rsqlQuery,
+                    sort);
             return Response.status(Status.OK).entity(sboms).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
@@ -239,6 +246,13 @@ public class SBOMResource {
             examples = { @ExampleObject(
                     name = "Find all SBOM generation requests with provided buildId",
                     value = "buildId=eq=ABCDEFGHIJKLM") })
+    @Parameter(
+            name = "sort",
+            description = "Optional RSQL sort",
+            examples = { @ExampleObject(name = "Order generation requests by id in ascending order", value = "id=asc="),
+                    @ExampleObject(
+                            name = "Order generation requests by creation time in descending order",
+                            value = "creationTime=desc=") })
     @APIResponses({
             @APIResponse(
                     responseCode = "200",
@@ -254,14 +268,16 @@ public class SBOMResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Response searchGenerationRequests(
             @Valid @BeanParam PaginationParameters paginationParams,
-            @QueryParam("query") String rsqlQuery) {
+            @QueryParam("query") String rsqlQuery,
+            @QueryParam("sort") String sort) {
 
         try {
 
             Page<SbomGenerationRequest> requests = sbomService.searchSbomRequestsByQueryPaginated(
                     paginationParams.getPageIndex(),
                     paginationParams.getPageSize(),
-                    rsqlQuery);
+                    rsqlQuery,
+                    sort);
             return Response.status(Status.OK).entity(requests).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
