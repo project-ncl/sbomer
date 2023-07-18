@@ -79,7 +79,7 @@ public class SBOMerClientTest {
         pagParams.setPageIndex(0);
         pagParams.setPageSize(1);
         String rsqlQuery = "id==123";
-        Response response = client.searchSboms("123", pagParams, rsqlQuery);
+        Response response = client.searchSboms("123", pagParams, rsqlQuery, null);
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
@@ -103,7 +103,8 @@ public class SBOMerClientTest {
         pagParams.setPageSize(20);
 
         String rsqlQuery = "buildId=eq=QUARKUS;generationRequest.buildId=eq=QUARKUS;generationRequest.status=eq=FINISHED;generationRequest.result=eq=SUCCESS";
-        Response response = client.searchSboms("QUARKUS", pagParams, rsqlQuery);
+        String sortQuery = "creationTime=desc=";
+        Response response = client.searchSboms("QUARKUS", pagParams, rsqlQuery, sortQuery);
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
@@ -128,7 +129,8 @@ public class SBOMerClientTest {
         pagParams.setPageIndex(0);
         pagParams.setPageSize(1);
         String rsqlQuery = "id==AABBCC";
-        Response response = client.searchGenerationRequests("AABBCC", pagParams, rsqlQuery);
+        String sortQuery = "creationTime=desc=";
+        Response response = client.searchGenerationRequests("AABBCC", pagParams, rsqlQuery, sortQuery);
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<Page<SbomGenerationRequest>>() {

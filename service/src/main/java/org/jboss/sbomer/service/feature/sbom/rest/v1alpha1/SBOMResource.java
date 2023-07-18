@@ -95,7 +95,9 @@ public class SBOMResource {
             name = "sort",
             description = "Optional RSQL sort",
             examples = { @ExampleObject(name = "Order SBOMs by id in ascending order", value = "id=asc="),
-                    @ExampleObject(name = "Order SBOMs by creation time in descending order", value = "creationTime=desc=") })
+                    @ExampleObject(
+                            name = "Order SBOMs by creation time in descending order",
+                            value = "creationTime=desc=") })
     @APIResponses({
             @APIResponse(
                     responseCode = "200",

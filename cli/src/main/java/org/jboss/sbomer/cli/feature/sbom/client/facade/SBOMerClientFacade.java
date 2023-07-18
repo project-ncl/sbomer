@@ -58,12 +58,15 @@ public class SBOMerClientFacade {
         pagParams.setPageIndex(0);
         pagParams.setPageSize(20);
 
-        // TODO: sort by creation time desc
         String rsqlQuery = "buildId=eq=" + buildId + ";status=eq=FINISHED;result=eq=SUCCESS";
+        String sortQuery = "creationTime=desc=";
 
-        log.info("Searching existing successful SBOM Generation Requests with rsqlQuery: {}", rsqlQuery);
+        log.info(
+                "Searching existing successful SBOM Generation Requests with rsqlQuery: {}, sortQuery: {}",
+                rsqlQuery,
+                sortQuery);
 
-        Response response = sbomerClient.searchGenerationRequests(buildId, pagParams, rsqlQuery);
+        Response response = sbomerClient.searchGenerationRequests(buildId, pagParams, rsqlQuery, sortQuery);
 
         String json = response.readEntity(String.class);
         TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<Page<SbomGenerationRequest>>() {
@@ -94,10 +97,11 @@ public class SBOMerClientFacade {
         pagParams.setPageSize(20);
 
         String rsqlQuery = "generationRequest.id=eq=" + requestId;
+        String rsqlSort = null;
 
         log.info("Searching existing successful SBOM Generation Requests with rsqlQuery: {}", rsqlQuery);
 
-        Response response = sbomerClient.searchSboms(requestId, pagParams, rsqlQuery);
+        Response response = sbomerClient.searchSboms(requestId, pagParams, rsqlQuery, rsqlSort);
 
         String json = response.readEntity(String.class);
         TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
