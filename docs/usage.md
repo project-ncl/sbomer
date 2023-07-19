@@ -136,7 +136,7 @@ Below you can see the static and default parameters set for the Domino generator
 **Static**
 
 ```
-java -jar domino.jar from-maven report --project-dir=[DIR] --output-file=[OUTPUT_DIR]/bom.json --manifest -s [PATH_TO_SETTINGS_XML_FILE]
+java -jar domino.jar report --project-dir=[DIR] --output-file=[OUTPUT_DIR]/bom.json --manifest -s [PATH_TO_SETTINGS_XML_FILE]
 ```
 
 **Defaults**
@@ -147,7 +147,7 @@ java -jar domino.jar from-maven report --project-dir=[DIR] --output-file=[OUTPUT
 
 **Custom arguments**
 
-Run the `java -jar domino.jar from-maven report --help` command to get a list of all possible options for Domino.
+Run the `java -jar domino.jar report --help` command to get a list of all possible options for Domino.
 
 #### CycloneDX Maven Plugin generator
 
