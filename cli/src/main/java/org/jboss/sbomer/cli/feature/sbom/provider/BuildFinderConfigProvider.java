@@ -34,6 +34,9 @@ import org.jboss.pnc.build.finder.core.BuildConfig;
 import org.jboss.pnc.build.finder.core.BuildSystem;
 import org.jboss.pnc.build.finder.core.ChecksumType;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @ApplicationScoped
 public class BuildFinderConfigProvider {
 
@@ -121,6 +124,7 @@ public class BuildFinderConfigProvider {
 
         if (optionalKojiHubURL.isPresent()) {
             String s = optionalKojiHubURL.get();
+            log.debug("Using KojiHubURL: {}", s);
 
             try {
                 URL kojiHubURL = new URL(s);
@@ -128,6 +132,9 @@ public class BuildFinderConfigProvider {
             } catch (MalformedURLException e) {
                 throw new IOException("Bad Koji hub URL: " + s, e);
             }
+        } else {
+            log.warn("Empty KojiHubURL!! Querying Brew will not work!!");
+
         }
     }
 
@@ -145,6 +152,7 @@ public class BuildFinderConfigProvider {
 
         if (optionalKojiWebURL.isPresent()) {
             String s = optionalKojiWebURL.get();
+            log.debug("Using KojiWebURL: {}", s);
 
             try {
                 URL kojiWebURL = new URL(s);
@@ -162,6 +170,8 @@ public class BuildFinderConfigProvider {
             } catch (MalformedURLException e) {
                 throw new IOException("Bad Koji web URL: " + s, e);
             }
+        } else {
+            log.warn("Empty KojiWebURL!! Querying Brew will not work!!");
         }
     }
 
