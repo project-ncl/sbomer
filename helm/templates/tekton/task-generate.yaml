@@ -56,7 +56,7 @@ spec:
         cd $(workspaces.data.path)/$(context.taskRun.name)
 
         echo "Running generation..."
-        exec /workdir/.sdkman/candidates/java/17/bin/java -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config $CONFIG_PATH --index "$(params.index)"
+        exec /workdir/.sdkman/candidates/java/17/bin/java -Duser.home=/workdir -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config $CONFIG_PATH --index "$(params.index)"
   workspaces:
     - name: data
       description: Workspace used to store the generated SBOMs
