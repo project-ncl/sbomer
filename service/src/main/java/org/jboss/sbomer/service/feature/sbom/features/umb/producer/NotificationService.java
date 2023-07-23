@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.producer;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.findPropertyWithNameInComponent;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.fromJsonNode;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
@@ -154,7 +154,7 @@ public class NotificationService {
         Optional<ExternalReference> pncBuildSystemRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                .filter(r -> r.getComment().equals(SBOM_RED_HAT_BUILD_ID))
+                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
                 .findFirst();
 
         Build buildPayload = Build.builder()

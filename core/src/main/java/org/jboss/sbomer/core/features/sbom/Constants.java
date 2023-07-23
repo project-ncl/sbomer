@@ -19,7 +19,8 @@ package org.jboss.sbomer.core.features.sbom;
 
 public class Constants {
 
-    public static final String SBOM_RED_HAT_BUILD_ID = "pnc-build-id";
+    public static final String SBOM_RED_HAT_PNC_BUILD_ID = "pnc-build-id";
+    public static final String SBOM_RED_HAT_BREW_BUILD_ID = "brew-build-id";
     public static final String SBOM_RED_HAT_PUBLIC_URL = "public-url";
     public static final String SBOM_RED_HAT_ORIGIN_URL = "origin-url";
     public static final String SBOM_RED_HAT_BUILD_SYSTEM = "build-system";
