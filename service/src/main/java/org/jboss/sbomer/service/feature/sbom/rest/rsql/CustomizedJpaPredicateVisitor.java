@@ -19,8 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
 import com.github.tennaito.rsql.jpa.AbstractJpaVisitor;
 import com.github.tennaito.rsql.jpa.PredicateBuilderStrategy;
-import com.github.tennaito.rsql.misc.ArgumentParser;
-import com.github.tennaito.rsql.misc.Mapper;
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.OrNode;
@@ -33,25 +31,9 @@ import javax.persistence.criteria.Predicate;
 @Slf4j
 public class CustomizedJpaPredicateVisitor<T> extends AbstractJpaVisitor<Predicate, T> {
     private From root;
-    private CustomPredicateBuilder<T> customizedPredicateBuilder;
 
     public CustomizedJpaPredicateVisitor<T> withRoot(From root) {
         this.root = root;
-        return this;
-    }
-
-    public CustomizedJpaPredicateVisitor<T> withPredicateBuilder(CustomPredicateBuilder builder) {
-        this.customizedPredicateBuilder = builder;
-        return this;
-    }
-
-    public CustomizedJpaPredicateVisitor<T> withMapper(Mapper mapper) {
-        this.getBuilderTools().setPropertiesMapper(mapper);
-        return this;
-    }
-
-    public CustomizedJpaPredicateVisitor<T> withArgumentParser(ArgumentParser argumentParser) {
-        this.getBuilderTools().setArgumentParser(argumentParser);
         return this;
     }
 
@@ -63,19 +45,19 @@ public class CustomizedJpaPredicateVisitor<T> extends AbstractJpaVisitor<Predica
     @Override
     public Predicate visit(AndNode node, EntityManager em) {
         log.trace("visit: AndNode {}", node);
-        return customizedPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
     }
 
     @Override
     public Predicate visit(OrNode node, EntityManager em) {
         log.trace("visit: OrNode {}", node);
-        return customizedPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
     }
 
     @Override
     public Predicate visit(ComparisonNode node, EntityManager em) {
         log.trace("visit: ComparisonNode {}", node);
-        return customizedPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
     }
 
 }

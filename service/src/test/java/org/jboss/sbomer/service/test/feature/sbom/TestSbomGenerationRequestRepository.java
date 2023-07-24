@@ -130,7 +130,8 @@ public class TestSbomGenerationRequestRepository {
 
     @Test
     public void testRSQL() {
-        SbomGenerationRequest request = sbomGenerationRequestRepository.searchByQuery(0, 1, "buildId=eq=" + BUILD_ID)
+        SbomGenerationRequest request = sbomGenerationRequestRepository
+                .searchByQuery(0, 1, "buildId=eq=" + BUILD_ID, null)
                 .get(0);
 
         assertNotNull(request);
@@ -138,7 +139,7 @@ public class TestSbomGenerationRequestRepository {
         assertEquals(REQUEST_ID, request.getId());
         assertEquals(BUILD_ID, request.getBuildId());
 
-        request = sbomGenerationRequestRepository.searchByQuery(0, 1, "buildId=eq=" + BUILD_ID).get(0);
+        request = sbomGenerationRequestRepository.searchByQuery(0, 1, "buildId=eq=" + BUILD_ID, null).get(0);
 
         assertNotNull(request);
         assertEquals(REQUEST_ID, request.getId());
@@ -149,7 +150,7 @@ public class TestSbomGenerationRequestRepository {
     @Test
     public void testPagination() {
         Page<SbomGenerationRequest> pagedRequest = sbomGenerationRequestRepository
-                .searchByQueryPaginated(0, 10, "buildId=eq=" + BUILD_ID);
+                .searchByQueryPaginated(0, 10, "buildId=eq=" + BUILD_ID, null);
 
         assertNotNull(pagedRequest);
         assertEquals(0, pagedRequest.getPageIndex());
@@ -189,7 +190,7 @@ public class TestSbomGenerationRequestRepository {
         sbom = sbomRepository.saveSbom(sbom);
 
         String rsqlQuery = "generationRequest.id=eq=" + REQUEST_ID_2_DELETE;
-        List<Sbom> sbomsAfterInsert = sbomRepository.searchByQuery(0, 10, rsqlQuery);
+        List<Sbom> sbomsAfterInsert = sbomRepository.searchByQuery(0, 10, rsqlQuery, null);
         assertEquals(1, sbomsAfterInsert.size());
 
         long beforeDeletion = SbomGenerationRequest.count("id = :id", Parameters.with("id", REQUEST_ID_2_DELETE));
@@ -197,7 +198,7 @@ public class TestSbomGenerationRequestRepository {
 
         sbomGenerationRequestRepository.deleteRequest(REQUEST_ID_2_DELETE);
 
-        List<Sbom> sbomsAfterDelete = sbomRepository.searchByQuery(0, 10, rsqlQuery);
+        List<Sbom> sbomsAfterDelete = sbomRepository.searchByQuery(0, 10, rsqlQuery, null);
         assertEquals(0, sbomsAfterDelete.size());
 
         long afterDeletion = SbomGenerationRequest.count("id = :id", Parameters.with("id", REQUEST_ID_2_DELETE));

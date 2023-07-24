@@ -78,12 +78,14 @@ public interface SBOMerClient {
     Response searchSboms(
             @HeaderParam("log-process-context") String processContext,
             @Valid @BeanParam PaginationParameters paginationParams,
-            @QueryParam("query") String rsqlQuery);
+            @QueryParam("query") String rsqlQuery,
+            @QueryParam("sort") String rsqlSort);
 
     @GET
     @Path("/requests")
     Response searchGenerationRequests(
             @HeaderParam("log-process-context") String processContext,
             @Valid @BeanParam PaginationParameters paginationParams,
-            @QueryParam("query") String rsqlQuery);
+            @QueryParam("query") String rsqlQuery,
+            @QueryParam("sort") String rsqlSort);
 }

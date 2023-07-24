@@ -23,12 +23,8 @@ import com.github.tennaito.rsql.jpa.PredicateBuilderStrategy;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.Node;
-import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.Column;
 import javax.persistence.EntityManager;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
@@ -38,10 +34,7 @@ import org.hibernate.query.criteria.internal.path.PluralAttributePath;
 import org.hibernate.query.criteria.internal.path.SingularAttributePath;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
-@Slf4j
 public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrategy {
 
     @Override

@@ -21,7 +21,7 @@ import javax.persistence.criteria.CriteriaQuery;
 
 public interface RSQLProducer<T> {
 
-    CriteriaQuery<T> getCriteriaQuery(Class<T> type, String rsqlQuery);
+    CriteriaQuery<T> getCriteriaQuery(Class<T> type, String rsqlQuery, String sort);
 
     CriteriaQuery<Long> getCountCriteriaQuery(Class<T> type, String rsqlQuery);
 

@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha1/sboms?pageSize=20&pageIndex=0&query=buildId%3Deq%3DQUARKUS%3BgenerationRequest.buildId%3Deq%3DQUARKUS%3BgenerationRequest.status%3Deq%3DFINISHED%3BgenerationRequest.result%3Deq%3DSUCCESS"
+    "url": "/api/v1alpha1/sboms?pageSize=20&pageIndex=0&query=buildId%3Deq%3DQUARKUS%3BgenerationRequest.buildId%3Deq%3DQUARKUS%3BgenerationRequest.status%3Deq%3DFINISHED%3BgenerationRequest.result%3Deq%3DSUCCESS&sort=creationTime%3Ddesc%3D"
   },
   "response": {
     "status": 200,

@@ -23,8 +23,6 @@ import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.LogicalNode;
 import cz.jirutka.rsql.parser.ast.Node;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,39 +43,28 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomPredicateBuilder<T> {
 
     public static <T> Predicate createPredicate(
-            Node node,
-            From root,
-            Class<T> entity,
-            EntityManager manager,
-            BuilderTools misc) {
-        log.debug("Creating Predicate for: {}", node);
-
-        if (node instanceof LogicalNode) {
-            return createPredicate((LogicalNode) node, root, entity, manager, misc);
-        }
-
-        if (node instanceof ComparisonNode) {
-            return createPredicate((ComparisonNode) node, root, entity, manager, misc);
-        }
-
-        throw new IllegalArgumentException("Unknown expression type: " + node.getClass());
-    }
-
-    public static <T> Predicate createPredicate(
             LogicalNode logical,
             From root,
             Class<T> entity,
             EntityManager entityManager,
             BuilderTools misc) {
+
         log.debug("Creating Predicate for logical node: {}", logical);
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-
         List<Predicate> predicates = new ArrayList<Predicate>();
 
-        log.debug("Creating Predicates from all children nodes.");
         for (Node node : logical.getChildren()) {
-            predicates.add(createPredicate(node, root, entity, entityManager, misc));
+
+            log.debug("Creating Predicates from all children nodes.");
+
+            if (node instanceof LogicalNode) {
+                predicates.add(createPredicate((LogicalNode) node, root, entity, entityManager, misc));
+            } else if (node instanceof ComparisonNode) {
+                predicates.add(createPredicate((ComparisonNode) node, root, entity, entityManager, misc));
+            } else {
+                throw new IllegalArgumentException("Unknown expression type: " + node.getClass());
+            }
         }
 
         switch (logical.getOperator()) {
@@ -106,6 +93,8 @@ public class CustomPredicateBuilder<T> {
             Class<T> entity,
             EntityManager entityManager,
             BuilderTools misc) {
+
+        log.debug("Creating Predicate for comparison node: {}", comparison);
 
         if (startRoot == null) {
             String msg = "From root node was undefined.";
@@ -138,6 +127,7 @@ public class CustomPredicateBuilder<T> {
                     propertyPath.getJavaType(),
                     comparison.getSelector(),
                     comparison.getOperator().getSymbol());
+
             if (misc.getPredicateBuilder() != null) {
                 return misc.getPredicateBuilder().createPredicate(comparison, startRoot, entity, entityManager, misc);
             }
