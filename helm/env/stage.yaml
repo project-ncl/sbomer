@@ -14,7 +14,6 @@ cache:
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-cache
     tag: latest
-    pullPolicy: Always
 
 service:
   route:
@@ -25,10 +24,8 @@ service:
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-service
     tag: latest
-    pullPolicy: Always
 
 generator:
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-generator
     tag: latest
-    pullPolicy: Always
