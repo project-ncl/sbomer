@@ -1,11 +1,29 @@
 {{/*
+Define the name of the cache component
+*/}}
+{{- define "sbomer.component.cache" -}}
+{{ .Release.Name }}-cache
+{{- end -}}
+
+{{/*
+SBOMer internal product mapping
+*/}}
+{{- define "sbomer.productMapping" -}}
+{{- if eq .Values.env "dev" -}}
+"prod"
+{{- else -}}
+{{ .Values.env }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the url of the service
 */}}
 {{- define "sbomer.serviceUrl" -}}
 {{- if .Values.service.route.enabled -}}
     "https://{{ .Values.service.route.host }}"
 {{- else -}}
-    http://192.168.39.1:8080
+    http://host.minikube.internal:8080
 {{- end -}}
 {{- end -}}
 

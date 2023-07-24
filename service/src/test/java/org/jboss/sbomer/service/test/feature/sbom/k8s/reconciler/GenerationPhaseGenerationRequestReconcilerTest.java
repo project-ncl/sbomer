@@ -38,7 +38,7 @@ import javax.inject.Inject;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.service.feature.sbom.config.SbomConfig;
+import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -75,7 +75,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
 
     @ApplicationScoped
     @Mock
-    public static class MockedSbomConfig implements SbomConfig {
+    public static class MockedGenerationRequestControllerConfig implements GenerationRequestControllerConfig {
 
         @Override
         public String sbomDir() {
@@ -90,7 +90,7 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
     }
 
     @InjectMock
-    SbomConfig sbomConfig;
+    GenerationRequestControllerConfig controllerConfig;
 
     @Inject
     GenerationRequestReconciler controller;
@@ -416,8 +416,8 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
 
     @Test
     public void testFailedWithCleanup(@TempDir Path tempDir) throws Exception {
-        when(sbomConfig.cleanup()).thenReturn(true);
-        when(sbomConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
+        when(controllerConfig.cleanup()).thenReturn(true);
+        when(controllerConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
 
         // Let's create the expected path for the working directory and some content in it
         Path newDirPath = Files
@@ -445,8 +445,8 @@ public class GenerationPhaseGenerationRequestReconcilerTest {
 
     @Test
     public void testFailedWithoutCleanup(@TempDir Path tempDir) throws Exception {
-        when(sbomConfig.cleanup()).thenReturn(false);
-        when(sbomConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
+        when(controllerConfig.cleanup()).thenReturn(false);
+        when(controllerConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
 
         // Let's create the expected path for the working directory and some content in it
         Path newDirPath = Files

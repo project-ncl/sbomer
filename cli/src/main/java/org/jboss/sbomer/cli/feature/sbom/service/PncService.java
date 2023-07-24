@@ -49,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 public class PncService {
 
-    @ConfigProperty(name = "sbomer.pnc.api-url")
+    @ConfigProperty(name = "sbomer.pnc.host")
     @Getter
     String apiUrl;
 

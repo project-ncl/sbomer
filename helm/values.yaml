@@ -1,8 +1,7 @@
 # Global configuration
 
+# (required)
 env: dev
-
-productMapping: prod
 
 rbac:
   # Specifies whether RBAC resources should be created
@@ -15,11 +14,17 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
+# PNC system configuration
 pnc:
-  host: "orch.psi.redhat.com" # TODO: remove it from here
+  # (required) 
+  # The hostname where the PNC system can be reached
+  host: "" # placeholder
 
+# Indy repository configuration
 indy:
-  host: "indy.psi.redhat.com" # TODO: remove it from here
+  # (required)
+  # The hostname where the Indy repository can be reached
+  host: "" # placeholder
 
 # Tekton generator component
 generator:

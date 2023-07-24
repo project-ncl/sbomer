@@ -15,32 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.feature.sbom.client;
+package org.jboss.sbomer.cli.config;
 
-import java.util.Collections;
-import java.util.Map;
+import io.quarkus.runtime.configuration.ConfigBuilder;
+import io.smallrye.config.SmallRyeConfigBuilder;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-
-import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
-
-public class ServiceWireMock implements QuarkusTestResourceLifecycleManager {
-
-    private WireMockServer wireMockServer;
+public class UserHomeApplicationYamlConfigBuilder implements ConfigBuilder {
 
     @Override
-    public Map<String, String> start() {
-        wireMockServer = new WireMockServer(12377);
-        wireMockServer.start();
-
-        return Collections.singletonMap("sbomer.host", wireMockServer.baseUrl());
-    }
-
-    @Override
-    public void stop() {
-        if (wireMockServer != null) {
-            wireMockServer.stop();
-        }
+    public SmallRyeConfigBuilder configBuilder(SmallRyeConfigBuilder builder) {
+        return builder.withSources(new InUserHomeFileSystemLoader());
     }
 
 }

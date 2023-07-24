@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.features.umb;
+package org.jboss.sbomer.service.feature.sbom.config.features;
 
 import java.util.Optional;
 
@@ -42,7 +42,7 @@ public interface UmbConfig {
          *
          * @return {@code true} if enabled, {@code false} otherwise
          */
-        @WithDefault("true")
+        @WithDefault("false")
         @WithName("enabled")
         boolean isEnabled();
 
@@ -51,7 +51,7 @@ public interface UmbConfig {
          */
         Optional<String> topic();
 
-        UmbConsumerTrigger trigger();
+        Optional<UmbConsumerTrigger> trigger();
     }
 
     interface UmbProducerConfig {
@@ -60,7 +60,7 @@ public interface UmbConfig {
          *
          * @return {@code true} if enabled, {@code false} otherwise
          */
-        @WithDefault("true")
+        @WithDefault("false")
         @WithName("enabled")
         boolean isEnabled();
 
@@ -85,7 +85,7 @@ public interface UmbConfig {
 
     }
 
-    @WithDefault("true")
+    @WithDefault("false")
     @WithName("enabled")
     boolean isEnabled();
 

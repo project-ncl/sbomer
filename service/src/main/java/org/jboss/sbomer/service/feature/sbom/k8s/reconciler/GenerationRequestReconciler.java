@@ -44,7 +44,8 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.service.feature.sbom.config.SbomConfig;
+import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
+import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -124,7 +125,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
     }
 
     @Inject
-    SbomConfig sbomConfig;
+    GenerationRequestControllerConfig controllerConfig;
 
     @Inject
     SbomRepository sbomRepository;
@@ -514,14 +515,14 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
      * @param generationRequest
      */
     private void cleanupFinishedGenerationRequest(GenerationRequest generationRequest) {
-        if (!sbomConfig.cleanup()) {
+        if (!controllerConfig.cleanup()) {
             log.debug(
                     "The cleanup setting is set to false, skipping cleaning up finished GenerationRequest '{}'",
                     generationRequest.getName());
             return;
         }
 
-        Path workdirPath = Path.of(sbomConfig.sbomDir(), generationRequest.getMetadata().getName());
+        Path workdirPath = Path.of(controllerConfig.sbomDir(), generationRequest.getMetadata().getName());
 
         log.debug(
                 "Removing '{}' path being the working directory for the finished '{}' GenerationRequest",
@@ -701,7 +702,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             log.info("Reading SBOM for index '{}'", i);
 
             Path sbomPath = Path.of(
-                    sbomConfig.sbomDir(),
+                    controllerConfig.sbomDir(),
                     generationRequest.getMetadata().getName(),
                     generationRequest.getMetadata().getName() + "-1-generate-" + i,
                     "bom.json"); // TODO: should not be hardcoded

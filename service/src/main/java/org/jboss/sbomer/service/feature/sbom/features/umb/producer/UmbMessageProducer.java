@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.producer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -30,7 +31,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.sbomer.service.feature.sbom.features.umb.UmbConfig;
+import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
 
 import io.quarkus.arc.Unremovable;
@@ -50,7 +51,7 @@ public class UmbMessageProducer implements MessageProducer {
     public static final String MESSAGE_HEADER_TYPE_KEY = "type";
 
     @ConfigProperty(name = "quarkus.qpid-jms.url")
-    String amqpConnection;
+    Optional<String> amqpConnection;
 
     @Inject
     UmbConfig umbConfig;
