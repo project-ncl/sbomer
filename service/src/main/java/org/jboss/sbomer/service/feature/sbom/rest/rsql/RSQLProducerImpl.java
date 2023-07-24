@@ -78,20 +78,23 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
         CriteriaQuery<T> criteria = builder.createQuery(type);
         Root root = criteria.from(type);
 
+        CriteriaQuery<T> query = null;
+
         if (Strings.isEmpty(rsqlQuery)) {
-            return criteria.where(builder.conjunction());
+            query = criteria.where(builder.conjunction());
+        } else {
+
+            // Create custom implementation of RSQLVisitor which converts nodes to predicates using
+            // CustomizedPredicateBuilder or CustomizedPredicateBuilderStrategy for custom operators
+            RSQLVisitor<Predicate, EntityManager> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
+                    .withPredicateBuilderStrategy(new CustomizedPredicateBuilderStrategy());
+
+            // create RSQLParser with default and custom operators
+            Node rootNode = predicateParser.parse(rsqlQuery);
+            Predicate predicate = rootNode.accept(visitor, entityManager);
+
+            query = criteria.where(predicate);
         }
-
-        // Create custom implementation of RSQLVisitor which converts nodes to predicates using
-        // CustomizedPredicateBuilder or CustomizedPredicateBuilderStrategy for custom operators
-        RSQLVisitor<Predicate, EntityManager> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
-                .withPredicateBuilderStrategy(new CustomizedPredicateBuilderStrategy());
-
-        // create RSQLParser with default and custom operators
-        Node rootNode = predicateParser.parse(rsqlQuery);
-        Predicate predicate = rootNode.accept(visitor, entityManager);
-
-        CriteriaQuery<T> query = criteria.where(predicate);
 
         if (!Strings.isEmpty(sort)) {
 
