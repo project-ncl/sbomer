@@ -106,9 +106,17 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
 
             // Add build-related information, if we found a build in PNC
             if (artifact.getBuild() != null) {
+                log.debug(
+                        "Component '{}' was built in PNC, adding enrichment from PNC build '{}'",
+                        component.getPurl(),
+                        artifact.getBuild().getId());
                 processPncBuild(component, artifact.getBuild());
             } else {
                 // Lookup the build in Brew, as the artifact was found in PNC but without a build attached
+                log.debug(
+                        "Component '{}' was not built in PNC, will search in Brew the corresponding artifact '{}'",
+                        component.getPurl(),
+                        artifact.getPublicUrl());
                 processBrewBuild(component, artifact);
             }
         } else {
@@ -142,10 +150,14 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
     }
 
     private void processBrewBuild(Component component, Artifact artifact) {
-        log.debug("Looking up artifact '{}' in Brew...", artifact.getPublicUrl());
-
         KojiBuild brewBuild = findBuildInBrew(artifact);
         if (brewBuild != null) {
+
+            log.debug(
+                    "Component '{}' was built in Brew, adding enrichment from Brew build '{}'",
+                    component.getPurl(),
+                    brewBuild.getBuildInfo().getId());
+
             SbomUtils.addExternalReference(
                     component,
                     ExternalReference.Type.BUILD_SYSTEM,
@@ -165,6 +177,8 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
                     SbomUtils.addPedigreeCommit(component, scmSource, commit);
                 }
             }
+        } else {
+            log.debug("Component '{}' was not built in Brew, cannot add any enrichment!", component.getPurl());
         }
     }
 
