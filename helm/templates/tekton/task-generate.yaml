@@ -31,6 +31,8 @@ spec:
           value: {{ .Values.gerrit.host }}
         - name: SBOMER_INDY_HOST
           value: {{ .Values.indy.host }}
+        - name: SBOMER_KOJI_HOST
+          value: {{ .Values.koji.host }}
         - name: SBOMER_PNC_PRODUCT_MAPPING
           value: {{ include "sbomer.productMapping" . }}
       script: |
