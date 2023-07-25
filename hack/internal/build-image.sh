@@ -77,10 +77,7 @@ SHORTCOMMIT=$(git rev-parse --short HEAD)
 IMAGE_SLUG="${1}"
 IMAGE_TAG_LATEST="${IMAGE_REGISTRY}/${IMAGE_SLUG}:latest"
 IMAGE_TAG_COMMIT="${IMAGE_REGISTRY}/${IMAGE_SLUG}:${SHORTCOMMIT}"
-
-if [ -z "$CUSTOM_TAG" ]; then
-  IMAGE_TAG_CUSTOM="${IMAGE_REGISTRY}/${IMAGE_SLUG}:${CUSTOM_TAG}"
-fi
+IMAGE_TAG_NATIVE="${IMAGE_REGISTRY}/${IMAGE_SLUG}:${SHORTCOMMIT}-native"
 
 set -x
 
@@ -100,9 +97,9 @@ if [ "$PUSH" = "yes" ]; then
   "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_LATEST"
   "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_COMMIT"
 
-  if [ -z "$CUSTOM_TAG" ]; then
-    "${BUILD_SCRIPT[@]}" tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_CUSTOM"
-    "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_CUSTOM"
+  if [ "$NATIVE" = "yes" ]; then
+    "${BUILD_SCRIPT[@]}" tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_NATIVE"
+    "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_NATIVE"
   fi
 fi
 
