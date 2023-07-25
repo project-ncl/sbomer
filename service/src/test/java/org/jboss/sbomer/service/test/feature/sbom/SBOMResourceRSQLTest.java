@@ -18,10 +18,10 @@
 package org.jboss.sbomer.service.test.feature.sbom;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 
 import org.hamcrest.CoreMatchers;
@@ -29,9 +29,6 @@ import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.mockito.Mockito;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -54,7 +51,11 @@ public class SBOMResourceRSQLTest {
         int pageSizeLarge = 50;
         Page<Sbom> singlePagedOneSbom = initializeOneResultPaginated(pageIndex, pageSizeLarge);
         Mockito.when(
-                sbomService.searchSbomsByQueryPaginated(pageIndex, pageSizeLarge, "buildId=eq=AWI7P3EJ23YAA", null))
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSizeLarge,
+                        "buildId=eq=AWI7P3EJ23YAA",
+                        "creationTime=desc="))
                 .thenReturn(singlePagedOneSbom);
 
         given().when()
@@ -80,7 +81,11 @@ public class SBOMResourceRSQLTest {
         // One page, two results
         Page<Sbom> singlePagedTwoSboms = initializeTwoResultsPaginated(pageIndex, pageSizeLarge);
         Mockito.when(
-                sbomService.searchSbomsByQueryPaginated(pageIndex, pageSizeLarge, "buildId=eq=AWI7P3EJ23YAA", null))
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSizeLarge,
+                        "buildId=eq=AWI7P3EJ23YAA",
+                        "creationTime=desc="))
                 .thenReturn(singlePagedTwoSboms);
 
         given().when()
@@ -109,7 +114,12 @@ public class SBOMResourceRSQLTest {
         int pageSizeTiny = 1;
 
         Page<Sbom> doublePagedTwoSboms = initializeTwoResultsPaginated(pageIndex, pageSizeTiny);
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSizeTiny, "buildId=eq=AWI7P3EJ23YAA", null))
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSizeTiny,
+                        "buildId=eq=AWI7P3EJ23YAA",
+                        "creationTime=desc="))
                 .thenReturn(doublePagedTwoSboms);
 
         given().when()
@@ -142,25 +152,49 @@ public class SBOMResourceRSQLTest {
 
         Page<Sbom> pagedSboms = initializeOneResultPaginated(pageIndex, pageSize);
 
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "id==12345", null))
+        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "id==12345", "creationTime=desc="))
                 .thenReturn(pagedSboms);
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "buildId==AWI7P3EJ23YAA", null))
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "buildId==AWI7P3EJ23YAA",
+                        "creationTime=desc="))
                 .thenReturn(pagedSboms);
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "buildId=eq=AWI7P3EJ23YAA", null))
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "buildId=eq=AWI7P3EJ23YAA",
+                        "creationTime=desc="))
                 .thenReturn(pagedSboms);
         Mockito.when(
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
                         "rootPurl=='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'",
-                        null))
+                        "creationTime=desc="))
                 .thenReturn(pagedSboms);
         Mockito.when(
-                sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "statusMessage=='all went well'", null))
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "statusMessage=='all went well'",
+                        "creationTime=desc="))
                 .thenReturn(pagedSboms);
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "statusMessage=='all*'", null))
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "statusMessage=='all*'",
+                        "creationTime=desc="))
                 .thenReturn(pagedSboms);
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "statusMessage=='*went*'", null))
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "statusMessage=='*went*'",
+                        "creationTime=desc="))
                 .thenReturn(pagedSboms);
 
         given().when()
@@ -253,7 +287,12 @@ public class SBOMResourceRSQLTest {
         int pageSize = 50;
         Page<Sbom> pagedSboms = initializeOneResultPaginated(pageIndex, pageSize);
 
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "rootPurl=isnull=false", null))
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "rootPurl=isnull=false",
+                        "creationTime=desc="))
                 .thenReturn(pagedSboms);
 
         given().when()
@@ -278,7 +317,9 @@ public class SBOMResourceRSQLTest {
             sbom.setRootPurl(null);
         });
 
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "rootPurl=isnull=true", null))
+        Mockito.when(
+                sbomService
+                        .searchSbomsByQueryPaginated(pageIndex, pageSize, "rootPurl=isnull=true", "creationTime=desc="))
                 .thenReturn(pagedSboms);
 
         given().when()
@@ -322,21 +363,26 @@ public class SBOMResourceRSQLTest {
         Page<Sbom> oneContentPage = initializeOneResultPaginated(1, 1);
         Page<Sbom> twoContentPage = initializeTwoResultsPaginated(1, 2);
 
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(pageIndex, pageSize, "buildId=eq=AWI7P3EJ23YAA", null))
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "buildId=eq=AWI7P3EJ23YAA",
+                        "creationTime=desc="))
                 .thenReturn(oneContentPage);
         Mockito.when(
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
                         "rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'",
-                        null))
+                        "creationTime=desc="))
                 .thenReturn(oneContentPage);
         Mockito.when(
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
                         "buildId=eq=AWI7P3EJ23YAA;rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'",
-                        null))
+                        "creationTime=desc="))
                 .thenReturn(oneContentPage);
         given().when()
                 .contentType(ContentType.JSON)
