@@ -78,6 +78,10 @@ IMAGE_SLUG="${1}"
 IMAGE_TAG_LATEST="${IMAGE_REGISTRY}/${IMAGE_SLUG}:latest"
 IMAGE_TAG_COMMIT="${IMAGE_REGISTRY}/${IMAGE_SLUG}:${SHORTCOMMIT}"
 
+if [ -z "$CUSTOM_TAG" ]; then
+  IMAGE_TAG_CUSTOM="${IMAGE_REGISTRY}/${IMAGE_SLUG}:${CUSTOM_TAG}"
+fi
+
 set -x
 
 pushd "$SCRIPT_DIR/../../" > /dev/null
@@ -91,9 +95,15 @@ fi
 "${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "images/${IMAGE_SLUG}/${CONTAINERFILE}" .
 
 if [ "$PUSH" = "yes" ]; then
-"${BUILD_SCRIPT[@]}" tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_COMMIT"
-"${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_LATEST"
-"${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_COMMIT"
+  "${BUILD_SCRIPT[@]}" tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_COMMIT"
+
+  "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_LATEST"
+  "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_COMMIT"
+
+  if [ -z "$CUSTOM_TAG" ]; then
+    "${BUILD_SCRIPT[@]}" tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_CUSTOM"
+    "${BUILD_SCRIPT[@]}" push "$IMAGE_TAG_CUSTOM"
+  fi
 fi
 
 mkdir -p target
