@@ -55,6 +55,9 @@ sbomer:
   ## Gerrit configuration
   # gerrit:
   #   host:
+  koji:
+    hub-url: "https://${sbomer.koji.host}/brewhub"
+    web-url: "https://${sbomer.koji.host}/brew"
   generation:
     enabled: true
     default-generator: maven-cyclonedx

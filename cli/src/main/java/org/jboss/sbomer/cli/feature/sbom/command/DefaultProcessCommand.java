@@ -17,9 +17,11 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -28,10 +30,13 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
+import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.cli.feature.sbom.utils.RhVersionPattern;
+import org.jboss.sbomer.cli.feature.sbom.utils.buildfinder.FinderStatus;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
@@ -52,6 +57,9 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
     @Inject
     protected PncService pncService;
 
+    @Inject
+    protected KojiService kojiService;
+
     /**
      * Performs processing for a given {@link Component}.
      *
@@ -69,13 +77,17 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         SbomUtils.setSupplier(component);
         SbomUtils.addMrrc(component);
 
-        // If the component has already both "pnc-build-id" and "pnc-environment-image", do not bother querying again
-        // PNC!
-        if (!SbomUtils.hasExternalReference(component, ExternalReference.Type.BUILD_SYSTEM, SBOM_RED_HAT_BUILD_ID)
-                || !SbomUtils.hasExternalReference(
+        // If the component does not have "pnc-build-id" nor "pnc-environment-image" nor "brew-build-id", query it
+        if (!SbomUtils.hasExternalReference(component, ExternalReference.Type.BUILD_SYSTEM, SBOM_RED_HAT_PNC_BUILD_ID)
+                && !SbomUtils.hasExternalReference(
                         component,
                         ExternalReference.Type.BUILD_META,
-                        SBOM_RED_HAT_ENVIRONMENT_IMAGE)) {
+                        SBOM_RED_HAT_ENVIRONMENT_IMAGE)
+                && !SbomUtils.hasExternalReference(
+                        component,
+                        ExternalReference.Type.BUILD_SYSTEM,
+                        SBOM_RED_HAT_BREW_BUILD_ID)) {
+
             Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
             Artifact artifact = pncService
                     .getArtifact(getParent().getParent().getParent().getBuildId(), component.getPurl(), sha256);
@@ -94,7 +106,18 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
 
             // Add build-related information, if we found a build in PNC
             if (artifact.getBuild() != null) {
-                processBuild(component, artifact.getBuild());
+                log.debug(
+                        "Component '{}' was built in PNC, adding enrichment from PNC build '{}'",
+                        component.getPurl(),
+                        artifact.getBuild().getId());
+                processPncBuild(component, artifact.getBuild());
+            } else {
+                // Lookup the build in Brew, as the artifact was found in PNC but without a build attached
+                log.debug(
+                        "Component '{}' was not built in PNC, will search in Brew the corresponding artifact '{}'",
+                        component.getPurl(),
+                        artifact.getPublicUrl());
+                processBrewBuild(component, artifact);
             }
         } else {
             log.debug(
@@ -103,12 +126,12 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         }
     }
 
-    private void processBuild(Component component, Build build) {
+    private void processPncBuild(Component component, Build build) {
         SbomUtils.addExternalReference(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM,
                 "https://" + pncService.getApiUrl() + "/pnc-rest/v2/builds/" + build.getId().toString(),
-                SBOM_RED_HAT_BUILD_ID);
+                SBOM_RED_HAT_PNC_BUILD_ID);
 
         SbomUtils.addExternalReference(
                 component,
@@ -124,6 +147,60 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         }
 
         SbomUtils.addPedigreeCommit(component, build.getScmUrl() + "#" + build.getScmTag(), build.getScmRevision());
+    }
+
+    private void processBrewBuild(Component component, Artifact artifact) {
+        KojiBuild brewBuild = findBuildInBrew(artifact);
+        if (brewBuild != null) {
+
+            log.debug(
+                    "Component '{}' was built in Brew, adding enrichment from Brew build '{}'",
+                    component.getPurl(),
+                    brewBuild.getBuildInfo().getId());
+
+            SbomUtils.addExternalReference(
+                    component,
+                    ExternalReference.Type.BUILD_SYSTEM,
+                    kojiService.getConfig().getKojiWebURL() + "/buildinfo?buildID=" + brewBuild.getBuildInfo().getId(),
+                    SBOM_RED_HAT_BREW_BUILD_ID);
+
+            if (brewBuild.getSource().isPresent()) {
+                String scmSource = brewBuild.getSource().get();
+
+                if (!SbomUtils.hasExternalReference(component, ExternalReference.Type.VCS)) {
+                    SbomUtils.addExternalReference(component, ExternalReference.Type.VCS, scmSource, "");
+                }
+
+                int hashIndex = scmSource.lastIndexOf('#');
+                if (hashIndex != -1) {
+                    String commit = scmSource.substring(hashIndex + 1);
+                    SbomUtils.addPedigreeCommit(component, scmSource, commit);
+                }
+            }
+        } else {
+            log.debug("Component '{}' was not built in Brew, cannot add any enrichment!", component.getPurl());
+        }
+    }
+
+    private KojiBuild findBuildInBrew(Artifact artifact) {
+
+        if (artifact.getPublicUrl() != null) {
+            try {
+                FinderStatus status = new FinderStatus();
+                List<KojiBuild> brewBuilds = kojiService.find(artifact.getPublicUrl(), status, status);
+                if (brewBuilds.size() == 1) {
+                    return brewBuilds.get(0);
+                } else if (brewBuilds.size() > 1) {
+                    log.warn(
+                            "Multiple builds where found in Brew for the artifact '{}', picking the first one!",
+                            artifact.getPublicUrl());
+                    return brewBuilds.get(0);
+                }
+            } catch (Throwable e) {
+                log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     @Override
