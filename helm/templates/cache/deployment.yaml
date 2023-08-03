@@ -34,6 +34,13 @@ spec:
           args:
             - -c
             - envsubst '$${PNC_SERVICE_HOST} $${INDY_REPOSITORY_HOST}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
+          resources:
+            requests:
+              cpu: 800m
+              memory: 1000Mi
+            limits:
+              cpu: 800m
+              memory: 1000Mi
       restartPolicy: Always
       volumes:
         - name: sbomer-cache
