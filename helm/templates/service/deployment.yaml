@@ -75,7 +75,7 @@ spec:
             - name: APP_ENV
               value: {{ .Values.env }}
             - name: SBOMER_ROUTE_HOST
-              value: {{ .Values.service.route.host }}
+              value: {{ .Values.service.route.infinibloxHost }}
             - name: SBOMER_SECRET_NAME
               valueFrom:
                 fieldRef:

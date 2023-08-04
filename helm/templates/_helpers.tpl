@@ -21,7 +21,7 @@ Create the url of the service
 */}}
 {{- define "sbomer.serviceUrl" -}}
 {{- if .Values.service.route.enabled -}}
-    "https://{{ .Values.service.route.host }}"
+    "https://{{ .Values.service.route.infinibloxHost }}"
 {{- else -}}
     http://host.minikube.internal:8080
 {{- end -}}
