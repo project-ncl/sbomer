@@ -19,10 +19,10 @@ package org.jboss.sbomer.cli.test.feature.sbom.generate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 
 import org.jboss.sbomer.cli.feature.sbom.generate.MavenDominoGenerator;
 import org.jboss.sbomer.cli.feature.sbom.generate.ProcessRunner;
@@ -35,53 +35,15 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
-
 public class MavenDominoGeneratorTest {
-
 
     final Path dominoDir = Path.of("/path/to/domino/dir");
     final Path workDir = Path.of("work/dir");
 
-
-    @Test
-    void testFailedWhenNoDirProvided() {
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            new MavenDominoGenerator().generate(null);
-        });
-
-        assertEquals("Working directory validation failed", thrown.getLocalizedMessage());
-        assertEquals(1, thrown.getErrors().size());
-        assertEquals("No project path provided", thrown.getErrors().get(0));
-    }
-
-    @Test
-    void testFailedWhenNonExistingDirectory() {
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            new MavenDominoGenerator().generate(Path.of("surely/doesnt/exist"));
-        });
-
-        assertEquals("Working directory validation failed", thrown.getLocalizedMessage());
-        assertEquals(1, thrown.getErrors().size());
-        assertEquals("Provided path 'surely/doesnt/exist' does not exist", thrown.getErrors().get(0));
-    }
-
-    @Test
-    void testFailedWhenNotADirectory(@TempDir Path tempDir) throws IOException {
-        Path aFile = Files.createFile(Path.of(tempDir.toAbsolutePath().toString(), "a-file.txt"));
-
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            new MavenDominoGenerator().generate(aFile);
-        });
-
-        assertEquals("Working directory validation failed", thrown.getLocalizedMessage());
-        assertEquals(1, thrown.getErrors().size());
-        assertEquals(String.format("Provided path '%s' is not a directory", aFile), thrown.getErrors().get(0));
-    }
-
     @Test
     void testFailedWhenNoDominoDirProvided(@TempDir Path projectDir) {
         ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            MavenDominoGenerator.builder().withDominoDir(null).build().generate(projectDir);
+            MavenDominoGenerator.builder().withDominoDir(null).build().run(projectDir);
         });
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
@@ -92,7 +54,7 @@ public class MavenDominoGeneratorTest {
     @Test
     void testFailedWhenDominoDirDoesntExist(@TempDir Path projectDir) {
         ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            MavenDominoGenerator.builder().withDominoDir(Path.of("some/dir")).build().generate(projectDir);
+            MavenDominoGenerator.builder().withDominoDir(Path.of("some/dir")).build().run(projectDir);
         });
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
@@ -103,7 +65,7 @@ public class MavenDominoGeneratorTest {
     @Test
     void testFailedWhenDominoDoesntExistForDefaultVersion(@TempDir Path projectDir, @TempDir Path wrongDir) {
         ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            MavenDominoGenerator.builder().withDominoDir(wrongDir).build().generate(projectDir);
+            MavenDominoGenerator.builder().withDominoDir(wrongDir).build().run(projectDir);
         });
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
@@ -116,11 +78,7 @@ public class MavenDominoGeneratorTest {
     @Test
     void testFailedWhenDominoDirDoesntExistWithCustomVersion(@TempDir Path projectDir, @TempDir Path dominoDir) {
         ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            MavenDominoGenerator.builder()
-                    .withDominoDir(dominoDir)
-                    .withDominoVersion("1.2.3")
-                    .build()
-                    .generate(projectDir);
+            MavenDominoGenerator.builder().withDominoDir(dominoDir).withDominoVersion("1.2.3").build().run(projectDir);
         });
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
@@ -134,7 +92,7 @@ public class MavenDominoGeneratorTest {
     void testGenerate() {
         MavenDominoGenerator generator = MavenDominoGenerator.builder().withDominoDir(dominoDir).build();
 
-        ProcessBuilder pb = generate(generator, dominoDir, workDir);
+        List<String> cmd = generate(generator, dominoDir, workDir);
 
         assertEquals(
                 Arrays.asList(
@@ -148,8 +106,7 @@ public class MavenDominoGeneratorTest {
                         "--project-dir=work/dir",
                         "--output-file=bom.json",
                         "--manifest"),
-                pb.command());
-
+                cmd);
     }
 
     @Test
@@ -161,7 +118,7 @@ public class MavenDominoGeneratorTest {
                 .withSettingsXmlPath(settingsXmlPath)
                 .build();
 
-        ProcessBuilder pb = generate(generator, dominoDir, workDir);
+        List<String> cmd = generate(generator, dominoDir, workDir);
 
         assertEquals(
                 Arrays.asList(
@@ -177,14 +134,14 @@ public class MavenDominoGeneratorTest {
                         "--manifest",
                         "-s",
                         "settings.xml"),
-                pb.command());
+                cmd);
     }
 
     @Test
     void testGenerateWithCustomArgs() {
         MavenDominoGenerator generator = MavenDominoGenerator.builder().withDominoDir(dominoDir).build();
 
-        ProcessBuilder pb = generate(generator, dominoDir, workDir, "one-arg", "1", "--test");
+        List<String> cmd = generate(generator, dominoDir, workDir, "one-arg", "1", "--test");
 
         assertEquals(
                 Arrays.asList(
@@ -201,14 +158,37 @@ public class MavenDominoGeneratorTest {
                         "one-arg",
                         "1",
                         "--test"),
-                pb.command());
+                cmd);
     }
 
-    private ProcessBuilder generate(MavenDominoGenerator generator, Path dominoDir, Path workDir, String... args) {
-        ArgumentCaptor<ProcessBuilder> pbCaptor = ArgumentCaptor.forClass(ProcessBuilder.class);
+    @Test
+    void testGenerateWithEmptyCustomArgs() {
+        MavenDominoGenerator generator = MavenDominoGenerator.builder().withDominoDir(dominoDir).build();
+
+        List<String> cmd = generate(generator, dominoDir, workDir, "");
+
+        assertEquals(
+                Arrays.asList(
+                        "java",
+                        "-Xms256m",
+                        "-Xmx512m",
+                        "-Dquarkus.args=\"\"",
+                        "-jar",
+                        "/path/to/domino/dir/domino.jar",
+                        "report",
+                        "--project-dir=work/dir",
+                        "--output-file=bom.json",
+                        "--manifest"),
+                cmd);
+    }
+
+    private List<String> generate(MavenDominoGenerator generator, Path dominoDir, Path workDir, String... args) {
+        ArgumentCaptor<Path> workDirCaptor = ArgumentCaptor.forClass(Path.class);
+        ArgumentCaptor<String[]> commandCaptor = ArgumentCaptor.forClass(String[].class);
 
         try (MockedStatic<ProcessRunner> runnerMock = Mockito.mockStatic(ProcessRunner.class)) {
-            runnerMock.when(() -> ProcessRunner.run(pbCaptor.capture())).thenAnswer((Answer<Void>) invocation -> null);
+            runnerMock.when(() -> ProcessRunner.run(workDirCaptor.capture(), commandCaptor.capture()))
+                    .thenAnswer((Answer<Void>) invocation -> null);
 
             try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
                 filesMock.when(() -> Files.exists(workDir)).thenReturn(true);
@@ -217,13 +197,15 @@ public class MavenDominoGeneratorTest {
                 filesMock.when(() -> Files.exists(dominoDir)).thenReturn(true);
                 filesMock.when(() -> Files.exists(Path.of(dominoDir.toString(), "domino.jar"))).thenReturn(true);
 
-                var outputPath = generator.generate(workDir, args);
+                var outputPath = generator.run(workDir, args);
 
                 assertEquals(Path.of("bom.json"), outputPath);
             }
 
         }
 
-        return pbCaptor.getValue();
+        assertEquals(Path.of("work/dir"), workDirCaptor.getValue());
+
+        return Arrays.asList(commandCaptor.getValue());
     }
 }
