@@ -99,17 +99,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.github.hakky54</groupId>
-      <artifactId>logcaptor</artifactId>
-      <version>2.9.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>2.0.7</version>
-    </dependency>
-    <dependency>
       <groupId>com.github.tomakehurst</groupId>
       <artifactId>wiremock</artifactId>
       <version>3.0.0-beta-7</version>
@@ -123,14 +112,6 @@
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <classpathDependencyExcludes>
-            <classpathDependencyExclude>org.jboss.slf4j:slf4j-jboss-logmanager</classpathDependencyExclude>
-          </classpathDependencyExcludes>
-        </configuration>
       </plugin>
     </plugins>
   </build>
