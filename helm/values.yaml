@@ -69,6 +69,9 @@ service:
     enabled: false
     # Placeholder for the route host
     host: ""
+    # Disabled by default, enabled only in OpenShift environments
+    tls:
+      enabled: false
 
   # service.storage is the size of the PVC where the generated SBOMs will be stored until
   # moved to the database
