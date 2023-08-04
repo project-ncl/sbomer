@@ -54,6 +54,7 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
         MavenDominoGenerator generator = MavenDominoGenerator.builder()
                 .withDominoDir(dominoDir)
                 .withDominoVersion(toolVersion())
+                .withSettingsXmlPath(settingsXmlPath)
                 .build();
 
         log.info("Starting SBOM generation using Domino");

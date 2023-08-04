@@ -27,10 +27,7 @@ import java.util.Arrays;
 import org.jboss.sbomer.cli.feature.sbom.generate.MavenDominoGenerator;
 import org.jboss.sbomer.cli.feature.sbom.generate.ProcessRunner;
 import org.jboss.sbomer.core.errors.ValidationException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
@@ -38,28 +35,13 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
-import nl.altindag.log.LogCaptor;
 
 public class MavenDominoGeneratorTest {
-    private static LogCaptor logCaptor;
+
 
     final Path dominoDir = Path.of("/path/to/domino/dir");
     final Path workDir = Path.of("work/dir");
 
-    @BeforeAll
-    public static void setup() {
-        logCaptor = LogCaptor.forClass(MavenDominoGenerator.class);
-    }
-
-    @AfterEach
-    public void afterEach() {
-        logCaptor.clearLogs();
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        logCaptor.close();
-    }
 
     @Test
     void testFailedWhenNoDirProvided() {

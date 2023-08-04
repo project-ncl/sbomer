@@ -106,14 +106,14 @@
                 <artifactId>core</artifactId>
                 <version>${version.org.jboss.pnc.build.finder}</version>
                 <exclusions>
-                  <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                  </exclusion>
-                  <exclusion>
-                    <groupId>org.fusesource.jansi</groupId>
-                    <artifactId>jansi</artifactId>
-                  </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.fusesource.jansi</groupId>
+                        <artifactId>jansi</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
         </dependencies>
