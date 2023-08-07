@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.generate;
 
-import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -65,36 +64,6 @@ public class MavenDominoGenerator implements SbomGenerator {
     Path outputFile = Path.of(BOM_FILE_NAME);
 
     /**
-     * Perform validation of the Maven project directory located at a given path.
-     *
-     * @param workDir
-     */
-    private void validateWorkDir(Path workDir) {
-        log.debug("Validating working directory: '{}'...", workDir);
-
-        if (workDir == null) {
-            throw new ValidationException(
-                    "Working directory validation failed",
-                    Collections.singletonList("No project path provided"));
-        }
-
-        if (!Files.exists(workDir)) {
-            throw new ValidationException(
-                    "Working directory validation failed",
-                    Collections.singletonList(String.format("Provided path '%s' does not exist", workDir.toString())));
-        }
-
-        if (!Files.isDirectory(workDir)) {
-            throw new ValidationException(
-                    "Working directory validation failed",
-                    Collections
-                            .singletonList(String.format("Provided path '%s' is not a directory", workDir.toString())));
-        }
-
-        log.debug("Working directory '{}' exists", workDir);
-    }
-
-    /**
      * Perform validation of the Domino tool.
      *
      * @return The {@link Path} to the Domino tool.
@@ -130,29 +99,21 @@ public class MavenDominoGenerator implements SbomGenerator {
                     Collections.singletonList(String.format("Domino could not be found on path '%s'", dominoPath)));
         }
 
-        log.debug("Domino tool is valid and available at '{}' is valid", dominoPath);
+        log.debug("Domino tool is valid and available at '{}', will use it", dominoPath);
 
         return dominoPath;
 
     }
 
     @Override
-    public Path generate(Path workDir, String... generatorArgs) {
-        log.info("Working directory: '{}'", workDir);
-        log.debug("Generator arguments: '{}'", Arrays.asList(generatorArgs));
-
-        validateWorkDir(workDir);
+    public Path run(Path workDir, String... generatorArgs) {
+        log.info("Preparing to generate SBOM using the Maven Domino generator");
 
         Path dominoToolPath = dominoToolPath();
 
-        log.debug("Using Domino tool at '{}'", dominoToolPath);
-
         String[] command = command(dominoToolPath, workDir, generatorArgs);
 
-        log.debug("Command to execute: '{}'", Arrays.asList(command));
-
-        ProcessBuilder pb = prepareProcessBuilder(workDir, command);
-        ProcessRunner.run(pb);
+        ProcessRunner.run(workDir, command);
 
         return outputFile;
     }
@@ -174,8 +135,19 @@ public class MavenDominoGenerator implements SbomGenerator {
                         String.format("--output-file=%s", outputFile),
                         "--manifest"));
 
-        if (args != null) {
-            cmd.addAll(Arrays.asList(args));
+        if (args != null && args.length > 0) {
+            log.debug("Validating additional arguments: '{}' (size: {})", Arrays.toString(args), args.length);
+
+            for (String arg : args) {
+                if (arg == null || arg.isBlank()) {
+                    log.warn("Skipping adding empty argument to the command!");
+                    continue;
+                }
+
+                cmd.add(arg);
+            }
+        } else {
+            log.debug("No additional arguments provided");
         }
 
         if (settingsXmlPath != null) {
@@ -185,15 +157,5 @@ public class MavenDominoGenerator implements SbomGenerator {
         }
 
         return cmd.toArray(new String[cmd.size()]);
-    }
-
-    private ProcessBuilder prepareProcessBuilder(Path workDir, String... command) {
-        ProcessBuilder processBuilder = new ProcessBuilder().redirectOutput(Redirect.INHERIT)
-                .redirectError(Redirect.INHERIT);
-
-        processBuilder.command(command);
-        processBuilder.directory(workDir.toAbsolutePath().toFile());
-
-        return processBuilder;
     }
 }

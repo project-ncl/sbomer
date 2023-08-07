@@ -35,8 +35,6 @@ import picocli.CommandLine.Option;
         subcommandsRepeatable = true)
 public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
 
-    private static final String BOM_FILE_NAME = "bom.json";
-
     @Option(
             names = { "--domino-dir" },
             description = "Directory where the Domino tool can be found. Default: ${DEFAULT-VALUE}",
@@ -59,11 +57,10 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
 
         log.info("Starting SBOM generation using Domino");
 
-        generator.generate(parent.getWorkdir(), generatorArgs().split(" "));
+        Path outputFile = generator.run(parent.getWorkdir(), generatorArgs().split(" "));
 
         log.info("SBOM generation finished");
 
-        return Path.of(getParent().getWorkdir().toAbsolutePath().toString(), BOM_FILE_NAME);
+        return outputFile;
     }
-
 }

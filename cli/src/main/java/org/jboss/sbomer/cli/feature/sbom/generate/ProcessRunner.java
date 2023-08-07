@@ -18,9 +18,15 @@
 package org.jboss.sbomer.cli.feature.sbom.generate;
 
 import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,13 +37,59 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ProcessRunner {
+
+    /**
+     * Perform validation of the Maven project directory located at a given path.
+     *
+     * @param workDir
+     */
+    private static void validateWorkDir(Path workDir) {
+        log.debug("Validating working directory: '{}'...", workDir);
+
+        if (workDir == null) {
+            throw new ValidationException(
+                    "Command execution validation failed",
+                    Collections.singletonList("No working directory provided"));
+        }
+
+        if (!Files.exists(workDir)) {
+            throw new ValidationException(
+                    "Command execution validation failed",
+                    Collections.singletonList(
+                            String.format("Provided working directory '%s' does not exist", workDir.toString())));
+        }
+
+        if (!Files.isDirectory(workDir)) {
+            throw new ValidationException(
+                    "Command execution validation failed",
+                    Collections.singletonList(
+                            String.format("Provided working directory '%s' is not a directory", workDir.toString())));
+        }
+
+        log.debug("Working directory '{}' will be used", workDir);
+    }
+
     /**
      * Run the {@link Process} for the
      *
-     * @param pb The {@link ProcessBuilder} instance to start the process from.
+     * @param workDir The {@link Path} to the working directory
+     * @param command The command to execute
      * @throws ApplicationException in case the process cannot be started or failed.
      */
-    public static void run(ProcessBuilder pb) {
+    public static void run(Path workDir, String... command) {
+        if (Objects.isNull(command) || command.length == 0) {
+            throw new ValidationException(
+                    "Command execution validation failed",
+                    Collections.singletonList(String.format("No command to provided")));
+        }
+
+        ProcessRunner.validateWorkDir(workDir);
+
+        ProcessBuilder pb = new ProcessBuilder().redirectOutput(Redirect.INHERIT).redirectError(Redirect.INHERIT);
+
+        pb.command(command);
+        pb.directory(workDir.toAbsolutePath().toFile());
+
         log.info("Preparing to execute command: '{}'", pb.command().stream().collect(Collectors.joining(" ")));
 
         Process process = null;
