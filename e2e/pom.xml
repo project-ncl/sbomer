@@ -62,10 +62,10 @@
 
   <profiles>
     <profile>
-      <id>stage</id>
+      <id>e2e-stage</id>
       <activation>
         <property>
-          <name>stage</name>
+          <name>e2e-stage</name>
         </property>
       </activation>
       <build>

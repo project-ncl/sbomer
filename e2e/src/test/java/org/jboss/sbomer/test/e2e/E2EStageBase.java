@@ -19,9 +19,9 @@ package org.jboss.sbomer.test.e2e;
 
 public class E2EStageBase extends E2EBase {
 
-	@Override
-	public String sbomerUriPropertyName() {
-		return "sbomerStageUri";
-	}
+    @Override
+    public String sbomerUriPropertyName() {
+        return "sbomerStageUri";
+    }
 
 }

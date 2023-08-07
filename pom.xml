@@ -35,6 +35,13 @@
         <version>39</version>
     </parent>
 
+    <modules>
+        <module>core</module>
+        <module>cli</module>
+        <module>service</module>
+        <module>e2e</module>
+    </modules>
+
     <properties>
         <compiler-plugin.version>3.10.1</compiler-plugin.version>
         <maven.compiler.release>17</maven.compiler.release>
@@ -259,29 +266,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>core</module>
-                <module>cli</module>
-                <module>service</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>e2e</id>
-            <activation>
-                <property>
-                    <name>e2e</name>
-                </property>
-            </activation>
-            <modules>
-                <module>e2e</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>
