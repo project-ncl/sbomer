@@ -199,7 +199,7 @@ public class MavenDominoGeneratorTest {
 
                 var outputPath = generator.run(workDir, args);
 
-                assertEquals(Path.of("bom.json"), outputPath);
+                assertEquals(Path.of("work/dir/bom.json"), outputPath);
             }
 
         }
