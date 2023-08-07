@@ -38,6 +38,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessRunner {
 
+    private ProcessRunner() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
+
     /**
      * Perform validation of the Maven project directory located at a given path.
      *
@@ -105,7 +109,8 @@ public class ProcessRunner {
         try {
             exitCode = process.waitFor();
         } catch (InterruptedException e) {
-            throw new ApplicationException("Unable to obtain the status for the process", e);
+            log.error("Unable to obtain the status for the process", e);
+            Thread.currentThread().interrupt();
         }
 
         if (exitCode != 0) {
