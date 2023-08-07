@@ -57,11 +57,6 @@ public class MavenDominoGenerator implements SbomGenerator {
      * Path to the Maven {@code settings.xml} file. Relative to {@link #workDir}.
      */
     Path settingsXmlPath;
-    /**
-     * Output file name. Relative to {@link #workDir}.
-     */
-    @Builder.Default
-    Path outputFile = Path.of(BOM_FILE_NAME);
 
     /**
      * Perform validation of the Domino tool.
@@ -115,7 +110,7 @@ public class MavenDominoGenerator implements SbomGenerator {
 
         ProcessRunner.run(workDir, command);
 
-        return outputFile;
+        return Path.of(workDir.toString(), BOM_FILE_NAME);
     }
 
     private String[] command(Path dominoToolPath, Path workDir, String... args) {
@@ -132,7 +127,7 @@ public class MavenDominoGenerator implements SbomGenerator {
                         dominoToolPath.toString(),
                         "report",
                         String.format("--project-dir=%s", workDir.toString()),
-                        String.format("--output-file=%s", outputFile),
+                        String.format("--output-file=%s", BOM_FILE_NAME),
                         "--manifest"));
 
         if (args != null && args.length > 0) {
