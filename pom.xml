@@ -49,7 +49,6 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>2.16.6.Final</quarkus.platform.version>
-        <skipITs>true</skipITs>
         <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
         <failsafe-plugin.version>3.0.0-M7</failsafe-plugin.version>
         <version.cyclonedx>7.3.2</version.cyclonedx>
