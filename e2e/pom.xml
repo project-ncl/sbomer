@@ -97,6 +97,7 @@
               <properties>
                 <includeTags>stage</includeTags>
               </properties>
+              <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
             </configuration>
           </plugin>
         </plugins>
