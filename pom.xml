@@ -226,6 +226,7 @@
                     </properties>
                     <header>${maven.multiModuleProjectDirectory}/.license-header.txt</header>
                     <excludes>
+                        <exclude>.github/**</exclude>
                         <exclude>.license-header.txt</exclude>
                         <exclude>.sdkmanrc</exclude>
                         <exclude>.dockerignore</exclude>
