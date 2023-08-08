@@ -1,0 +1,28 @@
+{
+	"username": "renovate-release",
+	"gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+	"onboarding": false,
+	"platform": "github",
+	"forkProcessing": "enabled",
+	"requireConfig": "ignored",
+	"dryRun": "full",
+	"branchPrefix": "renovate-bot/",
+	"repositories": [
+		"project-ncl/sbomer"
+	],
+	"packageRules": [
+		{
+			"description": "lockFileMaintenance",
+			"matchUpdateTypes": [
+				"pin",
+				"digest",
+				"patch",
+				"minor",
+				"major",
+				"lockFileMaintenance"
+			],
+			"dependencyDashboardApproval": false,
+			"minimumReleaseAge": null
+		}
+	]
+}
