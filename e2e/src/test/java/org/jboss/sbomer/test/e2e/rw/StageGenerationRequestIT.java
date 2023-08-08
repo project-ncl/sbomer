@@ -21,28 +21,32 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
+import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Tag("stage")
 public class StageGenerationRequestIT extends E2EStageBase {
-    @Test
-    public void testSuccessfulGeneration() throws IOException {
-        String requestId = requestGeneration("AZ4HNIBW4YYAA");
 
-        log.info("Generation Request created: {}", requestId);
+    private final static String BUILD_ID = "AZ4HNIBW4YYAA";
+    String generationRequestId;
+
+    @Test
+    @Order(1)
+    public void testSuccessfulGeneration() throws IOException {
+        generationRequestId = requestGeneration(BUILD_ID);
+
+        log.info("Generation Request created: {}", generationRequestId);
 
         Awaitility.await().atMost(5, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            final Response body = given().contentType(ContentType.JSON)
-                    .when()
-                    .get(String.format("/api/v1alpha1/sboms/requests/%s", requestId));
-
+            final Response body = getGeneration(generationRequestId);
             String status = body.path("status").toString();
 
             log.info("Current generation request status: {}", status);
@@ -54,5 +58,15 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
             return status.equals("FINISHED");
         });
+    }
+
+    @Test
+    @Order(2)
+    public void ensureUmbMessageWasSent() {
+        givenLastCompleteUmbMessage().then()
+                .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
+                .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(BUILD_ID))
+                .body("raw_messages[0].msg.build.id", CoreMatchers.is(BUILD_ID))
+                .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
     }
 }

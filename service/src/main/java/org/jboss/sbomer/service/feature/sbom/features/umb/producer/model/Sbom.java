@@ -40,7 +40,14 @@ public class Sbom {
         String link;
     }
 
+    @Data
+    @Builder
+    public static class GenerationRequest {
+        String id;
+    }
+
     String id;
     String link;
     Bom bom;
+    GenerationRequest generationRequest;
 }

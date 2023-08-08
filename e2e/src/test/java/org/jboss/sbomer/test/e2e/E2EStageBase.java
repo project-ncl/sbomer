@@ -24,4 +24,9 @@ public class E2EStageBase extends E2EBase {
         return "sbomerStageUri";
     }
 
+    @Override
+    public String datagrepperUriPropertyName() {
+        return "datagrepperStageUri";
+    }
+
 }

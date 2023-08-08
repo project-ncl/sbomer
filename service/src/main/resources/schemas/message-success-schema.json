@@ -67,6 +67,16 @@
           "description": "SBOM link to the SBOMer REST API",
           "type": "string"
         },
+        "generationRequest": {
+          "type": "object",
+          "description": "SBOM generation request",
+          "properties": {
+            "id": {
+              "description": "SBOM generation request identifier",
+              "type": "string"
+            }
+          }
+        },
         "bom": {
           "type": "object",
           "description": "BOM information",

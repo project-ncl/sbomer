@@ -22,34 +22,57 @@ import org.hamcrest.CoreMatchers;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class E2EBase {
+    public abstract String datagrepperUriPropertyName();
+
     public abstract String sbomerUriPropertyName();
 
-    public String getBaseUri() {
-        String uri = System.getProperty(sbomerUriPropertyName());
+    private String getSbomerBaseUri() {
+        return validateProperty(sbomerUriPropertyName());
+    }
+
+    private String getDatagrepperBaseUri() {
+        return validateProperty(datagrepperUriPropertyName());
+    }
+
+    private String validateProperty(String propertyName) {
+        String uri = System.getProperty(propertyName);
 
         if (uri == null) {
             throw new RuntimeException(
                     String.format(
-                            "Could not obtain SBOMer URI, make sure you set the '-D%s' property",
-                            sbomerUriPropertyName()));
+                            "Could not obtain required property, make sure you set the '-D%s' property",
+                            propertyName));
         }
 
         return uri;
     }
 
-    public RequestSpecification given() {
-        return RestAssured.given().baseUri(getBaseUri());
+    public Response givenLastCompleteUmbMessage() {
+        return RestAssured.given()
+                .baseUri(getDatagrepperBaseUri())
+                .param("topic", "/topic/VirtualTopic.eng.pnc.sbom.complete")
+                .param("rows_per_page", 1)
+                .get("/raw");
+    }
+
+    public Response getGeneration(String generationId) {
+        return RestAssured.given()
+                .baseUri(getSbomerBaseUri())
+                .contentType(ContentType.JSON)
+                .when()
+                .get(String.format("/api/v1alpha1/sboms/requests/%s", generationId));
     }
 
     public String requestGeneration(String buildId) {
         log.info("Requesting SBOM for build ID: {}", buildId);
 
-        Response response = given().when()
+        Response response = RestAssured.given()
+                .baseUri(getSbomerBaseUri())
+                .when()
                 .contentType(ContentType.JSON)
                 .post(String.format("/api/v1alpha1/sboms/generate/build/%s", buildId));
 
