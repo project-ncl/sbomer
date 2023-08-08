@@ -1,3 +1,4 @@
+# Based on tag 9.2-722
 FROM registry.access.redhat.com/ubi9@sha256:c35238b35cbebe4e6c5d0f63a54e54dba41d0b425f2d101ad9f04a5e5ec100b8
 
 RUN INSTALL_PKGS="jq unzip zip git" && \
