@@ -1,4 +1,5 @@
-FROM registry.access.redhat.com/ubi9@sha256:4ea5966341930537784fd14b19073fb2af58d11b302332bb5dc445e0851b286d
+# Based on tag 9.2-722
+FROM registry.access.redhat.com/ubi9@sha256:c35238b35cbebe4e6c5d0f63a54e54dba41d0b425f2d101ad9f04a5e5ec100b8
 
 RUN INSTALL_PKGS="jq unzip zip git" && \
     dnf --disableplugin=subscription-manager -y --nodocs --setopt=install_weak_deps=0 install $INSTALL_PKGS && \
