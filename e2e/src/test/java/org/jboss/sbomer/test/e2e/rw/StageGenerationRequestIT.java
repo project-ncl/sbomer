@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StageGenerationRequestIT extends E2EStageBase {
 
     private final static String BUILD_ID = "AZ4HNIBW4YYAA";
-    String generationRequestId;
+    static String generationRequestId;
 
     @Test
     @Order(1)
