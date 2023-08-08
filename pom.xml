@@ -39,6 +39,7 @@
         <module>core</module>
         <module>cli</module>
         <module>service</module>
+        <module>e2e</module>
     </modules>
 
     <properties>
