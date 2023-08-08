@@ -34,7 +34,6 @@ import javax.inject.Inject;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
@@ -44,6 +43,7 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.B
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.BomFormat;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -148,6 +148,7 @@ public class NotificationService {
         Sbom sbomPayload = Sbom.builder()
                 .id(String.valueOf(sbom.getId()))
                 .link(sbomerConfig.apiUrl() + "sboms/" + sbom.getId())
+                .generationRequest(GenerationRequest.builder().id(sbom.getGenerationRequest().getId()).build())
                 .bom(bomPayload)
                 .build();
 

@@ -47,6 +47,7 @@ public class UmbMessageProducer implements MessageProducer {
     public static final String MESSAGE_HEADER_PURL_KEY = "purl";
     public static final String MESSAGE_HEADER_BUILD_ID_KEY = "pnc_build_id";
     public static final String MESSAGE_HEADER_SBOM_ID_KEY = "sbom_id";
+    public static final String MESSAGE_HEADER_GENERATION_REQUEST_ID_KEY = "generation_request_id";
     public static final String MESSAGE_HEADER_PRODUCER_KEY = "producer";
     public static final String MESSAGE_HEADER_TYPE_KEY = "type";
 
@@ -96,6 +97,7 @@ public class UmbMessageProducer implements MessageProducer {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(MESSAGE_HEADER_PURL_KEY, message.getPurl());
         headers.put(MESSAGE_HEADER_BUILD_ID_KEY, message.getBuild().getId());
+        headers.put(MESSAGE_HEADER_GENERATION_REQUEST_ID_KEY, message.getSbom().getGenerationRequest().getId());
         headers.put(MESSAGE_HEADER_SBOM_ID_KEY, message.getSbom().getId());
         headers.put(MESSAGE_HEADER_PRODUCER_KEY, "PNC SBOMer");
         headers.put(MESSAGE_HEADER_TYPE_KEY, "GenerationFinishedMessage");
