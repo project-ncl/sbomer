@@ -232,6 +232,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -244,14 +247,6 @@
           <name>native</name>
         </property>
       </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${failsafe-plugin.version}</version>
-          </plugin>
-        </plugins>
-      </build>
       <properties>
         <quarkus.package.type>native</quarkus.package.type>
       </properties>
