@@ -210,7 +210,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
+                <version>4.2</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>
@@ -223,26 +223,30 @@
                     <properties>
                         <copyright-years>${project.inceptionYear}</copyright-years>
                     </properties>
-                    <header>${maven.multiModuleProjectDirectory}/.license-header.txt</header>
-                    <excludes>
-                        <exclude>.github/**</exclude>
-                        <exclude>.license-header.txt</exclude>
-                        <exclude>.sdkmanrc</exclude>
-                        <exclude>.dockerignore</exclude>
-                        <exclude>**/banner.txt</exclude>
-                        <exclude>helm/**</exclude>
-                        <exclude>**/README</exclude>
-                        <exclude>**/LICENSE.txt</exclude>
-                        <exclude>**/Dockerfile**</exclude>
-                        <exclude>**/Containerfile**</exclude>
-                        <exclude>**/eclipse-codeStyle.xml</exclude>
-                        <exclude>.github/dependabot.yml</exclude>
-                        <exclude>.mvn/**</exclude>
-                        <exclude>.m2/**</exclude>
-                        <exclude>mvnw**</exclude>
-                        <exclude>**/secret*.txt</exclude>
-                        <exclude>**/src/test/**</exclude>
-                    </excludes>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${maven.multiModuleProjectDirectory}/.license-header.txt</header>
+                            <excludes>
+                                <exclude>.github/**</exclude>
+                                <exclude>.license-header.txt</exclude>
+                                <exclude>.sdkmanrc</exclude>
+                                <exclude>.dockerignore</exclude>
+                                <exclude>**/banner.txt</exclude>
+                                <exclude>helm/**</exclude>
+                                <exclude>**/README</exclude>
+                                <exclude>**/LICENSE.txt</exclude>
+                                <exclude>**/Dockerfile**</exclude>
+                                <exclude>**/Containerfile**</exclude>
+                                <exclude>**/eclipse-codeStyle.xml</exclude>
+                                <exclude>.github/dependabot.yml</exclude>
+                                <exclude>.mvn/**</exclude>
+                                <exclude>.m2/**</exclude>
+                                <exclude>mvnw**</exclude>
+                                <exclude>**/secret*.txt</exclude>
+                                <exclude>**/src/test/**</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
             </plugin>
             <plugin>
