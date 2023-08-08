@@ -53,7 +53,7 @@
         <surefire-plugin.version>3.1.2</surefire-plugin.version>
         <failsafe-plugin.version>3.1.2</failsafe-plugin.version>
         <version.cyclonedx>7.3.2</version.cyclonedx>
-        <version.hibernatetypes>1.0.2</version.hibernatetypes>
+        <version.hibernatetypes>2.0.0</version.hibernatetypes>
         <version.lombok>1.18.28</version.lombok>
         <version.mapstruct>1.4.2.Final</version.mapstruct>
         <version.pnc-rest>2.4.3</version.pnc-rest>
