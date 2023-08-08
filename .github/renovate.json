@@ -5,7 +5,6 @@
 	"platform": "github",
 	"forkProcessing": "enabled",
 	"requireConfig": "ignored",
-	"dryRun": "full",
 	"branchPrefix": "renovate-bot/",
 	"repositories": [
 		"project-ncl/sbomer"
