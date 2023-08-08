@@ -56,7 +56,7 @@
         <version.hibernatetypes>1.0.2</version.hibernatetypes>
         <version.lombok>1.18.28</version.lombok>
         <version.mapstruct>1.4.2.Final</version.mapstruct>
-        <version.pnc-rest>2.4.3</version.pnc-rest>
+        <version.pnc-rest>2.5.1</version.pnc-rest>
         <version.pnc-api>2.4.5</version.pnc-api>
         <version.pnc-common>2.2.1</version.pnc-common>
         <version.quarkus-jgit>2.3.2</version.quarkus-jgit>
