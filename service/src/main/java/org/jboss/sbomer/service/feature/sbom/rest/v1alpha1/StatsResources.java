@@ -51,55 +51,55 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 @PermitAll
 public class StatsResources {
 
-	@Inject
-	SbomService sbomService;
+    @Inject
+    SbomService sbomService;
 
-	@ConfigProperty(name = "buildNumber", defaultValue = "dev")
-	String version;
+    @ConfigProperty(name = "buildNumber", defaultValue = "dev")
+    String version;
 
-	@GET
-	@Operation(summary = "Get service runtime information", description = "Service information and statistics.")
-	@APIResponses({ @APIResponse(
-			responseCode = "200",
-			description = "Available runtime information.",
-			content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-	public Response stats() {
-		long uptimeMilis = getUptimeMilis();
+    @GET
+    @Operation(summary = "Get service runtime information", description = "Service information and statistics.")
+    @APIResponses({ @APIResponse(
+            responseCode = "200",
+            description = "Available runtime information.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    public Response stats() {
+        long uptimeMilis = getUptimeMilis();
 
-		Stats stats = Stats.builder()
-				.withVersion(version)
-				.withUptime(toUptime(uptimeMilis))
-				.withUptimeMilis(uptimeMilis)
-				.withResources(resources())
-				.build();
+        Stats stats = Stats.builder()
+                .withVersion(version)
+                .withUptime(toUptime(uptimeMilis))
+                .withUptimeMilis(uptimeMilis)
+                .withResources(resources())
+                .build();
 
-		return Response.status(Status.OK).entity(stats).build();
-	}
+        return Response.status(Status.OK).entity(stats).build();
+    }
 
-	private long getUptimeMilis() {
-		return ManagementFactory.getRuntimeMXBean().getUptime();
-	}
+    private long getUptimeMilis() {
+        return ManagementFactory.getRuntimeMXBean().getUptime();
+    }
 
-	private Resources resources() {
-		return Resources.builder().withSboms(sbomStats()).withGenerationRequests(generationRequestStats()).build();
-	}
+    private Resources resources() {
+        return Resources.builder().withSboms(sbomStats()).withGenerationRequests(generationRequestStats()).build();
+    }
 
-	private SbomStats sbomStats() {
-		return SbomStats.builder().withTotal(sbomService.countSboms()).build();
-	}
+    private SbomStats sbomStats() {
+        return SbomStats.builder().withTotal(sbomService.countSboms()).build();
+    }
 
-	private GenerationRequestStats generationRequestStats() {
-		return GenerationRequestStats.builder()
-				.withTotal(sbomService.countSbomGenerationRequests())
-				.withInProgress(sbomService.countInProgressSbomGenerationRequests())
-				.build();
-	}
+    private GenerationRequestStats generationRequestStats() {
+        return GenerationRequestStats.builder()
+                .withTotal(sbomService.countSbomGenerationRequests())
+                .withInProgress(sbomService.countInProgressSbomGenerationRequests())
+                .build();
+    }
 
-	private String toUptime(long miliseconds) {
-		return Duration.ofMillis(miliseconds)
-				.toString()
-				.substring(2)
-				.replaceAll("(\\d[HMS])(?!$)", "$1 ")
-				.toLowerCase();
-	}
+    private String toUptime(long miliseconds) {
+        return Duration.ofMillis(miliseconds)
+                .toString()
+                .substring(2)
+                .replaceAll("(\\d[HMS])(?!$)", "$1 ")
+                .toLowerCase();
+    }
 }

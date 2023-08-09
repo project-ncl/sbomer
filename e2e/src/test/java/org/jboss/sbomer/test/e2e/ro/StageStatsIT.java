@@ -30,7 +30,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
 @Tag("stage")
-public class StageStats extends E2EStageBase {
+public class StageStatsIT extends E2EStageBase {
     private Response getStats() {
         return RestAssured.given()
                 .baseUri(getSbomerBaseUri())
@@ -45,8 +45,9 @@ public class StageStats extends E2EStageBase {
 
         stats.then()
                 .statusCode(200)
-                .body("resources.sbomCount", CoreMatchers.is(Matchers.greaterThanOrEqualTo(0)))
-                .body("resources.generationRequestCount", CoreMatchers.is(Matchers.greaterThanOrEqualTo(0)))
+                .body("resources.sboms.total", CoreMatchers.is(Matchers.greaterThanOrEqualTo(0)))
+                .body("resources.generationRequests.inProgress", CoreMatchers.is(Matchers.greaterThanOrEqualTo(0)))
+                .body("resources.generationRequests.total", CoreMatchers.is(Matchers.greaterThanOrEqualTo(0)))
                 .body("uptime", CoreMatchers.isA(String.class))
                 .body("uptimeMilis", CoreMatchers.is(Matchers.greaterThan(0)))
                 .body("version", CoreMatchers.isA(String.class));

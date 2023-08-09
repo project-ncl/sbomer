@@ -41,8 +41,9 @@ public class StatsResourceIT {
                 .get("/api/v1alpha1/stats")
                 .then()
                 .statusCode(200)
-                .body("resources.sbomCount", CoreMatchers.is(0))
-                .body("resources.generationRequestCount", CoreMatchers.is(0))
+                .body("resources.sboms.total", CoreMatchers.is(0))
+                .body("resources.generationRequests.total", CoreMatchers.is(0))
+                .body("resources.generationRequests.inProgress", CoreMatchers.is(0))
                 .body("uptime", CoreMatchers.isA(String.class))
                 .body("uptimeMilis", CoreMatchers.isA(Integer.class))
                 .body("version", CoreMatchers.is("dev"));
@@ -58,8 +59,8 @@ public class StatsResourceIT {
                 .get("/api/v1alpha1/stats")
                 .then()
                 .statusCode(200)
-                .body("resources.sbomCount", CoreMatchers.is(12))
-                .body("resources.generationRequestCount", CoreMatchers.is(500));
+                .body("resources.sboms.total", CoreMatchers.is(12))
+                .body("resources.generationRequests.total", CoreMatchers.is(500));
     }
 
 }
