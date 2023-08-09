@@ -54,6 +54,16 @@ public class SbomService {
     Validator validator;
 
     @WithSpan
+    public long countSboms() {
+        return sbomRepository.count();
+    }
+
+    @WithSpan
+    public long countSbomGenerationRequests() {
+        return sbomRequestRepository.count();
+    }
+
+    @WithSpan
     public List<Sbom> searchSbomsByQuery(
             @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
             @SpanAttribute(value = "sort") String sort) {
