@@ -31,6 +31,7 @@ import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.pnc.common.log.MDCUtils;
 import org.slf4j.MDC;
 
+import io.opentelemetry.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -48,12 +49,14 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
     public void filter(ContainerRequestContext requestContext) throws IOException {
         requestContext.setProperty(REQUEST_EXECUTION_START, System.currentTimeMillis());
         MDCUtils.setMDCFromRequestContext(requestContext);
+        MDCUtils.addMDCFromOtelHeadersWithFallback(requestContext, Span.current().getSpanContext(), false);
 
         UriInfo uriInfo = requestContext.getUriInfo();
         Request request = requestContext.getRequest();
 
         String forwardedFor = requestContext.getHeaderString("X-FORWARDED-FOR");
         if (forwardedFor != null) {
+            MDC.put(MDCKeys.X_FORWARDED_FOR_KEY, forwardedFor);
             log.info("Requested {} {}, forwardedFor: {}.", request.getMethod(), uriInfo.getRequestUri(), forwardedFor);
         } else {
             log.info("Requested {} {}.", request.getMethod(), uriInfo.getRequestUri());

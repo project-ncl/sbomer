@@ -84,6 +84,11 @@ spec:
               value: "/data"
             - name: SBOMER_TEKTON_SA
               value: {{ include "sbomer.serviceAccountName" . }}
+            - name: OTLP_EXPORTER_ENDPOINT
+              value: {{ .Values.otlp.endpoint }}
+            - name: OTLP_RESOURCE_ATTRIBUTES
+              value: {{ .Values.otlp.attributes }}
+
           ports:
             - containerPort: 8080
               name: http

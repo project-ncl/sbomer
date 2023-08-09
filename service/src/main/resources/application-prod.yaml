@@ -56,3 +56,14 @@ quarkus:
     client-id: pnc-sbomer
     tls:
       verification: none
+
+  # https://quarkus.io/guides/opentelemetry
+  opentelemetry:
+    enabled: true
+    tracer:
+      enabled: true
+      resource-attributes: "${OTLP_RESOURCE_ATTRIBUTES}"
+      exporter:
+        otlp:
+          # Send telemetry data to an opentelemetry-collector
+          endpoint: "${OTLP_EXPORTER_ENDPOINT}"

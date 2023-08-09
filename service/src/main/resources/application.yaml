@@ -43,7 +43,7 @@ quarkus:
       # Disable JSON logging for console by default
       json:
         ~: false
-      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+      format: "%d{HH:mm:ss,SSS} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId}, sampled=%X{sampled} [%c{3.}] (%t) %s%e mdc:[%X]%n"
     file:
       # Disable file logging
       enable: false
@@ -88,6 +88,11 @@ quarkus:
   ## https://quarkus.io/guides/security-oidc-configuration-properties-reference
   ## OpenID Connect (OIDC) configuration
   oidc:
+    enabled: false
+
+  # https://quarkus.io/guides/opentelemetry
+  ## Opentelemetry configuration
+  opentelemetry:
     enabled: false
 
 sbomer:

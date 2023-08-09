@@ -26,7 +26,6 @@ import javax.transaction.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
@@ -34,8 +33,8 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.RestUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -54,23 +53,35 @@ public class SbomService {
     @Inject
     Validator validator;
 
-    public List<Sbom> searchSbomsByQuery(String rsqlQuery, String sort) {
+    @WithSpan
+    public List<Sbom> searchSbomsByQuery(
+            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
+            @SpanAttribute(value = "sort") String sort) {
         return sbomRepository.searchByQuery(rsqlQuery, sort);
     }
 
-    public Page<Sbom> searchSbomsByQueryPaginated(int pageIndex, int pageSize, String rsqlQuery, String sort) {
+    @WithSpan
+    public Page<Sbom> searchSbomsByQueryPaginated(
+            @SpanAttribute(value = "pageIndex") int pageIndex,
+            @SpanAttribute(value = "pageSize") int pageSize,
+            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
+            @SpanAttribute(value = "sort") String sort) {
         return sbomRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery, sort);
     }
 
-    public List<SbomGenerationRequest> searchSbomRequestsByQuery(String rsqlQuery, String sort) {
+    @WithSpan
+    public List<SbomGenerationRequest> searchSbomRequestsByQuery(
+            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
+            @SpanAttribute(value = "sort") String sort) {
         return sbomRequestRepository.searchByQuery(rsqlQuery, sort);
     }
 
+    @WithSpan
     public Page<SbomGenerationRequest> searchSbomRequestsByQueryPaginated(
-            int pageIndex,
-            int pageSize,
-            String rsqlQuery,
-            String sort) {
+            @SpanAttribute(value = "pageIndex") int pageIndex,
+            @SpanAttribute(value = "pageSize") int pageSize,
+            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
+            @SpanAttribute(value = "sort") String sort) {
         return sbomRequestRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery, sort);
     }
 
@@ -80,7 +91,8 @@ public class SbomService {
      * @param sbomId As {@link String}.
      * @return The {@link Sbom} object.
      */
-    public Sbom get(String sbomId) {
+    @WithSpan
+    public Sbom get(@SpanAttribute(value = "sbomId") String sbomId) {
         return sbomRepository.findById(sbomId);
     }
 
@@ -89,8 +101,9 @@ public class SbomService {
      *
      * @param id The {@link SbomGenerationRequest} id to delete from the database.
      */
+    @WithSpan
     @Transactional
-    public void deleteSbomRequest(String id) {
+    public void deleteSbomRequest(@SpanAttribute(value = "id") String id) {
         log.info("Deleting SBOM Generation Request: {}", id);
 
         sbomRequestRepository.deleteRequest(id);
@@ -102,6 +115,7 @@ public class SbomService {
      * @param sbom The {@link Sbom} resource to store in database.
      * @return Updated {@link Sbom} resource.
      */
+    @WithSpan
     @Transactional
     public Sbom save(Sbom sbom) {
         log.debug("Preparing for storing SBOM: {}", sbom.toString());
