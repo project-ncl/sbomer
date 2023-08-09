@@ -28,6 +28,7 @@ import javax.validation.Validator;
 
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -61,6 +62,12 @@ public class SbomService {
     @WithSpan
     public long countSbomGenerationRequests() {
         return sbomRequestRepository.count();
+    }
+
+    @WithSpan
+    public long countInProgressSbomGenerationRequests() {
+        return sbomRequestRepository
+                .count("status != ?1 or status != ?2", SbomGenerationStatus.FINISHED, SbomGenerationStatus.FAILED);
     }
 
     @WithSpan

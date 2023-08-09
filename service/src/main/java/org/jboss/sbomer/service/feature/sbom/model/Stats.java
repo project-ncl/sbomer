@@ -26,8 +26,21 @@ public class Stats {
     @Data
     @Builder(setterPrefix = "with")
     public static class Resources {
-        long sbomCount;
-        long generationRequestCount;
+        SbomStats sboms;
+        GenerationRequestStats generationRequests;
+    }
+
+    @Data
+    @Builder(setterPrefix = "with")
+    public static class SbomStats {
+        long total;
+    }
+
+    @Data
+    @Builder(setterPrefix = "with")
+    public static class GenerationRequestStats {
+        long total;
+        long inProgress;
     }
 
     Resources resources;

@@ -30,11 +30,11 @@ public abstract class E2EBase {
 
     public abstract String sbomerUriPropertyName();
 
-    private String getSbomerBaseUri() {
+    protected String getSbomerBaseUri() {
         return validateProperty(sbomerUriPropertyName());
     }
 
-    private String getDatagrepperBaseUri() {
+    protected String getDatagrepperBaseUri() {
         return validateProperty(datagrepperUriPropertyName());
     }
 

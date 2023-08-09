@@ -38,7 +38,9 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.GenerationRequestStats;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Resources;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.SbomStats;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
 @Path("/api/v1alpha1/stats")
@@ -62,24 +64,42 @@ public class StatsResources {
 			description = "Available runtime information.",
 			content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
 	public Response stats() {
-		long uptimeMilis = ManagementFactory.getRuntimeMXBean().getUptime();
+		long uptimeMilis = getUptimeMilis();
 
 		Stats stats = Stats.builder()
 				.withVersion(version)
-				.withUptime(
-						Duration.ofMillis(uptimeMilis)
-								.toString()
-								.substring(2)
-								.replaceAll("(\\d[HMS])(?!$)", "$1 ")
-								.toLowerCase())
+				.withUptime(toUptime(uptimeMilis))
 				.withUptimeMilis(uptimeMilis)
-				.withResources(
-						Resources.builder()
-								.withSbomCount(sbomService.countSboms())
-								.withGenerationRequestCount(sbomService.countSbomGenerationRequests())
-								.build())
+				.withResources(resources())
 				.build();
 
 		return Response.status(Status.OK).entity(stats).build();
+	}
+
+	private long getUptimeMilis() {
+		return ManagementFactory.getRuntimeMXBean().getUptime();
+	}
+
+	private Resources resources() {
+		return Resources.builder().withSboms(sbomStats()).withGenerationRequests(generationRequestStats()).build();
+	}
+
+	private SbomStats sbomStats() {
+		return SbomStats.builder().withTotal(sbomService.countSboms()).build();
+	}
+
+	private GenerationRequestStats generationRequestStats() {
+		return GenerationRequestStats.builder()
+				.withTotal(sbomService.countSbomGenerationRequests())
+				.withInProgress(sbomService.countInProgressSbomGenerationRequests())
+				.build();
+	}
+
+	private String toUptime(long miliseconds) {
+		return Duration.ofMillis(miliseconds)
+				.toString()
+				.substring(2)
+				.replaceAll("(\\d[HMS])(?!$)", "$1 ")
+				.toLowerCase();
 	}
 }

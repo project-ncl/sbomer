@@ -31,35 +31,35 @@ import io.restassured.RestAssured;
 @WithKubernetesTestServer
 public class StatsResourceIT {
 
-	@InjectSpy
-	SbomService sbomService;
+    @InjectSpy
+    SbomService sbomService;
 
-	@Test
-	void testEmptyStatsEndpoint() {
-		RestAssured.given()
-				.when()
-				.get("/api/v1alpha1/stats")
-				.then()
-				.statusCode(200)
-				.body("resources.sbomCount", CoreMatchers.is(0))
-				.body("resources.generationRequestCount", CoreMatchers.is(0))
-				.body("uptime", CoreMatchers.isA(String.class))
-				.body("uptimeMilis", CoreMatchers.isA(Integer.class))
-				.body("version", CoreMatchers.is("dev"));
-	}
+    @Test
+    void testEmptyStatsEndpoint() {
+        RestAssured.given()
+                .when()
+                .get("/api/v1alpha1/stats")
+                .then()
+                .statusCode(200)
+                .body("resources.sbomCount", CoreMatchers.is(0))
+                .body("resources.generationRequestCount", CoreMatchers.is(0))
+                .body("uptime", CoreMatchers.isA(String.class))
+                .body("uptimeMilis", CoreMatchers.isA(Integer.class))
+                .body("version", CoreMatchers.is("dev"));
+    }
 
-	@Test
-	void testStatsEndpoint() {
-		Mockito.when(sbomService.countSboms()).thenReturn(12l);
-		Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
+    @Test
+    void testStatsEndpoint() {
+        Mockito.when(sbomService.countSboms()).thenReturn(12l);
+        Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
 
-		RestAssured.given()
-				.when()
-				.get("/api/v1alpha1/stats")
-				.then()
-				.statusCode(200)
-				.body("resources.sbomCount", CoreMatchers.is(12))
-				.body("resources.generationRequestCount", CoreMatchers.is(500));
-	}
+        RestAssured.given()
+                .when()
+                .get("/api/v1alpha1/stats")
+                .then()
+                .statusCode(200)
+                .body("resources.sbomCount", CoreMatchers.is(12))
+                .body("resources.generationRequestCount", CoreMatchers.is(500));
+    }
 
 }
