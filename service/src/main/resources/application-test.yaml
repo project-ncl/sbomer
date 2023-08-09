@@ -32,6 +32,8 @@ quarkus:
   operator-sdk:
     start-operator: false
 
+  opentelemetry:
+    enabled: false
 sbomer:
   controller:
     generation-request:
