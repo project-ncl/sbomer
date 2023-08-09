@@ -49,7 +49,7 @@ public class StageStatsIT extends E2EStageBase {
                 .body("resources.generationRequests.inProgress", CoreMatchers.is(Matchers.greaterThanOrEqualTo(0)))
                 .body("resources.generationRequests.total", CoreMatchers.is(Matchers.greaterThanOrEqualTo(0)))
                 .body("uptime", CoreMatchers.isA(String.class))
-                .body("uptimeMilis", CoreMatchers.is(Matchers.greaterThan(0)))
+                .body("uptimeMillis", CoreMatchers.is(Matchers.greaterThan(0)))
                 .body("version", CoreMatchers.isA(String.class));
     }
 

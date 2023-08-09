@@ -45,7 +45,7 @@ public class StatsResourceIT {
                 .body("resources.generationRequests.total", CoreMatchers.is(0))
                 .body("resources.generationRequests.inProgress", CoreMatchers.is(0))
                 .body("uptime", CoreMatchers.isA(String.class))
-                .body("uptimeMilis", CoreMatchers.isA(Integer.class))
+                .body("uptimeMillis", CoreMatchers.isA(Integer.class))
                 .body("version", CoreMatchers.isA(String.class));
     }
 

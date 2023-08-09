@@ -44,7 +44,7 @@ public class Stats {
     }
 
     Resources resources;
-    long uptimeMilis;
+    long uptimeMillis;
     String uptime;
     String version;
 

@@ -69,7 +69,7 @@ public class StatsResources {
         Stats stats = Stats.builder()
                 .withVersion(version)
                 .withUptime(toUptime(uptimeMillis))
-                .withUptimeMilis(uptimeMillis)
+                .withUptimeMillis(uptimeMillis)
                 .withResources(resources())
                 .build();
 
