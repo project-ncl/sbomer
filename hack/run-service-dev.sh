@@ -26,4 +26,5 @@ SCRIPT_DIR=$(dirname "$0")
 
 set -x
 
-exec "$SCRIPT_DIR/run-maven.sh" -pl service -am quarkus:dev -Dquarkus.http.host=0.0.0.0
+exec "$SCRIPT_DIR/run-maven.sh" -pl service -am quarkus:dev -Dquarkus.http.host=0.0.0.0 -DbuildNumber=dev "$@"
+

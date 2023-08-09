@@ -17,6 +17,9 @@
 #
 
 quarkus:
+  application:
+    version: ${buildNumber}
+
   # Make the startup a bit nicer
   banner:
     path: banner.txt

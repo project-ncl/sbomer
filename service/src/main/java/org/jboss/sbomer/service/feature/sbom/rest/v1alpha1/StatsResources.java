@@ -54,7 +54,7 @@ public class StatsResources {
     @Inject
     SbomService sbomService;
 
-    @ConfigProperty(name = "buildNumber", defaultValue = "dev")
+    @ConfigProperty(name = "quarkus.application.version", defaultValue = "dev")
     String version;
 
     @GET
@@ -64,19 +64,19 @@ public class StatsResources {
             description = "Available runtime information.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Response stats() {
-        long uptimeMilis = getUptimeMilis();
+        long uptimeMillis = getUptimeMillis();
 
         Stats stats = Stats.builder()
                 .withVersion(version)
-                .withUptime(toUptime(uptimeMilis))
-                .withUptimeMilis(uptimeMilis)
+                .withUptime(toUptime(uptimeMillis))
+                .withUptimeMilis(uptimeMillis)
                 .withResources(resources())
                 .build();
 
         return Response.status(Status.OK).entity(stats).build();
     }
 
-    private long getUptimeMilis() {
+    private long getUptimeMillis() {
         return ManagementFactory.getRuntimeMXBean().getUptime();
     }
 
@@ -95,8 +95,8 @@ public class StatsResources {
                 .build();
     }
 
-    private String toUptime(long miliseconds) {
-        return Duration.ofMillis(miliseconds)
+    private String toUptime(long milliseconds) {
+        return Duration.ofMillis(milliseconds)
                 .toString()
                 .substring(2)
                 .replaceAll("(\\d[HMS])(?!$)", "$1 ")
