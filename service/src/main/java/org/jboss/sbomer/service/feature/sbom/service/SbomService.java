@@ -67,7 +67,7 @@ public class SbomService {
     @WithSpan
     public long countInProgressSbomGenerationRequests() {
         return sbomRequestRepository
-                .count("status != ?1 or status != ?2", SbomGenerationStatus.FINISHED, SbomGenerationStatus.FAILED);
+                .count("status != ?1 and status != ?2", SbomGenerationStatus.FINISHED, SbomGenerationStatus.FAILED);
     }
 
     @WithSpan
