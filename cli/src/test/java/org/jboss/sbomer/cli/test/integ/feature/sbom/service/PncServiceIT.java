@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.ProductVersionRef;

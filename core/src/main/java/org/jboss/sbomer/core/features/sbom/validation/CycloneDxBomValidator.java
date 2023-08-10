@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.parsers.JsonParser;

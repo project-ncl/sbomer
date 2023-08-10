@@ -24,9 +24,9 @@ import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.OrNode;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
 
 @Slf4j
 public class CustomizedJpaPredicateVisitor<T> extends AbstractJpaVisitor<Predicate, T> {

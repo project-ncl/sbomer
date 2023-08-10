@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
-import javax.jms.Message;
+import jakarta.jms.Message;
 
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;

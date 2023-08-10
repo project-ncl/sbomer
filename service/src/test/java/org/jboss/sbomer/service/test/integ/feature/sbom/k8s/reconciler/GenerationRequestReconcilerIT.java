@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.URL;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.awaitility.Awaitility;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;

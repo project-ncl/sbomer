@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 public interface RSQLProducer<T> {
 

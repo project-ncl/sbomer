@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.client.ArtifactClient;
@@ -39,6 +37,8 @@ import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

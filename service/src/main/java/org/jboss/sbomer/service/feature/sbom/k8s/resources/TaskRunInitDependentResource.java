@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;

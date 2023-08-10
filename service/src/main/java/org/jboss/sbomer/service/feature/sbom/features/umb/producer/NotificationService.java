@@ -28,8 +28,8 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalRef
 import java.util.List;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;

@@ -19,8 +19,8 @@ package org.jboss.sbomer.cli.test.integ.feature.sbom;
 
 import java.util.Optional;
 
-import javax.enterprise.inject.Alternative;
-import javax.inject.Singleton;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Singleton;
 
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;

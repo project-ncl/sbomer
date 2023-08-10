@@ -28,9 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Order;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
 
 @Slf4j
 public class CustomizedJpaPredicateSortVisitor<T> implements RSQLVisitor<Collection<Order>, EntityManager> {
