@@ -25,6 +25,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
+import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +33,10 @@ import lombok.extern.slf4j.Slf4j;
 public class NotFinalOrFailedRequestCondition implements Condition<TaskRun, GenerationRequest> {
 
     @Override
-    public boolean isMet(GenerationRequest primary, TaskRun secondary, Context<GenerationRequest> context) {
+    public boolean isMet(
+            DependentResource<TaskRun, GenerationRequest> dependentResource,
+            GenerationRequest primary,
+            Context<GenerationRequest> context) {
         MDCUtils.addBuildContext(primary.getBuildId());
 
         if (primary.getStatus() != null && !primary.getStatus().isFinal()) {
