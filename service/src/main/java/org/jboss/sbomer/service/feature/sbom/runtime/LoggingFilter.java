@@ -19,6 +19,11 @@ package org.jboss.sbomer.service.feature.sbom.runtime;
 
 import java.io.IOException;
 
+import org.jboss.pnc.api.constants.MDCKeys;
+import org.jboss.sbomer.core.utils.MDCUtils;
+import org.slf4j.MDC;
+
+import io.opentelemetry.api.trace.Span;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
@@ -26,12 +31,6 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
-
-import org.jboss.pnc.api.constants.MDCKeys;
-import org.jboss.pnc.common.log.MDCUtils;
-import org.slf4j.MDC;
-
-import io.opentelemetry.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
 
 /**
