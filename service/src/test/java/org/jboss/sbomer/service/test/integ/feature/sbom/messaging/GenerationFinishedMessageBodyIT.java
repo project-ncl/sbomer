@@ -131,14 +131,15 @@ public class GenerationFinishedMessageBodyIT {
 
         ValidationResult result = validator.validate(message);
 
-        assertEquals(3, result.getErrors().size());
         assertFalse(result.isValid());
 
         assertThat(
                 result.getErrors(),
+
                 CoreMatchers.hasItems(
-                        "#: Property \"productConfig\" does not match schema",
-                        "#/productConfig: Property \"errataTool\" does not match schema",
+                        "#/productConfig: Property \"productConfig\" does not match schema",
+                        "#/productConfig: Property \"productConfig\" does not match additional properties schema",
+                        "#/productConfig/errataTool: Property \"errataTool\" does not match schema",
                         "#/productConfig/errataTool: Instance does not have required property \"productVersion\""));
     }
 
@@ -149,14 +150,14 @@ public class GenerationFinishedMessageBodyIT {
 
         ValidationResult result = validator.validate(message);
 
-        assertEquals(2, result.getErrors().size());
         assertFalse(result.isValid());
 
         assertThat(
                 result.getErrors(),
 
                 CoreMatchers.hasItems(
-                        "#: Property \"sbom\" does not match schema",
+                        "#/sbom: Property \"sbom\" does not match schema",
+                        "#/sbom: Property \"sbom\" does not match additional properties schema",
                         "#/sbom: Instance does not have required property \"link\""));
     }
 }

@@ -17,26 +17,23 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
-import com.github.tennaito.rsql.builder.BuilderTools;
-import com.github.tennaito.rsql.jpa.PredicateBuilder;
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.LogicalNode;
-import cz.jirutka.rsql.parser.ast.Node;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+
+import com.github.tennaito.rsql.builder.BuilderTools;
+import com.github.tennaito.rsql.jpa.PredicateBuilder;
+
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
+import cz.jirutka.rsql.parser.ast.LogicalNode;
+import cz.jirutka.rsql.parser.ast.Node;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
-
-import org.hibernate.query.criteria.internal.path.PluralAttributePath;
-import org.hibernate.query.criteria.internal.path.SingularAttributePath;
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -116,11 +113,9 @@ public class CustomPredicateBuilder<T> {
         Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, entityManager, misc);
 
         if ((RSQLProducerImpl.IS_NULL.equals(comparison.getOperator())
-                && (Enum.class.isAssignableFrom(propertyPath.getJavaType())
-                        || propertyPath instanceof PluralAttributePath))
+                && Enum.class.isAssignableFrom(propertyPath.getJavaType())
                 || (RSQLProducerImpl.IS_EQUAL.equals(comparison.getOperator())
-                        && Enum.class.isAssignableFrom(propertyPath.getJavaType())
-                        && propertyPath instanceof SingularAttributePath)) {
+                        && Enum.class.isAssignableFrom(propertyPath.getJavaType())))) {
 
             log.debug(
                     "Detected type '{}' for selector '{}' with custom comparison operator '{}'. Delegating to custom PredicateBuilderStrategy!",

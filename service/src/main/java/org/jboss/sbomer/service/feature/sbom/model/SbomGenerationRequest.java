@@ -20,19 +20,10 @@ package org.jboss.sbomer.service.feature.sbom.model;
 import java.io.IOException;
 import java.time.Instant;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import jakarta.transaction.Transactional;
-
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.type.SqlTypes;
 import org.jboss.resteasy.spi.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -50,6 +41,15 @@ import io.quarkiverse.hibernate.types.json.JsonBinaryType;
 import io.quarkiverse.hibernate.types.json.JsonTypes;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -71,7 +71,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
-@TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 @Builder(setterPrefix = "with")
 @RegisterForReflection
 public class SbomGenerationRequest extends PanacheEntityBase {
@@ -94,13 +93,13 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @Column(name = "build_id", nullable = false, updatable = false)
     String buildId;
 
-    @Type(type = JsonTypes.JSON_BIN)
+    @Type(JsonBinaryType.class)
     @Column(name = "config", columnDefinition = JsonTypes.JSON_BIN)
     @ToString.Exclude
     private JsonNode config;
 
     @Column(name = "reason", nullable = true, updatable = true)
-    @Type(type = "org.hibernate.type.TextType")
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
 
     /**

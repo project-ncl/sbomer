@@ -19,17 +19,15 @@ package org.jboss.sbomer.cli.feature.sbom.provider;
 
 import java.net.URL;
 
-import jakarta.enterprise.inject.Disposes;
-import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
-
 import org.jboss.pnc.build.finder.core.BuildConfig;
-import org.jboss.pnc.build.finder.koji.ClientSession;
 import org.jboss.pnc.build.finder.koji.KojiClientSession;
 
 import com.redhat.red.build.koji.KojiClientException;
 
 import io.quarkus.arc.DefaultBean;
+import jakarta.enterprise.inject.Disposes;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -40,7 +38,7 @@ public class KojiProvider {
 
     @Produces
     @DefaultBean
-    public ClientSession createSession() throws KojiClientException {
+    public KojiClientSession createSession() throws KojiClientException {
         log.debug("Using default Koji ClientSession");
 
         URL kojiHubURL = config.getKojiHubURL();

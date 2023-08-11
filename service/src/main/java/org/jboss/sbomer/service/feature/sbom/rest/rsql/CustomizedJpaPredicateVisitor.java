@@ -19,14 +19,14 @@ package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
 import com.github.tennaito.rsql.jpa.AbstractJpaVisitor;
 import com.github.tennaito.rsql.jpa.PredicateBuilderStrategy;
+
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.OrNode;
-import lombok.extern.slf4j.Slf4j;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Predicate;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CustomizedJpaPredicateVisitor<T> extends AbstractJpaVisitor<Predicate, T> {

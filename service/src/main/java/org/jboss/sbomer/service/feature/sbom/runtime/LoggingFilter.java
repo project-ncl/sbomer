@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.runtime;
 import java.io.IOException;
 
 import org.jboss.pnc.api.constants.MDCKeys;
-import org.jboss.sbomer.core.utils.MDCUtils;
+import org.jboss.pnc.common.log.MDCUtils;
 import org.slf4j.MDC;
 
 import io.opentelemetry.api.trace.Span;

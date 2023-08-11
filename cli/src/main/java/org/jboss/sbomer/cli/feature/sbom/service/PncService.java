@@ -21,24 +21,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.pnc.client.ArtifactClient;
-import org.jboss.pnc.client.BuildClient;
-import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.RemoteCollection;
-import org.jboss.pnc.client.RemoteResourceException;
-import org.jboss.pnc.client.RemoteResourceNotFoundException;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.BuildClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.BuildConfigurationClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceException;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceNotFoundException;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,22 +51,18 @@ public class PncService {
     @Getter
     String apiUrl;
 
-    ArtifactClient artifactClient;
-
     BuildClient buildClient;
 
     BuildConfigurationClient buildConfigurationClient;
 
     @PostConstruct
     void init() {
-        artifactClient = new ArtifactClient(getConfiguration());
         buildClient = new BuildClient(getConfiguration());
         buildConfigurationClient = new BuildConfigurationClient(getConfiguration());
     }
 
     @PreDestroy
     void cleanup() {
-        artifactClient.close();
         buildClient.close();
         buildConfigurationClient.close();
     }

@@ -17,6 +17,11 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.client;
 
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
+import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.core.utils.PaginationParameters;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
@@ -29,11 +34,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-import org.jboss.pnc.rest.api.parameters.PaginationParameters;
-import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
-import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
 
 /**
  * Client used to interact with the SBOMer REST API.

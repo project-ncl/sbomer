@@ -21,6 +21,25 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
 
+import org.cyclonedx.BomGeneratorFactory;
+import org.cyclonedx.exception.ParseException;
+import org.cyclonedx.generators.json.BomJsonGenerator;
+import org.cyclonedx.model.Bom;
+import org.cyclonedx.parsers.JsonParser;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.quarkiverse.hibernate.types.json.JsonBinaryType;
+import io.quarkiverse.hibernate.types.json.JsonTypes;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,25 +54,6 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-
-import org.cyclonedx.BomGeneratorFactory;
-import org.cyclonedx.exception.ParseException;
-import org.cyclonedx.generators.json.BomJsonGenerator;
-import org.cyclonedx.model.Bom;
-import org.cyclonedx.parsers.JsonParser;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import io.quarkiverse.hibernate.types.json.JsonBinaryType;
-import io.quarkiverse.hibernate.types.json.JsonTypes;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -67,7 +67,6 @@ import lombok.ToString;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@TypeDef(name = JsonTypes.JSON_BIN, typeClass = JsonBinaryType.class)
 @ToString
 @Table(
         name = "sbom",
@@ -93,7 +92,7 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "creation_time", nullable = false, updatable = false)
     private Instant creationTime;
 
-    @Type(type = JsonTypes.JSON_BIN)
+    @Type(JsonBinaryType.class)
     @Column(name = "sbom", columnDefinition = JsonTypes.JSON_BIN)
     @CycloneDxBom
     @ToString.Exclude
@@ -108,7 +107,7 @@ public class Sbom extends PanacheEntityBase {
 
     @JsonIgnore
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "status_msg")
     private String statusMessage;
 
