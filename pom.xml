@@ -59,7 +59,7 @@
         <version.pnc-api>2.4.5</version.pnc-api>
         <version.pnc-common>2.2.1</version.pnc-common>
         <version.quarkus-jgit>2.3.2</version.quarkus-jgit>
-        <version.tekton-client>0.7.0</version.tekton-client>
+        <version.tekton-client>1.0.1</version.tekton-client>
         <version.rsql-parser>2.1.0</version.rsql-parser>
         <version.rsql-jpa>2.0.2</version.rsql-jpa>
         <version.commons-cli>1.5.0</version.commons-cli>
