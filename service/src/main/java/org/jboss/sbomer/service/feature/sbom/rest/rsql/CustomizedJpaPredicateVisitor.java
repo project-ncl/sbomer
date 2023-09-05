@@ -19,11 +19,11 @@ package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
 import com.github.tennaito.rsql.jpa.AbstractJpaVisitor;
 import com.github.tennaito.rsql.jpa.PredicateBuilderStrategy;
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
 
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.OrNode;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
@@ -43,21 +43,21 @@ public class CustomizedJpaPredicateVisitor<T> extends AbstractJpaVisitor<Predica
     }
 
     @Override
-    public Predicate visit(AndNode node, EntityManager em) {
+    public Predicate visit(AndNode node, EntityManagerAdapter ema) {
         log.trace("visit: AndNode {}", node);
-        return CustomPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateBuilder.createPredicate(node, root, entityClass, ema, getBuilderTools());
     }
 
     @Override
-    public Predicate visit(OrNode node, EntityManager em) {
+    public Predicate visit(OrNode node, EntityManagerAdapter ema) {
         log.trace("visit: OrNode {}", node);
-        return CustomPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateBuilder.createPredicate(node, root, entityClass, ema, getBuilderTools());
     }
 
     @Override
-    public Predicate visit(ComparisonNode node, EntityManager em) {
+    public Predicate visit(ComparisonNode node, EntityManagerAdapter ema) {
         log.trace("visit: ComparisonNode {}", node);
-        return CustomPredicateBuilder.createPredicate(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateBuilder.createPredicate(node, root, entityClass, ema, getBuilderTools());
     }
 
 }

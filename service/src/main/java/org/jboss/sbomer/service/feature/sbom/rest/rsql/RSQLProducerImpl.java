@@ -23,6 +23,8 @@ import java.util.Set;
 
 import org.jboss.pnc.common.Strings;
 
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
+
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.Node;
@@ -72,7 +74,8 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
     @Override
     public CriteriaQuery<T> getCriteriaQuery(Class<T> type, String rsqlQuery, String sort) {
 
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        EntityManagerAdapter ema = new EntityManagerAdapter(entityManager);
+        CriteriaBuilder builder = ema.getCriteriaBuilder();
         CriteriaQuery<T> criteria = builder.createQuery(type);
         Root root = criteria.from(type);
 
@@ -84,12 +87,12 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
 
             // Create custom implementation of RSQLVisitor which converts nodes to predicates using
             // CustomizedPredicateBuilder or CustomizedPredicateBuilderStrategy for custom operators
-            RSQLVisitor<Predicate, EntityManager> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
+            RSQLVisitor<Predicate, EntityManagerAdapter> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
                     .withPredicateBuilderStrategy(new CustomizedPredicateBuilderStrategy());
 
             // create RSQLParser with default and custom operators
             Node rootNode = predicateParser.parse(rsqlQuery);
-            Predicate predicate = rootNode.accept(visitor, entityManager);
+            Predicate predicate = rootNode.accept(visitor, ema);
 
             query = criteria.where(predicate);
         }
@@ -105,7 +108,7 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
                     .withRoot(root);
 
             Node sortRootNode = sortParser.parse(compliantSort);
-            Collection<Order> orders = sortVisitor.accept(sortRootNode, entityManager);
+            Collection<Order> orders = sortVisitor.accept(sortRootNode, ema);
             query.orderBy(orders.toArray(new Order[orders.size()]));
         }
 
@@ -124,11 +127,11 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
 
         // Create custom implementation of RSQLVisitor which converts nodes to predicates using
         // CustomizedPredicateBuilder or CustomizedPredicateBuilderStrategy for custom operators
-        RSQLVisitor<Predicate, EntityManager> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
+        RSQLVisitor<Predicate, EntityManagerAdapter> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
                 .withPredicateBuilderStrategy(new CustomizedPredicateBuilderStrategy());
         // create RSQLParser with default and custom operators
         Node rootNode = predicateParser.parse(rsqlQuery);
-        Predicate predicate = rootNode.accept(visitor, entityManager);
+        Predicate predicate = rootNode.accept(visitor, new EntityManagerAdapter(entityManager));
 
         return criteria.where(predicate);
     }

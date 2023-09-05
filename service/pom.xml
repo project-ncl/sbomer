@@ -177,7 +177,7 @@
       <version>${version.rsql-parser}</version>
     </dependency>
     <dependency>
-      <groupId>com.github.goldmann</groupId>
+      <groupId>io.github.trilobitsystems</groupId>
       <artifactId>rsql-jpa</artifactId>
       <version>${version.rsql-jpa}</version>
     </dependency>

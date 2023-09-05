@@ -25,11 +25,11 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
 
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.LogicalNode;
 import cz.jirutka.rsql.parser.ast.Node;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
@@ -43,12 +43,12 @@ public class CustomPredicateBuilder<T> {
             LogicalNode logical,
             From root,
             Class<T> entity,
-            EntityManager entityManager,
+            EntityManagerAdapter ema,
             BuilderTools misc) {
 
         log.debug("Creating Predicate for logical node: {}", logical);
 
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaBuilder builder = ema.getCriteriaBuilder();
         List<Predicate> predicates = new ArrayList<Predicate>();
 
         for (Node node : logical.getChildren()) {
@@ -56,9 +56,9 @@ public class CustomPredicateBuilder<T> {
             log.debug("Creating Predicates from all children nodes.");
 
             if (node instanceof LogicalNode) {
-                predicates.add(createPredicate((LogicalNode) node, root, entity, entityManager, misc));
+                predicates.add(createPredicate((LogicalNode) node, root, entity, ema, misc));
             } else if (node instanceof ComparisonNode) {
-                predicates.add(createPredicate((ComparisonNode) node, root, entity, entityManager, misc));
+                predicates.add(createPredicate((ComparisonNode) node, root, entity, ema, misc));
             } else {
                 throw new IllegalArgumentException("Unknown expression type: " + node.getClass());
             }
@@ -88,7 +88,7 @@ public class CustomPredicateBuilder<T> {
             ComparisonNode comparison,
             From startRoot,
             Class<T> entity,
-            EntityManager entityManager,
+            EntityManagerAdapter ema,
             BuilderTools misc) {
 
         log.debug("Creating Predicate for comparison node: {}", comparison);
@@ -110,7 +110,7 @@ public class CustomPredicateBuilder<T> {
             throw new IllegalArgumentException(msg);
         }
 
-        Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, entityManager, misc);
+        Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, ema, misc);
 
         if ((RSQLProducerImpl.IS_NULL.equals(comparison.getOperator())
                 && Enum.class.isAssignableFrom(propertyPath.getJavaType())
@@ -124,11 +124,11 @@ public class CustomPredicateBuilder<T> {
                     comparison.getOperator().getSymbol());
 
             if (misc.getPredicateBuilder() != null) {
-                return misc.getPredicateBuilder().createPredicate(comparison, startRoot, entity, entityManager, misc);
+                return misc.getPredicateBuilder().createPredicate(comparison, startRoot, entity, ema, misc);
             }
         }
 
-        return PredicateBuilder.createPredicate(comparison, startRoot, entity, entityManager, misc);
+        return PredicateBuilder.createPredicate(comparison, startRoot, entity, ema, misc);
     }
 
 }

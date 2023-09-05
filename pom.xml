@@ -60,7 +60,7 @@
         <version.quarkus-jgit>2.3.2</version.quarkus-jgit>
         <version.tekton-client>1.0.0</version.tekton-client>
         <version.rsql-parser>2.1.0</version.rsql-parser>
-        <version.rsql-jpa>3.0.0-SNAPSHOT</version.rsql-jpa>
+        <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
         <version.commons-cli>1.5.0</version.commons-cli>
         <quarkus.qpid.jms.group-id>${quarkus.platform.group-id}</quarkus.qpid.jms.group-id>
         <quarkus.qpid.jms.version>${quarkus.platform.version}</quarkus.qpid.jms.version>

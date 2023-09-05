@@ -23,11 +23,11 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
 import com.github.tennaito.rsql.jpa.PredicateBuilderStrategy;
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
 
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.Node;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
@@ -40,14 +40,14 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
             Node node,
             From root,
             Class<T> entity,
-            EntityManager manager,
+            EntityManagerAdapter ema,
             BuilderTools tools) throws IllegalArgumentException {
 
         ComparisonNode cn = (ComparisonNode) node;
         ComparisonOperator operator = cn.getOperator();
-        CriteriaBuilder builder = manager.getCriteriaBuilder();
+        CriteriaBuilder builder = ema.getCriteriaBuilder();
 
-        Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, manager, tools);
+        Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, ema, tools);
 
         if (operator.equals(RSQLProducerImpl.IS_NULL)) {
             Object argument = cn.getArguments().get(0);
