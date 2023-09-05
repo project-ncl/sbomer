@@ -44,7 +44,7 @@ import org.mockito.Mockito;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 
 @QuarkusTest
 public class ConfigReaderIT {
