@@ -17,10 +17,10 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.k8s.reconciler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -52,8 +52,8 @@ import org.mockito.Mockito;
 import io.fabric8.knative.internal.pkg.apis.ConditionBuilder;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminatedBuilder;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
-import io.fabric8.tekton.pipeline.v1beta1.ArrayOrString;
 import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.ParamValue;
 import io.fabric8.tekton.pipeline.v1beta1.StepStateBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
@@ -62,7 +62,7 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.quarkus.test.Mock;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.kubernetes.client.KubernetesTestServer;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 
@@ -119,9 +119,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
                 .endMetadata()
                 .withNewSpec()
                 .withParams(
-                        new ParamBuilder().withName("index")
-                                .withValue(new ArrayOrString(String.valueOf(index)))
-                                .build())
+                        new ParamBuilder().withName("index").withValue(new ParamValue(String.valueOf(index))).build())
                 .endSpec()
                 .build();
     }

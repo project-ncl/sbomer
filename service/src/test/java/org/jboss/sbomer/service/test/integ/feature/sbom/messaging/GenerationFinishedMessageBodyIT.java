@@ -17,22 +17,20 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 
-import jakarta.inject.Inject;
-
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig.ErrataProductConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.GenerationFinishedMessageBodyValidator;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.GenerationFinishedMessageBodyValidator.ValidationResult;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.Bom;
@@ -41,6 +39,7 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
+import jakarta.inject.Inject;
 
 @QuarkusTest
 @WithKubernetesTestServer
@@ -89,7 +88,7 @@ public class GenerationFinishedMessageBodyIT {
         assertEquals(4, result.getErrors().size());
         assertFalse(result.isValid());
 
-        assertThat(
+        MatcherAssert.assertThat(
                 result.getErrors(),
                 CoreMatchers.hasItems(
                         "#: Instance does not have required property \"purl\"",
@@ -107,7 +106,7 @@ public class GenerationFinishedMessageBodyIT {
         assertEquals(3, result.getErrors().size());
         assertFalse(result.isValid());
 
-        assertThat(
+        MatcherAssert.assertThat(
                 result.getErrors(),
                 CoreMatchers.hasItems(
                         "#: Instance does not have required property \"productConfig\"",
@@ -133,7 +132,7 @@ public class GenerationFinishedMessageBodyIT {
 
         assertFalse(result.isValid());
 
-        assertThat(
+        MatcherAssert.assertThat(
                 result.getErrors(),
 
                 CoreMatchers.hasItems(
@@ -152,7 +151,7 @@ public class GenerationFinishedMessageBodyIT {
 
         assertFalse(result.isValid());
 
-        assertThat(
+        MatcherAssert.assertThat(
                 result.getErrors(),
 
                 CoreMatchers.hasItems(

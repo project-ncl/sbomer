@@ -30,7 +30,6 @@ import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -42,7 +41,6 @@ import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@ApplicationScoped
 public class RSQLProducerImpl<T> implements RSQLProducer<T> {
 
     private final RSQLParser predicateParser;

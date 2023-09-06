@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.k8s.reconciler;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -46,8 +46,8 @@ import org.mockito.Mockito;
 
 import io.fabric8.knative.internal.pkg.apis.ConditionBuilder;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminatedBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ArrayOrString;
 import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.ParamValue;
 import io.fabric8.tekton.pipeline.v1beta1.StepStateBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
@@ -81,7 +81,7 @@ public class InitializationPhaseGenerationRequestReconcilerIT {
                 .withLabels(Map.of(Labels.LABEL_PHASE, SbomGenerationPhase.INIT.name().toLowerCase()))
                 .endMetadata()
                 .withNewSpec()
-                .withParams(new ParamBuilder().withName("build-id").withValue(new ArrayOrString("AABBCC")).build())
+                .withParams(new ParamBuilder().withName("build-id").withValue(new ParamValue("AABBCC")).build())
                 .endSpec()
                 .build();
     }
@@ -97,7 +97,7 @@ public class InitializationPhaseGenerationRequestReconcilerIT {
                 .getTaskResults()
                 .add(
                         new TaskRunResultBuilder().withName(TaskRunInitDependentResource.RESULT_NAME)
-                                .withValue(new ArrayOrString(TestResources.asString("configs/multi-product.yaml")))
+                                .withValue(new ParamValue(TestResources.asString("configs/multi-product.yaml")))
                                 .build());
     }
 
