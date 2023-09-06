@@ -46,13 +46,19 @@
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.3.1</quarkus.platform.version>
-        <surefire-plugin.version>3.1.2</surefire-plugin.version>
-        <failsafe-plugin.version>3.1.2</failsafe-plugin.version>
+
+        <version.surefire-plugin>3.1.2</version.surefire-plugin>
+        <version.failsafe-plugin>3.1.2</version.failsafe-plugin>
+
+        <!--
+        Keep "version.quarkus-platform" in sync with the Quarkus Operator SDK extension Quarkus version:
+        https://github.com/quarkiverse/quarkus-operator-sdk/blob/main/pom.xml#L15 for the Quarkus
+        Operator SDK extension version defined below ("version.quarkus-operator-sdk").
+        -->
+        <version.quarkus-platform>3.2.4.Final</version.quarkus-platform>
+        <version.quarkus-operator-sdk>6.3.0</version.quarkus-operator-sdk>
+
         <version.cyclonedx>7.3.2</version.cyclonedx>
-        <version.hibernatetypes>2.0.0</version.hibernatetypes>
         <version.lombok>1.18.28</version.lombok>
         <version.pnc-rest>2.5.1</version.pnc-rest>
         <version.pnc-common>2.4.0-alpha</version.pnc-common>
@@ -61,11 +67,8 @@
         <version.rsql-parser>2.1.0</version.rsql-parser>
         <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
         <version.commons-cli>1.5.0</version.commons-cli>
-        <quarkus.qpid.jms.group-id>${quarkus.platform.group-id}</quarkus.qpid.jms.group-id>
-        <quarkus.qpid.jms.version>${quarkus.platform.version}</quarkus.qpid.jms.version>
-        <quarkus-test-artemis-version>3.1.0</quarkus-test-artemis-version>
-        <quarkus-operator-sdk-version>6.3.0</quarkus-operator-sdk-version>
-        <version.org.jboss.pnc.build.finder>2.2.0</version.org.jboss.pnc.build.finder>
+        <version.quarkus-test-artemis>3.1.0</version.quarkus-test-artemis>
+        <version.build-finder>2.2.0</version.build-finder>
     </properties>
 
     <dependencyManagement>
@@ -73,40 +76,16 @@
             <dependency>
                 <groupId>io.quarkiverse.operatorsdk</groupId>
                 <artifactId>quarkus-operator-sdk-bom</artifactId>
-                <version>${quarkus-operator-sdk-version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>io.quarkus</groupId>
-                        <artifactId>quarkus-kubernetes</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>${quarkus.platform.artifact-id}</artifactId>
-                <version>${quarkus.platform.version}</version>
+                <version>${version.quarkus-operator-sdk}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>${quarkus.qpid.jms.group-id}</groupId>
+                <groupId>io.quarkus.platform</groupId>
                 <artifactId>quarkus-qpid-jms-bom</artifactId>
-                <version>${quarkus.qpid.jms.version}</version>
+                <version>${version.quarkus-platform}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.pnc.build.finder</groupId>
-                <artifactId>core</artifactId>
-                <version>${version.org.jboss.pnc.build.finder}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-classic</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -116,7 +95,7 @@
                 <plugin>
                     <groupId>io.quarkus</groupId>
                     <artifactId>quarkus-maven-plugin</artifactId>
-                    <version>${quarkus.platform.version}</version>
+                    <version>${version.quarkus-platform}</version>
                     <extensions>true</extensions>
                     <executions>
                         <execution>
@@ -130,7 +109,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${surefire-plugin.version}</version>
+                    <version>${version.surefire-plugin}</version>
                     <configuration>
                         <systemPropertyVariables>
                             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
@@ -140,7 +119,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${failsafe-plugin.version}</version>
+                    <version>${version.failsafe-plugin}</version>
                     <executions>
                         <execution>
                             <goals>

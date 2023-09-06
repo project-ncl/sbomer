@@ -22,7 +22,6 @@ import java.time.Instant;
 
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 import org.jboss.resteasy.spi.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
@@ -37,8 +36,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.quarkiverse.hibernate.types.json.JsonBinaryType;
-import io.quarkiverse.hibernate.types.json.JsonTypes;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.persistence.Column;
@@ -93,8 +90,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @Column(name = "build_id", nullable = false, updatable = false)
     String buildId;
 
-    @Type(JsonBinaryType.class)
-    @Column(name = "config", columnDefinition = JsonTypes.JSON_BIN)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "config")
     @ToString.Exclude
     private JsonNode config;
 

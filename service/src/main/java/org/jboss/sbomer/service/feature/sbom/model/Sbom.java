@@ -28,7 +28,6 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
@@ -36,8 +35,6 @@ import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.quarkiverse.hibernate.types.json.JsonBinaryType;
-import io.quarkiverse.hibernate.types.json.JsonTypes;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.persistence.CascadeType;
@@ -92,8 +89,8 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "creation_time", nullable = false, updatable = false)
     private Instant creationTime;
 
-    @Type(JsonBinaryType.class)
-    @Column(name = "sbom", columnDefinition = JsonTypes.JSON_BIN)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "sbom")
     @CycloneDxBom
     @ToString.Exclude
     private JsonNode sbom;

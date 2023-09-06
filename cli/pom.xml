@@ -45,6 +45,7 @@
     <dependency>
       <groupId>org.jboss.pnc.build.finder</groupId>
       <artifactId>core</artifactId>
+      <version>${version.build-finder}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
