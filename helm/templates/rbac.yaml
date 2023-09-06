@@ -17,7 +17,7 @@ metadata:
 rules:
   - apiGroups: ["tekton.dev"]
     resources: ["taskruns"]
-    verbs: ["create", "get", "watch", "list", "delete"]
+    verbs: ["create", "get", "watch", "list", "delete", "patch", "update"]
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["create", "update", "get", "watch", "list", "delete"]
