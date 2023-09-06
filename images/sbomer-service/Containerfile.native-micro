@@ -17,7 +17,10 @@
 # docker run -i --rm -p 8080:8080 quarkus/sbomer
 #
 ###
-FROM quay.io/quarkus/quarkus-micro-image:2.0
+
+# https://quay.io/repository/quarkus/quarkus-micro-image?tab=tags
+# Based on tag 2.0-2023-09-03
+FROM quay.io/quarkus/quarkus-micro-image@sha256:76fd3379d526181ad9c88c12e925bf9da99e6a51e4743ff17bd675c488ff36a2
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \

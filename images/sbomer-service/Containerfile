@@ -75,7 +75,10 @@
 #   accessed directly. (example: "foo.example.com,bar.example.com")
 #
 ###
-FROM registry.access.redhat.com/ubi8/openjdk-17:1.16
+
+# https://catalog.redhat.com/software/containers/ubi9/openjdk-17/61ee7c26ed74b2ffb22b07f6
+# Based on tag 1.16-1.1693315921
+FROM registry.access.redhat.com/ubi9/openjdk-17@sha256:3e5bfd783f718c720a5a802837bd02056d0332ed0323bba04e81790aba9e8690
 
 ENV LANGUAGE='en_US:en'
 
