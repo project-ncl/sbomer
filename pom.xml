@@ -62,7 +62,7 @@
         <version.lombok>1.18.28</version.lombok>
         <version.pnc-rest>2.5.1</version.pnc-rest>
         <version.pnc-common>2.4.0-alpha</version.pnc-common>
-        <version.quarkus-jgit>3.0.2</version.quarkus-jgit>
+        <version.quarkus-jgit>3.0.3</version.quarkus-jgit>
         <version.tekton-client>1.0.1</version.tekton-client>
         <version.rsql-parser>2.1.0</version.rsql-parser>
         <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
