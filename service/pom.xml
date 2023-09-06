@@ -87,11 +87,6 @@
       <artifactId>quarkus-smallrye-context-propagation</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.quarkiverse.hibernatetypes</groupId>
-      <artifactId>quarkus-hibernate-types</artifactId>
-      <version>${version.hibernatetypes}</version>
-    </dependency>
-    <dependency>
       <groupId>org.cyclonedx</groupId>
       <artifactId>cyclonedx-core-java</artifactId>
       <version>${version.cyclonedx}</version>
@@ -219,7 +214,7 @@
     <dependency>
       <groupId>io.quarkiverse.artemis</groupId>
       <artifactId>quarkus-test-artemis</artifactId>
-      <version>${quarkus-test-artemis-version}</version>
+      <version>${version.quarkus-test-artemis}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
