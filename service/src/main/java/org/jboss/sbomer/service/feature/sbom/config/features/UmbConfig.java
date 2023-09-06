@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.config.features;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;

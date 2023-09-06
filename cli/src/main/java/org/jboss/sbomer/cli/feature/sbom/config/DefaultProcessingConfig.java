@@ -19,7 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.config;
 
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 

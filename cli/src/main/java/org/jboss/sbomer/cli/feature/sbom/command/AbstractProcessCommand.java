@@ -19,7 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.util.concurrent.Callable;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;

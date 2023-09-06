@@ -17,28 +17,28 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.jboss.pnc.common.Strings;
+
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -74,7 +74,8 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
     @Override
     public CriteriaQuery<T> getCriteriaQuery(Class<T> type, String rsqlQuery, String sort) {
 
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        EntityManagerAdapter ema = new EntityManagerAdapter(entityManager);
+        CriteriaBuilder builder = ema.getCriteriaBuilder();
         CriteriaQuery<T> criteria = builder.createQuery(type);
         Root root = criteria.from(type);
 
@@ -86,12 +87,12 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
 
             // Create custom implementation of RSQLVisitor which converts nodes to predicates using
             // CustomizedPredicateBuilder or CustomizedPredicateBuilderStrategy for custom operators
-            RSQLVisitor<Predicate, EntityManager> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
+            RSQLVisitor<Predicate, EntityManagerAdapter> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
                     .withPredicateBuilderStrategy(new CustomizedPredicateBuilderStrategy());
 
             // create RSQLParser with default and custom operators
             Node rootNode = predicateParser.parse(rsqlQuery);
-            Predicate predicate = rootNode.accept(visitor, entityManager);
+            Predicate predicate = rootNode.accept(visitor, ema);
 
             query = criteria.where(predicate);
         }
@@ -107,7 +108,7 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
                     .withRoot(root);
 
             Node sortRootNode = sortParser.parse(compliantSort);
-            Collection<Order> orders = sortVisitor.accept(sortRootNode, entityManager);
+            Collection<Order> orders = sortVisitor.accept(sortRootNode, ema);
             query.orderBy(orders.toArray(new Order[orders.size()]));
         }
 
@@ -126,11 +127,11 @@ public class RSQLProducerImpl<T> implements RSQLProducer<T> {
 
         // Create custom implementation of RSQLVisitor which converts nodes to predicates using
         // CustomizedPredicateBuilder or CustomizedPredicateBuilderStrategy for custom operators
-        RSQLVisitor<Predicate, EntityManager> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
+        RSQLVisitor<Predicate, EntityManagerAdapter> visitor = new CustomizedJpaPredicateVisitor<T>().withRoot(root)
                 .withPredicateBuilderStrategy(new CustomizedPredicateBuilderStrategy());
         // create RSQLParser with default and custom operators
         Node rootNode = predicateParser.parse(rsqlQuery);
-        Predicate predicate = rootNode.accept(visitor, entityManager);
+        Predicate predicate = rootNode.accept(visitor, new EntityManagerAdapter(entityManager));
 
         return criteria.where(predicate);
     }

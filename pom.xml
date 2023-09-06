@@ -49,24 +49,23 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>2.16.9.Final</quarkus.platform.version>
+        <quarkus.platform.version>3.0.4.Final</quarkus.platform.version>
         <surefire-plugin.version>3.1.2</surefire-plugin.version>
         <failsafe-plugin.version>3.1.2</failsafe-plugin.version>
         <version.cyclonedx>7.3.2</version.cyclonedx>
-        <version.hibernatetypes>1.0.2</version.hibernatetypes>
+        <version.hibernatetypes>2.0.0</version.hibernatetypes>
         <version.lombok>1.18.28</version.lombok>
         <version.pnc-rest>2.5.1</version.pnc-rest>
-        <version.pnc-api>2.4.5</version.pnc-api>
-        <version.pnc-common>2.2.1</version.pnc-common>
+        <version.pnc-common>2.4.0-alpha</version.pnc-common>
         <version.quarkus-jgit>2.3.2</version.quarkus-jgit>
-        <version.tekton-client>0.7.0</version.tekton-client>
+        <version.tekton-client>1.0.0</version.tekton-client>
         <version.rsql-parser>2.1.0</version.rsql-parser>
-        <version.rsql-jpa>2.0.2</version.rsql-jpa>
+        <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
         <version.commons-cli>1.5.0</version.commons-cli>
         <quarkus.qpid.jms.group-id>${quarkus.platform.group-id}</quarkus.qpid.jms.group-id>
         <quarkus.qpid.jms.version>${quarkus.platform.version}</quarkus.qpid.jms.version>
         <quarkus-test-artemis-version>2.1.1</quarkus-test-artemis-version>
-        <quarkus-operator-sdk-version>5.1.4</quarkus-operator-sdk-version>
+        <quarkus-operator-sdk-version>6.0.3</quarkus-operator-sdk-version>
         <version.org.jboss.pnc.build.finder>2.2.0</version.org.jboss.pnc.build.finder>
         <version.org.fusesource.jansi>2.0.1</version.org.fusesource.jansi>
     </properties>

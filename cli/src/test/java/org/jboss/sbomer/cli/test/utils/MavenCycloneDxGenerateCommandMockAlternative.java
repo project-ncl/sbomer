@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import javax.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Alternative;
 
 import org.jboss.sbomer.cli.feature.sbom.command.MavenCycloneDxGenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.ProcessCommand;

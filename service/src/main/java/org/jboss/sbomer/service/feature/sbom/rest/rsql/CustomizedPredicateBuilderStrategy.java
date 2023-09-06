@@ -17,23 +17,21 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
 import com.github.tennaito.rsql.jpa.PredicateBuilderStrategy;
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
+
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.Node;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
-import org.hibernate.query.criteria.internal.path.PluralAttributePath;
-import org.hibernate.query.criteria.internal.path.SingularAttributePath;
-import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 
 public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrategy {
 
@@ -42,30 +40,22 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
             Node node,
             From root,
             Class<T> entity,
-            EntityManager manager,
+            EntityManagerAdapter ema,
             BuilderTools tools) throws IllegalArgumentException {
 
         ComparisonNode cn = (ComparisonNode) node;
         ComparisonOperator operator = cn.getOperator();
-        CriteriaBuilder builder = manager.getCriteriaBuilder();
+        CriteriaBuilder builder = ema.getCriteriaBuilder();
 
-        Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, manager, tools);
+        Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, ema, tools);
 
         if (operator.equals(RSQLProducerImpl.IS_NULL)) {
             Object argument = cn.getArguments().get(0);
             if (argument instanceof String) {
                 if (Boolean.parseBoolean((String) argument)) {
-                    if (path instanceof SingularAttributePath) {
-                        return builder.isNull(path);
-                    } else if (path instanceof PluralAttributePath) {
-                        return builder.isEmpty(path);
-                    }
+                    return builder.isNull(path);
                 } else {
-                    if (path instanceof SingularAttributePath) {
-                        return builder.isNotNull(path);
-                    } else if (path instanceof PluralAttributePath) {
-                        return builder.isNotEmpty(path);
-                    }
+                    return builder.isNotNull(path);
                 }
             }
         } else if (operator.equals(RSQLProducerImpl.IS_EQUAL)) {

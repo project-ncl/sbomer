@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.sbomer.cli.FeatureTopCommand;
 

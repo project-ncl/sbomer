@@ -17,26 +17,23 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
-import com.github.tennaito.rsql.builder.BuilderTools;
-import com.github.tennaito.rsql.jpa.PredicateBuilder;
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.LogicalNode;
-import cz.jirutka.rsql.parser.ast.Node;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
-import org.hibernate.query.criteria.internal.path.PluralAttributePath;
-import org.hibernate.query.criteria.internal.path.SingularAttributePath;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
+import com.github.tennaito.rsql.builder.BuilderTools;
+import com.github.tennaito.rsql.jpa.PredicateBuilder;
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
+
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
+import cz.jirutka.rsql.parser.ast.LogicalNode;
+import cz.jirutka.rsql.parser.ast.Node;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -46,12 +43,12 @@ public class CustomPredicateBuilder<T> {
             LogicalNode logical,
             From root,
             Class<T> entity,
-            EntityManager entityManager,
+            EntityManagerAdapter ema,
             BuilderTools misc) {
 
         log.debug("Creating Predicate for logical node: {}", logical);
 
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaBuilder builder = ema.getCriteriaBuilder();
         List<Predicate> predicates = new ArrayList<Predicate>();
 
         for (Node node : logical.getChildren()) {
@@ -59,9 +56,9 @@ public class CustomPredicateBuilder<T> {
             log.debug("Creating Predicates from all children nodes.");
 
             if (node instanceof LogicalNode) {
-                predicates.add(createPredicate((LogicalNode) node, root, entity, entityManager, misc));
+                predicates.add(createPredicate((LogicalNode) node, root, entity, ema, misc));
             } else if (node instanceof ComparisonNode) {
-                predicates.add(createPredicate((ComparisonNode) node, root, entity, entityManager, misc));
+                predicates.add(createPredicate((ComparisonNode) node, root, entity, ema, misc));
             } else {
                 throw new IllegalArgumentException("Unknown expression type: " + node.getClass());
             }
@@ -91,7 +88,7 @@ public class CustomPredicateBuilder<T> {
             ComparisonNode comparison,
             From startRoot,
             Class<T> entity,
-            EntityManager entityManager,
+            EntityManagerAdapter ema,
             BuilderTools misc) {
 
         log.debug("Creating Predicate for comparison node: {}", comparison);
@@ -113,14 +110,12 @@ public class CustomPredicateBuilder<T> {
             throw new IllegalArgumentException(msg);
         }
 
-        Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, entityManager, misc);
+        Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, ema, misc);
 
         if ((RSQLProducerImpl.IS_NULL.equals(comparison.getOperator())
-                && (Enum.class.isAssignableFrom(propertyPath.getJavaType())
-                        || propertyPath instanceof PluralAttributePath))
+                && Enum.class.isAssignableFrom(propertyPath.getJavaType())
                 || (RSQLProducerImpl.IS_EQUAL.equals(comparison.getOperator())
-                        && Enum.class.isAssignableFrom(propertyPath.getJavaType())
-                        && propertyPath instanceof SingularAttributePath)) {
+                        && Enum.class.isAssignableFrom(propertyPath.getJavaType())))) {
 
             log.debug(
                     "Detected type '{}' for selector '{}' with custom comparison operator '{}'. Delegating to custom PredicateBuilderStrategy!",
@@ -129,11 +124,11 @@ public class CustomPredicateBuilder<T> {
                     comparison.getOperator().getSymbol());
 
             if (misc.getPredicateBuilder() != null) {
-                return misc.getPredicateBuilder().createPredicate(comparison, startRoot, entity, entityManager, misc);
+                return misc.getPredicateBuilder().createPredicate(comparison, startRoot, entity, ema, misc);
             }
         }
 
-        return PredicateBuilder.createPredicate(comparison, startRoot, entity, entityManager, misc);
+        return PredicateBuilder.createPredicate(comparison, startRoot, entity, ema, misc);
     }
 
 }

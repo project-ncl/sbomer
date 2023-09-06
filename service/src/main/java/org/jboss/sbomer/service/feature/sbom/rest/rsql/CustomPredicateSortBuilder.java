@@ -17,28 +17,26 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
-import com.github.tennaito.rsql.builder.BuilderTools;
-import com.github.tennaito.rsql.jpa.PredicateBuilder;
-
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.ComparisonOperator;
-import cz.jirutka.rsql.parser.ast.LogicalNode;
-import cz.jirutka.rsql.parser.ast.Node;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
 
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
+import com.github.tennaito.rsql.builder.BuilderTools;
+import com.github.tennaito.rsql.jpa.PredicateBuilder;
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
+
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
+import cz.jirutka.rsql.parser.ast.ComparisonOperator;
+import cz.jirutka.rsql.parser.ast.LogicalNode;
+import cz.jirutka.rsql.parser.ast.Node;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -48,7 +46,7 @@ public class CustomPredicateSortBuilder<T> {
             LogicalNode logical,
             From root,
             Class<T> entity,
-            EntityManager entityManager,
+            EntityManagerAdapter entityManager,
             BuilderTools misc) {
 
         log.debug("Creating Order for logical node: {}", logical);
@@ -85,7 +83,7 @@ public class CustomPredicateSortBuilder<T> {
             ComparisonNode comparison,
             From startRoot,
             Class<T> entity,
-            EntityManager entityManager,
+            EntityManagerAdapter entityManager,
             BuilderTools misc) {
 
         log.debug("Creating Order for comparison node: {}", comparison);
@@ -120,16 +118,16 @@ public class CustomPredicateSortBuilder<T> {
             Node node,
             From root,
             Class<T> entity,
-            EntityManager manager,
+            EntityManagerAdapter ema,
             BuilderTools tools) throws IllegalArgumentException {
 
         log.debug("Creating Order for comparison node: {}", node);
 
         ComparisonNode cn = (ComparisonNode) node;
         ComparisonOperator operator = cn.getOperator();
-        CriteriaBuilder builder = manager.getCriteriaBuilder();
+        CriteriaBuilder builder = ema.getCriteriaBuilder();
 
-        Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, manager, tools);
+        Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, ema, tools);
 
         if (operator.equals(RSQLProducerImpl.ASC)) {
             return List.of(builder.asc(path));

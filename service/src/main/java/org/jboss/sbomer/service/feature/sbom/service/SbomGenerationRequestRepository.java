@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transactional;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;

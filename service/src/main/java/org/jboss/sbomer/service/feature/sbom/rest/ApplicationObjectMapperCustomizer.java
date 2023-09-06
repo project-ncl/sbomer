@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;

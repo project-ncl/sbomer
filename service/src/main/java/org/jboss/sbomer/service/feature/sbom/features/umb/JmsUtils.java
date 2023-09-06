@@ -20,12 +20,12 @@ package org.jboss.sbomer.service.feature.sbom.features.umb;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.TextMessage;
+import jakarta.jms.BytesMessage;
+import jakarta.jms.JMSException;
+import jakarta.jms.MapMessage;
+import jakarta.jms.Message;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.TextMessage;
 
 import org.jboss.pnc.common.json.JsonUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;

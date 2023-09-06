@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
@@ -34,6 +34,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.Draft;
 import io.vertx.json.schema.JsonSchema;
 import io.vertx.json.schema.JsonSchemaOptions;
+import io.vertx.json.schema.OutputFormat;
 import io.vertx.json.schema.OutputUnit;
 import io.vertx.json.schema.Validator;
 import lombok.Builder;
@@ -93,6 +94,7 @@ public class GenerationFinishedMessageBodyValidator {
                 .create(
                         JsonSchema.of(new JsonObject(schema)),
                         new JsonSchemaOptions().setBaseUri("https://jboss.org/sbomer/message.json")
+                                .setOutputFormat(OutputFormat.Basic)
                                 .setDraft(Draft.DRAFT202012))
                 .validate(new JsonObject(messageStr));
 

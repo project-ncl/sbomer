@@ -21,14 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
@@ -106,7 +106,7 @@ public class UmbMessageProducer implements MessageProducer {
 
     private void sendMessageWithRetries(String message, Map<String, String> headers, int retries) {
         Session session = null;
-        javax.jms.MessageProducer messageProducer = null;
+        jakarta.jms.MessageProducer messageProducer = null;
         try {
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             messageProducer = session.createProducer(session.createTopic(umbConfig.producer().topic().get()));
@@ -133,7 +133,7 @@ public class UmbMessageProducer implements MessageProducer {
             String message,
             Map<String, String> headers,
             Session session,
-            javax.jms.MessageProducer messageProducer) {
+            jakarta.jms.MessageProducer messageProducer) {
 
         TextMessage textMessage;
         try {
@@ -207,7 +207,7 @@ public class UmbMessageProducer implements MessageProducer {
         }
     }
 
-    private void closeMsgProducer(javax.jms.MessageProducer messageProducer) {
+    private void closeMsgProducer(jakarta.jms.MessageProducer messageProducer) {
         if (messageProducer != null) {
             try {
                 messageProducer.close();

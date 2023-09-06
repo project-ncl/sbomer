@@ -17,23 +17,23 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest.rsql;
 
+import java.util.Collection;
+
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.builder.SimpleBuilderTools;
+import com.github.tennaito.rsql.jpa.AbstractJpaVisitor;
+import com.github.tennaito.rsql.misc.EntityManagerAdapter;
+
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.OrNode;
-import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collection;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Order;
-
 @Slf4j
-public class CustomizedJpaPredicateSortVisitor<T> implements RSQLVisitor<Collection<Order>, EntityManager> {
+public class CustomizedJpaPredicateSortVisitor<T> extends AbstractJpaVisitor<Collection<Order>, T> {
 
     private From root;
     protected Class<T> entityClass;
@@ -59,30 +59,30 @@ public class CustomizedJpaPredicateSortVisitor<T> implements RSQLVisitor<Collect
     }
 
     @Override
-    public Collection<Order> visit(AndNode node, EntityManager em) {
+    public Collection<Order> visit(AndNode node, EntityManagerAdapter ema) {
         log.trace("visit: AndNode {}", node);
-        return CustomPredicateSortBuilder.createExpression(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateSortBuilder.createExpression(node, root, entityClass, ema, getBuilderTools());
     }
 
     @Override
-    public Collection<Order> visit(OrNode node, EntityManager em) {
+    public Collection<Order> visit(OrNode node, EntityManagerAdapter ema) {
         log.trace("visit: OrNode {}", node);
-        return CustomPredicateSortBuilder.createExpression(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateSortBuilder.createExpression(node, root, entityClass, ema, getBuilderTools());
     }
 
     @Override
-    public Collection<Order> visit(ComparisonNode node, EntityManager em) {
+    public Collection<Order> visit(ComparisonNode node, EntityManagerAdapter ema) {
         log.trace("visit: ComparisonNode {}", node);
-        return CustomPredicateSortBuilder.createExpression(node, root, entityClass, em, getBuilderTools());
+        return CustomPredicateSortBuilder.createExpression(node, root, entityClass, ema, getBuilderTools());
     }
 
-    public Collection<Order> accept(Node node, EntityManager em) {
+    public Collection<Order> accept(Node node, EntityManagerAdapter ema) {
         if (node instanceof AndNode) {
-            return visit((AndNode) node, em);
+            return visit((AndNode) node, ema);
         } else if (node instanceof OrNode) {
-            return visit((OrNode) node, em);
+            return visit((OrNode) node, ema);
         } else {
-            return visit((ComparisonNode) node, em);
+            return visit((ComparisonNode) node, ema);
         }
     }
 
