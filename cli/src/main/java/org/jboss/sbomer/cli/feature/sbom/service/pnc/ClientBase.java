@@ -22,13 +22,8 @@ import java.util.Optional;
 
 import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.client.ApacheHttpClient43EngineWithRetry;
-import org.jboss.pnc.client.BasicAuthentication;
-import org.jboss.pnc.client.BearerAuthentication;
 import org.jboss.pnc.client.Configuration;
-import org.jboss.pnc.client.MdcToHeadersFilter;
 import org.jboss.pnc.client.RemoteCollectionConfig;
-import org.jboss.pnc.client.RequestLoggingFilter;
-import org.jboss.pnc.client.ResteasyJackson2ProviderWithDateISO8601;
 import org.jboss.resteasy.client.jaxrs.ProxyBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
