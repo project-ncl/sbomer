@@ -129,7 +129,7 @@ Currently **default generator** is the CycloneDX Maven Plugin generator.
 #### Domino Maven generator
 
 * Type: `maven-domino`
-* Default version: 0.0.90.
+* Default version: 0.0.97.
 
 Below you can see the static and default parameters set for the Domino generator.
 
