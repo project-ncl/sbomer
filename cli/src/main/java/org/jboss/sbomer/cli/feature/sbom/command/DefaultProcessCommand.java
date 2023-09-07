@@ -31,6 +31,7 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
+import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
@@ -147,6 +148,12 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         }
 
         SbomUtils.addPedigreeCommit(component, build.getScmUrl() + "#" + build.getScmTag(), build.getScmRevision());
+        if (!Strings.isEmpty(build.getScmRepository().getExternalUrl())) {
+            SbomUtils.addPedigreeCommit(
+                    component,
+                    build.getScmRepository().getExternalUrl() + "#" + build.getBuildConfigRevision().getScmRevision(),
+                    build.getBuildConfigRevision().getScmRevision());
+        }
     }
 
     private void processBrewBuild(Component component, Artifact artifact) {
