@@ -32,8 +32,8 @@
         - type: redhat-product
           errata:
             productName: RHBQ
-            productVersion: RHEL-8-RHBQ-2.13
-            productVariant: 8Base-RHBQ-2.13
+            productVersion: Middleware-RHBQ-2.13
+            productVariant: 8Base-MW-RHBQ-2.13
       generator:
         type: maven-domino
         args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm"
@@ -47,6 +47,17 @@
     # - generator:
     #     type: maven-domino
     #     args: "--config-file .domino/manifest/quarkus-qpid-jms-bom-bom.json --warn-on-missing-scm"
+"483":
+  products:
+    - processors:
+        - type: redhat-product
+          errata:
+            productName: RHBQ
+            productVersion: Middleware-RHBQ-3.2
+            productVariant: 8Base-MW-RHBQ-3.2
+      generator:
+        type: maven-domino
+        args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm"
 "436":
   products:
     - processors:
