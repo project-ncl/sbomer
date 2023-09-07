@@ -40,7 +40,8 @@ function install_java() {
       ca_keystore_path="$HOME/.sdkman/candidates/java/${java_version}-tem/lib/security/cacerts"
     fi 
 
-    keytool -import -trustcacerts -alias redhat-ca -file /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt -keystore "$ca_keystore_path" -noprompt -storepass changeit
+    keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$ca_keystore_path" -noprompt -storepass changeit
+    keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt -keystore "$ca_keystore_path" -noprompt -storepass changeit
   done
 }
 
