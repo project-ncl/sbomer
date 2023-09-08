@@ -148,12 +148,12 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
         }
 
         SbomUtils.addPedigreeCommit(component, build.getScmUrl() + "#" + build.getScmTag(), build.getScmRevision());
-        if (!Strings.isEmpty(build.getScmRepository().getExternalUrl()) && build.getBuildConfigRevision() != null) {
-            SbomUtils.addPedigreeCommit(
-                    component,
-                    build.getScmRepository().getExternalUrl() + "#" + build.getBuildConfigRevision().getScmRevision(),
-                    build.getBuildConfigRevision().getScmRevision());
-        }
+        // Reverted the code below (NCL-8171) until NCL-6938 is done
+        /*
+         * if (!Strings.isEmpty(build.getScmRepository().getExternalUrl()) && build.getBuildConfigRevision() != null) {
+         * SbomUtils.addPedigreeCommit( component, build.getScmRepository().getExternalUrl() + "#" +
+         * build.getBuildConfigRevision().getScmRevision(), build.getBuildConfigRevision().getScmRevision()); }
+         */
     }
 
     private void processBrewBuild(Component component, Artifact artifact) {
