@@ -17,7 +17,10 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,9 +30,12 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.GroupConfiguration;
+import org.jboss.pnc.dto.GroupConfigurationRef;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.BuildClient;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.BuildConfigurationClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.GroupConfigurationClient;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceException;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceNotFoundException;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -55,16 +61,20 @@ public class PncService {
 
     BuildConfigurationClient buildConfigurationClient;
 
+    GroupConfigurationClient groupConfigurationClient;
+
     @PostConstruct
     void init() {
         buildClient = new BuildClient(getConfiguration());
         buildConfigurationClient = new BuildConfigurationClient(getConfiguration());
+        groupConfigurationClient = new GroupConfigurationClient(getConfiguration());
     }
 
     @PreDestroy
     void cleanup() {
         buildClient.close();
         buildConfigurationClient.close();
+        groupConfigurationClient.close();
     }
 
     /**
@@ -110,12 +120,12 @@ public class PncService {
      * In case the {@link BuildConfiguration} with provided identifier cannot be found {@code null} is returned.
      * </p>
      *
-     * @param buildId Tbe {@link BuildConfiguration} identifier in PNC
+     * @param buildConfigId The {@link BuildConfiguration} identifier in PNC
      * @return The {@link BuildConfiguration} object or {@code null} in case the {@link BuildConfiguration} could not be
      *         found.
      */
     public BuildConfiguration getBuildConfig(String buildConfigId) {
-        log.debug("Fetching BuildConfig from PNC with id '{}'", buildConfigId);
+        log.debug("Fetching BuildConfiguration from PNC with id '{}'", buildConfigId);
         try {
             return buildConfigurationClient.getSpecific(buildConfigId);
         } catch (RemoteResourceNotFoundException ex) {
@@ -130,24 +140,55 @@ public class PncService {
 
     /**
      * <p>
+     * Fetch information about the PNC {@link GroupConfiguration} identified by the particular {@code groupConfigId}.
+     * </p>
+     *
+     * <p>
+     * In case the {@link GroupConfiguration} with provided identifier cannot be found {@code null} is returned.
+     * </p>
+     *
+     * @param groupConfigId The {@link GroupConfiguration} identifier in PNC
+     * @return The {@link GroupConfiguration} object or {@code null} in case the {@link GroupConfiguration} could not be
+     *         found.
+     */
+    public GroupConfiguration getGroupConfig(String groupConfigId) {
+        log.debug("Fetching GroupConfiguration from PNC with id '{}'", groupConfigId);
+        try {
+            return groupConfigurationClient.getSpecific(groupConfigId);
+        } catch (RemoteResourceNotFoundException ex) {
+            log.warn("GroupConfiguration with id '{}' was not found in PNC", groupConfigId);
+            return null;
+        } catch (RemoteResourceException ex) {
+            throw new ApplicationException(
+                    "GroupConfiguration could not be retrieved because PNC responded with an error",
+                    ex);
+        }
+    }
+
+    /**
+     * <p>
      * Obtains the {@link ProductVersionRef} for a given PNC {@link Build} identifier.
      * <p>
      *
      * @param buildId The {@link Build} identifier to get the Product Version for.
-     * @return The {@link ProductVersionRef} object for the related or {@code null} in case it is not possible to obtain
-     *         it.
+     * @return A list with {@link ProductVersionRef} objects for the given Build or empty list in case it is not
+     *         possible to obtain any product version.
      */
-    public ProductVersionRef getProductVersion(String buildId) {
+    public List<ProductVersionRef> getProductVersions(String buildId) {
+        List<ProductVersionRef> productVersions = new ArrayList<>();
+
         log.debug("Fetching Product Version information from PNC for build '{}'", buildId);
 
         if (buildId == null) {
-            return null;
+            log.warn("No PNC Build ID provided, interrupting processing");
+            return Collections.emptyList();
         }
+
         Build build = getBuild(buildId);
 
         if (build == null) {
-            log.warn("Build related to the SBOM could not be found in PNC, interrupting processing");
-            return null;
+            log.warn("Build with ID '{}' could not be found in PNC, interrupting processing", buildId);
+            return Collections.emptyList();
         }
 
         log.debug("Build: {}", build);
@@ -155,23 +196,52 @@ public class PncService {
         BuildConfiguration buildConfig = getBuildConfig(build.getBuildConfigRevision().getId());
 
         if (buildConfig == null) {
-            log.warn("BuildConfig related to the SBOM could not be found in PNC, interrupting processing");
-            return null;
+            log.warn("BuildConfig related to Build '{}' could not be found in PNC, interrupting processing", buildId);
+            return Collections.emptyList();
         }
 
         log.debug("BuildConfig: {}", buildConfig);
 
         ProductVersionRef productVersion = buildConfig.getProductVersion();
 
-        if (productVersion == null) {
-            log.warn(
-                    "BuildConfig related to the SBOM does not provide product version information, interrupting processing");
-            return null;
+        // Product version was found, let's use it!
+        if (productVersion != null) {
+            return List.of(productVersion);
         }
 
-        log.debug("ProductVersion: {}", productVersion);
+        // So, the product version is not assigned to the build configuration. We need to check whether this build
+        // config is part of a group config which has the product versions assigned.
 
-        return productVersion;
+        log.warn(
+                "BuildConfig '{}' does not provide product version information, trying to obtain product version from Group Configurations",
+                buildConfig.getId());
+
+        Map<String, GroupConfigurationRef> groupConfigs = buildConfig.getGroupConfigs();
+
+        // It looks that there are no group configs, nothing to do then!
+        if (groupConfigs == null || groupConfigs.size() == 0) {
+            log.warn(
+                    "BuildConfig does not have any Group COnfiguration, unable to proceed without product version, interrupting processing");
+            return Collections.emptyList();
+        }
+
+        // In case there are some group configs, let's iterate over these and find out whether these are related to
+        // a product version
+        groupConfigs.values().forEach(groupConfigRef -> {
+            GroupConfiguration groupConfig = getGroupConfig(groupConfigRef.getId());
+
+            if (groupConfig == null) {
+                log.warn("GroupConfiguration '{}' could not be found, this is unexpected, but ignoring");
+                return;
+            }
+
+            productVersions.add(groupConfig.getProductVersion());
+
+        });
+
+        log.debug("ProductVersions: {}", productVersions);
+
+        return productVersions;
     }
 
     /**

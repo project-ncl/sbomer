@@ -22,9 +22,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
-
-import jakarta.inject.Inject;
+import java.util.stream.Collectors;
 
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -32,8 +33,8 @@ import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig;
-import org.jboss.sbomer.cli.feature.sbom.config.DefaultProcessingConfig;
 import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig.DefaultGeneratorConfig;
+import org.jboss.sbomer.cli.feature.sbom.config.DefaultProcessingConfig;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
@@ -47,6 +48,7 @@ import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -126,6 +128,11 @@ public class GenerateConfigCommand implements Callable<Integer> {
         return null;
     }
 
+    /**
+     * Retrieves configuration from a SBOMer configuration file stored in the source code repository.
+     *
+     * @return {@link Config} object if the configuration could be retrieved or {@code null} otherwise.
+     */
     private Config clientConfig() {
         log.debug("Attempting to fetch configuration from source code repository");
 
@@ -148,26 +155,65 @@ public class GenerateConfigCommand implements Callable<Integer> {
         return config;
     }
 
+    /**
+     * Retrieves configuration from a SBOMer configuration file from the internal mapping.
+     *
+     * @return {@link Config} object if the configuration could be retrieved or {@code null} otherwise.
+     */
     private Config mappingConfig() {
         log.debug("Attempting to fetch configuration from SBOMer internal mapping");
 
-        ProductVersionRef productVersion = pncService.getProductVersion(buildId);
+        List<ProductVersionRef> productVersions = pncService.getProductVersions(buildId);
 
-        if (productVersion == null) {
+        if (productVersions.isEmpty()) {
             log.debug("Could not obtain PNC Product Version information for the '{}' PNC build", buildId);
             return null;
         }
 
-        Config config = productVersionMapper.getMapping().get(productVersion.getId());
+        List<Config> configs = new ArrayList<>();
 
-        if (config == null) {
+        productVersions.forEach(productVersion -> {
             log.debug(
-                    "Configuration not found SBOMer internal mapping for product version: {}",
+                    "Trying to find configuration in internal mapping for product version {}",
                     productVersion.getId());
+
+            Config config = productVersionMapper.getMapping().get(productVersion.getId());
+
+            if (config == null) {
+                log.debug(
+                        "Configuration not found in SBOMer internal mapping for product version: {}",
+                        productVersion.getId());
+                return;
+            }
+
+            log.debug("Configuration found in internal mapping for product version {}", productVersion.getId());
+
+            configs.add(config);
+        });
+
+        if (configs.isEmpty()) {
+            log.debug(
+                    "No configuration found for product versions: {}",
+                    productVersions.stream().map(pv -> pv.getId()).collect(Collectors.toList()));
             return null;
         }
 
-        log.debug("Configuration found in SBOMer internal mapping");
+        log.info("Found {} configurations in the internal SBOMer mapping for build ID '{}'", configs.size(), buildId);
+
+        Config config = Config.builder()
+                .buildId(buildId)
+                .apiVersion("sbomer.jboss.org/v1alpha1")
+                .products(new ArrayList<>())
+                .build();
+
+        configs.forEach(cfg -> {
+            config.getProducts().addAll(cfg.getProducts());
+        });
+
+        log.info(
+                "Found {} products in the internal SBOMer mapping for build ID '{}'",
+                config.getProducts().size(),
+                buildId);
 
         return config;
     }

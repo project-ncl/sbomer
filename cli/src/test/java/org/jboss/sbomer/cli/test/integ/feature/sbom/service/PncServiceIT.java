@@ -18,9 +18,11 @@
 package org.jboss.sbomer.cli.test.integ.feature.sbom.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -61,16 +63,33 @@ public class PncServiceIT {
 
     @Test
     void testGetProductVersionMissingBuild() {
-        assertNull(service.getProductVersion("NOTEXISTING"));
+        assertNull(service.getProductVersions("NOTEXISTING"));
     }
 
     @Test
     void testGetProductVersion() {
-        ProductVersionRef productVersionRef = service.getProductVersion("ARYT3LBXDVYAC");
+        List<ProductVersionRef> productVersions = service.getProductVersions("ARYT3LBXDVYAC");
 
-        assertNotNull(productVersionRef);
-        assertEquals("179", productVersionRef.getId());
-        assertEquals("1.0", productVersionRef.getVersion());
+        assertNotNull(productVersions);
+        assertFalse(productVersions.isEmpty());
+        assertEquals(1, productVersions.size());
+        assertEquals("179", productVersions.get(0).getId());
+        assertEquals("1.0", productVersions.get(0).getVersion());
+    }
+
+    /**
+     * This tests a case where the productVersion in the build config is null. If this is the case we try to retrieve
+     * the productVersion from a groupConfig the build config is assigned to (if any).
+     */
+    @Test
+    void testGetProductVersionFromGroupConfig() {
+        List<ProductVersionRef> productVersions = service.getProductVersions("BUILDWITHGROUPSCONFIGPRODUCT");
+
+        assertNotNull(productVersions);
+        assertFalse(productVersions.isEmpty());
+        assertEquals(1, productVersions.size());
+        assertEquals("483", productVersions.get(0).getId());
+        assertEquals("3.2", productVersions.get(0).getVersion());
     }
 
     @Test

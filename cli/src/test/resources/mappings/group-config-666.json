@@ -1,0 +1,37 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/group-configs/666"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "666",
+      "name": "Quarkus Platform 3.2.5 all",
+      "productVersion": {
+        "id": "483",
+        "version": "3.2",
+        "attributes": {
+          "BREW_TAG_PREFIX": "qrksp-3.2-pnc"
+        }
+      },
+      "buildConfigs": {
+        "12921": {
+          "id": "12921",
+          "name": "io.quarkus-quarkus-platform-3.2.5",
+          "description": null,
+          "buildScript": "mvn -DskipTests clean deploy -B dependency:tree -Denforcer.skip=true -am",
+          "scmRevision": "3.2-temp-redhat",
+          "creationTime": "2023-08-30T17:53:49.481Z",
+          "modificationTime": "2023-09-08T13:33:42.354Z",
+          "buildType": "MVN",
+          "defaultAlignmentParams": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true -DstrictPropertyValidation=true",
+          "brewPullActive": false
+        }
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
