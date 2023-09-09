@@ -22,10 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import jakarta.inject.Inject;
 
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -35,6 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -63,7 +63,7 @@ public class PncServiceIT {
 
     @Test
     void testGetProductVersionMissingBuild() {
-        assertNull(service.getProductVersions("NOTEXISTING"));
+        assertEquals(Collections.emptyList(), service.getProductVersions("NOTEXISTING"));
     }
 
     @Test
