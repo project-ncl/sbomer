@@ -47,7 +47,7 @@
     # - generator:
     #     type: maven-domino
     #     args: "--config-file .domino/manifest/quarkus-qpid-jms-bom-bom.json --warn-on-missing-scm"
-"483":
+"484":
   products:
     - processors:
         - type: redhat-product
