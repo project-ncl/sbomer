@@ -17,28 +17,31 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition;
 
-import java.util.Objects;
-
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 
-public class InitFinishedCondition implements Condition<TaskRun, GenerationRequest> {
+public class ConfigMissingOrGenerated implements Condition<TaskRun, GenerationRequest> {
 
     @Override
     public boolean isMet(
             DependentResource<TaskRun, GenerationRequest> dependentResource,
             GenerationRequest primary,
             Context<GenerationRequest> context) {
-        if (Objects.equals(primary.getStatus(), SbomGenerationStatus.INITIALIZED)) {
+
+        // Here we are checking whether the configuration exists already or not. In case it's not there, we need to
+        // generate one, thus returning true to let the reconciliation happen on the {
+        // TaskRunInitDependentResource.
+        // In case the config exists and we have some TaskRuns associated with it this means that we generated it.
+        // In such case we need to return true as well, to keep the resource. Cleanup of resources are done after
+        // successful generation only.
+        if (primary.getConfig() == null || !context.getSecondaryResources(TaskRun.class).isEmpty()) {
             return true;
         }
 
         return false;
     }
-
 }

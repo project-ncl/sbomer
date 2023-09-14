@@ -17,6 +17,9 @@
 #
 
 quarkus:
+  application:
+    version: dev
+
   datasource:
     username: sbomer
     password: password

@@ -19,9 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.util.Map;
 
-import jakarta.inject.Inject;
-
-import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -34,6 +31,7 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.CRUDNoGCKubernetesDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependent;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @KubernetesDependent(resourceDiscriminator = InitResourceDiscriminator.class)
@@ -66,7 +64,6 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
      */
     @Override
     protected TaskRun desired(GenerationRequest generationRequest, Context<GenerationRequest> context) {
-        MDCUtils.addBuildContext(generationRequest.getBuildId());
 
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}'",

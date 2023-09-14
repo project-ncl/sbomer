@@ -69,7 +69,7 @@ public class SchemaValidator {
      */
     public static ValidationResult validate(String schema, String body) {
         log.debug("Validating: {}", body);
-        log.debug("Schema: {}", schema);
+        log.trace("Schema: {}", schema);
 
         OutputUnit result = Validator
                 .create(

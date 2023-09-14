@@ -55,7 +55,7 @@ public class SbomerConfigProvider {
         defaultGenerationConfig = smallRyeConfig.getConfigMapping(DefaultGenerationConfig.class);
     }
 
-    public Config adjust(Config config) {
+    public void adjust(Config config) {
         log.debug("Adjusting configuration...");
 
         config.getProducts().forEach(product -> {
@@ -69,8 +69,6 @@ public class SbomerConfigProvider {
                 product.getProcessors().add(0, new DefaultProcessorConfig());
             }
         });
-
-        return config;
     }
 
     private void adjustGenerator(ProductConfig product) {

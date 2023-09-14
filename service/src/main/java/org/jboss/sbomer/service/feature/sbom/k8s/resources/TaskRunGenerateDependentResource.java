@@ -23,11 +23,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -49,6 +46,7 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.dependent.BulkDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependent;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependentResource;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @KubernetesDependent(resourceDiscriminator = GenerateResourceDiscriminator.class)
@@ -56,7 +54,6 @@ import lombok.extern.slf4j.Slf4j;
 public class TaskRunGenerateDependentResource extends KubernetesDependentResource<TaskRun, GenerationRequest>
         implements BulkDependentResource<TaskRun, GenerationRequest> {
 
-    public static final String PHASE_GENERATE = "generate";
     /**
      * Parameter holding the configuration for a given build.
      */
@@ -87,8 +84,6 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
 
     @Override
     public Map<String, TaskRun> desiredResources(GenerationRequest primary, Context<GenerationRequest> context) {
-        MDCUtils.addBuildContext(primary.getBuildId());
-
         Config config;
 
         try {
@@ -116,7 +111,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
             Context<GenerationRequest> context) {
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}' GenerationRequest",
-                PHASE_GENERATE,
+                SbomGenerationPhase.GENERATE,
                 generationRequest.getMetadata().getName());
 
         Map<String, String> labels = Labels.defaultLabelsToMap();
