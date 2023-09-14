@@ -81,9 +81,14 @@ public class CLI implements QuarkusApplication {
             if (command instanceof Callable) {
                 try {
                     @SuppressWarnings("unchecked")
-                    Callable<Object> callable = (Callable<Object>) command;
-                    Object executionResult = callable.call();
+                    Callable<Integer> callable = (Callable<Integer>) command;
+                    Integer executionResult = callable.call();
                     parsed.setExecutionResult(executionResult);
+
+                    if (executionResult != 0) {
+                        throw new Exception("Execution failed");
+                    }
+
                     result.add(executionResult);
 
                 } catch (ParameterException ex) {
