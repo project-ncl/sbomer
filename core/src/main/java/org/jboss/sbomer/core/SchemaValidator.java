@@ -45,7 +45,7 @@ public class SchemaValidator {
 
         List<String> errors;
 
-        public static ValidationResult fromOutputUnt(OutputUnit outputUnit) {
+        public static ValidationResult fromOutputUnit(OutputUnit outputUnit) {
             return ValidationResult.builder()
                     .isValid(outputUnit.getValid())
                     .errors(
@@ -69,6 +69,7 @@ public class SchemaValidator {
      */
     public static ValidationResult validate(String schema, String body) {
         log.debug("Validating: {}", body);
+        log.debug("Schema: {}", schema);
 
         OutputUnit result = Validator
                 .create(
@@ -76,7 +77,7 @@ public class SchemaValidator {
                         new JsonSchemaOptions().setBaseUri("https://jboss.org/sbomer").setDraft(Draft.DRAFT202012))
                 .validate(new JsonObject(body));
 
-        return ValidationResult.fromOutputUnt(result);
+        return ValidationResult.fromOutputUnit(result);
     }
 
 }

@@ -15,23 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.config;
+package org.jboss.sbomer.core.config;
 
 import java.util.Map;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
-import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithName;
 
 /**
  * @author Marek Goldmann
  */
-@StaticInitSafe
-@ApplicationScoped
 @ConfigMapping(prefix = "sbomer.generation")
 public interface DefaultGenerationConfig {
     public interface DefaultGeneratorConfig {

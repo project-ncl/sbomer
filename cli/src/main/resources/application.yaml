@@ -58,24 +58,6 @@ sbomer:
   koji:
     hub-url: "https://${sbomer.koji.hub.host}/brewhub"
     web-url: "https://${sbomer.koji.web.host}/brew"
-  generation:
-    enabled: true
-    default-generator: maven-cyclonedx
-    generators:
-      maven-domino:
-        default-version: "0.0.97"
-        default-args: "--include-non-managed --warn-on-missing-scm"
-      maven-cyclonedx:
-        default-version: "2.7.9"
-        default-args: "--batch-mode"
-
-  processing:
-    enabled: true
-    auto-process: true
-    # List of default processors that will be run on every generated SBOM
-    default-processors:
-      - name: "default"
-      - name: "redhat-product"
 
 "%dev":
   quarkus:
