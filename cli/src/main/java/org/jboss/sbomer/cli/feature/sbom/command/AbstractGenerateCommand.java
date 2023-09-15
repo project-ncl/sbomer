@@ -29,19 +29,18 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
-import jakarta.inject.Inject;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
 import org.jboss.sbomer.cli.feature.sbom.command.mixin.GeneratorToolMixin;
-import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig;
-import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
 import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
+import org.jboss.sbomer.core.config.DefaultGenerationConfig;
+import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
@@ -52,6 +51,7 @@ import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
@@ -73,8 +73,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     @Inject
     protected SBOMerClientFacade sbomerClientFacade;
 
-    @Inject
-    DefaultGenerationConfig defaultGenerationConfig;
+    protected SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
 
     /**
      * <p>
@@ -88,7 +87,8 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     protected abstract GeneratorType generatorType();
 
     protected String generatorArgs() {
-        DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig.forGenerator(generatorType());
+        DefaultGeneratorConfig defaultGeneratorConfig = sbomerConfigProvider.getDefaultGenerationConfig()
+                .forGenerator(generatorType());
 
         if (generator.getArgs() == null) {
             String defaultArgs = defaultGeneratorConfig.defaultArgs();
@@ -103,7 +103,8 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     }
 
     protected String toolVersion() {
-        DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig.forGenerator(generatorType());
+        DefaultGeneratorConfig defaultGeneratorConfig = sbomerConfigProvider.getDefaultGenerationConfig()
+                .forGenerator(generatorType());
 
         if (generator.getVersion() == null) {
             String toolVersion = defaultGeneratorConfig.defaultVersion();

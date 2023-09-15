@@ -15,37 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.config.runtime;
+package org.jboss.sbomer.core.config;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import io.smallrye.config.source.yaml.YamlConfigSourceProvider;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.extern.jackson.Jacksonized;
-
-@NoArgsConstructor
-@Data
-@EqualsAndHashCode(callSuper = false)
-@Builder
-@Jacksonized
-@JsonTypeName("default")
-public class DefaultProcessorConfig extends ProcessorConfig {
-
-    public ProcessorType getType() {
-        return ProcessorType.DEFAULT;
-
-    }
-
+class SbomerConfigSourceProvider extends YamlConfigSourceProvider {
     @Override
-    public List<String> toCommand() {
-        return Arrays.asList("default");
+    public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
+        final List<ConfigSource> sources = new ArrayList<>();
+        sources.addAll(loadConfigSources("META-INF/sbomer-config.yaml", 110, classLoader));
+        return sources;
     }
-
 }

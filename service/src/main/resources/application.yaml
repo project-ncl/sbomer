@@ -28,6 +28,11 @@ quarkus:
   devservices:
     enabled: false
 
+  index-dependency:
+    yaml:
+      group-id: com.fasterxml.jackson.jakarta.rs
+      artifact-id: jackson-jakarta-rs-yaml-provider
+
   # Default logging settings
   log:
     level: INFO

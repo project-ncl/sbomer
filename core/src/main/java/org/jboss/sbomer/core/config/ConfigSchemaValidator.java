@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.features.umb.producer;
+package org.jboss.sbomer.core.config;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,34 +23,44 @@ import java.nio.charset.StandardCharsets;
 
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.config.Validator;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
+/**
+ * @author Marek Goldmann
+ */
 @ApplicationScoped
-public class GenerationFinishedMessageBodyValidator implements Validator<GenerationFinishedMessageBody> {
-
-    public GenerationFinishedMessageBodyValidator() {
-    }
-
+public class ConfigSchemaValidator implements Validator<Config> {
+    /**
+     * Performs validation of a give {@link Config} according to the JSON schema.
+     *
+     * @param config The {@link Config} object to validate.
+     * @return a {@link ValidationResult} object.
+     */
     @Override
-    public ValidationResult validate(GenerationFinishedMessageBody messageBody) {
-        if (messageBody == null) {
-            throw new ApplicationException("No message to validate provided");
+    public ValidationResult validate(Config config) {
+        if (config == null) {
+            throw new ApplicationException("No configuration provided");
         }
 
         String schema;
 
         try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream("schemas/message-success-schema.json");
+            InputStream is = SchemaValidator.class.getClassLoader().getResourceAsStream("schemas/config.json");
             schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);
         }
 
-        return SchemaValidator.validate(schema, messageBody.toJson());
+        try {
+            return SchemaValidator.validate(schema, ObjectMapperProvider.json().writeValueAsString(config));
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("An error occurred while converting configuration file into JSON", e);
+        }
     }
-
 }

@@ -26,9 +26,15 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
+import org.jboss.sbomer.core.config.ConfigSchemaValidator;
+import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.errors.ValidationException;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -37,6 +43,8 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+
+import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -74,6 +82,9 @@ public class SBOMResource {
 
     @Inject
     KubernetesClient kubernetesClient;
+
+    @Inject
+    ConfigSchemaValidator configSchemaValidator;
 
     // RSQL Examples:
     // -------------------------------------------------------------------------------
@@ -197,6 +208,7 @@ public class SBOMResource {
     }
 
     @POST
+    @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
     @Operation(
             summary = "Generate SBOM based on the PNC build",
             description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
@@ -211,19 +223,37 @@ public class SBOMResource {
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
 
-    public Response generate(@PathParam("buildId") String buildId) throws Exception {
+    public Response generate(@PathParam("buildId") String buildId, Config config) throws Exception {
 
         try {
             MDCUtils.addBuildContext(buildId);
 
             log.info("New generation request for build id '{}'", buildId);
-            log.debug("Creating GenerationRequest Kubernetes resource");
+            log.debug("Creating GenerationRequest Kubernetes resource...");
 
             GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata(buildId)
                     .endMetadata()
                     .withBuildId(buildId)
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
+
+            if (config != null) {
+                log.debug("Received product configuration...");
+
+                SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+                sbomerConfigProvider.adjust(config);
+                config.setBuildId(buildId);
+
+                ValidationResult validationResult = configSchemaValidator.validate(config);
+
+                if (!validationResult.isValid()) {
+                    throw new ValidationException("Provided config is not valid", validationResult.getErrors());
+                }
+
+                // Because the config is valid, use it and set the status to initialized
+                req.setStatus(SbomGenerationStatus.INITIALIZED);
+                req.setConfig(ObjectMapperProvider.json().writeValueAsString(config));
+            }
 
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
 

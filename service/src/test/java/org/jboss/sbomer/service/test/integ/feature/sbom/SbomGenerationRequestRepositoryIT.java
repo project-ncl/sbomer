@@ -84,7 +84,7 @@ public class SbomGenerationRequestRepositoryIT {
 
         DefaultProcessorConfig defaultProcessorConfig = DefaultProcessorConfig.builder().build();
         RedHatProductProcessorConfig redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
-                .errata(
+                .withErrata(
                         ErrataConfig.builder()
                                 .productName("CCCDDD")
                                 .productVersion("CCDD")
@@ -92,14 +92,14 @@ public class SbomGenerationRequestRepositoryIT {
                                 .build())
                 .build();
         ProductConfig productConfig = ProductConfig.builder()
-                .generator(generatorConfig)
-                .processors(List.of(defaultProcessorConfig, redHatProductProcessorConfig))
+                .withGenerator(generatorConfig)
+                .withProcessors(List.of(defaultProcessorConfig, redHatProductProcessorConfig))
                 .build();
 
         return Config.builder()
-                .apiVersion("sbomer.jboss.org/v1alpha1")
-                .buildId(buildId)
-                .products(List.of(productConfig))
+                .withApiVersion("sbomer.jboss.org/v1alpha1")
+                .withBuildId(buildId)
+                .withProducts(List.of(productConfig))
                 .build();
     }
 

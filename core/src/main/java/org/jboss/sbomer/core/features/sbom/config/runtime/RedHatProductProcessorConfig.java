@@ -30,7 +30,7 @@ import lombok.extern.jackson.Jacksonized;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-@Builder
+@Builder(setterPrefix = "with")
 @Jacksonized
 @JsonTypeName("redhat-product")
 public class RedHatProductProcessorConfig extends ProcessorConfig {

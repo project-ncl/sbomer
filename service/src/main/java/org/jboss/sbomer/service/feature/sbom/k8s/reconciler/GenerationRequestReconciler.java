@@ -33,11 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-
 import org.cyclonedx.model.Bom;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -45,13 +41,12 @@ import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
-import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.InitFinishedCondition;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.NotFinalOrFailedRequestCondition;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigAvailableCondition;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigMissingOrGenerated;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
@@ -80,6 +75,8 @@ import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -103,14 +100,12 @@ import lombok.extern.slf4j.Slf4j;
         namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
         dependents = {
                 @Dependent(
-                        name = "init",
                         type = TaskRunInitDependentResource.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME,
-                        reconcilePrecondition = NotFinalOrFailedRequestCondition.class,
-                        readyPostcondition = InitFinishedCondition.class),
+                        reconcilePrecondition = ConfigMissingOrGenerated.class),
                 @Dependent(
                         type = TaskRunGenerateDependentResource.class,
-                        dependsOn = "init",
+                        reconcilePrecondition = ConfigAvailableCondition.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME) })
 @Slf4j
 public class GenerationRequestReconciler implements Reconciler<GenerationRequest>,

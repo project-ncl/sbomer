@@ -17,9 +17,6 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command.auto;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,21 +29,13 @@ import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
-import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig;
-import org.jboss.sbomer.cli.feature.sbom.config.DefaultGenerationConfig.DefaultGeneratorConfig;
-import org.jboss.sbomer.cli.feature.sbom.config.DefaultProcessingConfig;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
-import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +61,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
     @Option(names = { "--build-id" }, required = true, description = "The PNC build identifier, example: AYHJRDPEUMYAC")
     String buildId;
 
-    @Option(names = { "--format" }, defaultValue = "YAML", description = "Format of the generated configuration.")
+    @Option(names = { "--format" }, defaultValue = "yaml", description = "Format of the generated configuration.")
     ConfigFormat format;
 
     @Option(
@@ -89,10 +78,9 @@ public class GenerateConfigCommand implements Callable<Integer> {
     PncService pncService;
 
     @Inject
-    DefaultGenerationConfig defaultGenerationConfig;
+    ConfigSchemaValidator configSchemaValidator;
 
-    @Inject
-    DefaultProcessingConfig defaultProcessingConfig;
+    SbomerConfigProvider configAdjuster = new SbomerConfigProvider();
 
     @Inject
     ProductVersionMapper productVersionMapper;
@@ -201,9 +189,9 @@ public class GenerateConfigCommand implements Callable<Integer> {
         log.info("Found {} configurations in the internal SBOMer mapping for build ID '{}'", configs.size(), buildId);
 
         Config config = Config.builder()
-                .buildId(buildId)
-                .apiVersion("sbomer.jboss.org/v1alpha1")
-                .products(new ArrayList<>())
+                .withBuildId(buildId)
+                .withApiVersion("sbomer.jboss.org/v1alpha1")
+                .withProducts(new ArrayList<>())
                 .build();
 
         configs.forEach(cfg -> {
@@ -216,45 +204,6 @@ public class GenerateConfigCommand implements Callable<Integer> {
                 buildId);
 
         return config;
-    }
-
-    private GeneratorConfig defaultGeneratorConfig() {
-        DefaultGeneratorConfig defaultGeneratorConfig = defaultGenerationConfig
-                .forGenerator(defaultGenerationConfig.defaultGenerator());
-
-        return GeneratorConfig.builder()
-                .type(defaultGenerationConfig.defaultGenerator())
-                .args(defaultGeneratorConfig.defaultArgs())
-                .version(defaultGeneratorConfig.defaultVersion())
-                .build();
-    }
-
-    private void adjustGenerator(ProductConfig product) {
-        GeneratorConfig generatorConfig = product.getGenerator();
-
-        GeneratorConfig defaultGeneratorConfig = defaultGeneratorConfig();
-
-        // Generator configuration was not provided, will use defaults
-        if (generatorConfig == null) {
-            log.debug("No generator provided, will use defaults: '{}'", defaultGeneratorConfig);
-            product.setGenerator(defaultGeneratorConfig);
-        } else {
-
-            if (generatorConfig.getVersion() == null) {
-                String defaultVersion = defaultGenerationConfig.forGenerator(generatorConfig.getType())
-                        .defaultVersion();
-
-                log.debug("No generator version provided, will use default: '{}'", defaultVersion);
-                generatorConfig.setVersion(defaultVersion);
-            }
-
-            if (generatorConfig.getArgs() == null) {
-                String defaultArgs = defaultGenerationConfig.forGenerator(generatorConfig.getType()).defaultArgs();
-
-                log.debug("No generator args provided, will use default: '{}'", defaultArgs);
-                generatorConfig.setArgs(defaultArgs);
-            }
-        }
     }
 
     /**
@@ -275,25 +224,13 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
         log.debug("RAW config: '{}'", config);
 
-        log.debug("Adjusting configuration...");
-
-        config.getProducts().forEach(product -> {
-            // Adjusting generator configuration. This is the only thing we can adjust,
-            // because processor configuration is specific to the build and product release.
-            adjustGenerator(product);
-
-            if (!product.hasDefaultProcessor()) {
-                // Adding default processor as the first one
-                log.debug("No default processor specified, adding one");
-                product.getProcessors().add(0, new DefaultProcessorConfig());
-            }
-        });
+        configAdjuster.adjust(config);
 
         config.setBuildId(buildId);
 
         log.debug("Configuration adjusted, starting validation");
 
-        ValidationResult result = validate(config);
+        ValidationResult result = configSchemaValidator.validate(config);
 
         if (!result.isValid()) {
             log.error("Configuration is not valid!");
@@ -330,28 +267,4 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
         return GenerationResult.SUCCESS.getCode();
     }
-
-    /**
-     * Performs validation of a give {@link Config} according to the JSON schema.
-     *
-     * @param config The {@link Config} object to validate.
-     * @return a {@link org.jboss.sbomer.core.SchemaValidator.ValidationResult} object.
-     */
-    private ValidationResult validate(Config config) {
-        String schema;
-
-        try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream("schemas/config.json");
-            schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new ApplicationException("Could not read the configuration file schema", e);
-        }
-
-        try {
-            return SchemaValidator.validate(schema, configReader.getJsonObjectMapper().writeValueAsString(config));
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException("An error occurred while converting configuration file into JSON", e);
-        }
-    }
-
 }

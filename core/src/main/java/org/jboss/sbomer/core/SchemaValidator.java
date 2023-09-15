@@ -22,10 +22,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.Draft;
 import io.vertx.json.schema.JsonSchema;
 import io.vertx.json.schema.JsonSchemaOptions;
+import io.vertx.json.schema.OutputFormat;
 import io.vertx.json.schema.OutputUnit;
 import io.vertx.json.schema.Validator;
 import lombok.Builder;
@@ -39,16 +42,16 @@ public class SchemaValidator {
     }
 
     @Data
-    @Builder
+    @Builder(setterPrefix = "with")
     public static class ValidationResult {
         boolean isValid;
 
         List<String> errors;
 
-        public static ValidationResult fromOutputUnt(OutputUnit outputUnit) {
+        public static ValidationResult fromOutputUnit(OutputUnit outputUnit) {
             return ValidationResult.builder()
-                    .isValid(outputUnit.getValid())
-                    .errors(
+                    .withIsValid(outputUnit.getValid())
+                    .withErrors(
                             Optional.ofNullable(outputUnit.getErrors())
                                     .map(Collection::stream)
                                     .orElseGet(Stream::empty)
@@ -69,14 +72,27 @@ public class SchemaValidator {
      */
     public static ValidationResult validate(String schema, String body) {
         log.debug("Validating: {}", body);
+        log.trace("Schema: {}", schema);
 
         OutputUnit result = Validator
                 .create(
                         JsonSchema.of(new JsonObject(schema)),
-                        new JsonSchemaOptions().setBaseUri("https://jboss.org/sbomer").setDraft(Draft.DRAFT202012))
+                        new JsonSchemaOptions().setBaseUri("https://jboss.org/sbomer")
+                                .setOutputFormat(OutputFormat.Basic)
+                                .setDraft(Draft.DRAFT202012))
                 .validate(new JsonObject(body));
 
-        return ValidationResult.fromOutputUnt(result);
+        ValidationResult validationResult = ValidationResult.fromOutputUnit(result);
+
+        if (!validationResult.isValid()) {
+            log.error("Validation failed!");
+
+            validationResult.getErrors().forEach(msg -> {
+                log.error(msg);
+            });
+        }
+
+        return validationResult;
     }
 
 }

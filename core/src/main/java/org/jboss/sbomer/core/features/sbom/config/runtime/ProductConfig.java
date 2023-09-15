@@ -18,8 +18,10 @@
 package org.jboss.sbomer.core.features.sbom.config.runtime;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -33,7 +35,7 @@ import lombok.extern.jackson.Jacksonized;
  * @author Marek Goldmann
  */
 @Data
-@Builder
+@Builder(setterPrefix = "with")
 @Jacksonized
 public class ProductConfig {
     /**
@@ -50,7 +52,8 @@ public class ProductConfig {
     @JsonIgnore
     public boolean hasDefaultProcessor() {
         return Optional.ofNullable(processors)
-                .stream()
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
                 .anyMatch(processor -> processor instanceof DefaultProcessorConfig);
     }
 
