@@ -20,6 +20,8 @@ package org.jboss.sbomer.core.features.sbom.config.runtime;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import lombok.Builder;
@@ -35,6 +37,12 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 @JsonTypeName("default")
 public class DefaultProcessorConfig extends ProcessorConfig {
+
+    public ProcessorType getType() {
+        return ProcessorType.DEFAULT;
+
+    }
+
     @Override
     public List<String> toCommand() {
         return Arrays.asList("default");

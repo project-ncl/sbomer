@@ -77,6 +77,9 @@ public class GenerateConfigCommand implements Callable<Integer> {
     @Inject
     PncService pncService;
 
+    @Inject
+    ConfigSchemaValidator configSchemaValidator;
+
     SbomerConfigProvider configAdjuster = new SbomerConfigProvider();
 
     @Inject
@@ -227,7 +230,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
         log.debug("Configuration adjusted, starting validation");
 
-        ValidationResult result = ConfigSchemaValidator.validate(config);
+        ValidationResult result = configSchemaValidator.validate(config);
 
         if (!result.isValid()) {
             log.error("Configuration is not valid!");

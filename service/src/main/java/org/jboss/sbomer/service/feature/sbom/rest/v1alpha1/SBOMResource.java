@@ -83,6 +83,9 @@ public class SBOMResource {
     @Inject
     KubernetesClient kubernetesClient;
 
+    @Inject
+    ConfigSchemaValidator configSchemaValidator;
+
     // RSQL Examples:
     // -------------------------------------------------------------------------------
     // ==> "/api/v1alpha1/sboms?query=buildId==eq={buildId}&sort=id=asc="
@@ -241,7 +244,7 @@ public class SBOMResource {
                 sbomerConfigProvider.adjust(config);
                 config.setBuildId(buildId);
 
-                ValidationResult validationResult = ConfigSchemaValidator.validate(config);
+                ValidationResult validationResult = configSchemaValidator.validate(config);
 
                 if (!validationResult.isValid()) {
                     throw new ValidationException("Provided config is not valid", validationResult.getErrors());

@@ -81,7 +81,7 @@ public class SbomRepositoryIT {
 
         DefaultProcessorConfig defaultProcessorConfig = DefaultProcessorConfig.builder().build();
         RedHatProductProcessorConfig redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
-                .errata(
+                .withErrata(
                         ErrataConfig.builder()
                                 .productName("CCCDDD")
                                 .productVersion("CCDD")

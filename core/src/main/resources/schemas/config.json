@@ -38,18 +38,26 @@
               "type": "string"
             }
           },
-          "required": ["productName", "productVersion", "productVariant"],
+          "required": [
+            "productName",
+            "productVersion",
+            "productVariant"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["errata"],
+      "required": [
+        "errata"
+      ],
       "additionalProperties": false
     }
   },
   "properties": {
     "apiVersion": {
       "description": "Version of the configuration file",
-      "enum": ["sbomer.jboss.org/v1alpha1"]
+      "enum": [
+        "sbomer.jboss.org/v1alpha1"
+      ]
     },
     "buildId": {
       "description": "PNC build identifier",
@@ -71,7 +79,10 @@
               },
               "type": {
                 "description": "Type of generator",
-                "enum": ["maven-cyclonedx", "maven-domino"]
+                "enum": [
+                  "maven-cyclonedx",
+                  "maven-domino"
+                ]
               },
               "args": {
                 "description": "Optional custom arguments that are passed to the generator",
@@ -82,21 +93,33 @@
                 "type": "string"
               }
             },
-            "required": ["type"],
+            "required": [
+              "type"
+            ],
             "additionalProperties": false
           },
           "processors": {
             "type": "array",
+            "uniqueItems": true,
+            "minItems": 2,
+            "maxItems": 2,
             "prefixItems": [
-              { "$ref": "#/$defs/processor-default" },
-              { "$ref": "#/$defs/processor-redhat-product" }
-            ]
+              {
+                "$ref": "#/$defs/processor-default"
+              },
+              {
+                "$ref": "#/$defs/processor-redhat-product"
+              }
+            ],
+            "items": false
           }
         },
         "additionalProperties": false
       }
     }
   },
-  "required": ["products"],
+  "required": [
+    "products"
+  ],
   "additionalProperties": false
 }

@@ -20,85 +20,37 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.producer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
+import org.jboss.sbomer.core.SchemaValidator;
+import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
+import org.jboss.sbomer.core.config.Validator;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.Draft;
-import io.vertx.json.schema.JsonSchema;
-import io.vertx.json.schema.JsonSchemaOptions;
-import io.vertx.json.schema.OutputFormat;
-import io.vertx.json.schema.OutputUnit;
-import io.vertx.json.schema.Validator;
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.enterprise.context.ApplicationScoped;
 
-@Slf4j
 @ApplicationScoped
-public class GenerationFinishedMessageBodyValidator {
+public class GenerationFinishedMessageBodyValidator implements Validator<GenerationFinishedMessageBody> {
 
     public GenerationFinishedMessageBodyValidator() {
     }
 
-    @Data
-    @Builder
-    public static class ValidationResult {
-        boolean isValid;
-
-        List<String> errors;
-
-        public static ValidationResult fromOutputUnt(OutputUnit outputUnit) {
-            return ValidationResult.builder()
-                    .isValid(outputUnit.getValid())
-                    .errors(
-                            Optional.ofNullable(outputUnit.getErrors())
-                                    .map(Collection::stream)
-                                    .orElseGet(Stream::empty)
-                                    .map(
-                                            unit -> new StringBuilder().append(unit.getInstanceLocation())
-                                                    .append(": ")
-                                                    .append(unit.getError())
-                                                    .toString())
-                                    .toList())
-                    .build();
-        }
-    }
-
-    /**
-     * A method to validate the content of the message body according to the defined JSON Schema.
-     *
-     * @return
-     */
+    @Override
     public ValidationResult validate(GenerationFinishedMessageBody messageBody) {
-        String messageStr = messageBody.toJson();
+        if (messageBody == null) {
+            throw new ApplicationException("No message to validate provided");
+        }
+
         String schema;
 
         try {
             InputStream is = getClass().getClassLoader().getResourceAsStream("schemas/message-success-schema.json");
             schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new ApplicationException("Could not read the UMB message schema", e);
+            throw new ApplicationException("Could not read the configuration file schema", e);
         }
 
-        log.info("Validating: {}", messageStr);
-
-        OutputUnit result = Validator
-                .create(
-                        JsonSchema.of(new JsonObject(schema)),
-                        new JsonSchemaOptions().setBaseUri("https://jboss.org/sbomer/message.json")
-                                .setOutputFormat(OutputFormat.Basic)
-                                .setDraft(Draft.DRAFT202012))
-                .validate(new JsonObject(messageStr));
-
-        return ValidationResult.fromOutputUnt(result);
+        return SchemaValidator.validate(schema, messageBody.toJson());
     }
 
 }

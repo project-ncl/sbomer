@@ -29,17 +29,25 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 /**
  * @author Marek Goldmann
  */
-public class ConfigSchemaValidator {
+@ApplicationScoped
+public class ConfigSchemaValidator implements Validator<Config> {
     /**
      * Performs validation of a give {@link Config} according to the JSON schema.
      *
      * @param config The {@link Config} object to validate.
      * @return a {@link ValidationResult} object.
      */
-    public static ValidationResult validate(Config config) {
+    @Override
+    public ValidationResult validate(Config config) {
+        if (config == null) {
+            throw new ApplicationException("No configuration provided");
+        }
+
         String schema;
 
         try {
@@ -47,6 +55,14 @@ public class ConfigSchemaValidator {
             schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);
+        }
+
+        try {
+            String writeValueAsString = ObjectMapperProvider.json().writeValueAsString(config);
+            System.out.println(writeValueAsString);
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
         try {
