@@ -58,14 +58,6 @@ public class ConfigSchemaValidator implements Validator<Config> {
         }
 
         try {
-            String writeValueAsString = ObjectMapperProvider.json().writeValueAsString(config);
-            System.out.println(writeValueAsString);
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        try {
             return SchemaValidator.validate(schema, ObjectMapperProvider.json().writeValueAsString(config));
         } catch (JsonProcessingException e) {
             throw new ApplicationException("An error occurred while converting configuration file into JSON", e);
