@@ -19,10 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.rest.v1alpha1;
 
 import static org.jboss.sbomer.service.feature.sbom.UserRoles.SYSTEM_USER;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
@@ -30,11 +26,9 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
-import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
@@ -50,7 +44,6 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
 import cz.jirutka.rsql.parser.RSQLParserException;

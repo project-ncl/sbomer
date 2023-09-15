@@ -15,11 +15,11 @@ public class ProductConfigTest {
     @Test
     void testGenerateCommand() {
         Config config = Config.builder()
-                .buildId("AABBCC")
-                .products(
+                .withBuildId("AABBCC")
+                .withProducts(
                         List.of(
                                 ProductConfig.builder()
-                                        .generator(
+                                        .withGenerator(
                                                 GeneratorConfig.builder()
                                                         .type(GeneratorType.MAVEN_CYCLONEDX)
                                                         .version("1.2.3")

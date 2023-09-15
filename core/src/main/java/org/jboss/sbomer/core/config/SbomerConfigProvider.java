@@ -55,6 +55,12 @@ public class SbomerConfigProvider {
         defaultGenerationConfig = smallRyeConfig.getConfigMapping(DefaultGenerationConfig.class);
     }
 
+    /**
+     * Adjusts the provided {@link Config} by providing default values for not provided elements in generators as well
+     * as processors for each defined product.
+     *
+     * @param config The {@link Config} object to be adjusted.
+     */
     public void adjust(Config config) {
         log.debug("Adjusting configuration...");
 

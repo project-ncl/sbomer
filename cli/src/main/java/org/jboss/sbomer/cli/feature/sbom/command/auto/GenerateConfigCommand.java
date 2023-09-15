@@ -186,9 +186,9 @@ public class GenerateConfigCommand implements Callable<Integer> {
         log.info("Found {} configurations in the internal SBOMer mapping for build ID '{}'", configs.size(), buildId);
 
         Config config = Config.builder()
-                .buildId(buildId)
-                .apiVersion("sbomer.jboss.org/v1alpha1")
-                .products(new ArrayList<>())
+                .withBuildId(buildId)
+                .withApiVersion("sbomer.jboss.org/v1alpha1")
+                .withProducts(new ArrayList<>())
                 .build();
 
         configs.forEach(cfg -> {

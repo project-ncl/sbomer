@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.core.features.sbom.config.runtime;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ import lombok.extern.jackson.Jacksonized;
  */
 @Getter
 @Setter
-@Builder
+@Builder(setterPrefix = "with")
 @Jacksonized
 @AllArgsConstructor
 @NoArgsConstructor
@@ -57,5 +58,6 @@ public class Config {
     /**
      * List of configuration entries for products.
      */
-    List<ProductConfig> products;
+    @Builder.Default
+    List<ProductConfig> products = new ArrayList<>();
 }
