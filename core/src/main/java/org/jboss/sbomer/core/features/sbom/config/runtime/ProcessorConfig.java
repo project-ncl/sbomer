@@ -33,7 +33,7 @@ import lombok.Data;
         @JsonSubTypes.Type(value = RedHatProductProcessorConfig.class) })
 @Data
 public abstract class ProcessorConfig {
-    protected ProcessorType type;
+    ProcessorType type;
 
     @JsonIgnore
     public abstract List<String> toCommand();
