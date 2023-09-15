@@ -1,6 +1,6 @@
 
 # https://catalog.redhat.com/software/containers/ubi9/nginx-120/61a609f2bfd4a5234d596287
-# Based on tag 1-116.1692771028
+# Based on tag 1-126
 FROM registry.access.redhat.com/ubi9/nginx-120@sha256:69abff984ff18ad455059321d67406150a2e518dd36ba54fa28fb3afaaa2675d
 
 USER root
