@@ -42,14 +42,14 @@ http {
         ## Global cache config below
 
         # Cache entries for one month
-        proxy_cache_valid 200 1d;
-        # If the reuqest should be buffered before sending to the client
+        proxy_cache_valid 200 1m;
+        # If the request should be buffered before sending to the client
         proxy_buffering on;
         # What requests should we cache
         proxy_cache_methods GET HEAD;
         # Allow for updating cache in background
         proxy_cache_background_update on;
-        # Hold other clinents until the in-progress request is finished for the particular resource
+        # Hold other clients until the in-progress request is finished for the particular resource
         proxy_cache_lock on;
         # If expired items should be revalidated using usual headers
         proxy_cache_revalidate on;
@@ -86,7 +86,7 @@ http {
         location /maven/indy-static/ {
             proxy_cache maven;
 
-            proxy_pass http://${INDY_REPOSITORY_HOST}/api/content/maven/group/static/;
+            proxy_pass https://${INDY_REPOSITORY_HOST}/api/content/maven/group/static/;
             
         }
     }
