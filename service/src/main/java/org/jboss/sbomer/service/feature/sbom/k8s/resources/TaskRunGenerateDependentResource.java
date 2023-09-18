@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,6 +34,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.Duration;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -128,6 +130,14 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
             throw new ApplicationException("Could not serialize runtime configuration into YAML", e);
         }
 
+        Duration timeout = null;
+
+        try {
+            timeout = Duration.parse("6h");
+        } catch (ParseException e) {
+            throw new ApplicationException("Cannot set timeout", e);
+        }
+
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
                 .withLabels(labels)
@@ -141,6 +151,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                 .endMetadata()
                 .withNewSpec()
                 .withServiceAccountName(tektonConfig.sa())
+                .withTimeout(timeout)
                 .withParams(
                         new ParamBuilder().withName(PARAM_COMMAND_CONFIG_NAME).withNewValue(configStr).build(),
                         new ParamBuilder().withName(PARAM_COMMAND_INDEX_NAME)
