@@ -17,8 +17,14 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
+import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -45,10 +51,32 @@ public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequ
         // If the configuration is available (meaning that the initialization phase is finished) and the {@code cleanup}
         // setting is set to false, reconcile. We won't reconcile multiple times at this point, the only thing we want
         // to achieve is that the dependent resource (TaskRun) is retained.
-        if (!cleanup) {
+        // We should do this only in the case when there are already some secondary resources.
+        if (!cleanup && initTaskRunExist(context)) {
             return true;
         }
 
         return false;
     }
+
+    private boolean initTaskRunExist(Context<GenerationRequest> context) {
+        Set<TaskRun> secondaryResources = context.getSecondaryResources(TaskRun.class);
+
+        // No TaskRuns at all, so no init TaskRun for sure...
+        if (secondaryResources.isEmpty()) {
+            return false;
+        }
+
+        return secondaryResources.stream().anyMatch(taskRun -> {
+            Map<String, String> labels = taskRun.getMetadata().getLabels();
+
+            if (labels != null
+                    && Objects.equals(labels.get(Labels.LABEL_PHASE), SbomGenerationPhase.INIT.name().toLowerCase())) {
+                return true;
+            }
+
+            return false;
+        });
+    }
+
 }
