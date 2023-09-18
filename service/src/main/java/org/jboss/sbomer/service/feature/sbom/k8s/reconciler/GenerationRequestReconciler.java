@@ -46,7 +46,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigAvailableCondition;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigMissingOrGenerated;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigMissingCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
@@ -102,7 +102,7 @@ import lombok.extern.slf4j.Slf4j;
                 @Dependent(
                         type = TaskRunInitDependentResource.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME,
-                        reconcilePrecondition = ConfigMissingOrGenerated.class),
+                        reconcilePrecondition = ConfigMissingCondition.class),
                 @Dependent(
                         type = TaskRunGenerateDependentResource.class,
                         reconcilePrecondition = ConfigAvailableCondition.class,

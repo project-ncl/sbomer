@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
@@ -24,7 +25,10 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 
-public class ConfigMissingOrGenerated implements Condition<TaskRun, GenerationRequest> {
+public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequest> {
+
+    Boolean cleanup = ConfigProvider.getConfig()
+            .getValue("sbomer.controller.generation-request.cleanup", Boolean.class);
 
     @Override
     public boolean isMet(
@@ -33,12 +37,15 @@ public class ConfigMissingOrGenerated implements Condition<TaskRun, GenerationRe
             Context<GenerationRequest> context) {
 
         // Here we are checking whether the configuration exists already or not. In case it's not there, we need to
-        // generate one, thus returning true to let the reconciliation happen on the {
-        // TaskRunInitDependentResource.
-        // In case the config exists and we have some TaskRuns associated with it this means that we generated it.
-        // In such case we need to return true as well, to keep the resource. Cleanup of resources are done after
-        // successful generation only.
-        if (primary.getConfig() == null || !context.getSecondaryResources(TaskRun.class).isEmpty()) {
+        // generate one, thus returning true to let the reconciliation happen on the TaskRunInitDependentResource.
+        if (primary.getConfig() == null) {
+            return true;
+        }
+
+        // If the configuration is available (meaning that the initialization phase is finished) and the {@code cleanup}
+        // setting is set to false, reconcile. We won't reconcile multiple times at this point, the only thing we want
+        // to achieve is that the dependent resource (TaskRun) is retained.
+        if (!cleanup) {
             return true;
         }
 
