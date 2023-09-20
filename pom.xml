@@ -59,7 +59,7 @@
         <version.quarkus-operator-sdk>6.3.2</version.quarkus-operator-sdk>
 
         <version.cyclonedx>7.3.2</version.cyclonedx>
-        <version.lombok>1.18.28</version.lombok>
+        <version.lombok>1.18.30</version.lombok>
         <version.pnc-rest>2.5.1</version.pnc-rest>
         <version.pnc-common>2.4.0-alpha</version.pnc-common>
         <version.quarkus-jgit>3.0.5</version.quarkus-jgit>
