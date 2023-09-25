@@ -62,10 +62,14 @@ public class StageGenerationRequestIT extends E2EStageBase {
     @Test
     @Order(2)
     public void ensureUmbMessageWasSent() {
-        givenLastCompleteUmbMessage().then()
-                .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
-                .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(BUILD_ID))
-                .body("raw_messages[0].msg.build.id", CoreMatchers.is(BUILD_ID))
-                .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+            givenLastCompleteUmbMessage().then()
+                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
+                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(BUILD_ID))
+                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(BUILD_ID))
+                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+
+            return true;
+        });
     }
 }
