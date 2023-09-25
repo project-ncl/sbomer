@@ -15,21 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.test.integ;
-
-import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
-import org.jboss.sbomer.core.test.TestResources;
-import org.junit.jupiter.api.Test;
-
-import io.quarkus.test.junit.QuarkusTest;
+package org.jboss.sbomer.core.test.unit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
-@QuarkusTest
-public class MavenCommandLineParserIT {
+import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
+import org.jboss.sbomer.core.test.TestResources;
+import org.junit.jupiter.api.Test;
+
+public class MavenCommandLineParserTest {
 
     @Test
     public void windupParentTest() throws IOException, IllegalArgumentException {
@@ -170,5 +167,22 @@ public class MavenCommandLineParserIT {
         assertEquals(1, lineParser.getProperties().size());
         assertEquals(0, lineParser.getProjects().size());
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DskipTests=true"));
+    }
+
+    @Test
+    public void jwsTomcatTest() throws IOException, IllegalArgumentException {
+        String script = TestResources.asString("maven/A3L53ZF72MYAA.sh");
+
+        MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
+        assertEquals(0, lineParser.getProfiles().size());
+        assertEquals(3, lineParser.getProperties().size());
+        assertEquals(0, lineParser.getProjects().size());
+        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DrepoReportingRemoval=true"));
+        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dmaven.test.failure.ignore=true"));
+        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DversionIncrementalSuffix=redhat"));
+
+        assertEquals(
+                "mvn -C  -Dmaven.test.failure.ignore=true -DversionIncrementalSuffix=redhat -DrepoReportingRemoval=true",
+                lineParser.getRebuiltMvnCommandScript());
     }
 }

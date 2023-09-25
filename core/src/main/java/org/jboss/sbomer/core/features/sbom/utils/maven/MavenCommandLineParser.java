@@ -159,20 +159,19 @@ public class MavenCommandLineParser {
     }
 
     private String rebuildMavenCommand() {
-        return "mvn" + rebuildNoArgsCmd() + " " + rebuildProfilesCmd() + " " + rebuildProjectsCmd() + " "
-                + rebuildSystemPropertiesCmd();
+        return "mvn" + rebuildNoArgsCmd() + rebuildProfilesCmd() + rebuildProjectsCmd() + rebuildSystemPropertiesCmd();
     }
 
     private String rebuildProfilesCmd() {
         if (profiles.size() == 0) {
             return "";
         }
-        return "-" + PROFILES_OPTION + profiles.stream().collect(Collectors.joining(","));
+        return " -" + PROFILES_OPTION + profiles.stream().collect(Collectors.joining(","));
     }
 
     private String rebuildProjectsCmd() {
         if (projects.size() == 0) {
-            return "";
+            return " ";
         }
 
         String projectList = projects.stream().collect(Collectors.joining(","));
@@ -181,19 +180,19 @@ public class MavenCommandLineParser {
         // Finally remove all spaces inside the string
         projectList = projectList.replaceAll("\\s+", "");
 
-        return "-" + PROJECTS_OPTION + " " + projectList;
+        return " -" + PROJECTS_OPTION + " " + projectList;
     }
 
     private String rebuildNoArgsCmd() {
         if (noArgsOptions.size() == 0) {
             return "";
         }
-        return "-" + noArgsOptions.stream().collect(Collectors.joining(" -"));
+        return " -" + noArgsOptions.stream().collect(Collectors.joining(" -"));
     }
 
     private String rebuildSystemPropertiesCmd() {
         if (properties.size() == 0) {
-            return "";
+            return " ";
         }
 
         StringBuilder sb = new StringBuilder();
