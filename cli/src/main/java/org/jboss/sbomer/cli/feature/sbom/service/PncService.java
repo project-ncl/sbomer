@@ -84,7 +84,7 @@ public class PncService {
      * @return
      */
     public Configuration getConfiguration() {
-        return Configuration.builder().host(apiUrl).protocol("http").build();
+        return Configuration.builder().host(apiUrl).protocol("https").build();
     }
 
     /**
