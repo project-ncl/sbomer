@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 
 import io.quarkus.arc.All;
@@ -55,6 +56,7 @@ public class CLI implements QuarkusApplication {
     boolean verbose = false;
 
     @Override
+    @ActivateRequestContext
     public int run(String... args) throws Exception {
         CommandLine commandLine = new CommandLine(this, factory).setExecutionExceptionHandler(new ExceptionHandler())
                 .setCaseInsensitiveEnumValuesAllowed(true)
