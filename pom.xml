@@ -32,7 +32,7 @@
     <parent>
         <artifactId>jboss-parent</artifactId>
         <groupId>org.jboss</groupId>
-        <version>39</version>
+        <version>40</version>
     </parent>
 
     <modules>
