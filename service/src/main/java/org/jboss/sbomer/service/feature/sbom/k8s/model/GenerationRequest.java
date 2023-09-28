@@ -72,6 +72,7 @@ public class GenerationRequest extends ConfigMap {
     public static final String KEY_REASON = "reason";
     public static final String KEY_RESULT = "result";
     public static final String KEY_CONFIG = "config";
+    public static final String KEY_ENV_CONFIG = "env-config";
 
     public GenerationRequest() {
         super();
@@ -112,6 +113,15 @@ public class GenerationRequest extends ConfigMap {
 
     public void setConfig(String config) {
         getData().put(KEY_CONFIG, config);
+    }
+
+    @JsonIgnore
+    public String getEnvConfig() {
+        return getData().get(KEY_ENV_CONFIG);
+    }
+
+    public void setEnvConfig(String envConfig) {
+        getData().put(KEY_ENV_CONFIG, envConfig);
     }
 
     @JsonIgnore
@@ -180,6 +190,20 @@ public class GenerationRequest extends ConfigMap {
 
         try {
             return ObjectMapperProvider.yaml().readValue(getConfig().toString().getBytes(), Config.class);
+        } catch (IOException e) {
+            log.warn(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @JsonIgnore
+    public Map<String, String> toEnvConfig() {
+        if (getEnvConfig() == null) {
+            return null;
+        }
+
+        try {
+            return ObjectMapperProvider.yaml().readValue(getEnvConfig().toString().getBytes(), Map.class);
         } catch (IOException e) {
             log.warn(e.getMessage(), e);
             return null;

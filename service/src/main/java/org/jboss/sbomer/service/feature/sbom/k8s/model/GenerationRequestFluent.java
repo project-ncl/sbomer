@@ -31,6 +31,8 @@ public interface GenerationRequestFluent<A extends GenerationRequestFluent<A>> e
 
     public A withReason(String reason);
 
+    public A withEnvConfig(String envConfig);
+
     public A withConfig(String config);
 
     public A withResult(GenerationResult result);

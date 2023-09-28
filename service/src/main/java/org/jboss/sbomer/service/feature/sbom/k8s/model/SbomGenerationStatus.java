@@ -18,7 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 public enum SbomGenerationStatus {
-    NEW, INITIALIZING, INITIALIZED, GENERATING, FINISHED, FAILED;
+    NEW, INITIALIZING, INITIALIZED, ENV_DETECTING, ENV_DETECTED, GENERATING, FINISHED, FAILED;
 
     public static SbomGenerationStatus fromName(String phase) {
         return SbomGenerationStatus.valueOf(phase.toUpperCase());
