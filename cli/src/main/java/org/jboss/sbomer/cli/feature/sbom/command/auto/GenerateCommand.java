@@ -46,7 +46,7 @@ import picocli.CommandLine.Spec;
 @Command(
         mixinStandardHelpOptions = true,
         name = "generate",
-        description = "Scripted SBOM generation using runtime configuration file being the output of the 'generate-config' command")
+        description = "Scripted SBOM generation using runtime configuration file being the output of the 'generate-env-config' command")
 public class GenerateCommand implements Callable<Integer> {
     @Option(
             names = { "-c", "--config", },

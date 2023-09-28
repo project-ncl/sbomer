@@ -17,14 +17,14 @@
  */
 package org.jboss.sbomer.core.test.unit;
 
+import org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser;
+import org.jboss.sbomer.core.test.TestResources;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-
-import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
-import org.jboss.sbomer.core.test.TestResources;
-import org.junit.jupiter.api.Test;
 
 public class MavenCommandLineParserTest {
 

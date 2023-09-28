@@ -34,13 +34,14 @@ public class SbomerConfigProviderTest {
 
         assertTrue(defaultGenerationConfig.isEnabled());
         assertEquals(GeneratorType.MAVEN_CYCLONEDX, defaultGenerationConfig.defaultGenerator());
-        assertEquals(2, defaultGenerationConfig.generators().size());
+        assertEquals(3, defaultGenerationConfig.generators().size());
         assertEquals(
                 "--batch-mode",
                 defaultGenerationConfig.generators().get(GeneratorType.MAVEN_CYCLONEDX).defaultArgs());
         assertEquals(
                 "--include-non-managed --warn-on-missing-scm",
                 defaultGenerationConfig.generators().get(GeneratorType.MAVEN_DOMINO).defaultArgs());
+        assertEquals("-info", defaultGenerationConfig.generators().get(GeneratorType.GRADLE_CYCLONEDX).defaultArgs());
     }
 
     @Nested
