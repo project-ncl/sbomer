@@ -32,8 +32,8 @@ public class ConfigAvailableCondition implements Condition<TaskRun, GenerationRe
             GenerationRequest primary,
             Context<GenerationRequest> context) {
 
-        // If the configuration is available, reconcile
-        if (primary.getConfig() != null) {
+        // If the configurations are available, reconcile
+        if (primary.getConfig() != null && primary.getEnvConfig() != null) {
             return true;
         }
 

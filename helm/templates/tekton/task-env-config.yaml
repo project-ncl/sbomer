@@ -1,0 +1,41 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sbomer-env-config
+{{ include "sbomer.labels" (list .) | indent 2 }}
+spec:
+  params:
+    - name: build-id
+      type: string
+      description: "PNC build identifier"
+  steps:
+    - name: generate
+      image: {{ .Values.generator.image.repository }}:{{ .Values.generator.image.tag }}
+      imagePullPolicy: {{ .Values.generator.image.pullPolicy }}
+      resources:
+        limits:
+          cpu: 500m
+          memory: 500Mi
+        requests:
+          cpu: 200m
+          memory: 300Mi
+      env:
+        - name: SBOMER_HOST
+          value: {{ include "sbomer.serviceUrl" . }}
+        - name: SBOMER_PNC_HOST
+          value: {{ .Values.pnc.host }}
+        - name: SBOMER_GERRIT_HOST
+          value: {{ .Values.gerrit.host }}
+        - name: SBOMER_PNC_PRODUCT_MAPPING
+          value: {{ include "sbomer.productMapping" . }}
+        # SBOMER_CACHE_SERVICE_HOST is set by Kubernetes for us
+      script: |
+        #!/usr/bin/env bash
+
+        set -e
+        set -x
+
+        exec /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v sbom auto generate-env-config --build-id "$(params.build-id)" --format yaml --target "$(results.env-config.path)"
+  results:
+    - name: "env-config"
+      description: "Environment Runtime configuration"

@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jboss.pnc.client.BuildClient;
+import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -55,6 +57,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TaskRunGenerateDependentResource extends KubernetesDependentResource<TaskRun, GenerationRequest>
         implements BulkDependentResource<TaskRun, GenerationRequest> {
+
+    /**
+     * Parameter holding the environment configuration for a given build.
+     */
+    public static final String PARAM_COMMAND_ENV_CONFIG_NAME = "env-config";
 
     /**
      * Parameter holding the configuration for a given build.
@@ -97,16 +104,28 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                     primary.getConfig());
         }
 
+        Map<String, String> envConfig;
+
+        try {
+            envConfig = objectMapper.readValue(primary.getEnvConfig().getBytes(), Map.class);
+        } catch (IOException e) {
+            throw new ApplicationException(
+                    "Unable to parse environment configuration from GenerationRequest '{}': {}",
+                    primary.getMetadata().getName(),
+                    primary.getEnvConfig());
+        }
+
         Map<String, TaskRun> taskRuns = new HashMap<>(config.getProducts().size());
 
         for (int i = 0; i < config.getProducts().size(); i++) {
-            taskRuns.put(Integer.toString(i), desired(config, i, primary, context));
+            taskRuns.put(Integer.toString(i), desired(envConfig, config, i, primary, context));
         }
 
         return taskRuns;
     }
 
     private TaskRun desired(
+            Map<String, String> envConfig,
             Config config,
             int index,
             GenerationRequest generationRequest,
@@ -128,6 +147,14 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
             configStr = objectMapper.writeValueAsString(config);
         } catch (JsonProcessingException e) {
             throw new ApplicationException("Could not serialize runtime configuration into YAML", e);
+        }
+
+        String envConfigStr;
+
+        try {
+            envConfigStr = objectMapper.writeValueAsString(envConfig);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Could not serialize environment configuration into YAML", e);
         }
 
         Duration timeout = null;
@@ -153,6 +180,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                 .withServiceAccountName(tektonConfig.sa())
                 .withTimeout(timeout)
                 .withParams(
+                        new ParamBuilder().withName(PARAM_COMMAND_ENV_CONFIG_NAME).withNewValue(envConfigStr).build(),
                         new ParamBuilder().withName(PARAM_COMMAND_CONFIG_NAME).withNewValue(configStr).build(),
                         new ParamBuilder().withName(PARAM_COMMAND_INDEX_NAME)
                                 .withNewValue(String.valueOf(index))
