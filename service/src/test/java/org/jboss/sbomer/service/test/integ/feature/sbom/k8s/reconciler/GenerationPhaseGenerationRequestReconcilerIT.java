@@ -104,6 +104,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
                 .endMetadata()
                 .withBuildId("AABBCC")
                 .withStatus(SbomGenerationStatus.GENERATING)
+                .withEnvConfig("")
                 .withConfig(TestResources.asString("configs/multi-product.yaml"))
                 .build();
     }
