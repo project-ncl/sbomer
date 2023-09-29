@@ -36,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -160,7 +161,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         }
 
         // Update environment config, if available
-        if (generationRequest.getEnvConfig() != null) {
+        if (generationRequest.getEnvConfig() != null && !generationRequest.getEnvConfig().isEmpty()) {
             try {
                 sbomGenerationRequest.setEnvConfig(
                         SbomUtils.toJsonNode(
@@ -171,6 +172,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                         "Could not convert environment configuration to store in the database",
                         e);
             }
+        } else {
+            sbomGenerationRequest.setEnvConfig(MissingNode.getInstance());
         }
 
         // Store it in the database
