@@ -76,20 +76,14 @@ public class GenerateEnvConfigCommand implements Callable<Integer> {
     /**
      * Retrieves environment configuration from a PNC Build, compliant with SDKMan.
      *
-     * @return a Map object if the configuration could be retrieved or {@code null} otherwise.
+     * @return a Map object if the configuration could be retrieved or an empty map otherwise.
      */
-    private Map<String, String> environmentConfig() {
+    private Map<String, String> environmentConfig(Build build) {
         // Make sure there is no context
         MDCUtils.removeContext();
-        MDCUtils.addBuildContext(buildId);
+        MDCUtils.addBuildContext(build.getId());
         log.debug("Attempting to fetch environment configuration from a PNC build");
 
-        Build build = pncService.getBuild(buildId);
-
-        if (build == null) {
-            log.warn("Could not retrieve PNC build '{}'", buildId);
-            return Collections.emptyMap();
-        }
         Map<String, String> buildEnvAttributes = build.getEnvironment().getAttributes();
         if (buildEnvAttributes == null || buildEnvAttributes.isEmpty()) {
             log.debug("Build environment attributes not found for the specified PNC build");
@@ -106,12 +100,20 @@ public class GenerateEnvConfigCommand implements Callable<Integer> {
 
     /**
      *
-     * @return {@code 0} in case the environment config file was generated successfully. An empty Map is valid as
-     *         default versions will be used
+     * @return {@code 0} in case the environment config file was generated successfully or {@code 1} in case the
+     *         provided buildId could not be found. A returned empty Map is valid as default versions will be used
      */
     @Override
     public Integer call() throws Exception {
-        Map<String, String> envConfig = environmentConfig();
+
+        Build build = pncService.getBuild(buildId);
+
+        if (build == null) {
+            log.warn("Could not retrieve PNC build '{}'", buildId);
+            return GenerationResult.ERR_GENERAL.getCode();
+        }
+
+        Map<String, String> envConfig = environmentConfig(build);
 
         if (envConfig.isEmpty()) {
             log.debug(
