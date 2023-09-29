@@ -336,6 +336,31 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
         StringBuilder sb = new StringBuilder("Environment detection failed. System failure. ");
         GenerationResult result = GenerationResult.ERR_SYSTEM;
+
+        if (envDetectTaskRun.getStatus() != null && envDetectTaskRun.getStatus().getSteps() != null
+                && !envDetectTaskRun.getStatus().getSteps().isEmpty()
+                && envDetectTaskRun.getStatus().getSteps().get(0).getTerminated() != null) {
+
+            Optional<GenerationResult> optResult = GenerationResult
+                    .fromCode(envDetectTaskRun.getStatus().getSteps().get(0).getTerminated().getExitCode());
+
+            if (optResult.isPresent()) {
+                result = optResult.get();
+
+                // At this point the config generation failed, let's try to provide more info on the failure
+                switch (result) {
+                    case ERR_GENERAL:
+                        sb.append("General error occurred (could not retrieve the provided PNC buildId).");
+                        break;
+                    default:
+                        // In case we don't have a mapped exit code, we assume it is a system error
+                        result = GenerationResult.ERR_SYSTEM;
+                        sb.append("Unexpected error occurred. ");
+                        break;
+
+                }
+            }
+        }
         String reason = sb.append("See logs for more information.").toString();
 
         log.warn("GenerationRequest '{}' failed. {}", generationRequest.getName(), reason);
