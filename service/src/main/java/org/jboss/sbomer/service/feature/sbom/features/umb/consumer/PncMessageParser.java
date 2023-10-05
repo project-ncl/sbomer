@@ -200,7 +200,8 @@ public class PncMessageParser implements Runnable {
         if (!msgBody.getBuild().isTemporaryBuild() && ProgressStatus.FINISHED.equals(msgBody.getBuild().getProgress())
                 && (BuildStatus.SUCCESS.equals(msgBody.getBuild().getStatus())
                         || BuildStatus.NO_REBUILD_REQUIRED.equals(msgBody.getBuild().getStatus()))
-                && BuildType.MVN.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())) {
+                && (BuildType.MVN.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())
+                        || BuildType.GRADLE.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType()))) {
             return true;
         }
 

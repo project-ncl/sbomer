@@ -18,11 +18,17 @@ RUN sh -c ./install_cert.sh
 
 USER 65532
 
-COPY --chown=65532:0 images/sbomer-generator/settings.xml images/sbomer-generator/install.sh /workdir/
+COPY --chown=65532:0 \
+    images/sbomer-generator/settings.xml \
+    images/sbomer-generator/cyclonedx-init.gradle \
+    images/sbomer-generator/install.sh \
+    images/sbomer-generator/sdk_find_closest_installed_software.sh \
+    /workdir/
 RUN sh -c ./install.sh
 
 ENV SBOMER_DOMINO_DIR="/workdir"
 ENV SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml"
+ENV SBOMER_GRADLE_SETTINGS_XML_PATH="/workdir/cyclonedx-init.gradle"
 
 COPY --chown=65532:0 cli/target/quarkus-app/lib/ /workdir/generator/lib/
 COPY --chown=65532:0 cli/target/quarkus-app/*.jar /workdir/generator/

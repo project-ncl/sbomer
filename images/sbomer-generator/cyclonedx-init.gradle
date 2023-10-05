@@ -1,0 +1,80 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2023 Red Hat, Inc., and individual contributors
+ * as indicated by the @author tags.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+allprojects {
+  repositories {
+    maven {
+        url "http://${System.env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/central/"
+        name "proxy-central"
+    }
+    mavenCentral()
+
+    maven {
+        url "http://${System.env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/redhat-ga/"
+        name "proxy-redhat-ga"
+    }
+    maven {
+        url "https://maven.repository.redhat.com/ga/"
+        name "redhat-ga"
+    }
+
+    maven {
+        url "http://${System.env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/indy-static/"
+        name "proxy-indy"
+    }
+    maven {
+        url "https://${System.env.SBOMER_INDY_HOST}/api/content/maven/group/static/"
+        name "indy"
+    }
+  }
+}
+
+initscript {
+  repositories {
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+  }
+
+  dependencies {
+    classpath "org.cyclonedx:cyclonedx-gradle-plugin:1.7.4"
+  }
+}
+
+allprojects {
+  apply plugin:org.cyclonedx.gradle.CycloneDxPlugin
+  cyclonedxBom {
+    // includeConfigs is the list of configuration names to include when generating the BOM (leave empty to include every configuration)
+    includeConfigs = ["runtimeClasspath", "compileClasspath"]
+    // skipConfigs is a list of configuration names to exclude when generating the BOM
+    skipConfigs = ["testRuntimeClasspath", "testCompileClasspath"]
+    // Specified the type of project being built. Defaults to 'library'
+    projectType = "library"
+    // Specified the version of the CycloneDX specification to use. Defaults to '1.4'
+    schemaVersion = "1.4"
+    // Boms destination directory. Defaults to 'build/reports'
+    destination = file("build/sbom")
+    // The file name for the generated BOMs (before the file format suffix). Defaults to 'bom'
+    outputName = "bom"
+    // The file format generated, can be xml, json or all for generating both. Defaults to 'all'
+    outputFormat = "json"
+    // Exclude BOM Serial Number. Defaults to 'true'
+    includeBomSerialNumber = false
+    // Exclude License Text. Defaults to 'true'
+    includeLicenseText = false
+  }
+}

@@ -17,21 +17,21 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
-import lombok.Getter;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
+import java.nio.file.Path;
 
-@Command(
-        mixinStandardHelpOptions = true,
-        name = "process",
-        aliases = { "p" },
-        description = "Process SBOM using selected processor",
-        subcommands = { DefaultProcessCommand.class, RedHatProductProcessCommand.class },
-        subcommandsRepeatable = true)
-public class ProcessCommand {
+import lombok.Getter;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ScopeType;
+
+public abstract class AbstractGradleGenerateCommand extends AbstractGenerateCommand {
 
     @Getter
-    @ParentCommand
-    AbstractGenerateCommand parent;
+    @Option(
+            names = { "--init-script" },
+            description = "Path to Gradle init script file that should be used for this run instead of the default one",
+            converter = PathConverter.class,
+            defaultValue = "${env:SBOMER_GRADLE_SETTINGS_XML_PATH}",
+            scope = ScopeType.INHERIT)
+    Path initScriptPath;
 
 }

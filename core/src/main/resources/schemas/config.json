@@ -81,7 +81,8 @@
                 "description": "Type of generator",
                 "enum": [
                   "maven-cyclonedx",
-                  "maven-domino"
+                  "maven-domino",
+                  "gradle-cyclonedx"
                 ]
               },
               "args": {

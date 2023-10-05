@@ -15,23 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.command;
+package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
-import lombok.Getter;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
-@Command(
-        mixinStandardHelpOptions = true,
-        name = "process",
-        aliases = { "p" },
-        description = "Process SBOM using selected processor",
-        subcommands = { DefaultProcessCommand.class, RedHatProductProcessCommand.class },
-        subcommandsRepeatable = true)
-public class ProcessCommand {
+public class EnvDetectResourceDiscriminator extends AbstractResourceDiscriminator {
 
-    @Getter
-    @ParentCommand
-    AbstractGenerateCommand parent;
+    @Override
+    protected SbomGenerationPhase getPhase() {
+        return SbomGenerationPhase.DETECTENVINFO;
+    }
 
 }

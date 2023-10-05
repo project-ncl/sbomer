@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
-import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -31,37 +29,30 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES;
+
 @Slf4j
 @Command(
         mixinStandardHelpOptions = true,
-        name = "maven-cyclonedx-plugin",
-        aliases = { "maven-cyclonedx" },
-        description = "SBOM generation for Maven projects using the CycloneDX Maven plugin",
+        name = "gradle-cyclonedx-plugin",
+        aliases = { "gradle-cyclonedx" },
+        description = "SBOM generation for Gradle projects using the CycloneDX Gradle plugin",
         subcommands = { ProcessCommand.class })
-public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand {
+public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateCommand {
 
     @Override
     protected Path doGenerate(String buildCmdOptions) {
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
 
-        // Split the build command to be passed to the ProcessBuilder, without separating the options surrounded by
-        // quotes
         List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
                 .stream()
                 .forEach(processBuilder.command()::add);
-        processBuilder.command()
-                .add(String.format("org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom", toolVersion()));
-        processBuilder.command().add("-DoutputFormat=json");
-        processBuilder.command().add("-DoutputName=bom");
+        processBuilder.command().add("cyclonedxBom");
 
-        // This is ignored currently, see https://github.com/CycloneDX/cyclonedx-maven-plugin/pull/321
-        // Leaving it here so we can decide what to do in the future
-        // builder.command().add(String.format("-DoutputDirectory=%s", directory.toString()));
-
-        if (settingsXmlPath != null) {
-            log.debug("Using provided Maven settings.xml configuration file located at '{}'", settingsXmlPath);
-            processBuilder.command().add("--settings");
-            processBuilder.command().add(settingsXmlPath.toString());
+        if (initScriptPath != null) {
+            log.debug("Using provided Gradle init script file located at '{}'", initScriptPath);
+            processBuilder.command().add("--init-script");
+            processBuilder.command().add(initScriptPath.toString());
         }
 
         String args = generatorArgs();
@@ -71,7 +62,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
         processBuilder.directory(parent.getWorkdir().toFile());
 
         log.info(
-                "Starting SBOM generation using the CycloneDX Maven plugin with command: '{}' ...",
+                "Starting SBOM generation using the CycloneDX Gradle plugin with command: '{}' ...",
                 processBuilder.command().stream().collect(Collectors.joining(" ")));
         Process process = null;
 
@@ -93,14 +84,14 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
             throw new ApplicationException("SBOM generation failed, see logs above");
         }
 
-        Path sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "target", "bom.json");
+        Path sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "build", "sbom", "bom.json");
 
         return sbomPath;
     }
 
     @Override
     protected GeneratorType generatorType() {
-        return GeneratorType.MAVEN_CYCLONEDX;
+        return GeneratorType.GRADLE_CYCLONEDX;
     }
 
 }

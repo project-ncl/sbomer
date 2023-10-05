@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.model;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Map;
 
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -95,6 +97,11 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @ToString.Exclude
     private JsonNode config;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "env_config")
+    @ToString.Exclude
+    private JsonNode envConfig;
+
     @Column(name = "reason", nullable = true, updatable = true)
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
@@ -151,6 +158,22 @@ public class SbomGenerationRequest extends PanacheEntityBase {
             } catch (IOException e) {
                 throw new ApplicationException("Could not convert configuration to store in the database", e);
             }
+        }
+
+        // Update environment config, if available
+        if (generationRequest.getEnvConfig() != null && !generationRequest.getEnvConfig().isEmpty()) {
+            try {
+                sbomGenerationRequest.setEnvConfig(
+                        SbomUtils.toJsonNode(
+                                ObjectMapperProvider.yaml()
+                                        .readValue(generationRequest.getEnvConfig().getBytes(), Map.class)));
+            } catch (IOException e) {
+                throw new ApplicationException(
+                        "Could not convert environment configuration to store in the database",
+                        e);
+            }
+        } else {
+            sbomGenerationRequest.setEnvConfig(MissingNode.getInstance());
         }
 
         // Store it in the database

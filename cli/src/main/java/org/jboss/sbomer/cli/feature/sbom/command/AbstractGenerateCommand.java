@@ -38,7 +38,6 @@ import org.jboss.sbomer.cli.feature.sbom.command.mixin.GeneratorToolMixin;
 import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
 import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
-import org.jboss.sbomer.core.config.DefaultGenerationConfig;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -47,7 +46,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.core.features.sbom.utils.maven.MavenCommandLineParser;
+import org.jboss.sbomer.core.features.sbom.utils.commandline.CommandLineParserUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -134,8 +133,15 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
 
         // Filter only valid Pnc builds
         if (!isValidBuild(build)) {
+            log.error("Build is not valid! Needs to be a FINISHED build with status SUCCESS or NO_REBUILD_REQUIRED");
+            return CommandLine.ExitCode.SOFTWARE;
+        }
+
+        // Filter only valid Pnc build types
+        if (!isValidBuildType(build)) {
             log.error(
-                    "Build is not valid! Needs to be a FINISHED build of type MVN with status SUCCESS or NO_REBUILD_REQUIRED");
+                    "The generation of SBOMs for the build type " + build.getBuildConfigRevision().getBuildType()
+                            + " is not yet implemented!");
             return CommandLine.ExitCode.SOFTWARE;
         }
 
@@ -252,14 +258,8 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
             // In case the original build command script contains profiles, projects list or system properties
             // definitions, get them as a best effort and pass them to the SBOM generation to try to resolve the same
             // dependency tree.
-            String buildCmdOptions = "mvn";
-            try {
-                MavenCommandLineParser lineParser = MavenCommandLineParser.build()
-                        .launder(build.getBuildConfigRevision().getBuildScript());
-                buildCmdOptions = lineParser.getRebuiltMvnCommandScript();
-            } catch (IllegalArgumentException exc) {
-                log.error("Could not launder the provided build command script! Using the default build command", exc);
-            }
+            String buildCmdOptions = CommandLineParserUtil.getLaunderedCommandScript(build);
+            log.info("buildCmdOptions: '{}'", buildCmdOptions);
 
             // Generate the SBOM
             sbomPath = doGenerate(buildCmdOptions);
@@ -368,14 +368,17 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         return size.get() / 1024;
     }
 
-    // TODO: Move check for Maven build into Maven command
     private boolean isValidBuild(Build build) {
         if (!build.getTemporaryBuild() && org.jboss.pnc.enums.BuildProgress.FINISHED.equals(build.getProgress())
                 && (org.jboss.pnc.enums.BuildStatus.SUCCESS.equals(build.getStatus())
-                        || org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus()))
-                && org.jboss.pnc.enums.BuildType.MVN.equals(build.getBuildConfigRevision().getBuildType())) {
+                        || org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus()))) {
             return true;
         }
         return false;
+    }
+
+    private boolean isValidBuildType(Build build) {
+        return org.jboss.pnc.enums.BuildType.MVN.equals(build.getBuildConfigRevision().getBuildType())
+                || org.jboss.pnc.enums.BuildType.GRADLE.equals(build.getBuildConfigRevision().getBuildType());
     }
 }

@@ -33,6 +33,7 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
     private SbomGenerationStatus status;
     private String reason;
     private String config;
+    private String envConfig;
     private GenerationResult result;
 
     @Override
@@ -81,6 +82,16 @@ public class GenerationRequestFluentImpl<A extends GenerationRequestFluent<A>> e
 
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public A withEnvConfig(String envConfig) {
+        this.envConfig = envConfig;
+        return (A) this;
+    }
+
+    public String getEnvConfig() {
+        return envConfig;
     }
 
     @Override

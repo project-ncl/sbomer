@@ -27,6 +27,9 @@ sbomer:
       maven-cyclonedx:
         default-version: "2.7.9"
         default-args: "--batch-mode"
+      gradle-cyclonedx:
+        default-version: "1.7.4"
+        default-args: "-info"
 
   processing:
     enabled: true

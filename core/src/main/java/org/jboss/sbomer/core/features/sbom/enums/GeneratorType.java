@@ -27,5 +27,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public enum GeneratorType {
     @JsonProperty("maven-cyclonedx")
     MAVEN_CYCLONEDX, @JsonProperty("maven-domino")
-    MAVEN_DOMINO;
+    MAVEN_DOMINO, @JsonProperty("gradle-cyclonedx")
+    GRADLE_CYCLONEDX
 }

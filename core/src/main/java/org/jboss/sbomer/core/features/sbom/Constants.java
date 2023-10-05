@@ -43,6 +43,8 @@ public class Constants {
     public final static String PROPERTY_ERRATA_PRODUCT_VERSION = "errata-tool-product-version";
     public final static String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
 
+    public final static String BUILD_ATTRIBUTES_BREW_BUILD_VERSION = "BREW_BUILD_VERSION";
+
     /**
      * The label name that identifies the particular Sbom resource.
      */

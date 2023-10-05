@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.Draft;
 import io.vertx.json.schema.JsonSchema;

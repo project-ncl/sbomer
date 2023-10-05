@@ -27,8 +27,7 @@ function install_sdk() {
 }
 
 function install_java() {
-  # 8.0.362 11.0.18
-  for java_version in 17.0.7; do
+  for java_version in 8.0.362 11.0.18 17.0.7; do
     sdk install java ${java_version}-tem
     sdk install java ${java_version%%.*} "$(sdk home java ${java_version}-tem)"
     sdk use java ${java_version}-tem
@@ -52,6 +51,13 @@ function install_maven() {
   done
 }
 
+function install_gradle() {
+  for gradle_version in 4.10 5.4.1 5.6.2 6.3 6.8.3 7.1.1 7.6; do
+    sdk install gradle ${gradle_version}
+    sdk install gradle ${gradle_version%.*} "$(sdk home gradle ${gradle_version})"
+  done
+}
+
 function install_domino() {
   for domino_version in 0.0.90 0.0.97; do
     curl -L https://github.com/quarkusio/quarkus-platform-bom-generator/releases/download/${domino_version}/domino.jar -o domino-${domino_version}.jar
@@ -61,4 +67,5 @@ function install_domino() {
 install_sdk
 install_java
 install_maven
+install_gradle
 install_domino

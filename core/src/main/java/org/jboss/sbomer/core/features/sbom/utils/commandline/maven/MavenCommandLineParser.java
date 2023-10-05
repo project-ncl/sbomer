@@ -15,12 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.utils.maven;
+package org.jboss.sbomer.core.features.sbom.utils.commandline.maven;
 
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.PROFILES_OPTION;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.PROJECTS_OPTION;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.SYSTEM_PROPERTIES_OPTION;
-import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.NO_ARGS_OPTIONS;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addIgnorableOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addIneffectiveOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addNoArgsOptions;
@@ -125,7 +124,7 @@ public class MavenCommandLineParser {
                 projects = parseKeyValuePairs(cmd.getOptionValues(PROJECTS_OPTION));
             }
 
-            for (String option : NO_ARGS_OPTIONS) {
+            for (String option : MavenCommandOptions.NO_ARGS_OPTIONS) {
                 if (cmd.hasOption(option)) {
                     noArgsOptions.add(option);
                 }

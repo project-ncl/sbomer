@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -317,6 +318,25 @@ public class SbomUtils {
             String configuration = ObjectMapperProvider.json()
                     .writerWithDefaultPrettyPrinter()
                     .writeValueAsString(config);
+            return ObjectMapperProvider.json().readTree(configuration);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Converts the given environment config {@link Map} into a {@link JsonNode} object.
+     *
+     * @param envConfig The environment config {@link Map} to convert
+     * @return {@link JsonNode} representation of the {@link Map}.
+     */
+    public static JsonNode toJsonNode(Map<String, String> envConfig) {
+
+        try {
+            String configuration = ObjectMapperProvider.json()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(envConfig);
             return ObjectMapperProvider.json().readTree(configuration);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage(), e);

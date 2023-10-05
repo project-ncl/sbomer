@@ -32,7 +32,7 @@ import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEven
 
 public abstract class AbstractResourceDiscriminator implements ResourceDiscriminator<TaskRun, GenerationRequest> {
     /**
-     * The phase of the SBOM generation, could be: init or generate.
+     * The phase of the SBOM generation, could be: init, envconfig or generate.
      *
      * @return Name of the phase
      */

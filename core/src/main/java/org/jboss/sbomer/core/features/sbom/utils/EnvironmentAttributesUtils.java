@@ -1,0 +1,90 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2023 Red Hat, Inc., and individual contributors
+ * as indicated by the @author tags.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.jboss.sbomer.core.features.sbom.utils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class EnvironmentAttributesUtils {
+
+    private static final String MAVEN_ATTRIBUTE_KEY = "MAVEN";
+    private static final String GRADLE_ATTRIBUTE_KEY = "GRADLE";
+    private static final String JDK_ATTRIBUTE_KEY = "JDK";
+
+    private static final String MAVEN_SDKMAN_KEY = "maven";
+    private static final String GRADLE_SDKMAN_KEY = "gradle";
+    private static final String SDK_SDKMAN_KEY = "java";
+
+    private static final String JAVA_LEGACY_VERSION_REGEX = "^1\\.(\\d+)";
+    private static final String JAVA_VERSION_REGEX = "^([^.-]+)";
+
+    private static final Pattern JAVA_LEGACY_VERSION_PATTERN = Pattern.compile(JAVA_LEGACY_VERSION_REGEX);
+    private static final Pattern JAVA_VERSION_PATTERN = Pattern.compile(JAVA_VERSION_REGEX);
+
+    public static Map<String, String> getSDKManCompliantAttributes(Map<String, String> environmentAttributes) {
+        Map<String, String> sdkManAttributes = new HashMap<String, String>();
+
+        // Find Maven
+        Optional<String> mavenVersion = environmentAttributes.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(MAVEN_ATTRIBUTE_KEY))
+                .map(Map.Entry::getValue)
+                .findFirst();
+        if (mavenVersion.isPresent()) {
+            sdkManAttributes.put(MAVEN_SDKMAN_KEY, mavenVersion.get().trim());
+        }
+
+        // Find Gradle
+        Optional<String> gradleVersion = environmentAttributes.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(GRADLE_ATTRIBUTE_KEY))
+                .map(Map.Entry::getValue)
+                .findFirst();
+        if (gradleVersion.isPresent()) {
+            sdkManAttributes.put(GRADLE_SDKMAN_KEY, gradleVersion.get().trim());
+        }
+
+        // Find Java. We need to do some ugly polishing due to the metadata available in PNC.
+        Optional<String> javaVersion = environmentAttributes.entrySet().stream().filter(entry -> {
+            return entry.getKey().contains(JDK_ATTRIBUTE_KEY) && !entry.getValue().contains("Mandrel");
+        }).map(entry -> {
+            return entry.getValue().replace("OpenJDK", "").replace("OracleJDK", "").replace("Oracle JDK", "");
+        }).findFirst();
+        if (javaVersion.isPresent()) {
+            String javaVersionString = javaVersion.get().trim();
+            if (javaVersionString.startsWith("1.")) {
+                Matcher matcher = JAVA_LEGACY_VERSION_PATTERN.matcher(javaVersionString);
+                if (matcher.find()) {
+                    sdkManAttributes.put(SDK_SDKMAN_KEY, matcher.group(1));
+                }
+            } else if (javaVersionString.startsWith("8u")) {
+                sdkManAttributes.put(SDK_SDKMAN_KEY, "8");
+            } else {
+                Matcher matcher = JAVA_VERSION_PATTERN.matcher(javaVersionString);
+                if (matcher.find()) {
+                    sdkManAttributes.put(SDK_SDKMAN_KEY, matcher.group(1));
+                }
+            }
+
+        }
+        return sdkManAttributes;
+    }
+}
