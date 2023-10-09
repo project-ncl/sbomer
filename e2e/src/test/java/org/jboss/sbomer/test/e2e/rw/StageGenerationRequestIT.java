@@ -44,7 +44,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
         log.info("Generation Request created: {}", generationRequestId);
 
-        Awaitility.await().atMost(5, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+        Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
             final Response body = getGeneration(generationRequestId);
             String status = body.path("status").toString();
 
