@@ -44,6 +44,10 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
     protected Path doGenerate(String buildCmdOptions) {
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
 
+        // Making the plugin version configurable
+        processBuilder.command()
+                .add(String.format("PLUGIN_VERSION=%s", toolVersion()));
+
         List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
                 .stream()
                 .forEach(processBuilder.command()::add);

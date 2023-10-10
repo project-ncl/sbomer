@@ -51,7 +51,7 @@ initscript {
   }
 
   dependencies {
-    classpath "org.cyclonedx:cyclonedx-gradle-plugin:1.7.4"
+    classpath "org.cyclonedx:cyclonedx-gradle-plugin:${System.env.PLUGIN_VERSION}"
   }
 }
 
@@ -70,11 +70,12 @@ allprojects {
     destination = file("build/sbom")
     // The file name for the generated BOMs (before the file format suffix). Defaults to 'bom'
     outputName = "bom"
-    // The file format generated, can be xml, json or all for generating both. Defaults to 'all'
-    outputFormat = "json"
     // Exclude BOM Serial Number. Defaults to 'true'
     includeBomSerialNumber = false
+    // Below properties are suppressed to be backward compatible with older versions of plugin (1.6.1)
+    // The file format generated, can be xml, json or all for generating both. Defaults to 'all'
+    // outputFormat = "json"
     // Exclude License Text. Defaults to 'true'
-    includeLicenseText = false
+    // includeLicenseText = false
   }
 }
