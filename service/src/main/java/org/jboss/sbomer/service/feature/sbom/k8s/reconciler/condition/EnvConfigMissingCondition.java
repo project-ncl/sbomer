@@ -50,35 +50,15 @@ public class EnvConfigMissingCondition implements Condition<TaskRun, GenerationR
             return true;
         }
 
-        // If the configuration is available (meaning that the initialization phase is finished) and the {@code cleanup}
-        // setting is set to false, reconcile. We won't reconcile multiple times at this point, the only thing we want
-        // to achieve is that the dependent resource (TaskRun) is retained.
+        // If the configurations (product and environment) are available (meaning that environment initialization is
+        // finished) and the {@code cleanup} setting is set to false, reconcile. We won't reconcile multiple times at
+        // this point, the only thing we want to achieve is that the dependent resource (TaskRun) is retained.
         // We should do this only in the case when there are already some secondary resources.
-        if (!cleanup && initTaskRunExist(context) && envDetectTaskRunExist(context)) {
+        if (!cleanup && envDetectTaskRunExist(context)) {
             return true;
         }
 
         return false;
-    }
-
-    private boolean initTaskRunExist(Context<GenerationRequest> context) {
-        Set<TaskRun> secondaryResources = context.getSecondaryResources(TaskRun.class);
-
-        // No TaskRuns at all, so no init TaskRun for sure...
-        if (secondaryResources.isEmpty()) {
-            return false;
-        }
-
-        return secondaryResources.stream().anyMatch(taskRun -> {
-            Map<String, String> labels = taskRun.getMetadata().getLabels();
-
-            if (labels != null
-                    && Objects.equals(labels.get(Labels.LABEL_PHASE), SbomGenerationPhase.INIT.name().toLowerCase())) {
-                return true;
-            }
-
-            return false;
-        });
     }
 
     private boolean envDetectTaskRunExist(Context<GenerationRequest> context) {
