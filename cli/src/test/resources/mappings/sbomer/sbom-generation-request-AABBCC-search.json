@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha1/sboms/requests?pageIndex=0&pageSize=1&query=id%3D%3DAABBCC&sort=creationTime%3Ddesc%3D"
+    "url": "/api/v1alpha2/sboms/requests?pageIndex=0&pageSize=1&query=id%3D%3DAABBCC&sort=creationTime%3Ddesc%3D"
   },
   "response": {
     "status": 200,

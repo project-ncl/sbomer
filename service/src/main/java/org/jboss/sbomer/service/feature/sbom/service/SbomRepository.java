@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.time.Instant;
 import java.util.List;
 
-import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
@@ -39,7 +39,7 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
         super(Sbom.class);
     }
 
-    public List<SbomRecord> searchSboms(QueryParameters parameters) {
+    public List<SbomRecord> searchSbomRecords(QueryParameters parameters) {
         // TODO: Implement strong typing
         return searchProjected(SbomRecord.class, parameters, (query, builder, root) -> {
             Join<Sbom, SbomGenerationRequest> generationRequest = root.join("generationRequest");

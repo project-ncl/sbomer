@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -27,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
@@ -74,7 +74,12 @@ public class SbomRepositoryIT {
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = sbom.getCycloneDxBom();
 
-        assertNull(bom);
+        assertEquals("CycloneDX", bom.getBomFormat());
+        Component firstComponent = bom.getComponents().get(0);
+        assertEquals("microprofile-graphql-spec", firstComponent.getName());
+        assertEquals(
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",
+                firstComponent.getPurl());
         assertEquals("416640206274228224", sbom.getId());
         assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
 

@@ -29,7 +29,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
-import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
@@ -73,13 +73,13 @@ import lombok.extern.slf4j.Slf4j;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1alpha1, with RSQL capabilities")
+@Tag(name = "v1alpha1", description = "v1alpha1 API endpoints")
 @PermitAll
 @Slf4j
 public class SBOMResource {
 
     @Inject
-    SbomService sbomService;
+    protected SbomService sbomService;
 
     @Inject
     KubernetesClient kubernetesClient;
@@ -129,7 +129,7 @@ public class SBOMResource {
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
         try {
-            Page<SbomRecord> sboms = sbomService.searchSbomsByQueryPaginated(
+            Page<Sbom> sboms = sbomService.searchSbomsByQueryPaginated(
                     paginationParams.getPageIndex(),
                     paginationParams.getPageSize(),
                     rsqlQuery,

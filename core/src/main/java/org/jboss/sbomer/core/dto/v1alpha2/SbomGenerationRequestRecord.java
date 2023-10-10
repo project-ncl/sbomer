@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.dto.v1alpha1;
+package org.jboss.sbomer.core.dto.v1alpha2;
 
 import java.time.Instant;
 

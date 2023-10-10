@@ -20,12 +20,10 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 import java.nio.file.Path;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
-@Slf4j
 @Command(
         mixinStandardHelpOptions = true,
         name = "generate",

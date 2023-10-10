@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -72,7 +72,7 @@ public class SbomService {
     }
 
     @WithSpan
-    public Page<SbomRecord> searchSbomsByQueryPaginated(
+    public Page<SbomRecord> searchSbomRecordsByQueryPaginated(
             @SpanAttribute(value = "pageIndex") int pageIndex,
             @SpanAttribute(value = "pageSize") int pageSize,
             @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
@@ -85,7 +85,26 @@ public class SbomService {
                 .pageIndex(pageIndex)
                 .build();
 
-        List<SbomRecord> content = sbomRepository.searchSboms(parameters);
+        List<SbomRecord> content = sbomRepository.searchSbomRecords(parameters);
+
+        return toPage(content, parameters);
+    }
+
+    @WithSpan
+    public Page<Sbom> searchSbomsByQueryPaginated(
+            @SpanAttribute(value = "pageIndex") int pageIndex,
+            @SpanAttribute(value = "pageSize") int pageSize,
+            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
+            @SpanAttribute(value = "sort") String sort) {
+
+        QueryParameters parameters = QueryParameters.builder()
+                .rsqlQuery(rsqlQuery)
+                .sort(sort)
+                .pageSize(pageSize)
+                .pageIndex(pageIndex)
+                .build();
+
+        List<Sbom> content = sbomRepository.search(parameters);
 
         return toPage(content, parameters);
     }

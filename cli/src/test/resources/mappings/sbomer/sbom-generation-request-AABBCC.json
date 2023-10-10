@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha1/sboms/requests/AABBCC"
+    "url": "/api/v1alpha2/sboms/requests/AABBCC"
   },
   "response": {
     "status": 200,

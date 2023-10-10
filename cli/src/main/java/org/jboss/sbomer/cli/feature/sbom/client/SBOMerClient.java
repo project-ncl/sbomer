@@ -40,7 +40,7 @@ import jakarta.ws.rs.core.Response;
  */
 @ApplicationScoped
 @RegisterRestClient(configKey = "sbomer")
-@Path("/api/v1alpha1/sboms")
+@Path("/api/v1alpha2/sboms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public interface SBOMerClient {

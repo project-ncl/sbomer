@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -50,7 +50,8 @@ public class SBOMServiceTestIT {
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
         String rsqlQuery = "buildId=eq=" + INITIAL_BUILD_ID;
-        Collection<SbomRecord> sboms = sbomService.searchSbomsByQueryPaginated(0, 1, rsqlQuery, null).getContent();
+        Collection<SbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(0, 1, rsqlQuery, null)
+                .getContent();
         assertTrue(sboms.size() > 0);
     }
 
@@ -63,7 +64,7 @@ public class SBOMServiceTestIT {
 
         sbomService.save(dummySbom);
 
-        Page<SbomRecord> page = sbomService.searchSbomsByQueryPaginated(0, 50, null, null);
+        Page<SbomRecord> page = sbomService.searchSbomRecordsByQueryPaginated(0, 50, null, null);
         assertEquals(0, page.getPageIndex());
         assertEquals(50, page.getPageSize());
         assertTrue(page.getTotalHits() > 0);
