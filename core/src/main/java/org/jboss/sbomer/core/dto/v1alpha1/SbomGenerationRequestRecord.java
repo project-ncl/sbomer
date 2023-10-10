@@ -15,14 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.rsql;
+package org.jboss.sbomer.core.dto.v1alpha1;
 
-import jakarta.persistence.criteria.CriteriaQuery;
+import java.time.Instant;
 
-public interface RSQLProducer<T> {
+import com.fasterxml.jackson.databind.JsonNode;
 
-    CriteriaQuery<T> getCriteriaQuery(Class<T> type, String rsqlQuery, String sort);
-
-    CriteriaQuery<Long> getCountCriteriaQuery(Class<T> type, String rsqlQuery);
-
-}
+public record SbomGenerationRequestRecord(String id, String buildId, JsonNode config, Instant creationTime) {
+};

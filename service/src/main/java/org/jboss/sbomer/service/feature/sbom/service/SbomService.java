@@ -20,22 +20,23 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-
+import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.rest.RestUtils;
 
 import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -71,26 +72,22 @@ public class SbomService {
     }
 
     @WithSpan
-    public List<Sbom> searchSbomsByQuery(
-            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
-            @SpanAttribute(value = "sort") String sort) {
-        return sbomRepository.searchByQuery(rsqlQuery, sort);
-    }
-
-    @WithSpan
-    public Page<Sbom> searchSbomsByQueryPaginated(
+    public Page<SbomRecord> searchSbomsByQueryPaginated(
             @SpanAttribute(value = "pageIndex") int pageIndex,
             @SpanAttribute(value = "pageSize") int pageSize,
             @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
             @SpanAttribute(value = "sort") String sort) {
-        return sbomRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery, sort);
-    }
 
-    @WithSpan
-    public List<SbomGenerationRequest> searchSbomRequestsByQuery(
-            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
-            @SpanAttribute(value = "sort") String sort) {
-        return sbomRequestRepository.searchByQuery(rsqlQuery, sort);
+        QueryParameters parameters = QueryParameters.builder()
+                .rsqlQuery(rsqlQuery)
+                .sort(sort)
+                .pageSize(pageSize)
+                .pageIndex(pageIndex)
+                .build();
+
+        List<SbomRecord> content = sbomRepository.searchSboms(parameters);
+
+        return toPage(content, parameters);
     }
 
     @WithSpan
@@ -99,7 +96,39 @@ public class SbomService {
             @SpanAttribute(value = "pageSize") int pageSize,
             @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
             @SpanAttribute(value = "sort") String sort) {
-        return sbomRequestRepository.searchByQueryPaginated(pageIndex, pageSize, rsqlQuery, sort);
+
+        QueryParameters parameters = QueryParameters.builder()
+                .rsqlQuery(rsqlQuery)
+                .sort(sort)
+                .pageSize(pageSize)
+                .pageIndex(pageIndex)
+                .build();
+
+        List<SbomGenerationRequest> content = sbomRequestRepository.search(parameters);
+
+        return toPage(content, parameters);
+    }
+
+    /**
+     * Prepares a {@link Page} object with the result of the search.
+     *
+     * @param content The content to populate the page with.
+     * @param parameters Query parameters passed to the search.
+     * @return A {@link Page} element with content.
+     */
+    protected <X> Page<X> toPage(List<X> content, QueryParameters parameters) {
+        // Count the total number of entries so that we can set up pagination.
+        Long count = sbomRepository.countByRsqlQuery(parameters.getRsqlQuery());
+
+        int totalPages = 0;
+
+        if (count == 0) {
+            totalPages = 1; // a single page of zero results
+        } else {
+            totalPages = (int) Math.ceil((double) count / (double) parameters.getPageSize());
+        }
+
+        return new Page<>(parameters.getPageIndex(), parameters.getPageSize(), totalPages, count, content);
     }
 
     /**

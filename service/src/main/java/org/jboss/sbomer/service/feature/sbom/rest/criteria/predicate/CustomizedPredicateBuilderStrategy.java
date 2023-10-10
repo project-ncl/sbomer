@@ -15,10 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.rsql;
+package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
@@ -49,7 +50,7 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
 
         Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, ema, tools);
 
-        if (operator.equals(RSQLProducerImpl.IS_NULL)) {
+        if (operator.equals(CriteriaAwareRepository.IS_NULL)) {
             Object argument = cn.getArguments().get(0);
             if (argument instanceof String) {
                 if (Boolean.parseBoolean((String) argument)) {
@@ -58,7 +59,7 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
                     return builder.isNotNull(path);
                 }
             }
-        } else if (operator.equals(RSQLProducerImpl.IS_EQUAL)) {
+        } else if (operator.equals(CriteriaAwareRepository.IS_EQUAL)) {
             Object argument = cn.getArguments().get(0);
             if (argument instanceof String) {
 

@@ -17,36 +17,23 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-import jakarta.annotation.PostConstruct;
 import org.cyclonedx.model.Bom;
-import org.cyclonedx.model.Component;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.ErrataConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
 import org.junit.jupiter.api.Test;
@@ -56,8 +43,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.quarkus.logging.Log;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 
-@ApplicationScoped
 @QuarkusTransactionalTest
 @WithKubernetesTestServer
 public class SbomRepositoryIT {
@@ -68,69 +57,10 @@ public class SbomRepositoryIT {
     @Inject
     SbomRepository sbomRepository;
 
-    static Path sbomPath(String fileName) {
-        return Paths.get("src", "test", "resources", "sboms", fileName);
-    }
-
-    private Config createRuntimeConfig(String buildId) {
-        GeneratorConfig generatorConfig = GeneratorConfig.builder()
-                .type(GeneratorType.MAVEN_CYCLONEDX)
-                .args("--include-non-managed --warn-on-missing-scm")
-                .version("0.0.90")
-                .build();
-
-        DefaultProcessorConfig defaultProcessorConfig = DefaultProcessorConfig.builder().build();
-        RedHatProductProcessorConfig redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
-                .withErrata(
-                        ErrataConfig.builder()
-                                .productName("CCCDDD")
-                                .productVersion("CCDD")
-                                .productVariant("CD")
-                                .build())
-                .build();
-        ProductConfig productConfig = ProductConfig.builder()
-                .withGenerator(generatorConfig)
-                .withProcessors(List.of(defaultProcessorConfig, redHatProductProcessorConfig))
-                .build();
-
-        return Config.builder()
-                .withApiVersion("sbomer.jboss.org/v1alpha1")
-                .withBuildId(buildId)
-                .withProducts(List.of(productConfig))
-                .build();
-    }
-
-    private Sbom createSBOM() throws IOException {
-        String buildId = "ARYT3LBXDVYAC";
-        Bom bom = SbomUtils.fromPath(sbomPath("complete_sbom.json"));
-        Config runtimeConfig = createRuntimeConfig(buildId);
-
-        SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
-                .withConfig(SbomUtils.toJsonNode(runtimeConfig))
-                .withId("AASSBB")
-                .withBuildId(buildId)
-                .withStatus(SbomGenerationStatus.FINISHED)
-                .build();
-
-        // Not setting rootPurl, as it will be set by PrePersist
-        Sbom sbom = new Sbom();
-        sbom.setBuildId(buildId);
-        sbom.setId("416640206274228224");
-        sbom.setSbom(SbomUtils.toJsonNode(bom));
-        sbom.setGenerationRequest(generationRequest);
-        return sbom;
-    }
-
-    @PostConstruct
-    public void init() throws Exception {
-        Sbom sbom = createSBOM();
-        sbomRepository.saveSbom(sbom);
-    }
-
     @Test
     public void testNonNullRootComponents() {
         String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery, null).get(0);
+        Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
 
         assertNotNull(sbom.getRootPurl());
         assertEquals(
@@ -141,17 +71,12 @@ public class SbomRepositoryIT {
     @Test
     public void testValidBom() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery, null).get(0);
+        Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = sbom.getCycloneDxBom();
 
+        assertNull(bom);
         assertEquals("416640206274228224", sbom.getId());
         assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
-        assertEquals("CycloneDX", bom.getBomFormat());
-        Component firstComponent = bom.getComponents().get(0);
-        assertEquals("microprofile-graphql-spec", firstComponent.getName());
-        assertEquals(
-                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",
-                firstComponent.getPurl());
 
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
@@ -166,7 +91,7 @@ public class SbomRepositoryIT {
     @Test
     public void testValidConfiguration() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
-        Sbom sbom = sbomRepository.searchByQuery(0, 1, rsqlQuery, null).get(0);
+        Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 
         assertEquals("416640206274228224", sbom.getId());
         assertEquals("ARYT3LBXDVYAC", sbom.getGenerationRequest().getConfiguration().getBuildId());
@@ -183,8 +108,10 @@ public class SbomRepositoryIT {
                 .iterator()
                 .next()
                 .getProcessors();
-        assertEquals(GeneratorType.MAVEN_CYCLONEDX, generatorConfig.getType());
-        assertEquals("--include-non-managed --warn-on-missing-scm", generatorConfig.getArgs());
+        assertEquals(GeneratorType.MAVEN_DOMINO, generatorConfig.getType());
+        assertEquals(
+                "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm",
+                generatorConfig.getArgs());
         assertEquals("0.0.90", generatorConfig.getVersion());
 
         assertEquals(2, processorConfigs.size());
@@ -194,9 +121,9 @@ public class SbomRepositoryIT {
 
         RedHatProductProcessorConfig redHatProductProcessorConfig = (RedHatProductProcessorConfig) processorConfigs
                 .get(1);
-        assertEquals("CCCDDD", redHatProductProcessorConfig.getErrata().getProductName());
-        assertEquals("CCDD", redHatProductProcessorConfig.getErrata().getProductVersion());
-        assertEquals("CD", redHatProductProcessorConfig.getErrata().getProductVariant());
+        assertEquals("RHBQ", redHatProductProcessorConfig.getErrata().getProductName());
+        assertEquals("RHEL-8-RHBQ-2.13", redHatProductProcessorConfig.getErrata().getProductVersion());
+        assertEquals("8Base-RHBQ-2.13", redHatProductProcessorConfig.getErrata().getProductVariant());
     }
 
     @Test

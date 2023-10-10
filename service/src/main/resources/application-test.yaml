@@ -24,6 +24,8 @@ quarkus:
   hibernate-orm:
     database:
       generation: drop-and-create
+    log:
+      sql: true
   qpid-jms:
     url: amqp://localhost:5672
     username: ""

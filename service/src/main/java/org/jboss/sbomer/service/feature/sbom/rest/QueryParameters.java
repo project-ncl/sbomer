@@ -15,16 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.service;
+package org.jboss.sbomer.service.feature.sbom.rest;
 
-import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.rest.rsql.RSQLProducerImpl;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
+@Builder
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class QueryParameters {
 
-@ApplicationScoped
-@Named
-public class SbomGenerationRequestRSQLProducer extends RSQLProducerImpl<SbomGenerationRequest> {
+    String rsqlQuery;
+    String sort;
+    @Builder.Default
+    int pageIndex = 0;
 
+    @Builder.Default
+    int pageSize = 50;
+
+    public int firstResult() {
+        return pageIndex * pageSize;
+    }
+
+    public int maxResults() {
+        return pageSize;
+    }
 }

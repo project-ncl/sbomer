@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.rsql;
+package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
 
 import com.github.tennaito.rsql.jpa.AbstractJpaVisitor;
 import com.github.tennaito.rsql.jpa.PredicateBuilderStrategy;

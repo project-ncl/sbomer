@@ -15,13 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.rsql;
+package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
@@ -112,9 +113,9 @@ public class CustomPredicateBuilder<T> {
 
         Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, ema, misc);
 
-        if ((RSQLProducerImpl.IS_NULL.equals(comparison.getOperator())
+        if ((CriteriaAwareRepository.IS_NULL.equals(comparison.getOperator())
                 && Enum.class.isAssignableFrom(propertyPath.getJavaType())
-                || (RSQLProducerImpl.IS_EQUAL.equals(comparison.getOperator())
+                || (CriteriaAwareRepository.IS_EQUAL.equals(comparison.getOperator())
                         && Enum.class.isAssignableFrom(propertyPath.getJavaType())))) {
 
             log.debug(

@@ -15,16 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.service;
+package org.jboss.sbomer.core;
 
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.rest.rsql.RSQLProducerImpl;
+import java.util.Objects;
+import java.util.function.Function;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
+@FunctionalInterface
+public interface TriFunction<A, B, C, R> {
 
-@ApplicationScoped
-@Named
-public class SbomRSQLProducer extends RSQLProducerImpl<Sbom> {
+    R apply(A a, B b, C c);
 
+    default <V> TriFunction<A, B, C, V> andThen(Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
+        return (A a, B b, C c) -> after.apply(apply(a, b, c));
+    }
 }
