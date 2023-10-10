@@ -380,9 +380,22 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
-        TaskRun envDetectTaskRun = envDetectTaskRuns(secondaryResources);
+        // I only care about the Product Config, the Env Config can be empty and defaults will be used.
+        Config config = generationRequest.toConfig();
+        if (config == null) {
 
-        if (envDetectTaskRun == null) {
+            log.error(
+                    "Product configuration from GenerationRequest '{}' could not be read",
+                    generationRequest.getName());
+            return updateRequest(
+                    generationRequest,
+                    SbomGenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Generation failed. Could not read product configuration");
+        }
+
+        Set<TaskRun> generateTaskRuns = generateTaskRuns(secondaryResources);
+        if (generateTaskRuns.isEmpty()) {
             return UpdateControl.noUpdate();
         }
 
