@@ -835,7 +835,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             Path sbomPath = Path.of(
                     controllerConfig.sbomDir(),
                     generationRequest.getMetadata().getName(),
-                    generationRequest.getMetadata().getName() + "-1-generate-" + i,
+                    generationRequest.getMetadata().getName() + "-2-generate-" + i,
                     "bom.json"); // TODO: should not be hardcoded
 
             // Read the generated SBOM JSON file
