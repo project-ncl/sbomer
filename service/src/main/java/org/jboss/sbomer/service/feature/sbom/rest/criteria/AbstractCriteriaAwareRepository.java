@@ -129,7 +129,7 @@ public abstract class AbstractCriteriaAwareRepository<T> implements PanacheRepos
         String compliantSort = CustomPredicateSortBuilder.rsqlParserCompliantSort(sort);
         log.debug("Modified RSQL sort string from: '{}' to a RSQL parser compliant format: '{}'", sort, compliantSort);
 
-        CustomizedJpaPredicateSortVisitor<?> sortVisitor = new CustomizedJpaPredicateSortVisitor<>(Sbom.class)
+        CustomizedJpaPredicateSortVisitor<?> sortVisitor = new CustomizedJpaPredicateSortVisitor<>(entityType)
                 .withRoot(root);
 
         Node sortRootNode = sortParser.parse(compliantSort);

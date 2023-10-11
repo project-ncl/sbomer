@@ -29,7 +29,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
-import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
