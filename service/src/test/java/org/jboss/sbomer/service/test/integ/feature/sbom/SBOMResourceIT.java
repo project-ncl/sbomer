@@ -46,20 +46,20 @@ public class SBOMResourceIT {
     @Test
     public void testExistenceOfSbomsEndpoint() {
         Mockito.when(sbomService.searchSbomsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
-        given().when().get("/api/v1alpha1/sboms").then().statusCode(200);
+        given().when().get("/api/v1alpha2/sboms").then().statusCode(200);
     }
 
     @Test
     public void testListSbomsPageParams() {
         Mockito.when(sbomService.searchSbomsByQueryPaginated(1, 20, null, null)).thenReturn(new Page<>());
-        given().when().get("/api/v1alpha1/sboms?pageIndex=1&pageSize=20").then().statusCode(200);
+        given().when().get("/api/v1alpha2/sboms?pageIndex=1&pageSize=20").then().statusCode(200);
     }
 
     @Test
     public void testGetSbomByIdShouldNotFailForMissing() throws IOException {
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/5644785")
+                .request("GET", "/api/v1alpha2/sboms/5644785")
                 .then()
                 .statusCode(404)
                 .body("message", CoreMatchers.is("SBOM with id '5644785' not found"))
@@ -77,7 +77,7 @@ public class SBOMResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/12345")
+                .request("GET", "/api/v1alpha2/sboms/12345")
                 .then()
                 .statusCode(200)
                 .body("id", CoreMatchers.equalTo("12345"))
@@ -98,7 +98,7 @@ public class SBOMResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/12345/bom")
+                .request("GET", "/api/v1alpha2/sboms/12345/bom")
                 .then()
                 .statusCode(200)
                 .body(
@@ -113,7 +113,7 @@ public class SBOMResourceIT {
     public void testGetSbomByIdShouldHandleIncorrecInput() throws IOException {
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/fgETHHG4785")
+                .request("GET", "/api/v1alpha2/sboms/fgETHHG4785")
                 .then()
                 .statusCode(404)
                 .body("message", CoreMatchers.is("SBOM with id 'fgETHHG4785' not found"))
@@ -135,7 +135,7 @@ public class SBOMResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha1/sboms/12345/bom")
+                .request("GET", "/api/v1alpha2/sboms/12345/bom")
                 .then()
                 .statusCode(200)
                 .body("metadata.component.name", CoreMatchers.equalTo("microprofile-graphql-parent"))
@@ -163,7 +163,7 @@ public class SBOMResourceIT {
 
     // given().when()
     // .contentType(ContentType.JSON)
-    // .request("POST", "/api/v1alpha1/sboms/generate/build/AABBCC")
+    // .request("POST", "/api/v1alpha2/sboms/generate/build/AABBCC")
     // .then()
     // .statusCode(202)
     // .body("id", CoreMatchers.any(Long.class))

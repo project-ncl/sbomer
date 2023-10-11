@@ -17,7 +17,7 @@
 #
 
 sbomer:
-  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha1/"
+  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha2/"
 
   controller:
     generation-request:

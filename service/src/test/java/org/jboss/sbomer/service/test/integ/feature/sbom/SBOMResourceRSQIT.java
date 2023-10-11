@@ -28,6 +28,7 @@ import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -43,6 +44,60 @@ public class SBOMResourceRSQIT {
 
     @InjectSpy
     SbomService sbomService;
+
+    @Nested
+    class v1alpha1 {
+        static String API_PATH = "/api/v1alpha1";
+
+        @Test
+        void testGetSbomContentWithSearch() {
+            given().when()
+                    .contentType(ContentType.JSON)
+                    .request("GET", API_PATH + "/sboms")
+                    .then()
+                    .statusCode(200)
+                    .body("pageIndex", CoreMatchers.equalTo(0))
+                    .and()
+                    .body("pageSize", CoreMatchers.equalTo(50))
+                    .and()
+                    .body("totalPages", CoreMatchers.equalTo(1))
+                    .and()
+                    .body("totalHits", CoreMatchers.equalTo(1))
+                    .and()
+                    .body("content.id", CoreMatchers.hasItem("416640206274228224"))
+                    .and()
+                    .body("content[0].buildId", CoreMatchers.is("ARYT3LBXDVYAC"))
+                    .and()
+                    .body("content[0].sbom", CoreMatchers.is(CoreMatchers.notNullValue()));
+        }
+    }
+
+    @Nested
+    class v1alpha2 {
+        static String API_PATH = "/api/v1alpha2";
+
+        @Test
+        void testGetSbomContentWithSearch() {
+            given().when()
+                    .contentType(ContentType.JSON)
+                    .request("GET", API_PATH + "/sboms")
+                    .then()
+                    .statusCode(200)
+                    .body("pageIndex", CoreMatchers.equalTo(0))
+                    .and()
+                    .body("pageSize", CoreMatchers.equalTo(50))
+                    .and()
+                    .body("totalPages", CoreMatchers.equalTo(1))
+                    .and()
+                    .body("totalHits", CoreMatchers.equalTo(1))
+                    .and()
+                    .body("content.id", CoreMatchers.hasItem("416640206274228224"))
+                    .and()
+                    .body("content[0].buildId", CoreMatchers.is("ARYT3LBXDVYAC"))
+                    .and()
+                    .body("content[0].sbom", CoreMatchers.is(CoreMatchers.nullValue()));
+        }
+    }
 
     @Test
     public void testRSQLSearchPagination() {
@@ -313,9 +368,6 @@ public class SBOMResourceRSQIT {
         int pageIndex = 0;
         int pageSize = 50;
         Page<Sbom> pagedSboms = initializeOneResultPaginated(pageIndex, pageSize);
-        pagedSboms.getContent().stream().forEach(sbom -> {
-            sbom.setRootPurl(null);
-        });
 
         Mockito.when(
                 sbomService
@@ -353,12 +405,6 @@ public class SBOMResourceRSQIT {
 
         int pageIndex = 0;
         int pageSize = 50;
-
-        String BUILD_ID = "AWI7P3EJ23YAA";
-        String ROOT_PURL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom";
-        Sbom base = createFirstSbom();
-        base.setBuildId(BUILD_ID);
-        base.setRootPurl(ROOT_PURL);
 
         Page<Sbom> oneContentPage = initializeOneResultPaginated(1, 1);
         Page<Sbom> twoContentPage = initializeTwoResultsPaginated(1, 2);
@@ -535,6 +581,7 @@ public class SBOMResourceRSQIT {
         sbom.setStatusMessage("all went well, again");
         sbom.setCreationTime(Instant.now());
         return sbom;
+
     }
 
 }

@@ -36,7 +36,7 @@ public class StageStatsIT extends E2EStageBase {
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1alpha1/stats"));
+                .get(String.format("/api/v1alpha2/stats"));
     }
 
     @Test

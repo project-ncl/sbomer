@@ -15,16 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.service;
+package org.jboss.sbomer.core.dto.v1alpha2;
 
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.rest.rsql.RSQLProducerImpl;
+import java.time.Instant;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
+import com.fasterxml.jackson.databind.JsonNode;
 
-@ApplicationScoped
-@Named
-public class SbomRSQLProducer extends RSQLProducerImpl<Sbom> {
-
-}
+public record SbomGenerationRequestRecord(String id, String buildId, JsonNode config, Instant creationTime) {
+};

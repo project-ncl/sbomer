@@ -15,14 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.rsql;
+package org.jboss.sbomer.core;
 
-import jakarta.persistence.criteria.CriteriaQuery;
+import java.util.Objects;
+import java.util.function.Function;
 
-public interface RSQLProducer<T> {
+@FunctionalInterface
+public interface TriFunction<A, B, C, R> {
 
-    CriteriaQuery<T> getCriteriaQuery(Class<T> type, String rsqlQuery, String sort);
+    R apply(A a, B b, C c);
 
-    CriteriaQuery<Long> getCountCriteriaQuery(Class<T> type, String rsqlQuery);
-
+    default <V> TriFunction<A, B, C, V> andThen(Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
+        return (A a, B b, C c) -> after.apply(apply(a, b, c));
+    }
 }

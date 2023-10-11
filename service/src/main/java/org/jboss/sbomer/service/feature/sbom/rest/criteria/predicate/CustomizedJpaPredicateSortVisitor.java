@@ -15,62 +15,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.rsql;
+package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
 
 import java.util.Collection;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.builder.SimpleBuilderTools;
-import com.github.tennaito.rsql.jpa.AbstractJpaVisitor;
 import com.github.tennaito.rsql.misc.EntityManagerAdapter;
 
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.OrNode;
-import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class CustomizedJpaPredicateSortVisitor<T> extends AbstractJpaVisitor<Collection<Order>, T> {
+public class CustomizedJpaPredicateSortVisitor<T> {
 
-    private From root;
+    private Root<?> root;
     protected Class<T> entityClass;
-    protected BuilderTools builderTools;
+    protected BuilderTools builderTools = new SimpleBuilderTools();
 
-    /**
-     * Constructor with template varargs for entityClass discovery.
-     *
-     * @param e not for usage
-     */
-    public CustomizedJpaPredicateSortVisitor(T... type) {
-        // getting class from template... :P
-        if (type.length == 0) {
-            entityClass = (Class<T>) type.getClass().getComponentType();
-        } else {
-            entityClass = (Class<T>) type[0].getClass();
-        }
+    public CustomizedJpaPredicateSortVisitor(Class<T> type) {
+        this.entityClass = type;
     }
 
-    public CustomizedJpaPredicateSortVisitor<T> withRoot(From root) {
+    public CustomizedJpaPredicateSortVisitor<T> withRoot(Root<?> root) {
         this.root = root;
         return this;
     }
 
-    @Override
     public Collection<Order> visit(AndNode node, EntityManagerAdapter ema) {
         log.trace("visit: AndNode {}", node);
         return CustomPredicateSortBuilder.createExpression(node, root, entityClass, ema, getBuilderTools());
     }
 
-    @Override
     public Collection<Order> visit(OrNode node, EntityManagerAdapter ema) {
         log.trace("visit: OrNode {}", node);
         return CustomPredicateSortBuilder.createExpression(node, root, entityClass, ema, getBuilderTools());
     }
 
-    @Override
     public Collection<Order> visit(ComparisonNode node, EntityManagerAdapter ema) {
         log.trace("visit: ComparisonNode {}", node);
         return CustomPredicateSortBuilder.createExpression(node, root, entityClass, ema, getBuilderTools());

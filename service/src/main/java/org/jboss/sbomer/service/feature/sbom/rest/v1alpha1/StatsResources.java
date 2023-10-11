@@ -47,7 +47,7 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Tag(name = "Stats", description = "SBOMer information and statistics")
+@Tag(name = "v1alpha1", description = "v1alpha1 API endpoints")
 @PermitAll
 public class StatsResources {
 

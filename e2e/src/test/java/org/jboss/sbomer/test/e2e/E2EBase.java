@@ -64,7 +64,7 @@ public abstract class E2EBase {
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1alpha1/sboms/requests/%s", generationId));
+                .get(String.format("/api/v1alpha2/sboms/requests/%s", generationId));
     }
 
     public String requestGeneration(String buildId) {
@@ -74,7 +74,7 @@ public abstract class E2EBase {
                 .baseUri(getSbomerBaseUri())
                 .when()
                 .contentType(ContentType.JSON)
-                .post(String.format("/api/v1alpha1/sboms/generate/build/%s", buildId));
+                .post(String.format("/api/v1alpha2/sboms/generate/build/%s", buildId));
 
         response.then()
                 .statusCode(202)

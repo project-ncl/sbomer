@@ -72,13 +72,13 @@ import lombok.extern.slf4j.Slf4j;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Tag(name = "SBOMs", description = "Endpoints related to SBOM handling, version v1alpha1, with RSQL capabilities")
+@Tag(name = "v1alpha1", description = "v1alpha1 API endpoints")
 @PermitAll
 @Slf4j
 public class SBOMResource {
 
     @Inject
-    SbomService sbomService;
+    protected SbomService sbomService;
 
     @Inject
     KubernetesClient kubernetesClient;

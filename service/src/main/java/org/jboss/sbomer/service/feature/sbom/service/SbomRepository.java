@@ -17,16 +17,50 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
+import java.time.Instant;
+import java.util.List;
+
+import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
+import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.criteria.Join;
 import jakarta.transaction.Transactional;
 
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-
 @ApplicationScoped
-public class SbomRepository extends RSQLBaseRepository<Sbom, String> {
+public class SbomRepository extends CriteriaAwareRepository<Sbom> {
 
-    protected Class getEntityClass() {
-        return Sbom.class;
+    public SbomRepository() {
+        super(Sbom.class);
+    }
+
+    public List<SbomRecord> searchSbomRecords(QueryParameters parameters) {
+        // TODO: Implement strong typing
+        return searchProjected(SbomRecord.class, parameters, (query, builder, root) -> {
+            Join<Sbom, SbomGenerationRequest> generationRequest = root.join("generationRequest");
+
+            return query.select(
+                    builder.construct(
+                            SbomRecord.class,
+                            root.<String> get("id"),
+                            root.<String> get("buildId"),
+                            root.<String> get("rootPurl"),
+                            root.<Instant> get("creationTime"),
+                            root.<Integer> get("configIndex"),
+                            root.<String> get("statusMessage"),
+                            generationRequest.<String> get("id"),
+                            generationRequest.<String> get("buildId"),
+                            generationRequest.<JsonNode> get("config"),
+                            generationRequest.<Instant> get("creationTime"))
+
+            );
+
+        });
     }
 
     @Transactional

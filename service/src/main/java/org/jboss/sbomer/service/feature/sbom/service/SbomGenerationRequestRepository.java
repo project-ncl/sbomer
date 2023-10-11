@@ -17,22 +17,22 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
-
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
 
 import io.quarkus.panache.common.Parameters;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j
-public class SbomGenerationRequestRepository extends RSQLBaseRepository<SbomGenerationRequest, String> {
+public class SbomGenerationRequestRepository extends CriteriaAwareRepository<SbomGenerationRequest> {
 
-    protected Class getEntityClass() {
-        return SbomGenerationRequest.class;
+    public SbomGenerationRequestRepository() {
+        super(SbomGenerationRequest.class);
     }
 
     @Transactional

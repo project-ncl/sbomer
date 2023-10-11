@@ -21,12 +21,10 @@ import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateConfigCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateEnvConfigCommand;
 
-import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
-@Slf4j
 @Command(
         mixinStandardHelpOptions = true,
         name = "auto",

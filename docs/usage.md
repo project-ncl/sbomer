@@ -234,7 +234,7 @@ Currently there is no authentication or authorization required to use this servi
 Please note that the return is a list of SBOMs in a paginated way.
 
 ```bash
-curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms
+curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha2/sboms
 ```
 
 #### Requesting SBOM generation manually
@@ -244,7 +244,7 @@ curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms
 To request an SBOM generation we need to pass the PNC build id:
 
 ```bash
-curl -v -X POST https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/generate/build/[PNC_BUILD_ID]
+curl -v -X POST https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha2/sboms/generate/build/[PNC_BUILD_ID]
 ```
 
 #### Fetching a specific SBOM
@@ -252,7 +252,7 @@ curl -v -X POST https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha
 Once the SBOM is generated it becomes available at:
 
 ```bash
-curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/[SBOM_ID]
+curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha2/sboms/[SBOM_ID]
 ```
 
 ### Generation requests
@@ -264,7 +264,7 @@ Generation requests provide information on the progress of the generation.
 List of all requests:
 
 ```bash
-curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/requests
+curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha2/sboms/requests
 ```
 
 #### Fetching a specific generation request
@@ -272,5 +272,5 @@ curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/req
 Get a specific generation request:
 
 ```bash
-curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha1/sboms/requests/[REQUEST_ID]
+curl https://sbomer-stage.apps.ocp-c1.prod.psi.redhat.com/api/v1alpha2/sboms/requests/[REQUEST_ID]
 ```

@@ -43,8 +43,10 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
+import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
 import org.junit.jupiter.api.Test;
 
@@ -64,6 +66,9 @@ public class SbomGenerationRequestRepositoryIT {
 
     @Inject
     SbomGenerationRequestRepository sbomGenerationRequestRepository;
+
+    @Inject
+    SbomService sbomService;
 
     final static String REQUEST_ID = "FFAASSBB";
     final static String BUILD_ID = "RRYT3LBXDVYAC";
@@ -117,7 +122,7 @@ public class SbomGenerationRequestRepositoryIT {
         // Not setting rootPurl, as it will be set by PrePersist
         Sbom sbom = new Sbom();
         sbom.setBuildId(BUILD_ID);
-        sbom.setId("416640206274228224");
+        sbom.setId("416640206274228333");
         sbom.setSbom(SbomUtils.toJsonNode(bom));
         sbom.setGenerationRequest(generationRequest);
         return sbom;
@@ -132,7 +137,7 @@ public class SbomGenerationRequestRepositoryIT {
     @Test
     public void testRSQL() {
         SbomGenerationRequest request = sbomGenerationRequestRepository
-                .searchByQuery(0, 1, "buildId=eq=" + BUILD_ID, null)
+                .search(QueryParameters.builder().rsqlQuery("buildId=eq=" + BUILD_ID).pageIndex(0).pageSize(1).build())
                 .get(0);
 
         assertNotNull(request);
@@ -140,7 +145,9 @@ public class SbomGenerationRequestRepositoryIT {
         assertEquals(REQUEST_ID, request.getId());
         assertEquals(BUILD_ID, request.getBuildId());
 
-        request = sbomGenerationRequestRepository.searchByQuery(0, 1, "buildId=eq=" + BUILD_ID, null).get(0);
+        request = sbomGenerationRequestRepository
+                .search(QueryParameters.builder().rsqlQuery("buildId=eq=" + BUILD_ID).pageIndex(0).pageSize(1).build())
+                .get(0);
 
         assertNotNull(request);
         assertEquals(REQUEST_ID, request.getId());
@@ -150,8 +157,8 @@ public class SbomGenerationRequestRepositoryIT {
 
     @Test
     public void testPagination() {
-        Page<SbomGenerationRequest> pagedRequest = sbomGenerationRequestRepository
-                .searchByQueryPaginated(0, 10, "buildId=eq=" + BUILD_ID, null);
+        Page<SbomGenerationRequest> pagedRequest = sbomService
+                .searchSbomRequestsByQueryPaginated(0, 10, "buildId=eq=" + BUILD_ID, null);
 
         assertNotNull(pagedRequest);
         assertEquals(0, pagedRequest.getPageIndex());
@@ -191,7 +198,8 @@ public class SbomGenerationRequestRepositoryIT {
         sbom = sbomRepository.saveSbom(sbom);
 
         String rsqlQuery = "generationRequest.id=eq=" + REQUEST_ID_2_DELETE;
-        List<Sbom> sbomsAfterInsert = sbomRepository.searchByQuery(0, 10, rsqlQuery, null);
+        List<Sbom> sbomsAfterInsert = sbomRepository
+                .search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build());
         assertEquals(1, sbomsAfterInsert.size());
 
         long beforeDeletion = SbomGenerationRequest.count("id = :id", Parameters.with("id", REQUEST_ID_2_DELETE));
@@ -199,7 +207,8 @@ public class SbomGenerationRequestRepositoryIT {
 
         sbomGenerationRequestRepository.deleteRequest(REQUEST_ID_2_DELETE);
 
-        List<Sbom> sbomsAfterDelete = sbomRepository.searchByQuery(0, 10, rsqlQuery, null);
+        List<Sbom> sbomsAfterDelete = sbomRepository
+                .search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build());
         assertEquals(0, sbomsAfterDelete.size());
 
         long afterDeletion = SbomGenerationRequest.count("id = :id", Parameters.with("id", REQUEST_ID_2_DELETE));

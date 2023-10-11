@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.rsql;
+package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +24,7 @@ import java.util.List;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
@@ -34,9 +35,9 @@ import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.LogicalNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -44,7 +45,7 @@ public class CustomPredicateSortBuilder<T> {
 
     public static <T> Collection<Order> createExpression(
             LogicalNode logical,
-            From root,
+            Root<?> root,
             Class<T> entity,
             EntityManagerAdapter entityManager,
             BuilderTools misc) {
@@ -81,7 +82,7 @@ public class CustomPredicateSortBuilder<T> {
      */
     public static <T> Collection<Order> createExpression(
             ComparisonNode comparison,
-            From startRoot,
+            Root<?> startRoot,
             Class<T> entity,
             EntityManagerAdapter entityManager,
             BuilderTools misc) {
@@ -105,8 +106,8 @@ public class CustomPredicateSortBuilder<T> {
             throw new IllegalArgumentException(msg);
         }
 
-        if (RSQLProducerImpl.ASC.equals(comparison.getOperator())
-                || RSQLProducerImpl.DESC.equals(comparison.getOperator())) {
+        if (CriteriaAwareRepository.ASC.equals(comparison.getOperator())
+                || CriteriaAwareRepository.DESC.equals(comparison.getOperator())) {
 
             return createOrder(comparison, startRoot, entity, entityManager, misc);
         }
@@ -116,7 +117,7 @@ public class CustomPredicateSortBuilder<T> {
 
     public static <T> Collection<Order> createOrder(
             Node node,
-            From root,
+            Root<?> root,
             Class<T> entity,
             EntityManagerAdapter ema,
             BuilderTools tools) throws IllegalArgumentException {
@@ -127,11 +128,11 @@ public class CustomPredicateSortBuilder<T> {
         ComparisonOperator operator = cn.getOperator();
         CriteriaBuilder builder = ema.getCriteriaBuilder();
 
-        Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, ema, tools);
+        Path<?> path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, ema, tools);
 
-        if (operator.equals(RSQLProducerImpl.ASC)) {
+        if (operator.equals(CriteriaAwareRepository.ASC)) {
             return List.of(builder.asc(path));
-        } else if (operator.equals(RSQLProducerImpl.DESC)) {
+        } else if (operator.equals(CriteriaAwareRepository.DESC)) {
             return List.of(builder.desc(path));
         }
 
@@ -151,12 +152,12 @@ public class CustomPredicateSortBuilder<T> {
             String[] sortTokens = sort.split(";");
             for (int i = 0; i < sortTokens.length; i++) {
                 var token = sortTokens[i];
-                if (token.contains(RSQLProducerImpl.ASC.getSymbol())) {
-                    token = token.replaceFirst(RSQLProducerImpl.ASC.getSymbol(), "");
-                    compliantSort.append(token).append(RSQLProducerImpl.ASC.getSymbol()).append(token);
-                } else if (token.contains(RSQLProducerImpl.DESC.getSymbol())) {
-                    token = token.replaceFirst(RSQLProducerImpl.DESC.getSymbol(), "");
-                    compliantSort.append(token).append(RSQLProducerImpl.DESC.getSymbol()).append(token);
+                if (token.contains(CriteriaAwareRepository.ASC.getSymbol())) {
+                    token = token.replaceFirst(CriteriaAwareRepository.ASC.getSymbol(), "");
+                    compliantSort.append(token).append(CriteriaAwareRepository.ASC.getSymbol()).append(token);
+                } else if (token.contains(CriteriaAwareRepository.DESC.getSymbol())) {
+                    token = token.replaceFirst(CriteriaAwareRepository.DESC.getSymbol(), "");
+                    compliantSort.append(token).append(CriteriaAwareRepository.DESC.getSymbol()).append(token);
                 } else {
                     compliantSort.append(token);
                 }
