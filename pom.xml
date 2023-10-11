@@ -67,7 +67,7 @@
         <version.rsql-parser>2.1.0</version.rsql-parser>
         <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
         <version.commons-cli>1.5.0</version.commons-cli>
-        <version.quarkus-test-artemis>3.1.1</version.quarkus-test-artemis>
+        <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
         <version.build-finder>2.2.0</version.build-finder>
     </properties>
 
