@@ -1,5 +1,5 @@
 # https://catalog.redhat.com/software/containers/ubi9/618326f8c0d15aff4912fe0b
-# Based on tag 9.2-755
+# Based on tag 9.2-755.1696515532
 FROM registry.access.redhat.com/ubi9@sha256:20f695d2a91352d4eaa25107535126727b5945bff38ed36a3e59590f495046f0
 
 RUN INSTALL_PKGS="jq unzip zip git" && \
