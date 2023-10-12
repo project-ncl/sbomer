@@ -83,6 +83,25 @@ public abstract class E2EBase {
                 .body("status", CoreMatchers.is("NEW"));
 
         return response.body().path("id").toString();
+    }
 
+    public String requestGeneration(String buildId, String jsonBody) {
+        log.info("Requesting SBOM for build ID: {}, with jsonBody: {}", buildId, jsonBody);
+
+        Response response = RestAssured.given()
+                .baseUri(getSbomerBaseUri())
+                .contentType(ContentType.JSON)
+                .body(jsonBody)
+                .when()
+                .contentType(ContentType.JSON)
+                .post(String.format("/api/v1alpha2/sboms/generate/build/%s", buildId));
+
+        response.then()
+                .statusCode(202)
+                .body("buildId", CoreMatchers.is(buildId))
+                .and()
+                .body("status", CoreMatchers.is("NEW"));
+
+        return response.body().path("id").toString();
     }
 }
