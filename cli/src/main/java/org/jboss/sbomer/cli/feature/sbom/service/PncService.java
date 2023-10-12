@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import io.quarkus.oidc.client.Tokens;
+import jakarta.enterprise.context.control.ActivateRequestContext;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.RemoteCollection;
@@ -63,6 +66,9 @@ public class PncService {
 
     GroupConfigurationClient groupConfigurationClient;
 
+    @Inject
+    Tokens serviceTokens;
+
     @PostConstruct
     void init() {
         buildClient = new BuildClient(getConfiguration());
@@ -84,7 +90,11 @@ public class PncService {
      * @return
      */
     public Configuration getConfiguration() {
-        return Configuration.builder().host(apiUrl).protocol("http").build();
+        return Configuration.builder()
+                .host(apiUrl)
+                .bearerTokenSupplier(() -> serviceTokens.getAccessToken())
+                .protocol("http")
+                .build();
     }
 
     /**
