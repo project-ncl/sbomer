@@ -17,11 +17,13 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils.commandline;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.core.features.sbom.Constants;
+import org.jboss.sbomer.core.features.sbom.utils.EnvironmentAttributesUtils;
 import org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser;
 
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +43,14 @@ public class CommandLineParserUtil {
                 log.error("Could not launder the provided build command script! Using the default build command", exc);
             }
         } else if (org.jboss.pnc.enums.BuildType.GRADLE.equals(build.getBuildConfigRevision().getBuildType())) {
-            buildCmdOptions = "gradle";
+            Optional<String> gradleMajorVersion = EnvironmentAttributesUtils
+                    .getGradleSDKManCompliantMajorVersion(build.getEnvironment().getAttributes());
+            if (gradleMajorVersion.isPresent()) {
+                buildCmdOptions += (Constants.GRADLE_MAJOR_VERSION_COMMAND_PREFIX + gradleMajorVersion.get().trim()
+                        + "#");
+            }
+
+            buildCmdOptions += "gradle";
             // Looks like we need to override the final version as it might not be picked up in the CycloneDX
             // generation, which would be overridden by the gradle.properties. The BREW_BUILD_VERSION attribute contains
             // the version we need.

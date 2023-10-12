@@ -35,56 +35,99 @@ public class EnvironmentAttributesUtils {
 
     private static final String JAVA_LEGACY_VERSION_REGEX = "^1\\.(\\d+)";
     private static final String JAVA_VERSION_REGEX = "^([^.-]+)";
+    private static final String GRADLE_MAJOR_VERSION_REGEX = "^(\\d+)";
 
     private static final Pattern JAVA_LEGACY_VERSION_PATTERN = Pattern.compile(JAVA_LEGACY_VERSION_REGEX);
     private static final Pattern JAVA_VERSION_PATTERN = Pattern.compile(JAVA_VERSION_REGEX);
+    private static final Pattern GRADLE_MAJOR_VERSION_PATTERN = Pattern.compile(GRADLE_MAJOR_VERSION_REGEX);
 
     public static Map<String, String> getSDKManCompliantAttributes(Map<String, String> environmentAttributes) {
         Map<String, String> sdkManAttributes = new HashMap<String, String>();
 
         // Find Maven
-        Optional<String> mavenVersion = environmentAttributes.entrySet()
-                .stream()
-                .filter(entry -> entry.getKey().equalsIgnoreCase(MAVEN_ATTRIBUTE_KEY))
-                .map(Map.Entry::getValue)
-                .findFirst();
+        Optional<String> mavenVersion = getMavenSDKManCompliantVersion(environmentAttributes);
         if (mavenVersion.isPresent()) {
             sdkManAttributes.put(MAVEN_SDKMAN_KEY, mavenVersion.get().trim());
         }
 
         // Find Gradle
-        Optional<String> gradleVersion = environmentAttributes.entrySet()
-                .stream()
-                .filter(entry -> entry.getKey().equalsIgnoreCase(GRADLE_ATTRIBUTE_KEY))
-                .map(Map.Entry::getValue)
-                .findFirst();
+        Optional<String> gradleVersion = getGradleSDKManCompliantVersion(environmentAttributes);
         if (gradleVersion.isPresent()) {
             sdkManAttributes.put(GRADLE_SDKMAN_KEY, gradleVersion.get().trim());
         }
 
         // Find Java. We need to do some ugly polishing due to the metadata available in PNC.
+        Optional<String> javaVersion = getJavaSDKManCompliantVersion(environmentAttributes);
+        if (javaVersion.isPresent()) {
+            sdkManAttributes.put(SDK_SDKMAN_KEY, javaVersion.get().trim());
+        }
+
+        return sdkManAttributes;
+    }
+
+    public static Optional<String> getMavenSDKManCompliantVersion(Map<String, String> environmentAttributes) {
+        if (environmentAttributes == null || environmentAttributes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return environmentAttributes.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(MAVEN_ATTRIBUTE_KEY))
+                .map(Map.Entry::getValue)
+                .findFirst();
+    }
+
+    public static Optional<String> getGradleSDKManCompliantVersion(Map<String, String> environmentAttributes) {
+        if (environmentAttributes == null || environmentAttributes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return environmentAttributes.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(GRADLE_ATTRIBUTE_KEY))
+                .map(Map.Entry::getValue)
+                .findFirst();
+    }
+
+    public static Optional<String> getJavaSDKManCompliantVersion(Map<String, String> environmentAttributes) {
+        if (environmentAttributes == null || environmentAttributes.isEmpty()) {
+            return Optional.empty();
+        }
+
         Optional<String> javaVersion = environmentAttributes.entrySet().stream().filter(entry -> {
             return entry.getKey().contains(JDK_ATTRIBUTE_KEY) && !entry.getValue().contains("Mandrel");
         }).map(entry -> {
             return entry.getValue().replace("OpenJDK", "").replace("OracleJDK", "").replace("Oracle JDK", "");
         }).findFirst();
+
         if (javaVersion.isPresent()) {
             String javaVersionString = javaVersion.get().trim();
             if (javaVersionString.startsWith("1.")) {
                 Matcher matcher = JAVA_LEGACY_VERSION_PATTERN.matcher(javaVersionString);
                 if (matcher.find()) {
-                    sdkManAttributes.put(SDK_SDKMAN_KEY, matcher.group(1));
+                    return Optional.of(matcher.group(1));
                 }
             } else if (javaVersionString.startsWith("8u")) {
-                sdkManAttributes.put(SDK_SDKMAN_KEY, "8");
+                return Optional.of("8");
             } else {
                 Matcher matcher = JAVA_VERSION_PATTERN.matcher(javaVersionString);
                 if (matcher.find()) {
-                    sdkManAttributes.put(SDK_SDKMAN_KEY, matcher.group(1));
+                    return Optional.of(matcher.group(1));
                 }
             }
-
         }
-        return sdkManAttributes;
+        return Optional.empty();
     }
+
+    public static Optional<String> getGradleSDKManCompliantMajorVersion(Map<String, String> environmentAttributes) {
+        Optional<String> gradleVersion = getGradleSDKManCompliantVersion(environmentAttributes);
+        if (gradleVersion.isPresent()) {
+            Matcher matcher = GRADLE_MAJOR_VERSION_PATTERN.matcher(gradleVersion.get().trim());
+            if (matcher.find()) {
+                return Optional.of(matcher.group(1));
+            }
+        }
+        return Optional.empty();
+    }
+
 }

@@ -44,6 +44,8 @@ public class Constants {
     public final static String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
 
     public final static String BUILD_ATTRIBUTES_BREW_BUILD_VERSION = "BREW_BUILD_VERSION";
+    public final static String GRADLE_MAJOR_VERSION_COMMAND_PREFIX = "GRADLE_MAJOR_VERSION=";
+    public final static String GRADLE_PLUGIN_VERSION_ENV_VARIABLE = "PLUGIN_VERSION";
 
     /**
      * The label name that identifies the particular Sbom resource.

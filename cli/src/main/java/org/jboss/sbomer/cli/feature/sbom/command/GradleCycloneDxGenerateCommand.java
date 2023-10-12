@@ -21,15 +21,20 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 
+import static org.jboss.sbomer.core.features.sbom.Constants.GRADLE_PLUGIN_VERSION_ENV_VARIABLE;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES;
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.gradle.GradleCommandLineParser.extractGradleMainBuildCommand;
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.gradle.GradleCommandLineParser.extractGradleMajorVersion;
 
 @Slf4j
 @Command(
@@ -43,11 +48,10 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
     @Override
     protected Path doGenerate(String buildCmdOptions) {
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
-        processBuilder.environment().put("PLUGIN_VERSION", toolVersion());
 
-        List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
-                .stream()
-                .forEach(processBuilder.command()::add);
+        configureProcessEnvironmentVariable(buildCmdOptions, processBuilder);
+        configureProcessMainBuildCommands(buildCmdOptions, processBuilder);
+
         processBuilder.command().add("cyclonedxBom");
 
         if (initScriptPath != null) {
@@ -93,6 +97,29 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
     @Override
     protected GeneratorType generatorType() {
         return GeneratorType.GRADLE_CYCLONEDX;
+    }
+
+    private void configureProcessEnvironmentVariable(String buildCmdOptions, ProcessBuilder processBuilder) {
+        // If there is an hint about the major Gradle version required, use it.
+        Optional<Integer> gradleMajorVersion = extractGradleMajorVersion(buildCmdOptions);
+        if (!gradleMajorVersion.isPresent() || gradleMajorVersion.get() >= 5) {
+            processBuilder.environment().put(GRADLE_PLUGIN_VERSION_ENV_VARIABLE, toolVersion());
+        } else {
+            // If the version is previous 5, force the Gradle CycloneDX plugin version to 1.6.1 for backward
+            // compatibility
+            processBuilder.environment().put(GRADLE_PLUGIN_VERSION_ENV_VARIABLE, "1.6.1");
+        }
+    }
+
+    private void configureProcessMainBuildCommands(String buildCmdOptions, ProcessBuilder processBuilder) {
+        Optional<String> mainGradleBuildCommand = extractGradleMainBuildCommand(buildCmdOptions);
+        if (!mainGradleBuildCommand.isPresent()) {
+            throw new ApplicationException("Gradle build command is empty.");
+        }
+
+        List.of(mainGradleBuildCommand.get().split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
+                .stream()
+                .forEach(processBuilder.command()::add);
     }
 
 }
