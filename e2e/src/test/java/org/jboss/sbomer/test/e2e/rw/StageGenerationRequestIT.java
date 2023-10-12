@@ -18,6 +18,9 @@
 package org.jboss.sbomer.test.e2e.rw;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
@@ -34,25 +37,34 @@ import lombok.extern.slf4j.Slf4j;
 @Tag("stage")
 public class StageGenerationRequestIT extends E2EStageBase {
 
-    private final static String BUILD_ID = "AZ4HNIBW4YYAA";
-    static String generationRequestId;
+    static Path sbomPath(String fileName) {
+        return Paths.get("src", "test", "resources", "requests", fileName);
+    }
+
+    private final static String MAVEN_BUILD_ID = "AZ4HNIBW4YYAA";
+    private final static String GRADLE_5_BUILD_ID = "A3YCIKLQTVYAA";
+    private final static String GRADLE_4_BUILD_ID = "A3LCEFCLLVYAA";
+
+    static String mavenGenerationRequestId;
+    static String gradle5GenerationRequestId;
+    static String gradle4GenerationRequestId;
 
     @Test
     @Order(1)
-    public void testSuccessfulGeneration() throws IOException {
-        generationRequestId = requestGeneration(BUILD_ID);
+    public void testSuccessfulGenerationMavenBuild() throws IOException {
+        mavenGenerationRequestId = requestGeneration(MAVEN_BUILD_ID);
 
-        log.info("Generation Request created: {}", generationRequestId);
+        log.info("Maven build - Generation Request created: {}", mavenGenerationRequestId);
 
         Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            final Response body = getGeneration(generationRequestId);
+            final Response body = getGeneration(mavenGenerationRequestId);
             String status = body.path("status").toString();
 
-            log.info("Current generation request status: {}", status);
+            log.info("Maven build - Current generation request status: {}", status);
 
             if (status.equals("FAILED")) {
-                log.error("Generation failed: {}", body.asPrettyString());
-                throw new Exception("Generation failed!");
+                log.error("Maven build - Generation failed: {}", body.asPrettyString());
+                throw new Exception("Maven build - Generation failed!");
             }
 
             return status.equals("FINISHED");
@@ -61,13 +73,87 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
     @Test
     @Order(2)
-    public void ensureUmbMessageWasSent() {
+    public void ensureUmbMessageWasSentForMavenBuild() {
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
             givenLastCompleteUmbMessage().then()
-                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
-                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(BUILD_ID))
-                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(BUILD_ID))
-                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(mavenGenerationRequestId))
+                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(MAVEN_BUILD_ID))
+                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(MAVEN_BUILD_ID))
+                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(mavenGenerationRequestId));
+
+            return true;
+        });
+    }
+
+    @Test
+    @Order(3)
+    public void testSuccessfulGenerationGradle5Build() throws IOException {
+        String requestBody = Files.readString(sbomPath(GRADLE_5_BUILD_ID + ".json"));
+        gradle5GenerationRequestId = requestGeneration(GRADLE_5_BUILD_ID, requestBody);
+
+        log.info("Gradle 5 build - Generation Request created: {}", gradle5GenerationRequestId);
+
+        Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+            final Response body = getGeneration(gradle5GenerationRequestId);
+            String status = body.path("status").toString();
+
+            log.info("Gradle 5 build - Current generation request status: {}", status);
+
+            if (status.equals("FAILED")) {
+                log.error("Gradle 5 build - generation failed: {}", body.asPrettyString());
+                throw new Exception("Gradle 5 build - Generation failed!");
+            }
+
+            return status.equals("FINISHED");
+        });
+    }
+
+    @Test
+    @Order(4)
+    public void ensureUmbMessageWasSentForGradle5Build() {
+        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+            givenLastCompleteUmbMessage().then()
+                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle5GenerationRequestId))
+                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(GRADLE_5_BUILD_ID))
+                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(GRADLE_5_BUILD_ID))
+                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(gradle5GenerationRequestId));
+
+            return true;
+        });
+    }
+
+    @Test
+    @Order(5)
+    public void testSuccessfulGenerationGradle4Build() throws IOException {
+        String requestBody = Files.readString(sbomPath(GRADLE_5_BUILD_ID + ".json"));
+        gradle4GenerationRequestId = requestGeneration(GRADLE_4_BUILD_ID, requestBody);
+
+        log.info("Gradle 4 build - Generation Request created: {}", gradle4GenerationRequestId);
+
+        Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+            final Response body = getGeneration(gradle4GenerationRequestId);
+            String status = body.path("status").toString();
+
+            log.info("Gradle 4 build - Current generation request status: {}", status);
+
+            if (status.equals("FAILED")) {
+                log.error("Gradle 4 build - generation failed: {}", body.asPrettyString());
+                throw new Exception("Gradle 4 build - Generation failed!");
+            }
+
+            return status.equals("FINISHED");
+        });
+    }
+
+    @Test
+    @Order(6)
+    public void ensureUmbMessageWasSentForGradle4Build() {
+        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+            givenLastCompleteUmbMessage().then()
+                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle4GenerationRequestId))
+                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(GRADLE_4_BUILD_ID))
+                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(GRADLE_4_BUILD_ID))
+                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(gradle4GenerationRequestId));
 
             return true;
         });
