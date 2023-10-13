@@ -1,6 +1,8 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
+  annotations:
+    sbomer-secret: sbomer-sso-clients
   name: sbomer-generate
 {{ include "sbomer.labels" (list .) | indent 2 }}
 spec:
@@ -44,8 +46,12 @@ spec:
           value: {{ .Values.oidc.auth.server.url }}
         - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
           value: {{ .Values.oidc.client.id }}
-        - name: QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET
-          value: {{ .Values.oidc.client.secret }}
+        - name: SBOMER_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['sbomer-secret']
+        - name: APP_ENV
+          value: {{ .Values.env }}
 
       script: |
         #!/usr/bin/env bash
@@ -53,6 +59,8 @@ spec:
         set -e
         set -x
         set -o pipefail
+
+        export QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET="$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer-client.secret)"
 
         CONFIG_PATH="/workdir/config.yaml"
         ENV_CONFIG_PATH="/workdir/env-config.yaml"
@@ -95,6 +103,47 @@ spec:
 
         echo "Running generation..."
         exec /workdir/.sdkman/candidates/java/17/bin/java -Duser.home=/workdir -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config $CONFIG_PATH --index "$(params.index)"
+      volumeMounts:
+        - name: secrets-workdir
+          mountPath: /mnt/secrets
+  sidecars:
+    - image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
+      name: get-vault-secrets
+      command:
+        - /bin/bash
+      args:
+        - -c
+        - cd /mnt/secrets;
+          pnc-vault-secrets dump $(SBOMER_SECRET_NAME)-$(APP_ENV);
+      env:
+        - name: VAULT_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-address
+        - name: VAULT_APP_ROLE_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-app-role-id
+        - name: VAULT_APP_SECRET_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-app-secret-id
+        - name: SBOMER_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['sbomer-secret']
+        - name: APP_ENV
+          value: {{ .Values.env }}
+      volumeMounts:
+        - name: secrets-workdir
+          mountPath: /mnt/secrets
   workspaces:
     - name: data
       description: Workspace used to store the generated SBOMs
+  volumes:
+    - name: secrets-workdir
+      emptyDir:
+        medium: Memory
