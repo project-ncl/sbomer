@@ -75,7 +75,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     @Order(2)
     public void ensureUmbMessageWasSentForMavenBuild() {
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            givenLastCompleteUmbMessage().then()
+            givenLastCompleteUmbMessageForGeneration(mavenGenerationRequestId).then()
                     .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(mavenGenerationRequestId))
                     .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(MAVEN_BUILD_ID))
                     .body("raw_messages[0].msg.build.id", CoreMatchers.is(MAVEN_BUILD_ID))
@@ -112,7 +112,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     @Order(4)
     public void ensureUmbMessageWasSentForGradle5Build() {
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            givenLastCompleteUmbMessage().then()
+            givenLastCompleteUmbMessageForGeneration(gradle5GenerationRequestId).then()
                     .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle5GenerationRequestId))
                     .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(GRADLE_5_BUILD_ID))
                     .body("raw_messages[0].msg.build.id", CoreMatchers.is(GRADLE_5_BUILD_ID))
@@ -149,7 +149,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     @Order(6)
     public void ensureUmbMessageWasSentForGradle4Build() {
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            givenLastCompleteUmbMessage().then()
+            givenLastCompleteUmbMessageForGeneration(gradle4GenerationRequestId).then()
                     .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle4GenerationRequestId))
                     .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(GRADLE_4_BUILD_ID))
                     .body("raw_messages[0].msg.build.id", CoreMatchers.is(GRADLE_4_BUILD_ID))
