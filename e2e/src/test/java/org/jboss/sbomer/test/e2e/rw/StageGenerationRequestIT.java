@@ -125,7 +125,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     @Test
     @Order(5)
     public void testSuccessfulGenerationGradle4Build() throws IOException {
-        String requestBody = Files.readString(sbomPath(GRADLE_5_BUILD_ID + ".json"));
+        String requestBody = Files.readString(sbomPath(GRADLE_4_BUILD_ID + ".json"));
         gradle4GenerationRequestId = requestGeneration(GRADLE_4_BUILD_ID, requestBody);
 
         log.info("Gradle 4 build - Generation Request created: {}", gradle4GenerationRequestId);
