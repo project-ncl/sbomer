@@ -28,6 +28,13 @@ spec:
           value: {{ .Values.gerrit.host }}
         - name: SBOMER_PNC_PRODUCT_MAPPING
           value: {{ include "sbomer.productMapping" . }}
+        - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
+          value: {{ .Values.oidc.auth.server.url }}
+        - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
+          value: {{ .Values.oidc.client.id }}
+        - name: QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET
+          value: {{ .Values.oidc.client.secret }}
+
         # SBOMER_CACHE_SERVICE_HOST is set by Kubernetes for us
       script: |
         #!/usr/bin/env bash
