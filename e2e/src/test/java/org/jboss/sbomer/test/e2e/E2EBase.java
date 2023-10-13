@@ -59,6 +59,16 @@ public abstract class E2EBase {
                 .get("/raw");
     }
 
+    public Response givenLastCompleteUmbMessageForGeneration(String generationRequestId) {
+        return RestAssured.given()
+                .baseUri(getDatagrepperBaseUri())
+                .param("delta", "43200") // 12 hours in seconds
+                .param("topic", "/topic/VirtualTopic.eng.pnc.sbom.complete")
+                .param("contains", generationRequestId)
+                .param("rows_per_page", 1)
+                .get("/raw");
+    }
+
     public Response getGeneration(String generationId) {
         return RestAssured.given()
                 .baseUri(getSbomerBaseUri())
