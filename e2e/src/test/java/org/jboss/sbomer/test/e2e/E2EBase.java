@@ -60,6 +60,8 @@ public abstract class E2EBase {
     }
 
     public Response givenLastCompleteUmbMessageForGeneration(String generationRequestId) {
+        log.info("Finding last UMB message available for the request: {}", generationRequestId);
+
         return RestAssured.given()
                 .baseUri(getDatagrepperBaseUri())
                 .param("delta", "43200") // 12 hours in seconds
