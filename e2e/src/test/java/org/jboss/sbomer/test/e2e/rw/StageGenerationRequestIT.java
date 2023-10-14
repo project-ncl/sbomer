@@ -48,9 +48,9 @@ public class StageGenerationRequestIT extends E2EStageBase {
     private final static String GRADLE_5_BUILD_ID = "A3YCIKLQTVYAA";
     private final static String GRADLE_4_BUILD_ID = "A3LCEFCLLVYAA";
 
-    private String mavenGenerationRequestId;
-    private String gradle5GenerationRequestId;
-    private String gradle4GenerationRequestId;
+    static String mavenGenerationRequestId;
+    static String gradle5GenerationRequestId;
+    static String gradle4GenerationRequestId;
 
     @Test
     @Order(1)
@@ -92,7 +92,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     @Order(3)
     public void testSuccessfulGenerationGradle5Build() throws IOException {
         String requestBody = Files.readString(sbomPath(GRADLE_5_BUILD_ID + ".json"));
-        gradle5GenerationRequestId = requestGeneration(GRADLE_5_BUILD_ID, requestBody);
+        gradle5GenerationRequestId = requestGenerationWithConfiguration(GRADLE_5_BUILD_ID, requestBody);
 
         log.info("Gradle 5 build - Generation Request created: {}", gradle5GenerationRequestId);
 
@@ -129,7 +129,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     @Order(5)
     public void testSuccessfulGenerationGradle4Build() throws IOException {
         String requestBody = Files.readString(sbomPath(GRADLE_4_BUILD_ID + ".json"));
-        gradle4GenerationRequestId = requestGeneration(GRADLE_4_BUILD_ID, requestBody);
+        gradle4GenerationRequestId = requestGenerationWithConfiguration(GRADLE_4_BUILD_ID, requestBody);
 
         log.info("Gradle 4 build - Generation Request created: {}", gradle4GenerationRequestId);
 

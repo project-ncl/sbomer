@@ -97,7 +97,7 @@ public abstract class E2EBase {
         return response.body().path("id").toString();
     }
 
-    public String requestGeneration(String buildId, String jsonBody) {
+    public String requestGenerationWithConfiguration(String buildId, String jsonBody) {
         log.info("Requesting SBOM for build ID: {}, with jsonBody: {}", buildId, jsonBody);
 
         Response response = RestAssured.given()
@@ -108,11 +108,12 @@ public abstract class E2EBase {
                 .contentType(ContentType.JSON)
                 .post(String.format("/api/v1alpha2/sboms/generate/build/%s", buildId));
 
+        // We are providing the configuration so the status will jump to INITIALIZED, not NEW
         response.then()
                 .statusCode(202)
                 .body("buildId", CoreMatchers.is(buildId))
                 .and()
-                .body("status", CoreMatchers.is("NEW"));
+                .body("status", CoreMatchers.is("INITIALIZED"));
 
         return response.body().path("id").toString();
     }
