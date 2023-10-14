@@ -26,15 +26,18 @@ import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Tag("stage")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StageGenerationRequestIT extends E2EStageBase {
 
     static Path sbomPath(String fileName) {
@@ -45,9 +48,9 @@ public class StageGenerationRequestIT extends E2EStageBase {
     private final static String GRADLE_5_BUILD_ID = "A3YCIKLQTVYAA";
     private final static String GRADLE_4_BUILD_ID = "A3LCEFCLLVYAA";
 
-    static String mavenGenerationRequestId;
-    static String gradle5GenerationRequestId;
-    static String gradle4GenerationRequestId;
+    private String mavenGenerationRequestId;
+    private String gradle5GenerationRequestId;
+    private String gradle4GenerationRequestId;
 
     @Test
     @Order(1)
