@@ -22,15 +22,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.jms.ConnectionFactory;
-import jakarta.jms.JMSConsumer;
-import jakarta.jms.JMSContext;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.Session;
-
 import org.apache.qpid.jms.provider.exceptions.ProviderConnectionRemotelyClosedException;
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
@@ -47,12 +38,21 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.arc.Unremovable;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.ExceptionListener;
+import jakarta.jms.JMSConsumer;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Unremovable
 @ApplicationScoped
-public class PncMessageParser implements Runnable {
+public class PncMessageParser implements Runnable, ExceptionListener {
 
     private AtomicBoolean shouldRun = new AtomicBoolean(false);
     private AtomicBoolean connected = new AtomicBoolean(false);
@@ -97,6 +97,9 @@ public class PncMessageParser implements Runnable {
 
         try (JMSContext context = cf.createContext(Session.AUTO_ACKNOWLEDGE)) {
             log.info("JMS client ID {}.", context.getClientID());
+
+            // Ensure we catch errors related to the connection.
+            context.setExceptionListener(this);
 
             JMSConsumer consumer = context.createConsumer(context.createQueue(config.consumer().topic().get()));
             while (shouldRun.get()) {
@@ -157,12 +160,7 @@ public class PncMessageParser implements Runnable {
 
             }
         } catch (Exception e) {
-            Throwable cause = getRootCause(e);
-            if (ProviderConnectionRemotelyClosedException.class.equals(cause.getClass())) {
-                log.warn("The JMS connection was remotely closed, will be handled with the reconnection.");
-            } else {
-                log.error("Something wrong happened in the PNCMessageParser", e);
-            }
+            logFailure(e);
         }
 
         connected.set(false);
@@ -214,6 +212,29 @@ public class PncMessageParser implements Runnable {
             cause = cause.getCause();
         }
         return cause;
+    }
+
+    /**
+     * A general handler for logging failures related to UMB connection and message consumption. It logs the exception
+     * as well.
+     *
+     * @param e Exception that was thrown by the underlying JMS system.
+     */
+    public void logFailure(Exception e) {
+        Throwable cause = getRootCause(e);
+
+        if (ProviderConnectionRemotelyClosedException.class.equals(cause.getClass())) {
+            log.error("The JMS connection was remotely closed, will be handled with the reconnection.", e);
+        } else {
+            log.error("Something wrong happened in the PNCMessageParser", e);
+        }
+    }
+
+    @Override
+    public void onException(JMSException e) {
+        logFailure(e);
+
+        connected.set(false);
     }
 
 }

@@ -148,7 +148,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
         });
     }
 
-    //@Test
+    // @Test
     @Order(6)
     public void ensureUmbMessageWasSentForGradle4Build() {
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
