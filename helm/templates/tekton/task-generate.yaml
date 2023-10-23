@@ -42,6 +42,7 @@ spec:
           value: {{ .Values.koji.web.host }}
         - name: SBOMER_PNC_PRODUCT_MAPPING
           value: {{ include "sbomer.productMapping" . }}
+{{ if ne .Values.env "dev" -}}
         - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
           value: {{ .Values.oidc.auth.server.url }}
         - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
@@ -50,6 +51,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['sbomer-secret']
+{{- end }}
         - name: APP_ENV
           value: {{ .Values.env }}
 
@@ -60,7 +62,13 @@ spec:
         set -x
         set -o pipefail
 
-        export QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET="$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer-client.secret)"
+        if [ x"${APP_ENV}" == "xdev" ]; then
+          export QUARKUS_OIDC_CLIENT_CLIENT_ENABLED=false
+        fi
+
+        if [ -n "${SBOMER_SECRET_NAME}" ]; then
+          export QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET="$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer-client.secret)"
+        fi
 
         CONFIG_PATH="/workdir/config.yaml"
         ENV_CONFIG_PATH="/workdir/env-config.yaml"
@@ -106,6 +114,7 @@ spec:
       volumeMounts:
         - name: secrets-workdir
           mountPath: /mnt/secrets
+{{ if ne .Values.env "dev" -}}
   sidecars:
     - image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
       name: get-vault-secrets
@@ -140,6 +149,7 @@ spec:
       volumeMounts:
         - name: secrets-workdir
           mountPath: /mnt/secrets
+{{- end }}
   workspaces:
     - name: data
       description: Workspace used to store the generated SBOMs

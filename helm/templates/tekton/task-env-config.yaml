@@ -30,6 +30,7 @@ spec:
           value: {{ .Values.gerrit.host }}
         - name: SBOMER_PNC_PRODUCT_MAPPING
           value: {{ include "sbomer.productMapping" . }}
+{{ if ne .Values.env "dev" -}}
         - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
           value: {{ .Values.oidc.auth.server.url }}
         - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
@@ -38,6 +39,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['sbomer-secret']
+{{- end }}
         - name: APP_ENV
           value: {{ .Values.env }}
         # SBOMER_CACHE_SERVICE_HOST is set by Kubernetes for us
@@ -47,12 +49,19 @@ spec:
         set -e
         set -x
 
-        export QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET="$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer-client.secret)"
+        if [ x"${APP_ENV}" == "xdev" ]; then
+          export QUARKUS_OIDC_CLIENT_CLIENT_ENABLED=false
+        fi
+
+        if [ -n "${SBOMER_SECRET_NAME}" ]; then
+          export QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET="$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer-client.secret)"
+        fi
 
         exec /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v sbom auto generate-env-config --build-id "$(params.build-id)" --format yaml --target "$(results.env-config.path)"
       volumeMounts:
         - name: secrets-workdir
           mountPath: /mnt/secrets
+{{ if ne .Values.env "dev" -}}
   sidecars:
     - image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
       name: get-vault-secrets
@@ -87,6 +96,7 @@ spec:
       volumeMounts:
         - name: secrets-workdir
           mountPath: /mnt/secrets
+{{- end }}
   results:
     - name: "env-config"
       description: "Environment Runtime configuration"

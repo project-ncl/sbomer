@@ -67,7 +67,7 @@ particular Tekton release. To be as close as possible to the staging and product
 similar version of Tekton for development as deployed on the target environments.
 
 ```
-kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.41.1/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.41.3/release.yaml
 ```
 
 ## Installing SBOMer using Helm
