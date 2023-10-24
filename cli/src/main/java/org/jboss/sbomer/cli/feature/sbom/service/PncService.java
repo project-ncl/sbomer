@@ -24,11 +24,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import io.quarkus.oidc.client.Tokens;
-import jakarta.enterprise.context.control.ActivateRequestContext;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.client.Configuration;
+import org.jboss.pnc.client.Configuration.ConfigurationBuilder;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
@@ -43,9 +41,11 @@ import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceException;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceNotFoundException;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
+import io.quarkus.oidc.client.Tokens;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -60,14 +60,14 @@ public class PncService {
     @Getter
     String apiUrl;
 
+    @ConfigProperty(name = "quarkus.oidc-client.enabled")
+    boolean oidcClientEnabled;
+
     BuildClient buildClient;
 
     BuildConfigurationClient buildConfigurationClient;
 
     GroupConfigurationClient groupConfigurationClient;
-
-    @Inject
-    Tokens serviceTokens;
 
     @PostConstruct
     void init() {
@@ -90,11 +90,15 @@ public class PncService {
      * @return
      */
     public Configuration getConfiguration() {
-        return Configuration.builder()
-                .host(apiUrl)
-                .bearerTokenSupplier(() -> serviceTokens.getAccessToken())
-                .protocol("http")
-                .build();
+
+        ConfigurationBuilder configurationBuilder = Configuration.builder().host(apiUrl).protocol("http");
+
+        if (oidcClientEnabled) {
+            Tokens serviceTokens = CDI.current().select(Tokens.class).get();
+            configurationBuilder.bearerTokenSupplier(() -> serviceTokens.getAccessToken());
+        }
+
+        return configurationBuilder.build();
     }
 
     /**
