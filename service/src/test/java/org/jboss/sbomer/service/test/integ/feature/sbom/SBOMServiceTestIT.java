@@ -19,7 +19,9 @@ package org.jboss.sbomer.service.test.integ.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -28,9 +30,15 @@ import java.util.Iterator;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
+import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import io.quarkus.arc.ClientProxy;
+import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import jakarta.inject.Inject;
@@ -43,6 +51,9 @@ public class SBOMServiceTestIT {
 
     @Inject
     SbomService sbomService;
+
+    @Inject
+    SbomRepository sbomRepository;
 
     private static final String INITIAL_BUILD_ID = "ARYT3LBXDVYAC";
 
@@ -82,5 +93,38 @@ public class SBOMServiceTestIT {
         }
 
         assertNotNull(foundSbom);
+    }
+
+    @Nested
+    class GetByPurl {
+        @Test
+        public void testGetSbomByPurlNotFound() {
+            Sbom sbom = sbomService.findByPurl("doesntexist");
+            assertNull(sbom);
+        }
+
+        @Test
+        public void testGetSbomByPurl() {
+            SbomRepository sbomRepositorySpy = spy(ClientProxy.unwrap(sbomRepository));
+            QuarkusMock.installMockForInstance(sbomRepositorySpy, sbomRepository);
+
+            // Part of the import.sql
+            String purl = "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom";
+            Sbom sbom = sbomService.findByPurl(purl);
+
+            assertNotNull(sbom);
+
+            Mockito.verify(sbomRepositorySpy, Mockito.times(1))
+                    .search(
+                            QueryParameters.builder()
+                                    .rsqlQuery("rootPurl=eq='" + purl + "'")
+                                    .sort("creationTime=desc=")
+                                    .pageSize(10)
+                                    .pageIndex(0)
+                                    .build());
+
+            assertEquals("416640206274228224", sbom.getId());
+            assertEquals(sbom.getRootPurl(), purl);
+        }
     }
 }

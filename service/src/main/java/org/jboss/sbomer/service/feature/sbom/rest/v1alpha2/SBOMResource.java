@@ -27,6 +27,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 import jakarta.annotation.security.PermitAll;
@@ -37,6 +38,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
@@ -99,5 +101,75 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
                     .entity("Failed while parsing the provided RSQL string, please verify the correct syntax")
                     .build();
         }
+    }
+
+    @GET
+    @Path("/purl/{purl}")
+    @Operation(summary = "Get specific SBOM", description = "Find latest generated SBOM for a given purl.")
+    @Parameter(
+            name = "purl",
+            description = "Package URL identifier",
+            example = "scheme:type/namespace/name@version?qualifiers#subpath")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The SBOM",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Could not parse provided arguments",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Response findByPurl(@PathParam("purl") String purl) {
+        Sbom sbom = sbomService.findByPurl(purl);
+
+        if (sbom == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        return Response.status(Status.OK).entity(sbom).build();
+    }
+
+    @GET
+    @Path("/purl/{purl}/bom")
+    @Operation(
+            summary = "Get the BOM content of particular SBOM identified by provided purl",
+            description = "Returns the CycloneDX BOM content of particular SBOM identified by provided purl")
+    @Parameter(
+            name = "purl",
+            description = "Package URL identifier",
+            example = "scheme:type/namespace/name@version?qualifiers#subpath")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The CycloneDX BOM",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Could not parse provided arguments",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Response getBomByPurl(@PathParam("purl") String purl) {
+        Sbom sbom = sbomService.findByPurl(purl);
+
+        if (sbom == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        return Response.status(Status.OK).entity(sbom.getCycloneDxBom()).build();
     }
 }
