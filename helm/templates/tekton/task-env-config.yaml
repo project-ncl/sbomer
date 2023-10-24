@@ -30,7 +30,7 @@ spec:
           value: {{ .Values.gerrit.host }}
         - name: SBOMER_PNC_PRODUCT_MAPPING
           value: {{ include "sbomer.productMapping" . }}
-{{ if ne .Values.env "dev" -}}
+{{- if ne .Values.env "dev" }}
         - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
           value: {{ .Values.oidc.auth.server.url }}
         - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
@@ -61,7 +61,7 @@ spec:
       volumeMounts:
         - name: secrets-workdir
           mountPath: /mnt/secrets
-{{ if ne .Values.env "dev" -}}
+{{- if ne .Values.env "dev" }}
   sidecars:
     - image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
       name: get-vault-secrets

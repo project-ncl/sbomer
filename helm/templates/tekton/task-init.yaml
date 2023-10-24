@@ -63,7 +63,7 @@ spec:
       volumeMounts:
         - name: secrets-workdir
           mountPath: /mnt/secrets
-{{ if ne .Values.env "dev" -}}
+{{- if ne .Values.env "dev" }}
   sidecars:
     - image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
       name: get-vault-secrets
