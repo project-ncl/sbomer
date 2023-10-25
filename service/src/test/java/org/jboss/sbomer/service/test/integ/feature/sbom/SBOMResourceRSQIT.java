@@ -26,11 +26,14 @@ import java.util.Arrays;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
@@ -97,10 +100,68 @@ public class SBOMResourceRSQIT {
                     .and()
                     .body("content[0].sbom", CoreMatchers.is(CoreMatchers.nullValue()));
         }
+
+        @Nested
+        class GetByPurl {
+
+            static String PURL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom";
+
+            @Test
+            void testFetchSbomByPurl() throws Exception {
+                Mockito.when(sbomService.findByPurl(PURL)).thenReturn(createFirstSbom());
+
+                given().when()
+                        .contentType(ContentType.JSON)
+                        .pathParam("purl", PURL)
+                        .get(API_PATH + "/sboms/purl/{purl}")
+                        .then()
+                        .statusCode(200)
+                        .and()
+                        .body("id", CoreMatchers.is("12345"))
+                        .and()
+                        .body("buildId", CoreMatchers.is("AWI7P3EJ23YAA"))
+                        .and()
+                        .body("sbom", CoreMatchers.is(CoreMatchers.notNullValue()));
+            }
+
+            @Test
+            void testFetchSbomBomByPurl() throws Exception {
+                Mockito.when(sbomService.findByPurl(PURL)).thenReturn(createFirstSbom());
+
+                given().when()
+                        .contentType(ContentType.JSON)
+                        .pathParam("purl", PURL)
+                        .get(API_PATH + "/sboms/purl/{purl}/bom")
+                        .then()
+                        .statusCode(200)
+                        .and()
+                        .body("metadata.component.name", CoreMatchers.is("microprofile-graphql-parent"))
+                        .and()
+                        // This purl doesn't match PURL above, but this is expected because of the test data used
+                        .body(
+                                "metadata.component.purl",
+                                CoreMatchers.is(
+                                        "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom"));
+            }
+
+            @Test
+            void testFetchSbomByPurlNotFound() {
+                Mockito.when(sbomService.findByPurl(PURL)).thenReturn(null);
+
+                given().when()
+                        .contentType(ContentType.JSON)
+                        .pathParam("purl", PURL)
+                        .get(API_PATH + "/sboms/purl/{purl}")
+                        .then()
+                        .statusCode(404);
+            }
+
+        }
+
     }
 
     @Test
-    public void testRSQLSearchPagination() {
+    public void testRSQLSearchPagination() throws Exception {
         // One page, one result
         int pageIndex = 0;
         int pageSizeLarge = 50;
@@ -201,7 +262,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearch() {
+    public void testRSQLSearch() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
 
@@ -337,7 +398,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchNotNullValues() {
+    public void testRSQLSearchNotNullValues() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
         Page<Sbom> pagedSboms = initializeOneResultPaginated(pageIndex, pageSize);
@@ -364,7 +425,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchNullValues() {
+    public void testRSQLSearchNullValues() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
         Page<Sbom> pagedSboms = initializeOneResultPaginated(pageIndex, pageSize);
@@ -401,7 +462,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchAndLogicalNode() {
+    public void testRSQLSearchAndLogicalNode() throws Exception {
 
         int pageIndex = 0;
         int pageSize = 50;
@@ -480,7 +541,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchAndLogicalNodeWithSorting() {
+    public void testRSQLSearchAndLogicalNodeWithSorting() throws Exception {
 
         int pageIndex = 0;
         int pageSize = 20;
@@ -535,13 +596,13 @@ public class SBOMResourceRSQIT {
         assertTrue(creationTime1.isAfter(creationTime2));
     }
 
-    private Page<Sbom> initializeOneResultPaginated(int pageIndex, int pageSize) {
+    private Page<Sbom> initializeOneResultPaginated(int pageIndex, int pageSize) throws Exception {
         int totalHits = 1;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
         return new Page<Sbom>(pageIndex, pageSize, totalPages, totalHits, Arrays.asList(createFirstSbom()));
     }
 
-    private Page<Sbom> initializeTwoResultsPaginated(int pageIndex, int pageSize) {
+    private Page<Sbom> initializeTwoResultsPaginated(int pageIndex, int pageSize) throws Exception {
         int totalHits = 2;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
         return new Page<Sbom>(
@@ -552,7 +613,7 @@ public class SBOMResourceRSQIT {
                 Arrays.asList(createFirstSbom(), createSecondSbom()));
     }
 
-    private Page<Sbom> initializeTwoResultsPaginatedInverted(int pageIndex, int pageSize) {
+    private Page<Sbom> initializeTwoResultsPaginatedInverted(int pageIndex, int pageSize) throws Exception {
         int totalHits = 2;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
         return new Page<Sbom>(
@@ -563,13 +624,17 @@ public class SBOMResourceRSQIT {
                 Arrays.asList(createSecondSbom(), createFirstSbom()));
     }
 
-    private Sbom createFirstSbom() {
+    private Sbom createFirstSbom() throws Exception {
         Sbom sbom = new Sbom();
         sbom.setId("12345");
         sbom.setBuildId("AWI7P3EJ23YAA");
         sbom.setRootPurl("pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom");
         sbom.setStatusMessage("all went well");
         sbom.setCreationTime(Instant.now().minus(Duration.ofDays(1)));
+
+        String bomJson = TestResources.asString("sboms/complete_sbom.json");
+        sbom.setSbom(new ObjectMapper().readTree(bomJson));
+
         return sbom;
     }
 

@@ -216,4 +216,32 @@ public class SbomService {
 
         log.debug("SBOM '{}' is valid!", sbom.getId());
     }
+
+    /**
+     * Searches for the latest generated SBOM matching the provided {@code purl}.
+     *
+     * @param purl
+     * @return The latest generated SBOM or {@code null}.
+     */
+    public Sbom findByPurl(String purl) {
+        log.debug("Trying to find latest generated SBOM for purl: '{}'", purl);
+
+        QueryParameters parameters = QueryParameters.builder()
+                .rsqlQuery("rootPurl=eq='" + purl + "'")
+                .sort("creationTime=desc=")
+                .pageSize(10)
+                .pageIndex(0)
+                .build();
+
+        List<Sbom> sboms = sbomRepository.search(parameters);
+
+        log.debug("Found {} results for the '{}' purl", sboms.size(), purl);
+
+        if (sboms.isEmpty()) {
+            return null;
+        }
+
+        return sboms.get(0);
+
+    }
 }
