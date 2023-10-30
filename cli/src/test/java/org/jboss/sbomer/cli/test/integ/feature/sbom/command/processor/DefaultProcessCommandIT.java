@@ -71,6 +71,11 @@ public class DefaultProcessCommandIT {
     @Inject
     DefaultProcessCommand command;
 
+    private JsonNode generateRHBom() throws IOException {
+        String bomJson = TestResources.asString("boms/plain.json");
+        return objectMapper.readTree(bomJson);
+    }
+
     private JsonNode generateBom() throws IOException {
         String bomJson = TestResources.asString("boms/valid.json");
         return objectMapper.readTree(bomJson);
@@ -119,6 +124,54 @@ public class DefaultProcessCommandIT {
     }
 
     @Test
+    void shouldSkipAdjustingPurlWithRepositoryUrl() throws Exception {
+        Mockito.when(pncService.getApiUrl()).thenReturn("apiurl");
+
+        DefaultProcessCommand spiedCommand = spy(command);
+        stubBuildId(spiedCommand);
+
+        Bom before = SbomUtils.fromJsonNode(generateBom());
+
+        assertEquals("pkg:maven/com.beust/jcommander@1.72?type=jar", before.getMetadata().getComponent().getPurl());
+
+        Bom processed = spiedCommand.doProcess(before);
+
+        assertEquals("pkg:maven/com.beust/jcommander@1.72?type=jar", processed.getMetadata().getComponent().getPurl());
+    }
+
+    @Test
+    void shouldAdjustingRHComponentPurlWithRepositoryUrl() throws Exception {
+        Mockito.when(pncService.getApiUrl()).thenReturn("apiurl");
+
+        DefaultProcessCommand spiedCommand = spy(command);
+        stubBuildId(spiedCommand);
+
+        Bom before = SbomUtils.fromJsonNode(generateRHBom());
+
+        String[] componentPurls = { "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom" };
+
+        for (String purl : componentPurls) {
+            Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(purl, before);
+            assertTrue(componentOpt.isPresent());
+            Component component = componentOpt.get();
+
+            Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
+            String sha = sha256.isPresent() ? sha256.get() : null;
+            Mockito.when(pncService.getArtifact("BBVVCC", purl, sha256)).thenReturn(generateArtifact(purl, sha));
+        }
+
+        assertEquals(
+                "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
+                before.getMetadata().getComponent().getPurl());
+
+        Bom processed = spiedCommand.doProcess(before);
+
+        assertEquals(
+                "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga&type=pom",
+                processed.getMetadata().getComponent().getPurl());
+    }
+
+    @Test
     void shouldManipulateBomContent() throws Exception {
         log.info("test: shouldManipulateBomContent");
 
@@ -146,9 +199,20 @@ public class DefaultProcessCommandIT {
         DefaultProcessCommand spiedCommand = spy(command);
         stubBuildId(spiedCommand);
 
+        assertTrue(
+                SbomUtils.findComponentWithPurl(
+                        "pkg:maven/org.jboss.arquillian.container/arquillian-container-spi@1.6.0.Final?type=jar",
+                        baseBom).isPresent());
+
         Bom bom = spiedCommand.doProcess(SbomUtils.fromJsonNode(generateBom()));
 
-        for (String purl : componentPurls) {
+        String[] adjustedComponentPurls = {
+                "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga&type=jar",
+                "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga&type=jar",
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-api@1.1.0.redhat-00008?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga&type=jar",
+                "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-tck@1.1.0.redhat-00008?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga&type=jar" };
+
+        for (String purl : adjustedComponentPurls) {
             Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(purl, bom);
             assertTrue(componentOpt.isPresent());
             Component component = componentOpt.get();
@@ -177,6 +241,12 @@ public class DefaultProcessCommandIT {
             assertEquals("scmrevision", commit.getUid());
             assertEquals("scmurl#scmtag", commit.getUrl());
         }
+
+        // This is to check that community components are not enhanced with the repository_url qualifier
+        assertTrue(
+                SbomUtils.findComponentWithPurl(
+                        "pkg:maven/org.jboss.arquillian.container/arquillian-container-spi@1.6.0.Final?type=jar",
+                        bom).isPresent());
     }
 
     @Test
@@ -219,7 +289,9 @@ public class DefaultProcessCommandIT {
 
         Bom bom = spiedCommand.doProcess(SbomUtils.fromJsonNode(generateBom()));
 
-        Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(specialPurl, bom);
+        String adjustedSpecialPurl = "pkg:maven/commons-io/commons-io@2.6.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga&type=jar";
+
+        Optional<Component> componentOpt = SbomUtils.findComponentWithPurl(adjustedSpecialPurl, bom);
         assertTrue(componentOpt.isPresent());
         Component component = componentOpt.get();
 

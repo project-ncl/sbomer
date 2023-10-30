@@ -23,6 +23,7 @@ import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUI
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
@@ -38,6 +39,9 @@ import org.jboss.sbomer.cli.feature.sbom.utils.buildfinder.FinderStatus;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -50,6 +54,8 @@ import picocli.CommandLine.ParentCommand;
         description = "Process the SBOM with enrichments applied to known CycloneDX fields")
 public class DefaultProcessCommand extends AbstractProcessCommand {
 
+    private static final Pattern REPOSITORY_URL_PATTERN = Pattern.compile(".+repository_url=.+");
+
     @ParentCommand
     ProcessCommand parent;
 
@@ -58,6 +64,39 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
 
     @Inject
     protected KojiService kojiService;
+
+    /**
+     * If the purl of the component does not contain the {@code repository_url} we need to add it and point to Red Hat
+     * Maven Repository.
+     *
+     * @param component The {@code Component} to adjust.
+     */
+    private void adjustPurlRepositoryUrl(Component component) {
+        if (REPOSITORY_URL_PATTERN.matcher(component.getPurl()).matches()) {
+            log.debug(
+                    "Component's purl '{}' already contains 'repository_url' qualifier, skipping",
+                    component.getPurl());
+            return;
+        }
+
+        PackageURL purl;
+
+        try {
+            purl = new PackageURL(component.getPurl());
+        } catch (MalformedPackageURLException e) {
+            log.warn(
+                    "Unable to parse component's purl: '{}', skipping adjusting it to include 'repository_url'",
+                    component.getPurl(),
+                    e);
+            return;
+        }
+
+        purl.getQualifiers().put("repository_url", "https://maven.repository.redhat.com/ga");
+
+        log.debug("Component's purl was adjusted: {}", purl.toString());
+
+        component.setPurl(purl);
+    }
 
     /**
      * Performs processing for a given {@link Component}.
@@ -123,6 +162,8 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
                     "Component with purl '{}' is already enriched, skipping further processing for this component",
                     component.getPurl());
         }
+
+        adjustPurlRepositoryUrl(component);
     }
 
     private void processPncBuild(Component component, Build build) {

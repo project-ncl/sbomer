@@ -41,8 +41,8 @@
   },
   "components": [
     {
-      "name": "jcommander",
-      "purl": "pkg:maven/com.beust/jcommander@1.72?type=jar",
+      "name": "log4j",
+      "purl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
       "type": "library",
       "group": "com.beust",
       "version": "1.72",
@@ -1077,6 +1077,20 @@
       "purl": "pkg:maven/org.jboss.arquillian.container/arquillian-container-spi@1.6.0.Final?type=jar",
       "type": "library",
       "group": "org.jboss.arquillian.container",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "08270058ba7f3f3e1754f5e739fddf12"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "5450e525a880b7967d5b086fdefcf88971218b4c"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "122dd093db60b5fafcb428b28569aa72993e2a2c63d3d87b7dcc076bdebd8a72"
+        }
+      ],
       "version": "1.6.0.Final",
       "licenses": [
         {
