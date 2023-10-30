@@ -42,7 +42,7 @@ quarkus:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
       stderr: true
   oidc-client:
-    enabled: true
+    client-enabled: true
     auth-server-url: http://localhost:8180/auth/realms/quarkus
     client-id: quarkus-app
     credentials:
@@ -75,7 +75,7 @@ sbomer:
         json:
           ~: false
     oidc-client:
-      enabled: false
+      client-enabled: false
 
   sbomer:
     pnc:
@@ -88,7 +88,7 @@ sbomer:
         json:
           ~: false
     oidc-client:
-      enabled: false
+      client-enabled: false
 
 
   sbomer:
