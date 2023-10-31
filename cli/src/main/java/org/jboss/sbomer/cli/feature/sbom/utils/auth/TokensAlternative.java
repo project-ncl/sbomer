@@ -27,7 +27,7 @@ import jakarta.enterprise.inject.Produces;
 import java.time.Duration;
 
 @ApplicationScoped
-@LookupIfProperty(name = "quarkus.oidc-client.enabled", stringValue = "false")
+@LookupIfProperty(name = "quarkus.oidc-client.client-enabled", stringValue = "false")
 @IfBuildProfile(anyOf = { "test", "dev" })
 /**
  * To be able to start in test mode without authorization

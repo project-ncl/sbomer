@@ -60,7 +60,7 @@ public class PncService {
     @Getter
     String apiUrl;
 
-    @ConfigProperty(name = "quarkus.oidc-client.enabled")
+    @ConfigProperty(name = "quarkus.oidc-client.client-enabled")
     boolean oidcClientEnabled;
 
     BuildClient buildClient;
