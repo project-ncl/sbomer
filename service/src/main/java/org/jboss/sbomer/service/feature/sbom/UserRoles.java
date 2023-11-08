@@ -19,6 +19,6 @@ package org.jboss.sbomer.service.feature.sbom;
 
 public class UserRoles {
 
-    public static final String SYSTEM_USER = "pnc-users-sbomer-admin";
+    public static final String SYSTEM_USER = "system-user";
 
 }
