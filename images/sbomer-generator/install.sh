@@ -59,7 +59,7 @@ function install_gradle() {
 }
 
 function install_domino() {
-  for domino_version in 0.0.90 0.0.97; do
+  for domino_version in 0.0.90 0.0.97 0.0.100; do
     curl -L https://github.com/quarkusio/quarkus-platform-bom-generator/releases/download/${domino_version}/domino.jar -o domino-${domino_version}.jar
   done
 }
