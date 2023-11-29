@@ -32,7 +32,7 @@
     <parent>
         <artifactId>jboss-parent</artifactId>
         <groupId>org.jboss</groupId>
-        <version>40</version>
+        <version>41</version>
     </parent>
 
     <modules>
@@ -47,7 +47,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <version.surefire-plugin>3.2.1</version.surefire-plugin>
+        <version.surefire-plugin>3.2.2</version.surefire-plugin>
         <version.failsafe-plugin>3.2.2</version.failsafe-plugin>
 
         <!--
