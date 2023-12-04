@@ -23,13 +23,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.jms.ConnectionFactory;
-import jakarta.jms.Message;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -40,6 +33,13 @@ import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.Scheduled.SkipPredicate;
 import io.quarkus.scheduler.ScheduledExecution;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import lombok.extern.slf4j.Slf4j;
 
 @Unremovable
@@ -62,6 +62,13 @@ public class UmbMessageConsumer implements MessageConsumer {
             return false;
         }
     }
+
+    private final Long startupTime = System.currentTimeMillis();
+
+    /**
+     * Maximal time without received message. Currently set to 3 hours.
+     */
+    final private static long MAX_QUIET_TIME_MILLIS = 10800000;
 
     @ConfigProperty(name = "quarkus.qpid-jms.url")
     Optional<String> amqpConnection;
@@ -125,6 +132,48 @@ public class UmbMessageConsumer implements MessageConsumer {
             log.info("Reconnecting UMB connection for topic {} ...", umbConfig.consumer().topic().get());
             scheduler.submit(pncMessageParser);
         }
+    }
+
+    @Scheduled(every = "1h", delay = 10, delayUnit = TimeUnit.SECONDS, skipExecutionIf = UmbNotEnabledPredicate.class)
+    public void checkLastMessageTime() throws IOException, JMSException {
+        log.info("Checking if there were UMB messages received recently...");
+
+        if (pncMessageParser.getLastMessage() == null) {
+            if (System.currentTimeMillis() - startupTime > MAX_QUIET_TIME_MILLIS) {
+                log.warn(
+                        "Did not receive any messages since startup for more than {} ms which is the maximal quiet period configured, scheduling consumer restart",
+                        MAX_QUIET_TIME_MILLIS);
+
+                // Schedule reconnect
+                pncMessageParser.scheduleReconnect();
+
+                return;
+            }
+
+            log.debug(
+                    "We did not receive any message after startup just yet -- we are running for {} ms, it's OK!",
+                    System.currentTimeMillis() - startupTime);
+        } else {
+            if (System.currentTimeMillis()
+                    - pncMessageParser.getLastMessage().getJMSTimestamp() > MAX_QUIET_TIME_MILLIS) {
+                log.warn(
+                        "Last message was published at {}, it was {} ms ago, this is more than allowed for the quiet period which is currently set at: {} ms, scheduling reconnect",
+                        pncMessageParser.getLastMessage().getJMSTimestamp(),
+                        System.currentTimeMillis() - pncMessageParser.getLastMessage().getJMSTimestamp(),
+                        MAX_QUIET_TIME_MILLIS);
+
+                // Schedule reconnect
+                pncMessageParser.scheduleReconnect();
+
+                return;
+            }
+
+            log.debug(
+                    "We received last message {} ms ago, it's OK!",
+                    System.currentTimeMillis() - pncMessageParser.getLastMessage().getJMSTimestamp());
+        }
+
+        log.info("UMB consumer seems to be working just fine!");
     }
 
 }

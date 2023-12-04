@@ -178,6 +178,10 @@ public class PncMessageParser implements Runnable, ExceptionListener {
         return connected.get();
     }
 
+    public void scheduleReconnect() {
+        connected.set(false);
+    }
+
     public Message getLastMessage() {
         return lastMessage;
     }
@@ -233,8 +237,7 @@ public class PncMessageParser implements Runnable, ExceptionListener {
     @Override
     public void onException(JMSException e) {
         logFailure(e);
-
-        connected.set(false);
+        scheduleReconnect();
     }
 
 }
