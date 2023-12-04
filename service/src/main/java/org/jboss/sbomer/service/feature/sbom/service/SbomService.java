@@ -86,8 +86,9 @@ public class SbomService {
                 .build();
 
         List<SbomRecord> content = sbomRepository.searchSbomRecords(parameters);
+        Long count = sbomRepository.countByRsqlQuery(parameters.getRsqlQuery());
 
-        return toPage(content, parameters);
+        return toPage(content, parameters, count);
     }
 
     @WithSpan
@@ -105,8 +106,9 @@ public class SbomService {
                 .build();
 
         List<Sbom> content = sbomRepository.search(parameters);
+        Long count = sbomRepository.countByRsqlQuery(parameters.getRsqlQuery());
 
-        return toPage(content, parameters);
+        return toPage(content, parameters, count);
     }
 
     @WithSpan
@@ -124,8 +126,9 @@ public class SbomService {
                 .build();
 
         List<SbomGenerationRequest> content = sbomRequestRepository.search(parameters);
+        Long count = sbomRequestRepository.countByRsqlQuery(parameters.getRsqlQuery());
 
-        return toPage(content, parameters);
+        return toPage(content, parameters, count);
     }
 
     /**
@@ -135,10 +138,7 @@ public class SbomService {
      * @param parameters Query parameters passed to the search.
      * @return A {@link Page} element with content.
      */
-    protected <X> Page<X> toPage(List<X> content, QueryParameters parameters) {
-        // Count the total number of entries so that we can set up pagination.
-        Long count = sbomRepository.countByRsqlQuery(parameters.getRsqlQuery());
-
+    protected <X> Page<X> toPage(List<X> content, QueryParameters parameters, Long count) {
         int totalPages = 0;
 
         if (count == 0) {
