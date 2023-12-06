@@ -35,6 +35,7 @@ import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.features.umb.JmsUtils;
+import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncBuildNotificationHandler;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncMessageParser;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.UmbMessageConsumer;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
@@ -63,7 +64,7 @@ public class PncBuildIT {
     ConnectionFactory connectionFactory;
 
     @Inject
-    PncMessageParser pncMessageParser;
+    PncBuildNotificationHandler handler;
 
     @Test
     @Order(1)
@@ -98,7 +99,7 @@ public class PncBuildIT {
         assertEquals(ProgressStatus.FINISHED, msgBody.getBuild().getProgress());
         assertEquals("AX5TJMYHQAIAE", msgBody.getBuild().getId());
 
-        assertTrue(pncMessageParser.isSuccessfulPersistentBuild(msgBody));
+        assertTrue(handler.isSuccessfulPersistentBuild(msgBody));
     }
 
     private TextMessage preparePNCBuildMsg(JMSContext context) throws IOException {

@@ -73,8 +73,8 @@ public class NotificationService {
 
     public void notifyCompleted(List<org.jboss.sbomer.service.feature.sbom.model.Sbom> sboms) {
 
-        if (!umbConfig.isEnabled()) {
-            log.info("UMB feature disabled");
+        if (!umbConfig.isEnabled() || umbConfig.usesReactive()) {
+            log.info("UMB feature disabled, Qpid UMB notification service will be disabled");
             return;
         }
 

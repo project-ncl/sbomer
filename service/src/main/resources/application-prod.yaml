@@ -16,6 +16,14 @@
 # limitations under the License.
 #
 
+mp:
+  messaging:
+    incoming:
+      builds:
+        port: ${UMB_BROKER_PORT}
+        address: "${CONSUMER_TOPIC}"
+        host: "${UMB_BROKER_HOST}"
+
 sbomer:
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha2/"
 
