@@ -35,6 +35,8 @@ spec:
               echo "#!/bin/bash" >> /mnt/secrets/env.sh;
               echo "export CONSUMER_TOPIC=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/consumer.topic)\"" >> /mnt/secrets/env.sh;
               echo "export PRODUCER_TOPIC=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/producer.topic)\"" >> /mnt/secrets/env.sh;
+              echo "export UMB_BROKER_HOST=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/umb-broker.host)\"" >> /mnt/secrets/env.sh;
+              echo "export UMB_BROKER_PORT=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/umb-broker.port)\"" >> /mnt/secrets/env.sh;
               echo "export UMB_BROKER_URL=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/qpid-jms.url)\"" >> /mnt/secrets/env.sh;
               echo "export QUARKUS_OIDC_AUTH_SERVER_URL=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/auth-server-url.txt)\"" >> /mnt/secrets/env.sh;
               echo "export QUARKUS_DATASOURCE_USERNAME=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.user)\"" >> /mnt/secrets/env.sh;
