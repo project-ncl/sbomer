@@ -23,6 +23,11 @@ mp:
         port: ${UMB_BROKER_PORT}
         address: "${CONSUMER_TOPIC}"
         host: "${UMB_BROKER_HOST}"
+    outgoing:
+      generation-finished:
+        port: ${UMB_BROKER_PORT}
+        address: "${PRODUCER_TOPIC}"
+        host: "${UMB_BROKER_HOST}"
 
 sbomer:
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha2/"

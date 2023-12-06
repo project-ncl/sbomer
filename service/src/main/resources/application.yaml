@@ -33,6 +33,15 @@ mp:
         # that would allow to programmatically control the SmallRye Messaging subsystem.
         enabled: ${sbomer.features.umb.reactive}
         client-options-name: umb
+    outgoing:
+      generation-finished:
+        connector: smallrye-amqp
+        # This ignores the "sbomer.features.umb.enabled" property.
+        # This means that if it is disabled, we need to remember to NOT set
+        # "sbomer.features.umb.reactive" to true. I couldn't find better solution
+        # that would allow to programmatically control the SmallRye Messaging subsystem.
+        enabled: ${sbomer.features.umb.reactive}
+        client-options-name: umb
 
 quarkus:
   application:

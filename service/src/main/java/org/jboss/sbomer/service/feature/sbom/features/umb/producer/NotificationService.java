@@ -66,6 +66,9 @@ public class NotificationService {
     UmbConfig umbConfig;
 
     @Inject
+    AmqpMessageProducer amqpMessageProducer;
+
+    @Inject
     UmbMessageProducer messageProducer;
 
     @Inject
@@ -73,8 +76,8 @@ public class NotificationService {
 
     public void notifyCompleted(List<org.jboss.sbomer.service.feature.sbom.model.Sbom> sboms) {
 
-        if (!umbConfig.isEnabled() || umbConfig.usesReactive()) {
-            log.info("UMB feature disabled, Qpid UMB notification service will be disabled");
+        if (!umbConfig.isEnabled()) {
+            log.info("UMB feature disabled, notification service won't send a notification");
             return;
         }
 
@@ -112,7 +115,13 @@ public class NotificationService {
             ValidationResult result = validator.validate(msg);
             if (result.isValid()) {
                 log.info("GenerationFinishedMessage is valid, sending it to the topic!");
-                messageProducer.sendToTopic(msg);
+
+                if (umbConfig.usesReactive()) {
+                    amqpMessageProducer.notify(msg);
+                } else {
+                    messageProducer.sendToTopic(msg);
+                }
+
             } else {
                 log.warn(
                         "GenerationFinishedMessage is NOT valid, NOT sending it to the topic! Validation errors: {}",
