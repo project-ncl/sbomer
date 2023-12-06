@@ -16,6 +16,33 @@
 # limitations under the License.
 #
 
+smallrye:
+  messaging:
+    worker:
+      "build-processor-pool":
+        max-concurrency: 10
+
+mp:
+  messaging:
+    incoming:
+      builds:
+        connector: smallrye-amqp
+        # This ignores the "sbomer.features.umb.enabled" property.
+        # This means that if it is disabled, we need to remember to NOT set
+        # "sbomer.features.umb.reactive" to true. I couldn't find better solution
+        # that would allow to programmatically control the SmallRye Messaging subsystem.
+        enabled: ${sbomer.features.umb.reactive}
+        client-options-name: umb
+    outgoing:
+      generation-finished:
+        connector: smallrye-amqp
+        # This ignores the "sbomer.features.umb.enabled" property.
+        # This means that if it is disabled, we need to remember to NOT set
+        # "sbomer.features.umb.reactive" to true. I couldn't find better solution
+        # that would allow to programmatically control the SmallRye Messaging subsystem.
+        enabled: ${sbomer.features.umb.reactive}
+        client-options-name: umb
+
 quarkus:
   application:
     version: ${buildNumber}
@@ -24,7 +51,7 @@ quarkus:
   banner:
     path: banner.txt
 
-  # We don't use https://quarkus.io/guides/dev-services currently 
+  # We don't use https://quarkus.io/guides/dev-services currently
   devservices:
     enabled: false
 
@@ -84,7 +111,7 @@ quarkus:
       # Just validate, do not do anything else
       generation:
         ~: validate
-  
+
   # https://docs.quarkiverse.io/quarkus-operator-sdk/dev/index.html
   operator-sdk:
     crd:
@@ -108,13 +135,15 @@ sbomer:
     umb:
       # Disable UMB feature entirely by default
       enabled: false
+      # Enables the new AMQP client based on SmallRye Reactive.
+      # If it is disabled, the old client based on Qpid will be used.
+      reactive: false
 
   # Tekton-related configuration
   tekton:
-
     # Name of the ServiceAccount used to run Tekton TaskRuns
     sa: sbomer
-  
+
   controller:
     generation-request:
       # # The directory where the content between TaskRuns (dependent resources) will be

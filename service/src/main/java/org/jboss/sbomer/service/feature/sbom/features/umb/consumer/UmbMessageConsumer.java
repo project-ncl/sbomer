@@ -89,8 +89,8 @@ public class UmbMessageConsumer implements MessageConsumer {
 
     @Override
     public void init(@Observes StartupEvent ev) {
-        if (!umbConfig.isEnabled()) {
-            log.info("UMB feature disabled");
+        if (!umbConfig.isEnabled() || umbConfig.usesReactive()) {
+            log.info("UMB feature disabled, Qpid UMB message consumer will be disabled");
             return;
         }
 

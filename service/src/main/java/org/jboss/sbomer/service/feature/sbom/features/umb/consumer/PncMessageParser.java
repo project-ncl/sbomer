@@ -18,25 +18,15 @@
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.qpid.jms.provider.exceptions.ProviderConnectionRemotelyClosedException;
-import org.jboss.pnc.api.enums.BuildStatus;
-import org.jboss.pnc.api.enums.BuildType;
-import org.jboss.pnc.api.enums.ProgressStatus;
-import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig.UmbConsumerTrigger;
 import org.jboss.sbomer.service.feature.sbom.features.umb.JmsUtils;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.arc.Unremovable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -65,7 +55,7 @@ public class PncMessageParser implements Runnable, ExceptionListener {
     ConnectionFactory cf;
 
     @Inject
-    KubernetesClient kubernetesClient;
+    PncBuildNotificationHandler buildNotificationHandler;
 
     private Message lastMessage;
 
@@ -113,51 +103,21 @@ public class PncMessageParser implements Runnable, ExceptionListener {
                 lastMessage = message;
                 receivedMessages.incrementAndGet();
 
+                PncBuildNotificationMessageBody msgBody = null;
+
                 try {
-                    PncBuildNotificationMessageBody msgBody = JmsUtils.getMsgBody(lastMessage);
-
-                    if (msgBody == null) {
-                        continue;
-                    }
-
-                    if (Strings.isEmpty(msgBody.getBuild().getId())) {
-                        log.warn("Received UMB message without Build ID specified");
-                        continue;
-                    }
-
-                    if (Objects.equals(config.consumer().trigger().orElse(null), UmbConsumerTrigger.NONE)) {
-                        log.warn(
-                                "The UMB consumer configuration is set to NONE, skipping SBOM generation for PNC Build '{}'",
-                                msgBody.getBuild().getId());
-                        continue;
-                    }
-
-                    if (isSuccessfulPersistentBuild(msgBody)) {
-                        // TODO: Check whether it is a product-related build?
-
-                        log.info(
-                                "Triggering the automated SBOM generation for build {} ...",
-                                msgBody.getBuild().getId());
-
-                        GenerationRequest req = new GenerationRequestBuilder()
-                                .withNewDefaultMetadata(msgBody.getBuild().getId())
-                                .endMetadata()
-                                .withBuildId(msgBody.getBuild().getId())
-                                .withStatus(SbomGenerationStatus.NEW)
-                                .build();
-
-                        ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
-
-                        log.info("Request created: {}", cm.getMetadata().getName());
-                    }
+                    msgBody = JmsUtils.getMsgBody(lastMessage);
                 } catch (JMSException | IOException e) {
                     log.error(
                             "Cannot convert UMB message {} from topic {} to Json",
                             message.getJMSMessageID(),
                             message.getJMSDestination(),
                             e);
+                    continue;
                 }
 
+                // Handle the message
+                buildNotificationHandler.handle(msgBody);
             }
         } catch (Exception e) {
             logFailure(e);
@@ -188,26 +148,6 @@ public class PncMessageParser implements Runnable, ExceptionListener {
 
     public int getReceivedMessages() {
         return receivedMessages.get();
-    }
-
-    public boolean isSuccessfulPersistentBuild(PncBuildNotificationMessageBody msgBody) {
-        log.info(
-                "Received UMB message notification for {} build {}, with status {}, progress {} and build type {}",
-                msgBody.getBuild().isTemporaryBuild() ? "temporary" : "persistent",
-                msgBody.getBuild().getId(),
-                msgBody.getBuild().getStatus(),
-                msgBody.getBuild().getProgress(),
-                msgBody.getBuild().getBuildConfigRevision().getBuildType());
-
-        if (!msgBody.getBuild().isTemporaryBuild() && ProgressStatus.FINISHED.equals(msgBody.getBuild().getProgress())
-                && (BuildStatus.SUCCESS.equals(msgBody.getBuild().getStatus())
-                        || BuildStatus.NO_REBUILD_REQUIRED.equals(msgBody.getBuild().getStatus()))
-                && (BuildType.MVN.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())
-                        || BuildType.GRADLE.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType()))) {
-            return true;
-        }
-
-        return false;
     }
 
     private Throwable getRootCause(Throwable throwable) {

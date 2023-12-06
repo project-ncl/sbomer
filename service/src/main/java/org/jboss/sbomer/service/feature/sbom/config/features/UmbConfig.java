@@ -19,11 +19,10 @@ package org.jboss.sbomer.service.feature.sbom.config.features;
 
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * @author Marek Goldmann
@@ -88,6 +87,24 @@ public interface UmbConfig {
     @WithDefault("false")
     @WithName("enabled")
     boolean isEnabled();
+
+    /**
+     * <p>
+     * Enables the new AMQP client using reactive pattern and the SmallRye Reactive framework. Please note that setting
+     * this to {@code true} will automatically disable the Qpid JMS client. If set to {@code false} the old Qpid JMS
+     * client will be used instead.
+     * </p>
+     *
+     * <p>
+     * {@see https://smallrye.io/smallrye-reactive-messaging/4.12.0/amqp/amqp/}
+     * </p>
+     *
+     * @return {@code true} if SmallRye Reactive Messaging should be used for message processing, {@code false} to use
+     *         Qpid JMS
+     */
+    @WithDefault("true")
+    @WithName("reactive")
+    boolean usesReactive();
 
     UmbConsumerConfig consumer();
 
