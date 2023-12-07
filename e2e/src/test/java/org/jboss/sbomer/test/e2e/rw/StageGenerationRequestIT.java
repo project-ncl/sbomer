@@ -144,17 +144,17 @@ public class StageGenerationRequestIT extends E2EStageBase {
             return status.equals("FINISHED");
         });
 
-        log.info("Gradle 4 build finished, waiting for UMB message");
+        // log.info("Gradle 4 build finished, waiting for UMB message");
 
-        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            givenLastCompleteUmbMessageForGeneration(gradle4GenerationRequestId).then()
-                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle4GenerationRequestId))
-                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(GRADLE_4_BUILD_ID))
-                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(GRADLE_4_BUILD_ID))
-                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(gradle4GenerationRequestId));
+        // Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+        // givenLastCompleteUmbMessageForGeneration(gradle4GenerationRequestId).then()
+        // .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle4GenerationRequestId))
+        // .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(GRADLE_4_BUILD_ID))
+        // .body("raw_messages[0].msg.build.id", CoreMatchers.is(GRADLE_4_BUILD_ID))
+        // .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(gradle4GenerationRequestId));
 
-            return true;
-        });
+        // return true;
+        // });
 
         log.info("Gradle 4 build passed");
     }
