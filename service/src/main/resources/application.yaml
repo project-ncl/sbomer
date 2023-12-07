@@ -34,7 +34,7 @@ mp:
         enabled: ${sbomer.features.umb.reactive}
         client-options-name: umb
     outgoing:
-      generation-finished:
+      finished:
         connector: smallrye-amqp
         # This ignores the "sbomer.features.umb.enabled" property.
         # This means that if it is disabled, we need to remember to NOT set

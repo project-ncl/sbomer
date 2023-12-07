@@ -17,29 +17,71 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.producer;
 
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.reactive.messaging.Message;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.quarkus.arc.Unremovable;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * A message producer sending messages to the AMQP channels.
+ *
+ * @author Marek Goldmann
+ */
 @ApplicationScoped
 @Unremovable
 @Slf4j
 public class AmqpMessageProducer {
 
-	@Inject
-	@Channel("generation-finished")
-	Emitter<GenerationFinishedMessageBody> emitter;
+    @Inject
+    @Channel("finished")
+    Emitter<String> emitter;
 
-	public void notify(GenerationFinishedMessageBody msg) {
-		log.info("About to send notification for finished SBOM generation using the AMQP producer");
-		CompletionStage<Void> acked = emitter.send(msg);
-		acked.toCompletableFuture().join();
-	}
+    /**
+     * Publish the provided {@link GenerationFinishedMessageBody} {@code msg} to the channel by using an {@link Emitter}
+     * and wait for the acknowledgement.
+     *
+     * @param msg the {@link GenerationFinishedMessageBody} message body to send
+     */
+    public void notify(GenerationFinishedMessageBody msg) {
+        if (msg == null) {
+            log.warn("A message body was expected, but got null, not sending anything");
+            return;
+        }
+
+        String data = null;
+
+        try {
+            data = ObjectMapperProvider.json().writeValueAsString(msg);
+            log.debug(data);
+        } catch (JsonProcessingException e) {
+            // TODO: This is a fatal failure, other systems may depend on it, handle it better!
+            log.error("Unable to convert message content into JSON, this is unexpected", e);
+            return;
+        }
+
+        log.info(
+                "Sending notification for finished SBOM generation (SBOM id: '{}', PNC build id: '{}') using the AMQP producer",
+                msg.getSbom().getId(),
+                msg.getBuild().getId());
+
+        emitter.send(Message.of(data, () -> {
+            log.debug("Notification for SBOM id '{}' was ACKed", msg.getSbom().getId());
+            return CompletableFuture.completedFuture(null);
+        }, reason -> {
+            log.error("Notification for SBOM id '{}' was NACKed", msg.getSbom().getId());
+            log.error("Got NACK", reason);
+            return CompletableFuture.completedFuture(null);
+        }));
+    }
 }
