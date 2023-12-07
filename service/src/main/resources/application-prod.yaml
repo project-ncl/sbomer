@@ -26,7 +26,7 @@ mp:
     outgoing:
       finished:
         port: ${UMB_BROKER_PORT}
-        address: "${PRODUCER_TOPIC}"
+        address: "topic://${PRODUCER_TOPIC}"
         host: "${UMB_BROKER_HOST}"
 
 sbomer:
