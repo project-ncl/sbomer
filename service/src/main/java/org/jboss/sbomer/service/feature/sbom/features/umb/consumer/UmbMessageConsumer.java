@@ -55,7 +55,8 @@ public class UmbMessageConsumer implements MessageConsumer {
 
         @Override
         public boolean test(ScheduledExecution execution) {
-            if (!umbConfig.isEnabled() || !umbConfig.consumer().isEnabled() || umbConfig.consumer().topic().isEmpty()) {
+            if (!umbConfig.isEnabled() || umbConfig.usesReactive() || !umbConfig.consumer().isEnabled()
+                    || umbConfig.consumer().topic().isEmpty()) {
                 return true;
             }
 
