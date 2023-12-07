@@ -51,14 +51,6 @@ public abstract class E2EBase {
         return uri;
     }
 
-    public Response givenLastCompleteUmbMessage() {
-        return RestAssured.given()
-                .baseUri(getDatagrepperBaseUri())
-                .param("topic", "/topic/VirtualTopic.eng.pnc.sbom.complete")
-                .param("rows_per_page", 1)
-                .get("/raw");
-    }
-
     public Response givenLastCompleteUmbMessageForGeneration(String generationRequestId) {
         log.info("Finding last UMB message available for the request: {}", generationRequestId);
 
@@ -66,8 +58,9 @@ public abstract class E2EBase {
                 .baseUri(getDatagrepperBaseUri())
                 .param("delta", "43200") // 12 hours in seconds
                 .param("topic", "/topic/VirtualTopic.eng.pnc.sbom.complete")
-                .param("contains", generationRequestId)
+                .param("contains", "\"generationRequest\":{\"id\":\"" + generationRequestId + "\"}")
                 .param("rows_per_page", 1)
+                .param("order", "desc")
                 .get("/raw");
     }
 

@@ -28,7 +28,7 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Generat
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.arc.Unremovable;
-import io.smallrye.mutiny.Uni;
+import io.smallrye.reactive.messaging.amqp.OutgoingAmqpMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +83,13 @@ public class AmqpMessageProducer {
             log.error("Notification for SBOM id '{}' was NACKed", msg.getSbom().getId());
             log.error("Got NACK", reason);
             return CompletableFuture.completedFuture(null);
-        }));
+        })
+                .addMetadata(
+                        OutgoingAmqpMetadata.builder()
+                                .withApplicationProperty(
+                                        "generation_request_id",
+                                        msg.getSbom().getGenerationRequest().getId())
+                                .withApplicationProperty("pnc_build_id", msg.getBuild().getId())
+                                .build()));
     }
 }
