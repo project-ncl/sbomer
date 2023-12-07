@@ -16,8 +16,8 @@
 ###
 
 # https://catalog.redhat.com/software/containers/ubi9/ubi-minimal/615bd9b4075b022acc111bf5
-# Based on tag 9.2-750.1697625013
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:c8c7a06ce1c5fa23c1cbd7a0fd891eacd099bc232aa9985ddb183cfe98d1deaf
+# Based on tag 9.3-1361.1699548032
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:c77792b8084ce5946c68f39024fa460ef7769c0eef3fce995e70299e21a7e166
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \
