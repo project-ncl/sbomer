@@ -82,6 +82,7 @@ public class AmqpMessageConsumer {
     @Blocking(ordered = false, value = "build-processor-pool")
     public CompletionStage<Void> process(Message<String> message) {
         log.debug("Received new message via the AMQP consumer");
+        log.debug("Message content: {}", message.getPayload());
 
         receivedMessages.incrementAndGet();
 

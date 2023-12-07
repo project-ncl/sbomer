@@ -71,7 +71,8 @@ public class AmqpMessageProducer {
         }
 
         log.info(
-                "Sending notification for finished SBOM generation (SBOM id: '{}', PNC build id: '{}') using the AMQP producer",
+                "Sending notification for finished SBOM generation (Generation request: '{}', SBOM id: '{}', PNC build id: '{}') using the AMQP producer",
+                msg.getSbom().getGenerationRequest().getId(),
                 msg.getSbom().getId(),
                 msg.getBuild().getId());
 
