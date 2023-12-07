@@ -27,7 +27,6 @@ import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -53,7 +52,6 @@ public class StageGenerationRequestIT extends E2EStageBase {
     static String gradle4GenerationRequestId;
 
     @Test
-    @Order(1)
     public void testSuccessfulGenerationMavenBuild() throws IOException {
         mavenGenerationRequestId = requestGeneration(MAVEN_BUILD_ID);
 
@@ -72,11 +70,9 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
             return status.equals("FINISHED");
         });
-    }
 
-    @Test
-    @Order(2)
-    public void ensureUmbMessageWasSentForMavenBuild() {
+        log.info("Maven build finished, waiting for UMB message");
+
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
             givenLastCompleteUmbMessageForGeneration(mavenGenerationRequestId).then()
                     .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(mavenGenerationRequestId))
@@ -86,10 +82,12 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
             return true;
         });
+
+        log.info("Maven build passed");
+
     }
 
     @Test
-    @Order(3)
     public void testSuccessfulGenerationGradle5Build() throws IOException {
         String requestBody = Files.readString(sbomPath(GRADLE_5_BUILD_ID + ".json"));
         gradle5GenerationRequestId = requestGenerationWithConfiguration(GRADLE_5_BUILD_ID, requestBody);
@@ -109,11 +107,9 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
             return status.equals("FINISHED");
         });
-    }
 
-    @Test
-    @Order(4)
-    public void ensureUmbMessageWasSentForGradle5Build() {
+        log.info("Gradle 5 build finished, waiting for UMB message");
+
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
             givenLastCompleteUmbMessageForGeneration(gradle5GenerationRequestId).then()
                     .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle5GenerationRequestId))
@@ -123,10 +119,11 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
             return true;
         });
+
+        log.info("Gradle 5 build passed");
     }
 
     @Test
-    @Order(5)
     public void testSuccessfulGenerationGradle4Build() throws IOException {
         String requestBody = Files.readString(sbomPath(GRADLE_4_BUILD_ID + ".json"));
         gradle4GenerationRequestId = requestGenerationWithConfiguration(GRADLE_4_BUILD_ID, requestBody);
@@ -146,11 +143,9 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
             return status.equals("FINISHED");
         });
-    }
 
-    // @Test
-    @Order(6)
-    public void ensureUmbMessageWasSentForGradle4Build() {
+        log.info("Gradle 4 build finished, waiting for UMB message");
+
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
             givenLastCompleteUmbMessageForGeneration(gradle4GenerationRequestId).then()
                     .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle4GenerationRequestId))
@@ -160,5 +155,8 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
             return true;
         });
+
+        log.info("Gradle 4 build passed");
     }
+
 }
