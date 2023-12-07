@@ -17,17 +17,22 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+import java.io.IOException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.StartupEvent;
 import io.smallrye.reactive.messaging.annotations.Blocking;
+import io.vertx.core.json.JsonObject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -50,6 +55,7 @@ public class AmqpMessageConsumer {
     PncBuildNotificationHandler buildNotificationHandler;
 
     private AtomicInteger receivedMessages = new AtomicInteger(0);
+    private AtomicInteger processedMessages = new AtomicInteger(0);
 
     public void init(@Observes StartupEvent ev) {
         if (!umbConfig.usesReactive()) {
@@ -74,12 +80,23 @@ public class AmqpMessageConsumer {
 
     @Incoming("builds")
     @Blocking(ordered = false, value = "build-processor-pool")
-    public CompletionStage<Void> process(Message<PncBuildNotificationMessageBody> message) {
+    public CompletionStage<Void> process(Message<String> message) {
         log.debug("Received new message via the AMQP consumer");
 
         receivedMessages.incrementAndGet();
 
-        buildNotificationHandler.handle(message.getPayload());
+        PncBuildNotificationMessageBody body = null;
+
+        try {
+            body = ObjectMapperProvider.json().readValue(message.getPayload(), PncBuildNotificationMessageBody.class);
+        } catch (JsonProcessingException e) {
+            log.error("Unable to deserialize PNC build finished message, this is unexpected", e);
+            return message.nack(e);
+        }
+
+        buildNotificationHandler.handle(body);
+
+        processedMessages.getAndIncrement();
 
         return message.ack();
     }

@@ -24,7 +24,7 @@ mp:
         address: "${CONSUMER_TOPIC}"
         host: "${UMB_BROKER_HOST}"
     outgoing:
-      generation-finished:
+      finished:
         port: ${UMB_BROKER_PORT}
         address: "${PRODUCER_TOPIC}"
         host: "${UMB_BROKER_HOST}"

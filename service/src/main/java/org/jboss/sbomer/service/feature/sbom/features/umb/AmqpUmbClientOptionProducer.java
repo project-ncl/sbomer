@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.features.umb;
 
 import io.smallrye.common.annotation.Identifier;
 import io.vertx.amqp.AmqpClientOptions;
+import io.vertx.core.net.PfxOptions;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,11 @@ public class AmqpUmbClientOptionProducer {
     public AmqpClientOptions getClientOptions() {
         log.info("Setting up AMQP client options");
 
-        return new AmqpClientOptions().setSsl(true).setConnectTimeout(30 * 1000).setReconnectInterval(5 * 1000);
+        return new AmqpClientOptions().setSsl(true)
+                .setConnectTimeout(30 * 1000)
+                .setReconnectInterval(5 * 1000)
+                .setPfxKeyCertOptions(
+                        new PfxOptions().setPath(System.getProperty("javax.net.ssl.keyStore"))
+                                .setPassword(System.getProperty("javax.net.ssl.keyStorePassword")));
     }
 }
