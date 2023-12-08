@@ -137,7 +137,7 @@ sbomer:
       enabled: false
       # Enables the new AMQP client based on SmallRye Reactive.
       # If it is disabled, the old client based on Qpid will be used.
-      reactive: false
+      reactive: true
 
   # Tekton-related configuration
   tekton:
