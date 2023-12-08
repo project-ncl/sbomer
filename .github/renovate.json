@@ -39,6 +39,16 @@
 			],
 			"dependencyDashboardApproval": false,
 			"minimumReleaseAge": null
+		},
+		{
+			"matchPackageNames": [
+				"io.quarkus.platform:quarkus-qpid-jms-bom",
+				"io.quarkus:quarkus-maven-plugin"
+			],
+			"matchManagers": [
+				"maven"
+			],
+			"enabled": false
 		}
 	]
 }
