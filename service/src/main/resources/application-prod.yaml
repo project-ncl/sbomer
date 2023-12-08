@@ -59,9 +59,6 @@ quarkus:
       json:
         ~: true
 
-  qpid-jms:
-    url: "${UMB_BROKER_URL}"
-
   oidc:
     enabled: true
     connection-delay: 30S

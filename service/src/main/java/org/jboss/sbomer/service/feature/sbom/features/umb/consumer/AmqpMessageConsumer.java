@@ -95,6 +95,8 @@ public class AmqpMessageConsumer {
             return message.nack(e);
         }
 
+        log.debug("Message properly deserialized");
+
         buildNotificationHandler.handle(body);
 
         processedMessages.getAndIncrement();

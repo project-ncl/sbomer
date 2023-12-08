@@ -17,96 +17,101 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import jakarta.inject.Inject;
-import jakarta.jms.ConnectionFactory;
-import jakarta.jms.JMSContext;
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.TextMessage;
-
-import org.jboss.pnc.api.enums.BuildStatus;
-import org.jboss.pnc.api.enums.ProgressStatus;
+import org.awaitility.Awaitility;
+import org.eclipse.microprofile.reactive.messaging.Message;
+import org.eclipse.microprofile.reactive.messaging.spi.Connector;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.service.feature.sbom.features.umb.JmsUtils;
+import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncBuildNotificationHandler;
-import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncMessageParser;
-import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.UmbMessageConsumer;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.mockito.ArgumentCaptor;
 
-import io.quarkus.artemis.test.ArtemisTestResource;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
+import io.smallrye.reactive.messaging.amqp.OutgoingAmqpMetadata;
+import io.smallrye.reactive.messaging.memory.InMemoryConnector;
+import io.smallrye.reactive.messaging.memory.InMemorySource;
+import io.vertx.core.json.JsonObject;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
-@QuarkusTestResource(ArtemisTestResource.class)
-@TestMethodOrder(OrderAnnotation.class)
+@QuarkusTestResource(AmqpTestResourceLifecycleManager.class)
 @Slf4j
 @WithKubernetesTestServer
 public class PncBuildIT {
 
     @Inject
-    UmbMessageConsumer msgConsumer;
+    AmqpMessageConsumer consumer;
 
     @Inject
-    ConnectionFactory connectionFactory;
+    AmqpMessageProducer producer;
 
-    @Inject
+    @InjectSpy
     PncBuildNotificationHandler handler;
 
+    @Inject
+    KubernetesClient kubernetesClient;
+
+    @Inject
+    @Connector("smallrye-in-memory")
+    InMemoryConnector connector;
+
     @Test
-    @Order(1)
     public void testUMBProducerPNCBuild() throws Exception {
         log.info("Running testUMBProducerPNCBuild...");
 
-        try (JMSContext context = connectionFactory.createContext(JMSContext.AUTO_ACKNOWLEDGE)) {
-            TextMessage txgMsg = preparePNCBuildMsg(context);
-            context.createProducer()
-                    .send(context.createQueue("Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.builds"), txgMsg);
-        }
+        InMemorySource<Message<String>> builds = connector.source("builds");
+        Message<String> txgMsg = preparePNCBuildMsg();
+
+        builds.send(txgMsg);
+
+        ArgumentCaptor<PncBuildNotificationMessageBody> argumentCaptor = ArgumentCaptor
+                .forClass(PncBuildNotificationMessageBody.class);
+
+        Awaitility.await().atMost(1, TimeUnit.MINUTES).pollInterval(1, TimeUnit.SECONDS).until(() -> {
+            List<ConfigMap> configMaps = kubernetesClient.configMaps().list().getItems();
+
+            Optional<ConfigMap> request = configMaps.stream()
+                    .filter(cm -> cm.getData().get(GenerationRequest.KEY_BUILD_ID).equals("AX5TJMYHQAIAE"))
+                    .findFirst();
+
+            if (request.isPresent()) {
+                log.info("Generation request was found!");
+                return true;
+            }
+
+            return false;
+        });
+
+        verify(handler, times(1)).handle(argumentCaptor.capture());
+        List<PncBuildNotificationMessageBody> messages = argumentCaptor.getAllValues();
+
+        assertEquals(1, messages.size());
+
+        // See "payloads/umb-pnc-build-body.json" file
+        assertEquals(messages.get(0).getBuild().getId(), "AX5TJMYHQAIAE");
     }
 
-    @Test
-    @Order(2)
-    public void testUMBConsumerPNCBuild() throws Exception {
-        log.info("Running testUMBConsumerPNCBuild...");
+    private org.eclipse.microprofile.reactive.messaging.Message<String> preparePNCBuildMsg() throws IOException {
+        JsonObject headers = new JsonObject();
 
-        assertTrue(Wait.waitFor(() -> {
-            Message msg = msgConsumer.getLastMessageReceived();
-            return msg != null;
-        }, 10000, 25), "PNC Build message did not became available in allotted time");
-
-        Message msg = msgConsumer.getLastMessageReceived();
-        String producer = msg.getStringProperty("producer");
-        assertEquals("PNC", producer);
-
-        PncBuildNotificationMessageBody msgBody = JmsUtils.getMsgBody(msg);
-
-        assertEquals(false, msgBody.getBuild().isTemporaryBuild());
-        assertEquals(BuildStatus.SUCCESS, msgBody.getBuild().getStatus());
-        assertEquals(ProgressStatus.FINISHED, msgBody.getBuild().getProgress());
-        assertEquals("AX5TJMYHQAIAE", msgBody.getBuild().getId());
-
-        assertTrue(handler.isSuccessfulPersistentBuild(msgBody));
-    }
-
-    private TextMessage preparePNCBuildMsg(JMSContext context) throws IOException {
-
-        // Rebuilding mesg
-        // https://datagrepper.engineering.redhat.com/id?id=ID:orch-70-z4tx6-43917-1678809685060-25:1:8557:1:1&is_raw=true&size=extra-large
-        Map<String, String> headers = new HashMap<>();
         headers.put("type", "BuildStateChange");
         headers.put("attribute", "state-change");
         headers.put("name", "org.kie-kie-jpmml-integration-7.67.0.Final-7.13.3");
@@ -122,18 +127,16 @@ public class PncBuildIT {
         headers.put("persistent", "true");
         headers.put("producer", "PNC");
 
-        String msgBody = TestResources.asString("payloads/umb-pnc-build-body.json");
-        TextMessage textMessage = context.createTextMessage(msgBody);
+        OutgoingAmqpMetadata metadata = OutgoingAmqpMetadata.builder().withApplicationProperties(headers).build();
 
-        headers.forEach((k, v) -> {
-            try {
-                textMessage.setStringProperty(k, v);
-            } catch (JMSException e) {
-                log.error("Error while setting JMS headers", e);
-            }
-        });
+        String payload = TestResources.asString("payloads/umb-pnc-build-body.json");
 
-        return textMessage;
+        org.eclipse.microprofile.reactive.messaging.Message<String> msg = org.eclipse.microprofile.reactive.messaging.Message
+                .of(payload);
+
+        msg.addMetadata(metadata);
+
+        return msg;
     }
 
 }

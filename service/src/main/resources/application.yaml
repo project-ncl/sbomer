@@ -94,10 +94,6 @@ quarkus:
     always-include: true
     path: /api
 
-  # https://quarkus.io/guides/jms
-  # qpid-jms:
-  #   url:
-
   # Database configuration
   datasource:
     db-kind: postgresql

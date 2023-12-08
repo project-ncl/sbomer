@@ -77,7 +77,7 @@ public class PncBuildNotificationHandler {
         if (isSuccessfulPersistentBuild(messageBody)) {
             // TODO: Check whether it is a product-related build?
 
-            log.info("Triggering the automated SBOM generation for build {} ...", messageBody.getBuild().getId());
+            log.info("Triggering automated SBOM generation for PNC build '{}'' ...", messageBody.getBuild().getId());
 
             GenerationRequest req = new GenerationRequestBuilder()
                     .withNewDefaultMetadata(messageBody.getBuild().getId())
@@ -85,6 +85,8 @@ public class PncBuildNotificationHandler {
                     .withBuildId(messageBody.getBuild().getId())
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
+
+            log.debug("ConfigMap to create: '{}'", req);
 
             ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
 
