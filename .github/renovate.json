@@ -1,4 +1,8 @@
 {
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:recommended"
+	],
 	"username": "renovate-release",
 	"gitAuthor": "Renovate Bot <bot@renovateapp.com>",
 	"onboarding": false,
@@ -9,6 +13,19 @@
 	"repositories": [
 		"project-ncl/sbomer"
 	],
+	"rebaseWhen": "behind-base-branch",
+	"timezone": "Europe/Warsaw",
+	"schedule": [
+		"before 5am"
+	],
+	"labels": [
+		"dependencies"
+	],
+	"vulnerabilityAlerts": {
+		"labels": [
+			"security"
+		]
+	},
 	"packageRules": [
 		{
 			"description": "lockFileMaintenance",
