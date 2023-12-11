@@ -113,10 +113,7 @@ public class NotificationService {
             if (result.isValid()) {
                 log.info("GenerationFinishedMessage is valid, sending it to the topic!");
 
-                if (umbConfig.usesReactive()) {
-                    amqpMessageProducer.notify(msg);
-                }
-
+                amqpMessageProducer.notify(msg);
             } else {
                 log.warn(
                         "GenerationFinishedMessage is NOT valid, NOT sending it to the topic! Validation errors: {}",
@@ -158,8 +155,8 @@ public class NotificationService {
         Optional<ExternalReference> pncBuildSystemRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
-                .findFirst();
+                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
+                        .findFirst();
 
         Build buildPayload = Build.builder()
                 .id(sbom.getBuildId())

@@ -21,12 +21,12 @@ mp:
     incoming:
       builds:
         port: ${UMB_BROKER_PORT}
-        address: "${CONSUMER_TOPIC}"
+        address: ${sbomer.features.umb.consumer.topic}
         host: "${UMB_BROKER_HOST}"
     outgoing:
       finished:
         port: ${UMB_BROKER_PORT}
-        address: "topic://${PRODUCER_TOPIC}"
+        address: "topic://${sbomer.features.umb.producer.topic}"
         host: "${UMB_BROKER_HOST}"
 
 sbomer:
@@ -49,8 +49,6 @@ sbomer:
       producer:
         enabled: true
         topic: "${PRODUCER_TOPIC}"
-        retries: 15
-        max-back-off: 30
 
 quarkus:
   log:

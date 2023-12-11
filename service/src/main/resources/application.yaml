@@ -27,20 +27,12 @@ mp:
     incoming:
       builds:
         connector: smallrye-amqp
-        # This ignores the "sbomer.features.umb.enabled" property.
-        # This means that if it is disabled, we need to remember to NOT set
-        # "sbomer.features.umb.reactive" to true. I couldn't find better solution
-        # that would allow to programmatically control the SmallRye Messaging subsystem.
-        enabled: ${sbomer.features.umb.reactive}
+        enabled: ${sbomer.features.umb.enabled}
         client-options-name: umb
     outgoing:
       finished:
         connector: smallrye-amqp
-        # This ignores the "sbomer.features.umb.enabled" property.
-        # This means that if it is disabled, we need to remember to NOT set
-        # "sbomer.features.umb.reactive" to true. I couldn't find better solution
-        # that would allow to programmatically control the SmallRye Messaging subsystem.
-        enabled: ${sbomer.features.umb.reactive}
+        enabled: ${sbomer.features.umb.enabled}
         client-options-name: umb
 
 quarkus:
@@ -131,9 +123,6 @@ sbomer:
     umb:
       # Disable UMB feature entirely by default
       enabled: false
-      # Enables the new AMQP client based on SmallRye Reactive.
-      # If it is disabled, the old client based on Qpid will be used.
-      reactive: true
 
   # Tekton-related configuration
   tekton:
