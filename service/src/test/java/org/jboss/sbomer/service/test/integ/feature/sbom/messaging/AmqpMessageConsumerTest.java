@@ -22,10 +22,11 @@ import java.io.IOException;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
+import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.smallrye.reactive.messaging.amqp.OutgoingAmqpMetadata;
+import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 
 @QuarkusTest
@@ -35,13 +36,10 @@ public class AmqpMessageConsumerTest {
 
     @Test
     void testParsingOfUnexpectedData() throws IOException {
-        OutgoingAmqpMetadata metadata = OutgoingAmqpMetadata.builder()
-                .withApplicationProperty("type", "DeliverableAnalysisStateChange")
-                .build();
+        Message<String> message = AmqpMessageHelper.toMessage(
+                TestResources.asString("umb/unexpected.json"),
+                new JsonObject().put("type", "DeliverableAnalysisStateChange"));
 
-        Message<String> msg = Message.of(TestResources.asString("umb/unexpected.json"));
-        msg.addMetadata(metadata);
-
-        consumer.process(msg);
+        consumer.process(message);
     }
 }
