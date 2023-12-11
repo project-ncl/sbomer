@@ -83,7 +83,7 @@ public class StatsResources {
 
         Messaging messaging = null;
 
-        if (!umbConfig.isEnabled()) {
+        if (umbConfig.isEnabled()) {
             messaging = Messaging.builder()
                     .withConsumer(
                             Consumer.builder()
