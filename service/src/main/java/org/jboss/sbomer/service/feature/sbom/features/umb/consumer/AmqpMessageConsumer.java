@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,7 +31,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.StartupEvent;
+import io.smallrye.reactive.messaging.amqp.IncomingAmqpMetadata;
 import io.smallrye.reactive.messaging.annotations.Blocking;
+import io.vertx.core.json.JsonObject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -83,6 +86,25 @@ public class AmqpMessageConsumer {
         log.debug("Message content: {}", message.getPayload());
 
         receivedMessages.incrementAndGet();
+
+        // Checking whether there is some additional metadata attached to the message
+        Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
+
+        metadata.ifPresent(meta -> {
+            JsonObject properties = meta.getProperties();
+
+            log.trace(properties.toString());
+
+            String correlationId = properties.getString("correlation-id");
+            String messageId = properties.getString("message-id");
+            Long timestamp = properties.getLong("timestamp");
+
+            log.debug(
+                    "Additional metadata: correlation-id: {}, message-id: {}, timestamp: {}",
+                    correlationId,
+                    messageId,
+                    timestamp);
+        });
 
         PncBuildNotificationMessageBody body = null;
 
