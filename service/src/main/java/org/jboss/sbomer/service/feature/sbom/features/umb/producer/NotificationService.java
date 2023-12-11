@@ -69,9 +69,6 @@ public class NotificationService {
     AmqpMessageProducer amqpMessageProducer;
 
     @Inject
-    UmbMessageProducer messageProducer;
-
-    @Inject
     GenerationFinishedMessageBodyValidator validator;
 
     public void notifyCompleted(List<org.jboss.sbomer.service.feature.sbom.model.Sbom> sboms) {
@@ -116,12 +113,7 @@ public class NotificationService {
             if (result.isValid()) {
                 log.info("GenerationFinishedMessage is valid, sending it to the topic!");
 
-                if (umbConfig.usesReactive()) {
-                    amqpMessageProducer.notify(msg);
-                } else {
-                    messageProducer.sendToTopic(msg);
-                }
-
+                amqpMessageProducer.notify(msg);
             } else {
                 log.warn(
                         "GenerationFinishedMessage is NOT valid, NOT sending it to the topic! Validation errors: {}",

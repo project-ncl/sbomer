@@ -22,6 +22,8 @@ import java.util.Optional;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 
 import io.fabric8.kubernetes.api.builder.VisitableBuilder;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 
 public class GenerationRequestBuilder extends GenerationRequestFluentImpl<GenerationRequestBuilder>
         implements VisitableBuilder<GenerationRequest, GenerationRequestBuilder> {
@@ -43,7 +45,7 @@ public class GenerationRequestBuilder extends GenerationRequestFluentImpl<Genera
                 getBinaryData(),
                 getData(),
                 getImmutable(),
-                getKind(),
+                HasMetadata.getKind(ConfigMap.class),
                 buildMetadata());
 
         buildable.setAdditionalProperties(getAdditionalProperties());

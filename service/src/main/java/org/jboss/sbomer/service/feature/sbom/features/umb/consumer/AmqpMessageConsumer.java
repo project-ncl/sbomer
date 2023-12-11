@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
-import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.StartupEvent;
+import io.smallrye.reactive.messaging.amqp.IncomingAmqpMetadata;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import io.vertx.core.json.JsonObject;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -39,7 +40,7 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * An UMB message consumer that uitlizies the SmallRye Reactive messaging support with the AMQ connector.
+ * An UMB message consumer that utilizes the SmallRye Reactive messaging support with the AMQ connector.
  *
  * @author Marek Goldmann
  */
@@ -58,8 +59,8 @@ public class AmqpMessageConsumer {
     private AtomicInteger processedMessages = new AtomicInteger(0);
 
     public void init(@Observes StartupEvent ev) {
-        if (!umbConfig.usesReactive()) {
-            log.info("Reactive AMQP message handling is disabled in the configuration: reactive: false");
+        if (!umbConfig.isEnabled()) {
+            log.info("UMB support is disabled");
             return;
         }
 
@@ -86,6 +87,25 @@ public class AmqpMessageConsumer {
 
         receivedMessages.incrementAndGet();
 
+        // Checking whether there is some additional metadata attached to the message
+        Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
+
+        metadata.ifPresent(meta -> {
+            JsonObject properties = meta.getProperties();
+
+            log.trace(properties.toString());
+
+            String correlationId = properties.getString("correlation-id");
+            String messageId = properties.getString("message-id");
+            Long timestamp = properties.getLong("timestamp");
+
+            log.debug(
+                    "Additional metadata: correlation-id: {}, message-id: {}, timestamp: {}",
+                    correlationId,
+                    messageId,
+                    timestamp);
+        });
+
         PncBuildNotificationMessageBody body = null;
 
         try {
@@ -95,10 +115,20 @@ public class AmqpMessageConsumer {
             return message.nack(e);
         }
 
+        log.debug("Message properly deserialized");
+
         buildNotificationHandler.handle(body);
 
         processedMessages.getAndIncrement();
 
         return message.ack();
+    }
+
+    public int getProcessedMessages() {
+        return processedMessages.get();
+    }
+
+    public int getReceivedMessages() {
+        return receivedMessages.get();
     }
 }

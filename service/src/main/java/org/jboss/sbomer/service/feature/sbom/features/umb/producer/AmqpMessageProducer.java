@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.features.umb.producer;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.arc.Unremovable;
 import io.smallrye.reactive.messaging.amqp.OutgoingAmqpMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +47,17 @@ public class AmqpMessageProducer {
 
     @Inject
     @Channel("finished")
-    Emitter<String> emitter;
+    Instance<Emitter<String>> emitter;
+
+    /**
+     * Total number of produced messages that were NACKed by the broker.
+     */
+    private AtomicInteger nackedMessages = new AtomicInteger(0);
+
+    /**
+     * Total number of produced messages that were ACKed by the broker.
+     */
+    private AtomicInteger ackedMessages = new AtomicInteger(0);
 
     /**
      * Publish the provided {@link GenerationFinishedMessageBody} {@code msg} to the channel by using an {@link Emitter}
@@ -54,6 +66,11 @@ public class AmqpMessageProducer {
      * @param msg the {@link GenerationFinishedMessageBody} message body to send
      */
     public void notify(GenerationFinishedMessageBody msg) {
+        if (emitter.isUnsatisfied()) {
+            log.error("About to send a generation finished notification, but could not obtain the emitter");
+            return;
+        }
+
         if (msg == null) {
             log.warn("A message body was expected, but got null, not sending anything");
             return;
@@ -76,12 +93,16 @@ public class AmqpMessageProducer {
                 msg.getSbom().getId(),
                 msg.getBuild().getId());
 
-        emitter.send(Message.of(data, () -> {
+        emitter.get().send(Message.of(data, () -> {
+            ackedMessages.incrementAndGet();
             log.debug("Notification for SBOM id '{}' was ACKed", msg.getSbom().getId());
+
             return CompletableFuture.completedFuture(null);
         }, reason -> {
             log.error("Notification for SBOM id '{}' was NACKed", msg.getSbom().getId());
             log.error("Got NACK", reason);
+
+            nackedMessages.incrementAndGet();
             return CompletableFuture.completedFuture(null);
         })
                 .addMetadata(
@@ -91,5 +112,13 @@ public class AmqpMessageProducer {
                                         msg.getSbom().getGenerationRequest().getId())
                                 .withApplicationProperty("pnc_build_id", msg.getBuild().getId())
                                 .build()));
+    }
+
+    public int getAckedMessages() {
+        return ackedMessages.get();
+    }
+
+    public int getNackedMessages() {
+        return nackedMessages.get();
     }
 }
