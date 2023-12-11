@@ -1,0 +1,11 @@
+{
+	"attribute": "deliverable-analysis-state-change",
+	"milestoneId": "2322",
+	"status": "IN_PROGRESS",
+	"deliverablesUrls": [
+		"http://aaaa.u.r.com/eap/7.4.12.GA-CR3-candidate/jboss-eap-7.4.12.GA-CR3-maven-repository.zip",
+		"http://aaaa.u.r.com/eap/7.4.12.GA-CR3-candidate/jboss-eap-7.4.12.GA-CR3-full-maven-repository.zip",
+		"http://aaaa.u.r.com/eap/7.4.12.GA-CR3-candidate/jboss-eap-7.4.12.GA-CR3-image-builder-maven-repository.zip",
+		"http://aaaa.u.r.com/eap/7.4.12.GA-CR3-candidate/jboss-eap-7.4.12.GA-CR3.zip"
+	]
+}
