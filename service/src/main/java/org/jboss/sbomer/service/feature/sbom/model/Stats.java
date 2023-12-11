@@ -23,6 +23,34 @@ import lombok.Data;
 @Data
 @Builder(setterPrefix = "with")
 public class Stats {
+
+    /**
+     * Statistics related to message consumer. All stats since application boot time.
+     */
+    @Data
+    @Builder(setterPrefix = "with")
+    public static class Consumer {
+        int received;
+        int processed;
+    }
+
+    /**
+     * Statistics related to message producer. All stats since application boot time.
+     */
+    @Data
+    @Builder(setterPrefix = "with")
+    public static class Producer {
+        int nacked;
+        int acked;
+    }
+
+    @Data
+    @Builder(setterPrefix = "with")
+    public static class Messaging {
+        Consumer consumer;
+        Producer producer;
+    }
+
     @Data
     @Builder(setterPrefix = "with")
     public static class Resources {
@@ -43,6 +71,7 @@ public class Stats {
         long inProgress;
     }
 
+    Messaging messaging;
     Resources resources;
     long uptimeMillis;
     String uptime;

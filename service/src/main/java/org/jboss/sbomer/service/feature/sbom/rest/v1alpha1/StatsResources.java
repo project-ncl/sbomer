@@ -37,8 +37,14 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
+import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.Consumer;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.GenerationRequestStats;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.Messaging;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.Producer;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Resources;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.SbomStats;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -54,6 +60,15 @@ public class StatsResources {
     @Inject
     SbomService sbomService;
 
+    @Inject
+    AmqpMessageConsumer messageConsumer;
+
+    @Inject
+    AmqpMessageProducer messageProducer;
+
+    @Inject
+    UmbConfig umbConfig;
+
     @ConfigProperty(name = "quarkus.application.version", defaultValue = "dev")
     String version;
 
@@ -66,11 +81,29 @@ public class StatsResources {
     public Response stats() {
         long uptimeMillis = getUptimeMillis();
 
+        Messaging messaging = null;
+
+        if (!umbConfig.isEnabled()) {
+            messaging = Messaging.builder()
+                    .withConsumer(
+                            Consumer.builder()
+                                    .withProcessed(messageConsumer.getProcessedMessages())
+                                    .withReceived(messageConsumer.getReceivedMessages())
+                                    .build())
+                    .withProducer(
+                            Producer.builder()
+                                    .withAcked(messageProducer.getAckedMessages())
+                                    .withNacked(messageProducer.getNackedMessages())
+                                    .build())
+                    .build();
+        }
+
         Stats stats = Stats.builder()
                 .withVersion(version)
                 .withUptime(toUptime(uptimeMillis))
                 .withUptimeMillis(uptimeMillis)
                 .withResources(resources())
+                .withMessaging(messaging)
                 .build();
 
         return Response.status(Status.OK).entity(stats).build();

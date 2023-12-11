@@ -123,4 +123,12 @@ public class AmqpMessageConsumer {
 
         return message.ack();
     }
+
+    public int getProcessedMessages() {
+        return processedMessages.get();
+    }
+
+    public int getReceivedMessages() {
+        return receivedMessages.get();
+    }
 }

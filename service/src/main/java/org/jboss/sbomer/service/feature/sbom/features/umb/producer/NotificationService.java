@@ -155,8 +155,8 @@ public class NotificationService {
         Optional<ExternalReference> pncBuildSystemRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
-                        .findFirst();
+                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
+                .findFirst();
 
         Build buildPayload = Build.builder()
                 .id(sbom.getBuildId())
