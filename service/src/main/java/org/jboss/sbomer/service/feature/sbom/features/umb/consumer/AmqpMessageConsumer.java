@@ -17,12 +17,15 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
+import org.eclipse.microprofile.reactive.messaging.Metadata;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
@@ -82,29 +85,31 @@ public class AmqpMessageConsumer {
     @Incoming("builds")
     @Blocking(ordered = false, value = "build-processor-pool")
     public CompletionStage<Void> process(Message<String> message) {
+        receivedMessages.incrementAndGet();
+
         log.debug("Received new message via the AMQP consumer");
         log.debug("Message content: {}", message.getPayload());
-
-        receivedMessages.incrementAndGet();
 
         // Checking whether there is some additional metadata attached to the message
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
 
+        AtomicBoolean isBuildStateChange = new AtomicBoolean(false);
+
         metadata.ifPresent(meta -> {
             JsonObject properties = meta.getProperties();
 
-            log.trace(properties.toString());
+            log.debug("Message properties: {}", properties.toString());
 
-            String correlationId = properties.getString("correlation-id");
-            String messageId = properties.getString("message-id");
-            Long timestamp = properties.getLong("timestamp");
-
-            log.debug(
-                    "Additional metadata: correlation-id: {}, message-id: {}, timestamp: {}",
-                    correlationId,
-                    messageId,
-                    timestamp);
+            if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
+                isBuildStateChange.set(true);
+            }
         });
+
+        // This shouldn't happen anymore because we use a selector to filter messages
+        if (isBuildStateChange.get() != true) {
+            log.warn("Received a message that is not BuildStateChange, ignoring it");
+            return message.ack();
+        }
 
         PncBuildNotificationMessageBody body = null;
 

@@ -35,6 +35,7 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncBuildNotif
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -44,9 +45,10 @@ import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
-import io.smallrye.reactive.messaging.amqp.OutgoingAmqpMetadata;
 import io.smallrye.reactive.messaging.memory.InMemoryConnector;
 import io.smallrye.reactive.messaging.memory.InMemorySource;
+import io.vertx.amqp.AmqpMessage;
+import io.vertx.amqp.AmqpMessageBuilder;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -85,7 +87,7 @@ public class PncBuildIT {
         ArgumentCaptor<PncBuildNotificationMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(PncBuildNotificationMessageBody.class);
 
-        Awaitility.await().atMost(1, TimeUnit.MINUTES).pollInterval(1, TimeUnit.SECONDS).until(() -> {
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
             List<ConfigMap> configMaps = kubernetesClient.configMaps().list().getItems();
 
             Optional<ConfigMap> request = configMaps.stream()
@@ -109,7 +111,7 @@ public class PncBuildIT {
         assertEquals(messages.get(0).getBuild().getId(), "AX5TJMYHQAIAE");
     }
 
-    private org.eclipse.microprofile.reactive.messaging.Message<String> preparePNCBuildMsg() throws IOException {
+    private Message<String> preparePNCBuildMsg() throws IOException {
         JsonObject headers = new JsonObject();
 
         headers.put("type", "BuildStateChange");
@@ -127,16 +129,6 @@ public class PncBuildIT {
         headers.put("persistent", "true");
         headers.put("producer", "PNC");
 
-        OutgoingAmqpMetadata metadata = OutgoingAmqpMetadata.builder().withApplicationProperties(headers).build();
-
-        String payload = TestResources.asString("payloads/umb-pnc-build-body.json");
-
-        org.eclipse.microprofile.reactive.messaging.Message<String> msg = org.eclipse.microprofile.reactive.messaging.Message
-                .of(payload);
-
-        msg.addMetadata(metadata);
-
-        return msg;
+        return AmqpMessageHelper.toMessage(TestResources.asString("payloads/umb-pnc-build-body.json"), headers);
     }
-
 }
