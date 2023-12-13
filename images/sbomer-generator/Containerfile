@@ -1,6 +1,6 @@
 # https://catalog.redhat.com/software/containers/ubi9/618326f8c0d15aff4912fe0b
 # Based on tag 9.3-1361.1699548029
-FROM registry.access.redhat.com/ubi9@sha256:6b95efc134c2af3d45472c0a2f88e6085433df058cc210abb2bb061ac4d74359
+FROM registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
 
 RUN INSTALL_PKGS="jq unzip zip git" && \
     dnf --disableplugin=subscription-manager -y --nodocs --setopt=install_weak_deps=0 install $INSTALL_PKGS && \
