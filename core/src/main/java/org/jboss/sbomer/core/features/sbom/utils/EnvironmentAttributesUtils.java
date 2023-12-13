@@ -28,10 +28,12 @@ public class EnvironmentAttributesUtils {
     private static final String MAVEN_ATTRIBUTE_KEY = "MAVEN";
     private static final String GRADLE_ATTRIBUTE_KEY = "GRADLE";
     private static final String JDK_ATTRIBUTE_KEY = "JDK";
+    private static final String NODEJS_ATTRIBUTE_KEY = "NODEJS";
 
     private static final String MAVEN_SDKMAN_KEY = "maven";
     private static final String GRADLE_SDKMAN_KEY = "gradle";
     private static final String SDK_SDKMAN_KEY = "java";
+    private static final String NODEJS_NVM_KEY = "node";
 
     private static final String JAVA_LEGACY_VERSION_REGEX = "^1\\.(\\d+)";
     private static final String JAVA_VERSION_REGEX = "^([^.-]+)";
@@ -119,6 +121,18 @@ public class EnvironmentAttributesUtils {
         return Optional.empty();
     }
 
+    public static Optional<String> getNodeJsNvmCompliantVersion(Map<String, String> environmentAttributes) {
+        if (environmentAttributes == null || environmentAttributes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return environmentAttributes.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(NODEJS_ATTRIBUTE_KEY))
+                .map(Map.Entry::getValue)
+                .findFirst();
+    }
+
     public static Optional<String> getGradleSDKManCompliantMajorVersion(Map<String, String> environmentAttributes) {
         Optional<String> gradleVersion = getGradleSDKManCompliantVersion(environmentAttributes);
         if (gradleVersion.isPresent()) {
@@ -128,6 +142,18 @@ public class EnvironmentAttributesUtils {
             }
         }
         return Optional.empty();
+    }
+
+    public static Map<String, String> getNvmCompliantAttributes(Map<String, String> environmentAttributes) {
+        Map<String, String> nvmAttributes = new HashMap<String, String>();
+
+        // Find Maven
+        Optional<String> nodeJSVersion = getNodeJsNvmCompliantVersion(environmentAttributes);
+        if (nodeJSVersion.isPresent()) {
+            nvmAttributes.put(NODEJS_NVM_KEY, nodeJSVersion.get().trim());
+        }
+
+        return nvmAttributes;
     }
 
 }

@@ -89,7 +89,16 @@ public class GenerateEnvConfigCommand implements Callable<Integer> {
             log.debug("Build environment attributes not found for the specified PNC build");
             return Collections.emptyMap();
         }
-        Map<String, String> envConfig = EnvironmentAttributesUtils.getSDKManCompliantAttributes(buildEnvAttributes);
+        Map<String, String> envConfig = null;
+        switch (build.getBuildConfigRevision().getBuildType()) {
+            case GRADLE, MVN:
+                envConfig = EnvironmentAttributesUtils.getSDKManCompliantAttributes(buildEnvAttributes);
+                break;
+            case NPM:
+                envConfig = EnvironmentAttributesUtils.getNvmCompliantAttributes(buildEnvAttributes);
+            default:
+                break;
+        }
         if (envConfig == null || envConfig.isEmpty()) {
             log.debug("No compliant SDKMan environment attributes could be generated");
             return Collections.emptyMap();

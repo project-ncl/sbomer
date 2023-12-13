@@ -82,7 +82,8 @@
                 "enum": [
                   "maven-cyclonedx",
                   "maven-domino",
-                  "gradle-cyclonedx"
+                  "gradle-cyclonedx",
+                  "nodejs-cyclonedx"
                 ]
               },
               "args": {

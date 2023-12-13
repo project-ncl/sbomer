@@ -30,7 +30,7 @@ import picocli.CommandLine.ScopeType;
         aliases = { "g" },
         description = "SBOM generation",
         subcommands = { MavenCycloneDxGenerateCommand.class, MavenDominoGenerateCommand.class,
-                GradleCycloneDxGenerateCommand.class })
+                GradleCycloneDxGenerateCommand.class, NodejsCycloneDxGenerateCommand.class })
 public class GenerateCommand {
 
     @Getter
