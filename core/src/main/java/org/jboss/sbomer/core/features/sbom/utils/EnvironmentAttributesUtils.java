@@ -147,7 +147,7 @@ public class EnvironmentAttributesUtils {
     public static Map<String, String> getNvmCompliantAttributes(Map<String, String> environmentAttributes) {
         Map<String, String> nvmAttributes = new HashMap<String, String>();
 
-        // Find Maven
+        // Find NodeJs
         Optional<String> nodeJSVersion = getNodeJsNvmCompliantVersion(environmentAttributes);
         if (nodeJSVersion.isPresent()) {
             nvmAttributes.put(NODEJS_NVM_KEY, nodeJSVersion.get().trim());
