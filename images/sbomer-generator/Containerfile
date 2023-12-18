@@ -28,6 +28,7 @@ COPY --chown=65532:0 \
 
 RUN sh -c ./install.sh
 RUN sh -c ./install_nvm.sh
+RUN sh -c ./setup-npm.sh
 
 ENV SBOMER_DOMINO_DIR="/workdir"
 ENV SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml"
