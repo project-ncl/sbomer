@@ -78,7 +78,10 @@ spec:
         # Set the path to Gradle init script file so that it can be used by the generator
         export SBOMER_GRADLE_SETTINGS_XML_PATH="/workdir/cyclonedx-init.gradle"
 
+        # This loads SDK
         source /workdir/.sdkman/bin/sdkman-init.sh
+        # This loads NVM
+        source /workdir/.bashrc
 
         export MAVEN_OPTS="-Xms256m -Xmx512m"
 
@@ -98,10 +101,14 @@ spec:
            # Check if the output is not empty
            if [ -n "$key" ]; then
               # Call the script with softwaretype and required_version as arguments
-              best_available_version=$(/workdir/sdk_find_closest_installed_software.sh "$key" "$value" )
+              best_available_version=$(/workdir/sdk_nvm_find_closest_installed_software.sh "$key" "$value" )
               # Now set the closest softwaretype to the required_version
               if [ -n "$best_available_version" ]; then
-                 sdk use $key ${best_available_version}
+                 if [ "$key" == "gradle" ] || [ "$key" == "maven" ] || [ "$key" == "java" ]; then
+                    sdk use $key ${best_available_version}
+                 else
+                    nvm use ${best_available_version}
+                 fi
               fi
            fi      
         done < /workdir/env-config.yaml

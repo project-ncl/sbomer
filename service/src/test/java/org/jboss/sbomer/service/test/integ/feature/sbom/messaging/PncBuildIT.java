@@ -47,8 +47,6 @@ import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.smallrye.reactive.messaging.memory.InMemoryConnector;
 import io.smallrye.reactive.messaging.memory.InMemorySource;
-import io.vertx.amqp.AmqpMessage;
-import io.vertx.amqp.AmqpMessageBuilder;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;

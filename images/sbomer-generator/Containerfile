@@ -21,9 +21,13 @@ COPY --chown=65532:0 \
     images/sbomer-generator/settings.xml \
     images/sbomer-generator/cyclonedx-init.gradle \
     images/sbomer-generator/install.sh \
-    images/sbomer-generator/sdk_find_closest_installed_software.sh \
+    images/sbomer-generator/install_nvm.sh \
+    images/sbomer-generator/sdk_nvm_find_closest_installed_software.sh \
     /workdir/
+
 RUN sh -c ./install.sh
+RUN sh -c ./install_nvm.sh
+RUN sh -c ./setup-npm.sh
 
 ENV SBOMER_DOMINO_DIR="/workdir"
 ENV SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml"

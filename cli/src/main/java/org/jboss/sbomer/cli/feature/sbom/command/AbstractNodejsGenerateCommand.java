@@ -15,19 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.enums;
+package org.jboss.sbomer.cli.feature.sbom.command;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+public abstract class AbstractNodejsGenerateCommand extends AbstractGenerateCommand {
 
-/**
- * Supported generator implementations.
- *
- * @author Marek Goldmann
- */
-public enum GeneratorType {
-    @JsonProperty("maven-cyclonedx")
-    MAVEN_CYCLONEDX, @JsonProperty("maven-domino")
-    MAVEN_DOMINO, @JsonProperty("gradle-cyclonedx")
-    GRADLE_CYCLONEDX, @JsonProperty("nodejs-cyclonedx")
-    NODEJS_CYCLONEDX
 }

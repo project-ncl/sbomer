@@ -46,10 +46,12 @@ public class StageGenerationRequestIT extends E2EStageBase {
     private final static String MAVEN_BUILD_ID = "AZ4HNIBW4YYAA";
     private final static String GRADLE_5_BUILD_ID = "A3YCIKLQTVYAA";
     private final static String GRADLE_4_BUILD_ID = "A3LCEFCLLVYAA";
+    private final static String NODEJS_NPM_BUILD_ID = "A4WLAOY3BJIAA";
 
     static String mavenGenerationRequestId;
     static String gradle5GenerationRequestId;
     static String gradle4GenerationRequestId;
+    static String nodeJsNpmGenerationRequestId;
 
     @Test
     public void testSuccessfulGenerationMavenBuild() throws IOException {
@@ -159,4 +161,43 @@ public class StageGenerationRequestIT extends E2EStageBase {
         log.info("Gradle 4 build passed");
     }
 
+    @Test
+    public void testSuccessfulGenerationNodeJsNpmBuild() throws IOException {
+        String requestBody = Files.readString(sbomPath(NODEJS_NPM_BUILD_ID + ".json"));
+        nodeJsNpmGenerationRequestId = requestGenerationWithConfiguration(NODEJS_NPM_BUILD_ID, requestBody);
+
+        log.info("NodeJs NPM build - Generation Request created: {}", nodeJsNpmGenerationRequestId);
+
+        Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+            final Response body = getGeneration(nodeJsNpmGenerationRequestId);
+            String status = body.path("status").toString();
+
+            log.info("NodeJs NPM build - Current generation request status: {}", status);
+
+            if (status.equals("FAILED")) {
+                log.error("NodeJs NPM build - generation failed: {}", body.asPrettyString());
+                throw new Exception("NodeJs NPM build - Generation failed!");
+            }
+
+            return status.equals("FINISHED");
+        });
+
+        log.info("NodeJs NPM build finished, waiting for UMB message");
+
+        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+            givenLastCompleteUmbMessageForGeneration(nodeJsNpmGenerationRequestId).then()
+                    .body(
+                            "raw_messages[0].headers.generation_request_id",
+                            CoreMatchers.is(nodeJsNpmGenerationRequestId))
+                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
+                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
+                    .body(
+                            "raw_messages[0].msg.sbom.generationRequest.id",
+                            CoreMatchers.is(nodeJsNpmGenerationRequestId));
+
+            return true;
+        });
+
+        log.info("NodeJs NPM build passed");
+    }
 }
