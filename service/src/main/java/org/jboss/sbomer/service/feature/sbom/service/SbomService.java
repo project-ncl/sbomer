@@ -23,6 +23,7 @@ import java.util.Set;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
@@ -54,6 +55,9 @@ public class SbomService {
 
     @Inject
     Validator validator;
+
+    @Inject
+    NotificationService notificationService;
 
     @WithSpan
     public long countSboms() {
@@ -243,5 +247,16 @@ public class SbomService {
 
         return sboms.get(0);
 
+    }
+
+    /**
+     * Notify the creation of an existing SBOM via UMB.
+     *
+     * @param sbom The {@link Sbom} resource to nofify about.
+     */
+    @WithSpan
+    public void notifyCompleted(@SpanAttribute(value = "sbom") Sbom sbom) {
+        log.info("Notifying the generation of SBOM: {}", sbom);
+        notificationService.notifyCompleted(List.of(sbom));
     }
 }
