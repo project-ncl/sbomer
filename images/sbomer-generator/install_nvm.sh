@@ -35,12 +35,20 @@ function install_nodejs() {
     nvm install ${nodejs_version}
     echo ${nodejs_version} > "$HOME/.nvmrc" # This stores the last version which can be set running 'nvm use'
   done
-  # Now that we have a .nvmrc file, we can add 'nvm use'
-  echo "nvm use" >> "$HOME/.bashrc"
+
+  # Now that we have a .nvmrc file, we can add 'nvm use' and some npm setup
+cat << 'EOF' >> "$HOME/.bashrc"
+nvm use
+npm config set loglevel info
+npm config set maxsockets 80
+npm config set fetch-retries 10
+npm config set fetch-retry-mintimeout 60000
+EOF
+
 }
 
 function install_cyclonedx_npm() {
-  nvm use
+  source "${HOME}/.bashrc"
   npm install --global @cyclonedx/cyclonedx-npm
 }
 
