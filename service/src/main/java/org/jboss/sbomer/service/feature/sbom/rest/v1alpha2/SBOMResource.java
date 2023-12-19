@@ -184,7 +184,6 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
     @APIResponses({
             @APIResponse(
                     responseCode = "200",
-                    description = "The SBOM",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @APIResponse(
                     responseCode = "404",
