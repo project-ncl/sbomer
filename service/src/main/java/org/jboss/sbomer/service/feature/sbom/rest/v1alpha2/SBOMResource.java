@@ -37,6 +37,7 @@ import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -52,6 +53,7 @@ import jakarta.ws.rs.core.Response.Status;
 @Tag(name = "v1alpha2", description = "v1alpha2 API endpoints")
 @PermitAll
 public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1alpha1.SBOMResource {
+
     @GET
     @Operation(summary = "List SBOMs", description = "List paginated SBOMs using RSQL advanced search.")
     @Parameter(
@@ -171,5 +173,30 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
         }
 
         return Response.status(Status.OK).entity(sbom.getCycloneDxBom()).build();
+    }
+
+    @POST
+    @Operation(
+            summary = "Resend UMB notification message for a completed SBOM",
+            description = "Force the resending of the UMB notification message for an already generated SBOM.")
+    @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
+    @Path("{id}/notify")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested SBOM could not be found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @APIResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
+    public Response notify(@PathParam("id") String sbomId) throws Exception {
+
+        Sbom sbom = doGetBomById(sbomId);
+        sbomService.notifyCompleted(sbom);
+        return Response.status(Status.OK).build();
     }
 }

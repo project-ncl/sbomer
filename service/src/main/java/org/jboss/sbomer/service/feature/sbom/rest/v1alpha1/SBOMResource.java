@@ -197,7 +197,7 @@ public class SBOMResource {
         return Response.status(Status.OK).entity(SbomUtils.toJsonNode(sbom.getCycloneDxBom())).build();
     }
 
-    private Sbom doGetBomById(String sbomId) {
+    protected Sbom doGetBomById(String sbomId) {
         Sbom sbom = sbomService.get(sbomId);
 
         if (sbom == null) {
