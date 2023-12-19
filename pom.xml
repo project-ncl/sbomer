@@ -48,7 +48,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <version.surefire-plugin>3.2.3</version.surefire-plugin>
-        <version.failsafe-plugin>3.2.2</version.failsafe-plugin>
+        <version.failsafe-plugin>3.2.3</version.failsafe-plugin>
 
         <!--
         Keep "version.quarkus-platform" in sync with the Quarkus Operator SDK extension Quarkus version:
