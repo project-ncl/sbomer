@@ -16,7 +16,7 @@
 ###
 
 # https://catalog.redhat.com/software/containers/ubi9/ubi-minimal/615bd9b4075b022acc111bf5
-# Based on tag 9.3-1361.1699548032
+# Based on tag 9.3-1475
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:a340f4b9fb261a75c84666a3dccb88e193a116da3cebabaf9bcdc33609b61172
 WORKDIR /work/
 RUN chown 1001 /work \
