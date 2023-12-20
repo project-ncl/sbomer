@@ -87,12 +87,7 @@ public class CLI implements QuarkusApplication {
                     Integer executionResult = callable.call();
                     parsed.setExecutionResult(executionResult);
 
-                    if (executionResult != 0) {
-                        throw new Exception("Execution failed");
-                    }
-
                     result.add(executionResult);
-
                 } catch (ParameterException ex) {
                     throw ex;
                 } catch (ExecutionException ex) {
