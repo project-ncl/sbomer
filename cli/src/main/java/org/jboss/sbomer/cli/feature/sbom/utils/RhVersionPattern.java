@@ -27,10 +27,16 @@ public class RhVersionPattern {
     private static final Pattern RH_VERSION_SUFFIX_PATTERN = Pattern
             .compile(GlobUtil.toRegexPattern(RH_VERSION_SUFFIX));
     private static final String RH_VERSION_EXPR = "*redhat-*";
+    private static final String RH_NPM_PURL_VERSION = ".*(?:%40redhat|@redhat).*";
     private static final Pattern RH_VERSION_PATTERN = Pattern.compile(GlobUtil.toRegexPattern(RH_VERSION_EXPR));
+    private static final Pattern RH_NPM_PURL_PATTERN = Pattern.compile(GlobUtil.toRegexPattern(RH_NPM_PURL_VERSION));
 
     public static boolean isRhVersion(String version) {
         return RH_VERSION_PATTERN.matcher(version).matches();
+    }
+
+    public static boolean isRhPurl(String purl) {
+        return RH_NPM_PURL_PATTERN.matcher(purl).matches();
     }
 
     public static String ensureNoRhSuffix(String version) {

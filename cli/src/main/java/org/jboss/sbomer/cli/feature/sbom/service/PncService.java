@@ -274,6 +274,10 @@ public class PncService {
         try {
             // Fetch all artifacts via purl (always available)
             String artifactQuery = "purl==\"" + purl + "\"";
+            // We need to make a small tweak to find the NPM purls because PNC does not like the % in the purl
+            if (purl.startsWith("pkg:npm/%40redhat/")) {
+                artifactQuery = "purl=like=\"" + purl.replace("pkg:npm/%40redhat/", "pkg:npm/?40redhat/") + "\"";
+            }
             RemoteCollection<Artifact> artifacts = buildClient
                     .getDependencyArtifacts(buildId, Optional.empty(), Optional.of(artifactQuery));
             if (artifacts.size() == 0) {

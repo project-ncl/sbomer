@@ -65,7 +65,7 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
      * @param component
      */
     protected void processComponent(Component component) {
-        if (!RhVersionPattern.isRhVersion(component.getVersion())) {
+        if (!RhVersionPattern.isRhVersion(component.getVersion()) && !RhVersionPattern.isRhPurl(component.getPurl())) {
             log.info("Component unknown to PNC found, purl: '{}', skipping processing", component.getPurl());
             return;
         }
