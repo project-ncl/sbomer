@@ -181,10 +181,7 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
             description = "Force the resending of the UMB notification message for an already generated SBOM.")
     @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
     @Path("{id}/notify")
-    @APIResponses({
-            @APIResponse(
-                    responseCode = "200",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+    @APIResponses({ @APIResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @APIResponse(
                     responseCode = "404",
                     description = "Requested SBOM could not be found",

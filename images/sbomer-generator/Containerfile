@@ -25,6 +25,9 @@ COPY --chown=65532:0 \
     images/sbomer-generator/sdk_nvm_find_closest_installed_software.sh \
     /workdir/
 
+RUN touch /workdir/.npmrc && \
+    chmod 644 /workdir/.npmrc
+
 RUN sh -c ./install.sh
 RUN sh -c ./install_nvm.sh
 
