@@ -20,9 +20,8 @@ package org.jboss.sbomer.cli.test.integ;
 import java.nio.file.Path;
 import java.util.Set;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.jboss.sbomer.cli.test.integ.DefaultProcessCommandIT.CustomPncServiceProfile;
+import org.jboss.sbomer.cli.test.integ.CliFailFastIt.CustomPncServiceProfile;
+import org.jboss.sbomer.cli.test.utils.FailedDefaultProcessCommand;
 import org.jboss.sbomer.cli.test.utils.MavenCycloneDxGenerateCommandMockAlternative;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.junit.jupiter.api.Assertions;
@@ -40,17 +39,18 @@ import io.quarkus.test.junit.main.QuarkusMainTest;
 @QuarkusMainTest
 @QuarkusTestResource(PncWireMock.class)
 @TestProfile(CustomPncServiceProfile.class)
-public class DefaultProcessCommandIT {
+public class CliFailFastIt {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {
         @Override
         public Set<Class<?>> getEnabledAlternatives() {
-            return Set.of(MavenCycloneDxGenerateCommandMockAlternative.class);
+            return Set.of(MavenCycloneDxGenerateCommandMockAlternative.class, FailedDefaultProcessCommand.class);
         }
     }
 
     @Test
-    @DisplayName("Should successfully run default processor")
-    void testSuccessfulProcessing(QuarkusMainLauncher launcher, @TempDir Path tempDir) throws Exception {
+    @DisplayName("Should fail after default processor fails")
+    void testShouldNotRunNextCommandIfPreviousFails(QuarkusMainLauncher launcher, @TempDir Path tempDir)
+            throws Exception {
 
         LaunchResult result = launcher.launch(
                 "-v",
@@ -61,18 +61,18 @@ public class DefaultProcessCommandIT {
                 "--output",
                 tempDir.toAbsolutePath().toString() + "/bom.json",
                 "--build-id",
-                "ARYT3LBXDVYAC",
+                "QUARKUS",
                 "maven-cyclonedx",
                 "process",
-                "default");
+                "default",
+                "redhat-product",
+                "--productName",
+                "PRNAME",
+                "--productVersion",
+                "PRVERSION",
+                "--productVariant",
+                "PRVARIANT");
 
-        Assertions.assertEquals(0, result.exitCode());
-
-        // TODO: Why output? It should be errorOutput.
-        MatcherAssert.assertThat(
-                result.getOutput(),
-                CoreMatchers.containsString(
-                        "Starting processing of Red Hat component 'pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom' with PNC artifact '123'"));
-        MatcherAssert.assertThat(result.getOutput(), CoreMatchers.containsString("DEFAULT processor finished"));
+        Assertions.assertEquals(333, result.exitCode());
     }
 }
