@@ -98,8 +98,24 @@ public class CLI implements QuarkusApplication {
             }
         }
 
+        /**
+         * Checks whether one of previously run commands failed.
+         *
+         * @param result A {@link List} of return values from a command.
+         * @return {@code true} if one of previous cmmands failed, {@code false} otherwise.
+         */
+        private boolean isFailed(List<Object> result) {
+            return result.stream().filter(r -> r instanceof Integer && ((Integer) r) != 0).count() > 0;
+        }
+
         private List<Object> recursivelyExecuteUserObject(ParseResult parseResult, List<Object> result)
                 throws ExecutionException {
+            // Check whether something that was run previous failed
+            // If yes, do not run subsequent commands
+            if (isFailed(result)) {
+                return result;
+            }
+
             CommandLine parsed = parseResult.commandSpec().commandLine();
 
             runIfCallable(parsed, result);
