@@ -25,6 +25,13 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 EOF
 
+cat << 'EOF' >> "$HOME/.npmrc"
+loglevel=info
+maxsockets=80
+fetch-retries=10
+fetch-retry-mintimeout=60000
+EOF
+
 function install_nvm() {
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
   source "${HOME}/.bashrc"
@@ -37,14 +44,7 @@ function install_nodejs() {
   done
 
   # Now that we have a .nvmrc file, we can add 'nvm use' and some npm setup
-cat << 'EOF' >> "$HOME/.bashrc"
-nvm use
-npm config set loglevel info
-npm config set maxsockets 80
-npm config set fetch-retries 10
-npm config set fetch-retry-mintimeout 60000
-EOF
-
+  echo "nvm use" >> "$HOME/.bashrc"
 }
 
 function install_cyclonedx_npm() {
