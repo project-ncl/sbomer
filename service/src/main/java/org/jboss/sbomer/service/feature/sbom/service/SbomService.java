@@ -23,6 +23,8 @@ import java.util.Set;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
+import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
@@ -58,6 +60,9 @@ public class SbomService {
 
     @Inject
     NotificationService notificationService;
+
+    @Inject
+    SbomerConfig sbomerConfig;
 
     @WithSpan
     public long countSboms() {
@@ -228,10 +233,11 @@ public class SbomService {
      * @return The latest generated SBOM or {@code null}.
      */
     public Sbom findByPurl(String purl) {
-        log.debug("Trying to find latest generated SBOM for purl: '{}'", purl);
+        String polishedPurl = UrlUtils.removeAllowedQualifiersFromPurl(purl, sbomerConfig.purlQualifiersAllowList());
+        log.debug("Trying to find latest generated SBOM for purl: '{}' (polished to '{}')", purl, polishedPurl);
 
         QueryParameters parameters = QueryParameters.builder()
-                .rsqlQuery("rootPurl=eq='" + purl + "'")
+                .rsqlQuery("rootPurl=eq='" + polishedPurl + "'")
                 .sort("creationTime=desc=")
                 .pageSize(10)
                 .pageIndex(0)
@@ -239,7 +245,7 @@ public class SbomService {
 
         List<Sbom> sboms = sbomRepository.search(parameters);
 
-        log.debug("Found {} results for the '{}' purl", sboms.size(), purl);
+        log.debug("Found {} results for the '{}' purl", sboms.size(), polishedPurl);
 
         if (sboms.isEmpty()) {
             return null;
