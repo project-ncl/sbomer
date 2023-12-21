@@ -59,7 +59,7 @@ public class UrlUtils {
         try {
             PackageURL packageURL = new PackageURL(purl);
             Map<String, String> qualifiers = packageURL.getQualifiers();
-            if (qualifiers == null || qualifiers.isEmpty()) {
+            if (qualifiers == null || qualifiers.isEmpty() || allowList == null || allowList.isEmpty()) {
                 // Nothing to remove!
                 return purl;
             }
