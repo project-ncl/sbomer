@@ -60,7 +60,7 @@
 
         <version.cyclonedx>8.0.3</version.cyclonedx>
         <version.lombok>1.18.30</version.lombok>
-        <version.pnc-rest>2.5.1</version.pnc-rest>
+        <version.pnc-rest>2.6.10</version.pnc-rest>
         <version.pnc-common>2.4.0-alpha</version.pnc-common>
         <version.quarkus-jgit>3.0.6</version.quarkus-jgit>
         <version.tekton-client>1.0.1</version.tekton-client>
