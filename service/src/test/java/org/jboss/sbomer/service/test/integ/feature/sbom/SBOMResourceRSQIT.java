@@ -105,6 +105,7 @@ public class SBOMResourceRSQIT {
         class GetByPurl {
 
             static String PURL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom";
+            static String PURL_WITH_REPOSITORY_URL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom";
 
             @Test
             void testFetchSbomByPurl() throws Exception {
@@ -156,6 +157,24 @@ public class SBOMResourceRSQIT {
                         .statusCode(404);
             }
 
+            @Test
+            void testFetchSbomByPurlWithAllowedQualifier() throws Exception {
+
+                Mockito.when(sbomService.findByPurl(PURL_WITH_REPOSITORY_URL)).thenReturn(createFirstSbom());
+
+                given().when()
+                        .contentType(ContentType.JSON)
+                        .pathParam("purl", PURL_WITH_REPOSITORY_URL)
+                        .get(API_PATH + "/sboms/purl/{purl}")
+                        .then()
+                        .statusCode(200)
+                        .and()
+                        .body("id", CoreMatchers.is("12345"))
+                        .and()
+                        .body("buildId", CoreMatchers.is("AWI7P3EJ23YAA"))
+                        .and()
+                        .body("sbom", CoreMatchers.is(CoreMatchers.notNullValue()));
+            }
         }
 
     }

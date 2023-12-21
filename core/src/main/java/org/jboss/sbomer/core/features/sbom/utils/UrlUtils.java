@@ -20,6 +20,11 @@ package org.jboss.sbomer.core.features.sbom.utils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 
 public class UrlUtils {
 
@@ -38,6 +43,38 @@ public class UrlUtils {
             return URLDecoder.decode(value, UTF_8);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to urldecode", e);
+        }
+    }
+
+    /**
+     * Removes from the provided purl the qualifiers which are present (if any) in the allowList. If the purl does not
+     * contain any qualifier which needs to be removed, the original purl is returned, otherwise a new purl is built and
+     * returned.
+     *
+     * @param purl
+     * @param allowList
+     * @return
+     */
+    public static String removeAllowedQualifiersFromPurl(String purl, List<String> allowList) {
+        try {
+            PackageURL packageURL = new PackageURL(purl);
+            Map<String, String> qualifiers = packageURL.getQualifiers();
+            if (qualifiers == null || qualifiers.isEmpty()) {
+                // Nothing to remove!
+                return purl;
+            }
+
+            if (!allowList.stream().anyMatch(qualifiers::containsKey)) {
+                // The qualifiers do not include any allowedQualifier
+                return purl;
+            }
+
+            qualifiers.keySet().removeAll(allowList);
+            return packageURL.toString();
+
+        } catch (MalformedPackageURLException e) {
+            // Just return the originally provided purl
+            return purl;
         }
     }
 }

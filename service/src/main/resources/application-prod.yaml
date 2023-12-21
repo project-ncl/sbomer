@@ -32,6 +32,9 @@ mp:
 sbomer:
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha2/"
 
+  purl-qualifiers-allow-list:
+    - repository_url
+
   controller:
     generation-request:
       # This path is (in the service deployment) the mount
