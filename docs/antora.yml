@@ -1,0 +1,7 @@
+name: sbomer
+title: SBOMer
+version: 0.1
+nav:
+- modules/ROOT/nav.adoc
+
+

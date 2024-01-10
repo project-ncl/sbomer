@@ -1,0 +1,10 @@
+= Welcome to SBOMer!
+:navtitle: Welcome
+
+You are vieweing the SBOMer documentation. There is not much to see here, yet.
+
+== Page source
+
+This page is sourced from the AsciiDoc file named [.path]_index.adoc_ that is located at [.path]_docs/modules/ROOT/pages_.
+
+
