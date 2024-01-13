@@ -1,10 +1,13 @@
 # https://catalog.redhat.com/software/containers/ubi9/618326f8c0d15aff4912fe0b
 FROM registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
 
-RUN INSTALL_PKGS="jq unzip zip git" && \
+RUN INSTALL_PKGS="jq wget unzip zip git" && \
     dnf --disableplugin=subscription-manager -y --nodocs --setopt=install_weak_deps=0 install $INSTALL_PKGS && \
     dnf clean all && \
     rm -rf /var/cache/* /var/log/dnf* /var/log/yum.*
+
+RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+RUN chmod a+x /usr/local/bin/yq
 
 WORKDIR /workdir
 ENV HOME=/workdir

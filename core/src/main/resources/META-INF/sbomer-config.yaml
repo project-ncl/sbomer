@@ -31,7 +31,7 @@ sbomer:
         default-version: "1.7.4"
         default-args: "-info"
       nodejs-cyclonedx:
-        default-version: "not supported"
+        default-version: "1.16.1"
         default-args: "--package-lock-only --omit dev --short-PURLs"
 
   processing:
