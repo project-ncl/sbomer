@@ -1,0 +1,11 @@
+= Deployment Guide
+
+include::ROOT:partial$wip.adoc[]
+
+== Staging Environment
+
+Our CI is automatically building the service when a new commit is detected in the `main` branch.
+This includes the service and all related images as well. Images are pushed to quay.io registry.
+
+Once this is done, the automatic deployment to staging begins using Helm. After a successful deployment
+xref:developer-guide:testing.adoc[e2e tests] are running. Only when everything passes the CI job completes successfully.

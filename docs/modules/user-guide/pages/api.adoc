@@ -1,0 +1,80 @@
+= SBOMer REST API
+:navtitle: REST API
+
+SBOMer exposes a REST API which is documented using Swagger. You can access it at the `/api` endpoint of any SBOMer deployment.
+
+Ready to view OpenAPI resources are available directly from the running instance:
+
+- link:{sbomer-url}/api/[Swagger UI]
+- link:{sbomer-url}/q/openapi[OpenAPI definition] in YAML format. The link:{sbomer-url}/q/openapi?format=json[JSON version is here].
+
+
+== Versioning
+
+The API is versioned. Latest version is `{sbomer-latest-api-version}` and it is available at `/api/{sbomer-latest-api-version}` context path.
+
+[WARNING]
+====
+SBOMer is in heavy development. You may expect frequent changes to the API.
+====
+
+== Authentication and Authorization
+
+Currently there is no authentication or authorization required to use this service. This may change in the future.
+
+== Basic SBOM Operations
+
+=== Fetching all SBOMs
+
+Please note that the return is a list of SBOMs in a paginated way.
+
+[source,console,subs="attributes+"]
+----
+$ curl {sbomer-url}/api/{sbomer-latest-api-version}/sboms
+----
+
+=== Requesting SBOM Generation Manually
+
+[NOTE]
+====
+This should not be required in general. SBOMer generates SBOMs automatically for successful PNC builds. It can
+still be handy if you want to retry a generation.
+====
+
+To request SBOM generation we need to pass the PNC build id:
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/build/[PNC_BUILD_ID]
+----
+
+=== Fetching a Specific SBOM
+
+Once the SBOM is generated it becomes available at:
+
+[source,console,subs="attributes+"]
+----
+$ curl {sbomer-url}/api/{sbomer-latest-api-version}/sboms/[SBOM_ID]
+----
+
+== Generation Requests
+
+Generation requests provide information on the progress of the generation.
+
+=== Fetching All Generation Requests
+
+Please note that the return is a list of generation requests in a paginated way.
+
+[source,console,subs="attributes+"]
+----
+$ curl {sbomer-url}/api/{sbomer-latest-api-version}/sboms/requests
+----
+
+=== Fetching a Specific Generation Request
+
+Get a specific generation request:
+
+[source,console,subs="attributes+"]
+----
+$ curl {sbomer-url}/api/{sbomer-latest-api-version}/sboms/requests/[REQUEST_ID]
+----

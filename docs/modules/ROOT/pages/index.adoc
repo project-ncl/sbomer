@@ -1,6 +1,8 @@
 = Welcome to SBOMer!
 :navtitle: Welcome
 
+== User Documentation
+
 You are vieweing the SBOMer documentation. There is not much to see here, yet.
 
 == Page source

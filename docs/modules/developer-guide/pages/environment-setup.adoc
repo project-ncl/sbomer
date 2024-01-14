@@ -1,0 +1,219 @@
+= Environment Setup
+:tekton-version: v0.41.3
+
+This page provides a list of actions that needs to be performed and tools that needs to be installed
+in order to develop SBOMer.
+
+Everything on this page is mostly a one-off preparation and will not
+be repeated unless you will decide to start from scratch.
+
+== Tools
+
+Please install required tools.
+
+=== JDK 17
+
+SBOMer is developed using JDK 17.
+
+You can use link:https://sdkman.io/[SDKMAN!] to install and manage JDKs:
+
+[source,console]
+----
+sdk install java 17.0.6-tem
+----
+
+[TIP]
+====
+Run `sdk list java` to get a list of all available Java versions!
+====
+
+When you enter the project directory you can run:
+
+[source,console]
+----
+sdk env
+----
+
+And you're all set!
+
+[TIP]
+====
+You can add to [filename]`$HOME/.sdkman/etc/config` file following entry:
+
+[source,bash]
+----
+sdkman_auto_env=true
+----
+
+And SDKMAN! will switch to the correct JDK when entering the project directory.
+See [filename]`.sdkmanrc` file in the project root directory.
+====
+
+=== Minikube
+
+Minikube will provide our local Kubernetes cluster where SBOMer will be performing the work.
+
+Please follow link:https://minikube.sigs.k8s.io/docs/start/[upstream documentation] on how to install Minikube.
+
+=== Helm
+
+Helm is used by us to manage SBOMer deployments.
+
+We have created comprehensive xref:helm.adoc[Helm guide]. Please follow it to get more information about Helm installation and usage.
+
+== Configuration
+
+This section focuses on setting up the tools.
+
+[#minikube-setup]
+=== Minikube Setup
+
+To prepare minikube just run the `./hack/minikube-setup.sh` command.
+
+[source,console]
+----
+$ ./hack/minikube-setup.sh
+😄  [sbomer] minikube v1.30.1 on Fedora 39
+✨  Using the kvm2 driver based on user configuration
+👍  Starting control plane node sbomer in cluster sbomer
+🔥  Creating kvm2 VM (CPUs=4, Memory=4096MB, Disk=20480MB) ...
+🐳  Preparing Kubernetes v1.24.12 on Docker 20.10.23 ...
+    ▪ Generating certificates and keys ...
+    ▪ Booting up control plane ...
+    ▪ Configuring RBAC rules ...
+🔗  Configuring bridge CNI (Container Networking Interface) ...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🔎  Verifying Kubernetes components...
+🌟  Enabled addons: storage-provisioner, default-storageclass
+    ▪ Want kubectl v1.24.12? Try 'minikube kubectl -- get pods -A'
+🏄  Done! kubectl is now configured to use "sbomer" cluster and "default" namespace by default
+----
+
+[NOTE]
+====
+This script uses the `kvm2` link:https://minikube.sigs.k8s.io/docs/drivers/[minikube driver]. If you don't use KVM,
+you may want to adjust this command.
+====
+
+=== Firewall Adjustments
+
+We will be mounting directories from the minikube instance into the host. Most likely the firewall will
+prevent us from doing it. But we really, really need to do it. Let's allow it:
+
+[source,console]
+----
+sudo firewall-cmd --permanent --zone=libvirt --add-rich-rule='rule family="ipv4" source address="192.168.39.0/24" accept'
+sudo firewall-cmd --reload
+----
+
+[#managing-kubernetes-contexts]
+=== Managing Kubernetes Contexts
+
+It's very easy to run commands against wrong Kubernetes cluster. To minimize the risk of damage we
+suggest using named contexts.
+
+You can always check what is the current context:
+
+[source,console]
+----
+kubectl config current-context
+$ sbomer
+----
+
+[TIP]
+====
+You can list all available contexts with the `kubectl config get-contexts` command.
+====
+
+We suggest to rename the `sbomer` context into `sbomer-local`, like this:
+
+[source,console]
+----
+$ kubectl config rename-context sbomer sbomer-local
+Context "sbomer" renamed to "sbomer-local".
+----
+
+We will use the `sbomer-local` context when issues some commands later, but for now, let's
+make sure we use it:
+
+[source,console]
+----
+$ kubectl config use-context sbomer-local
+Switched to context "sbomer-local".
+----
+
+=== Secrets
+
+We need to create `sbomer-redhatio-pull-secret` pull secret to be able to pull images from Red Hat registry.
+
+==== Red Hat Image Registry Pull Secret
+
+We use image(s) from Red Hat Container Registry. You can authenticate with the registry.redhat.io registry by
+link:https://access.redhat.com/terms-based-registry/#/[generating a token on this page].
+
+Once you generate the token, download the secret. Downloaded secret will have a generated name. We need to adjust it.
+Please edit the file and ensure that the name of the resource is `sbomer-redhatio-pull-secret`. It should look similar to this:
+
+[source,yaml,highlight=2]
+----
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sbomer-redhatio-pull-secret
+  labels:
+    app.kubernetes.io/name: "sbomer"
+data:
+  .dockerconfigjson: AWESOMEBASE64CONTENT===
+type: kubernetes.io/dockerconfigjson
+----
+
+Then apply it.
+
+[source,console]
+----
+$ kubectl apply -f sbomer-redhatio-pull-secret.yaml
+secret/sbomer-redhatio-pull-secret created
+----
+
+==== Quay Pull Secret
+
+=== Tekton Installation
+
+We need to install Tekton manually. To be as close as possible to the staging and production deployment we should use
+similar version of Tekton for development as deployed on the target environments. Currently it is `{tekton-version}`.
+
+[source,console,subs="attributes+"]
+----
+$ kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/{tekton-version}/release.yaml
+namespace/tekton-pipelines created
+clusterrole.rbac.authorization.k8s.io/tekton-pipelines-controller-cluster-access created
+clusterrole.rbac.authorization.k8s.io/tekton-pipelines-controller-tenant-access created
+clusterrole.rbac.authorization.k8s.io/tekton-pipelines-webhook-cluster-access created
+role.rbac.authorization.k8s.io/tekton-pipelines-controller created
+
+...
+
+configmap/git-resolver-config created
+configmap/hubresolver-config created
+deployment.apps/tekton-pipelines-remote-resolvers created
+horizontalpodautoscaler.autoscaling/tekton-pipelines-webhook created
+deployment.apps/tekton-pipelines-webhook created
+service/tekton-pipelines-webhook created
+----
+
+== You Are Set!
+
+Now you can proceed to the xref:development-guide.adoc[development guide page].
+
+=== What If My Environment Is Not Working?
+
+You can always start from scratch! To remove the minikube environment just run this command and
+follow the guide again.
+
+[source,console]
+----
+$ ./hack/minikube-delete.sh
+🔥  Deleting "sbomer" in kvm2 ...
+💀  Removed all traces of the "sbomer" cluster.
+----
+

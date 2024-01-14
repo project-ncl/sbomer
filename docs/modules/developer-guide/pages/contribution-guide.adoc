@@ -1,0 +1,5 @@
+= Contributing
+
+== Scope
+
+This page provides an overview of contributing to SBOMer as a software developer.

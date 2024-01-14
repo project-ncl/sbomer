@@ -16,14 +16,22 @@
 # limitations under the License.
 #
 
-name: sbomer
-title: SBOMer Documentation
-version: latest
+site:
+  title: SBOMer Documentation
+  start_page: sbomer::index.adoc
+content:
+  sources:
+    - url: ./
+      branches: HEAD
+      start_path: docs
+      edit_url: false
 
-start_page: ROOT:index.adoc
-
-nav:
-  - modules/ROOT/nav.adoc
-  - modules/user-guide/nav.adoc
-  - modules/developer-guide/nav.adoc
-  - modules/admin-guide/nav.adoc
+ui:
+  supplemental_files: ./docs/ui
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+asciidoc:
+  attributes:
+    sbomer-url: http://localhost:8080
+    sbomer-latest-api-version: v1alpha2

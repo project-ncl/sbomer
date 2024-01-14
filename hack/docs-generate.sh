@@ -1,3 +1,5 @@
+#!/bin/env bash
+
 #
 # JBoss, Home of Professional Open Source.
 # Copyright 2023 Red Hat, Inc., and individual contributors
@@ -16,14 +18,10 @@
 # limitations under the License.
 #
 
-name: sbomer
-title: SBOMer Documentation
-version: latest
+set -e
 
-start_page: ROOT:index.adoc
+SCRIPT_DIR=$(dirname "$0")
 
-nav:
-  - modules/ROOT/nav.adoc
-  - modules/user-guide/nav.adoc
-  - modules/developer-guide/nav.adoc
-  - modules/admin-guide/nav.adoc
+set -x
+
+exec npx antora "${SCRIPT_DIR}"/../antora-playbook.yml
