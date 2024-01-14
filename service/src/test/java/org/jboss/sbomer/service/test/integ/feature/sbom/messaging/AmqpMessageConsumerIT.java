@@ -30,7 +30,7 @@ import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-public class AmqpMessageConsumerTest {
+public class AmqpMessageConsumerIT {
     @Inject
     AmqpMessageConsumer consumer;
 
