@@ -21,9 +21,14 @@ site:
   start_page: sbomer::index.adoc
 content:
   sources:
-    - url: https://github.com/project-ncl/sbomer.git
-      branches: [antora]
+    # - url: https://github.com/project-ncl/sbomer.git
+    #   branches: [antora]
+    #   start_path: docs
+    # TODO: Temporarily
+    - url: ./
+      branches: HEAD
       start_path: docs
+      edit_url: false
 ui:
   supplemental_files: ./docs/ui
   bundle:

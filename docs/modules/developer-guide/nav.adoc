@@ -2,5 +2,4 @@
 ** xref:environment-setup.adoc[]
 ** xref:development-guide.adoc[]
 ** xref:testing.adoc[]
-** Blah
-*** xref:helm.adoc[]
+** xref:helm.adoc[]

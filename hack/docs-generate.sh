@@ -24,4 +24,4 @@ SCRIPT_DIR=$(dirname "$0")
 
 set -x
 
-exec npx antora "${SCRIPT_DIR}"/../antora-playbook.yml
+exec npx antora --clean --fetch "${SCRIPT_DIR}"/../antora-playbook.yml
