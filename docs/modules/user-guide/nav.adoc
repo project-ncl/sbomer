@@ -1,4 +1,3 @@
-* User Guide
-** xref:about.adoc[]
+* xref:index.adoc[User Guide]
 ** xref:configuration.adoc[]
 ** xref:api.adoc[]

@@ -1,4 +1,4 @@
-* Developer Guide
+* xref:index.adoc[Developer Guide]
 ** xref:environment-setup.adoc[]
 ** xref:development-guide.adoc[]
 ** xref:testing.adoc[]
