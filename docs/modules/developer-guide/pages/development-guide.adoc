@@ -1,0 +1,205 @@
+= Development Guide
+
+This page provides help with daily tasks performed by the SBOMer developer.
+
+[NOTE]
+====
+You should first complete steps described in the xref:environment-setup.adoc[environment setup document].
+====
+
+== Note on Environment Targets
+
+TBD
+
+For purpose of daily development we will target the local environment.
+
+== Build SBOMer Images
+
+First, let's build some images that will be used in the development using the `./hack/build-images-minikube.sh`
+command.
+
+
+[source,console]
+----
+./hack/build-images-minikube.sh
++ exec ./hack/../mvnw package -DskipTests
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] SBOMer                                                             [pom]
+[INFO] SBOMer Core                                                        [jar]
+[INFO] SBOMer CLI                                                         [jar]
+[INFO] SBOMer Service                                                     [jar]
+
+...
+
+Successfully built 1ccba9ff0649
+Successfully tagged localhost/sbomer-cache:latest
++ '[' no = yes ']'
++ mkdir -p target
++ minikube -p sbomer image inspect localhost/sbomer-cache:latest
++ popd
+----
+
+You will be running this command from time to time, depending on *what parts of the system* you will be changing.
+If you change under following directories you will be required to rebuild images:
+
+- `cli/`
+- `core/` (most probably)
+- `images/` (this one is obvious, I guess)
+
+== Setup SBOMer Using Helm
+
+Please follow link:https://helm.sh/docs/intro/install/[upstream documentation] to install Helm.
+
+[source,console]
+----
+$ helm --kube-context sbomer-local upgrade --install --values https://gitlab.cee.redhat.com/project-ncl/sbomer-support/-/raw/main/helm/dev.yaml sbomer ./helm/
+Release "sbomer" does not exist. Installing it now.
+NAME: sbomer
+LAST DEPLOYED: Fri Jan 12 12:27:09 2024
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+----
+
+After some time you should see the `cache` link:https://kubernetes.io/docs/concepts/workloads/controllers/deployment/[Deployment]
+ready:
+
+[source,console]
+----
+$ kubectl get deployments sbomer-cache
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+sbomer-cache   1/1     1            1           12m
+----
+
+As well as the `db` link:https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/[StatefulSet]:
+
+[source,console]
+----
+$ kubectl get statefulsets sbomer-db
+NAME        READY   AGE
+sbomer-db   1/1     13m
+----
+
+Good job!
+
+== Exposing the Database
+
+The database is running in the Kubernetes cluster, but our service will be outside of it.
+To make the service work we need to expose the database.
+
+[source,console]
+----
+$ ./hack/minikube-expose-db.sh
+Forwarding from 127.0.0.1:5432 -> 5432
+----
+
+This command will block and hang util you terminate it. The database should be exposed as long
+as you run the service.
+
+== Mounting the SBOM Dir
+
+Content generated in SBOMer by the generation tasks needs to be shared with the operator.
+Because we run operator outside of the cluster we need to have a way to expose it
+to the data running inside of Kubernetes.
+
+We can use the link:https://minikube.sigs.k8s.io/docs/handbook/mount/[minikube mount] feature.
+
+Prepare a directory on your host which you would like to use for sharing the data. In this example we
+will use `$HOME/Projects/sboms/shared`
+
+[source,console]
+----
+$ minikube -p sbomer mount $HOME/Projects/sboms/shared:/tmp/sbomer --uid=65532
+📁  Mounting host path /home/goldmann/Projects/sboms/shared into VM as /tmp/sbomer ...
+    ▪ Mount type:   9p
+    ▪ User ID:      65532
+    ▪ Group ID:     docker
+    ▪ Version:      9p2000.L
+    ▪ Message Size: 262144
+    ▪ Options:      map[]
+    ▪ Bind Address: 192.168.39.1:39103
+🚀  Userspace file server: ufs starting
+✅  Successfully mounted /home/goldmann/Projects/sboms/shared to /tmp/sbomer
+
+📌  NOTE: This process must stay alive for the mount to be accessible ...
+----
+
+This command will hang similarly to the one where we exposed the database.
+
+== Running Service in Development Mode
+
+Since we have the database running and exposed, the cache working and the directory shared with minikube host
+we can run our service in development mode!
+
+[source,console]
+----
+ $./hack/run-service-dev.sh
++ exec ./hack/run-maven.sh -pl service -am quarkus:dev -Dquarkus.http.host=0.0.0.0 -DbuildNumber=dev -Dlicense.skip=true
++ exec /home/goldmann/Projects/sboms/sbomer/hack/../mvnw -pl service -am quarkus:dev -Dquarkus.http.host=0.0.0.0 -DbuildNumber=dev -Dlicense.skip=true
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] SBOMer                                                             [pom]
+
+...
+
+12:58:55,232 INFO  traceId=, parentId=, spanId=, sampled= [io.quarkus] (Quarkus Main Thread) sbomer-service dev on JVM (powered by Quarkus 3.4.3) started in 6.918s. Listening on: http://0.0.0.0:8080 mdc:[{}]
+12:58:55,232 INFO  traceId=, parentId=, spanId=, sampled= [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated. mdc:[{}]
+12:58:55,233 INFO  traceId=, parentId=, spanId=, sampled= [io.quarkus] (Quarkus Main Thread) Installed features: [agroal, cdi, config-yaml, hibernate-orm, hibernate-orm-panache, hibernate-validator, jdbc-postgresql, jgit, jsch, keycloak-authorization, kubernetes, kubernetes-client, narayana-jta, oidc, openshift-client, opentelemetry, operator-sdk, quarkiverse-tekton-client, resteasy-reactive, resteasy-reactive-jackson, scheduler, security, smallrye-context-propagation, smallrye-health, smallrye-openapi, smallrye-reactive-messaging, smallrye-reactive-messaging-amqp, swagger-ui, vertx] mdc:[{}]
+
+--
+Tests paused
+Press [e] to edit command line args (currently ''), [r] to resume testing, [o] Toggle test output, [:] for the terminal, [h] for more options>
+----
+
+The service is now available at: http://localhost:8080.
+
+== Congratulations!
+
+You have a running service in development mode! You can go straight to the code and make changes. These will be immediately refected
+in the running service thanks to link:https://quarkus.io/guides/dev-mode-differences[Quarkus dev mode].
+
+Once you make changes, don't forget to xref:testing.adoc[run tests].
+
+== Running Tests
+
+[source,console]
+----
+./hack/run-maven.sh clean verify
+----
+
+== Building Images
+
+All images used by this service can be found in the `src/main/images` directory.
+
+[WARNING]
+====
+Please note that in order to build images you need to be in the *root of the repository*.
+====
+
+
+There are available scripts that help with building all images:
+
+- `./hack/build-images-podman.sh`
+
+  Uses local Podman to build all images.
+
+- `./hack/build-images-docker.sh`
+
+  Uses local Docker to build all images.
+
+- `./hack/build-images-minikube.sh`
+
+  Build images inside of the Minikube environment. This is very useful in case of the `local` development environment
+  where you want to test images in a full Kubernetes deployment.
+
+> :arrow_right: Service needs to be built first!
+>
+> If you don't use above scripts -- please make sure you build the project before building images to ensure the latest
+> state of the service is included in the image.
+

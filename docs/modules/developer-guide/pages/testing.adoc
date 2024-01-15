@@ -1,0 +1,32 @@
+= Testing
+
+include::ROOT:partial$wip.adoc[]
+
+== Unit Tests
+
+[source,console]
+----
+$ ./hack/run-test-unit.sh
+----
+
+== Integration Tests
+
+[source,console]
+----
+$ ./hack/run-test-integ.sh
+----
+
+== End to End Tests
+
+In order to run e2e test we need to target some environment. Currently we only use the
+xref:admin-guide:deployment-environments#staging[staging environment] for this purpose.
+
+Two environment variables should be provided:
+
+- `SBOMER_STAGE_URL` -- a url to the staging deployment of SBOMer, and
+- `DATAGREPPER_STAGE_URL` -- a url to the staging deployment of the link:https://github.com/fedora-infra/datagrepper[datagrepper] instance.
+
+[source,console]
+----
+$ ./hack/run-test-e2e.sh -P e2e-stage -DsbomerStageUri=$SBOMER_STAGE_URL -DdatagrepperStageUri=$DATAGREPPER_STAGE_URL
+----
