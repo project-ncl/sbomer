@@ -47,12 +47,6 @@ function install_nodejs() {
   echo "nvm use" >> "$HOME/.bashrc"
 }
 
-function install_cyclonedx_npm() {
-  source "${HOME}/.bashrc"
-  npm install --global @cyclonedx/cyclonedx-npm
-}
-
 install_nvm
 install_nodejs
-install_cyclonedx_npm
 

@@ -42,7 +42,6 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
     @Override
     protected Path doGenerate(String buildCmdOptions) {
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
-
         processBuilder.command().add("cyclonedx-npm");
         processBuilder.command().addAll(Arrays.asList("--output-format", "JSON", "--output-file", BOM_FILE_NAME));
 
