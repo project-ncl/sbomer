@@ -108,10 +108,12 @@ spec:
                     sdk use $key ${best_available_version}
                  else
                     nvm use ${best_available_version}
+                    # Change the cache folder to be in the home workspace
+                    export npm_config_cache=/workdir
                     # Install the version of the plugin needed
                     generator_version=$(cat $CONFIG_PATH | yq -r '.products[$(params.index)].generator.version')
                     echo "Will install @cyclonedx/cyclonedx-npm@${generator_version}..."
-                    npm install --no-cache --global @cyclonedx/cyclonedx-npm@${generator_version}
+                    npm install --global @cyclonedx/cyclonedx-npm@${generator_version}
                  fi
               fi
            fi      
