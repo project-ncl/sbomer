@@ -38,7 +38,7 @@ function install_nvm() {
 }
 
 function install_nodejs() {
-  for nodejs_version in v8.17.0 v10.24.1 v12.22.12 v14.21.3 v16.20.2 v18.19.0 v20.10.0; do
+  for nodejs_version in v18.19.0 v20.11.0; do
     nvm install ${nodejs_version}
     echo ${nodejs_version} > "$HOME/.nvmrc" # This stores the last version which can be set running 'nvm use'
   done
