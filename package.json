@@ -10,8 +10,8 @@
     "@antora/cli": "^3.1.4",
     "@antora/lunr-extension": "^1.0.0-alpha.8",
     "@antora/site-generator-default": "^3.1.4",
-    "@commitlint/cli": "^17.6.5",
-    "@commitlint/config-conventional": "^17.6.5",
+    "@commitlint/cli": "^18.0.0",
+    "@commitlint/config-conventional": "^18.0.0",
     "gulp": "^4.0.2",
     "gulp-connect": "^5.7.0",
     "js-yaml": "^4.0.0"
