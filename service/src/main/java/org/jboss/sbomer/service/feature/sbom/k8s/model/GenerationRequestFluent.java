@@ -18,25 +18,89 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import io.fabric8.kubernetes.api.model.ConfigMapFluent;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 
-public interface GenerationRequestFluent<A extends GenerationRequestFluent<A>> extends ConfigMapFluent<A> {
+@SuppressWarnings(value = "unchecked")
+public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> extends ConfigMapFluent<A> {
 
-    public A withId(String id);
+    private String id;
+    private String buildId;
+    private SbomGenerationStatus status;
+    private String reason;
+    private String config;
+    private String envConfig;
+    private GenerationResult result;
 
-    public A withBuildId(String buildId);
+    public ConfigMapFluent<A>.MetadataNested<A> withNewDefaultMetadata(String buildId) {
+        return withNewMetadataLike(
+                new ObjectMetaBuilder().withGenerateName("sbom-request-" + buildId.toLowerCase() + "-")
+                        .withLabels(Labels.defaultLabelsToMap())
+                        .build());
+    }
 
-    public A withStatus(SbomGenerationStatus status);
+    public A withBuildId(String buildId) {
+        this.buildId = buildId;
+        return (A) this;
+    }
 
-    public A withReason(String reason);
+    public String getBuildId() {
+        return buildId;
+    }
 
-    public A withEnvConfig(String envConfig);
+    public A withId(String id) {
+        this.id = id;
+        return (A) this;
+    }
 
-    public A withConfig(String config);
+    public String getId() {
+        return id;
+    }
 
-    public A withResult(GenerationResult result);
+    public A withStatus(SbomGenerationStatus status) {
+        this.status = status;
+        return (A) this;
+    }
 
-    public ConfigMapFluent.MetadataNested<A> withNewDefaultMetadata(String buildId);
+    public SbomGenerationStatus getStatus() {
+        return status;
+    }
 
+    public A withReason(String reason) {
+        this.reason = reason;
+        return (A) this;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public A withEnvConfig(String envConfig) {
+        this.envConfig = envConfig;
+        return (A) this;
+    }
+
+    public String getEnvConfig() {
+        return envConfig;
+    }
+
+    public A withConfig(String config) {
+        this.config = config;
+        return (A) this;
+    }
+
+    public String getConfig() {
+        return config;
+    }
+
+    public A withResult(GenerationResult result) {
+        this.result = result;
+        return (A) this;
+    }
+
+    public GenerationResult getResult() {
+        return result;
+    }
 }

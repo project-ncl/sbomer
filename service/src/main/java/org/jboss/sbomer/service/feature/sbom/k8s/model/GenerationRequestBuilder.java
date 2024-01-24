@@ -25,7 +25,7 @@ import io.fabric8.kubernetes.api.builder.VisitableBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
-public class GenerationRequestBuilder extends GenerationRequestFluentImpl<GenerationRequestBuilder>
+public class GenerationRequestBuilder extends GenerationRequestFluent<GenerationRequestBuilder>
         implements VisitableBuilder<GenerationRequest, GenerationRequestBuilder> {
 
     @Override
