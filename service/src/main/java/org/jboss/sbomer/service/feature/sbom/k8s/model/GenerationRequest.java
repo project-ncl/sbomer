@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;

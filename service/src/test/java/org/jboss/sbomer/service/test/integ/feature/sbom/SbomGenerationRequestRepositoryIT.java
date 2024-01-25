@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -186,6 +187,7 @@ public class SbomGenerationRequestRepositoryIT {
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withConfig(SbomUtils.toJsonNode(runtimeConfig))
+                .withEnvConfig(SbomUtils.toJsonNode(Map.of("k", "v")))
                 .withId(REQUEST_ID_2_DELETE)
                 .withBuildId(BUILD_ID_2_DELETE)
                 .withStatus(SbomGenerationStatus.FINISHED)
