@@ -1,0 +1,29 @@
+default:
+  image:
+    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    entrypoint: ['']
+  tags: [docker]
+
+build:
+  stage: build
+  script:
+    - curl -s "https://get.sdkman.io" | bash
+    - source "$HOME/.sdkman/bin/sdkman-init.sh"
+    - sdk version
+
+# pages:
+#   stage: deploy
+#   script:
+#     - dnf install -y --setopt=tsflags=nodocs make gcc-c++
+#     - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+#     - export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" --no-use
+#     - nvm install v18
+#     - npm install --global yarn
+#     - yarn install --frozen-lockfile --no-progress
+#     - >
+#       NODE_TLS_REJECT_UNAUTHORIZED=0
+#       npx antora --fetch --to-dir public antora-playbook.yml
+#   artifacts:
+#     paths:
+#       - public
+#   only: [main]
