@@ -1,0 +1,35 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    name: "Code"
+    uses: ./.github/workflows/build-code.yml
+
+  image-service:
+    name: "Image / Service"
+    needs: build
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: sbomer-service
+      artifact: service
+    secrets: inherit
+
+  image-cache:
+    name: "Image / Cache"
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: sbomer-cache
+    secrets: inherit
+
+  image-generator:
+    name: "Image / Generator"
+    needs: build
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: sbomer-generator
+      artifact: cli
+    secrets: inherit

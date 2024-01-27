@@ -2,6 +2,8 @@
 build
 node_modules
 
+certs
+
 #Maven
 target/
 pom.xml.tag

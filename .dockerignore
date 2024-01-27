@@ -1,4 +1,5 @@
 *
+!certs/*
 !images/*
 !cli/target/*
 !service/target/*

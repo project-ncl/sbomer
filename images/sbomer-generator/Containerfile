@@ -15,8 +15,11 @@ ENV HOME=/workdir
 RUN chown -R 65532:0 /workdir && \
     chmod -R g=u /workdir
 
-COPY --chown=65532:0 images/sbomer-generator/install_cert.sh /workdir/
-RUN sh -c ./install_cert.sh
+COPY certs/2022-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
+COPY certs/2015-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
+COPY certs/rhcs-ca-chain-2022-cross-signed-2015.crt /etc/pki/ca-trust/source/anchors/rhcs-ca-chain-2022-cross-signed-2015.crt
+
+RUN update-ca-trust
 
 USER 65532
 
