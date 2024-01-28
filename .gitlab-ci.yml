@@ -83,6 +83,7 @@ e2e-stage:
         - "e2e/target/surefire-reports/**/*.xml"
   needs:
     - job: deploy-stage
+  only: [main]
 
 promote:
   image:
