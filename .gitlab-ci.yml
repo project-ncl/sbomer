@@ -21,7 +21,7 @@ default:
 
 ensure-images:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    name: registry.access.redhat.com/ubi9@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165
     entrypoint: [""]
   stage: .pre
   resource_group: deploy
@@ -63,7 +63,7 @@ deploy-stage:
 
 e2e-stage:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    name: registry.access.redhat.com/ubi9@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165
     entrypoint: [""]
   stage: deploy
   cache:
@@ -98,7 +98,7 @@ e2e-stage:
 
 promote:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    name: registry.access.redhat.com/ubi9@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165
     entrypoint: [""]
   stage: deploy
   when: manual
@@ -127,7 +127,7 @@ deploy-prod:
 
 pages:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    name: registry.access.redhat.com/ubi9@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165
     entrypoint: [""]
   stage: deploy
   script:
