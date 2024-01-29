@@ -31,7 +31,7 @@ ensure-images:
     - |
       SHA_SHORT=$(git rev-parse --short HEAD)
 
-      echo "SHA_SHORT=${SHA_SHORT} > variables.env
+      echo "SHA_SHORT=${SHA_SHORT}" > variables.env
 
       function wait_for_image() {
         if ! skopeo inspect --creds "${QUAY_CREDS_STAGE}" "docker://${IMAGE_REGISTRY_STAGE}/${1}:${SHA_SHORT}" > "image-manifest-${1}.json"; then

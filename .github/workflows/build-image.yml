@@ -21,6 +21,8 @@ jobs:
       - uses: project-ncl/sbomer/.github/actions/checkout@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          actor: ${{ github.actor }}
+          triggering-actor: ${{ github.triggering_actor }}
 
       - name: Set vars
         id: vars

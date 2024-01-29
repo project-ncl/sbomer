@@ -5,6 +5,12 @@ inputs:
   github-token:
     description: 'GitHub token'
     required: true
+  triggering-actor:
+    required: true
+    description: 'The GitHub triggering actor'
+  actor:
+    required: true
+    description: 'The GitHub actor'
 
 runs:
   using: "composite"
@@ -15,7 +21,7 @@ runs:
       uses: actions-cool/check-user-permission@v2
       with:
         require: write
-        username: ${{ github.triggering_actor }}
+        username: ${{ inputs.triggering-actor }}
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
 
@@ -23,9 +29,9 @@ runs:
       if: steps.checkAccess.outputs.require-result == 'false' && github.event_name == 'pull_request'
       shell: bash
       run: |
-        echo "${{ github.triggering_actor }} does not have permissions on this repo."
+        echo "${{ inputs.triggering-actor }} does not have permissions on this repo."
         echo "Current permission level is ${{ steps.checkAccess.outputs.user-permission }}"
-        echo "Job originally triggered by ${{ github.actor }}"
+        echo "Job originally triggered by ${{ inputs.actor }}"
         exit 1
 
     - uses: actions/checkout@v4
