@@ -11,6 +11,7 @@ jobs:
   build:
     name: "Code"
     uses: ./.github/workflows/build-code.yml
+    secrets: inherit
 
   image-service:
     name: "Image / Service"
