@@ -15,7 +15,6 @@
     paths:
       - manifest-prev.yaml
       - manifest.yaml
-  only: [main]
 
 default:
   tags: [docker]
@@ -53,12 +52,13 @@ deploy-stage:
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest.yaml || true
   needs:
     - job: ensure-images
+  only: [main]
 
 e2e-stage:
   image:
     name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
     entrypoint: [""]
-  stage: test
+  stage: deploy
   cache:
     paths:
       - .m2/repository
@@ -110,6 +110,7 @@ deploy-prod:
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest.yaml || true
   needs:
     - job: promote
+  only: [main]
 
 pages:
   image:
