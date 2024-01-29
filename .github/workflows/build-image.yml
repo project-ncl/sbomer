@@ -19,7 +19,7 @@ jobs:
     name: "Build ${{ inputs.image }} image"
     steps:
       - uses: project-ncl/sbomer/.github/actions/checkout@main
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request_target'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           actor: ${{ github.actor }}
@@ -27,7 +27,7 @@ jobs:
           repo-full-name: ${{ github.event.pull_request.head.repo.full_name }}
 
       - uses: actions/checkout@v4
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request_target'
 
       - name: Set vars
         id: vars
