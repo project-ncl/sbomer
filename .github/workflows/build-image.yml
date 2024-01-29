@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Build ${{ inputs.image }} image"
     steps:
-      - uses: actions/checkout@v4
+      - uses: ./.github/actions/checkout
 
       - name: Set vars
         id: vars
@@ -52,7 +52,7 @@ jobs:
         with:
           image: ${{ inputs.image }}
           layers: true
-          tags: latest ${{ vars.outputs.sha_sort }}
+          tags: latest ${{ steps.vars.outputs.sha_sort }}
           containerfiles: |
             ./images/${{ inputs.image }}/Containerfile
 
