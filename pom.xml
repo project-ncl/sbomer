@@ -192,6 +192,7 @@
                         <licenseSet>
                             <header>${maven.multiModuleProjectDirectory}/.license-header.txt</header>
                             <excludes>
+                                <exclude>manifest*.yaml</exclude>
                                 <exclude>.ci/**</exclude>
                                 <exclude>.gitlab-ci.yml</exclude>
                                 <exclude>.github/**</exclude>
