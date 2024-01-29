@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Build and Verify"
     steps:
-      - uses: ./.github/workflows/actions/checkout.yml
+      - uses: ./.github/actions/checkout
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3

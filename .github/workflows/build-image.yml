@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Build ${{ inputs.image }} image"
     steps:
-      - uses: ./.github/workflows/actions/checkout.yml
+      - uses: ./.github/actions/checkout
 
       - name: Set vars
         id: vars
