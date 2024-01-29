@@ -52,7 +52,7 @@ jobs:
         with:
           image: ${{ inputs.image }}
           layers: true
-          tags: latest ${{ vars.outputs.sha_sort }}
+          tags: latest ${{ steps.vars.outputs.sha_sort }}
           containerfiles: |
             ./images/${{ inputs.image }}/Containerfile
 
