@@ -79,6 +79,7 @@ e2e-stage:
       -Dorg.slf4j.simpleLogger.showDateTime=true
       -Djava.awt.headless=true
   script:
+    - dnf install -y --setopt=tsflags=nodocs unzip zip
     - curl -s "https://get.sdkman.io" | bash
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
     - sdk install java 17.0.9
