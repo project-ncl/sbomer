@@ -19,6 +19,12 @@ jobs:
     name: "Build ${{ inputs.image }} image"
     steps:
       - uses: actions/checkout@v4
+        if: github.event_name == 'pull_request'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/checkout@v4
+        if: github.event_name != 'pull_request'
 
       - name: Set vars
         id: vars
