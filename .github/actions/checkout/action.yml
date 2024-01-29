@@ -1,6 +1,11 @@
 name: Checkout source code
 description: "Checks out source hopefully in a secure way"
 
+inputs:
+  github-token:
+    description: 'GitHub token'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -12,7 +17,7 @@ runs:
         require: write
         username: ${{ github.triggering_actor }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
 
     - name: Check User Permission
       if: steps.checkAccess.outputs.require-result == 'false' && github.event_name == 'pull_request'

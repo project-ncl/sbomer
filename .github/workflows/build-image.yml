@@ -19,6 +19,8 @@ jobs:
     name: "Build ${{ inputs.image }} image"
     steps:
       - uses: project-ncl/sbomer/.github/actions/checkout@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set vars
         id: vars
