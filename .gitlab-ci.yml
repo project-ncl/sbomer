@@ -82,8 +82,8 @@ e2e-stage:
     - dnf install -y --setopt=tsflags=nodocs unzip zip
     - curl -s "https://get.sdkman.io" | bash
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
-    - sdk install java 17.0.9
-    - sdk install maven 3.9.5
+    - sdk install java 17.0.10-tem
+    - sdk install maven 3.9.6
     - ./hack/run-test-e2e.sh -P e2e-stage -DsbomerStageUri="https://${SBOMER_STAGE_HOST}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
   artifacts:
     reports:
