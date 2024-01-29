@@ -27,10 +27,14 @@ ensure-images:
   resource_group: deploy
   timeout: 10m
   script:
-    - dnf install -y --setopt=tsflags=nodocs skopeo
+    - dnf install -y --setopt=tsflags=nodocs skopeo git
     - |
+      SHA_SHORT=$(git rev-parse --short HEAD)
+
+      echo "SHA_SHORT=${SHA_SHORT} > variables.env
+
       function wait_for_image() {
-        if ! skopeo inspect --creds "${QUAY_CREDS_STAGE}" "docker://${IMAGE_REGISTRY_STAGE}/${1}:${CI_COMMIT_SHORT_SHA}" > "image-manifest-${1}.json"; then
+        if ! skopeo inspect --creds "${QUAY_CREDS_STAGE}" "docker://${IMAGE_REGISTRY_STAGE}/${1}:${SHA_SHORT}" > "image-manifest-${1}.json"; then
           sleep 30
         fi
       }
@@ -42,13 +46,15 @@ ensure-images:
     name: image-manifests
     paths:
       - image-manifest-*.json
+    reports:
+      dotenv: variables.env
 
 deploy-stage:
   <<: *job-deploy
   script:
     - *job-deploy-default-scripts
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest-prev.yaml || true
-    - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
+    - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest.yaml || true
   needs:
     - job: ensure-images
@@ -94,11 +100,12 @@ promote:
   resource_group: deploy
   script:
     - dnf install -y --setopt=tsflags=nodocs skopeo
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-cache:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-cache:${CI_COMMIT_SHORT_SHA}"
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-service:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-service:${CI_COMMIT_SHORT_SHA}"
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-generator:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-generator:${CI_COMMIT_SHORT_SHA}"
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-cache:${SHA_SHORT}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-cache:${SHA_SHORT}"
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-service:${SHA_SHORT}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-service:${SHA_SHORT}"
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-generator:${SHA_SHORT}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-generator:${SHA_SHORT}"
   needs:
     - job: e2e-stage
+    - job: ensure-images
   only: [main]
 
 deploy-prod:
@@ -106,10 +113,11 @@ deploy-prod:
   script:
     - *job-deploy-default-scripts
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest-prev.yaml || true
-    - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
+    - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest.yaml || true
   needs:
     - job: promote
+    - job: ensure-images
   only: [main]
 
 pages:
