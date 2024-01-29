@@ -36,6 +36,7 @@ ensure-images:
       function wait_for_image() {
         if ! skopeo inspect --creds "${QUAY_CREDS_STAGE}" "docker://${IMAGE_REGISTRY_STAGE}/${1}:${SHA_SHORT}" > "image-manifest-${1}.json"; then
           sleep 30
+          wait_for_image "${1}"
         fi
       }
 
