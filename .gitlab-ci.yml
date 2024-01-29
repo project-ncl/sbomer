@@ -25,7 +25,7 @@ ensure-images:
     entrypoint: [""]
   stage: .pre
   resource_group: deploy
-  timeout: 10m
+  timeout: 30m
   script:
     - dnf install -y --setopt=tsflags=nodocs skopeo git
     - |
