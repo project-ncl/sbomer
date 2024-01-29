@@ -31,7 +31,7 @@ jobs:
 
       - name: Set vars
         id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: echo "COMMIT_SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Populate certificates
         env:
@@ -61,7 +61,7 @@ jobs:
         with:
           image: ${{ inputs.image }}
           layers: true
-          tags: latest ${{ steps.vars.outputs.sha_sort }}
+          tags: latest ${{ env.COMMIT_SHORT_SHA }}
           containerfiles: |
             ./images/${{ inputs.image }}/Containerfile
 
