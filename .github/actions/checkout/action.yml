@@ -3,20 +3,22 @@ description: "Checks out source hopefully in a secure way"
 
 inputs:
   github-token:
-    description: 'GitHub token'
+    description: "GitHub token"
     required: true
   triggering-actor:
     required: true
-    description: 'The GitHub triggering actor'
-  actor:
+    description: "The GitHub triggering actor"
+  repo:
     required: true
-    description: 'The GitHub actor'
+    description: "Repository full name"
+  repo-full-name:
+    required: true
+    description: "Repository ref to check out"
 
 runs:
   using: "composite"
   steps:
     - name: Get User Permission
-      if: github.event_name == 'pull_request'
       id: checkAccess
       uses: actions-cool/check-user-permission@v2
       with:
@@ -26,18 +28,14 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
 
     - name: Check User Permission
-      if: steps.checkAccess.outputs.require-result == 'false' && github.event_name == 'pull_request'
+      if: steps.checkAccess.outputs.require-result == 'false'
       shell: bash
       run: |
         echo "${{ inputs.triggering-actor }} does not have permissions on this repo."
         echo "Current permission level is ${{ steps.checkAccess.outputs.user-permission }}"
-        echo "Job originally triggered by ${{ inputs.actor }}"
         exit 1
 
     - uses: actions/checkout@v4
-      if: github.event_name == 'pull_request'
       with:
-        ref: ${{ github.event.pull_request.head.sha }}
-
-    - uses: actions/checkout@v4
-      if: github.event_name != 'pull_request'
+        ref: ${{ inputs.repo-ref }}
+        repository: ${{ inputs.repo-full-name }}

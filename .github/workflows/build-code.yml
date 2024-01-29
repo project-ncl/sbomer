@@ -9,10 +9,15 @@ jobs:
     name: "Build and Verify"
     steps:
       - uses: project-ncl/sbomer/.github/actions/checkout@main
+        if: github.event_name == 'pull_request'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           actor: ${{ github.actor }}
-          triggering-actor: ${{ github.triggering_actor }}
+          repo-ref: ${{ github.event.pull_request.head.ref }}
+          repo-full-name: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - uses: actions/checkout@v4
+        if: github.event_name != 'pull_request'
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
