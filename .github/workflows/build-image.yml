@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Build ${{ inputs.image }} image"
     steps:
-      - uses: ./.github/actions/checkout
+      - uses: project-ncl/sbomer/.github/actions/checkout@main
 
       - name: Set vars
         id: vars
