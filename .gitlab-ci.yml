@@ -1,0 +1,133 @@
+.job-deploy-default-scripts: &job-deploy-default-scripts
+  - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2022-IT-Root-CA.pem
+  - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2015-IT-Root-CA.pem
+  - curl -L "https://${INTERNAL_CERTS_HOST}/chains/rhcs-ca-chain-2022-cross-signed-2015.crt" -o /usr/local/share/ca-certificates/rhcs-ca-chain-2022-cross-signed-2015.crt
+  - update-ca-certificates
+
+.job-deploy: &job-deploy
+  stage: deploy
+  image:
+    name: alpine/helm:3.14.0
+    entrypoint: [""]
+  artifacts:
+    name: manifests
+    when: always
+    paths:
+      - manifest-prev.yaml
+      - manifest.yaml
+
+default:
+  tags: [docker]
+
+ensure-images:
+  image:
+    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    entrypoint: [""]
+  stage: .pre
+  resource_group: deploy
+  timeout: 10m
+  script:
+    - dnf install -y --setopt=tsflags=nodocs skopeo
+    - |
+      function wait_for_image() {
+        if ! skopeo inspect --creds "${QUAY_CREDS_STAGE}" "docker://${IMAGE_REGISTRY_STAGE}/${1}:${CI_COMMIT_SHORT_SHA}" > "image-manifest-${1}.json"; then
+          sleep 30
+        fi
+      }
+
+      for image in "sbomer-service" "sbomer-cache" "sbomer-generator"; do
+        wait_for_image "${image}"
+      done
+  artifacts:
+    name: image-manifests
+    paths:
+      - image-manifest-*.json
+
+deploy-stage:
+  <<: *job-deploy
+  script:
+    - *job-deploy-default-scripts
+    - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest-prev.yaml || true
+    - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
+    - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest.yaml || true
+  needs:
+    - job: ensure-images
+  only: [main]
+
+e2e-stage:
+  image:
+    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    entrypoint: [""]
+  stage: deploy
+  cache:
+    paths:
+      - .m2/repository
+  resource_group: deploy
+  timeout: 20m
+  variables:
+    MAVEN_OPTS: >-
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+  script:
+    - curl -s "https://get.sdkman.io" | bash
+    - source "$HOME/.sdkman/bin/sdkman-init.sh"
+    - sdk install java 17.0.9
+    - sdk install maven 3.9.5
+    - ./hack/run-test-e2e.sh -P e2e-stage -DsbomerStageUri="https://${SBOMER_STAGE_HOST}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
+  artifacts:
+    reports:
+      junit:
+        - "e2e/target/surefire-reports/**/*.xml"
+  needs:
+    - job: deploy-stage
+  only: [main]
+
+promote:
+  image:
+    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    entrypoint: [""]
+  stage: deploy
+  when: manual
+  resource_group: deploy
+  script:
+    - dnf install -y --setopt=tsflags=nodocs skopeo
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-cache:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-cache:${CI_COMMIT_SHORT_SHA}"
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-service:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-service:${CI_COMMIT_SHORT_SHA}"
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-generator:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-generator:${CI_COMMIT_SHORT_SHA}"
+  needs:
+    - job: e2e-stage
+  only: [main]
+
+deploy-prod:
+  <<: *job-deploy
+  script:
+    - *job-deploy-default-scripts
+    - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest-prev.yaml || true
+    - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
+    - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest.yaml || true
+  needs:
+    - job: promote
+  only: [main]
+
+pages:
+  image:
+    name: registry.access.redhat.com/ubi9@sha256:fc300be6adbdf2ca812ad01efd0dee2a3e3f5d33958ad6cd99159e25e9ee1398
+    entrypoint: [""]
+  stage: deploy
+  script:
+    - dnf install -y --setopt=tsflags=nodocs make gcc-c++
+    - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    - export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" --no-use
+    - nvm install v18
+    - npm install --global yarn
+    - yarn install --frozen-lockfile --no-progress
+    - >
+      NODE_TLS_REJECT_UNAUTHORIZED=0
+      npx antora --fetch --to-dir public antora-playbook.yml
+  artifacts:
+    paths:
+      - public
+  only: [main]

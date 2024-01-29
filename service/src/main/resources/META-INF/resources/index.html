@@ -24,25 +24,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SBOMer</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
       crossorigin="anonymous"
     />
   </head>
   <body>
     <div class="container">
-      <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-          <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap" /></svg>
+      <header
+        class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom"
+      >
+        <a
+          href="/"
+          class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none"
+        >
+          <svg class="bi me-2" width="40" height="32">
+            <use xlink:href="#bootstrap" />
+          </svg>
           <span class="fs-4">Welcome!</span>
         </a>
 
         <ul class="nav nav-pills">
-          <li class="nav-item"><a href="/" class="nav-link active" aria-current="page">Home</a></li>
+          <li class="nav-item">
+            <a href="/" class="nav-link active" aria-current="page">Home</a>
+          </li>
           <li class="nav-item">
             <a
-              href="https://github.com/project-ncl/sbomer/blob/main/docs/index.md"
+              href="https://github.com/project-ncl/sbomer/blob/main/docs"
               target="_blank"
               class="nav-link"
               >Documentation</a
@@ -66,22 +75,20 @@
     <div class="px-4 py-5 my-5 text-center">
       <h1 class="display-3 fw-bold">SBOMer</h1>
       <div class="col-lg-6 mx-auto">
-        <p class="lead mb-4">
-          A service to generate <strong>SBOMs</strong> in the <strong>CycloneDX</strong> format for
-          <a href="https://orch.psi.redhat.com/pnc-web/">Project Newcastle (PNC)</a> builds.
-        </p>
-        <p class="lead mb-4">
-          This service is the implementation of the
-          <a href="https://docs.engineering.redhat.com/x/F_49F">Trusted Content MVP</a> in the PNC team.
-        </p>
+        <p class="lead mb-4">The <strong>SBOM</strong> generation service.</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-          <a type="button" class="btn btn-primary btn-lg px-4 gap-3" href="/api">Show me the API!</a>
+          <!-- <a type="button" class="btn btn-outline-primary btn-lg px-4 gap-3" href="/api"
+            >Documentation</a
+          > -->
+          <a type="button" class="btn btn-outline-primary btn-lg px-4 gap-3" href="/api"
+            >API</a
+          >
         </div>
       </div>
     </div>
     <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
       crossorigin="anonymous"
     ></script>
   </body>

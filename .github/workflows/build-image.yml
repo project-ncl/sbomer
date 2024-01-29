@@ -1,0 +1,68 @@
+name: Build container image
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+      artifact:
+        type: string
+        default: false
+      push:
+        type: boolean
+        default: false
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    name: "Build ${{ inputs.image }} image"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set vars
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Populate certificates
+        env:
+          IT_ROOT_CA_2022: ${{ secrets.IT_ROOT_CA_2022 }}
+          IT_ROOT_CA_2015: ${{ secrets.IT_ROOT_CA_2015 }}
+          CA_CHAIN: ${{ secrets.CA_CHAIN }}
+        run: |
+          mkdir certs
+          echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
+          echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
+          echo "$CA_CHAIN" > certs/rhcs-ca-chain-2022-cross-signed-2015.crt
+
+          openssl x509 -in certs/2015-IT-Root-CA.pem -text > /dev/null
+          openssl x509 -in certs/2022-IT-Root-CA.pem -text > /dev/null
+          openssl x509 -in certs/rhcs-ca-chain-2022-cross-signed-2015.crt -text > /dev/null
+
+      - name: Download ${{ inputs.artifact }}
+        if: "${{ inputs.artifact != 'false' }}"
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ inputs.artifact }}
+          path: ${{ inputs.artifact }}/target/quarkus-app
+
+      - name: Build ${{ inputs.image }} image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ inputs.image }}
+          layers: true
+          tags: latest ${{ vars.outputs.sha_sort }}
+          containerfiles: |
+            ./images/${{ inputs.image }}/Containerfile
+
+      - name: Push to Quay
+        id: push-to-quay
+        if: ${{ inputs.push }}
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ${{ secrets.REGISTRY_ORG }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}

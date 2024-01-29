@@ -4,7 +4,7 @@ FROM registry.access.redhat.com/ubi9/nginx-120@sha256:ff18b7501cb56d411daace3909
 
 USER root
 
-RUN curl -L https://certs.corp.redhat.com/certs/2022-IT-Root-CA.pem -o /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
+COPY certs/2022-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
 RUN update-ca-trust
 
 COPY images/sbomer-cache/nginx.conf.template /etc/nginx/nginx.conf.template

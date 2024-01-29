@@ -89,6 +89,12 @@ else
   CONTAINERFILE="Containerfile"
 fi
 
+mkdir -p certs
+
+curl -L https://certs.corp.redhat.com/certs/2022-IT-Root-CA.pem -o certs/2022-IT-Root-CA.pem
+curl -L https://certs.corp.redhat.com/certs/2015-IT-Root-CA.pem -o certs/2015-IT-Root-CA.pem
+curl -L https://certs.corp.redhat.com/chains/rhcs-ca-chain-2022-cross-signed-2015.crt -o certs/rhcs-ca-chain-2022-cross-signed-2015.crt
+
 "${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "images/${IMAGE_SLUG}/${CONTAINERFILE}" .
 
 if [ "$PUSH" = "yes" ]; then
