@@ -1,4 +1,4 @@
-.job-deploy-default-scripts: &job-deploy-default-scripts
+.cert-default-scripts: &cert-default-scripts
   - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2022-IT-Root-CA.pem
   - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2015-IT-Root-CA.pem
   - curl -L "https://${INTERNAL_CERTS_HOST}/chains/rhcs-ca-chain-2022-cross-signed-2015.crt" -o /usr/local/share/ca-certificates/rhcs-ca-chain-2022-cross-signed-2015.crt
@@ -53,7 +53,7 @@ ensure-images:
 deploy-stage:
   <<: *job-deploy
   script:
-    - *job-deploy-default-scripts
+    - *cert-default-scripts
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest-prev.yaml || true
     - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest.yaml || true
@@ -79,11 +79,14 @@ e2e-stage:
       -Dorg.slf4j.simpleLogger.showDateTime=true
       -Djava.awt.headless=true
   script:
+    - *cert-default-scripts
     - dnf install -y --setopt=tsflags=nodocs unzip zip
     - curl -s "https://get.sdkman.io" | bash
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
     - sdk install java 17.0.10-tem
     - sdk install maven 3.9.6
+    - keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
+    - keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
     - ./hack/run-test-e2e.sh -P e2e-stage -DsbomerStageUri="https://${SBOMER_STAGE_HOST}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
   artifacts:
     reports:
@@ -113,7 +116,7 @@ promote:
 deploy-prod:
   <<: *job-deploy
   script:
-    - *job-deploy-default-scripts
+    - *cert-default-scripts
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest-prev.yaml || true
     - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest.yaml || true
