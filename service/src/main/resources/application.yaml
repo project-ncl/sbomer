@@ -41,6 +41,10 @@ quarkus:
   application:
     version: ${buildNumber}
 
+  config:
+    mapping:
+      validate-unknown: false
+
   # Make the startup a bit nicer
   banner:
     path: banner.txt
