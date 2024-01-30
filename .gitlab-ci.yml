@@ -79,12 +79,13 @@ e2e-stage:
       -Dorg.slf4j.simpleLogger.showDateTime=true
       -Djava.awt.headless=true
   script:
-    - *cert-default-scripts
     - dnf install -y --setopt=tsflags=nodocs unzip zip
     - curl -s "https://get.sdkman.io" | bash
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
     - sdk install java 17.0.10-tem
     - sdk install maven 3.9.6
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
     - keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
     - ./hack/run-test-e2e.sh -P e2e-stage -DsbomerStageUri="https://${SBOMER_STAGE_HOST}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
