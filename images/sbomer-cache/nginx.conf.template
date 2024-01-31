@@ -27,8 +27,8 @@ http {
     # https://www.nginx.com/blog/nginx-caching-guide/
     # https://help.sonatype.com/repomanager2/installing-and-running/running-behind-a-reverse-proxy
 
-    proxy_cache_path /var/www/cache/orch levels=1:2 keys_zone=orch:10m inactive=24h max_size=512m use_temp_path=off;
-    proxy_cache_path /var/www/cache/maven levels=1:2 keys_zone=maven:10m inactive=24h max_size=3g use_temp_path=off;
+    proxy_cache_path /var/www/cache/orch levels=1:2 keys_zone=orch:10m inactive=1d max_size=512m use_temp_path=off;
+    proxy_cache_path /var/www/cache/maven levels=1:2 keys_zone=maven:10m inactive=30d max_size=3g use_temp_path=off;
 
     access_log /dev/stdout;
 
@@ -42,7 +42,7 @@ http {
         ## Global cache config below
 
         # Cache entries for one month
-        proxy_cache_valid 200 1m;
+        proxy_cache_valid 200 30d;
         # If the request should be buffered before sending to the client
         proxy_buffering on;
         # What requests should we cache
