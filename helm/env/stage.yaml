@@ -2,7 +2,7 @@ env: stage
 
 cache:
   storage:
-    accessMode: ReadWriteMany
+    accessMode: ReadWriteOnce
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-cache
     tag: latest
