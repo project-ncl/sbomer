@@ -18,7 +18,7 @@
 
 site:
   title: SBOMer Documentation
-  start_page: sbomer::index.adoc
+  start_page: docs::index.adoc
 content:
   sources:
     - url: ./
