@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}-cache
 {{ include "sbomer.labels" (list . "cache") | indent 2 }}
 spec:
-  replicas: 1
+  serviceName: {{ include "sbomer.component.cache" . }}
+  replicas: 3
   selector:
     matchLabels:
 {{ include "sbomer.selector" (list . "cache") | indent 6 }}
@@ -15,7 +16,7 @@ spec:
       serviceAccountName: {{ include "sbomer.serviceAccountName" . }}
       containers:
         - image: {{ .Values.cache.image.repository }}:{{ .Values.cache.image.tag }}
-          name: {{ .Release.Name }}-cache
+          name: nginx
           imagePullPolicy: {{ .Values.cache.image.pullPolicy }}
           env:
             - name: PNC_SERVICE_HOST
@@ -28,7 +29,7 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: "/var/www/cache"
-              name: sbomer-cache
+              name: data
           command:
             - /bin/bash
           args:
@@ -36,13 +37,17 @@ spec:
             - envsubst '$${PNC_SERVICE_HOST} $${INDY_REPOSITORY_HOST}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
           resources:
             requests:
-              cpu: 800m
+              cpu: 400m
               memory: 1000Mi
             limits:
-              cpu: 800m
+              cpu: 400m
               memory: 1000Mi
-      restartPolicy: Always
-      volumes:
-        - name: sbomer-cache
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-cache
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - {{ .Values.cache.storage.accessMode }}
+      resources:
+        requests:
+          storage: {{ .Values.cache.storage.size }}

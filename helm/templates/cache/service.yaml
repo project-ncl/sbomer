@@ -12,3 +12,7 @@ spec:
       port: 7070
       protocol: TCP
       targetPort: 7070
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 600
