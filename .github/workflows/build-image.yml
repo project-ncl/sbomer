@@ -55,8 +55,13 @@ jobs:
           name: dist-${{ inputs.artifact }}
           path: ${{ inputs.artifact }}/target/quarkus-app
 
+      - name: Prepare temporary directory
+        run: mkdir -p ${HOME}/tmp/buildah
+
       - name: Build ${{ inputs.image }} image
         id: build-image
+        env:
+          TMPDIR: ${HOME}/tmp/buildah
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ inputs.image }}
