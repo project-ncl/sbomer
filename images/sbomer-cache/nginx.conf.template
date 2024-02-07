@@ -34,6 +34,8 @@ http {
 
     server {
         listen 7070 default_server;
+        listen [::]:7070 ipv6only=on;
+
         server_name  _;
 
         location = /404.html {
@@ -65,13 +67,13 @@ http {
         location /pnc/orch/ {
             proxy_cache orch;
 
-            proxy_pass https://${PNC_SERVICE_HOST}:443/;
+            proxy_pass https://${PNC_SERVICE_HOST}/;
         }
 
         location /maven/central/ {
             proxy_cache maven;
 
-            proxy_pass https://repo1.maven.org:443/maven2/;
+            proxy_pass https://repo1.maven.org/maven2/;
         }
 
         location /maven/redhat-ga/ {
@@ -80,7 +82,7 @@ http {
             proxy_ssl_name maven.repository.redhat.com;
             proxy_ssl_server_name on;
 
-            proxy_pass https://maven.repository.redhat.com:443/ga/;
+            proxy_pass https://maven.repository.redhat.com/ga/;
         }
 
         location /maven/indy-static/ {
