@@ -64,8 +64,42 @@ function install_domino() {
   done
 }
 
+function install_nvm() {
+  cat << 'EOF' >> "$HOME/.bashrc"
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+EOF
+
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+  source "${HOME}/.bashrc"
+}
+
+function install_nodejs() {
+  cat << 'EOF' >> "$HOME/.npmrc"
+loglevel=info
+maxsockets=80
+fetch-retries=10
+fetch-retry-mintimeout=60000
+EOF
+
+  for nodejs_version in v18.19.0 v20.11.0; do
+    nvm install ${nodejs_version}
+    echo ${nodejs_version} > "$HOME/.nvmrc" # This stores the last version which can be set running 'nvm use'
+  done
+
+  # Now that we have a .nvmrc file, we can add 'nvm use' and some npm setup
+  echo "nvm use" >> "$HOME/.bashrc"
+}
+
 install_sdk
 install_java
 install_maven
 install_gradle
 install_domino
+install_nvm
+install_nodejs
+
+mkdir -p /workdir/.npm/_cacache
+chown -R 65532:0 /workdir
+chmod -R g=u /workdir

@@ -10,10 +10,11 @@ RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/d
 RUN chmod a+x /usr/local/bin/yq
 
 WORKDIR /workdir
-ENV HOME=/workdir
 
-RUN chown -R 65532:0 /workdir && \
-    chmod -R g=u /workdir
+ENV HOME=/workdir \
+    SBOMER_DOMINO_DIR="/workdir" \
+    SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml" \
+    SBOMER_GRADLE_SETTINGS_XML_PATH="/workdir/cyclonedx-init.gradle"
 
 COPY certs/2022-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
 COPY certs/2015-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
@@ -21,32 +22,19 @@ COPY certs/rhcs-ca-chain-2022-cross-signed-2015.crt /etc/pki/ca-trust/source/anc
 
 RUN update-ca-trust
 
+RUN chown -R 65532:0 /workdir && \
+    chmod -R g=u /workdir
+
 USER 65532
 
 COPY --chown=65532:0 \
     images/sbomer-generator/settings.xml \
     images/sbomer-generator/cyclonedx-init.gradle \
     images/sbomer-generator/install.sh \
-    images/sbomer-generator/install_nvm.sh \
     images/sbomer-generator/sdk_nvm_find_closest_installed_software.sh \
     /workdir/
 
-RUN touch /workdir/.npmrc && \
-    chmod 644 /workdir/.npmrc
-
 RUN sh -c ./install.sh
-RUN sh -c ./install_nvm.sh
-
-ENV SBOMER_DOMINO_DIR="/workdir"
-ENV SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml"
-ENV SBOMER_GRADLE_SETTINGS_XML_PATH="/workdir/cyclonedx-init.gradle"
-
-# Forcefully create the NPM cache folder after NPM has been installed, and setup the correct permissions
-USER root
-RUN mkdir -p /workdir/.npm/_cacache && \
-    chown -R 65532:0 /workdir && \
-    chmod -R g=u /workdir
-USER 65532
 
 COPY --chown=65532:0 cli/target/quarkus-app/lib/ /workdir/generator/lib/
 COPY --chown=65532:0 cli/target/quarkus-app/*.jar /workdir/generator/
