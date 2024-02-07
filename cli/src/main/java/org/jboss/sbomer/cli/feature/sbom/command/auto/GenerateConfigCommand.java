@@ -20,10 +20,13 @@ package org.jboss.sbomer.cli.feature.sbom.command.auto;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
@@ -33,8 +36,15 @@ import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
+import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.utils.EnvironmentAttributesUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
 import jakarta.inject.Inject;
@@ -81,6 +91,8 @@ public class GenerateConfigCommand implements Callable<Integer> {
     ConfigSchemaValidator configSchemaValidator;
 
     SbomerConfigProvider configAdjuster = new SbomerConfigProvider();
+
+    protected SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
 
     @Inject
     ProductVersionMapper productVersionMapper;
@@ -207,6 +219,132 @@ public class GenerateConfigCommand implements Callable<Integer> {
     }
 
     /**
+     * Retrieves environment configuration from a PNC Build, compliant with SDKMan.
+     *
+     * @return a Map object if the configuration could be retrieved or an empty map otherwise.
+     * @author Andrea Vibelli
+     */
+    private Map<String, String> environmentConfig(Build build) {
+        // Make sure there is no context
+        MDCUtils.removeContext();
+        MDCUtils.addBuildContext(build.getId());
+        log.debug("Attempting to fetch environment configuration from a PNC build");
+
+        Map<String, String> buildEnvAttributes = build.getEnvironment().getAttributes();
+        if (buildEnvAttributes == null || buildEnvAttributes.isEmpty()) {
+            log.debug("Build environment attributes not found for the specified PNC build");
+            return Collections.emptyMap();
+        }
+        Map<String, String> envConfig = null;
+        switch (build.getBuildConfigRevision().getBuildType()) {
+            case GRADLE, MVN:
+                envConfig = EnvironmentAttributesUtils.getSDKManCompliantAttributes(buildEnvAttributes);
+                break;
+            case NPM:
+                envConfig = EnvironmentAttributesUtils.getNvmCompliantAttributes(buildEnvAttributes);
+            default:
+                break;
+        }
+        if (envConfig == null || envConfig.isEmpty()) {
+            log.debug("No compliant SDKMan environment attributes could be generated");
+            return Collections.emptyMap();
+        }
+
+        return envConfig;
+    }
+
+    /**
+     * <p>
+     * Returns the {@link GeneratorType} for a given {@link org.jboss.pnc.enums.BuildType}.
+     * </p>
+     * 
+     * <p>
+     * When a the {@param buildType} cannot be converted, {@code null} is returned.
+     * </p>
+     * 
+     * @param buildType
+     * @return {@link GeneratorType}
+     */
+    private static GeneratorType buildTypeToGeneratoType(org.jboss.pnc.enums.BuildType buildType) {
+        if (buildType == null) {
+            return null;
+        }
+
+        switch (buildType) {
+            case GRADLE:
+                return GeneratorType.GRADLE_CYCLONEDX;
+            case MVN:
+                return GeneratorType.MAVEN_CYCLONEDX;
+            case NPM:
+                return GeneratorType.NODEJS_CYCLONEDX;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * <p>
+     * Prepares a default configuration ({@link Config}) for a given build identifier.
+     * </p>
+     * 
+     * <p>
+     * Retrieves the build information, specifically the build type assigned to the build and based on it a
+     * {@link Config} object is generated with default values.
+     * </p>
+     * 
+     * @return {@link Config} with default values
+     */
+    private Config initializeDefaultConfig() {
+        Build build = pncService.getBuild(buildId);
+
+        if (build == null) {
+            log.warn("Could not retrieve PNC build '{}'", buildId);
+            return null;
+        }
+
+        Map<String, String> envConfig = environmentConfig(build);
+
+        if (envConfig.isEmpty()) {
+            log.debug(
+                    "Could not obtain environment attributes for the '{}' build. The generation will use default versions!",
+                    buildId);
+        }
+
+        log.debug("RAW envConfig: '{}'", envConfig);
+        log.debug("Using {} format", format);
+
+        GeneratorType generatorType = GenerateConfigCommand
+                .buildTypeToGeneratoType(build.getBuildConfigRevision().getBuildType());
+
+        if (generatorType == null) {
+            log.warn("Unsupported build type: '{}'", build.getBuildConfigRevision().getBuildType());
+            return null;
+        }
+
+        DefaultGeneratorConfig defaultGeneratorConfig = sbomerConfigProvider.getDefaultGenerationConfig()
+                .forGenerator(generatorType);
+
+        Config config = Config.builder()
+                .withBuildId(buildId)
+                .withApiVersion("sbomer.jboss.org/v1alpha1")
+                .withProducts(
+                        List.of(
+                                ProductConfig.builder()
+                                        .withGenerator(
+                                                GeneratorConfig.builder()
+                                                        .type(generatorType)
+                                                        .version(defaultGeneratorConfig.defaultVersion())
+                                                        .args(defaultGeneratorConfig.defaultArgs())
+                                                        .build())
+                                        .withProcessors(List.of(DefaultProcessorConfig.builder().build()))
+                                        .build()))
+
+                .build();
+
+        return config;
+    }
+
+    /**
      *
      *
      * @return {@code 0} in case the config file was generated successfully, {@code 1} in case a general error occurred
@@ -218,7 +356,12 @@ public class GenerateConfigCommand implements Callable<Integer> {
         Config config = productConfig();
 
         if (config == null) {
-            log.error("Could not obtain product configuration for the '{}' build, exiting", buildId);
+            log.info("Unable to retrieve defined config for  build '{}', initializing default configuration", buildId);
+            config = initializeDefaultConfig();
+        }
+
+        if (config == null) {
+            log.warn("Could not obtain product configuration for the '{}' build, exiting", buildId);
             return GenerationResult.ERR_CONFIG_MISSING.getCode();
         }
 

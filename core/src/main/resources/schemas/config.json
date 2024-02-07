@@ -103,7 +103,7 @@
           "processors": {
             "type": "array",
             "uniqueItems": true,
-            "minItems": 2,
+            "minItems": 1,
             "maxItems": 2,
             "prefixItems": [
               {
