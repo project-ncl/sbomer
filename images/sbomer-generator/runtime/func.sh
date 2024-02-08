@@ -32,6 +32,8 @@ function install_java() {
     local certs_path="/etc/pki/ca-trust/source/anchors"
 
     sdk install java "${version}"
+    # Make an alias for major version
+    sdk install java ${version%%.*} "$(sdk home java ${version})"
 
     # Of course JDK 8 uses different paths and the keytool command does not have the '-cacerts' flag
     local ca_keystore_path="$HOME/.sdkman/candidates/java/${version}/jre/lib/security/cacerts"
@@ -69,6 +71,7 @@ fetch-retry-mintimeout=60000
 EOF
 
     nvm install "${1}" --no-use
+    echo ${1} >"$HOME/.nvmrc"
 }
 
 # Installs Domino.

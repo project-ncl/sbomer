@@ -59,17 +59,18 @@ for tool in $(jq -r '[keys[]] | join(" ")' ${env_config_path}); do
     "java")
         # Special case, we have only major version
         install_major_java "${version}"
-        echo "java=${version}" >>"${HOME}/.sdkmanrc"
+        echo "java=${version}" >>".sdkmanrc"
         ;;
     "node")
-        install_nodejs "${version}"
-        echo ${version} >"$HOME/.nvmrc"
-        echo "nvm use" >>"$HOME/.bashrc"
+        nodeversion=$(cat $HOME/.nvmrc)
+        # Special case -- we have nodejs installed already
+        echo "Skipping installing Node '${version}', we will use already installed version '${nodeversion}'"
+        nvm use "${nodeversion}"
         ;;
     *)
         # All other tools, rely on SDKMAN!
         sdk install "${tool}" "${version}"
-        echo "${tool}=${version}" >>"${HOME}/.sdkmanrc"
+        echo "${tool}=${version}" >>".sdkmanrc"
         ;;
     esac
 done
@@ -105,4 +106,4 @@ esac
 source "${HOME}/env.sh"
 
 echo "Running generation..."
-exec "${HOME}/.sdkman/candidates/java/17/bin/java" -Duser.home=/workdir -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config $CONFIG_PATH --index "${index}"
+exec "${HOME}/.sdkman/candidates/java/17/bin/java" -Duser.home=/workdir -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config "${config_path}" --index "${index}"
