@@ -20,7 +20,8 @@
 set -e
 set -o pipefail
 
-SBOMER_JDK17_VERSION="17.0.10-tem"
+SBOMER_JDK_VERSION="17.0.10-tem"
+NODEJS_VERSION="lts/iron"
 
 # SBOMer functions
 source "${HOME}/func.sh"
@@ -31,10 +32,10 @@ install_nvm
 # Activate nvm and sdk
 source "${HOME}/.bashrc"
 
-# Install JAva 17 -- required to run SBOMer itself
-install_java "${SBOMER_JDK17_VERSION}"
-# Make an alias
-sdk install java 17 "$(sdk home java ${SBOMER_JDK17_VERSION})"
+# Install Java 17 -- required to run SBOMer itself
+install_java "${SBOMER_JDK_VERSION}"
+# Install nodejs -- it will be done only once
+install_nodejs "${NODEJS_VERSION}"
 
 mkdir -p "${HOME}/.npm/_cacache"
 chown -R 65532:0 "${HOME}"

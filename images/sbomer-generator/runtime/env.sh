@@ -25,8 +25,6 @@ else
     fi
 fi
 
-export CONFIG_PATH="${HOME}/config.yaml"
-export ENV_CONFIG_PATH="${HOME}/env-config.json"
 # Set the path to Maven settings.xml file so that it can be used by the generator
 export SBOMER_MAVEN_SETTINGS_XML_PATH="${HOME}/settings.xml"
 # Set the path to Gradle init script file so that it can be used by the generator
