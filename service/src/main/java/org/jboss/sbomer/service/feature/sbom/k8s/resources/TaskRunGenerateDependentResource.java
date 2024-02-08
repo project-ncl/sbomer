@@ -130,17 +130,18 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
         String configStr;
 
         try {
-            configStr = objectMapper.writeValueAsString(config);
+            configStr = ObjectMapperProvider.json().writeValueAsString(config);
         } catch (JsonProcessingException e) {
-            throw new ApplicationException("Could not serialize runtime configuration into YAML", e);
+            throw new ApplicationException("Could not serialize runtime configuration into JSON", e);
         }
 
         String envConfigStr;
 
         try {
-            envConfigStr = objectMapper.writeValueAsString(config.getEnvironment());
+            // Store the content of the environment configuration as a JSON string
+            envConfigStr = ObjectMapperProvider.json().writeValueAsString(config.getEnvironment());
         } catch (JsonProcessingException e) {
-            throw new ApplicationException("Could not serialize environment configuration into YAML", e);
+            throw new ApplicationException("Could not serialize environment configuration into JSON", e);
         }
 
         Duration timeout = null;

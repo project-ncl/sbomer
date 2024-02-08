@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+#
+# JBoss, Home of Professional Open Source.
+# Copyright 2023 Red Hat, Inc., and individual contributors
+# as indicated by the @author tags.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# List all available Temurin Java versions for a given major release.
+function available_java_versions() {
+    sdk list java | grep -E -i ".*\|.*\|.*\|.*\|.*\| ${1}\.0\..*-tem" | awk -F\| '{ print $6 }' | sed 's/^[ \t]*//'
+}
+
+# Find the latest version of Temurin Java for a given major release.
+function latest_java_version() {
+    echo $(available_java_versions ${1} | head -1)
+}
+
+function install_java() {
+    local version=${1}
+    local certs_path="/etc/pki/ca-trust/source/anchors"
+
+    sdk install java "${version}"
+
+    # Of course JDK 8 uses different paths and the keytool command does not have the '-cacerts' flag
+    local ca_keystore_path="$HOME/.sdkman/candidates/java/${version}/jre/lib/security/cacerts"
+
+    if [ ! -f "$ca_keystore_path" ]; then
+        ca_keystore_path="$HOME/.sdkman/candidates/java/${version}/lib/security/cacerts"
+    fi
+
+    for cert in "2015-IT-Root-CA" "2022-IT-Root-CA"; do
+        keytool -delete -alias "${cert}" -keystore "${ca_keystore_path}" -noprompt -storepass changeit || true
+        keytool -import -trustcacerts -alias "${cert}" -file "${certs_path}/${cert}.pem" -keystore "$ca_keystore_path" -noprompt -storepass changeit
+    done
+}
+
+function install_major_java() {
+    local java_version=$(latest_java_version ${version})
+    install_java "${java_version}"
+}
+
+function install_sdk() {
+    curl -s "https://get.sdkman.io" | bash
+    echo "sdkman_auto_answer=true" >.sdkman/etc/config
+}
+
+function install_nvm() {
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+}
+
+function install_nodejs() {
+    cat <<'EOF' >>"$HOME/.npmrc"
+loglevel=info
+maxsockets=80
+fetch-retries=10
+fetch-retry-mintimeout=60000
+EOF
+
+    nvm install "${1}" --no-use
+}
+
+# Installs Domino.
+function install_domino() {
+    echo "> Installing Domino CycloneDX SBOM generator version '${1}'"
+
+    # Ensure the target directory exists
+    mkdir -p "${SBOMER_DOMINO_DIR}"
+
+    curl -s -L https://github.com/quarkusio/quarkus-platform-bom-generator/releases/download/${1}/domino.jar -o ${SBOMER_DOMINO_DIR}/domino-${1}.jar
+
+    echo "Domino installed!"
+}
+
+function install_nodejs_cyclonedx() {
+    echo "Installing @cyclonedx/cyclonedx-npm NPM package version '${1}'"
+    npm install --global "@cyclonedx/cyclonedx-npm@${1}"
+    echo "NPM package @cyclonedx/cyclonedx-npm installed!"
+}

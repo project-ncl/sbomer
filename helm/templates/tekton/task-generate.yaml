@@ -62,28 +62,8 @@ spec:
         set -x
         set -o pipefail
 
-        if [ x"${APP_ENV}" == "xdev" ]; then
-          export QUARKUS_OIDC_CLIENT_CLIENT_ENABLED=false
-        fi
-
-        if [ -n "${SBOMER_SECRET_NAME}" ]; then
-          export QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET="$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer-client.secret)"
-        fi
-
-        CONFIG_PATH="/workdir/config.yaml"
-        ENV_CONFIG_PATH="/workdir/env-config.yaml"
-
-        # Set the path to Maven settings.xml file so that it can be used by the generator
-        export SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml"
-        # Set the path to Gradle init script file so that it can be used by the generator
-        export SBOMER_GRADLE_SETTINGS_XML_PATH="/workdir/cyclonedx-init.gradle"
-
-        # This loads SDK
-        source /workdir/.sdkman/bin/sdkman-init.sh
-        # This loads NVM
-        source /workdir/.bashrc
-
-        export MAVEN_OPTS="-Xms256m -Xmx512m"
+        CONFIG_PATH="${HOME}/config.json"
+        ENV_CONFIG_PATH="${HOME}/env-config.json"
 
         echo "Storing configuration in the $CONFIG_PATH file"
         echo "$(params.config)" | tee $CONFIG_PATH
@@ -91,37 +71,10 @@ spec:
         echo "Storing environment configuration in the $ENV_CONFIG_PATH file"
         echo "$(params.env-config)" | tee $ENV_CONFIG_PATH
 
-        echo "Parsing the environment config file...."
-        # Read the YAML file and iterate through its entries
-        while IFS=':' read -r key value; do
-           # Remove leading and trailing spaces from key and value
-           key=$(echo "$key" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
-           value=$(echo "$value" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
-
-           # Check if the output is not empty
-           if [ -n "$key" ]; then
-              # Call the script with softwaretype and required_version as arguments
-              best_available_version=$(/workdir/sdk_nvm_find_closest_installed_software.sh "$key" "$value" )
-              # Now set the closest softwaretype to the required_version
-              if [ -n "$best_available_version" ]; then
-                 if [ "$key" == "gradle" ] || [ "$key" == "maven" ] || [ "$key" == "java" ]; then
-                    sdk use $key ${best_available_version}
-                 else
-                    nvm use ${best_available_version}
-                    # Install the version of the plugin needed
-                    generator_version=$(cat $CONFIG_PATH | yq -r '.products[$(params.index)].generator.version')
-                    echo "Will install @cyclonedx/cyclonedx-npm@${generator_version}..."
-                    npm install --global @cyclonedx/cyclonedx-npm@${generator_version}
-                 fi
-              fi
-           fi      
-        done < /workdir/env-config.yaml
-
         mkdir -p $(workspaces.data.path)/$(context.taskRun.name)
         cd $(workspaces.data.path)/$(context.taskRun.name)
 
-        echo "Running generation..."
-        exec /workdir/.sdkman/candidates/java/17/bin/java -Duser.home=/workdir -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config $CONFIG_PATH --index "$(params.index)"
+        exec ${HOME}/run.sh $CONFIG_PATH $ENV_CONFIG_PATH "$(params.index)"
       volumeMounts:
         - name: secrets-workdir
           mountPath: /mnt/secrets
