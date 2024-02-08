@@ -12,9 +12,7 @@ RUN chmod a+x /usr/local/bin/yq
 WORKDIR /workdir
 
 ENV HOME=/workdir \
-    SBOMER_DOMINO_DIR="/workdir" \
-    SBOMER_MAVEN_SETTINGS_XML_PATH="/workdir/settings.xml" \
-    SBOMER_GRADLE_SETTINGS_XML_PATH="/workdir/cyclonedx-init.gradle"
+    SBOMER_DOMINO_DIR="/workdir/domino"
 
 COPY certs/2022-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
 COPY certs/2015-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
@@ -29,11 +27,14 @@ USER 65532
 COPY --chown=65532:0 \
     images/sbomer-generator/settings.xml \
     images/sbomer-generator/cyclonedx-init.gradle \
+    images/sbomer-generator/runtime/env.sh \
+    images/sbomer-generator/runtime/func.sh \
+    images/sbomer-generator/runtime/func-gen.sh \
+    images/sbomer-generator/runtime/run.sh \
     images/sbomer-generator/install.sh \
-    images/sbomer-generator/sdk_nvm_find_closest_installed_software.sh \
     /workdir/
 
-RUN sh -c ./install.sh
+RUN sh -c ./install.sh && rm ./install.sh
 
 COPY --chown=65532:0 cli/target/quarkus-app/lib/ /workdir/generator/lib/
 COPY --chown=65532:0 cli/target/quarkus-app/*.jar /workdir/generator/
