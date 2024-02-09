@@ -65,7 +65,9 @@ public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, 
     }
 
     private void setPayload(ConstraintValidatorContext context, List<String> errors) {
-        context.unwrap(HibernateConstraintValidatorContext.class).withDynamicPayload(errors);
+        context.unwrap(HibernateConstraintValidatorContext.class)
+                .addExpressionVariable("errors", errors.toString())
+                .withDynamicPayload(errors);
     }
 
 }

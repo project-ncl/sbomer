@@ -31,7 +31,7 @@ import jakarta.validation.Payload;
 @Constraint(validatedBy = CycloneDxBomValidator.class)
 @Documented
 public @interface CycloneDxBom {
-    String message() default "Invalid CycloneDX object";
+    String message() default "Invalid CycloneDX object: ${errors}";
 
     Class<?>[] groups() default {};
 
