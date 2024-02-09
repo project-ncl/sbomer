@@ -79,6 +79,7 @@ import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -465,9 +466,23 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         // Get list of failed TaskRuns
         List<TaskRun> failedTaskRuns = generateTaskRuns.stream().filter(tr -> isSuccessful(tr) == false).toList();
 
+        List<Sbom> sboms = null;
+
         // If all tasks finished successfully
         if (failedTaskRuns.isEmpty()) {
-            List<Sbom> sboms = storeSboms(generationRequest);
+            try {
+                sboms = storeSboms(generationRequest);
+            } catch (ValidationException e) {
+                // There was an error when validating the entity, most probably the SBOM is not valid
+                log.error("Unable to validate generated SBOM", e);
+
+                return updateRequest(
+                        generationRequest,
+                        SbomGenerationStatus.FAILED,
+                        GenerationResult.ERR_GENERATION,
+                        "Generation failed. One or more generated SBOMs failed validation. See logs for more information.");
+            }
+
             notificationService.notifyCompleted(sboms);
 
             return updateRequest(
