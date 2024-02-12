@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://jboss.org/sbomer/config.json",
-  "title": "SBOMeruser configuration file",
+  "title": "SBOMer user configuration file",
   "description": "User-provided configuration file to instruct SBOM generation",
   "type": "object",
   "$defs": {
@@ -38,26 +38,18 @@
               "type": "string"
             }
           },
-          "required": [
-            "productName",
-            "productVersion",
-            "productVariant"
-          ],
+          "required": ["productName", "productVersion", "productVariant"],
           "additionalProperties": false
         }
       },
-      "required": [
-        "errata"
-      ],
+      "required": ["errata"],
       "additionalProperties": false
     }
   },
   "properties": {
     "apiVersion": {
       "description": "Version of the configuration file",
-      "enum": [
-        "sbomer.jboss.org/v1alpha1"
-      ]
+      "enum": ["sbomer.jboss.org/v1alpha1"]
     },
     "buildId": {
       "description": "PNC build identifier",
@@ -95,9 +87,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "type"
-            ],
+            "required": ["type"],
             "additionalProperties": false
           },
           "processors": {
@@ -118,10 +108,15 @@
         },
         "additionalProperties": false
       }
+    },
+    "environment": {
+      "description": "Environment used at build time",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
-  "required": [
-    "products"
-  ],
+  "required": ["products"],
   "additionalProperties": false
 }

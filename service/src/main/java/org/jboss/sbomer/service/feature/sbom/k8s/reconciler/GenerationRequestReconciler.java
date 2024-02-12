@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
-import org.hibernate.exception.ConstraintViolationException;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -48,9 +47,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigAvailableCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigMissingCondition;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.EnvConfigMissingCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
-import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunEnvDetectDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
@@ -107,10 +104,6 @@ import lombok.extern.slf4j.Slf4j;
                         type = TaskRunInitDependentResource.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME,
                         reconcilePrecondition = ConfigMissingCondition.class),
-                @Dependent(
-                        type = TaskRunEnvDetectDependentResource.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME,
-                        reconcilePrecondition = EnvConfigMissingCondition.class),
                 @Dependent(
                         type = TaskRunGenerateDependentResource.class,
                         reconcilePrecondition = ConfigAvailableCondition.class,
@@ -292,97 +285,6 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
-        TaskRun envDetectTaskRun = envDetectTaskRuns(secondaryResources);
-
-        if (envDetectTaskRun == null) {
-            return UpdateControl.noUpdate();
-        }
-
-        return updateRequest(generationRequest, SbomGenerationStatus.ENV_DETECTING, null, null);
-    }
-
-    /**
-     * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#ENV_DETECTED}
-     *
-     * @param secondaryResources
-     * @param generationRequest
-     *
-     * @return
-     */
-    private UpdateControl<GenerationRequest> reconcileEnvDetecting(
-            GenerationRequest generationRequest,
-            Set<TaskRun> secondaryResources) {
-
-        TaskRun envDetectTaskRun = envDetectTaskRuns(secondaryResources);
-
-        if (envDetectTaskRun == null) {
-            log.error(
-                    "There is no environment detecting TaskRun related to GenerationRequest '{}'",
-                    generationRequest.getName());
-
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Environment detection failed. Unable to find related TaskRun. See logs for more information.");
-        }
-
-        if (!isFinished(envDetectTaskRun)) {
-            return UpdateControl.noUpdate();
-        }
-
-        if (isSuccessful(envDetectTaskRun)) {
-            setEnvConfig(generationRequest, envDetectTaskRun);
-            return updateRequest(generationRequest, SbomGenerationStatus.ENV_DETECTED, null, null);
-        }
-
-        StringBuilder sb = new StringBuilder("Environment detection failed. System failure. ");
-        GenerationResult result = GenerationResult.ERR_SYSTEM;
-
-        if (envDetectTaskRun.getStatus() != null && envDetectTaskRun.getStatus().getSteps() != null
-                && !envDetectTaskRun.getStatus().getSteps().isEmpty()
-                && envDetectTaskRun.getStatus().getSteps().get(0).getTerminated() != null) {
-
-            Optional<GenerationResult> optResult = GenerationResult
-                    .fromCode(envDetectTaskRun.getStatus().getSteps().get(0).getTerminated().getExitCode());
-
-            if (optResult.isPresent()) {
-                result = optResult.get();
-
-                // At this point the config generation failed, let's try to provide more info on the failure
-                switch (result) {
-                    case ERR_GENERAL:
-                        sb.append("General error occurred (could not retrieve the provided PNC buildId).");
-                        break;
-                    default:
-                        // In case we don't have a mapped exit code, we assume it is a system error
-                        result = GenerationResult.ERR_SYSTEM;
-                        sb.append("Unexpected error occurred. ");
-                        break;
-
-                }
-            }
-        }
-        String reason = sb.append("See logs for more information.").toString();
-
-        log.warn("GenerationRequest '{}' failed. {}", generationRequest.getName(), reason);
-
-        return updateRequest(generationRequest, SbomGenerationStatus.FAILED, result, reason);
-    }
-
-    /**
-     * Possible next statuses: {@link SbomGenerationStatus#GENERATING}
-     *
-     * @param secondaryResources
-     * @param generationRequest
-     *
-     * @return
-     */
-    private UpdateControl<GenerationRequest> reconcileEnvDetected(
-            GenerationRequest generationRequest,
-            Set<TaskRun> secondaryResources) {
-
-        // I only care about the Product Config, the Env Config can be empty and defaults will be used.
         Config config = generationRequest.toConfig();
         if (config == null) {
 
@@ -631,26 +533,6 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
     }
 
     /**
-     * Returns the env-detection {@link TaskRun} from the given {@link TaskRun} {@link Set}.
-     *
-     * @param taskRuns
-     * @return The {@link TaskRun} or {@code null} if not found.
-     */
-    private TaskRun envDetectTaskRuns(Set<TaskRun> taskRuns) {
-        Optional<TaskRun> taskRun = taskRuns.stream().filter(tr -> {
-            if (Objects.equals(
-                    tr.getMetadata().getLabels().get(Labels.LABEL_PHASE),
-                    SbomGenerationPhase.DETECTENVINFO.name().toLowerCase())) {
-                return true;
-            }
-
-            return false;
-        }).findFirst();
-
-        return taskRun.orElse(null);
-    }
-
-    /**
      * Removes related to finished {@link GenerationRequest} and its instance as well.
      *
      * @param generationRequest
@@ -794,12 +676,6 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
             case INITIALIZED:
                 action = reconcileInitialized(generationRequest, secondaryResources);
                 break;
-            case ENV_DETECTING:
-                action = reconcileEnvDetecting(generationRequest, secondaryResources);
-                break;
-            case ENV_DETECTED:
-                action = reconcileEnvDetected(generationRequest, secondaryResources);
-                break;
             case GENERATING:
                 action = reconcileGenerating(generationRequest, secondaryResources);
                 break;
@@ -924,59 +800,6 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
         }
 
         return config;
-    }
-
-    private Map<String, String> setEnvConfig(GenerationRequest generationRequest, TaskRun taskRun) {
-        log.debug("Handling result of the environment detection task");
-
-        if (taskRun.getStatus() == null) {
-            throw new ApplicationException(
-                    "TaskRun '{}' does not have status sub-resource despite it is expected",
-                    taskRun.getMetadata().getName());
-
-        }
-
-        if (taskRun.getStatus().getTaskResults() == null || taskRun.getStatus().getTaskResults().isEmpty()) {
-            throw new ApplicationException(
-                    "TaskRun '{}' does not have any results despite it is expected to have one",
-                    taskRun.getMetadata().getName());
-        }
-
-        Optional<TaskRunResult> envConfigResult = taskRun.getStatus()
-                .getTaskResults()
-                .stream()
-                .filter(result -> Objects.equals(result.getName(), TaskRunEnvDetectDependentResource.RESULT_NAME))
-                .findFirst();
-
-        if (envConfigResult.isEmpty()) {
-            throw new ApplicationException(
-                    "Could not find the '{}' result within the TaskRun '{}'",
-                    TaskRunEnvDetectDependentResource.RESULT_NAME,
-                    taskRun.getMetadata().getName());
-        }
-
-        String envConfigVal = envConfigResult.get().getValue().getStringVal();
-        Map<String, String> envConfig;
-
-        try {
-            envConfig = objectMapper.readValue(envConfigVal.getBytes(), Map.class);
-        } catch (IOException e) {
-            throw new ApplicationException(
-                    "Could not parse the '{}' result within the TaskRun '{}': {}",
-                    TaskRunEnvDetectDependentResource.RESULT_NAME,
-                    taskRun.getMetadata().getName(),
-                    envConfigVal);
-        }
-
-        log.debug("Environment config from TaskRun '{}' parsed: {}", taskRun.getMetadata().getName(), envConfig);
-
-        try {
-            generationRequest.setEnvConfig(objectMapper.writeValueAsString(envConfig));
-        } catch (JsonProcessingException e) {
-            log.error("Unable to serialize environment configuration", e);
-        }
-
-        return envConfig;
     }
 
     @Override
