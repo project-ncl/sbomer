@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
@@ -34,18 +33,18 @@ import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
+import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.EnvironmentAttributesUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -257,11 +256,11 @@ public class GenerateConfigCommand implements Callable<Integer> {
      * <p>
      * Returns the {@link GeneratorType} for a given {@link org.jboss.pnc.enums.BuildType}.
      * </p>
-     * 
+     *
      * <p>
      * When a the {@param buildType} cannot be converted, {@code null} is returned.
      * </p>
-     * 
+     *
      * @param buildType
      * @return {@link GeneratorType}
      */
@@ -286,12 +285,12 @@ public class GenerateConfigCommand implements Callable<Integer> {
      * <p>
      * Prepares a default configuration ({@link Config}) for a given build identifier.
      * </p>
-     * 
+     *
      * <p>
      * Retrieves the build information, specifically the build type assigned to the build and based on it a
      * {@link Config} object is generated with default values.
      * </p>
-     * 
+     *
      * @return {@link Config} with default values
      */
     private Config initializeDefaultConfig() {
@@ -310,9 +309,6 @@ public class GenerateConfigCommand implements Callable<Integer> {
                     buildId);
         }
 
-        log.debug("RAW envConfig: '{}'", envConfig);
-        log.debug("Using {} format", format);
-
         GeneratorType generatorType = GenerateConfigCommand
                 .buildTypeToGeneratoType(build.getBuildConfigRevision().getBuildType());
 
@@ -326,7 +322,6 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
         Config config = Config.builder()
                 .withBuildId(buildId)
-                .withApiVersion("sbomer.jboss.org/v1alpha1")
                 .withProducts(
                         List.of(
                                 ProductConfig.builder()
@@ -339,6 +334,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
                                         .withProcessors(List.of(DefaultProcessorConfig.builder().build()))
                                         .build()))
 
+                .withEnvironment(envConfig)
                 .build();
 
         return config;
@@ -356,16 +352,16 @@ public class GenerateConfigCommand implements Callable<Integer> {
         Config config = productConfig();
 
         if (config == null) {
-            log.info("Unable to retrieve defined config for  build '{}', initializing default configuration", buildId);
+            log.info("Unable to retrieve config for  build '{}', initializing default configuration", buildId);
             config = initializeDefaultConfig();
         }
 
         if (config == null) {
-            log.warn("Could not obtain product configuration for the '{}' build, exiting", buildId);
+            log.warn("Could not initialize product configuration for '{}' build, exiting", buildId);
             return GenerationResult.ERR_CONFIG_MISSING.getCode();
         }
 
-        log.debug("RAW config: '{}'", config);
+        log.debug("RAW config: '{}'", ObjectMapperProvider.json().writeValueAsString(config));
 
         configAdjuster.adjust(config);
 

@@ -73,13 +73,17 @@ public class ConfigSchemaValidatorTest {
                             "#/products: Property \"products\" does not match schema",
                             "#/products: Items did not match schema",
                             "#/products/0/processors: Property \"processors\" does not match schema",
-                            "#/products/0/processors: Array has too few items ( + 0 < 2)",
+                            "#/products/0/processors: Array has too few items ( + 0 < 1)",
                             "#/products/0/processors: Property \"processors\" does not match additional properties schema",
                             "#/products: Property \"products\" does not match additional properties schema"));
         }
 
+        /**
+         * With the feautre to generate minifests for all builds (https://issues.redhat.com/browse/SBOMER-14) the Red
+         * Hat Product processor has been made optional.
+         */
         @Test
-        void shouldFailOnMissingRedHatProductProcessor() {
+        void shouldNotOnMissingRedHatProductProcessor() {
 
             Config config = minimalRuntimeConfig();
 
@@ -87,17 +91,7 @@ public class ConfigSchemaValidatorTest {
 
             ValidationResult result = validator.validate(config);
 
-            assertFalse(result.isValid());
-
-            MatcherAssert.assertThat(
-                    result.getErrors(),
-                    CoreMatchers.hasItems(
-                            "#/products: Property \"products\" does not match schema",
-                            "#/products: Items did not match schema",
-                            "#/products/0/processors: Property \"processors\" does not match schema",
-                            "#/products/0/processors: Array has too few items ( + 1 < 2)",
-                            "#/products/0/processors: Property \"processors\" does not match additional properties schema",
-                            "#/products: Property \"products\" does not match additional properties schema"));
+            assertTrue(result.isValid());
         }
 
         @Test

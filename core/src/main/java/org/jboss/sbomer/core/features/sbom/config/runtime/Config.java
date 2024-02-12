@@ -19,6 +19,7 @@ package org.jboss.sbomer.core.features.sbom.config.runtime;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,6 +55,11 @@ public class Config {
      * Build identifier within PNC.
      */
     String buildId;
+
+    /**
+     * Build environment (tools).
+     */
+    Map<String, String> environment;
 
     /**
      * List of configuration entries for products.
