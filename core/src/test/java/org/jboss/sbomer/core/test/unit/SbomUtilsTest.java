@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -143,6 +144,32 @@ public class SbomUtilsTest {
 
             properties = jsonNode.get("metadata").get("component").get("properties");
             assertNull(properties);
+        }
+
+        @Test
+        void shouldHandleRegularProtocolUrlsForPedigrees() {
+            Component component = new Component();
+            SbomUtils.addPedigreeCommit(
+                    component,
+                    "https://github.com/FasterXML/jackson-annotations.git",
+                    "aaabbbcccdddeee");
+
+            assertEquals(
+                    "https://github.com/FasterXML/jackson-annotations.git",
+                    component.getPedigree().getCommits().get(0).getUrl());
+        }
+
+        @Test
+        void shouldHandleGitProtocolUrlsForPedigrees() {
+            Component component = new Component();
+            SbomUtils.addPedigreeCommit(
+                    component,
+                    "git@github.com:FasterXML/jackson-annotations.git",
+                    "aaabbbcccdddeee");
+
+            assertEquals(
+                    "https://github.com/FasterXML/jackson-annotations.git",
+                    component.getPedigree().getCommits().get(0).getUrl());
         }
     }
 

@@ -1,0 +1,1264 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "version": 1,
+    "metadata": {
+      "timestamp": "2024-02-09T11:38:05Z",
+      "tools": [
+        {
+          "vendor": "OWASP Foundation",
+          "name": "CycloneDX Maven plugin",
+          "version": "2.7.9",
+          "hashes": [
+            {
+              "alg": "MD5",
+              "content": "8e595cdb67f17e4b41e046456970591d"
+            },
+            {
+              "alg": "SHA-1",
+              "content": "69e8ca804520d09ce4657e7235bae84d01cbffa6"
+            },
+            {
+              "alg": "SHA-256",
+              "content": "aa09074fe5aa403c008cd4fc7ef8ce41cd244489337f16b3e91a3914158a4db8"
+            },
+            {
+              "alg": "SHA-512",
+              "content": "1488a8112da8e675813d7585f57c5efb178aed32901118186ee12d0e4ae3d19c53774c7f860bf70d17d70f050119b69443a2637cf641675b4b5d9cdcdd69b89b"
+            },
+            {
+              "alg": "SHA-384",
+              "content": "b097295dfbf10887abc6eec58d4d0822cde5a73d1f5c1cf183a57bf569016ad5ced9d34efae3e574d82bb62837540c6c"
+            }
+          ]
+        }
+      ],
+      "component": {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.datatype",
+        "name": "jackson-datatypes-misc-parent",
+        "version": "2.15.3.custom",
+        "description": "Parent pom for Jackson misc datatype modules",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatypes-misc-parent@2.15.3.custom?type=pom",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "ed833fa4c7b97d6797b86f26d860d6ff3829a297",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-datatypes-misc.git#2.15.3.custom"
+            },
+            {
+              "uid": "19164955e392e1badf3ce5ac3e231b1a8ceba4bd",
+              "url": "https://github.com/FasterXML/jackson-datatypes-misc#jackson-datatypes-misc-parent-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc-parent/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FKMKEUCDYA6",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatypes-misc-parent@2.15.3.custom?type=pom"
+      },
+      "properties": [
+        {
+          "name": "maven.goal",
+          "value": "makeAggregateBom"
+        },
+        {
+          "name": "maven.scopes",
+          "value": "compile,provided,runtime,system"
+        },
+        {
+          "name": "maven.reproducible",
+          "value": "enabled"
+        }
+      ]
+    },
+    "components": [
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.core",
+        "name": "jackson-core",
+        "version": "2.15.3.custom",
+        "description": "Core Jackson processing abstractions (aka Streaming API), implementation for JSON",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "e10492c7c3e45118a261e4188cbe1997"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "d8964c0317d6e3f572e02fd7632d2fca80908b3e"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "0a82630ffd94a0e435edf0b7bac4a370578014e44c4319403dff3ea628785e69"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "e3f92f2007a86adc502fc988ff97a037de6dcfd6bec7a23b704ddec8325fa0d8a1fd4e74073efee473000533b553d63965715f486945e80a9b6ad67872c888a9"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "54b9798d25ae5c49969f8d4d0d56a6ecb6e1962373bbf03852c38e0376d94ab71a3fb317295116e23599c8b6bea2ace9"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "40b4ef53978cdb2cf656e4c15973dd7051d6ba7e",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-core.git#2.15.3.custom"
+            },
+            {
+              "uid": "80e6c424ef876f31f07d3ce12c68ecd5294fe004",
+              "url": "https://github.com/FasterXML/jackson-core.git#jackson-core-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson-core"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-core/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-core"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FGJSEDKDYAA",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.core",
+        "name": "jackson-databind",
+        "version": "2.15.3.custom",
+        "description": "General data-binding functionality for Jackson: works on core streaming API",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "4ffc5c6ad14ffa80dce84781166e5795"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "a0c75146bf9987e9752b86da09b7ac2e0f2bbcfa"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "04686b9408ea879019494a1e13bd45168cc78f49ab9f11050ae66c608bc150b4"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "208cb8018fc7d9282fad2bf83866bf82dbba18420688374441891c309ddb636e7889fe9d719c1071c9450c7a79a21c0418603f452bb11bf2dcc3e146288b64f6"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "8633191a1b53e3c2f9e760a57462e33520180a6e018265ecf28fb6486c1905166a456ea5c35a7efcbbb27fa1e9e3ab0f"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "c376a83a17bd1c6ec8c011058041c9cb04d09e5c",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-databind.git#2.15.3.custom"
+            },
+            {
+              "uid": "31dc75f082e225863d4e2f033f5df9a9daf062a9",
+              "url": "https://github.com/FasterXML/jackson-databind#jackson-databind-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-databind/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-databind"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FKMKEUCDYAE",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.core",
+        "name": "jackson-annotations",
+        "version": "2.15.3.custom",
+        "description": "Core annotations used for value types, used by Jackson data binding package.",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "a065c423be23c13699e702576eafb1e2"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "8b3871e43947d67064af3d198b156279bf67bdcc"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "122e7f9a6294aee17bae25589069433e1ea808091aa6443bd9e47a52e84609ae"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "3a61158e6a63b8efbc8bbbe799ae5f3d3c11aa2faaa141ccc78baedc1322974de4d21e99b119eb581370aa20cf2ff5487f232e0a46b287f9b4d2c1e83424ae04"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "d8f5f2a4c2a1c8a4610436f9698892bd418280a9c2a41065acc97287990ce64ea2a07eedf0a9dfe14096c766bd583f86"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.15.3.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "9ca9ce496fa6dd5cf414451d3ed142d2d39fec07",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-annotations.git#2.15.3.custom"
+            },
+            {
+              "uid": "7144eca86ae15eb4c57056a26b30751a39d38fb2",
+              "url": "git@github.com:FasterXML/jackson-annotations.git#jackson-annotations-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-annotations/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-annotations"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FKMKEUCDYA4",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.15.3.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.datatype",
+        "name": "jackson-datatype-joda-money",
+        "version": "2.15.3.custom",
+        "description": "Support for datatypes of Joda-Money library (https://www.joda.org/joda-money/)",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-joda-money@2.15.3.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "ed833fa4c7b97d6797b86f26d860d6ff3829a297",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-datatypes-misc.git#2.15.3.custom"
+            },
+            {
+              "uid": "19164955e392e1badf3ce5ac3e231b1a8ceba4bd",
+              "url": "https://github.com/FasterXML/jackson-datatypes-misc#jackson-datatypes-misc-parent-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-datatype-joda-money/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc/jackson-datatype-joda-money"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FKMKEUCDYA6",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-joda-money@2.15.3.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "org.joda",
+        "name": "joda-money",
+        "version": "1.0.1.redhat-00003",
+        "description": "Money representation and formatting",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "5d538af625ce12548233664eed9b77b2"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "15d1217cfb2f44b6e9ec175b17a8e960976337bd"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "0eefe0e0b0c4da3c6b5a86a2f34b7d6a6496f320538cd9c154f65bb2cd498806"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "08de8ccaff6578ff3bcb30e48d37f9cd4182621900f3033ba327a43c5cf18ec527a202aaf853e71367f24e7b5d4b970c19a56c18b39b77764ea070b5b0a7d311"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "b24ee9c791192c072626f24a064fd79aac8cb401704951398d1e5ccba6f9ccc9450cf0eb849fbaa7f961f9ffd20521e4"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.joda/joda-money@1.0.1.redhat-00003?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "e6581d071749745abbe30e295f8436e5590eadcd",
+              "url": "http://some.host.com/gerrit/JodaOrg/joda-money.git#1.0.1.redhat-00003"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "http://www.joda.org/joda-money/"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/JodaOrg/joda-money/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/JodaOrg/joda-money"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/71186",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.0:1.0.0",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/org.joda/joda-money@1.0.1.redhat-00003?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.datatype",
+        "name": "jackson-datatype-json-org",
+        "version": "2.15.3.custom",
+        "description": "Support for datatypes of \"org.json\" JSON library (see https://json.org/java), mainly to make it easier to upgrade code to Jackson, using automated conversions.",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-json-org@2.15.3.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "ed833fa4c7b97d6797b86f26d860d6ff3829a297",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-datatypes-misc.git#2.15.3.custom"
+            },
+            {
+              "uid": "19164955e392e1badf3ce5ac3e231b1a8ceba4bd",
+              "url": "https://github.com/FasterXML/jackson-datatypes-misc#jackson-datatypes-misc-parent-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-datatype-json-org/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc/jackson-datatype-json-org"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FKMKEUCDYA6",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-json-org@2.15.3.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "org.json",
+        "name": "json",
+        "version": "20230227.0.0.custom",
+        "description": "JSON is a light-weight, language independent, data interchange format. See http://www.JSON.org/ The files in this package implement JSON encoders/decoders in Java. It also includes the capability to convert between JSON and XML, HTTP headers, Cookies, and CDL. This is a reference implementation. There is a large number of JSON packages in Java. Perhaps someday the Java community will standardize on one. Until then, choose carefully.",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "3866f2e430e10636a58303370f6f70d8"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "0f426791ff7ba0865764384d5dd3ea093623703a"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "707b1ff0a9ee98a031fb409d89afcd19c50ca5eae72b6bf131879cba1cc185d2"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "8a5488688946ca70256650fe3da2928cd3e9e80a518d5ec821589704a963bcb8c234a629641b7c1ced27aa61a575bd3710b0e91147010ab5a8c4c5e5d237e9b0"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "6e9b9e901273904bf9879f223a3727b4a89e13c206f078a62e11eb1f8c9feedfbfca20085a29c2e51baa9eca39038be8"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "name": "Public Domain",
+              "url": "https://github.com/stleary/JSON-java/blob/master/LICENSE"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.json/json@20230227.0.0.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "8691899db5c14629bf5c7f4c63670074624eda04",
+              "url": "https://some.host.com/gerrit/stleary/JSON-java.git#20230227.0.0.custom"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/douglascrockford/JSON-java"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://issues.jboss.org/"
+          },
+          {
+            "type": "mailing-list",
+            "url": "http://lists.jboss.org/pipermail/jboss-user/"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/douglascrockford/JSON-java.git"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/AZZCUO6TC7AAA",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/org.json/json@20230227.0.0.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.datatype",
+        "name": "jackson-datatype-jsr353",
+        "version": "2.15.3.custom",
+        "description": "Add-on module for Jackson (https://github.com/FasterXML/jackson) to support working with JSR-353 (JSON-P) node types via data-binding",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr353@2.15.3.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "ed833fa4c7b97d6797b86f26d860d6ff3829a297",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-datatypes-misc.git#2.15.3.custom"
+            },
+            {
+              "uid": "19164955e392e1badf3ce5ac3e231b1a8ceba4bd",
+              "url": "https://github.com/FasterXML/jackson-datatypes-misc#jackson-datatypes-misc-parent-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-datatype-jsr353/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc/jackson-datatype-jsr353"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FKMKEUCDYA6",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr353@2.15.3.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "javax.json",
+        "name": "javax.json-api",
+        "version": "1.1.4.custom",
+        "description": "API module of JSR 374:Java API for Processing JSON",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "7752e9cd6d18ea560652e1053169fd45"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "b9731bea5642f7e243d09a355907e48a60ea441a"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "6ab5187ded9cb5f956c3420480fc643669b6cade33272e0cc1e7645a5b891103"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "3bcae90e8781aeba67bcfaf93d02493ec4b76c267e9fcc0872ef4550c8028ecdb7b7be1aa3153ba6e49d598fc0959c0490b5316170dcd55d39641f803ac8ccb6"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "10fd9cb40f2856777ec62b81954d3223df8290b42e339757d2d95a0655e6c85c6088a3f2cdd88eb525890b5e908014eb"
+          }
+        ],
+        "licenses": [
+          {
+            "expression": "(CDDL-1.1 OR GPL-2.0-only)"
+          }
+        ],
+        "purl": "pkg:maven/javax.json/javax.json-api@1.1.4.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "78fba785e1645a5201baf553cee0576c49a9ed3e",
+              "url": "http://some.host.com/gerrit/glassfish-json.git#1.1.4.custom"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://javaee.github.io/jsonp"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://issues.jboss.org/"
+          },
+          {
+            "type": "mailing-list",
+            "url": "http://lists.jboss.org/pipermail/jboss-user/"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/javaee/jsonp/javax.json-api"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/30233",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.0:1.0.0",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/javax.json/javax.json-api@1.1.4.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.datatype",
+        "name": "jackson-datatype-jakarta-jsonp",
+        "version": "2.15.3.custom",
+        "description": "Add-on module for Jackson (https://github.com/FasterXML/jackson) to support working with JSON-P (JSON Processing) node types (new Jakarta flavor) via data-binding",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp@2.15.3.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "ed833fa4c7b97d6797b86f26d860d6ff3829a297",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-datatypes-misc.git#2.15.3.custom"
+            },
+            {
+              "uid": "19164955e392e1badf3ce5ac3e231b1a8ceba4bd",
+              "url": "https://github.com/FasterXML/jackson-datatypes-misc#jackson-datatypes-misc-parent-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-datatype-jakarta-jsonp/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc/jackson-datatype-jakarta-jsonp"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FKMKEUCDYA6",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp@2.15.3.custom?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "jakarta.json",
+        "name": "jakarta.json-api",
+        "version": "2.1.1.redhat-00004",
+        "description": "Jakarta JSON Processing defines a Java(R) based framework for parsing, generating, transforming, and querying JSON documents.",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "eb77898cd6b7e2018b231c498a040fa0"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "eb5b6e53f4396200a62f543e8454f2b96fa1fdee"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "28df2d40813c4bfbc5c7ccc183dc5319e2bcf62e65bdceec7c81fc40f696e1b7"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "4e5333384f9affb3d1783efa857c2712c4bb8916b7b7424f81091c2288d1d77fb2c011f5a15224b29745dd2fe897060b4ecbb1bff5f04fb1e15365c3bceeab20"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "7b500fae4549e95291b325794802f1b5726585edd0c315fe0af502071207aca424d957bb9e4a41c9a86785827cd355bc"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "EPL-2.0",
+              "url": "https://www.eclipse.org/legal/epl-2.0"
+            }
+          },
+          {
+            "license": {
+              "name": "GNU General Public License, version 2 with the GNU Classpath Exception",
+              "url": "https://projects.eclipse.org/license/secondary-gpl-2.0-cp"
+            }
+          }
+        ],
+        "purl": "pkg:maven/jakarta.json/jakarta.json-api@2.1.1.redhat-00004?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "729a02b929152418f79ea8f320a2c026e500032f",
+              "url": "https://some.host.com/gerrit/eclipse-ee4j/jsonp.git#2.1.1.redhat-00004"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/eclipse-ee4j/jsonp"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://issues.jboss.org/"
+          },
+          {
+            "type": "mailing-list",
+            "url": "http://lists.jboss.org/pipermail/jboss-user/"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/eclipse-ee4j/jsonp"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A3OFCG7I2MYAY",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j11.0.9-11-mvn3.6.3:1.0.4",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/jakarta.json/jakarta.json-api@2.1.1.redhat-00004?type=jar"
+      },
+      {
+        "supplier": {
+          "name": "Red Hat",
+          "url": [
+            "https://www.redhat.com"
+          ]
+        },
+        "publisher": "Red Hat",
+        "group": "com.fasterxml.jackson.datatype",
+        "name": "jackson-datatype-jakarta-mail",
+        "version": "2.15.3.custom",
+        "description": "Add-on module for Jackson (https://github.com/FasterXML/jackson) to support working with Jakarta Mail types",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-mail@2.15.3.custom?type=jar",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "ed833fa4c7b97d6797b86f26d860d6ff3829a297",
+              "url": "https://some.host.com/gerrit/FasterXML/jackson-datatypes-misc.git#2.15.3.custom"
+            },
+            {
+              "uid": "19164955e392e1badf3ce5ac3e231b1a8ceba4bd",
+              "url": "https://github.com/FasterXML/jackson-datatypes-misc#jackson-datatypes-misc-parent-2.15.3"
+            }
+          ]
+        },
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc"
+          },
+          {
+            "type": "distribution",
+            "url": "https://maven.repository.redhat.com/ga/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/FasterXML/jackson-datatype-jakarta-mail/issues"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/FasterXML/jackson-datatypes-misc/jackson-datatype-jakarta-mail"
+          },
+          {
+            "type": "build-system",
+            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/A6FKMKEUCDYA6",
+            "comment": "pnc-build-id"
+          },
+          {
+            "type": "build-meta",
+            "url": "quay.io/ooops/builder-rhel-7-j8-mvn3.6.3:1.0.6",
+            "comment": "pnc-environment-image"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-mail@2.15.3.custom?type=jar"
+      },
+      {
+        "publisher": "Oracle",
+        "group": "com.sun.mail",
+        "name": "jakarta.mail",
+        "version": "2.0.1",
+        "description": "Jakarta Mail API",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "8885560796641719f1cc0c9ea17b8bee"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "96d3645f02a92bcc5e7ae1ff037151e44179f230"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "8988bdbde922ee173db7179e23393dd2258f3b64f708f41082e03f0e0494cc23"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "364b705fe3e51b1a612f7812cd4e57cff3b6ed844ca3566c206195d6512664661b0fcc138ecd2284ee33855fa378a4296842668fc66e3447d5dc5a1fc3e9c43d"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "be2357a3fc409ecdb7fa8baf62f1b28545a6bb6f9c53f567e4690014027a5a4376334da0c396a07c8931804b5f08448c"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "EPL-2.0"
+            }
+          },
+          {
+            "license": {
+              "id": "GPL-2.0-with-classpath-exception"
+            }
+          },
+          {
+            "license": {
+              "id": "BSD-3-Clause"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.sun.mail/jakarta.mail@2.0.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "http://eclipse-ee4j.github.io/mail/jakarta.mail"
+          },
+          {
+            "type": "distribution",
+            "url": "https://jakarta.oss.sonatype.org/service/local/staging/deploy/maven2/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/eclipse-ee4j/mail/issues"
+          },
+          {
+            "type": "mailing-list",
+            "url": "https://dev.eclipse.org/mhonarc/lists/jakarta.ee-community/"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/eclipse-ee4j/mail/jakarta.mail"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.sun.mail/jakarta.mail@2.0.1?type=jar"
+      },
+      {
+        "publisher": "Eclipse Foundation",
+        "group": "com.sun.activation",
+        "name": "jakarta.activation",
+        "version": "2.0.1",
+        "description": "Jakarta Activation",
+        "scope": "required",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "39228ac67f033514a0ccb3360ac461f3"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "828b80e886a52bb09fe41ff410b10b342f533ce1"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "b9e24b7dd6e07495562ea96531be3130c96dba4d78e1dfd88adbbdebf4332871"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "d1c214d2d6ecc61bba396d913c66c977418e74dfe96e5558951ccf99a60cfca6adfea3fc64b6e2d15f698e30dac870b8f6e8d7a22e0dff975f8dd83864714fc5"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "7481f94524b06ba81d12f5d9427dcd389d2c9130176567ff3e11c82fcfe605bf654116463b23d259573f3222b3414bcd"
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "BSD-3-Clause"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.sun.activation/jakarta.activation@2.0.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "website",
+            "url": "https://github.com/eclipse-ee4j/jaf/jakarta.activation"
+          },
+          {
+            "type": "distribution",
+            "url": "https://jakarta.oss.sonatype.org/service/local/staging/deploy/maven2/"
+          },
+          {
+            "type": "issue-tracker",
+            "url": "https://github.com/eclipse-ee4j/jaf/issues/"
+          },
+          {
+            "type": "mailing-list",
+            "url": "https://dev.eclipse.org/mhonarc/lists/jakarta.ee-community/"
+          },
+          {
+            "type": "vcs",
+            "url": "https://github.com/eclipse-ee4j/jaf/jakarta.activation"
+          }
+        ],
+        "type": "library",
+        "bom-ref": "pkg:maven/com.sun.activation/jakarta.activation@2.0.1?type=jar"
+      }
+    ],
+    "dependencies": [
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatypes-misc-parent@2.15.3.custom?type=pom",
+        "dependsOn": [
+          "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-joda-money@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-json-org@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr353@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-mail@2.15.3.custom?type=jar"
+        ]
+      },
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar",
+        "dependsOn": [
+          "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar"
+        ]
+      },
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.15.3.custom?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-joda-money@2.15.3.custom?type=jar",
+        "dependsOn": [
+          "pkg:maven/org.joda/joda-money@1.0.1.redhat-00003?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar"
+        ]
+      },
+      {
+        "ref": "pkg:maven/org.joda/joda-money@1.0.1.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-json-org@2.15.3.custom?type=jar",
+        "dependsOn": [
+          "pkg:maven/org.json/json@20230227.0.0.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar"
+        ]
+      },
+      {
+        "ref": "pkg:maven/org.json/json@20230227.0.0.custom?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr353@2.15.3.custom?type=jar",
+        "dependsOn": [
+          "pkg:maven/javax.json/javax.json-api@1.1.4.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar"
+        ]
+      },
+      {
+        "ref": "pkg:maven/javax.json/javax.json-api@1.1.4.custom?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-jsonp@2.15.3.custom?type=jar",
+        "dependsOn": [
+          "pkg:maven/jakarta.json/jakarta.json-api@2.1.1.redhat-00004?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar"
+        ]
+      },
+      {
+        "ref": "pkg:maven/jakarta.json/jakarta.json-api@2.1.1.redhat-00004?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jakarta-mail@2.15.3.custom?type=jar",
+        "dependsOn": [
+          "pkg:maven/com.sun.mail/jakarta.mail@2.0.1?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.15.3.custom?type=jar",
+          "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.15.3.custom?type=jar"
+        ]
+      },
+      {
+        "ref": "pkg:maven/com.sun.mail/jakarta.mail@2.0.1?type=jar",
+        "dependsOn": [
+          "pkg:maven/com.sun.activation/jakarta.activation@2.0.1?type=jar"
+        ]
+      },
+      {
+        "ref": "pkg:maven/com.sun.activation/jakarta.activation@2.0.1?type=jar",
+        "dependsOn": []
+      }
+    ]
+  }

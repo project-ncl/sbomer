@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.cyclonedx.BomGeneratorFactory;
@@ -55,6 +57,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SbomUtils {
 
     private static final Logger log = LoggerFactory.getLogger(SbomUtils.class);
+    private static Pattern gitProtocolPattern = Pattern.compile("git@(.+):(.+)", Pattern.CASE_INSENSITIVE);
 
     public static Version schemaVersion() {
         return Version.VERSION_14;
@@ -176,6 +179,20 @@ public class SbomUtils {
 
     public static void addPedigreeCommit(Component c, String url, String uid) {
         if (!Strings.isEmpty(url)) {
+
+            Matcher matcher = gitProtocolPattern.matcher(url);
+
+            if (matcher.find()) {
+                log.debug(
+                        "Found URL to be added as pedigree commit with the 'git@' protocol: '{}', trying to convert it into 'https://'",
+                        url);
+
+                url = "https://" + matcher.group(1) + "/" + matcher.group(2);
+
+                log.debug("Converted into: '{}'", url);
+
+            }
+
             Pedigree pedigree = c.getPedigree() == null ? new Pedigree() : c.getPedigree();
             List<Commit> commits = new ArrayList<>();
             if (pedigree.getCommits() != null) {
