@@ -88,6 +88,11 @@ public class NotificationService {
             return;
         }
 
+        if (sboms == null || sboms.isEmpty()) {
+            log.info("No SBOMs provided to send notifications for");
+            return;
+        }
+
         sboms.forEach(sbom -> {
             org.cyclonedx.model.Bom bom = fromJsonNode(sbom.getSbom());
 
@@ -103,6 +108,19 @@ public class NotificationService {
             if (component == null) {
                 log.warn(
                         "Could not find root metadata component for SBOM id '{}', skipping sending UMB notification",
+                        sbom.getId());
+                return;
+            }
+
+            /**
+             * https://issues.redhat.com/browse/SBOMER-19
+             *
+             * Skips sending UMB messages for manifests not related to a product build.
+             */
+            if (getProductConfiguration(bom) == null) {
+                log.info(
+                        "Could not retrieve product configuration from the main component (purl = '{}') in the '{}' SBOM, skipping sending UMB notification",
+                        component.getPurl(),
                         sbom.getId());
                 return;
             }
@@ -164,15 +182,7 @@ public class NotificationService {
                 .link(pncBuildSystemRef.isPresent() ? pncBuildSystemRef.get().getUrl() : null)
                 .build();
 
-        Optional<Property> productName = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, component);
-        Optional<Property> productVersion = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_VERSION, component);
-        Optional<Property> productVariant = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_VARIANT, component);
-
-        ProductConfig.ErrataProductConfig errataProductConfigPayload = ProductConfig.ErrataProductConfig.builder()
-                .productName(productName.isPresent() ? productName.get().getValue() : null)
-                .productVersion(productVersion.isPresent() ? productVersion.get().getValue() : null)
-                .productVariant(productVariant.isPresent() ? productVariant.get().getValue() : null)
-                .build();
+        ProductConfig.ErrataProductConfig errataProductConfigPayload = getProductConfiguration(bom);
         ProductConfig productConfigPayload = ProductConfig.builder().errataTool(errataProductConfigPayload).build();
 
         return GenerationFinishedMessageBody.builder()
@@ -180,6 +190,36 @@ public class NotificationService {
                 .sbom(sbomPayload)
                 .build(buildPayload)
                 .productConfig(productConfigPayload)
+                .build();
+    }
+
+    /**
+     * <p>
+     * Generates the {@link ProductConfig.ErrataProductConfig} object based on the data available in the the CycloneDX
+     * {@link org.cyclonedx.model.Bom} for the main component.
+     * </p>
+     *
+     * <p>
+     * In case required properties cannot be found, {@code null} is returned.
+     * </p>
+     *
+     * @param bom The {@link org.cyclonedx.model.Bom} BOM to be used for retrieving the Product config
+     * @return The {@link ProductConfig.ErrataProductConfig} object or {@code null} if data cannot be found.
+     */
+    private ProductConfig.ErrataProductConfig getProductConfiguration(org.cyclonedx.model.Bom bom) {
+        Component component = bom.getMetadata().getComponent();
+        Optional<Property> productName = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, component);
+        Optional<Property> productVersion = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_VERSION, component);
+        Optional<Property> productVariant = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_VARIANT, component);
+
+        if (productName.isEmpty() || productVersion.isEmpty() || productVariant.isEmpty()) {
+            return null;
+        }
+
+        return ProductConfig.ErrataProductConfig.builder()
+                .productName(productName.get().getValue())
+                .productVersion(productVersion.get().getValue())
+                .productVariant(productVariant.get().getValue())
                 .build();
     }
 }

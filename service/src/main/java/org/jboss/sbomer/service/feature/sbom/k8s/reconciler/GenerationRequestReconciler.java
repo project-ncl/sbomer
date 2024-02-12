@@ -386,6 +386,7 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
                         "Generation failed. One or more generated SBOMs failed validation. See logs for more information.");
             }
 
+            // TODO: Move this to reconcileFinished method
             notificationService.notifyCompleted(sboms);
 
             return updateRequest(

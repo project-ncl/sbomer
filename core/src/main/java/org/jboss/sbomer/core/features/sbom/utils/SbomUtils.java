@@ -116,6 +116,14 @@ public class SbomUtils {
     }
 
     public static Optional<Property> findPropertyWithNameInComponent(String propertyName, Component component) {
+        if (component == null) {
+            return Optional.empty();
+        }
+
+        if (component.getProperties() == null || component.getProperties().isEmpty()) {
+            return Optional.empty();
+        }
+
         return component.getProperties().stream().filter(c -> c.getName().equals(propertyName)).findFirst();
     }
 
