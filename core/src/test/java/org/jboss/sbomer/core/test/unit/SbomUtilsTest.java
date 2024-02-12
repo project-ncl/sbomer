@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
@@ -144,6 +146,30 @@ public class SbomUtilsTest {
 
             properties = jsonNode.get("metadata").get("component").get("properties");
             assertNull(properties);
+        }
+
+        @Test
+        void shouldNotFailOnNullRemoveErrataProperties() {
+            Bom bom = null;
+            SbomUtils.removeErrataProperties(bom);
+        }
+
+        @Test
+        void shouldNotFailOnNullFindProperty() {
+            assertEquals(Optional.ofNullable(null), SbomUtils.findPropertyWithNameInComponent("blah", null));
+        }
+
+        @Test
+        void shouldNotFailOnNullPropertiesFindProperty() {
+            Component component = new Component();
+            assertEquals(Optional.ofNullable(null), SbomUtils.findPropertyWithNameInComponent("blah", component));
+        }
+
+        @Test
+        void shouldNotFailOnEmptyPropertiesFindProperty() {
+            Component component = new Component();
+            component.setProperties(List.of());
+            assertEquals(Optional.ofNullable(null), SbomUtils.findPropertyWithNameInComponent("blah", component));
         }
 
         @Test
