@@ -42,12 +42,9 @@ jobs:
           mkdir certs
           echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
           echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
-          echo "$CA_CHAIN" > certs/rhcs-ca-chain-2022-cross-signed-2015.crt
 
           openssl x509 -in certs/2015-IT-Root-CA.pem -text > /dev/null
           openssl x509 -in certs/2022-IT-Root-CA.pem -text > /dev/null
-          openssl x509 -in certs/rhcs-ca-chain-2022-cross-signed-2015.crt -text > /dev/null
-
       - name: Download ${{ inputs.artifact }}
         if: "${{ inputs.artifact != 'false' }}"
         uses: actions/download-artifact@v4

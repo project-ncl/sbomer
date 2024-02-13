@@ -1,7 +1,6 @@
 .cert-default-scripts: &cert-default-scripts
   - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2022-IT-Root-CA.pem
   - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2015-IT-Root-CA.pem
-  - curl -L "https://${INTERNAL_CERTS_HOST}/chains/rhcs-ca-chain-2022-cross-signed-2015.crt" -o /usr/local/share/ca-certificates/rhcs-ca-chain-2022-cross-signed-2015.crt
   - update-ca-certificates
 
 .job-deploy: &job-deploy
