@@ -106,6 +106,7 @@ public class SbomGenerationRequestRepositoryIT {
                 .withApiVersion("sbomer.jboss.org/v1alpha1")
                 .withBuildId(buildId)
                 .withProducts(List.of(productConfig))
+                .withEnvironment(Map.of("k", "v"))
                 .build();
     }
 
@@ -187,7 +188,6 @@ public class SbomGenerationRequestRepositoryIT {
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withConfig(SbomUtils.toJsonNode(runtimeConfig))
-                .withEnvConfig(SbomUtils.toJsonNode(Map.of("k", "v")))
                 .withId(REQUEST_ID_2_DELETE)
                 .withBuildId(BUILD_ID_2_DELETE)
                 .withStatus(SbomGenerationStatus.FINISHED)

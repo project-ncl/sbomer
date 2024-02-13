@@ -71,9 +71,13 @@ VALUES (
 ]
 }
 ],
-"apiVersion": "sbomer.jboss.org/v1alpha1"
+"apiVersion": "sbomer.jboss.org/v1alpha1",
+"environment": {
+      "maven": "3.9.6",
+      "java": "17"
+    }
 }
-		
+
 		'
 	);
 INSERT INTO sbom(
