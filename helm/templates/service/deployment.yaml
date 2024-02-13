@@ -87,9 +87,9 @@ spec:
               value: "/data"
             - name: SBOMER_TEKTON_SA
               value: {{ include "sbomer.serviceAccountName" . }}
-            - name: OTLP_EXPORTER_ENDPOINT
+            - name: QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
               value: {{ .Values.otlp.endpoint }}
-            - name: OTLP_RESOURCE_ATTRIBUTES
+            - name: QUARKUS_OTEL_RESOURCE_ATTRIBUTES
               value: {{ .Values.otlp.attributes }}
 
           ports:
