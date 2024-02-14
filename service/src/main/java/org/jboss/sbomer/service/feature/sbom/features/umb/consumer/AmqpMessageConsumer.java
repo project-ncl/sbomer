@@ -93,25 +93,21 @@ public class AmqpMessageConsumer {
         // Checking whether there is some additional metadata attached to the message
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
 
-        AtomicBoolean isBuildStateChange = new AtomicBoolean(false);
-
-        metadata.ifPresent(meta -> {
+        boolean isBuildStateChange = metadata.map(meta -> {
             JsonObject properties = meta.getProperties();
 
             log.debug("Message properties: {}", properties.toString());
 
-            if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
-                isBuildStateChange.set(true);
-            }
-        });
+            return Objects.equals(properties.getString("type"), "BuildStateChange");
+        }).orElse(false);
 
         // This shouldn't happen anymore because we use a selector to filter messages
-        if (isBuildStateChange.get() != true) {
+        if (!isBuildStateChange.get()) {
             log.warn("Received a message that is not BuildStateChange, ignoring it");
             return message.ack();
         }
 
-        PncBuildNotificationMessageBody body = null;
+        PncBuildNotificationMessageBody body;
 
         try {
             body = ObjectMapperProvider.json().readValue(message.getPayload(), PncBuildNotificationMessageBody.class);
