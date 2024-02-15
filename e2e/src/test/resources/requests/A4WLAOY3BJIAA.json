@@ -1,6 +1,9 @@
 {
   "apiVersion": "sbomer.jboss.org/v1alpha1",
   "buildId": "A4WLAOY3BJIAA",
+  "environment": {
+    "node": "12"
+  },
   "products": [
     {
       "processors": [
