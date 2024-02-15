@@ -1,6 +1,11 @@
 {
   "apiVersion": "sbomer.jboss.org/v1alpha1",
   "buildId": "A3LCEFCLLVYAA",
+  "environment": {
+    "gradle": "4.10",
+    "java": "8",
+    "maven": "3.3.9"
+  },
   "products": [
     {
       "processors": [
