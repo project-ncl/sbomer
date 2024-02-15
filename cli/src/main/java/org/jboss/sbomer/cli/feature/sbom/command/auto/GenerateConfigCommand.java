@@ -96,32 +96,28 @@ public class GenerateConfigCommand implements Callable<Integer> {
     @Inject
     ProductVersionMapper productVersionMapper;
 
-    private Config productConfig() {
-        // Make sure there is no context
-        MDCUtils.removeContext();
-        MDCUtils.addBuildContext(buildId);
-
-        log.info("Obtaining runtime configuration for build '{}'", buildId);
+    private Config productConfig(Build build) {
+        log.info("Obtaining runtime configuration for build '{}'", build.getId());
 
         // 1. Find if we can obtain the configuration from the file, if not found
         // 2. Find if we can find configuration in the mapper
         // 3. Try to use defaults (if possible)
 
-        Config config = clientConfig();
+        Config config = clientConfig(build);
 
         // Client configuration found, use it!
         if (config != null) {
             return config;
         }
 
-        config = mappingConfig();
+        config = mappingConfig(build);
 
         // Mapping configuration found, use it!
         if (config != null) {
             return config;
         }
 
-        log.warn("Runtime configuration for build '{}' could not be found", buildId);
+        log.warn("Runtime configuration for build '{}' could not be found", build.getId());
 
         // Configuration file could not be found
         return null;
@@ -132,15 +128,8 @@ public class GenerateConfigCommand implements Callable<Integer> {
      *
      * @return {@link Config} object if the configuration could be retrieved or {@code null} otherwise.
      */
-    private Config clientConfig() {
+    private Config clientConfig(Build build) {
         log.debug("Attempting to fetch configuration from source code repository");
-
-        Build build = pncService.getBuild(buildId);
-
-        if (build == null) {
-            log.warn("Could not retrieve PNC build '{}'", buildId);
-            return null;
-        }
 
         Config config = configReader.getConfig(build);
 
@@ -159,13 +148,13 @@ public class GenerateConfigCommand implements Callable<Integer> {
      *
      * @return {@link Config} object if the configuration could be retrieved or {@code null} otherwise.
      */
-    private Config mappingConfig() {
+    private Config mappingConfig(Build build) {
         log.debug("Attempting to fetch configuration from SBOMer internal mapping");
 
-        List<ProductVersionRef> productVersions = pncService.getProductVersions(buildId);
+        List<ProductVersionRef> productVersions = pncService.getProductVersions(build.getId());
 
         if (productVersions.isEmpty()) {
-            log.debug("Could not obtain PNC Product Version information for the '{}' PNC build", buildId);
+            log.debug("Could not obtain PNC Product Version information for the '{}' PNC build", build.getId());
             return null;
         }
 
@@ -197,10 +186,13 @@ public class GenerateConfigCommand implements Callable<Integer> {
             return null;
         }
 
-        log.info("Found {} configurations in the internal SBOMer mapping for build ID '{}'", configs.size(), buildId);
+        log.info(
+                "Found {} configurations in the internal SBOMer mapping for build ID '{}'",
+                configs.size(),
+                build.getId());
 
         Config config = Config.builder()
-                .withBuildId(buildId)
+                .withBuildId(build.getId())
                 .withApiVersion("sbomer.jboss.org/v1alpha1")
                 .withProducts(new ArrayList<>())
                 .build();
@@ -212,7 +204,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
         log.info(
                 "Found {} products in the internal SBOMer mapping for build ID '{}'",
                 config.getProducts().size(),
-                buildId);
+                build.getId());
 
         return config;
     }
@@ -224,9 +216,6 @@ public class GenerateConfigCommand implements Callable<Integer> {
      * @author Andrea Vibelli
      */
     private Map<String, String> environmentConfig(Build build) {
-        // Make sure there is no context
-        MDCUtils.removeContext();
-        MDCUtils.addBuildContext(build.getId());
         log.debug("Attempting to fetch environment configuration from a PNC build");
 
         Map<String, String> buildEnvAttributes = build.getEnvironment().getAttributes();
@@ -293,22 +282,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
      *
      * @return {@link Config} with default values
      */
-    private Config initializeDefaultConfig() {
-        Build build = pncService.getBuild(buildId);
-
-        if (build == null) {
-            log.warn("Could not retrieve PNC build '{}'", buildId);
-            return null;
-        }
-
-        Map<String, String> envConfig = environmentConfig(build);
-
-        if (envConfig.isEmpty()) {
-            log.debug(
-                    "Could not obtain environment attributes for the '{}' build. The generation will use default versions!",
-                    buildId);
-        }
-
+    private Config initializeDefaultConfig(Build build) {
         GeneratorType generatorType = GenerateConfigCommand
                 .buildTypeToGeneratoType(build.getBuildConfigRevision().getBuildType());
 
@@ -321,7 +295,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
                 .forGenerator(generatorType);
 
         Config config = Config.builder()
-                .withBuildId(buildId)
+                .withBuildId(build.getId())
                 .withProducts(
                         List.of(
                                 ProductConfig.builder()
@@ -333,8 +307,6 @@ public class GenerateConfigCommand implements Callable<Integer> {
                                                         .build())
                                         .withProcessors(List.of(DefaultProcessorConfig.builder().build()))
                                         .build()))
-
-                .withEnvironment(envConfig)
                 .build();
 
         return config;
@@ -349,23 +321,45 @@ public class GenerateConfigCommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        Config config = productConfig();
+        // Make sure there is no context
+        MDCUtils.removeContext();
+        MDCUtils.addBuildContext(this.buildId);
+
+        Build build = pncService.getBuild(this.buildId);
+
+        if (build == null) {
+            log.error("Could not retrieve PNC build '{}'", this.buildId);
+            return GenerationResult.ERR_GENERAL.getCode();
+        }
+
+        Config config = productConfig(build);
 
         if (config == null) {
-            log.info("Unable to retrieve config for  build '{}', initializing default configuration", buildId);
-            config = initializeDefaultConfig();
+            log.info("Unable to retrieve config for  build '{}', initializing default configuration", build.getId());
+            config = initializeDefaultConfig(build);
         }
 
         if (config == null) {
-            log.warn("Could not initialize product configuration for '{}' build, exiting", buildId);
+            log.warn("Could not initialize product configuration for '{}' build, exiting", build.getId());
             return GenerationResult.ERR_CONFIG_MISSING.getCode();
+        }
+
+        if (config.getEnvironment() == null) {
+            Map<String, String> envConfig = environmentConfig(build);
+
+            if (envConfig.isEmpty()) {
+                log.error("Could not obtain environment attributes for the '{}' build!", build.getId());
+                return GenerationResult.ERR_GENERAL.getCode();
+            }
+
+            config.setEnvironment(envConfig);
         }
 
         log.debug("RAW config: '{}'", ObjectMapperProvider.json().writeValueAsString(config));
 
         configAdjuster.adjust(config);
 
-        config.setBuildId(buildId);
+        config.setBuildId(build.getId());
 
         log.debug("Configuration adjusted, starting validation");
 
