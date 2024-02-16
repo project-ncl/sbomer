@@ -20,7 +20,7 @@ rules:
     verbs: ["create", "get", "watch", "list", "delete", "patch", "update"]
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
-    verbs: ["create", "get", "update"]
+    verbs: ["create", "get", "watch", "list", "delete", "patch", "update"]
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["create", "update", "get", "watch", "list", "delete"]
