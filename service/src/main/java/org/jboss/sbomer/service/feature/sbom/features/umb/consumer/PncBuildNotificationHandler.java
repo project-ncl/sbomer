@@ -17,14 +17,11 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
-import java.util.Objects;
-
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
-import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig.UmbConsumerTrigger;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
@@ -67,16 +64,7 @@ public class PncBuildNotificationHandler {
             return;
         }
 
-        if (Objects.equals(config.consumer().trigger().orElse(null), UmbConsumerTrigger.NONE)) {
-            log.warn(
-                    "The UMB consumer configuration is set to NONE, skipping SBOM generation for PNC Build '{}'",
-                    messageBody.getBuild().getId());
-            return;
-        }
-
         if (isSuccessfulPersistentBuild(messageBody)) {
-            // TODO: Check whether it is a product-related build?
-
             log.info("Triggering automated SBOM generation for PNC build '{}'' ...", messageBody.getBuild().getId());
 
             GenerationRequest req = new GenerationRequestBuilder()

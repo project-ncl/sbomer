@@ -101,7 +101,6 @@ public class AmqpMessageConsumer {
             return Objects.equals(properties.getString("type"), "BuildStateChange");
         }).orElse(false);
 
-        // This shouldn't happen anymore because we use a selector to filter messages
         if (!isBuildStateChange) {
             log.warn("Received a message that is not BuildStateChange, ignoring it");
             return message.ack();
