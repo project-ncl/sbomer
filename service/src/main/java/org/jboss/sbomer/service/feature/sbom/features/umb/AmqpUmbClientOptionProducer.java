@@ -17,6 +17,11 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.jboss.sbomer.core.errors.ApplicationException;
+
 import io.smallrye.common.annotation.Identifier;
 import io.vertx.amqp.AmqpClientOptions;
 import io.vertx.core.net.PfxOptions;
@@ -36,11 +41,25 @@ public class AmqpUmbClientOptionProducer {
     public AmqpClientOptions getClientOptions() {
         log.info("Setting up AMQP client options");
 
+        String path = System.getenv("SBOMER_KEYSTORE_PATH");
+        String password = System.getenv("SBOMER_KEYSTORE_PASSWORD");
+
+        if (path == null || password == null) {
+            throw new ApplicationException(
+                    "The path or password to keystore was not provided, please make sure you set up the SBOMER_KEYSTORE_PATH and SBOMER_KEYSTORE_PASSWORD environment variables correctly");
+        }
+
+        if (Files.notExists(Path.of(path))) {
+            throw new ApplicationException(
+                    "The keystore file path provided by the SBOMER_KEYSTORE_PATH environment variable does not exist: '{}'",
+                    path);
+        }
+
+        log.debug("Using '{}' keystore to read certificates to connect to AMQP broker", path);
+
         return new AmqpClientOptions().setSsl(true)
                 .setConnectTimeout(30 * 1000)
                 .setReconnectInterval(5 * 1000)
-                .setPfxKeyCertOptions(
-                        new PfxOptions().setPath(System.getProperty("javax.net.ssl.keyStore"))
-                                .setPassword(System.getProperty("javax.net.ssl.keyStorePassword")));
+                .setPfxKeyCertOptions(new PfxOptions().setPath(path).setPassword(password));
     }
 }

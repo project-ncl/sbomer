@@ -42,7 +42,8 @@ spec:
               echo "export QUARKUS_DATASOURCE_USERNAME=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.user)\"" >> /mnt/secrets/env.sh;
               echo "export QUARKUS_DATASOURCE_PASSWORD=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.password)\"" >> /mnt/secrets/env.sh;
               echo "export QUARKUS_DATASOURCE_JDBC_URL=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/datasource.connection)\"" >> /mnt/secrets/env.sh;
-              echo "export KEYSTORE_PASSWORD=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/${APP_ENV}-pnc-sbomer.password)\"" >> /mnt/secrets/env.sh;
+              echo "export SBOMER_KEYSTORE_PASSWORD=\"$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/${APP_ENV}-pnc-sbomer.password)\"" >> /mnt/secrets/env.sh;
+              echo "export SBOMER_KEYSTORE_PATH=\"/mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/${APP_ENV}-pnc-sbomer.pkcs12\"" >> /mnt/secrets/env.sh;
               source /mnt/secrets/env.sh;
           env:
             - name: VAULT_ADDR
