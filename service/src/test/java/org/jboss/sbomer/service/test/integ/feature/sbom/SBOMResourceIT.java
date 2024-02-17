@@ -46,7 +46,13 @@ public class SBOMResourceIT {
     @Test
     public void testExistenceOfSbomsEndpoint() {
         Mockito.when(sbomService.searchSbomsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
-        given().when().get("/api/v1alpha2/sboms").then().statusCode(200);
+        given().when()
+                .get("/api/v1alpha2/sboms")
+                .then()
+                .statusCode(200)
+                .body("totalHits", CoreMatchers.is(1))
+                .and()
+                .body("content[0].generationRequest.id", CoreMatchers.is("AASSBB"));
     }
 
     @Test

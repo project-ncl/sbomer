@@ -55,6 +55,7 @@ public class SBOMerClientTestIT {
         assertEquals(Status.OK.getStatusCode(), response.getStatus());
         Sbom sbom = response.readEntity(Sbom.class);
         assertNotNull(sbom);
+        assertNotNull(sbom.getSbom());
         assertEquals("123", sbom.getId());
         assertEquals("QUARKUS", sbom.getBuildId());
         assertNotNull(sbom.getGenerationRequest());
