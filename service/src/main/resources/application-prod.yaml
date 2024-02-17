@@ -48,7 +48,6 @@ sbomer:
       consumer:
         enabled: true
         topic: "${CONSUMER_TOPIC}"
-        trigger: product
       producer:
         enabled: true
         topic: "${PRODUCER_TOPIC}"

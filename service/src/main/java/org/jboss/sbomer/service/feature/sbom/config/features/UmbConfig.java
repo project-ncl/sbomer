@@ -31,10 +31,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ConfigMapping(prefix = "sbomer.features.umb")
 public interface UmbConfig {
 
-    enum UmbConsumerTrigger {
-        NONE, ALL, PRODUCT
-    }
-
     interface UmbConsumerConfig {
         /**
          * Enables the UMB consumer feature
@@ -49,8 +45,6 @@ public interface UmbConfig {
          * The topic that should be listened on.
          */
         Optional<String> topic();
-
-        Optional<UmbConsumerTrigger> trigger();
     }
 
     interface UmbProducerConfig {
