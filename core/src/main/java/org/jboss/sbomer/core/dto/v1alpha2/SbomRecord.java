@@ -28,7 +28,7 @@ public record SbomRecord(
         Instant creationTime,
         Integer configIndex,
         String statusMessage,
-        SbomGenerationRequestRecord sbomGenerationRequest) {
+        SbomGenerationRequestRecord generationRequest) {
 
     public SbomRecord(
             String id,
