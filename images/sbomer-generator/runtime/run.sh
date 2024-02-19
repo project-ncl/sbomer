@@ -79,8 +79,11 @@ done
 source "${HOME}/.bashrc"
 # SBOMer functions
 source "${HOME}/func-gen.sh"
-# Initialize environment
-sdk env
+
+if [ -f ".sdkmanrc" ]; then
+    # Initialize SDKMAN! environment
+    sdk env
+fi
 
 # Install required generator
 generator=$(jq -r ".products[${index}].generator.type" ${config_path})
