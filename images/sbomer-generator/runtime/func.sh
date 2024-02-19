@@ -24,7 +24,26 @@ function available_java_versions() {
 
 # Find the latest version of Temurin Java for a given major release.
 function latest_java_version() {
-    echo $(available_java_versions ${1} | head -1)
+    available_java_versions ${1} | head -1 | xargs
+}
+
+function retry() {
+    max_attempts=3
+    result=0
+    count=1
+
+    while [[ "${count}" -le "${max_attempts}" ]]; do
+        result=0
+        "${@}" || result="${?}"
+        if [[ $result -eq 0 ]]; then return 0; fi
+        echo "Command failed, will retry..."
+        count="$((count + 1))"
+        sleep 10
+        echo "Retrying..."
+    done
+
+    echo "Command failed despite we tried it to run it ${max_attempts} times"
+    exit 1
 }
 
 function install_java() {
@@ -49,7 +68,7 @@ function install_java() {
 }
 
 function install_major_java() {
-    local java_version=$(latest_java_version ${version})
+    java_version=$(latest_java_version ${version})
     install_java "${java_version}"
 }
 
