@@ -58,7 +58,7 @@ for tool in $(jq -r '[keys[]] | join(" ")' ${env_config_path}); do
     case "$tool" in
     "java")
         # Special case, we have only major version
-        install_major_java "${version}"
+        retry install_major_java "${version}"
         echo "java=${version}" >>".sdkmanrc"
         ;;
     "node")
@@ -69,7 +69,7 @@ for tool in $(jq -r '[keys[]] | join(" ")' ${env_config_path}); do
         ;;
     *)
         # All other tools, rely on SDKMAN!
-        sdk install "${tool}" "${version}"
+        retry sdk install "${tool}" "${version}"
         echo "${tool}=${version}" >>".sdkmanrc"
         ;;
     esac
