@@ -5,7 +5,7 @@ metadata:
   name: {{ .Release.Name }}-service
 {{ include "sbomer.labels" (list . "service") | indent 2 }}
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
 {{ include "sbomer.selector" (list . "service") | indent 6 }}
