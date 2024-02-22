@@ -15,31 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.v1alpha1;
+package org.jboss.sbomer.service.feature.sbom.rest.api;
+
+import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
 
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
-import jakarta.annotation.security.PermitAll;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.config.ConfigSchemaValidator;
+import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Consumer;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.GenerationRequestStats;
@@ -49,16 +45,27 @@ import org.jboss.sbomer.service.feature.sbom.model.Stats.Resources;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.SbomStats;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
-@Path("/api/v1alpha1/stats")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-@ApplicationScoped
-@Tag(name = "v1alpha1", description = "v1alpha1 API endpoints")
-@PermitAll
-public class StatsResources {
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.fabric8.kubernetes.client.KubernetesClient;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Response;
+
+public abstract class AbstractApiProvider {
 
     @Inject
-    SbomService sbomService;
+    protected KubernetesClient kubernetesClient;
+
+    @Inject
+    protected SbomService sbomService;
+
+    @Inject
+    protected ConfigSchemaValidator configSchemaValidator;
 
     @Inject
     AmqpMessageConsumer messageConsumer;
@@ -72,13 +79,51 @@ public class StatsResources {
     @ConfigProperty(name = "quarkus.application.version", defaultValue = "dev")
     String version;
 
+    protected Sbom doGetSbomByPurl(String purl) {
+        Sbom sbom = sbomService.findByPurl(purl);
+
+        if (sbom == null) {
+            throw new NotFoundException("SBOM with purl = '" + purl + "' couldn't be found");
+        }
+
+        return sbom;
+    }
+
+    protected Sbom doGetSbomById(String sbomId) {
+        Sbom sbom = sbomService.get(sbomId);
+
+        if (sbom == null) {
+            throw new NotFoundException("SBOM with id '{}' not found", sbomId);
+        }
+
+        return sbom;
+    }
+
+    protected JsonNode doGetBomById(String sbomId) {
+        Sbom sbom = doGetSbomById(sbomId);
+        return SbomUtils.toJsonNode(sbom.getCycloneDxBom());
+    }
+
+    protected JsonNode doGetBomByPurl(String purl) {
+        Sbom sbom = doGetSbomByPurl(purl);
+        return SbomUtils.toJsonNode(sbom.getCycloneDxBom());
+    }
+
+    protected SbomGenerationRequest doGetSbomGenerationRequestById(String generationRequestId) {
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId);
+
+        if (generationRequest == null) {
+            throw new NotFoundException("Generation request with id '{}' could not be found", generationRequestId);
+        }
+
+        return generationRequest;
+    }
+
+    @Path("/stats")
     @GET
     @Operation(summary = "Get service runtime information", description = "Service information and statistics.")
-    @APIResponses({ @APIResponse(
-            responseCode = "200",
-            description = "Available runtime information.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-    public Response stats() {
+    @APIResponses({ @APIResponse(responseCode = "200", description = "Available runtime information.") })
+    public Stats getStats() {
         long uptimeMillis = getUptimeMillis();
 
         Messaging messaging = null;
@@ -106,7 +151,7 @@ public class StatsResources {
                 .withMessaging(messaging)
                 .build();
 
-        return Response.status(Status.OK).entity(stats).build();
+        return stats;
     }
 
     private long getUptimeMillis() {
@@ -134,5 +179,28 @@ public class StatsResources {
                 .substring(2)
                 .replaceAll("(\\d[HMS])(?!$)", "$1 ")
                 .toLowerCase();
+    }
+
+    @DELETE
+    @Path("/sboms/requests/{id}")
+    @RolesAllowed(USER_DELETE_ROLE)
+    @Operation(
+            summary = "Delete SBOM generation request specified by id",
+            description = "Delete the specified SBOM generation request from the database")
+    @Parameter(name = "id", description = "The SBOM request identifier")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "SBOM generation request was successfully deleted"),
+            @APIResponse(responseCode = "404", description = "Specified SBOM generation request could not be found"),
+            @APIResponse(responseCode = "500", description = "Internal server error") })
+    public Response deleteGenerationRequest(@PathParam("id") final String id) {
+
+        try {
+            MDCUtils.addProcessContext(id);
+            sbomService.deleteSbomRequest(id);
+
+            return Response.ok().build();
+        } finally {
+            MDCUtils.removeProcessContext();
+        }
     }
 }

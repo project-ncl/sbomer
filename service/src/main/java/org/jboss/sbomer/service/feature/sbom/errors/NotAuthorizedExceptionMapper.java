@@ -17,19 +17,30 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
+@Slf4j
+public class NotAuthorizedExceptionMapper extends AbstractExceptionMapper<NotAuthorizedException> {
+
+    @Override
+    Status getStatus() {
+        return Status.UNAUTHORIZED;
+    }
+
     @Override
     Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
-
+        log.warn("Access to '{}' resource requested by an unauthorized client.", uriInfo.getPath(), ex);
         return responseBuilder.build();
     }
 
+    @Override
+    String errorMessage(NotAuthorizedException ex) {
+        return formattedString("Access to '{}' resource is not authorized!", uriInfo.getPath());
+    }
 }

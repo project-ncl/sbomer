@@ -15,11 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.dto.v1alpha3;
+package org.jboss.sbomer.cli.errors.pnc;
 
-import java.time.Instant;
+import org.jboss.sbomer.cli.errors.CommandLineException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
-import com.fasterxml.jackson.databind.JsonNode;
+/**
+ * Error indicating a failure related to the build progress or status received from PNC.
+ */
+public class InvalidPncBuildStateException extends CommandLineException {
+    private static final int EXIT_CODE = 31;
 
-public record BaseSbomGenerationRequestRecord(String id, String identifier, JsonNode config, String type, Instant creationTime) {
-};
+    public InvalidPncBuildStateException(String msg, Object... params) {
+        super(InvalidPncBuildStateException.EXIT_CODE, msg, params);
+    }
+
+    public InvalidPncBuildStateException(ApplicationException e) {
+        super(InvalidPncBuildStateException.EXIT_CODE, e);
+    }
+
+}

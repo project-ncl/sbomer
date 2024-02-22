@@ -17,33 +17,31 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
-import java.util.UUID;
-
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.Provider;
-
-import org.jboss.sbomer.core.errors.ErrorResponse;
-
 import cz.jirutka.rsql.parser.RSQLParserException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
 @Provider
 @Slf4j
-public class RSQLExceptionMapper implements ExceptionMapper<RSQLParserException> {
+public class RSQLExceptionMapper extends AbstractExceptionMapper<RSQLParserException> {
 
     @Override
-    public Response toResponse(RSQLParserException e) {
-        Response.StatusType status = Response.Status.BAD_REQUEST;
-        ErrorResponse error = ErrorResponse.builder()
-                .errorId(UUID.randomUUID().toString())
-                .errorType(e.getClass().getSimpleName())
-                .message(e.getMessage())
-                .build();
+    Status getStatus() {
+        return Status.BAD_REQUEST;
+    }
 
-        log.error(error.toString(), e);
+    @Override
+    String errorMessage(RSQLParserException ex) {
+        return "An error occurred while parsing the RSQL query, please make sure you use correct syntax";
+    }
 
-        return Response.status(status).entity(error).type(MediaType.APPLICATION_JSON).build();
+    @Override
+    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+        log.error("Could not parse RSQL", ex);
+
+        return responseBuilder.build();
     }
 }

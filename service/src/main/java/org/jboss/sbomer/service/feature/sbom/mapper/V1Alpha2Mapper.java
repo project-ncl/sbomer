@@ -19,6 +19,10 @@ package org.jboss.sbomer.service.feature.sbom.mapper;
 
 import java.util.List;
 
+import org.jboss.sbomer.core.dto.BaseSbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha2.SbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha2.SbomSearchRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -29,32 +33,19 @@ import org.mapstruct.Mapping;
 public interface V1Alpha2Mapper {
 
     @Mapping(source = "identifier", target = "buildId")
-    org.jboss.sbomer.core.dto.v1alpha2.SbomRecord toSbomRecord(Sbom entity);
+    SbomRecord toSbomRecord(Sbom entity);
 
     @Mapping(source = "identifier", target = "buildId")
-    // @Mapping(target = "reason", expression = "java(reason == null ? '' : reason)")
-    org.jboss.sbomer.core.dto.v1alpha2.SbomGenerationRequestRecord toSbomRequestRecord(SbomGenerationRequest entity);
-
-    Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord> toSbomRecordPage(Page<Sbom> sboms);
-
-    Page<org.jboss.sbomer.core.dto.v1alpha2.SbomGenerationRequestRecord> toSbomRequestRecordPage(
-            Page<SbomGenerationRequest> sbomRequests);
-
-    List<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord> toSbomRecordList(List<Sbom> sboms);
+    @Mapping(source = "generationRequest.identifier", target = "generationRequest.buildId")
+    SbomSearchRecord toSbomSearchRecord(BaseSbomRecord entity);
 
     @Mapping(source = "identifier", target = "buildId")
-    org.jboss.sbomer.core.dto.v1alpha2.SbomRecord toSbomRecord(
-            org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord record);
+    SbomGenerationRequestRecord toSbomRequestRecord(SbomGenerationRequest entity);
 
-    @Mapping(source = "identifier", target = "buildId")
-    // @Mapping(target = "reason", expression = "java(reason == null ? '' : reason)")
-    org.jboss.sbomer.core.dto.v1alpha2.SbomGenerationRequestRecord toSbomRequestRecord(
-            org.jboss.sbomer.core.dto.v1alpha3.BaseSbomGenerationRequestRecord record);
+    Page<SbomSearchRecord> toSbomSearchRecordPage(Page<BaseSbomRecord> sboms);
 
-    List<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord> toV2SbomRecordList(
-            List<org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord> sboms);
+    Page<SbomGenerationRequestRecord> toSbomRequestRecordPage(Page<SbomGenerationRequest> sbomRequests);
 
-    Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord> toV2SbomRecordPage(
-            Page<org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord> sboms);
+    List<SbomRecord> toSbomRecordList(List<Sbom> sboms);
 
 }
