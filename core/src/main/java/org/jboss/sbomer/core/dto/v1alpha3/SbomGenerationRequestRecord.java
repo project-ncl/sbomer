@@ -18,8 +18,19 @@
 package org.jboss.sbomer.core.dto.v1alpha3;
 
 import java.time.Instant;
+import java.util.Map;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public record SbomGenerationRequestRecord(String id, String identifier, JsonNode config, String type, Instant creationTime, String status, String result, String reason) {
+public record SbomGenerationRequestRecord(
+        String id,
+        String identifier,
+        @Schema(implementation = Map.class) JsonNode config,
+        String type,
+        Instant creationTime,
+        String status,
+        String result,
+        String reason) {
 };

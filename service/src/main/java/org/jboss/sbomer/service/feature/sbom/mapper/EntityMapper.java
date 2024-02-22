@@ -15,21 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errors;
+package org.jboss.sbomer.service.feature.sbom.mapper;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.ext.Provider;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
 
-@Slf4j
-@Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
-    @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
+import org.jboss.sbomer.core.features.sbom.rest.Page;
 
-        return responseBuilder.build();
-    }
+public interface EntityMapper<E, R> {
+    R toSbomRecord(E entity);
+
+    Page<R> toRecordPage(Page<E> entities);
+
+    List<R> toRecordList(List<E> entities);
 
 }

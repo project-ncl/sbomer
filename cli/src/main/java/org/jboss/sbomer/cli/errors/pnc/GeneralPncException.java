@@ -15,23 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.v1alpha3;
+package org.jboss.sbomer.cli.errors.pnc;
 
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.cli.errors.CommandLineException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
-import jakarta.annotation.security.PermitAll;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
+/**
+ * General error related to PNC.
+ */
+public class GeneralPncException extends CommandLineException {
+    private static final int EXIT_CODE = 30;
 
-@Path("/api/v1alpha3/stats")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-@ApplicationScoped
-@Tag(name = "v1alpha3")
-@PermitAll
-public class StatsResources extends org.jboss.sbomer.service.feature.sbom.rest.v1alpha2.StatsResources {
+    public GeneralPncException(String msg, Object... params) {
+        super(GeneralPncException.EXIT_CODE, msg, params);
+    }
+
+    public GeneralPncException(ApplicationException e) {
+        super(GeneralPncException.EXIT_CODE, e);
+    }
 
 }

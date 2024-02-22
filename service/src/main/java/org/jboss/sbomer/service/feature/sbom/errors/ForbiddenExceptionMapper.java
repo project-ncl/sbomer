@@ -1,3 +1,4 @@
+
 /*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
@@ -17,19 +18,30 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
+@Slf4j
+public class ForbiddenExceptionMapper extends AbstractExceptionMapper<ForbiddenException> {
+
+    @Override
+    Status getStatus() {
+        return Status.FORBIDDEN;
+    }
+
     @Override
     Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
-
+        log.warn("Access to '{}' resource requested by a client has been forbidden.", uriInfo.getPath(), ex);
         return responseBuilder.build();
     }
 
+    @Override
+    String errorMessage(ForbiddenException ex) {
+        return formattedString("Access to '{}' resource is forbidden!", uriInfo.getPath());
+    }
 }

@@ -25,17 +25,18 @@ import java.time.Instant;
 import java.util.Arrays;
 
 import org.hamcrest.CoreMatchers;
-import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
-import org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord;
+import org.hamcrest.Matchers;
+import org.jboss.sbomer.core.dto.BaseSbomRecord;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -141,7 +142,8 @@ public class SBOMResourceRSQIT {
                         .and()
                         .body("metadata.component.name", CoreMatchers.is("microprofile-graphql-parent"))
                         .and()
-                        // This purl doesn't match PURL above, but this is expected because of the test data used
+                        // This purl doesn't match PURL above, but this is expected because of
+                        // the test data used
                         .body(
                                 "metadata.component.purl",
                                 CoreMatchers.is(
@@ -157,7 +159,14 @@ public class SBOMResourceRSQIT {
                         .pathParam("purl", PURL)
                         .get(API_PATH + "/sboms/purl/{purl}")
                         .then()
-                        .statusCode(404);
+                        .statusCode(404)
+                        .body("errorId", CoreMatchers.isA(String.class))
+                        .body("error", CoreMatchers.is("Not Found"))
+                        .body(
+                                "message",
+                                CoreMatchers.is(
+                                        "SBOM with purl = 'pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom' couldn't be found"))
+                        .body("$", Matchers.not(Matchers.hasKey("errors")));
             }
 
             @Test
@@ -794,14 +803,19 @@ public class SBOMResourceRSQIT {
 
     @Test
     public void testRSQLSearchNotAllowedProperty() {
-        String msg = "RSQL on field Sbom.sbom with type JsonNode is not supported!";
-
         given().when()
                 .contentType(ContentType.JSON)
                 .request("GET", "/api/v1alpha1/sboms?query=sbom==null")
                 .then()
                 .statusCode(400)
-                .body(CoreMatchers.equalTo(msg));
+                .body("resource", CoreMatchers.is("/api/v1alpha1/sboms"))
+                .body("errorId", CoreMatchers.isA(String.class))
+                .body("error", CoreMatchers.is("Bad Request"))
+                .body(
+                        "message",
+                        CoreMatchers.is(
+                                "Invalid arguments provided: RSQL on field Sbom.sbom with type JsonNode is not supported!"))
+                .body("$", Matchers.not(Matchers.hasKey("errors")));
     }
 
     @Test
@@ -988,6 +1002,14 @@ public class SBOMResourceRSQIT {
 
         String bomJson = TestResources.asString("sboms/complete_sbom.json");
         sbom.setSbom(new ObjectMapper().readTree(bomJson));
+
+        SbomGenerationRequest generationRequest = new SbomGenerationRequest();
+        generationRequest.setId("g12345");
+        generationRequest.setIdentifier("gAWI7P3EJ23YAA");
+        generationRequest.setCreationTime(Instant.now().minus(Duration.ofDays(1)));
+        generationRequest.setType(GenerationRequestType.BUILD);
+
+        sbom.setGenerationRequest(generationRequest);
 
         return sbom;
     }

@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.core.errors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AccessLevel;
@@ -37,7 +38,10 @@ import lombok.ToString;
 @ToString
 public class ErrorResponse {
     String errorId;
-    String errorType;
+    String error;
+    String resource;
     String message;
-    List<String> errors;
+    @Builder.Default
+    List<String> errors = new ArrayList<>();
+
 }

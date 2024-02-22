@@ -17,18 +17,18 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest;
 
-import jakarta.ws.rs.core.Application;
-
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Contact;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.info.License;
 
+import jakarta.ws.rs.core.Application;
+
 @OpenAPIDefinition(
         info = @Info(
                 title = "SBOMer service",
                 version = "0.0.1",
-                contact = @Contact(name = "SBOMer Team", url = "https://chat.google.com/room/AAAACy6IApc"),
+                contact = @Contact(name = "SBOMer Team"),
                 license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0.html")))
 public class SBOMerApplication extends Application {
 }
