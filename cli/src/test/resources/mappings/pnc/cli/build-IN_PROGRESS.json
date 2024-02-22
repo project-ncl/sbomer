@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/builds/IN_PROGRESS"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "QUARKUS",
+      "buildConfigRevision": {
+        "id": "QUARKUS",
+        "buildType": "MVN",
+        "buildScript": "mvn -DskipTests clean deploy"
+      },
+      "temporaryBuild": false,
+      "progress": "IN_PROGRESS",
+      "status": "BUILDING",
+      "scmUrl": "https://c.r.com/gerrit/project/name.git",
+      "scmTag": "a-tag"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

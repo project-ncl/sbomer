@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -15,17 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.integ.feature.sbom.command;
+package org.jboss.sbomer.cli.errors.pnc;
 
-import io.quarkus.test.junit.main.QuarkusMainTest;
+import org.jboss.sbomer.cli.errors.CommandLineException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
-@QuarkusMainTest
-public class CycloneDXPluginMavenGenerateCommandIT {
+/**
+ * Error indicating that the requested PNC build does not exist in PNC.
+ */
+public class MissingPncBuildException extends CommandLineException {
+    private static final int EXIT_CODE = 303;
 
-    // @Test
-    // // @Disabled("Figure out how to run a generation integration test")
-    // @DisplayName("Should run the cyclonedx generation")
-    // @Launch(value = { "-v", "sbom", "generate", "--build-id", "BBVVCC", "maven-cyclonedx" })
-    // void shouldRunGeneration() throws Exception {
-    // }
+    public MissingPncBuildException(String msg, Object... params) {
+        super(MissingPncBuildException.EXIT_CODE, msg, params);
+    }
+
+    public MissingPncBuildException(ApplicationException e) {
+        super(MissingPncBuildException.EXIT_CODE, e);
+    }
+
 }

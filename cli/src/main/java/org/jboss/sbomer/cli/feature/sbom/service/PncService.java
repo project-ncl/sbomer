@@ -38,6 +38,7 @@ import org.jboss.pnc.dto.GroupConfigurationRef;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceException;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceNotFoundException;
@@ -146,7 +147,7 @@ public class PncService {
             log.warn("Build with id '{}' was not found in PNC", buildId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException("Build could not be retrieved because PNC responded with an error", ex);
+            throw new GeneralPncException("Build could not be retrieved because PNC responded with an error", ex);
         }
     }
 
@@ -171,9 +172,7 @@ public class PncService {
             log.warn("BuildConfig with id '{}' was not found in PNC", buildConfigId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException(
-                    "BuildConfig could not be retrieved because PNC responded with an error",
-                    ex);
+            throw new GeneralPncException("BuildConfig could not be retrieved because PNC responded with an error", ex);
         }
     }
 
@@ -198,7 +197,7 @@ public class PncService {
             log.warn("GroupConfiguration with id '{}' was not found in PNC", groupConfigId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException(
+            throw new GeneralPncException(
                     "GroupConfiguration could not be retrieved because PNC responded with an error",
                     ex);
         }

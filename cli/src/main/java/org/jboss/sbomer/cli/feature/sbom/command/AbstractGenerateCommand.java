@@ -33,6 +33,10 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.jboss.pnc.dto.Build;
+import org.jboss.sbomer.cli.errors.GitCloneException;
+import org.jboss.sbomer.cli.errors.pnc.InvalidPncBuildStateException;
+import org.jboss.sbomer.cli.errors.pnc.MissingPncBuildException;
+import org.jboss.sbomer.cli.errors.pnc.UnsupportedPncBuildException;
 import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
 import org.jboss.sbomer.cli.feature.sbom.command.mixin.GeneratorToolMixin;
 import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
@@ -127,22 +131,23 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         Build build = pncService.getBuild(parent.getBuildId());
 
         if (build == null) {
-            log.error("Could not fetch the PNC build with id '{}'", parent.getBuildId());
-            return CommandLine.ExitCode.SOFTWARE;
+            throw new MissingPncBuildException("Could not fetch the PNC build with id '{}'", parent.getBuildId());
         }
 
-        // Filter only valid Pnc builds
+        // Filter only valid PNC builds
         if (!isValidBuild(build)) {
-            log.error("Build is not valid! Needs to be a FINISHED build with status SUCCESS or NO_REBUILD_REQUIRED");
-            return CommandLine.ExitCode.SOFTWARE;
+            throw new InvalidPncBuildStateException(
+                    "Build '{}' is not valid! Progress needs to be 'FINISHED' with status 'SUCCESS' or 'NO_REBUILD_REQUIRED'. Currently: progress: '{}', status: '{}'",
+                    parent.getBuildId(),
+                    build.getProgress(),
+                    build.getStatus());
         }
 
-        // Filter only valid Pnc build types
+        // Filter only valid PNC build types
         if (!isValidBuildType(build)) {
-            log.error(
-                    "The generation of SBOMs for the build type " + build.getBuildConfigRevision().getBuildType()
-                            + " is not yet implemented!");
-            return CommandLine.ExitCode.SOFTWARE;
+            throw new UnsupportedPncBuildException(
+                    "The generation of SBOMs for the build type '{}' is not yet implemented!",
+                    build.getBuildConfigRevision().getBuildType());
         }
 
         // Get the correct scm information for builds which have either SUCCESS or NO_REBUILD_REQUIRED status
@@ -252,8 +257,12 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
 
         if (sbomPath == null) {
 
-            // Clone the source code related to the build
-            doClone(scmUrl, scmTag, parent.getWorkdir(), isForce);
+            try {
+                // Clone the source code related to the build
+                doClone(scmUrl, scmTag, parent.getWorkdir(), isForce);
+            } catch (ApplicationException e) {
+                throw new GitCloneException(e);
+            }
 
             // In case the original build command script contains profiles, projects list or system properties
             // definitions, get them as a best effort and pass them to the SBOM generation to try to resolve the same
@@ -320,9 +329,12 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         try {
             Git.cloneRepository().setDirectory(path.toFile()).setURI(url).setBranch(tag).setDepth(1).call();
         } catch (InvalidRemoteException e) {
-            throw new ApplicationException("Unknown error occurred while preparing to clone the repository", e);
+            throw new ApplicationException(
+                    "Unknown error occurred while preparing to clone the '{}'  repository",
+                    url,
+                    e);
         } catch (GitAPIException e) {
-            log.error("Unable to clone the repository", e);
+            log.error("Unable to clone the '{}' repository", url, e);
             throw new ApplicationException("Unable to clone the repository", e);
         }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -15,17 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.integ.feature.sbom.command;
+package org.jboss.sbomer.cli.errors.pnc;
 
-import io.quarkus.test.junit.main.QuarkusMainTest;
+import org.jboss.sbomer.cli.errors.CommandLineException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
-@QuarkusMainTest
-public class CycloneDXPluginMavenGenerateCommandIT {
+/**
+ * Error indicating a failure related to the build progress or status received from PNC.
+ */
+public class InvalidPncBuildStateException extends CommandLineException {
+    private static final int EXIT_CODE = 301;
 
-    // @Test
-    // // @Disabled("Figure out how to run a generation integration test")
-    // @DisplayName("Should run the cyclonedx generation")
-    // @Launch(value = { "-v", "sbom", "generate", "--build-id", "BBVVCC", "maven-cyclonedx" })
-    // void shouldRunGeneration() throws Exception {
-    // }
+    public InvalidPncBuildStateException(String msg, Object... params) {
+        super(InvalidPncBuildStateException.EXIT_CODE, msg, params);
+    }
+
+    public InvalidPncBuildStateException(ApplicationException e) {
+        super(InvalidPncBuildStateException.EXIT_CODE, e);
+    }
+
 }
