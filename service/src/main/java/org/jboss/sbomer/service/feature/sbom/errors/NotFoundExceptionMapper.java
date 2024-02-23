@@ -17,19 +17,20 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
-    @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
+public class NotFoundExceptionMapper extends AbstractExceptionMapper<NotFoundException> {
 
-        return responseBuilder.build();
+    @Override
+    Status getStatus() {
+        return Status.NOT_FOUND;
     }
 
+    @Override
+    String errorMessage(NotFoundException ex) {
+        return formattedString("Requested resource '{}' does not exist", uriInfo.getPath());
+    }
 }

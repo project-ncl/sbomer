@@ -35,7 +35,7 @@ public class ClientExceptionMapper implements ExceptionMapper<ClientException> {
     public Response toResponse(ClientException ex) {
         ErrorResponse error = ErrorResponse.builder()
                 .errorId(ex.getErrorId())
-                .errorType(ex.getClass().getSimpleName())
+                .error(ex.getClass().getSimpleName())
                 .message(ex.getMessage())
                 .errors(ex.getErrors())
                 .build();

@@ -29,7 +29,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
-import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -157,10 +156,6 @@ public class SBOMResource {
             return Response.status(Status.OK).entity(mapSbomPage(sboms)).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
-        } catch (RSQLParserException rsqlExc) {
-            return Response.status(Status.BAD_REQUEST)
-                    .entity("Failed while parsing the provided RSQL string, please verify the correct syntax")
-                    .build();
         }
     }
 
@@ -222,7 +217,7 @@ public class SBOMResource {
         Sbom sbom = sbomService.get(sbomId);
 
         if (sbom == null) {
-            throw new NotFoundException("SBOM with id '" + sbomId + "' not found");
+            throw new jakarta.ws.rs.NotFoundException("SBOM with id '" + sbomId + "' not found");
         }
 
         return sbom;
@@ -335,10 +330,6 @@ public class SBOMResource {
             return Response.status(Status.OK).entity(mapSbomRequestPage(requests)).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
-        } catch (RSQLParserException rsqlExc) {
-            return Response.status(Status.BAD_REQUEST)
-                    .entity("Failed while parsing the provided RSQL string, please verify the correct syntax")
-                    .build();
         }
     }
 

@@ -17,19 +17,37 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
+import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
-    @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
+@Slf4j
+public class NotAllowedExceptionMapper extends AbstractExceptionMapper<NotAllowedException> {
 
-        return responseBuilder.build();
+    @Override
+    Status getStatus() {
+        return Status.METHOD_NOT_ALLOWED;
     }
 
+    @Override
+    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+        log.warn(
+                "Client requested '{}' resource with not allowed method: '{}'",
+                uriInfo.getPath(),
+                request.getMethod(),
+                ex);
+                return responseBuilder.build();
+    }
+
+    @Override
+    String errorMessage(NotAllowedException ex) {
+        return formattedString(
+                "Requesting resource '{}' using '{}' method is not allowed. Please consult API documentation.",
+                uriInfo.getPath(),
+                request.getMethod());
+    }
 }

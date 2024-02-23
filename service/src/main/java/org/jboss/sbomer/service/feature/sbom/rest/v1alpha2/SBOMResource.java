@@ -109,10 +109,6 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
             return Response.status(Status.OK).entity(mapSbomRecordPage(sboms)).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
-        } catch (RSQLParserException rsqlExc) {
-            return Response.status(Status.BAD_REQUEST)
-                    .entity("Failed while parsing the provided RSQL string, please verify the correct syntax")
-                    .build();
         }
     }
 
