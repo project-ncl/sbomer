@@ -15,11 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.dto.v1alpha2;
+package org.jboss.sbomer.core.features.sbom.enums;
 
-import java.time.Instant;
+public enum GenerationRequestType {
+    BUILD, OPERATION;
 
-import com.fasterxml.jackson.databind.JsonNode;
+    public static GenerationRequestType fromName(String type) {
+        return GenerationRequestType.valueOf(type.toUpperCase());
+    }
 
-public record SbomGenerationRequestRecord(String id, String identifier, JsonNode config, String type, Instant creationTime) {
-};
+    public String toName() {
+        return this.name().toLowerCase();
+    }
+
+}

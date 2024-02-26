@@ -13,7 +13,7 @@
       "content": [
         {
           "id": "123",
-          "buildId": "QUARKUS",
+          "identifier": "QUARKUS",
           "rootPurl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
           "configIndex": 0,
           "statusMessage": "",
@@ -70,7 +70,8 @@
           },
           "generationRequest": {
             "id": "AABBCC",
-            "buildId": "QUARKUS",
+            "identifier": "QUARKUS",
+            "type": "BUILD",
             "config": {
               "buildId": "QUARKUS",
               "products": [

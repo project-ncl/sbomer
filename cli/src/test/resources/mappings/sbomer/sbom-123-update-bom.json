@@ -7,7 +7,7 @@
     "status": 200,
     "jsonBody": {
       "id": "123",
-      "buildId": "QUARKUS",
+      "identifier": "QUARKUS",
       "rootPurl": null,
       "configIndex": 0,
       "statusMessage": null,

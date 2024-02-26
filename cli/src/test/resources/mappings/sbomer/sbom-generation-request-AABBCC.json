@@ -7,7 +7,8 @@
     "status": 200,
     "jsonBody": {
       "id": "AABBCC",
-      "buildId": "QUARKUS",
+      "identifier": "QUARKUS",
+      "type": "BUILD",
       "config": {
         "buildId": "QUARKUS",
         "products": [

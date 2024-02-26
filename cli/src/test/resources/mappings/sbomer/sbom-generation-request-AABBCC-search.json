@@ -13,7 +13,8 @@
       "content": [
         {
           "id": "AABBCC",
-          "buildId": "QUARKUS",
+          "identifier": "QUARKUS",
+          "type": "BUILD",
           "config": {
             "buildId": "QUARKUS",
             "products": [

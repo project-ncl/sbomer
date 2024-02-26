@@ -35,7 +35,7 @@ import lombok.extern.jackson.Jacksonized;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sbom {
     private String id;
-    private String buildId;
+    private String identifier;
     private String rootPurl;
     private JsonNode sbom;
     private Integer configIndex;
