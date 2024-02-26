@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.cli;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class ExceptionHandler implements IExecutionExceptionHandler {
                     Path.of(failureReasonPath),
                     ObjectMapperProvider.json()
                             .writeValueAsString(Map.of("message", ex.getMessage(), "exitCode", exitCode))
-                            .getBytes());
+                            .getBytes(StandardCharsets.UTF_8));
         }
 
         return exitCode;
