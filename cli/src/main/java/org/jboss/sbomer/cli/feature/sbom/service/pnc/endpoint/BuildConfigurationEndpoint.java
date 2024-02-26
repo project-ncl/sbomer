@@ -15,16 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.service.pnc;
+package org.jboss.sbomer.cli.feature.sbom.service.pnc.endpoint;
 
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.pnc.dto.Artifact;
-import org.jboss.pnc.dto.Build;
-import org.jboss.pnc.dto.response.Page;
+import org.jboss.pnc.dto.BuildConfiguration;
 
-import jakarta.validation.Valid;
-import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -32,28 +28,16 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Tag(name = "Builds")
-@Path("/builds")
+@Tag(name = "Build Configs")
+@Path("/build-configs")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 // @Client
-public interface BuildEndpoint {
-    static final String B_ID = "ID of the build";
+public interface BuildConfigurationEndpoint {
+    static final String BC_ID = "ID of the build config";
 
     @GET
     @Path("/{id}")
-    Build getSpecific(@Parameter(description = B_ID) @PathParam("id") String id);
-
-    @GET
-    @Path("/{id}/artifacts/dependencies")
-    // @TimedMetric
-    Page<Artifact> getDependencyArtifacts(
-            @Parameter(description = B_ID) @PathParam("id") String id,
-            @Valid @BeanParam PageParameters pageParameters);
-
-    @GET
-    @Path("/{id}/artifacts/built")
-    Page<Artifact> getBuiltArtifacts(
-            @Parameter(description = B_ID) @PathParam("id") String id,
-            @Valid @BeanParam PageParameters pageParameters);
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON) // workaround for PATCH support
+    BuildConfiguration getSpecific(@Parameter(description = BC_ID) @PathParam("id") String id);
 }

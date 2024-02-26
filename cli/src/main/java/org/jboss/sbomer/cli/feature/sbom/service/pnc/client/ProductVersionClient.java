@@ -15,21 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.service.pnc;
+package org.jboss.sbomer.cli.feature.sbom.service.pnc.client;
 
 import org.jboss.pnc.client.Configuration;
-import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.ProductVersion;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceException;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceNotFoundException;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.endpoint.ProductVersionEndpoint;
 
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 
-public class BuildConfigurationClient extends ClientBase<BuildConfigurationEndpoint> {
-    public BuildConfigurationClient(Configuration configuration) {
-        super(configuration, BuildConfigurationEndpoint.class);
+public class ProductVersionClient extends ClientBase<ProductVersionEndpoint> {
+    public ProductVersionClient(Configuration configuration) {
+        super(configuration, ProductVersionEndpoint.class);
     }
 
-    public BuildConfiguration getSpecific(String id) throws RemoteResourceException {
+    public ProductVersion getSpecific(String id) throws RemoteResourceException {
         try {
             return getEndpoint().getSpecific(id);
         } catch (NotFoundException e) {

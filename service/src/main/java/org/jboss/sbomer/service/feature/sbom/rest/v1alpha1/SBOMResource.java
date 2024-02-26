@@ -32,6 +32,7 @@ import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -81,7 +82,7 @@ public class SBOMResource {
     protected SbomService sbomService;
 
     @Inject
-    KubernetesClient kubernetesClient;
+    protected KubernetesClient kubernetesClient;
 
     @Inject
     ConfigSchemaValidator configSchemaValidator;
@@ -231,9 +232,11 @@ public class SBOMResource {
             log.info("New generation request for build id '{}'", buildId);
             log.debug("Creating GenerationRequest Kubernetes resource...");
 
-            GenerationRequest req = new GenerationRequestBuilder().withNewDefaultMetadata(buildId)
+            GenerationRequest req = new GenerationRequestBuilder()
+                    .withNewDefaultMetadata(buildId, GenerationRequestType.BUILD)
                     .endMetadata()
-                    .withBuildId(buildId)
+                    .withIdentifier(buildId)
+                    .withType(GenerationRequestType.BUILD)
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
@@ -276,8 +279,8 @@ public class SBOMResource {
             name = "query",
             description = "A RSQL query to search the generation requests",
             examples = { @ExampleObject(
-                    name = "Find all SBOM generation requests with provided buildId",
-                    value = "buildId=eq=ABCDEFGHIJKLM") })
+                    name = "Find all SBOM generation requests with provided identifier",
+                    value = "identifier=eq=ABCDEFGHIJKLM") })
     @Parameter(
             name = "sort",
             description = "Optional RSQL sort",

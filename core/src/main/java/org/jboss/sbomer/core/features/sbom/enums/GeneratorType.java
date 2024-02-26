@@ -29,5 +29,6 @@ public enum GeneratorType {
     MAVEN_CYCLONEDX, @JsonProperty("maven-domino")
     MAVEN_DOMINO, @JsonProperty("gradle-cyclonedx")
     GRADLE_CYCLONEDX, @JsonProperty("nodejs-cyclonedx")
-    NODEJS_CYCLONEDX
+    NODEJS_CYCLONEDX, @JsonProperty("maven-cyclonedx-operation")
+    MAVEN_CYCLONEDX_OPERATION
 }

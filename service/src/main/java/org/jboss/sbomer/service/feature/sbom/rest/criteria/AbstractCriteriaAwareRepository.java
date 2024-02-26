@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jboss.pnc.common.Strings;
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate.CustomPredicateSortBuilder;
 import org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate.CustomizedJpaPredicateSortVisitor;
 import org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate.CustomizedJpaPredicateVisitor;

@@ -31,14 +31,23 @@ import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
+import org.jboss.pnc.dto.DeliverableAnalyzerReport;
 import org.jboss.pnc.dto.GroupConfiguration;
 import org.jboss.pnc.dto.GroupConfigurationRef;
+import org.jboss.pnc.dto.ProductMilestone;
+import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
-import org.jboss.sbomer.cli.feature.sbom.service.pnc.BuildClient;
-import org.jboss.sbomer.cli.feature.sbom.service.pnc.BuildConfigurationClient;
-import org.jboss.sbomer.cli.feature.sbom.service.pnc.GroupConfigurationClient;
+import org.jboss.pnc.dto.response.AnalyzedArtifact;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceException;
 import org.jboss.sbomer.cli.feature.sbom.service.pnc.RemoteResourceNotFoundException;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.client.BuildClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.client.BuildConfigurationClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.client.DeliverableAnalyzerReportClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.client.GroupConfigurationClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.client.OperationClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.client.ProductMilestoneClient;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.client.ProductVersionClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
 import io.quarkus.oidc.client.Tokens;
@@ -69,11 +78,23 @@ public class PncService {
 
     GroupConfigurationClient groupConfigurationClient;
 
+    OperationClient operationClient;
+
+    ProductMilestoneClient productMilestoneClient;
+
+    ProductVersionClient productVersionClient;
+
+    DeliverableAnalyzerReportClient deliverableAnalyzerReportClient;
+
     @PostConstruct
     void init() {
         buildClient = new BuildClient(getConfiguration());
         buildConfigurationClient = new BuildConfigurationClient(getConfiguration());
         groupConfigurationClient = new GroupConfigurationClient(getConfiguration());
+        operationClient = new OperationClient(getConfiguration());
+        productMilestoneClient = new ProductMilestoneClient(getConfiguration());
+        productVersionClient = new ProductVersionClient(getConfiguration());
+        deliverableAnalyzerReportClient = new DeliverableAnalyzerReportClient(getConfiguration());
     }
 
     @PreDestroy
@@ -81,6 +102,10 @@ public class PncService {
         buildClient.close();
         buildConfigurationClient.close();
         groupConfigurationClient.close();
+        operationClient.close();
+        productMilestoneClient.close();
+        productVersionClient.close();
+        deliverableAnalyzerReportClient.close();
     }
 
     /**
@@ -175,6 +200,88 @@ public class PncService {
         } catch (RemoteResourceException ex) {
             throw new ApplicationException(
                     "GroupConfiguration could not be retrieved because PNC responded with an error",
+                    ex);
+        }
+    }
+
+    /**
+     * <p>
+     * Fetch information about the PNC {@link DeliverableAnalyzerOperation} identified by the particular
+     * {@code operationId}.
+     * </p>
+     *
+     * <p>
+     * In case the {@link DeliverableAnalyzerOperation} with provided identifier cannot be found {@code null} is
+     * returned.
+     * </p>
+     *
+     * @param operationId The {@link DeliverableAnalyzerOperation} identifier in PNC
+     * @return The {@link DeliverableAnalyzerOperation} object or {@code null} in case the
+     *         {@link DeliverableAnalyzerOperation} could not be found.
+     */
+    public DeliverableAnalyzerOperation getDeliverableAnalyzerOperation(String operationId) {
+        log.debug("Fetching DeliverableAnalyzerOperation from PNC with id '{}'", operationId);
+        try {
+            return operationClient.getSpecificDeliverableAnalyzer(operationId);
+        } catch (RemoteResourceNotFoundException ex) {
+            log.warn("DeliverableAnalyzerOperation with id '{}' was not found in PNC", operationId);
+            return null;
+        } catch (RemoteResourceException ex) {
+            throw new ApplicationException(
+                    "DeliverableAnalyzerOperation could not be retrieved because PNC responded with an error",
+                    ex);
+        }
+    }
+
+    /**
+     * <p>
+     * Fetch information about the PNC {@link ProductVersion} identified by the particular {@code productVersionId}.
+     * </p>
+     *
+     * <p>
+     * In case the {@link ProductVersion} with provided identifier cannot be found {@code null} is returned.
+     * </p>
+     *
+     * @param productVersionId The {@link ProductVersion} identifier in PNC
+     * @return The {@link ProductVersion} object or {@code null} in case the {@link ProductVersion} could not be found.
+     */
+    public ProductVersion getProductVersion(String productVersionId) {
+        log.debug("Fetching ProductVersion from PNC with id '{}'", productVersionId);
+        try {
+            return productVersionClient.getSpecific(productVersionId);
+        } catch (RemoteResourceNotFoundException ex) {
+            log.warn("ProductVersion with id '{}' was not found in PNC", productVersionId);
+            return null;
+        } catch (RemoteResourceException ex) {
+            throw new ApplicationException(
+                    "ProductVersion could not be retrieved because PNC responded with an error",
+                    ex);
+        }
+    }
+
+    /**
+     * <p>
+     * Fetch information about the PNC {@link ProductMilestone} identified by the particular {@code milestoneId}.
+     * </p>
+     *
+     * <p>
+     * In case the {@link ProductMilestone} with provided identifier cannot be found {@code null} is returned.
+     * </p>
+     *
+     * @param milestoneId The {@link ProductMilestone} identifier in PNC
+     * @return The {@link ProductMilestone} object or {@code null} in case the {@link ProductMilestone} could not be
+     *         found.
+     */
+    public ProductMilestone getMilestone(String milestoneId) {
+        log.debug("Fetching ProductMilestone from PNC with id '{}'", milestoneId);
+        try {
+            return productMilestoneClient.getSpecific(milestoneId);
+        } catch (RemoteResourceNotFoundException ex) {
+            log.warn("ProductMilestone with id '{}' was not found in PNC", milestoneId);
+            return null;
+        } catch (RemoteResourceException ex) {
+            throw new ApplicationException(
+                    "ProductMilestone could not be retrieved because PNC responded with an error",
                     ex);
         }
     }
@@ -325,6 +432,32 @@ public class PncService {
             throw new ApplicationException(
                     "Artifact with purl '{}' could not be retrieved because PNC responded with an error",
                     purl,
+                    ex);
+        }
+    }
+
+    /**
+     * Fetch all the {@link AnalyzedArtifact} which have been analyzed in a {@link DeliverableAnalyzerReport} .
+     *
+     * @param reportId
+     * @return The {@link AnalyzedArtifact}s
+     */
+    public List<AnalyzedArtifact> getAllAnalyzedArtifacts(String reportId) {
+        log.debug("Fetching analyzed artifacts from PNC for DeliverableAnalyzerReport '{}'", reportId);
+
+        try {
+            RemoteCollection<AnalyzedArtifact> analyzedArtifact = deliverableAnalyzerReportClient
+                    .getAnalyzedArtifacts(reportId);
+            return analyzedArtifact.getAll().stream().collect(Collectors.toList());
+        } catch (RemoteResourceNotFoundException ex) {
+            throw new ApplicationException(
+                    "Analyzed Artifacts for the DeliverableAnalyzerReport '{}' were not found in PNC",
+                    reportId,
+                    ex);
+        } catch (RemoteResourceException ex) {
+            throw new ApplicationException(
+                    "Analyzed Artifacts for the DeliverableAnalyzerReport '{}' could not be retrieved because PNC responded with an error",
+                    reportId,
                     ex);
         }
     }

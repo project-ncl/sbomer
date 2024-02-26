@@ -44,6 +44,8 @@ import org.jboss.pnc.build.finder.core.DistributionAnalyzerListener;
 import org.jboss.pnc.build.finder.core.LocalFile;
 import org.jboss.pnc.build.finder.koji.ClientSession;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
+import org.jboss.pnc.dto.Artifact;
+import org.jboss.sbomer.cli.feature.sbom.utils.buildfinder.FinderStatus;
 
 import com.redhat.red.build.koji.KojiClientException;
 
@@ -166,5 +168,26 @@ public class KojiService {
 
     public BuildConfig getConfig() {
         return config;
+    }
+
+    public KojiBuild findBuild(Artifact artifact) {
+
+        if (artifact.getPublicUrl() != null) {
+            try {
+                FinderStatus status = new FinderStatus();
+                List<KojiBuild> brewBuilds = find(artifact.getPublicUrl(), status, status);
+                if (brewBuilds.size() == 1) {
+                    return brewBuilds.get(0);
+                } else if (brewBuilds.size() > 1) {
+                    log.warn(
+                            "Multiple builds where found in Brew for the artifact '{}', picking the first one!",
+                            artifact.getPublicUrl());
+                    return brewBuilds.get(0);
+                }
+            } catch (Throwable e) {
+                log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
+            }
+        }
+        return null;
     }
 }

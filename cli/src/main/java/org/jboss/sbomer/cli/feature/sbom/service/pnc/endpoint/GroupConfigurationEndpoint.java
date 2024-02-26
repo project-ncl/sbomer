@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.service.pnc;
+package org.jboss.sbomer.cli.feature.sbom.service.pnc.endpoint;
 
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.pnc.dto.BuildConfiguration;
+import org.jboss.pnc.dto.GroupConfiguration;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -28,16 +28,29 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Tag(name = "Build Configs")
-@Path("/build-configs")
+@Tag(name = "Group Configs")
+@Path("/group-configs")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 // @Client
-public interface BuildConfigurationEndpoint {
-    static final String BC_ID = "ID of the build config";
+public interface GroupConfigurationEndpoint {
+    static final String GC_ID = "ID of the group config";
 
+    static final String GET_ALL_DESC = "Gets all group configs.";
+
+    static final String CREATE_NEW_DESC = "Creates a new group config.";
+
+    static final String GET_SPECIFIC_DESC = "Gets a specific group config.";
+
+    /**
+     * {@value GET_SPECIFIC_DESC}
+     *
+     * @param id {@value GC_ID}
+     * @return
+     */
     @GET
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON) // workaround for PATCH support
-    BuildConfiguration getSpecific(@Parameter(description = BC_ID) @PathParam("id") String id);
+    GroupConfiguration getSpecific(@Parameter(description = GC_ID) @PathParam("id") String id);
+
 }

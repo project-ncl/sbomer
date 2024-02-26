@@ -15,12 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.service.pnc;
+package org.jboss.sbomer.cli.feature.sbom.service.pnc.endpoint;
 
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.pnc.dto.GroupConfiguration;
+import org.jboss.pnc.dto.DeliverableAnalyzerReport;
+import org.jboss.pnc.dto.response.AnalyzedArtifact;
 
+import org.jboss.pnc.dto.response.Page;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.PageParameters;
+
+import jakarta.validation.Valid;
+import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -28,29 +34,21 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Tag(name = "Group Configs")
-@Path("/group-configs")
+@Tag(name = "Deliverable Analysis")
+@Path("/deliverable-analyses")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-// @Client
-public interface GroupConfigurationEndpoint {
-    static final String GC_ID = "ID of the group config";
+public interface DeliverableAnalyzerReportEndpoint {
 
-    static final String GET_ALL_DESC = "Gets all group configs.";
+    String DEL_AN_ID = "Id of the Deliverable Analysis Report";
 
-    static final String CREATE_NEW_DESC = "Creates a new group config.";
-
-    static final String GET_SPECIFIC_DESC = "Gets a specific group config.";
-
-    /**
-     * {@value GET_SPECIFIC_DESC}
-     *
-     * @param id {@value GC_ID}
-     * @return
-     */
     @GET
     @Path("/{id}")
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON) // workaround for PATCH support
-    GroupConfiguration getSpecific(@Parameter(description = GC_ID) @PathParam("id") String id);
+    DeliverableAnalyzerReport getSpecific(@Parameter(description = DEL_AN_ID) @PathParam("id") String id);
 
+    @Path("/{id}/analyzed-artifacts")
+    @GET
+    Page<AnalyzedArtifact> getAnalyzedArtifacts(
+            @Parameter(description = DEL_AN_ID) @PathParam("id") String id,
+            @Valid @BeanParam PageParameters pageParameters);
 }
