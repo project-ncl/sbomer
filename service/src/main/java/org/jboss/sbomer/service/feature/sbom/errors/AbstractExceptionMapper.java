@@ -70,11 +70,11 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
      * Override to privide any additional error messages that can be useful for the clinet to understand the problem.
      * See {@link ErrorResponse#getErrors()}.
      * </p>
-     * 
+     *
      * <p>
      * By default empty list is returned.
      * </p>
-     * 
+     *
      * @return
      */
     List<String> customErrors() {
@@ -86,11 +86,11 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
      * A hook that is executed before the response is returned. It can be used for example to help audit things (log
      * messages).
      * </p>
-     * 
+     *
      * <p>
      * Returned {@link Response} object is returned to the client.
      * </p>
-     * 
+     *
      * @param responseBuilder The prepared default {@link Response} object.
      * @param ex The {@link Throwable} containing the cause
      */

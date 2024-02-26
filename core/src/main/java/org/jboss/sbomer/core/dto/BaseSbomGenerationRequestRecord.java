@@ -15,23 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.v1alpha2;
+package org.jboss.sbomer.core.dto;
 
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import java.time.Instant;
+import java.util.Map;
 
-import jakarta.annotation.security.PermitAll;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-@Path("/api/v1alpha2/stats")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-@ApplicationScoped
-@Tag(name = "v1alpha2", description = "v1alpha2 API endpoints")
-@PermitAll
-public class StatsResources extends org.jboss.sbomer.service.feature.sbom.rest.v1alpha1.StatsResources {
+import com.fasterxml.jackson.databind.JsonNode;
 
-}
+public record BaseSbomGenerationRequestRecord(
+        String id,
+        String identifier,
+        @Schema(implementation = Map.class) JsonNode config,
+        String type,
+        Instant creationTime) {
+};

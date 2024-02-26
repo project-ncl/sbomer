@@ -17,8 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.mapper;
 
-import java.util.List;
-
+import org.jboss.sbomer.core.dto.BaseSbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -27,15 +28,16 @@ import org.mapstruct.Mapper;
 @Mapper(config = MapperConfig.class)
 public interface V1Alpha3Mapper {
 
-    org.jboss.sbomer.core.dto.v1alpha3.SbomRecord toSbomRecord(Sbom entity);
+    SbomRecord toSbomRecord(Sbom entity);
 
-    org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord toSbomRequestRecord(SbomGenerationRequest entity);
+    BaseSbomRecord toSearchRecord(Sbom entity);
 
-    Page<org.jboss.sbomer.core.dto.v1alpha3.SbomRecord> toSbomRecordPage(Page<Sbom> sboms);
+    SbomGenerationRequestRecord toSbomRequestRecord(SbomGenerationRequest entity);
 
-    Page<org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord> toSbomRequestRecordPage(
-            Page<SbomGenerationRequest> sbomRequests);
+    Page<BaseSbomRecord> toSbomSearchRecordPage(Page<BaseSbomRecord> sboms);
 
-    List<org.jboss.sbomer.core.dto.v1alpha3.SbomRecord> toSbomRecordList(List<Sbom> sboms);
+    Page<SbomRecord> toSbomRecordPage(Page<Sbom> sboms);
+
+    Page<SbomGenerationRequestRecord> toSbomRequestRecordPage(Page<SbomGenerationRequest> sbomRequests);
 
 }

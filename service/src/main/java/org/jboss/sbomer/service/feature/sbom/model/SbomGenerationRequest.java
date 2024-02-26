@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.model;
 import java.io.IOException;
 import java.time.Instant;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -102,6 +103,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "config")
     @ToString.Exclude
+    @Schema(implementation = Config.class)
     private JsonNode config;
 
     @Column(name = "reason", nullable = true, updatable = true)

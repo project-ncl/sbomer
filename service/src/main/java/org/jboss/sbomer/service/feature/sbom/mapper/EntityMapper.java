@@ -15,22 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errors;
+package org.jboss.sbomer.service.feature.sbom.mapper;
 
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.ext.Provider;
+import java.util.List;
 
-@Provider
-public class NotFoundExceptionMapper extends AbstractExceptionMapper<NotFoundException> {
+import org.jboss.sbomer.core.features.sbom.rest.Page;
 
-    @Override
-    Status getStatus() {
-        return Status.NOT_FOUND;
-    }
+public interface EntityMapper<E, R> {
+    R toSbomRecord(E entity);
 
-    @Override
-    String errorMessage(NotFoundException ex) {
-        return formattedString("Requested resource '{}' does not exist", uriInfo.getPath());
-    }
+    Page<R> toRecordPage(Page<E> entities);
+
+    List<R> toRecordList(List<E> entities);
+
 }

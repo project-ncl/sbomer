@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.mapper;
 
 import java.util.List;
 
+import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;

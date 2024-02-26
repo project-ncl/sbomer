@@ -55,9 +55,7 @@ public class ErrorResourcesIT {
                 .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/doesnotexist"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Not Found"))
-                .body(
-                        "message",
-                        CoreMatchers.is("Requested resource '/api/v1alpha2/sboms/doesnotexist' does not exist"))
+                .body("message", CoreMatchers.is("SBOM with id 'doesnotexist' not found"))
                 .body("$", Matchers.not(Matchers.hasKey("errors")));
     }
 
@@ -118,6 +116,23 @@ public class ErrorResourcesIT {
     }
 
     @Test
+    void testIllegalParameters() {
+        RestAssured.given()
+                .when()
+                .get("/api/v1alpha2/sboms?sort=123")
+                .then()
+                .statusCode(400)
+                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms"))
+                .body("errorId", CoreMatchers.isA(String.class))
+                .body("error", CoreMatchers.is("Bad Request"))
+                .body(
+                        "message",
+                        CoreMatchers.is(
+                                "An error occurred while parsing the RSQL query, please make sure you use correct syntax"))
+                .body("$", Matchers.not(Matchers.hasKey("errors")));
+    }
+
+    @Test
     void testResteasyInternalFailure() {
         // This doesn't make sense, but what we want to test is handling of any Failure
         Failure failure = new Failure("This is a message", Response.status(500).build());
@@ -141,7 +156,8 @@ public class ErrorResourcesIT {
 
     @Test
     void testDefaultExceptionMapper() {
-        // This doesn't make sense, but what we want to test handling of an exception that we don't handle explicitly
+        // This doesn't make sense, but what we want to test handling of an exception that we don't handle
+        // explicitly
         doThrow(NotAcceptableException.class).when(sbomService).get("NotAcceptable");
 
         RestAssured.given()

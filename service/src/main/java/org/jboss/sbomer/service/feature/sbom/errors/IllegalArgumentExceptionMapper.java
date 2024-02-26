@@ -15,11 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.dto.v1alpha3;
+package org.jboss.sbomer.service.feature.sbom.errors;
 
-import java.time.Instant;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.Provider;
 
-import com.fasterxml.jackson.databind.JsonNode;
+@Provider
+public class IllegalArgumentExceptionMapper extends AbstractExceptionMapper<IllegalArgumentException> {
 
-public record BaseSbomGenerationRequestRecord(String id, String identifier, JsonNode config, String type, Instant creationTime) {
-};
+    @Override
+    Status getStatus() {
+        return Status.BAD_REQUEST;
+    }
+
+    @Override
+    String errorMessage(IllegalArgumentException ex) {
+        return formattedString("Invalid arguments provided: {}", ex.getMessage());
+    }
+}

@@ -40,7 +40,7 @@ public class NotAllowedExceptionMapper extends AbstractExceptionMapper<NotAllowe
                 uriInfo.getPath(),
                 request.getMethod(),
                 ex);
-                return responseBuilder.build();
+        return responseBuilder.build();
     }
 
     @Override

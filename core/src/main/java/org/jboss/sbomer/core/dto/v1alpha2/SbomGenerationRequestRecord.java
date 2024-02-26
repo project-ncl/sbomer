@@ -18,8 +18,16 @@
 package org.jboss.sbomer.core.dto.v1alpha2;
 
 import java.time.Instant;
+import java.util.Map;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public record SbomGenerationRequestRecord(String id, String buildId, JsonNode config, Instant creationTime) {
+@Schema(name = "V1Alpha2SbomGenerationRequestRecord")
+public record SbomGenerationRequestRecord(
+        String id,
+        String buildId,
+        @Schema(implementation = Map.class) JsonNode config,
+        Instant creationTime) {
 };
