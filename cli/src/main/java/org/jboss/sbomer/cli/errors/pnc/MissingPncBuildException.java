@@ -24,7 +24,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
  * Error indicating that the requested PNC build does not exist in PNC.
  */
 public class MissingPncBuildException extends CommandLineException {
-    private static final int EXIT_CODE = 303;
+    private static final int EXIT_CODE = 33;
 
     public MissingPncBuildException(String msg, Object... params) {
         super(MissingPncBuildException.EXIT_CODE, msg, params);

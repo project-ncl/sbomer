@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.sbomer.cli.errors.pnc.MissingPncBuildException;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
@@ -328,8 +329,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
         Build build = pncService.getBuild(this.buildId);
 
         if (build == null) {
-            log.error("Could not retrieve PNC build '{}'", this.buildId);
-            return GenerationResult.ERR_GENERAL.getCode();
+            throw new MissingPncBuildException("Could not retrieve PNC build '{}'", this.buildId);
         }
 
         Config config = productConfig(build);

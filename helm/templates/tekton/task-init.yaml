@@ -48,6 +48,8 @@ spec:
 
         set -o pipefail
 
+        SBOMER_CLI_FAILURE_REASON_PATH=$(results.reason.path)
+
         if [ x"${APP_ENV}" == "xdev" ]; then
           export QUARKUS_OIDC_CLIENT_CLIENT_ENABLED=false
         fi
@@ -98,8 +100,10 @@ spec:
           mountPath: /mnt/secrets
 {{- end }}
   results:
-    - name: "config"
+    - name: config
       description: "Runtime configuration"
+    - name: reason
+      description: "Custom JSON-formatted message containing more information about the failure"
   volumes:
     - name: secrets-workdir
       emptyDir:

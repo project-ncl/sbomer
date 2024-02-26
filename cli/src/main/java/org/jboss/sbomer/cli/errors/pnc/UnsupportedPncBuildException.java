@@ -24,7 +24,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
  * Error indicating that the PNC build type is not yet supported in SBOMer.
  */
 public class UnsupportedPncBuildException extends CommandLineException {
-    private static final int EXIT_CODE = 302;
+    private static final int EXIT_CODE = 32;
 
     public UnsupportedPncBuildException(String msg, Object... params) {
         super(UnsupportedPncBuildException.EXIT_CODE, msg, params);

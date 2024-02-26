@@ -36,7 +36,7 @@ public class BaseGenerateCommandIT {
     @DisplayName("Should fail in case of build not found in PNC")
     void shouldFailForMissingBuild(QuarkusMainLauncher launcher) {
         LaunchResult result = launcher.launch("-v", "sbom", "generate", "--build-id", "NOTEXISTING", "maven-cyclonedx");
-        assertEquals(303, result.exitCode());
+        assertEquals(33, result.exitCode());
         assertTrue(result.getErrorOutput().contains("Could not fetch the PNC build with id 'NOTEXISTING'"));
     }
 
@@ -44,7 +44,7 @@ public class BaseGenerateCommandIT {
     @DisplayName("Should fail in case the PNC build is still in progress")
     void shouldFailForBuildInProgress(QuarkusMainLauncher launcher) {
         LaunchResult result = launcher.launch("-v", "sbom", "generate", "--build-id", "IN_PROGRESS", "maven-cyclonedx");
-        assertEquals(301, result.exitCode());
+        assertEquals(31, result.exitCode());
         assertTrue(
                 result.getErrorOutput()
                         .contains(
@@ -56,7 +56,7 @@ public class BaseGenerateCommandIT {
     void shouldFailForInvalidBuildType(QuarkusMainLauncher launcher) {
         LaunchResult result = launcher
                 .launch("-v", "sbom", "generate", "--build-id", "UNSUPPORTED_BUILD_TYPE", "maven-cyclonedx");
-        assertEquals(302, result.exitCode());
+        assertEquals(32, result.exitCode());
         assertTrue(
                 result.getErrorOutput()
                         .contains("The generation of SBOMs for the build type 'SBT' is not yet implemented"));

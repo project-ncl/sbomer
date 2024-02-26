@@ -17,7 +17,12 @@
  */
 package org.jboss.sbomer.cli;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+
 import org.jboss.sbomer.core.errors.ClientException;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import picocli.CommandLine;
 import picocli.CommandLine.IExecutionExceptionHandler;
@@ -55,8 +60,20 @@ public class ExceptionHandler implements IExecutionExceptionHandler {
             ex.printStackTrace(cmd.getErr());
         }
 
-        return cmd.getExitCodeExceptionMapper() != null ? cmd.getExitCodeExceptionMapper().getExitCode(ex)
+        int exitCode = cmd.getExitCodeExceptionMapper() != null ? cmd.getExitCodeExceptionMapper().getExitCode(ex)
                 : cmd.getCommandSpec().exitCodeOnExecutionException();
+
+        String failureReasonPath = System.getenv("SBOMER_CLI_FAILURE_REASON_PATH");
+
+        if (failureReasonPath != null) {
+            Files.write(
+                    Path.of(failureReasonPath),
+                    ObjectMapperProvider.json()
+                            .writeValueAsString(Map.of("message", ex.getMessage(), "exitCode", exitCode))
+                            .getBytes());
+        }
+
+        return exitCode;
     }
 
 }
