@@ -20,15 +20,13 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.messaging.Metadata;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
-import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -56,7 +54,7 @@ public class AmqpMessageConsumer {
     UmbConfig umbConfig;
 
     @Inject
-    PncBuildNotificationHandler buildNotificationHandler;
+    PncNotificationHandler notificationHandler;
 
     private AtomicInteger receivedMessages = new AtomicInteger(0);
     private AtomicInteger processedMessages = new AtomicInteger(0);
@@ -92,35 +90,34 @@ public class AmqpMessageConsumer {
 
         // Checking whether there is some additional metadata attached to the message
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
+        AtomicReference<GenerationRequestType> atomicEnum = new AtomicReference<>(null);
 
-        boolean isBuildStateChange = metadata.map(meta -> {
+        metadata.ifPresent(meta -> {
             JsonObject properties = meta.getProperties();
 
             log.debug("Message properties: {}", properties.toString());
 
-            return Objects.equals(properties.getString("type"), "BuildStateChange");
-        }).orElse(false);
+            if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
+                atomicEnum.set(GenerationRequestType.BUILD);
+            } else if (Objects.equals(properties.getString("type"), "DeliverableAnalysisStateChange")) {
+                atomicEnum.set(GenerationRequestType.OPERATION);
+            }
+        });
 
-        if (!isBuildStateChange) {
-            log.warn("Received a message that is not BuildStateChange, ignoring it");
+        // This shouldn't happen anymore because we use a selector to filter messages
+        if (atomicEnum.get() == null) {
+            log.warn("Received a message that is not BuildStateChange nor DeliverableAnalysisStateChange, ignoring it");
             return message.ack();
         }
 
-        PncBuildNotificationMessageBody body;
-
         try {
-            body = ObjectMapperProvider.json().readValue(message.getPayload(), PncBuildNotificationMessageBody.class);
+            notificationHandler.handle(message, atomicEnum.get());
         } catch (JsonProcessingException e) {
-            log.error("Unable to deserialize PNC build finished message, this is unexpected", e);
+            log.error("Unable to deserialize PNC message, this is unexpected", e);
             return message.nack(e);
         }
 
-        log.debug("Message properly deserialized");
-
-        buildNotificationHandler.handle(body);
-
         processedMessages.getAndIncrement();
-
         return message.ack();
     }
 
