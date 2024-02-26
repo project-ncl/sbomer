@@ -60,7 +60,7 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.pnc</groupId>
-      <artifactId>rest-client</artifactId>
+      <artifactId>rest-client-jakarta</artifactId>
       <version>${version.pnc-rest}</version>
       <exclusions>
         <exclusion>
