@@ -75,7 +75,8 @@
                   "maven-cyclonedx",
                   "maven-domino",
                   "gradle-cyclonedx",
-                  "nodejs-cyclonedx"
+                  "nodejs-cyclonedx",
+                  "maven-cyclonedx-operation"
                 ]
               },
               "args": {

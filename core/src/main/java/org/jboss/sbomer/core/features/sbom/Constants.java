@@ -19,6 +19,12 @@ package org.jboss.sbomer.core.features.sbom;
 
 public class Constants {
 
+    public static final String SBOMER_NAME = "SBOMer";
+    public static final String SBOMER_LICENSE_ID = "Apache-2.0";
+    public static final String SBOMER_GIT_URL = "git@github.com:project-ncl/sbomer.git";
+    public static final String SBOMER_WEBSITE = "https://github.com/project-ncl/sbomer";
+
+    public static final String SBOM_RED_HAT_PNC_OPERATION_ID = "pnc-operation-id";
     public static final String SBOM_RED_HAT_PNC_BUILD_ID = "pnc-build-id";
     public static final String SBOM_RED_HAT_BREW_BUILD_ID = "brew-build-id";
     public static final String SBOM_RED_HAT_PUBLIC_URL = "public-url";

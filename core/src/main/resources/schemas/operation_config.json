@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jboss.org/sbomer/operation-config.json",
+  "title": "SBOMeruser configuration file",
+  "description": "User-provided configuration file to instruct SBOM generation",
+  "type": "object",
+  "$defs": {
+    "processor-redhat-product": {
+      "$id": "/schemas/processors/redhat-product",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "redhat-product"
+        },
+        "errata": {
+          "description": "Product information from Errata Tool",
+          "type": "object",
+          "properties": {
+            "productName": {
+              "description": "Errata Tool product name",
+              "type": "string"
+            },
+            "productVersion": {
+              "description": "Errata Tool product version",
+              "type": "string"
+            },
+            "productVariant": {
+              "description": "Errata Tool product variant",
+              "type": "string"
+            }
+          },
+          "required": ["productName", "productVersion", "productVariant"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["errata"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "apiVersion": {
+      "description": "Version of the configuration file",
+      "enum": ["sbomer.jboss.org/v1alpha1"]
+    },
+    "operationId": {
+      "description": "PNC operation identifier",
+      "type": "string"
+    },
+    "product": {
+      "description": "Product configuration",
+      "type": "object",
+      "properties": {
+        "generator": {
+          "description": "Generator configuration",
+          "type": "object",
+          "properties": {
+            "operationId": {
+              "description": "The PNC operation identifier",
+              "type": "string"
+            },
+            "type": {
+              "description": "Type of generator",
+              "enum": ["maven-cyclonedx-operation"]
+            },
+            "args": {
+              "description": "[Ignored] Custom arguments that are passed to the generator",
+              "type": "string"
+            },
+            "version": {
+              "description": "[Ignored] Version of the generator",
+              "type": "string"
+            }
+          },
+          "required": ["type"],
+          "additionalProperties": false
+        },
+        "processors": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 0,
+          "maxItems": 1,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/processor-redhat-product"
+            }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "deliverableUrls": {
+      "description": "List of deliverables urls",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "The deliverable url",
+        "additionalProperties": false
+      }
+    }
+  }, 
+  "required": [
+    "product"
+  ],
+  "additionalProperties": false
+}

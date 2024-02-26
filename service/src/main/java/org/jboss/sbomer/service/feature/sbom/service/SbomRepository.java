@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
@@ -48,14 +49,15 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
                     builder.construct(
                             SbomRecord.class,
                             root.<String> get("id"),
-                            root.<String> get("buildId"),
+                            root.<String> get("identifier"),
                             root.<String> get("rootPurl"),
                             root.<Instant> get("creationTime"),
                             root.<Integer> get("configIndex"),
                             root.<String> get("statusMessage"),
                             generationRequest.<String> get("id"),
-                            generationRequest.<String> get("buildId"),
+                            generationRequest.<String> get("identifier").alias("gIdentifier"),
                             generationRequest.<JsonNode> get("config"),
+                            generationRequest.<GenerationRequestType> get("type").as(String.class),
                             generationRequest.<Instant> get("creationTime"))
 
             );
