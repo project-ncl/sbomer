@@ -19,11 +19,11 @@ package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
-public class EnvDetectResourceDiscriminator extends AbstractResourceDiscriminator {
+public class OperationInitResourceDiscriminator extends AbstractResourceDiscriminator {
 
     @Override
     protected SbomGenerationPhase getPhase() {
-        return SbomGenerationPhase.DETECTENVINFO;
+        return SbomGenerationPhase.OPERATIONINIT;
     }
 
 }

@@ -15,8 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.k8s.model;
+package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
-public enum SbomGenerationPhase {
-    INIT, GENERATE, OPERATIONINIT, OPERATIONGENERATE
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
+
+public class OperationGenerateResourceDiscriminator extends AbstractResourceDiscriminator {
+
+    @Override
+    protected SbomGenerationPhase getPhase() {
+        return SbomGenerationPhase.OPERATIONGENERATE;
+    }
+
 }

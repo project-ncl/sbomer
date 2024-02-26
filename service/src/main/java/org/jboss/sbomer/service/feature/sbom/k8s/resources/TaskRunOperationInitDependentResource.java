@@ -35,22 +35,24 @@ import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDep
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
-@KubernetesDependent(resourceDiscriminator = InitResourceDiscriminator.class)
+@KubernetesDependent(resourceDiscriminator = OperationInitResourceDiscriminator.class)
 @Slf4j
-public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentResource<TaskRun, GenerationRequest> {
+public class TaskRunOperationInitDependentResource
+        extends CRUDNoGCKubernetesDependentResource<TaskRun, GenerationRequest> {
 
-    public static final String RESULT_NAME = "config";
-    public static final String PARAM_BUILD_ID_NAME = "build-id";
-    public static final String TASK_NAME = "sbomer-init";
+    public static final String RESULT_NAME = "operation-config";
+    public static final String PARAM_OPERATION_ID_NAME = "operation-id";
+    public static final String PARAM_OPERATION_CONFIG_NAME = "config";
+    public static final String TASK_NAME = "sbomer-operation-init";
 
     @Inject
     TektonConfig tektonConfig;
 
-    TaskRunInitDependentResource() {
+    TaskRunOperationInitDependentResource() {
         super(TaskRun.class);
     }
 
-    public TaskRunInitDependentResource(Class<TaskRun> resourceType) {
+    public TaskRunOperationInitDependentResource(Class<TaskRun> resourceType) {
         super(TaskRun.class);
     }
 
@@ -69,19 +71,19 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
 
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}'",
-                SbomGenerationPhase.INIT,
+                SbomGenerationPhase.OPERATIONINIT,
                 generationRequest.getMetadata().getName());
 
-        Map<String, String> labels = Labels.defaultLabelsToMap(GenerationRequestType.BUILD);
+        Map<String, String> labels = Labels.defaultLabelsToMap(GenerationRequestType.OPERATION);
 
         labels.put(Labels.LABEL_IDENTIFIER, generationRequest.getIdentifier());
-        labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.INIT.name().toLowerCase());
+        labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.OPERATIONINIT.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
                 .withLabels(labels)
-                .withName(generationRequest.dependentResourceName(SbomGenerationPhase.INIT))
+                .withName(generationRequest.dependentResourceName(SbomGenerationPhase.OPERATIONINIT))
                 .withOwnerReferences(
                         new OwnerReferenceBuilder().withKind(generationRequest.getKind())
                                 .withName(generationRequest.getMetadata().getName())
@@ -89,12 +91,14 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                                 .withUid(generationRequest.getMetadata().getUid())
                                 .build())
                 .endMetadata()
-
                 .withNewSpec()
                 .withServiceAccountName(tektonConfig.sa())
                 .withParams(
-                        new ParamBuilder().withName(PARAM_BUILD_ID_NAME)
+                        new ParamBuilder().withName(PARAM_OPERATION_ID_NAME)
                                 .withNewValue(generationRequest.getIdentifier())
+                                .build(),
+                        new ParamBuilder().withName(PARAM_OPERATION_CONFIG_NAME)
+                                .withNewValue(generationRequest.getConfig())
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName(TASK_NAME).build())
                 .endSpec()

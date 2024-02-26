@@ -18,14 +18,19 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
+import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -66,7 +71,9 @@ import lombok.extern.slf4j.Slf4j;
 public class GenerationRequest extends ConfigMap {
 
     public static final String KEY_ID = "id";
-    public static final String KEY_BUILD_ID = "build-id";
+    public static final String KEY_TYPE = "type";
+    public static final String KEY_IDENTIFIER = "identifier";
+
     public static final String KEY_STATUS = "status";
     public static final String KEY_REASON = "reason";
     public static final String KEY_RESULT = "result";
@@ -88,6 +95,26 @@ public class GenerationRequest extends ConfigMap {
     }
 
     @JsonIgnore
+    public GenerationRequestType getType() {
+        String typeStr = getData().get(KEY_TYPE);
+
+        if (typeStr == null) {
+            return null;
+        }
+
+        return GenerationRequestType.fromName(typeStr);
+    }
+
+    public void setType(GenerationRequestType type) {
+        if (type == null) {
+            return;
+        }
+
+        getData().put(KEY_TYPE, type.toName());
+        getMetadata().getLabels().put(Labels.LABEL_TYPE, type.toName());
+    }
+
+    @JsonIgnore
     public String getId() {
         return getData().get(KEY_ID);
     }
@@ -97,12 +124,12 @@ public class GenerationRequest extends ConfigMap {
     }
 
     @JsonIgnore
-    public String getBuildId() {
-        return getData().get(KEY_BUILD_ID);
+    public String getIdentifier() {
+        return getData().get(KEY_IDENTIFIER);
     }
 
-    public void setBuildId(String buildId) {
-        getData().put(KEY_BUILD_ID, buildId);
+    public void setIdentifier(String identifier) {
+        getData().put(KEY_IDENTIFIER, identifier);
     }
 
     @JsonIgnore
@@ -172,6 +199,30 @@ public class GenerationRequest extends ConfigMap {
     }
 
     @JsonIgnore
+    public List<String> getDeliverableUrls() {
+        OperationConfig operationConfig = toOperationConfig();
+        if (operationConfig == null) {
+            return null;
+        }
+        return operationConfig.getDeliverableUrls();
+    }
+
+    public void setDeliverableUrls(List<String> deliverableUrls) {
+        if (deliverableUrls == null) {
+            return;
+        }
+        OperationConfig operationConfig = toOperationConfig();
+        if (operationConfig != null) {
+            operationConfig.setDeliverableUrls(deliverableUrls);
+        }
+        try {
+            setConfig(ObjectMapperProvider.yaml().writeValueAsString(operationConfig));
+        } catch (JsonProcessingException e) {
+            log.warn(e.getMessage(), e);
+        }
+    }
+
+    @JsonIgnore
     public String dependentResourceName(SbomGenerationPhase phase) {
         return this.getMetadata().getName() + "-" + phase.ordinal() + "-" + phase.name().toLowerCase();
     }
@@ -187,25 +238,35 @@ public class GenerationRequest extends ConfigMap {
             return null;
         }
 
-        try {
-            return ObjectMapperProvider.yaml().readValue(getConfig().toString().getBytes(), Config.class);
-        } catch (IOException e) {
-            log.warn(e.getMessage(), e);
-            return null;
+        if (GenerationRequestType.BUILD.equals(getType())) {
+            try {
+                return ObjectMapperProvider.yaml().readValue(getConfig().toString().getBytes(), Config.class);
+            } catch (IOException e) {
+                log.warn(e.getMessage(), e);
+                return null;
+            }
         }
+        log.warn("A Config was asked, but the SbomGenerationType ({}) is not compatible with it!", getType());
+        return null;
     }
 
     @JsonIgnore
-    public Map<String, String> toEnvConfig() {
-        if (getEnvConfig() == null) {
+    public OperationConfig toOperationConfig() {
+        if (getConfig() == null) {
             return null;
         }
 
-        try {
-            return ObjectMapperProvider.yaml().readValue(getEnvConfig().toString().getBytes(), Map.class);
-        } catch (IOException e) {
-            log.warn(e.getMessage(), e);
-            return null;
+        if (GenerationRequestType.OPERATION.equals(getType())) {
+
+            try {
+                return ObjectMapperProvider.yaml().readValue(getConfig().toString().getBytes(), OperationConfig.class);
+            } catch (IOException e) {
+                log.warn(e.getMessage(), e);
+                return null;
+            }
         }
+        log.warn("An OperationConfig was asked, but the SbomGenerationType ({}) is not compatible with it!", getType());
+        return null;
     }
+
 }

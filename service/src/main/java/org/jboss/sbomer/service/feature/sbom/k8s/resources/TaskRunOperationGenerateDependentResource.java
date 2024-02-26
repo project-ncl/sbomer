@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
@@ -33,7 +32,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.Duration;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
@@ -52,28 +50,21 @@ import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDep
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
-@KubernetesDependent(resourceDiscriminator = GenerateResourceDiscriminator.class)
+@KubernetesDependent(resourceDiscriminator = OperationGenerateResourceDiscriminator.class)
 @Slf4j
-public class TaskRunGenerateDependentResource extends KubernetesDependentResource<TaskRun, GenerationRequest>
+public class TaskRunOperationGenerateDependentResource extends KubernetesDependentResource<TaskRun, GenerationRequest>
         implements BulkDependentResource<TaskRun, GenerationRequest> {
 
-    public static final String TASK_NAME = "sbomer-generate";
+    public static final String TASK_NAME = "sbomer-operation-generate";
 
     /**
-     * Parameter holding the environment configuration for a given build.
+     * Parameter holding the configuration for a given deliverable analysis operation.
      */
-    public static final String PARAM_COMMAND_ENV_CONFIG_NAME = "env-config";
-
+    public static final String PARAM_COMMAND_OPERATION_CONFIG_NAME = "operation-config";
     /**
-     * Parameter holding the configuration for a given build.
+     * The index of the deliverable within the configuration.
      */
-    public static final String PARAM_COMMAND_CONFIG_NAME = "config";
-    /**
-     * The index of the product within the configuration.
-     */
-    public static final String PARAM_COMMAND_INDEX_NAME = "index";
-
-    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+    public static final String PARAM_COMMAND_DELIVERABLE_INDEX_NAME = "deliverable-index";
 
     @Inject
     TektonConfig tektonConfig;
@@ -84,30 +75,27 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     @Inject
     TektonClient tektonClient;
 
-    TaskRunGenerateDependentResource() {
+    TaskRunOperationGenerateDependentResource() {
         super(TaskRun.class);
     }
 
-    public TaskRunGenerateDependentResource(Class<TaskRun> resourceType) {
+    public TaskRunOperationGenerateDependentResource(Class<TaskRun> resourceType) {
         super(TaskRun.class);
     }
 
     @Override
     public Map<String, TaskRun> desiredResources(GenerationRequest primary, Context<GenerationRequest> context) {
-        Config config;
-
-        try {
-            config = objectMapper.readValue(primary.getConfig().getBytes(), Config.class);
-        } catch (IOException e) {
+        OperationConfig config = primary.toOperationConfig();
+        if (config == null) {
             throw new ApplicationException(
                     "Unable to parse configuration from GenerationRequest '{}': {}",
                     primary.getMetadata().getName(),
                     primary.getConfig());
         }
 
-        Map<String, TaskRun> taskRuns = new HashMap<>(config.getProducts().size());
+        Map<String, TaskRun> taskRuns = new HashMap<>(config.getDeliverableUrls().size());
 
-        for (int i = 0; i < config.getProducts().size(); i++) {
+        for (int i = 0; i < config.getDeliverableUrls().size(); i++) {
             taskRuns.put(Integer.toString(i), desired(config, i, primary, context));
         }
 
@@ -115,19 +103,20 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     }
 
     private TaskRun desired(
-            Config config,
+            OperationConfig config,
             int index,
             GenerationRequest generationRequest,
             Context<GenerationRequest> context) {
+
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}' GenerationRequest",
-                SbomGenerationPhase.GENERATE,
+                SbomGenerationPhase.OPERATIONGENERATE,
                 generationRequest.getMetadata().getName());
 
-        Map<String, String> labels = Labels.defaultLabelsToMap(GenerationRequestType.BUILD);
+        Map<String, String> labels = Labels.defaultLabelsToMap(GenerationRequestType.OPERATION);
 
         labels.put(Labels.LABEL_IDENTIFIER, generationRequest.getIdentifier());
-        labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
+        labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.OPERATIONGENERATE.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
         String configStr;
@@ -135,16 +124,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
         try {
             configStr = ObjectMapperProvider.json().writeValueAsString(config);
         } catch (JsonProcessingException e) {
-            throw new ApplicationException("Could not serialize runtime configuration into JSON", e);
-        }
-
-        String envConfigStr;
-
-        try {
-            // Store the content of the environment configuration as a JSON string
-            envConfigStr = ObjectMapperProvider.json().writeValueAsString(config.getEnvironment());
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException("Could not serialize environment configuration into JSON", e);
+            throw new ApplicationException("Could not serialize runtime configuration into YAML", e);
         }
 
         Duration timeout = null;
@@ -170,9 +150,10 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                 .withServiceAccountName(tektonConfig.sa())
                 .withTimeout(timeout)
                 .withParams(
-                        new ParamBuilder().withName(PARAM_COMMAND_ENV_CONFIG_NAME).withNewValue(envConfigStr).build(),
-                        new ParamBuilder().withName(PARAM_COMMAND_CONFIG_NAME).withNewValue(configStr).build(),
-                        new ParamBuilder().withName(PARAM_COMMAND_INDEX_NAME)
+                        new ParamBuilder().withName(PARAM_COMMAND_OPERATION_CONFIG_NAME)
+                                .withNewValue(configStr)
+                                .build(),
+                        new ParamBuilder().withName(PARAM_COMMAND_DELIVERABLE_INDEX_NAME)
                                 .withNewValue(String.valueOf(index))
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName(TASK_NAME).build())
@@ -189,7 +170,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     }
 
     private String resourceName(GenerationRequest generationRequest, int index) {
-        return generationRequest.dependentResourceName(SbomGenerationPhase.GENERATE) + "-" + index;
+        return generationRequest.dependentResourceName(SbomGenerationPhase.OPERATIONGENERATE) + "-" + index;
     }
 
     @Override
@@ -203,7 +184,8 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                         tr -> tr.getMetadata()
                                 .getName()
                                 .startsWith(
-                                        generationRequest.dependentResourceName(SbomGenerationPhase.GENERATE) + "-"))
+                                        generationRequest.dependentResourceName(SbomGenerationPhase.OPERATIONGENERATE)
+                                                + "-"))
                 .collect(
                         Collectors.toMap(
                                 tr -> tr.getMetadata()

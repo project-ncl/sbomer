@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -34,7 +35,7 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequest> {
+public class OperationConfigMissingCondition implements Condition<TaskRun, GenerationRequest> {
 
     Boolean cleanup = ConfigProvider.getConfig()
             .getValue("sbomer.controller.generation-request.cleanup", Boolean.class);
@@ -45,14 +46,19 @@ public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequ
             GenerationRequest primary,
             Context<GenerationRequest> context) {
 
-        if (!GenerationRequestType.BUILD.equals(primary.getType())) {
+        if (!GenerationRequestType.OPERATION.equals(primary.getType())) {
             return false;
         }
 
         // Here we are checking whether the configuration exists already or not. In case it's not there, we need to
-        // generate one, thus returning true to let the reconciliation happen on the TaskRunInitDependentResource.
-        if (primary.getConfig() == null) {
-            log.trace("ConfigMissingCondition is met: true");
+        // generate one, thus returning true to let the reconciliation happen on the
+        // TaskRunOperationInitDependentResource.
+        // Here, an OperationConfig is needed along with the list of DeliverablesConfig (both may or may not be
+        // provided)
+        OperationConfig operationConfig = primary.toOperationConfig();
+        if (operationConfig == null || operationConfig.getDeliverableUrls() == null
+                || operationConfig.getDeliverableUrls().isEmpty()) {
+            log.debug("OperationConfigMissingCondition is met: true");
             return true;
         }
 
@@ -61,11 +67,11 @@ public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequ
         // to achieve is that the dependent resource (TaskRun) is retained.
         // We should do this only in the case when there are already some secondary resources.
         if (!cleanup && initTaskRunExist(context)) {
-            log.trace("ConfigMissingCondition is met: true");
+            log.debug("OperationConfigMissingCondition is met: true");
             return true;
         }
 
-        log.trace("ConfigMissingCondition is met: false");
+        log.debug("OperationConfigMissingCondition is met: false");
         return false;
     }
 
@@ -80,8 +86,8 @@ public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequ
         return secondaryResources.stream().anyMatch(taskRun -> {
             Map<String, String> labels = taskRun.getMetadata().getLabels();
 
-            if (labels != null
-                    && Objects.equals(labels.get(Labels.LABEL_PHASE), SbomGenerationPhase.INIT.name().toLowerCase())) {
+            if (labels != null && Objects
+                    .equals(labels.get(Labels.LABEL_PHASE), SbomGenerationPhase.OPERATIONINIT.name().toLowerCase())) {
                 return true;
             }
 

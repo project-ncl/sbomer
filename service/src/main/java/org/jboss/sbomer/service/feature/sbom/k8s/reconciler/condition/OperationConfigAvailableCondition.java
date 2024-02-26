@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition;
 
+import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 
@@ -27,7 +28,7 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ConfigAvailableCondition implements Condition<TaskRun, GenerationRequest> {
+public class OperationConfigAvailableCondition implements Condition<TaskRun, GenerationRequest> {
 
     @Override
     public boolean isMet(
@@ -35,17 +36,19 @@ public class ConfigAvailableCondition implements Condition<TaskRun, GenerationRe
             GenerationRequest primary,
             Context<GenerationRequest> context) {
 
-        if (!GenerationRequestType.BUILD.equals(primary.getType())) {
+        if (!GenerationRequestType.OPERATION.equals(primary.getType())) {
             return false;
         }
 
-        // If configuration is available, reconcile
-        if (primary.getConfig() != null) {
-            log.trace("ConfigAvailableCondition is met: true");
+        // If the configurations are available, reconcile
+        OperationConfig operationConfig = primary.toOperationConfig();
+        if (operationConfig != null && operationConfig.getDeliverableUrls() != null
+                && !operationConfig.getDeliverableUrls().isEmpty()) {
+            log.debug("OperationConfigAvailableCondition is met: true");
             return true;
         }
 
-        log.trace("ConfigAvailableCondition is met: false");
+        log.debug("OperationConfigAvailableCondition is met: false");
         return false;
     }
 }
