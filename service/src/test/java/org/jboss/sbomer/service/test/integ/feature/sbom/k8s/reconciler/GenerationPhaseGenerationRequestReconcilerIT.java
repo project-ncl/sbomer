@@ -36,6 +36,7 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
@@ -102,7 +103,8 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
         return new GenerationRequestBuilder().withNewMetadata()
                 .withName("test-generation-request")
                 .endMetadata()
-                .withBuildId("AABBCC")
+                .withIdentifier("AABBCC")
+                .withType(GenerationRequestType.BUILD)
                 .withStatus(SbomGenerationStatus.GENERATING)
                 .withConfig(TestResources.asString("configs/multi-product.yaml"))
                 .withEnvConfig(TestResources.asString("configs/env-config.yaml"))

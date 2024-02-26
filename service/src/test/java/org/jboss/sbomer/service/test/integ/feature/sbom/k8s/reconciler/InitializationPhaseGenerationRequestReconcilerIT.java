@@ -30,6 +30,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -67,10 +68,11 @@ public class InitializationPhaseGenerationRequestReconcilerIT {
     GenerationRequestReconciler controller;
 
     private GenerationRequest dummyInitializationRequest(SbomGenerationStatus status) throws IOException {
-        return new GenerationRequestBuilder().withNewMetadata()
+        return new GenerationRequestBuilder().withNewDefaultMetadata("AABBCC", GenerationRequestType.BUILD)
                 .withName("test")
                 .endMetadata()
-                .withBuildId("AABBCC")
+                .withIdentifier("AABBCC")
+                .withType(GenerationRequestType.BUILD)
                 .withStatus(status)
                 .build();
     }

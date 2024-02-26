@@ -65,11 +65,11 @@ public class SBOMResourceRSQIT {
                     .and()
                     .body("totalPages", CoreMatchers.equalTo(1))
                     .and()
-                    .body("totalHits", CoreMatchers.equalTo(1))
+                    .body("totalHits", CoreMatchers.equalTo(2))
                     .and()
                     .body("content.id", CoreMatchers.hasItem("416640206274228224"))
                     .and()
-                    .body("content[0].buildId", CoreMatchers.is("ARYT3LBXDVYAC"))
+                    .body("content[0].identifier", CoreMatchers.is("ARYT3LBXDVYAC"))
                     .and()
                     .body("content[0].sbom", CoreMatchers.is(CoreMatchers.notNullValue()));
         }
@@ -92,11 +92,11 @@ public class SBOMResourceRSQIT {
                     .and()
                     .body("totalPages", CoreMatchers.equalTo(1))
                     .and()
-                    .body("totalHits", CoreMatchers.equalTo(1))
+                    .body("totalHits", CoreMatchers.equalTo(2))
                     .and()
                     .body("content.id", CoreMatchers.hasItem("416640206274228224"))
                     .and()
-                    .body("content[0].buildId", CoreMatchers.is("ARYT3LBXDVYAC"))
+                    .body("content[0].identifier", CoreMatchers.is("ARYT3LBXDVYAC"))
                     .and()
                     .body("content[0].sbom", CoreMatchers.is(CoreMatchers.nullValue()));
         }
@@ -120,7 +120,7 @@ public class SBOMResourceRSQIT {
                         .and()
                         .body("id", CoreMatchers.is("12345"))
                         .and()
-                        .body("buildId", CoreMatchers.is("AWI7P3EJ23YAA"))
+                        .body("identifier", CoreMatchers.is("AWI7P3EJ23YAA"))
                         .and()
                         .body("sbom", CoreMatchers.is(CoreMatchers.notNullValue()));
             }
@@ -171,7 +171,7 @@ public class SBOMResourceRSQIT {
                         .and()
                         .body("id", CoreMatchers.is("12345"))
                         .and()
-                        .body("buildId", CoreMatchers.is("AWI7P3EJ23YAA"))
+                        .body("identifier", CoreMatchers.is("AWI7P3EJ23YAA"))
                         .and()
                         .body("sbom", CoreMatchers.is(CoreMatchers.notNullValue()));
             }
@@ -189,7 +189,7 @@ public class SBOMResourceRSQIT {
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSizeLarge,
-                        "buildId=eq=AWI7P3EJ23YAA",
+                        "identifier=eq=AWI7P3EJ23YAA",
                         "creationTime=desc="))
                 .thenReturn(singlePagedOneSbom);
 
@@ -198,7 +198,7 @@ public class SBOMResourceRSQIT {
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeLarge
-                                + "&query=buildId=eq=AWI7P3EJ23YAA")
+                                + "&query=identifier=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
                 .body("pageIndex", CoreMatchers.equalTo(pageIndex))
@@ -211,7 +211,7 @@ public class SBOMResourceRSQIT {
                 .and()
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         // One page, two results
         Page<Sbom> singlePagedTwoSboms = initializeTwoResultsPaginated(pageIndex, pageSizeLarge);
@@ -219,7 +219,7 @@ public class SBOMResourceRSQIT {
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSizeLarge,
-                        "buildId=eq=AWI7P3EJ23YAA",
+                        "identifier=eq=AWI7P3EJ23YAA",
                         "creationTime=desc="))
                 .thenReturn(singlePagedTwoSboms);
 
@@ -228,7 +228,7 @@ public class SBOMResourceRSQIT {
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeLarge
-                                + "&query=buildId=eq=AWI7P3EJ23YAA")
+                                + "&query=identifier=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
                 .body("pageIndex", CoreMatchers.equalTo(pageIndex))
@@ -243,7 +243,7 @@ public class SBOMResourceRSQIT {
                 .and()
                 .body("content.id", CoreMatchers.hasItem("54321"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         // Two pages, two results
         int pageSizeTiny = 1;
@@ -253,7 +253,7 @@ public class SBOMResourceRSQIT {
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSizeTiny,
-                        "buildId=eq=AWI7P3EJ23YAA",
+                        "identifier=eq=AWI7P3EJ23YAA",
                         "creationTime=desc="))
                 .thenReturn(doublePagedTwoSboms);
 
@@ -262,7 +262,7 @@ public class SBOMResourceRSQIT {
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSizeTiny
-                                + "&query=buildId=eq=AWI7P3EJ23YAA")
+                                + "&query=identifier=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
                 .body("pageIndex", CoreMatchers.equalTo(pageIndex))
@@ -277,7 +277,7 @@ public class SBOMResourceRSQIT {
                 .and()
                 .body("content.id", CoreMatchers.hasItem("54321"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
     }
 
     @Test
@@ -293,14 +293,14 @@ public class SBOMResourceRSQIT {
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
-                        "buildId==AWI7P3EJ23YAA",
+                        "identifier==AWI7P3EJ23YAA",
                         "creationTime=desc="))
                 .thenReturn(pagedSboms);
         Mockito.when(
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
-                        "buildId=eq=AWI7P3EJ23YAA",
+                        "identifier=eq=AWI7P3EJ23YAA",
                         "creationTime=desc="))
                 .thenReturn(pagedSboms);
         Mockito.when(
@@ -341,31 +341,31 @@ public class SBOMResourceRSQIT {
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         given().when()
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
-                                + "&query=buildId==AWI7P3EJ23YAA")
+                                + "&query=identifier==AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         given().when()
                 .contentType(ContentType.JSON)
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
-                                + "&query=buildId=eq=AWI7P3EJ23YAA")
+                                + "&query=identifier=eq=AWI7P3EJ23YAA")
                 .then()
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         given().when()
                 .contentType(ContentType.JSON)
@@ -377,7 +377,7 @@ public class SBOMResourceRSQIT {
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         given().when()
                 .contentType(ContentType.JSON)
@@ -389,7 +389,7 @@ public class SBOMResourceRSQIT {
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         given().when()
                 .contentType(ContentType.JSON)
@@ -401,7 +401,7 @@ public class SBOMResourceRSQIT {
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         given().when()
                 .contentType(ContentType.JSON)
@@ -413,7 +413,54 @@ public class SBOMResourceRSQIT {
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+    }
+
+    @Test
+    public void testLegacyRSQLSearch() throws Exception {
+        int pageIndex = 0;
+        int pageSize = 50;
+
+        Page<Sbom> pagedSboms = initializeOneResultPaginated(pageIndex, pageSize);
+
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "buildId==AWI7P3EJ23YAA",
+                        "creationTime=desc="))
+                .thenReturn(pagedSboms);
+        Mockito.when(
+                sbomService.searchSbomsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "buildId=eq=AWI7P3EJ23YAA",
+                        "creationTime=desc="))
+                .thenReturn(pagedSboms);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request(
+                        "GET",
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                                + "&query=buildId==AWI7P3EJ23YAA")
+                .then()
+                .statusCode(200)
+                .body("content.id", CoreMatchers.hasItem("12345"))
+                .and()
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request(
+                        "GET",
+                        "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                                + "&query=buildId=eq=AWI7P3EJ23YAA")
+                .then()
+                .statusCode(200)
+                .body("content.id", CoreMatchers.hasItem("12345"))
+                .and()
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
     }
 
     @Test
@@ -440,7 +487,7 @@ public class SBOMResourceRSQIT {
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
     }
 
     @Test
@@ -464,7 +511,7 @@ public class SBOMResourceRSQIT {
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
     }
 
@@ -493,7 +540,7 @@ public class SBOMResourceRSQIT {
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
-                        "buildId=eq=AWI7P3EJ23YAA",
+                        "identifier=eq=AWI7P3EJ23YAA",
                         "creationTime=desc="))
                 .thenReturn(oneContentPage);
         Mockito.when(
@@ -507,7 +554,7 @@ public class SBOMResourceRSQIT {
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
-                        "buildId=eq=AWI7P3EJ23YAA;rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'",
+                        "identifier=eq=AWI7P3EJ23YAA;rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'",
                         "creationTime=desc="))
                 .thenReturn(oneContentPage);
         given().when()
@@ -515,18 +562,18 @@ public class SBOMResourceRSQIT {
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
-                                + "&query=buildId=eq=AWI7P3EJ23YAA;rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'")
+                                + "&query=identifier=eq=AWI7P3EJ23YAA;rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'")
                 .then()
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
 
         Mockito.when(
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
-                        "buildId=eq=AWI7P3EJ23YAA,buildId=eq=AWI7P3EJ23YAB",
+                        "identifier=eq=AWI7P3EJ23YAA,identifier=eq=AWI7P3EJ23YAB",
                         "id=asc="))
                 .thenReturn(twoContentPage);
 
@@ -535,16 +582,16 @@ public class SBOMResourceRSQIT {
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
-                                + "&query=buildId=eq=AWI7P3EJ23YAA,buildId=eq=AWI7P3EJ23YAB&sort=id=asc=")
+                                + "&query=identifier=eq=AWI7P3EJ23YAA,identifier=eq=AWI7P3EJ23YAB&sort=id=asc=")
                 .then()
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
                 .body("content.id", CoreMatchers.hasItem("54321"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"))
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAB"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAB"));
 
         given().when()
                 .contentType(ContentType.JSON)
@@ -556,7 +603,7 @@ public class SBOMResourceRSQIT {
                 .statusCode(200)
                 .body("content.id", CoreMatchers.hasItem("12345"))
                 .and()
-                .body("content.buildId", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
     }
 
     @Test
@@ -571,7 +618,7 @@ public class SBOMResourceRSQIT {
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
-                        "buildId=eq=AWI7P3EJ23YAA,buildId=eq=AWI7P3EJ23YAB",
+                        "identifier=eq=AWI7P3EJ23YAA,identifier=eq=AWI7P3EJ23YAB",
                         "id=asc="))
                 .thenReturn(twoContentPage);
 
@@ -580,7 +627,7 @@ public class SBOMResourceRSQIT {
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
-                                + "&query=buildId=eq=AWI7P3EJ23YAA,buildId=eq=AWI7P3EJ23YAB&sort=id=asc=")
+                                + "&query=identifier=eq=AWI7P3EJ23YAA,identifier=eq=AWI7P3EJ23YAB&sort=id=asc=")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -593,7 +640,7 @@ public class SBOMResourceRSQIT {
                 sbomService.searchSbomsByQueryPaginated(
                         pageIndex,
                         pageSize,
-                        "buildId=eq=AWI7P3EJ23YAA,buildId=eq=AWI7P3EJ23YAB",
+                        "identifier=eq=AWI7P3EJ23YAA,identifier=eq=AWI7P3EJ23YAB",
                         "creationTime=desc="))
                 .thenReturn(initializeTwoResultsPaginatedInverted(1, 2));
 
@@ -602,7 +649,7 @@ public class SBOMResourceRSQIT {
                 .request(
                         "GET",
                         "/api/v1alpha1/sboms?pageIndex=" + pageIndex + "&pageSize=" + pageSize
-                                + "&query=buildId=eq=AWI7P3EJ23YAA,buildId=eq=AWI7P3EJ23YAB&sort=creationTime=desc=")
+                                + "&query=identifier=eq=AWI7P3EJ23YAA,identifier=eq=AWI7P3EJ23YAB&sort=creationTime=desc=")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -646,7 +693,7 @@ public class SBOMResourceRSQIT {
     private Sbom createFirstSbom() throws Exception {
         Sbom sbom = new Sbom();
         sbom.setId("12345");
-        sbom.setBuildId("AWI7P3EJ23YAA");
+        sbom.setIdentifier("AWI7P3EJ23YAA");
         sbom.setRootPurl("pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom");
         sbom.setStatusMessage("all went well");
         sbom.setCreationTime(Instant.now().minus(Duration.ofDays(1)));
@@ -660,7 +707,7 @@ public class SBOMResourceRSQIT {
     private Sbom createSecondSbom() {
         Sbom sbom = new Sbom();
         sbom.setId("54321");
-        sbom.setBuildId("AWI7P3EJ23YAB");
+        sbom.setIdentifier("AWI7P3EJ23YAB");
         sbom.setRootPurl("pkg:maven/org.apache.logging.log4j/log4j@2.119.0.redhat-00002?type=pom");
         sbom.setStatusMessage("all went well, again");
         sbom.setCreationTime(Instant.now());

@@ -1,0 +1,11 @@
+# Single-product example.
+apiVersion: sbomer.jboss.org/v1alpha1
+product:
+  - processors:
+      - type: redhat-product
+        errata:
+          productName: "AAABBB"
+          productVersion: "AABB"
+          productVariant: "AB"
+    generator:
+      type: maven-cyclonedx-operation

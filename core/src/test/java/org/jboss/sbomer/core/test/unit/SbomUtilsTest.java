@@ -30,6 +30,14 @@ import java.util.Optional;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Component.Type;
+import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.BuildConfigurationRevision;
+import org.jboss.pnc.dto.Environment;
+import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.enums.SystemImageType;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -196,6 +204,115 @@ public class SbomUtilsTest {
             assertEquals(
                     "https://github.com/FasterXML/jackson-annotations.git",
                     component.getPedigree().getCommits().get(0).getUrl());
+        }
+
+        @Test
+        void shouldCreateComponent() {
+            Component component = SbomUtils.createComponent(
+                    "broker",
+                    "7.11.5.CR3",
+                    "broker-7.11.5.CR3-maven-repository.zip",
+                    "SBOM representing the deliverable my-7.11.5.CR3-maven-repository.zip",
+                    "pkg:generic/broker@7.11.5.CR3?download_url=https://download.com/my-7.11.5.CR3-maven-repository.zip",
+                    Type.FILE);
+            assertEquals("broker", component.getGroup());
+            assertEquals("7.11.5.CR3", component.getName());
+            assertEquals("broker-7.11.5.CR3-maven-repository.zip", component.getVersion());
+            assertEquals(
+                    "SBOM representing the deliverable my-7.11.5.CR3-maven-repository.zip",
+                    component.getDescription());
+            assertEquals(
+                    "pkg:generic/broker@7.11.5.CR3?download_url=https://download.com/my-7.11.5.CR3-maven-repository.zip",
+                    component.getPurl());
+            assertEquals(component.getBomRef(), component.getPurl());
+            assertEquals(Type.FILE, component.getType());
+        }
+
+        @Test
+        void shouldCreateMetadata() {
+            String ref = "pkg:generic/broker@7.11.5.CR3?download_url=https://download.com/my-7.11.5.CR3-maven-repository.zip";
+            Dependency dependency = SbomUtils.createDependency(ref);
+            assertEquals(ref, dependency.getRef());
+            assertNull(dependency.getDependencies());
+        }
+
+        @Test
+        void shouldSetPncMetadata() {
+            String pncApiUrl = "pncApiUrl.com";
+
+            String envName = "OpenJDK 1.8; Mvn 3.6.0; Gradle 5.6.2";
+            String envSystemImageRepositoryUrl = "quay.io/rh-newcastle";
+            String envSystemImageId = "builder-rhel-7-j8-mvn3.6.0-gradle5.6.2:1.0.8";
+            Environment environment = Environment.builder()
+                    .name(envName)
+                    .systemImageId(envSystemImageId)
+                    .systemImageRepositoryUrl(envSystemImageRepositoryUrl)
+                    .systemImageType(SystemImageType.DOCKER_IMAGE)
+                    .build();
+
+            String scmInternalUrl = "git+ssh://code.com/cpaas/cpaas-test-pnc-gradle.git";
+            String scmExternalUrl = "https://gitlab.cee.redhat.com/ncross/cpaas-test-pnc-gradle.git";
+            SCMRepository scmRepository = SCMRepository.builder()
+                    .internalUrl(scmInternalUrl)
+                    .externalUrl(scmExternalUrl)
+                    .build();
+
+            String scmUrl = "https://code.engineering.redhat.com/gerrit/cpaas/cpaas-test-pnc-gradle.git";
+            String scmRevision = "c8ecca0d966250c5caef8174a20a4f1f1f50e6d7";
+            String scmTag = "1.0.0.redhat-05289";
+            String scmBuildConfigRevision = "e08bf4d4d3c09ef38ec4e4bd5ddfccf5f51d6168";
+            boolean scmInternal = false;
+
+            BuildConfigurationRevision buildConfigurationRevision = BuildConfigurationRevision.builder()
+                    .scmRevision(scmBuildConfigRevision)
+                    .build();
+
+            String buildId = "13";
+            Build build = Build.builder()
+                    .id(buildId)
+                    .environment(environment)
+                    .scmRepository(scmRepository)
+                    .scmBuildConfigRevision(scmBuildConfigRevision)
+                    .scmTag(scmTag)
+                    .scmUrl(scmUrl)
+                    .scmRevision(scmRevision)
+                    .buildConfigRevision(buildConfigurationRevision)
+                    .build();
+
+            Component component = SbomUtils.setPncBuildMetadata(new Component(), build, pncApiUrl);
+            List<ExternalReference> buildSystems = SbomUtils
+                    .getExternalReferences(component, ExternalReference.Type.BUILD_SYSTEM);
+            assertEquals(1, buildSystems.size());
+            assertEquals(ExternalReference.Type.BUILD_SYSTEM, buildSystems.get(0).getType());
+            assertEquals("https://" + pncApiUrl + "/pnc-rest/v2/builds/" + buildId, buildSystems.get(0).getUrl());
+            assertEquals(Constants.SBOM_RED_HAT_PNC_BUILD_ID, buildSystems.get(0).getComment());
+
+            List<ExternalReference> buildMetadata = SbomUtils
+                    .getExternalReferences(component, ExternalReference.Type.BUILD_META);
+            assertEquals(1, buildMetadata.size());
+            assertEquals(ExternalReference.Type.BUILD_META, buildMetadata.get(0).getType());
+            assertEquals(envSystemImageRepositoryUrl + "/" + envSystemImageId, buildMetadata.get(0).getUrl());
+            assertEquals(Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE, buildMetadata.get(0).getComment());
+
+            List<ExternalReference> buildVcs = SbomUtils.getExternalReferences(component, ExternalReference.Type.VCS);
+            assertEquals(1, buildVcs.size());
+            assertEquals(ExternalReference.Type.VCS, buildVcs.get(0).getType());
+            assertEquals(scmExternalUrl, buildVcs.get(0).getUrl());
+            assertEquals("", buildVcs.get(0).getComment());
+        }
+
+        @Test
+        void shouldSetBrewMetadata() {
+            String kojiApiUrl = "kojiApiUrl.com";
+            String brewId = "1313";
+
+            Component component = SbomUtils.setBrewBuildMetadata(new Component(), brewId, Optional.empty(), kojiApiUrl);
+            List<ExternalReference> buildSystems = SbomUtils
+                    .getExternalReferences(component, ExternalReference.Type.BUILD_SYSTEM);
+            assertEquals(1, buildSystems.size());
+            assertEquals(ExternalReference.Type.BUILD_SYSTEM, buildSystems.get(0).getType());
+            assertEquals(kojiApiUrl + "/buildinfo?buildID=" + brewId, buildSystems.get(0).getUrl());
+            assertEquals(Constants.SBOM_RED_HAT_BREW_BUILD_ID, buildSystems.get(0).getComment());
         }
     }
 

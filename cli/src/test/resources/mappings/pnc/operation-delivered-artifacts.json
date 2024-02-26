@@ -1,0 +1,67 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/deliverable-analyses/A5RPHL7Y3AIAA/analyzed-artifacts?pageIndex=0&pageSize=100"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "pageIndex": 0,
+      "pageSize": 100,
+      "totalPages": 1,
+      "totalHits": 1,
+      "content": [
+        {
+          "builtFromSource": true,
+          "brewId": 448644,
+          "artifact": {
+            "id": "404",
+            "identifier": "org.jboss:jboss-parent:pom:19.0.0.redhat-1",
+            "purl": "pkg:maven/org.jboss/jboss-parent@19.0.0.redhat-1?type=pom",
+            "artifactQuality": "NEW",
+            "buildCategory": "STANDARD",
+            "md5": "617b632749b5bc0a0b36afee1cbbb195",
+            "sha1": "15e8506a1383270aafe34913582f03e683203f74",
+            "sha256": "8cbb8a35a282d3bdac231cadbc18c14128b14c7bdb439b06b468414196df7ac1",
+            "filename": "jboss-parent-19.0.0.redhat-1.pom",
+            "deployPath": "/org/jboss/jboss-parent/19.0.0.redhat-1/jboss-parent-19.0.0.redhat-1.pom",
+            "importDate": "2017-03-09T14:53:36.922Z",
+            "originUrl": "http://originUrl.com/org/jboss/jboss-parent/19.0.0.redhat-1/jboss-parent-19.0.0.redhat-1.pom",
+            "size": 32038,
+            "deployUrl": "https://deployUrl.local/org/jboss/jboss-parent/19.0.0.redhat-1/jboss-parent-19.0.0.redhat-1.pom",
+            "publicUrl": "https://publicUrl.com/org/jboss/jboss-parent/19.0.0.redhat-1/jboss-parent-19.0.0.redhat-1.pom",
+            "creationTime": null,
+            "modificationTime": "2023-12-05T16:12:54.967Z",
+            "qualityLevelReason": "Added as delivered artifact for milestone 2636",
+            "targetRepository": {
+              "id": "1678",
+              "temporaryRepo": false,
+              "identifier": "indy-maven",
+              "repositoryType": "MAVEN",
+              "repositoryPath": "/api/content/maven/remote/mrrc-ga-rh/"
+            },
+            "build": null,
+            "creationUser": null,
+            "modificationUser": {
+              "id": "1013",
+              "username": "service-account"
+            }
+          },
+          "archiveFilenames": [
+            "my-7.11.5.CR3-maven-repository.zip!/my-7.11.5.GA-maven-repository/org/jboss/jboss-parent/19.0.0.redhat-1/jboss-parent-19.0.0.redhat-1.pom"
+          ],
+          "archiveUnmatchedFilenames": [
+            
+          ],
+          "distribution": {
+            "distributionUrl": "https://download.com/my-7.11.5.CR3-maven-repository.zip",
+            "creationTime": "2024-01-08T18:14:17.877+00:00"
+          }
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

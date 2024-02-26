@@ -1,0 +1,200 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/product-versions/316"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "316",
+      "version": "7.11",
+      "attributes": {
+        "BREW_TAG_PREFIX": "amq-broker-7.11-pnc"
+      },
+      "product": {
+        "id": "49",
+        "name": "AMQ Broker",
+        "description": null,
+        "abbreviation": "amq-broker",
+        "productManagers": "Jack Britton",
+        "productPagesCode": "amq-broker"
+      },
+      "currentProductMilestone": {
+        "id": "2694",
+        "version": "7.11.6.CR2",
+        "endDate": null,
+        "startingDate": "2024-01-26T00:00:00Z",
+        "plannedEndDate": "2024-01-27T00:00:00Z"
+      },
+      "productMilestones": {
+        "1566": {
+          "id": "1566",
+          "version": "7.11.0.ER1",
+          "endDate": null,
+          "startingDate": "2022-01-31T00:00:00Z",
+          "plannedEndDate": "2022-02-01T00:00:00Z"
+        },
+        "2086": {
+          "id": "2086",
+          "version": "7.11.0.CR1",
+          "endDate": null,
+          "startingDate": "2023-02-06T00:00:00Z",
+          "plannedEndDate": "2023-02-07T00:00:00Z"
+        },
+        "2139": {
+          "id": "2139",
+          "version": "7.11.0.CR2",
+          "endDate": null,
+          "startingDate": "2023-03-13T00:00:00Z",
+          "plannedEndDate": "2023-03-14T00:00:00Z"
+        },
+        "2254": {
+          "id": "2254",
+          "version": "7.11.1.ER1",
+          "endDate": null,
+          "startingDate": "2023-05-24T00:00:00Z",
+          "plannedEndDate": "2023-05-25T00:00:00Z"
+        },
+        "2292": {
+          "id": "2292",
+          "version": "7.11.1.CR1",
+          "endDate": null,
+          "startingDate": "2023-06-12T00:00:00Z",
+          "plannedEndDate": "2023-06-13T00:00:00Z"
+        },
+        "2410": {
+          "id": "2410",
+          "version": "7.11.2.ER1",
+          "endDate": null,
+          "startingDate": "2023-08-24T00:00:00Z",
+          "plannedEndDate": "2023-08-25T00:00:00Z"
+        },
+        "2452": {
+          "id": "2452",
+          "version": "7.11.2.CR1",
+          "endDate": null,
+          "startingDate": "2023-09-14T00:00:00Z",
+          "plannedEndDate": "2023-09-15T00:00:00Z"
+        },
+        "2512": {
+          "id": "2512",
+          "version": "7.11.3.CR1",
+          "endDate": null,
+          "startingDate": "2023-10-12T00:00:00Z",
+          "plannedEndDate": "2023-10-13T00:00:00Z"
+        },
+        "2587": {
+          "id": "2587",
+          "version": "7.11.4.CR1",
+          "endDate": null,
+          "startingDate": "2023-11-06T00:00:00Z",
+          "plannedEndDate": "2023-11-07T00:00:00Z"
+        },
+        "2633": {
+          "id": "2633",
+          "version": "7.11.5.CR1",
+          "endDate": null,
+          "startingDate": "2023-11-30T00:00:00Z",
+          "plannedEndDate": "2023-12-01T00:00:00Z"
+        },
+        "2636": {
+          "id": "2636",
+          "version": "7.11.5.CR2",
+          "endDate": null,
+          "startingDate": "2023-12-05T00:00:00Z",
+          "plannedEndDate": "2023-12-06T00:00:00Z"
+        },
+        "2655": {
+          "id": "2655",
+          "version": "7.11.5.CR3",
+          "endDate": null,
+          "startingDate": "2024-01-08T00:00:00Z",
+          "plannedEndDate": "2024-01-09T00:00:00Z"
+        },
+        "2665": {
+          "id": "2665",
+          "version": "7.11.5.CR4",
+          "endDate": null,
+          "startingDate": "2024-01-16T00:00:00Z",
+          "plannedEndDate": "2024-01-17T00:00:00Z"
+        },
+        "2683": {
+          "id": "2683",
+          "version": "7.11.6.CR1",
+          "endDate": null,
+          "startingDate": "2024-01-24T00:00:00Z",
+          "plannedEndDate": "2024-01-25T00:00:00Z"
+        },
+        "2694": {
+          "id": "2694",
+          "version": "7.11.6.CR2",
+          "endDate": null,
+          "startingDate": "2024-01-26T00:00:00Z",
+          "plannedEndDate": "2024-01-27T00:00:00Z"
+        }
+      },
+      "productReleases": {
+        
+      },
+      "groupConfigs": {
+        "1188": {
+          "id": "1188",
+          "name": "amq-broker-7.11"
+        }
+      },
+      "buildConfigs": {
+        "2052": {
+          "id": "2052",
+          "name": "activemq-artemis-nightly",
+          "description": null,
+          "buildScript": "mvn clean deploy dependency:tree -Prelease,extra-tests -Dmaven.timeout=60000 -DskipTests=true -Drat.skip=true -DskipWebsiteDocGeneration",
+          "scmRevision": "master-pnc",
+          "creationTime": "2019-08-31T07:41:16.677Z",
+          "modificationTime": "2022-05-09T09:33:08.316Z",
+          "buildType": "MVN",
+          "defaultAlignmentParams": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true",
+          "brewPullActive": false
+        },
+        "2053": {
+          "id": "2053",
+          "name": "amq-broker-nightly",
+          "description": null,
+          "buildScript": "mvn clean deploy dependency:tree",
+          "scmRevision": "master-pnc",
+          "creationTime": "2019-08-31T08:17:35.860Z",
+          "modificationTime": "2022-01-31T16:11:54.832Z",
+          "buildType": "MVN",
+          "defaultAlignmentParams": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true",
+          "brewPullActive": false
+        },
+        "7742": {
+          "id": "7742",
+          "name": "activemq-artemis-711",
+          "description": null,
+          "buildScript": "mvn source:test-jar-no-fork -DskipTests=true -DskipWebsiteDocGeneration -Drat.skip=true -Prelease dependency:tree deploy",
+          "scmRevision": "amq-broker-7.11",
+          "creationTime": "2022-05-09T14:28:26.091Z",
+          "modificationTime": "2023-03-13T15:31:39.928Z",
+          "buildType": "MVN",
+          "defaultAlignmentParams": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true -DstrictPropertyValidation=true",
+          "brewPullActive": true
+        },
+        "7743": {
+          "id": "7743",
+          "name": "amq-broker-711",
+          "description": null,
+          "buildScript": "mvn clean deploy dependency:tree",
+          "scmRevision": "7.11.x",
+          "creationTime": "2022-05-09T14:28:26.317Z",
+          "modificationTime": "2022-05-09T14:28:26.316Z",
+          "buildType": "MVN",
+          "defaultAlignmentParams": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true -DstrictPropertyValidation=true",
+          "brewPullActive": false
+        }
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

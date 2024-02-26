@@ -60,7 +60,7 @@ public class SBOMServiceTestIT {
     @Test
     public void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
-        String rsqlQuery = "buildId=eq=" + INITIAL_BUILD_ID;
+        String rsqlQuery = "identifier=eq=" + INITIAL_BUILD_ID;
         Collection<SbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(0, 1, rsqlQuery, null)
                 .getContent();
         assertTrue(sboms.size() > 0);
@@ -71,7 +71,7 @@ public class SBOMServiceTestIT {
         log.info("testListBaseSboms ...");
 
         Sbom dummySbom = new Sbom();
-        dummySbom.setBuildId(INITIAL_BUILD_ID);
+        dummySbom.setIdentifier(INITIAL_BUILD_ID);
 
         sbomService.save(dummySbom);
 
@@ -86,7 +86,7 @@ public class SBOMServiceTestIT {
         Iterator<SbomRecord> contentIterator = page.getContent().iterator();
         while (contentIterator.hasNext()) {
             SbomRecord sbom = contentIterator.next();
-            if (sbom.buildId().equals(INITIAL_BUILD_ID)) {
+            if (sbom.identifier().equals(INITIAL_BUILD_ID)) {
                 foundSbom = sbom;
                 break;
             }

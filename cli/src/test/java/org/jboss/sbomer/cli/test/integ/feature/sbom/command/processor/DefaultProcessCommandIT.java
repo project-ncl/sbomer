@@ -45,6 +45,8 @@ import org.jboss.sbomer.cli.feature.sbom.command.AbstractMavenGenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.DefaultProcessCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.GenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.ProcessCommand;
+import org.jboss.sbomer.cli.feature.sbom.provider.BuildFinderConfigProvider;
+import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -67,6 +69,12 @@ public class DefaultProcessCommandIT {
 
     @InjectMock
     PncService pncService;
+
+    @InjectMock
+    KojiService kojiService;
+
+    @InjectMock
+    BuildFinderConfigProvider buildFinderConfigProvider;
 
     @Inject
     DefaultProcessCommand command;
@@ -181,6 +189,8 @@ public class DefaultProcessCommandIT {
 
     @Test
     void shouldHandleArtifactsBuiltOutsideOfPNC() throws Exception {
+        log.info("test: shouldHandleArtifactsBuiltOutsideOfPNC");
+
         Mockito.when(pncService.getApiUrl()).thenReturn("apiurl");
 
         String[] componentPurls = { "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.8.0.redhat-00003?type=jar",

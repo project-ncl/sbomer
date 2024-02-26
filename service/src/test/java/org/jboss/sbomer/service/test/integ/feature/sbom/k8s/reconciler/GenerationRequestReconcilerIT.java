@@ -26,6 +26,7 @@ import java.util.List;
 import jakarta.inject.Inject;
 
 import org.awaitility.Awaitility;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -58,10 +59,12 @@ public class GenerationRequestReconcilerIT {
     void testReconciler() {
         operator.start();
 
-        GenerationRequest request = new GenerationRequestBuilder().withNewMetadata()
+        GenerationRequest request = new GenerationRequestBuilder()
+                .withNewDefaultMetadata("AABBCC", GenerationRequestType.BUILD)
                 .withName("test")
                 .endMetadata()
-                .withBuildId("AABBCC")
+                .withIdentifier("AABBCC")
+                .withType(GenerationRequestType.BUILD)
                 .build();
 
         GenerationRequest created = client.resource(request).create();
