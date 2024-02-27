@@ -100,20 +100,35 @@ public class MavenCycloneDxGenerateOperationCommand extends AbstractGenerateOper
         // Get all the analyzed artifacts retrieved in the deliverable analyzer operation
         List<AnalyzedArtifact> allAnalyzedArtifacts = pncService.getAllAnalyzedArtifacts(config.getOperationId());
         // A single operation might include multiple archives, filter only the ones related to this particular
-        // deliverable
-        List<AnalyzedArtifact> currentDeliverableArtifacts = allAnalyzedArtifacts.stream().filter(a -> {
-            return deliverableUrl.equals(a.getDistribution().getDistributionUrl());
-        }).collect(Collectors.toList());
+        // distribution. If no distribution is present, keep them all because it's an old analysis with older and fewer
+        // metadata.
+        boolean isLegacyAnalysis = allAnalyzedArtifacts.stream().anyMatch(a -> a.getDistribution() == null);
+        List<AnalyzedArtifact> currentDeliverableArtifacts = isLegacyAnalysis ? allAnalyzedArtifacts
+                : allAnalyzedArtifacts.stream().filter(a -> {
+                    return deliverableUrl.equals(a.getDistribution().getDistributionUrl());
+                }).collect(Collectors.toList());
 
-        log.info(
-                "Retrieved {} artifacts in the specified deliverable: '{}', out of {} total analyzed artifacts in the operation: '{}'",
-                currentDeliverableArtifacts.size(),
-                deliverableUrl,
-                allAnalyzedArtifacts.size(),
-                config.getOperationId());
+        if (isLegacyAnalysis) {
+            log.info(
+                    "The deliverable analysis operation '{}' seems to be old because it does not have the distribution metadata and all the filename match info; filtering cannot be done so the final manifest will contain ALL the content of ALL the deliverable urls (if multiple). Total analyzed artifacts in the operation: '{}'",
+                    config.getOperationId(),
+                    allAnalyzedArtifacts.size());
+        } else {
+            log.info(
+                    "Retrieved {} artifacts in the specified deliverable: '{}', out of {} total analyzed artifacts in the operation: '{}'",
+                    currentDeliverableArtifacts.size(),
+                    deliverableUrl,
+                    allAnalyzedArtifacts.size(),
+                    config.getOperationId());
+        }
 
-        // Exclude from the analyzed artifacts' filenames the filenames related to exploded locations (e.g. inside jars)
+        // Exclude from the analyzed artifacts' filenames the filenames related to exploded locations (e.g. inside
+        // jars). If this is a legacy analysis, keep them all
         List<AnalyzedArtifact> artifactsToManifest = currentDeliverableArtifacts.stream().filter(a -> {
+            if (isLegacyAnalysis) {
+                return true;
+            }
+
             List<String> filenames = a.getArchiveFilenames();
             filenames.removeIf(filename -> filename.contains(".jar!/"));
             return filenames.size() > 0;
