@@ -263,7 +263,7 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
 
             // Because the config is valid, use it and set the status to initialized
             req.setStatus(SbomGenerationStatus.NEW);
-            req.setConfig(ObjectMapperProvider.json().writeValueAsString(config));
+            req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(config));
         }
 
         log.debug("ConfigMap to create: '{}'", req);

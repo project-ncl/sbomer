@@ -19,10 +19,14 @@ package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.util.Map;
 
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
@@ -80,6 +84,14 @@ public class TaskRunOperationInitDependentResource
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.OPERATIONINIT.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
+        String configStr;
+
+        try {
+            configStr = ObjectMapperProvider.json().writeValueAsString(generationRequest.toOperationConfig());
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Could not serialize runtime operation configuration into JSON", e);
+        }
+
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
                 .withLabels(labels)
@@ -97,9 +109,7 @@ public class TaskRunOperationInitDependentResource
                         new ParamBuilder().withName(PARAM_OPERATION_ID_NAME)
                                 .withNewValue(generationRequest.getIdentifier())
                                 .build(),
-                        new ParamBuilder().withName(PARAM_OPERATION_CONFIG_NAME)
-                                .withNewValue(generationRequest.getConfig())
-                                .build())
+                        new ParamBuilder().withName(PARAM_OPERATION_CONFIG_NAME).withNewValue(configStr).build())
                 .withTaskRef(new TaskRefBuilder().withName(TASK_NAME).build())
                 .endSpec()
                 .build();
