@@ -161,43 +161,44 @@ public class SbomUtils {
     }
 
     public static Component setPncBuildMetadata(Component component, Build pncBuild, String pncApiUrl) {
-        if (pncBuild != null) {
+        if (pncBuild == null) {
+            return component;
+        }
 
+        addExternalReference(
+                component,
+                ExternalReference.Type.BUILD_SYSTEM,
+                "https://" + pncApiUrl + "/pnc-rest/v2/builds/" + pncBuild.getId().toString(),
+                SBOM_RED_HAT_PNC_BUILD_ID);
+
+        addExternalReference(
+                component,
+                ExternalReference.Type.BUILD_META,
+                pncBuild.getEnvironment().getSystemImageRepositoryUrl() + "/"
+                        + pncBuild.getEnvironment().getSystemImageId(),
+                SBOM_RED_HAT_ENVIRONMENT_IMAGE);
+
+        if (!hasExternalReference(component, ExternalReference.Type.VCS)) {
             addExternalReference(
                     component,
-                    ExternalReference.Type.BUILD_SYSTEM,
-                    "https://" + pncApiUrl + "/pnc-rest/v2/builds/" + pncBuild.getId().toString(),
-                    SBOM_RED_HAT_PNC_BUILD_ID);
+                    ExternalReference.Type.VCS,
+                    pncBuild.getScmRepository().getExternalUrl(),
+                    "");
+        }
 
-            addExternalReference(
+        addPedigreeCommit(component, pncBuild.getScmUrl() + "#" + pncBuild.getScmTag(), pncBuild.getScmRevision());
+
+        // If the SCM repository is not internal and a commitID was computed, add the pedigree.
+        if (!Strings.isEmpty(pncBuild.getScmRepository().getExternalUrl())
+                && pncBuild.getScmBuildConfigRevisionInternal() != null
+                && !Boolean.valueOf(pncBuild.getScmBuildConfigRevisionInternal())
+                && pncBuild.getScmBuildConfigRevision() != null) {
+
+            addPedigreeCommit(
                     component,
-                    ExternalReference.Type.BUILD_META,
-                    pncBuild.getEnvironment().getSystemImageRepositoryUrl() + "/"
-                            + pncBuild.getEnvironment().getSystemImageId(),
-                    SBOM_RED_HAT_ENVIRONMENT_IMAGE);
-
-            if (!hasExternalReference(component, ExternalReference.Type.VCS)) {
-                addExternalReference(
-                        component,
-                        ExternalReference.Type.VCS,
-                        pncBuild.getScmRepository().getExternalUrl(),
-                        "");
-            }
-
-            addPedigreeCommit(component, pncBuild.getScmUrl() + "#" + pncBuild.getScmTag(), pncBuild.getScmRevision());
-
-            // If the SCM repository is not internal and a commitID was computed, add the pedigree.
-            if (!Strings.isEmpty(pncBuild.getScmRepository().getExternalUrl())
-                    && pncBuild.getScmBuildConfigRevisionInternal() != null
-                    && !Boolean.valueOf(pncBuild.getScmBuildConfigRevisionInternal())
-                    && pncBuild.getScmBuildConfigRevision() != null) {
-
-                addPedigreeCommit(
-                        component,
-                        pncBuild.getScmRepository().getExternalUrl() + "#"
-                                + pncBuild.getBuildConfigRevision().getScmRevision(),
-                        pncBuild.getScmBuildConfigRevision());
-            }
+                    pncBuild.getScmRepository().getExternalUrl() + "#"
+                            + pncBuild.getBuildConfigRevision().getScmRevision(),
+                    pncBuild.getScmBuildConfigRevision());
         }
 
         return component;
@@ -276,7 +277,11 @@ public class SbomUtils {
     public static Component createComponent(Artifact artifact, Scope scope, Type type, BuildType buildType) {
 
         Component component = new Component();
-        setCoordinates(component, artifact.getIdentifier(), buildType);
+        if (buildType != null) {
+            setCoordinates(component, artifact.getIdentifier(), buildType);
+        } else {
+            component.setName(artifact.getFilename());
+        }
         component.setScope(scope);
         component.setType(type);
         component.setPurl(artifact.getPurl());
@@ -288,7 +293,8 @@ public class SbomUtils {
         hashes.add(new Hash(Algorithm.SHA_256, artifact.getSha256()));
         component.setHashes(hashes);
 
-        if (RhVersionPattern.isRhVersion(component.getVersion()) || RhVersionPattern.isRhPurl(component.getPurl())) {
+        if ((component.getVersion() != null && RhVersionPattern.isRhVersion(component.getVersion()))
+                || (component.getPurl() != null && RhVersionPattern.isRhPurl(component.getPurl()))) {
             SbomUtils.setPublisher(component);
             SbomUtils.setSupplier(component);
             SbomUtils.addMrrc(component);

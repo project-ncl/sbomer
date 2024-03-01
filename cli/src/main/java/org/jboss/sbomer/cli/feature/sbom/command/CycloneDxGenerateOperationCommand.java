@@ -176,13 +176,10 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             } else if (artifact.getBrewId() != null && artifact.getBrewId() > 0) {
                 brewBuild = kojiService.findBuild(artifact.getArtifact());
                 buildType = BuildType.MVN;
-            }
-
-            if (buildType == null) {
-                log.warn("An artifact has been found with no build type: '{}'.", artifact.getArtifact().getFilename());
-                // TODO Add representation of plain files e.g.
-                // 'amq-broker-7.11.5.CR3-bin.zip!/apache-artemis-2.28.0.redhat-00016/web/hawtio.war!/WEB-INF/lib/json-20171018.jar'
-                continue;
+            } else {
+                log.warn(
+                        "An artifact has been found with no associated build: '{}'. It will be added in the SBOM with generic type.",
+                        artifact.getArtifact().getFilename());
             }
 
             Component component = createComponent(artifact.getArtifact(), Scope.REQUIRED, Type.LIBRARY, buildType);
