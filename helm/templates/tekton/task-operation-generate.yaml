@@ -49,10 +49,8 @@ spec:
           value: {{ .Values.env }}
 
       script: |
-        #!/usr/bin/env bash
 
-        set -e
-        set -x
+        set -o pipefail
 
         OPERATION_CONFIG_PATH="${HOME}/operation-config.json"
         WORKDIR_PATH="$(workspaces.data.path)/$(context.taskRun.name)"

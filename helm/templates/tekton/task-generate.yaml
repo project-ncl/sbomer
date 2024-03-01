@@ -56,9 +56,7 @@ spec:
           value: {{ .Values.env }}
 
       script: |
-        #!/usr/bin/env bash
 
-        set -e
         set -o pipefail
 
         CONFIG_PATH="${HOME}/config.json"
