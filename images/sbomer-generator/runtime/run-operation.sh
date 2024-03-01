@@ -50,7 +50,7 @@ fi
 generator=$(jq -r ".product.generator.type" ${config_path})
 
 case "$generator" in
-"maven-cyclonedx-operation")
+"cyclonedx-operation")
     echo "The ${generator} generator does not require installation"
     ;;
 *)

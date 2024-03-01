@@ -85,7 +85,7 @@ public class SbomerConfigProviderTest {
                             .build());
 
             ProductConfig productConfig = ProductConfig.builder()
-                    .withGenerator(GeneratorConfig.builder().type(GeneratorType.MAVEN_CYCLONEDX_OPERATION).build())
+                    .withGenerator(GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build())
                     .withProcessors(processors)
 
                     .build();
@@ -172,7 +172,7 @@ public class SbomerConfigProviderTest {
             ProductConfig product = config.getProduct();
 
             assertEquals(1, product.getProcessors().size());
-            assertEquals(GeneratorType.MAVEN_CYCLONEDX_OPERATION, product.getGenerator().getType());
+            assertEquals(GeneratorType.CYCLONEDX_OPERATION, product.getGenerator().getType());
             assertNull(product.getGenerator().getArgs());
             assertNull(product.getGenerator().getVersion());
         }

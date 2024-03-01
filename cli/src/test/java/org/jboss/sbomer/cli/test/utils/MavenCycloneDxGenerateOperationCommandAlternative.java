@@ -6,17 +6,16 @@ import java.nio.file.Path;
 
 import jakarta.enterprise.inject.Alternative;
 
-import org.jboss.sbomer.cli.feature.sbom.command.MavenCycloneDxGenerateOperationCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.CycloneDxGenerateOperationCommand;
 
 import picocli.CommandLine.Command;
 
 @Alternative
 @Command(
         mixinStandardHelpOptions = true,
-        name = "maven-cyclonedx-plugin-operation",
-        aliases = { "maven-cyclonedx-operation" },
+        name = "cyclonedx-operation",
         description = "SBOM generation for deliverable Maven POMs using the CycloneDX Maven plugin")
-public class MavenCycloneDxGenerateOperationCommandAlternative extends MavenCycloneDxGenerateOperationCommand {
+public class MavenCycloneDxGenerateOperationCommandAlternative extends CycloneDxGenerateOperationCommand {
 
     @Override
     protected Path doGenerate() {

@@ -3014,7 +3014,7 @@ VALUES (
       }
     ],
     "generator": {
-      "type": "maven-cyclonedx-operation"
+      "type": "cyclonedx-operation"
     }
   }
 }',

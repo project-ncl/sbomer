@@ -29,7 +29,7 @@ import picocli.CommandLine.ScopeType;
         name = "generate-operation",
         aliases = { "go" },
         description = "SBOM generation for an operation",
-        subcommands = { MavenCycloneDxGenerateOperationCommand.class })
+        subcommands = { CycloneDxGenerateOperationCommand.class })
 public class GenerateOperationCommand {
 
     @Getter

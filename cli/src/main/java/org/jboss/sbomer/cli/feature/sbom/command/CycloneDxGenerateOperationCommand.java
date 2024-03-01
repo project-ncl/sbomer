@@ -61,14 +61,13 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.toJsonNode;
 @Slf4j
 @Command(
         mixinStandardHelpOptions = true,
-        name = "maven-cyclonedx-plugin-operation",
-        aliases = { "maven-cyclonedx-operation" },
+        name = "cyclonedx-operation",
         description = "SBOM generation for deliverable analyzer operations by manually creating a CycloneDX compliant SBOM")
-public class MavenCycloneDxGenerateOperationCommand extends AbstractGenerateOperationCommand {
+public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperationCommand {
 
     @Override
     protected GeneratorType generatorType() {
-        return GeneratorType.MAVEN_CYCLONEDX_OPERATION;
+        return GeneratorType.CYCLONEDX_OPERATION;
     }
 
     @Override
@@ -125,7 +124,7 @@ public class MavenCycloneDxGenerateOperationCommand extends AbstractGenerateOper
         // Exclude from the analyzed artifacts' filenames the filenames related to exploded locations (e.g. inside
         // jars). If this is a legacy analysis, keep them all
         List<AnalyzedArtifact> artifactsToManifest = currentDeliverableArtifacts.stream().filter(a -> {
-            if (isLegacyAnalysis) {
+            if (isLegacyAnalysis || a.getArchiveFilenames() == null) {
                 return true;
             }
 
@@ -169,7 +168,6 @@ public class MavenCycloneDxGenerateOperationCommand extends AbstractGenerateOper
         bom.addDependency(mainDependency);
 
         for (AnalyzedArtifact artifact : artifactsToManifest) {
-
             KojiBuild brewBuild = null;
             BuildType buildType = null;
 
@@ -181,6 +179,7 @@ public class MavenCycloneDxGenerateOperationCommand extends AbstractGenerateOper
             }
 
             if (buildType == null) {
+                log.warn("An artifact has been found with no build type: '{}'.", artifact.getArtifact().getFilename());
                 // TODO Add representation of plain files e.g.
                 // 'amq-broker-7.11.5.CR3-bin.zip!/apache-artemis-2.28.0.redhat-00016/web/hawtio.war!/WEB-INF/lib/json-20171018.jar'
                 continue;

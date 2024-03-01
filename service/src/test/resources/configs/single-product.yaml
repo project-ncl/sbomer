@@ -8,4 +8,4 @@ product:
           productVersion: "AABB"
           productVariant: "AB"
     generator:
-      type: maven-cyclonedx-operation
+      type: cyclonedx-operation

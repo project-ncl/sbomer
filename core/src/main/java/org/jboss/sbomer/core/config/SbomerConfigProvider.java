@@ -93,8 +93,8 @@ public class SbomerConfigProvider {
 
         // Generator configuration was not provided, will use defaults
         if (generatorConfig == null) {
-            log.debug("No generator provided, will use defaults: '{}'", GeneratorType.MAVEN_CYCLONEDX_OPERATION);
-            generatorConfig = GeneratorConfig.builder().type(GeneratorType.MAVEN_CYCLONEDX_OPERATION).build();
+            log.debug("No generator provided, will use defaults: '{}'", GeneratorType.CYCLONEDX_OPERATION);
+            generatorConfig = GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build();
             config.getProduct().setGenerator(generatorConfig);
         }
         // Nullify the args and version as they are not used anyway

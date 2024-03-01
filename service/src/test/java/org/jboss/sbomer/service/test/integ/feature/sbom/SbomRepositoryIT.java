@@ -193,7 +193,7 @@ public class SbomRepositoryIT {
                 .getOperationConfiguration()
                 .getProduct()
                 .getProcessors();
-        assertEquals(GeneratorType.MAVEN_CYCLONEDX_OPERATION, generatorConfig.getType());
+        assertEquals(GeneratorType.CYCLONEDX_OPERATION, generatorConfig.getType());
         assertNull(generatorConfig.getArgs());
         assertNull(generatorConfig.getVersion());
 

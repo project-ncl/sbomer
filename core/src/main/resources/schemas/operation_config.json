@@ -60,7 +60,7 @@
             },
             "type": {
               "description": "Type of generator",
-              "enum": ["maven-cyclonedx-operation"]
+              "enum": ["cyclonedx-operation"]
             },
             "args": {
               "description": "[Ignored] Custom arguments that are passed to the generator",

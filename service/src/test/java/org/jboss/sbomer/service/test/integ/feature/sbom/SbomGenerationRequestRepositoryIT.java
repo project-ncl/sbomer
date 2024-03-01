@@ -115,9 +115,7 @@ public class SbomGenerationRequestRepositoryIT {
     }
 
     private OperationConfig createRuntimeOperationConfig(String operationId) {
-        GeneratorConfig generatorConfig = GeneratorConfig.builder()
-                .type(GeneratorType.MAVEN_CYCLONEDX_OPERATION)
-                .build();
+        GeneratorConfig generatorConfig = GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build();
 
         RedHatProductProcessorConfig redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
                 .withErrata(

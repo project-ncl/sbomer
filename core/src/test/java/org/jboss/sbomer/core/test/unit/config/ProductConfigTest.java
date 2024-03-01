@@ -52,12 +52,12 @@ public class ProductConfigTest {
 
                         ProductConfig.builder()
                                 .withGenerator(
-                                        GeneratorConfig.builder().type(GeneratorType.MAVEN_CYCLONEDX_OPERATION).build())
+                                        GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build())
                                 .build())
                 .build();
 
         assertEquals(
-                List.of("-v", "sbom", "generate-operation", "--operation-id", "AABBCCDDD", "maven-cyclonedx-operation"),
+                List.of("-v", "sbom", "generate-operation", "--operation-id", "AABBCCDDD", "cyclonedx-operation"),
                 config.getProduct().generateCommand(config));
     }
 }

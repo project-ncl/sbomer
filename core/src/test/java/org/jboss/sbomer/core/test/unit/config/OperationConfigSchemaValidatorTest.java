@@ -37,7 +37,7 @@ public class OperationConfigSchemaValidatorTest {
                         .build());
 
         ProductConfig productConfig = ProductConfig.builder()
-                .withGenerator(GeneratorConfig.builder().type(GeneratorType.MAVEN_CYCLONEDX_OPERATION).build())
+                .withGenerator(GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build())
                 .build();
 
         return OperationConfig.builder().withOperationId("OPERATIONAABBCC").withProduct(productConfig).build();
