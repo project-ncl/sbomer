@@ -172,21 +172,30 @@ public class KojiService {
 
     public KojiBuild findBuild(Artifact artifact) {
 
-        if (artifact.getPublicUrl() != null) {
-            try {
-                FinderStatus status = new FinderStatus();
-                List<KojiBuild> brewBuilds = find(artifact.getPublicUrl(), status, status);
-                if (brewBuilds.size() == 1) {
-                    return brewBuilds.get(0);
-                } else if (brewBuilds.size() > 1) {
-                    log.warn(
-                            "Multiple builds where found in Brew for the artifact '{}', picking the first one!",
-                            artifact.getPublicUrl());
-                    return brewBuilds.get(0);
-                }
-            } catch (Throwable e) {
-                log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
+        if (artifact.getPublicUrl() == null) {
+            return null;
+        }
+
+        try {
+            FinderStatus status = new FinderStatus();
+            log.trace("Searching for artifact '{}' in Brew...", artifact.getPublicUrl());
+            List<KojiBuild> brewBuilds = find(artifact.getPublicUrl(), status, status);
+            if (brewBuilds.size() == 1) {
+                log.trace(
+                        "Found Brew build with id {} of artifact: '{}'",
+                        brewBuilds.get(0).getId(),
+                        artifact.getPublicUrl());
+                return brewBuilds.get(0);
+            } else if (brewBuilds.size() > 1) {
+                String brewBuildIds = brewBuilds.stream().map(KojiBuild::getId).collect(Collectors.joining(", "));
+                log.warn(
+                        "Multiple builds (with ids: {}) where found in Brew of the artifact '{}', picking the first one!",
+                        brewBuildIds,
+                        artifact.getPublicUrl());
+                return brewBuilds.get(0);
             }
+        } catch (Throwable e) {
+            log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
         }
         return null;
     }

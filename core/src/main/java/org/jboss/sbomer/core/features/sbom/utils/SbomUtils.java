@@ -323,7 +323,9 @@ public class SbomUtils {
         Tool tool = new Tool();
         tool.setName(SBOMER_NAME);
         tool.setVendor(PUBLISHER);
-        tool.setVersion(version);
+        if (version != null) {
+            tool.setVersion(version);
+        }
 
         return tool;
     }

@@ -137,7 +137,7 @@ public class SBOMerClientFacade {
         } catch (JsonProcessingException e) {
             log.warn("Could not find SBOMer version", e);
         }
-        return "";
+        return null;
     }
 
 }

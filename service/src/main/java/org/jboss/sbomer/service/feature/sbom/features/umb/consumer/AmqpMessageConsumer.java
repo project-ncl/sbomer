@@ -90,7 +90,7 @@ public class AmqpMessageConsumer {
 
         // Checking whether there is some additional metadata attached to the message
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
-        AtomicReference<GenerationRequestType> atomicEnum = new AtomicReference<>(null);
+        AtomicReference<GenerationRequestType> type = new AtomicReference<>(null);
 
         metadata.ifPresent(meta -> {
             JsonObject properties = meta.getProperties();
@@ -98,20 +98,20 @@ public class AmqpMessageConsumer {
             log.debug("Message properties: {}", properties.toString());
 
             if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
-                atomicEnum.set(GenerationRequestType.BUILD);
+                type.set(GenerationRequestType.BUILD);
             } else if (Objects.equals(properties.getString("type"), "DeliverableAnalysisStateChange")) {
-                atomicEnum.set(GenerationRequestType.OPERATION);
+                type.set(GenerationRequestType.OPERATION);
             }
         });
 
         // This shouldn't happen anymore because we use a selector to filter messages
-        if (atomicEnum.get() == null) {
+        if (type.get() == null) {
             log.warn("Received a message that is not BuildStateChange nor DeliverableAnalysisStateChange, ignoring it");
             return message.ack();
         }
 
         try {
-            notificationHandler.handle(message, atomicEnum.get());
+            notificationHandler.handle(message, type.get());
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize PNC message, this is unexpected", e);
             return message.nack(e);
