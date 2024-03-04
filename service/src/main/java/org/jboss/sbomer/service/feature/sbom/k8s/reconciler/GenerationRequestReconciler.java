@@ -47,8 +47,8 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationS
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigAvailableCondition;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.ConfigMissingCondition;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.IsBuildTypeInitializedCondition;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.IsBuildTypeCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.OperationConfigAvailableCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.OperationConfigMissingCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
@@ -108,11 +108,11 @@ import lombok.extern.slf4j.Slf4j;
         dependents = {
                 @Dependent(
                         type = TaskRunInitDependentResource.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME,
-                        reconcilePrecondition = ConfigMissingCondition.class),
+                        reconcilePrecondition = IsBuildTypeCondition.class,
+                        useEventSourceWithName = EVENT_SOURCE_NAME),
                 @Dependent(
                         type = TaskRunGenerateDependentResource.class,
-                        reconcilePrecondition = ConfigAvailableCondition.class,
+                        reconcilePrecondition = IsBuildTypeInitializedCondition.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME),
                 @Dependent(
                         type = TaskRunOperationInitDependentResource.class,

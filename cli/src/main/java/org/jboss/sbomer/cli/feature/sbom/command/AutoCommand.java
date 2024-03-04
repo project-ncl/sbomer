@@ -19,7 +19,6 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateConfigCommand;
-import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateEnvConfigCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateOperationConfigCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateOperationCommand;
 
@@ -32,8 +31,8 @@ import picocli.CommandLine.Spec;
         name = "auto",
         aliases = { "a" },
         description = "SBOM generation automation using configuration files",
-        subcommands = { GenerateConfigCommand.class, GenerateEnvConfigCommand.class, GenerateCommand.class,
-                GenerateOperationConfigCommand.class, GenerateOperationCommand.class })
+        subcommands = { GenerateConfigCommand.class, GenerateCommand.class, GenerateOperationConfigCommand.class,
+                GenerateOperationCommand.class })
 public class AutoCommand {
 
     @Spec

@@ -21,8 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,6 +45,7 @@ import lombok.extern.jackson.Jacksonized;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class Config {
 
     /**
@@ -66,4 +70,14 @@ public class Config {
      */
     @Builder.Default
     List<ProductConfig> products = new ArrayList<>();
+
+    /**
+     * Checks whether current object is an empty one.
+     *
+     * @return
+     */
+    @JsonIgnore
+    public boolean isEmpty() {
+        return this.equals(new Config());
+    }
 }

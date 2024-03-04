@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -67,7 +68,16 @@ public class GenerateConfigCommand implements Callable<Integer> {
         yaml, json;
     }
 
-    @Option(names = { "--build-id" }, required = true, description = "The PNC build identifier, example: AYHJRDPEUMYAC")
+    @Option(
+            names = { "-c", "--config", },
+            paramLabel = "FILE",
+            description = "Path to a configuration file in JSON or YAML format. If provided, the configuration file will be read, extended (if needed) and validated.")
+    Path configPath;
+
+    @Option(
+            names = { "--build-id" },
+            required = true,
+            description = "The PNC build identifier, example: AYHJRDPEUMYAC.")
     String buildId;
 
     @Option(names = { "--format" }, defaultValue = "yaml", description = "Format of the generated configuration.")
@@ -325,6 +335,31 @@ public class GenerateConfigCommand implements Callable<Integer> {
         MDCUtils.removeContext();
         MDCUtils.addBuildContext(this.buildId);
 
+        Config config = null;
+
+        if (this.configPath != null) {
+            log.debug("Trying to deserialize provided config at '{}'", this.configPath);
+
+            config = ObjectMapperProvider.yaml().readValue(this.configPath.toFile(), Config.class);
+
+            if (config.isEmpty()) {
+                log.debug("Deserialized configuration is empty, will generate one.");
+                config = null;
+            } else {
+                log.debug("Successfully deserialized provided configuration: '{}'", config);
+            }
+        }
+
+        if (config != null) {
+            if (!Objects.equals(this.buildId, config.getBuildId())) {
+                log.error(
+                        "Provided PNC build identifier '{}' does not match the build identifier in the configuration provided as well: '{}'",
+                        this.buildId,
+                        config.getBuildId());
+                return GenerationResult.ERR_CONFIG_INVALID.getCode();
+            }
+        }
+
         Build build = pncService.getBuild(this.buildId);
 
         if (build == null) {
@@ -332,7 +367,9 @@ public class GenerateConfigCommand implements Callable<Integer> {
             return GenerationResult.ERR_GENERAL.getCode();
         }
 
-        Config config = productConfig(build);
+        if (config == null) {
+            config = productConfig(build);
+        }
 
         if (config == null) {
             log.info("Unable to retrieve config for  build '{}', initializing default configuration", build.getId());
