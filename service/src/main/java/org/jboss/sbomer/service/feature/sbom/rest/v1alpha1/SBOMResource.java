@@ -284,8 +284,7 @@ public class SBOMResource {
                     throw new ValidationException("Provided config is not valid", validationResult.getErrors());
                 }
 
-                // Because the config is valid, use it and set the status to initialized
-                req.setStatus(SbomGenerationStatus.INITIALIZED);
+                req.setStatus(SbomGenerationStatus.INITIALIZING);
                 req.setConfig(ObjectMapperProvider.json().writeValueAsString(config));
             }
 
