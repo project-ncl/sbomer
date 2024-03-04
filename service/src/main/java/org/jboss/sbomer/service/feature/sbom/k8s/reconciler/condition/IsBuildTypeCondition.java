@@ -27,7 +27,7 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ConfigAvailableCondition implements Condition<TaskRun, GenerationRequest> {
+public class IsBuildTypeCondition implements Condition<TaskRun, GenerationRequest> {
 
     @Override
     public boolean isMet(
@@ -36,16 +36,10 @@ public class ConfigAvailableCondition implements Condition<TaskRun, GenerationRe
             Context<GenerationRequest> context) {
 
         if (!GenerationRequestType.BUILD.equals(primary.getType())) {
+            log.trace("Current generation request type: {} is not {}", primary.getType(), GenerationRequestType.BUILD);
             return false;
         }
 
-        // If configuration is available, reconcile
-        if (primary.getConfig() != null) {
-            log.trace("ConfigAvailableCondition is met: true");
-            return true;
-        }
-
-        log.trace("ConfigAvailableCondition is met: false");
-        return false;
+        return true;
     }
 }

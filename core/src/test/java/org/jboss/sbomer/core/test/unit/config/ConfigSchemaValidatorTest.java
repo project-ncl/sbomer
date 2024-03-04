@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hamcrest.CoreMatchers;
@@ -17,7 +16,6 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ErrataConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
@@ -28,21 +26,8 @@ public class ConfigSchemaValidatorTest {
     ConfigSchemaValidator validator = new ConfigSchemaValidator();
 
     private Config minimalRuntimeConfig() {
-        List<ProcessorConfig> processors = new ArrayList<>();
-
-        processors.add(
-                RedHatProductProcessorConfig.builder()
-                        .withErrata(
-                                ErrataConfig.builder()
-                                        .productName("CCCDDD")
-                                        .productVersion("CCDD")
-                                        .productVariant("CD")
-                                        .build())
-                        .build());
-
         ProductConfig productConfig = ProductConfig.builder()
                 .withGenerator(GeneratorConfig.builder().type(GeneratorType.MAVEN_CYCLONEDX).build())
-                // .withProcessors(processors)
 
                 .build();
 
@@ -63,7 +48,11 @@ public class ConfigSchemaValidatorTest {
 
         @Test
         void shouldFailOnInvalidObjectListingAllProblems() {
-            ValidationResult result = validator.validate(minimalRuntimeConfig());
+            Config config = minimalRuntimeConfig();
+            // Make the generator type not set
+            config.getProducts().get(0).getGenerator().setType(null);
+
+            ValidationResult result = validator.validate(config);
 
             assertFalse(result.isValid());
 
@@ -72,9 +61,9 @@ public class ConfigSchemaValidatorTest {
                     CoreMatchers.hasItems(
                             "#/products: Property \"products\" does not match schema",
                             "#/products: Items did not match schema",
-                            "#/products/0/processors: Property \"processors\" does not match schema",
-                            "#/products/0/processors: Array has too few items ( + 0 < 1)",
-                            "#/products/0/processors: Property \"processors\" does not match additional properties schema",
+                            "#/products/0/generator: Property \"generator\" does not match schema",
+                            "#/products/0/generator: Instance does not have required property \"type\"",
+                            "#/products/0/generator: Property \"generator\" does not match additional properties schema",
                             "#/products: Property \"products\" does not match additional properties schema"));
         }
 
