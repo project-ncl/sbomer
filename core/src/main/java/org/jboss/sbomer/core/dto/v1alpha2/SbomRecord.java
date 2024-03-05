@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public record SbomRecord(
         String id,
-        String identifier,
+        String buildId,
         String rootPurl,
         Instant creationTime,
         Integer configIndex,
@@ -32,24 +32,23 @@ public record SbomRecord(
 
     public SbomRecord(
             String id,
-            String identifier,
+            String buildId,
             String rootPurl,
             Instant creationTime,
             Integer configIndex,
             String statusMessage,
             String gId,
-            String gIdentifier,
+            String gBuildId,
             JsonNode gConfig,
-            String gType,
             Instant gCreationTime) {
         this(
                 id,
-                identifier,
+                buildId,
                 rootPurl,
                 creationTime,
                 configIndex,
                 statusMessage,
-                new SbomGenerationRequestRecord(gId, gIdentifier, gConfig, gType, gCreationTime));
+                new SbomGenerationRequestRecord(gId, gBuildId, gConfig, gCreationTime));
     }
 
 };

@@ -39,6 +39,7 @@ INSERT INTO sbom_generation_request(
 		identifier,
 		status,
 		result,
+		reason,
 		config,
     type
 	)
@@ -48,6 +49,7 @@ VALUES (
 		'ARYT3LBXDVYAC',
 		'FINISHED',
 		'SUCCESS',
+		'It succeeded',
 		'{
 "buildId": "ARYT3LBXDVYAC",
 "products": [
@@ -87,6 +89,7 @@ INSERT INTO sbom(
 		creation_time,
 		identifier,
 		generationRequest_id,
+		config_index,
 		sbom
 	)
 VALUES (
@@ -95,6 +98,7 @@ VALUES (
 		now(),
 		'ARYT3LBXDVYAC',
 		'AASSBB',
+		0,
 		'{
   "version": 1,
   "metadata": {
@@ -2990,6 +2994,7 @@ INSERT INTO sbom_generation_request(
 		identifier,
 		status,
 		result,
+		reason,
 		config,
     type
 	)
@@ -2999,6 +3004,7 @@ VALUES (
 		'OPBGCD23DVYAC',
 		'FINISHED',
 		'SUCCESS',
+		'',
 		'{
   "apiVersion": "sbomer.jboss.org/v1alpha1",
   "operationId": "OPBGCD23DVYAC",
@@ -3027,6 +3033,7 @@ INSERT INTO sbom(
 		creation_time,
 		identifier,
 		generationRequest_id,
+		config_index,
 		sbom
 	)
 VALUES (
@@ -3035,6 +3042,7 @@ VALUES (
 		'2023-12-25T00:00:00.000000Z',
 		'OPBGCD23DVYAC',
 		'OPAASSDDFF',
+		0,
     '{
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",

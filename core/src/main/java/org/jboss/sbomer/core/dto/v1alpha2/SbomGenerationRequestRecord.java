@@ -21,5 +21,5 @@ import java.time.Instant;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public record SbomGenerationRequestRecord(String id, String identifier, JsonNode config, String type, Instant creationTime) {
+public record SbomGenerationRequestRecord(String id, String buildId, JsonNode config, Instant creationTime) {
 };
