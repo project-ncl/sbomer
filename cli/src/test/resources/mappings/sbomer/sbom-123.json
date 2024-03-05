@@ -7,7 +7,7 @@
     "status": 200,
     "jsonBody": {
       "id": "123",
-      "identifier": "QUARKUS",
+      "buildId": "QUARKUS",
       "rootPurl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
       "configIndex": 0,
       "statusMessage": "FINISHED",
@@ -64,8 +64,7 @@
       },
       "generationRequest": {
         "id": "AABBCC",
-        "identifier": "QUARKUS",
-        "type": "BUILD",
+        "buildId": "QUARKUS",
         "config": {
           "buildId": "QUARKUS",
           "products": [

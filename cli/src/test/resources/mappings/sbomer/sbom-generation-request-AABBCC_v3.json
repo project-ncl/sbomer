@@ -1,13 +1,14 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha2/sboms/requests/AABBCC"
+    "url": "/api/v1alpha3/sboms/requests/AABBCC"
   },
   "response": {
     "status": 200,
     "jsonBody": {
       "id": "AABBCC",
-      "buildId": "QUARKUS",
+      "identifier": "QUARKUS",
+      "type": "BUILD",
       "config": {
         "buildId": "QUARKUS",
         "products": [

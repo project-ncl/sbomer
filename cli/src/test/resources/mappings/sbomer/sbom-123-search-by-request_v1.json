@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha2/sboms?pageIndex=0&pageSize=20&query=identifier%3Deq%3DQUARKUS%3BgenerationRequest.identifier%3Deq%3DQUARKUS%3BgenerationRequest.status%3Deq%3DFINISHED%3BgenerationRequest.result%3Deq%3DSUCCESS%3BgenerationRequest.type%3Deq%3DBUILD&sort=creationTime%3Ddesc%3D"
+    "url": "/api/v1alpha1/sboms?pageIndex=0&pageSize=20&query=identifier%3Deq%3DQUARKUS%3BgenerationRequest.identifier%3Deq%3DQUARKUS%3BgenerationRequest.status%3Deq%3DFINISHED%3BgenerationRequest.result%3Deq%3DSUCCESS%3BgenerationRequest.type%3Deq%3DBUILD&sort=creationTime%3Ddesc%3D"
   },
   "response": {
     "status": 200,
@@ -13,7 +13,7 @@
       "content": [
         {
           "id": "123",
-          "identifier": "QUARKUS",
+          "buildId": "QUARKUS",
           "rootPurl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
           "configIndex": 0,
           "statusMessage": "",
@@ -70,8 +70,7 @@
           },
           "generationRequest": {
             "id": "AABBCC",
-            "identifier": "QUARKUS",
-            "type": "BUILD",
+            "buildId": "QUARKUS",
             "config": {
               "buildId": "QUARKUS",
               "products": [

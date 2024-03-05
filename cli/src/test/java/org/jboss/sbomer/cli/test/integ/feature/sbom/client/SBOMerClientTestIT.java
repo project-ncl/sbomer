@@ -25,6 +25,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.cli.feature.sbom.client.SBOMerClient;
 import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
 import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -53,15 +55,14 @@ public class SBOMerClientTestIT {
     void testGetValidSbom() {
         Response response = client.getById("123", "123");
         assertEquals(Status.OK.getStatusCode(), response.getStatus());
-        Sbom sbom = response.readEntity(Sbom.class);
+        SbomRecord sbom = response.readEntity(SbomRecord.class);
         assertNotNull(sbom);
-        assertNotNull(sbom.getSbom());
-        assertEquals("123", sbom.getId());
-        assertEquals("QUARKUS", sbom.getIdentifier());
-        assertNotNull(sbom.getGenerationRequest());
-        assertEquals("AABBCC", sbom.getGenerationRequest().getId());
-        assertEquals("QUARKUS", sbom.getGenerationRequest().getIdentifier());
-        assertEquals("BUILD", sbom.getGenerationRequest().getType());
+        assertNotNull(sbom.sbom());
+        assertEquals("123", sbom.id());
+        assertEquals("QUARKUS", sbom.buildId());
+        assertNotNull(sbom.generationRequest());
+        assertEquals("AABBCC", sbom.generationRequest().id());
+        assertEquals("QUARKUS", sbom.generationRequest().buildId());
     }
 
     @Test
@@ -81,13 +82,14 @@ public class SBOMerClientTestIT {
         Response response = client.searchSboms("123", pagParams, rsqlQuery, null);
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
-        TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
+        objectMapper.registerModule(new JavaTimeModule());
+        TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord>> typeReference = new TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord>>() {
         };
         try {
-            Page<Sbom> sboms = objectMapper.readValue(json, typeReference);
+            Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord> sboms = objectMapper.readValue(json, typeReference);
             assertNotNull(sboms);
-            assertEquals("123", sboms.getContent().iterator().next().getId());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().getIdentifier());
+            assertEquals("123", sboms.getContent().iterator().next().id());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().buildId());
         } catch (JsonMappingException e) {
             fail(e.getMessage());
         } catch (JsonProcessingException e) {
@@ -106,14 +108,15 @@ public class SBOMerClientTestIT {
         Response response = client.searchSboms("QUARKUS", pagParams, rsqlQuery, sortQuery);
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
-        TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
+        objectMapper.registerModule(new JavaTimeModule());
+        TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord>> typeReference = new TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord>>() {
         };
         try {
-            Page<Sbom> sboms = objectMapper.readValue(json, typeReference);
+            Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord> sboms = objectMapper.readValue(json, typeReference);
             assertNotNull(sboms);
-            assertEquals("123", sboms.getContent().iterator().next().getId());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().getIdentifier());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().getGenerationRequest().getIdentifier());
+            assertEquals("123", sboms.getContent().iterator().next().id());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().buildId());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().generationRequest().buildId());
 
         } catch (JsonMappingException e) {
             fail(e.getMessage());
@@ -132,13 +135,15 @@ public class SBOMerClientTestIT {
         Response response = client.searchGenerationRequests("AABBCC", pagParams, rsqlQuery, sortQuery);
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
-        TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<Page<SbomGenerationRequest>>() {
+        objectMapper.registerModule(new JavaTimeModule());
+        TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord>> typeReference = new TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord>>() {
         };
         try {
-            Page<SbomGenerationRequest> sbomRequests = objectMapper.readValue(json, typeReference);
+            Page<org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord> sbomRequests = objectMapper
+                    .readValue(json, typeReference);
             assertNotNull(sbomRequests);
-            assertEquals("AABBCC", sbomRequests.getContent().iterator().next().getId());
-            assertEquals("QUARKUS", sbomRequests.getContent().iterator().next().getIdentifier());
+            assertEquals("AABBCC", sbomRequests.getContent().iterator().next().id());
+            assertEquals("QUARKUS", sbomRequests.getContent().iterator().next().buildId());
         } catch (JsonMappingException e) {
             fail(e.getMessage());
         } catch (JsonProcessingException e) {

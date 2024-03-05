@@ -88,6 +88,24 @@ public class SBOMResourceIT {
                 .statusCode(200)
                 .body("id", CoreMatchers.equalTo("12345"))
                 .and()
+                .body("buildId", CoreMatchers.equalTo("AAAABBBB"));
+    }
+
+    @Test
+    public void testGetSbomById_V3() throws IOException {
+        Sbom sbom = new Sbom();
+        sbom.setIdentifier("AAAABBBB");
+        sbom.setId("12345");
+
+        Mockito.when(sbomService.get("12345")).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha3/sboms/12345")
+                .then()
+                .statusCode(200)
+                .body("id", CoreMatchers.equalTo("12345"))
+                .and()
                 .body("identifier", CoreMatchers.equalTo("AAAABBBB"));
     }
 

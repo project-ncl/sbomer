@@ -92,19 +92,19 @@ public class SBOMResource {
     protected V1Alpha1Mapper mapper;
 
     protected Object mapSbom(Sbom sbom) {
-       return mapper.toSbomRecord(sbom);
+        return mapper.toSbomRecord(sbom);
     }
 
-    protected Object mapSbomPage(Page<Sbom> sboms){
-       return mapper.toSbomRecordPage(sboms);
+    protected Object mapSbomPage(Page<Sbom> sboms) {
+        return mapper.toSbomRecordPage(sboms);
     }
 
     protected Object mapSbomRequest(SbomGenerationRequest sbomGenerationRequest) {
-       return mapper.toSbomRequestRecord(sbomGenerationRequest);
+        return mapper.toSbomRequestRecord(sbomGenerationRequest);
     }
 
     protected Object mapSbomRequestPage(Page<SbomGenerationRequest> sbomRequests) {
-       return mapper.toSbomRequestRecordPage(sbomRequests);
+        return mapper.toSbomRequestRecordPage(sbomRequests);
     }
 
     // RSQL Examples:
