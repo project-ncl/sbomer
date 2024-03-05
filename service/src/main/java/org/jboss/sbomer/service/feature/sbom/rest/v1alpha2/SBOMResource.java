@@ -24,23 +24,11 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.config.OperationConfigSchemaValidator;
-import org.jboss.sbomer.core.config.SbomerConfigProvider;
-import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
-import org.jboss.sbomer.core.errors.ValidationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
-import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.utils.PaginationParameters;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
+import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-
-import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 import jakarta.annotation.security.PermitAll;
@@ -71,7 +59,11 @@ import lombok.extern.slf4j.Slf4j;
 public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1alpha1.SBOMResource {
 
     @Inject
-    OperationConfigSchemaValidator operationConfigSchemaValidator;
+    protected V1Alpha2Mapper mapper;
+
+    protected Object mapSbomRecordPage(Page<BaseSbomRecord> sbomRecords) {
+        return mapper.toV2SbomRecordPage(sbomRecords);
+    }
 
     @GET
     @Operation(summary = "List SBOMs", description = "List paginated SBOMs using RSQL advanced search.")
@@ -109,12 +101,12 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
         try {
-            Page<SbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
+            Page<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
                     paginationParams.getPageIndex(),
                     paginationParams.getPageSize(),
                     rsqlQuery,
                     sort);
-            return Response.status(Status.OK).entity(sboms).build();
+            return Response.status(Status.OK).entity(mapSbomRecordPage(sboms)).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
         } catch (RSQLParserException rsqlExc) {
@@ -155,7 +147,7 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        return Response.status(Status.OK).entity(sbom).build();
+        return Response.status(Status.OK).entity(mapSbom(sbom)).build();
     }
 
     @GET
@@ -216,64 +208,4 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
         return Response.status(Status.OK).build();
     }
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
-    @Operation(
-            summary = "Generate SBOM based on the PNC Deliverable Analysis operation",
-            description = "SBOM base generation for a particular Deliverable Analysis operation Id.")
-    @Parameter(
-            name = "operationId",
-            description = "PNC Deliverable Analysis operation identifier",
-            example = "A5WL3DFZ3AIAA")
-    @Path("/generate/operation/{operationId}")
-    @APIResponses({ @APIResponse(
-            responseCode = "202",
-            description = "Schedules generation of a SBOM for a particular PNC operationId. This is an asynchronous call. It does execute the generation behind the scenes.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-
-    public Response generateFromOperation(@PathParam("operationId") String operationId, OperationConfig config)
-            throws Exception {
-
-        log.info("New generation request for operation id '{}'", operationId);
-        log.debug("Creating GenerationRequest Kubernetes resource...");
-
-        GenerationRequest req = new GenerationRequestBuilder()
-                .withNewDefaultMetadata(operationId, GenerationRequestType.OPERATION)
-                .endMetadata()
-                .withIdentifier(operationId)
-                .withType(GenerationRequestType.OPERATION)
-                .withStatus(SbomGenerationStatus.NEW)
-                .build();
-
-        if (config != null) {
-            log.debug("Received product configuration...");
-            SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
-            sbomerConfigProvider.adjust(config);
-            config.setOperationId(operationId);
-
-            ValidationResult validationResult = operationConfigSchemaValidator.validate(config);
-
-            if (!validationResult.isValid()) {
-                throw new ValidationException("Provided operation config is not valid", validationResult.getErrors());
-            }
-
-            // Because the config is valid, use it and set the status to initialized
-            req.setStatus(SbomGenerationStatus.NEW);
-            req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(config));
-        }
-
-        log.debug("ConfigMap to create: '{}'", req);
-
-        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
-
-        kubernetesClient.configMaps().resource(req).create();
-
-        log.debug("ZipGenerationRequest Kubernetes resource '{}' created for operation '{}'", req.getId(), operationId);
-
-        return Response.status(Status.ACCEPTED).entity(sbomGenerationRequest).build();
-    }
 }

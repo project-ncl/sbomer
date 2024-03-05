@@ -41,6 +41,7 @@ import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha1Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -85,7 +86,26 @@ public class SBOMResource {
     protected KubernetesClient kubernetesClient;
 
     @Inject
-    ConfigSchemaValidator configSchemaValidator;
+    protected ConfigSchemaValidator configSchemaValidator;
+
+    @Inject
+    protected V1Alpha1Mapper mapper;
+
+    protected Object mapSbom(Sbom sbom) {
+       return mapper.toSbomRecord(sbom);
+    }
+
+    protected Object mapSbomPage(Page<Sbom> sboms){
+       return mapper.toSbomRecordPage(sboms);
+    }
+
+    protected Object mapSbomRequest(SbomGenerationRequest sbomGenerationRequest) {
+       return mapper.toSbomRequestRecord(sbomGenerationRequest);
+    }
+
+    protected Object mapSbomRequestPage(Page<SbomGenerationRequest> sbomRequests) {
+       return mapper.toSbomRequestRecordPage(sbomRequests);
+    }
 
     // RSQL Examples:
     // -------------------------------------------------------------------------------
@@ -134,7 +154,7 @@ public class SBOMResource {
                     paginationParams.getPageSize(),
                     rsqlQuery,
                     sort);
-            return Response.status(Status.OK).entity(sboms).build();
+            return Response.status(Status.OK).entity(mapSbomPage(sboms)).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
         } catch (RSQLParserException rsqlExc) {
@@ -167,7 +187,7 @@ public class SBOMResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
     public Response getById(@PathParam("id") String sbomId) {
         Sbom sbom = doGetBomById(sbomId);
-        return Response.status(Status.OK).entity(sbom).build();
+        return Response.status(Status.OK).entity(mapSbom(sbom)).build();
     }
 
     @GET
@@ -213,7 +233,7 @@ public class SBOMResource {
     @Operation(
             summary = "Generate SBOM based on the PNC build",
             description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
-    @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
+    @Parameter(name = "buildId", description = "PNC buildId", example = "ARYT3LBXDVYAC")
     @Path("/generate/build/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "202",
@@ -264,7 +284,7 @@ public class SBOMResource {
 
             log.debug("GenerationRequest Kubernetes resource '{}' created for build '{}'", req.getId(), buildId);
 
-            return Response.status(Status.ACCEPTED).entity(sbomGenerationRequest).build();
+            return Response.status(Status.ACCEPTED).entity(mapSbomRequest(sbomGenerationRequest)).build();
         } finally {
             MDCUtils.removeBuildContext();
         }
@@ -279,8 +299,8 @@ public class SBOMResource {
             name = "query",
             description = "A RSQL query to search the generation requests",
             examples = { @ExampleObject(
-                    name = "Find all SBOM generation requests with provided identifier",
-                    value = "identifier=eq=ABCDEFGHIJKLM") })
+                    name = "Find all SBOM generation requests with provided buildId",
+                    value = "buildId=eq=ABCDEFGHIJKLM") })
     @Parameter(
             name = "sort",
             description = "Optional RSQL sort",
@@ -307,13 +327,12 @@ public class SBOMResource {
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
         try {
-
             Page<SbomGenerationRequest> requests = sbomService.searchSbomRequestsByQueryPaginated(
                     paginationParams.getPageIndex(),
                     paginationParams.getPageSize(),
                     rsqlQuery,
                     sort);
-            return Response.status(Status.OK).entity(requests).build();
+            return Response.status(Status.OK).entity(mapSbomRequestPage(requests)).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
         } catch (RSQLParserException rsqlExc) {
@@ -353,7 +372,7 @@ public class SBOMResource {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        return Response.status(Status.OK).entity(sbomGenerationRequest).build();
+        return Response.status(Status.OK).entity(mapSbomRequest(sbomGenerationRequest)).build();
     }
 
     @DELETE

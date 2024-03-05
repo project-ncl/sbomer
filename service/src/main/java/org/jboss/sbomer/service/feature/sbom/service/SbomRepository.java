@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.time.Instant;
 import java.util.List;
 
-import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -40,14 +40,14 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
         super(Sbom.class);
     }
 
-    public List<SbomRecord> searchSbomRecords(QueryParameters parameters) {
+    public List<BaseSbomRecord> searchSbomRecords(QueryParameters parameters) {
         // TODO: Implement strong typing
-        return searchProjected(SbomRecord.class, parameters, (query, builder, root) -> {
+        return searchProjected(BaseSbomRecord.class, parameters, (query, builder, root) -> {
             Join<Sbom, SbomGenerationRequest> generationRequest = root.join("generationRequest");
 
             return query.select(
                     builder.construct(
-                            SbomRecord.class,
+                            BaseSbomRecord.class,
                             root.<String> get("id"),
                             root.<String> get("identifier"),
                             root.<String> get("rootPurl"),
@@ -58,10 +58,7 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
                             generationRequest.<String> get("identifier").alias("gIdentifier"),
                             generationRequest.<JsonNode> get("config"),
                             generationRequest.<GenerationRequestType> get("type").as(String.class),
-                            generationRequest.<Instant> get("creationTime"))
-
-            );
-
+                            generationRequest.<Instant> get("creationTime")));
         });
     }
 

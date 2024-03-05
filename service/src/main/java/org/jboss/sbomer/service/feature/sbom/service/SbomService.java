@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
@@ -81,7 +81,7 @@ public class SbomService {
     }
 
     @WithSpan
-    public Page<SbomRecord> searchSbomRecordsByQueryPaginated(
+    public Page<BaseSbomRecord> searchSbomRecordsByQueryPaginated(
             @SpanAttribute(value = "pageIndex") int pageIndex,
             @SpanAttribute(value = "pageSize") int pageSize,
             @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
@@ -94,7 +94,7 @@ public class SbomService {
                 .pageIndex(pageIndex)
                 .build();
 
-        List<SbomRecord> content = sbomRepository.searchSbomRecords(parameters);
+        List<BaseSbomRecord> content = sbomRepository.searchSbomRecords(parameters);
         Long count = sbomRepository.countByRsqlQuery(parameters.getRsqlQuery());
 
         return toPage(content, parameters, count);
