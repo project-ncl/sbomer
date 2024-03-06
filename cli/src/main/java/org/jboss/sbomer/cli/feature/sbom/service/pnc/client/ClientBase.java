@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.service.pnc;
+package org.jboss.sbomer.cli.feature.sbom.service.pnc.client;
 
 import java.io.Closeable;
 import java.util.Optional;
@@ -26,6 +26,12 @@ import org.jboss.pnc.client.Configuration;
 import org.jboss.pnc.client.RemoteCollectionConfig;
 import org.jboss.resteasy.client.jaxrs.ProxyBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.BasicAuthentication;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.BearerAuthentication;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.MdcToHeadersFilter;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.PageParameters;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.RequestLoggingFilter;
+import org.jboss.sbomer.cli.feature.sbom.service.pnc.ResteasyJackson2ProviderWithDateISO8601;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -111,6 +111,15 @@ public class CustomPredicateBuilder<T> {
             throw new IllegalArgumentException(msg);
         }
 
+        // This is to make the model change backward compatible, so older buildId selectors can still be used
+        if ((startRoot.getJavaType().equals(Sbom.class) || startRoot.getJavaType().equals(SbomGenerationRequest.class))
+                && comparison.getSelector().equals("buildId")) {
+
+            log.debug("Converting legacy selector 'buildId' into the new selector 'identifier'");
+
+            comparison = comparison.withSelector("identifier");
+        }
+
         Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, ema, misc);
 
         if ((CriteriaAwareRepository.IS_NULL.equals(comparison.getOperator())

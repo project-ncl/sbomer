@@ -24,14 +24,16 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
+import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
@@ -45,6 +47,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1alpha2/sboms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -52,7 +55,15 @@ import jakarta.ws.rs.core.Response.Status;
 @ApplicationScoped
 @Tag(name = "v1alpha2", description = "v1alpha2 API endpoints")
 @PermitAll
+@Slf4j
 public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1alpha1.SBOMResource {
+
+    @Inject
+    protected V1Alpha2Mapper mapper;
+
+    protected Object mapSbomRecordPage(Page<BaseSbomRecord> sbomRecords) {
+        return mapper.toV2SbomRecordPage(sbomRecords);
+    }
 
     @GET
     @Operation(summary = "List SBOMs", description = "List paginated SBOMs using RSQL advanced search.")
@@ -90,12 +101,12 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
         try {
-            Page<SbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
+            Page<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
                     paginationParams.getPageIndex(),
                     paginationParams.getPageSize(),
                     rsqlQuery,
                     sort);
-            return Response.status(Status.OK).entity(sboms).build();
+            return Response.status(Status.OK).entity(mapSbomRecordPage(sboms)).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Status.BAD_REQUEST).entity(iae.getMessage()).build();
         } catch (RSQLParserException rsqlExc) {
@@ -136,7 +147,7 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        return Response.status(Status.OK).entity(sbom).build();
+        return Response.status(Status.OK).entity(mapSbom(sbom)).build();
     }
 
     @GET
@@ -196,4 +207,5 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
         sbomService.notifyCompleted(sbom);
         return Response.status(Status.OK).build();
     }
+
 }

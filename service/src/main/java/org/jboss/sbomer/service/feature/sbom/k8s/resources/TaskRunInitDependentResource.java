@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.util.Map;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -40,6 +41,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
 
     public static final String RESULT_NAME = "config";
     public static final String PARAM_BUILD_ID_NAME = "build-id";
+    public static final String TASK_NAME = "sbomer-init";
 
     @Inject
     TektonConfig tektonConfig;
@@ -70,9 +72,9 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                 SbomGenerationPhase.INIT,
                 generationRequest.getMetadata().getName());
 
-        Map<String, String> labels = Labels.defaultLabelsToMap();
+        Map<String, String> labels = Labels.defaultLabelsToMap(GenerationRequestType.BUILD);
 
-        labels.put(Labels.LABEL_BUILD_ID, generationRequest.getBuildId());
+        labels.put(Labels.LABEL_IDENTIFIER, generationRequest.getIdentifier());
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.INIT.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
@@ -92,9 +94,9 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                 .withServiceAccountName(tektonConfig.sa())
                 .withParams(
                         new ParamBuilder().withName(PARAM_BUILD_ID_NAME)
-                                .withNewValue(generationRequest.getBuildId())
+                                .withNewValue(generationRequest.getIdentifier())
                                 .build())
-                .withTaskRef(new TaskRefBuilder().withName("sbomer-init").build())
+                .withTaskRef(new TaskRefBuilder().withName(TASK_NAME).build())
                 .endSpec()
                 .build();
 

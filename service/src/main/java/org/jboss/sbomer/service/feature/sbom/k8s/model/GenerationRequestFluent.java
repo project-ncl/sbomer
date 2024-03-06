@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
@@ -26,28 +27,40 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 @SuppressWarnings(value = "unchecked")
 public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> extends ConfigMapFluent<A> {
 
+    private GenerationRequestType type;
     private String id;
-    private String buildId;
+    private String identifier;
     private SbomGenerationStatus status;
     private String reason;
     private String config;
     private String envConfig;
     private GenerationResult result;
 
-    public ConfigMapFluent<A>.MetadataNested<A> withNewDefaultMetadata(String buildId) {
+    public ConfigMapFluent<A>.MetadataNested<A> withNewDefaultMetadata(
+            String identifier,
+            GenerationRequestType sbomGenerationType) {
         return withNewMetadataLike(
-                new ObjectMetaBuilder().withGenerateName("sbom-request-" + buildId.toLowerCase() + "-")
-                        .withLabels(Labels.defaultLabelsToMap())
+                new ObjectMetaBuilder().withGenerateName("sbom-request-" + identifier.toLowerCase() + "-")
+                        .withLabels(Labels.defaultLabelsToMap(sbomGenerationType))
                         .build());
     }
 
-    public A withBuildId(String buildId) {
-        this.buildId = buildId;
+    public A withType(GenerationRequestType type) {
+        this.type = type;
         return (A) this;
     }
 
-    public String getBuildId() {
-        return buildId;
+    public GenerationRequestType getType() {
+        return type;
+    }
+
+    public A withIdentifier(String identifier) {
+        this.identifier = identifier;
+        return (A) this;
+    }
+
+    public String getIdentifier() {
+        return identifier;
     }
 
     public A withId(String id) {

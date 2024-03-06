@@ -45,10 +45,8 @@ spec:
 
         # SBOMER_CACHE_SERVICE_HOST is set by Kubernetes for us
       script: |
-        #!/usr/bin/env bash
 
-        set -e
-        set -x
+        set -o pipefail
 
         if [ x"${APP_ENV}" == "xdev" ]; then
           export QUARKUS_OIDC_CLIENT_CLIENT_ENABLED=false

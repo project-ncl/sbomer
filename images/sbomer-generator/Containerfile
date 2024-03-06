@@ -31,6 +31,7 @@ COPY --chown=65532:0 \
     images/sbomer-generator/runtime/func.sh \
     images/sbomer-generator/runtime/func-gen.sh \
     images/sbomer-generator/runtime/run.sh \
+    images/sbomer-generator/runtime/run-operation.sh \
     images/sbomer-generator/install.sh \
     /workdir/
 

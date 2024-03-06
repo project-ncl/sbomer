@@ -18,6 +18,7 @@
 package org.jboss.sbomer.cli.test.integ.feature.sbom.client;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -32,8 +33,10 @@ public class ServiceWireMock implements QuarkusTestResourceLifecycleManager {
     public Map<String, String> start() {
         wireMockServer = new WireMockServer(12377);
         wireMockServer.start();
-
-        return Collections.singletonMap("sbomer.host", wireMockServer.baseUrl());
+        Map<String, String> configs = new HashMap<String, String>();
+        configs.put("sbomer.host", wireMockServer.baseUrl());
+        configs.put("quarkus.application.version", "test-version-1.0.0");
+        return Collections.unmodifiableMap(configs);
     }
 
     @Override

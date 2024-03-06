@@ -29,10 +29,13 @@ import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.eclipse.microprofile.reactive.messaging.spi.Connector;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
-import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncBuildNotificationHandler;
+import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncNotificationHandler;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
+import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncDelAnalysisNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
@@ -64,7 +67,7 @@ public class PncBuildIT {
     AmqpMessageProducer producer;
 
     @InjectSpy
-    PncBuildNotificationHandler handler;
+    PncNotificationHandler handler;
 
     @Inject
     KubernetesClient kubernetesClient;
@@ -82,14 +85,15 @@ public class PncBuildIT {
 
         builds.send(txgMsg);
 
-        ArgumentCaptor<PncBuildNotificationMessageBody> argumentCaptor = ArgumentCaptor
-                .forClass(PncBuildNotificationMessageBody.class);
+        ArgumentCaptor<Message<String>> msgArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        ArgumentCaptor<GenerationRequestType> msgTypeArgumentCaptor = ArgumentCaptor
+                .forClass(GenerationRequestType.class);
 
         Awaitility.await().atMost(30, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
             List<ConfigMap> configMaps = kubernetesClient.configMaps().list().getItems();
 
             Optional<ConfigMap> request = configMaps.stream()
-                    .filter(cm -> cm.getData().get(GenerationRequest.KEY_BUILD_ID).equals("AX5TJMYHQAIAE"))
+                    .filter(cm -> cm.getData().get(GenerationRequest.KEY_IDENTIFIER).equals("AX5TJMYHQAIAE"))
                     .findFirst();
 
             if (request.isPresent()) {
@@ -100,13 +104,63 @@ public class PncBuildIT {
             return false;
         });
 
-        verify(handler, times(1)).handle(argumentCaptor.capture());
-        List<PncBuildNotificationMessageBody> messages = argumentCaptor.getAllValues();
+        verify(handler, times(1)).handle(msgArgumentCaptor.capture(), msgTypeArgumentCaptor.capture());
+        List<Message<String>> messages = msgArgumentCaptor.getAllValues();
+        List<GenerationRequestType> messageTypes = msgTypeArgumentCaptor.getAllValues();
 
         assertEquals(1, messages.size());
+        assertEquals(1, messageTypes.size());
+        assertEquals(GenerationRequestType.BUILD, messageTypes.get(0));
+
+        PncBuildNotificationMessageBody buildMsgBody = ObjectMapperProvider.json()
+                .readValue(String.valueOf(messages.get(0).getPayload()), PncBuildNotificationMessageBody.class);
 
         // See "payloads/umb-pnc-build-body.json" file
-        assertEquals(messages.get(0).getBuild().getId(), "AX5TJMYHQAIAE");
+        assertEquals(buildMsgBody.getBuild().getId(), "AX5TJMYHQAIAE");
+    }
+
+    @Test
+    public void testUMBProducerDelAnalysisOperation() throws Exception {
+        log.info("Running testUMBProducerDelAnalysisOperation...");
+
+        InMemorySource<Message<String>> builds = connector.source("builds");
+        Message<String> txgMsg = preparePNCDelAnalysisMsg();
+
+        builds.send(txgMsg);
+
+        ArgumentCaptor<Message<String>> msgArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        ArgumentCaptor<GenerationRequestType> msgTypeArgumentCaptor = ArgumentCaptor
+                .forClass(GenerationRequestType.class);
+
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
+            List<ConfigMap> configMaps = kubernetesClient.configMaps().list().getItems();
+
+            Optional<ConfigMap> request = configMaps.stream()
+                    .filter(cm -> cm.getData().get(GenerationRequest.KEY_IDENTIFIER).equals("A6DFVW2SACIAA"))
+                    .findFirst();
+
+            if (request.isPresent()) {
+                log.info("Generation request was found!");
+                return true;
+            }
+
+            return false;
+        });
+
+        verify(handler, times(1)).handle(msgArgumentCaptor.capture(), msgTypeArgumentCaptor.capture());
+        List<Message<String>> messages = msgArgumentCaptor.getAllValues();
+        List<GenerationRequestType> messageTypes = msgTypeArgumentCaptor.getAllValues();
+
+        assertEquals(1, messages.size());
+        assertEquals(1, messageTypes.size());
+        assertEquals(GenerationRequestType.OPERATION, messageTypes.get(0));
+
+        PncDelAnalysisNotificationMessageBody buildMsgBody = ObjectMapperProvider.json()
+                .readValue(String.valueOf(messages.get(0).getPayload()), PncDelAnalysisNotificationMessageBody.class);
+
+        // See "payloads/umb-pnc-build-body.json" file
+        assertEquals(buildMsgBody.getOperationId(), "A6DFVW2SACIAA");
+        assertEquals(buildMsgBody.getMilestoneId(), "2712");
     }
 
     private Message<String> preparePNCBuildMsg() throws IOException {
@@ -129,4 +183,24 @@ public class PncBuildIT {
 
         return AmqpMessageHelper.toMessage(TestResources.asString("payloads/umb-pnc-build-body.json"), headers);
     }
+
+    private Message<String> preparePNCDelAnalysisMsg() throws IOException {
+        JsonObject headers = new JsonObject();
+        headers.put("type", "DeliverableAnalysisStateChange");
+        headers.put("attribute", "deliverable-analysis-state-change");
+        headers.put("name", "org.kie-kie-jpmml-integration-7.67.0.Final-7.13.3");
+        headers.put("milestoneId", "2712");
+        headers.put("operationId", "A6DFVW2SACIAA");
+        headers.put("status", "FINISHED");
+        headers.put("JMSXUserID", "projectnewcastle");
+        headers.put("amq6100_originalDestination", "topic://VirtualTopic.eng.pnc.builds");
+        headers.put("correlationId", "a420416c-d184-4ced-9277-500667305139");
+        headers.put("destination", "/topic/VirtualTopic.eng.pnc.builds");
+        headers.put("messageId", "ID:orch-70-z4tx6-43917-1678809685060-25:1:8557:1:1");
+        headers.put("persistent", "true");
+        headers.put("producer", "PNC");
+
+        return AmqpMessageHelper.toMessage(TestResources.asString("payloads/umb-pnc-del-analysis-body.json"), headers);
+    }
+
 }

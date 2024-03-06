@@ -50,7 +50,7 @@ public class SBOMResourceIT {
                 .get("/api/v1alpha2/sboms")
                 .then()
                 .statusCode(200)
-                .body("totalHits", CoreMatchers.is(1))
+                .body("totalHits", CoreMatchers.is(2))
                 .and()
                 .body("content[0].generationRequest.id", CoreMatchers.is("AASSBB"));
     }
@@ -76,7 +76,7 @@ public class SBOMResourceIT {
     @Test
     public void testGetSbomById() throws IOException {
         Sbom sbom = new Sbom();
-        sbom.setBuildId("AAAABBBB");
+        sbom.setIdentifier("AAAABBBB");
         sbom.setId("12345");
 
         Mockito.when(sbomService.get("12345")).thenReturn(sbom);
@@ -92,9 +92,27 @@ public class SBOMResourceIT {
     }
 
     @Test
+    public void testGetSbomById_V3() throws IOException {
+        Sbom sbom = new Sbom();
+        sbom.setIdentifier("AAAABBBB");
+        sbom.setId("12345");
+
+        Mockito.when(sbomService.get("12345")).thenReturn(sbom);
+
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("GET", "/api/v1alpha3/sboms/12345")
+                .then()
+                .statusCode(200)
+                .body("id", CoreMatchers.equalTo("12345"))
+                .and()
+                .body("identifier", CoreMatchers.equalTo("AAAABBBB"));
+    }
+
+    @Test
     public void testGetBomById() throws IOException {
         Sbom sbom = new Sbom();
-        sbom.setBuildId("AAAABBBB");
+        sbom.setIdentifier("AAAABBBB");
         sbom.setId("12345");
 
         String bomJson = TestResources.asString("sboms/complete_sbom.json");
@@ -131,7 +149,7 @@ public class SBOMResourceIT {
     public void ensureValidLicense() throws IOException {
 
         Sbom sbom = new Sbom();
-        sbom.setBuildId("AAAABBBB");
+        sbom.setIdentifier("AAAABBBB");
         sbom.setId("12345");
 
         String bomJson = TestResources.asString("sboms/complete_sbom.json");

@@ -74,12 +74,12 @@ public class NotificationServiceIT {
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withId("AABB")
-                .withBuildId("BIDBID")
+                .withIdentifier("BIDBID")
                 .withStatus(SbomGenerationStatus.FINISHED)
                 .build();
 
         Sbom sbom = new Sbom();
-        sbom.setBuildId("BIDBID");
+        sbom.setIdentifier("BIDBID");
         sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
         sbom.setId("416640206274228333");
         sbom.setSbom(SbomUtils.toJsonNode(bom));
@@ -167,6 +167,6 @@ public class NotificationServiceIT {
 
         notificationService.notifyCompleted(List.of(sbom));
 
-        verify(amqpMessageProducer, times(0)).notify(any());
+        verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));
     }
 }

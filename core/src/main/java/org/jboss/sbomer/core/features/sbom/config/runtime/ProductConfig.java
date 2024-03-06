@@ -92,4 +92,21 @@ public class ProductConfig {
 
         return command;
     }
+
+    @JsonIgnore
+    public List<String> generateCommand(OperationConfig config) {
+        List<String> command = new ArrayList<>();
+
+        // We're running the command under the sbomer feature.
+        command.add("-v");
+        command.add("sbom");
+        command.add("generate-operation");
+
+        command.add("--operation-id");
+        command.add(config.getOperationId());
+
+        command.add(generator.getType().toString().toLowerCase().replace("_", "-"));
+
+        return command;
+    }
 }

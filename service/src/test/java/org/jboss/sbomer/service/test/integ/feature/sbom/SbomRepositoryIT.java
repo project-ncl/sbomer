@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -31,6 +32,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
@@ -59,7 +61,7 @@ public class SbomRepositoryIT {
 
     @Test
     public void testNonNullRootComponents() {
-        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
+        String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
 
         assertNotNull(sbom.getRootPurl());
@@ -70,7 +72,7 @@ public class SbomRepositoryIT {
 
     @Test
     public void testValidBom() throws JsonProcessingException, JsonMappingException {
-        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
+        String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = sbom.getCycloneDxBom();
 
@@ -81,7 +83,7 @@ public class SbomRepositoryIT {
                 "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",
                 firstComponent.getPurl());
         assertEquals("416640206274228224", sbom.getId());
-        assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
+        assertEquals("ARYT3LBXDVYAC", sbom.getIdentifier());
 
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
@@ -95,7 +97,7 @@ public class SbomRepositoryIT {
 
     @Test
     public void testValidConfiguration() throws JsonProcessingException, JsonMappingException {
-        String rsqlQuery = "buildId=eq=ARYT3LBXDVYAC";
+        String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 
         assertEquals("416640206274228224", sbom.getId());
@@ -136,7 +138,90 @@ public class SbomRepositoryIT {
         Sbom sbom = sbomRepository.findById("416640206274228224");
 
         assertEquals("416640206274228224", sbom.getId());
-        assertEquals("ARYT3LBXDVYAC", sbom.getBuildId());
+        assertEquals("ARYT3LBXDVYAC", sbom.getIdentifier());
+        assertEquals(GenerationRequestType.BUILD, sbom.getGenerationRequest().getType());
     }
 
+    @Test
+    public void testNonNullRootOperationComponents() {
+        String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
+        Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
+
+        assertNotNull(sbom.getRootPurl());
+        assertEquals("pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC", sbom.getRootPurl());
+    }
+
+    @Test
+    public void testValidOperationBom() throws JsonProcessingException, JsonMappingException {
+        String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
+        Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
+        Bom bom = sbom.getCycloneDxBom();
+
+        assertEquals("CycloneDX", bom.getBomFormat());
+        Component firstComponent = bom.getComponents().get(0);
+        assertEquals("error_prone_annotations", firstComponent.getName());
+        assertEquals(
+                "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
+                firstComponent.getPurl());
+        assertEquals("816640206274228223", sbom.getId());
+        assertEquals("OPBGCD23DVYAC", sbom.getIdentifier());
+        assertEquals(GenerationRequestType.OPERATION, sbom.getGenerationRequest().getType());
+
+        Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
+        if (!violations.isEmpty()) {
+            Log.error(
+                    "violations: " + violations.stream()
+                            .map(e -> e.getMessage().toString())
+                            .collect(Collectors.joining("\n\t")));
+            fail("Validation errors on the baseSBOM entity should be empty!");
+        }
+    }
+
+    @Test
+    public void testValidOperationConfiguration() throws JsonProcessingException, JsonMappingException {
+        String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
+        Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
+
+        assertEquals("816640206274228223", sbom.getId());
+        assertEquals("OPBGCD23DVYAC", sbom.getGenerationRequest().getOperationConfiguration().getOperationId());
+
+        GeneratorConfig generatorConfig = sbom.getGenerationRequest()
+                .getOperationConfiguration()
+                .getProduct()
+                .getGenerator();
+        List<ProcessorConfig> processorConfigs = sbom.getGenerationRequest()
+                .getOperationConfiguration()
+                .getProduct()
+                .getProcessors();
+        assertEquals(GeneratorType.CYCLONEDX_OPERATION, generatorConfig.getType());
+        assertNull(generatorConfig.getArgs());
+        assertNull(generatorConfig.getVersion());
+
+        assertEquals(1, processorConfigs.size());
+
+        RedHatProductProcessorConfig redHatProductProcessorConfig = (RedHatProductProcessorConfig) processorConfigs
+                .get(0);
+        assertEquals(
+                List.of(
+                        "redhat-product",
+                        "--productName",
+                        "RHBQ",
+                        "--productVersion",
+                        "RHEL-8-RHBQ-2.13",
+                        "--productVariant",
+                        "8Base-RHBQ-2.13"),
+                redHatProductProcessorConfig.toCommand());
+        assertEquals("RHBQ", redHatProductProcessorConfig.getErrata().getProductName());
+        assertEquals("RHEL-8-RHBQ-2.13", redHatProductProcessorConfig.getErrata().getProductVersion());
+        assertEquals("8Base-RHBQ-2.13", redHatProductProcessorConfig.getErrata().getProductVariant());
+    }
+
+    @Test
+    public void testFindByIdOperationSbom() {
+        Sbom sbom = sbomRepository.findById("816640206274228223");
+
+        assertEquals("816640206274228223", sbom.getId());
+        assertEquals("OPBGCD23DVYAC", sbom.getIdentifier());
+        assertEquals(GenerationRequestType.OPERATION, sbom.getGenerationRequest().getType());
+    }
 }

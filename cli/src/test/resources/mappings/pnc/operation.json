@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/operations/deliverable-analyzer/A5RPHL7Y3AIAA"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "A5RPHL7Y3AIAA",
+      "submitTime": "2024-01-08T17:53:54.148Z",
+      "startTime": "2024-01-08T17:53:54.387Z",
+      "endTime": "2024-01-08T18:14:22.516Z",
+      "progressStatus": "FINISHED",
+      "result": "SUCCESSFUL",
+      "user": {
+        "id": "1013",
+        "username": "service-account-rh-messaging-ci"
+      },
+      "parameters": {
+        "url-1": "https://download.com/my-7.11.5.CR3-bin.zip",
+        "url-2": "https://download.com/my-7.11.5.CR3-maven-repository.zip"
+      },
+      "productMilestone": {
+        "id": "2655",
+        "version": "7.11.5.CR3",
+        "endDate": null,
+        "startingDate": "2024-01-08T00:00:00Z",
+        "plannedEndDate": "2024-01-09T00:00:00Z"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
@@ -30,7 +31,9 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequest> {
 
     Boolean cleanup = ConfigProvider.getConfig()
@@ -42,9 +45,14 @@ public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequ
             GenerationRequest primary,
             Context<GenerationRequest> context) {
 
+        if (!GenerationRequestType.BUILD.equals(primary.getType())) {
+            return false;
+        }
+
         // Here we are checking whether the configuration exists already or not. In case it's not there, we need to
         // generate one, thus returning true to let the reconciliation happen on the TaskRunInitDependentResource.
         if (primary.getConfig() == null) {
+            log.trace("ConfigMissingCondition is met: true");
             return true;
         }
 
@@ -53,9 +61,11 @@ public class ConfigMissingCondition implements Condition<TaskRun, GenerationRequ
         // to achieve is that the dependent resource (TaskRun) is retained.
         // We should do this only in the case when there are already some secondary resources.
         if (!cleanup && initTaskRunExist(context)) {
+            log.trace("ConfigMissingCondition is met: true");
             return true;
         }
 
+        log.trace("ConfigMissingCondition is met: false");
         return false;
     }
 

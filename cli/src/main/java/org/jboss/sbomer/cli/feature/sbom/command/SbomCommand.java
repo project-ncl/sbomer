@@ -31,7 +31,7 @@ import picocli.CommandLine.Spec;
         name = "sbom",
         aliases = { "s" },
         description = "SBOM generation",
-        subcommands = { AutoCommand.class, GenerateCommand.class })
+        subcommands = { AutoCommand.class, GenerateCommand.class, GenerateOperationCommand.class })
 public class SbomCommand implements FeatureTopCommand {
 
     @Spec

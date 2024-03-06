@@ -18,5 +18,5 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 public enum SbomGenerationPhase {
-    INIT, DETECTENVINFO, GENERATE;
+    INIT, GENERATE, OPERATIONINIT, OPERATIONGENERATE
 }

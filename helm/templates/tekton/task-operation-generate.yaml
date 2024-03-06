@@ -1,0 +1,111 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  annotations:
+    sbomer-secret: sbomer-sso-clients
+  name: sbomer-operation-generate
+{{ include "sbomer.labels" (list .) | indent 2 }}
+spec:
+  params:
+    - name: operation-config
+      type: string
+      description: "Runtime deliverable analysis configuration"
+    - name: deliverable-index
+      type: string
+      description: "Index to select which deliverable should the SBOM be generated for"
+  steps:
+    - name: generate
+      image: {{ .Values.generator.image.repository }}:{{ .Values.generator.image.tag }}
+      imagePullPolicy: {{ .Values.generator.image.pullPolicy }}
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 1000Mi
+        requests:
+          cpu: 200m
+          memory: 300Mi
+      env:
+        - name: SBOMER_HOST
+          value: {{ include "sbomer.serviceUrl" . }}
+        - name: SBOMER_PNC_HOST
+          value: {{ .Values.pnc.host }}
+        - name: SBOMER_INDY_HOST
+          value: {{ .Values.indy.host }}
+        - name: SBOMER_KOJI_HUB_HOST
+          value: {{ .Values.koji.hub.host }}
+        - name: SBOMER_KOJI_WEB_HOST
+          value: {{ .Values.koji.web.host }}
+{{- if ne .Values.env "dev" }}
+        - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
+          value: {{ .Values.oidc.auth.server.url }}
+        - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
+          value: {{ .Values.oidc.client.id }}
+        - name: SBOMER_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['sbomer-secret']
+{{- end }}
+        - name: APP_ENV
+          value: {{ .Values.env }}
+
+      script: |
+
+        set -o pipefail
+
+        OPERATION_CONFIG_PATH="${HOME}/operation-config.json"
+        WORKDIR_PATH="$(workspaces.data.path)/$(context.taskRun.name)"
+
+        echo "Storing configuration in the $OPERATION_CONFIG_PATH file"
+        echo '$(params.operation-config)' | tee $OPERATION_CONFIG_PATH
+
+        mkdir -p $WORKDIR_PATH
+        cd $WORKDIR_PATH
+
+        exec "${HOME}/run-operation.sh" "$OPERATION_CONFIG_PATH" "$WORKDIR_PATH" "$(params.deliverable-index)"
+
+      volumeMounts:
+        - name: secrets-workdir
+          mountPath: /mnt/secrets
+{{- if ne .Values.env "dev" }}
+  sidecars:
+    - image: quay.io/rh-newcastle/pnc-vault-secrets:1.0.1
+      name: get-vault-secrets
+      command:
+        - /bin/bash
+      args:
+        - -c
+        - cd /mnt/secrets;
+          pnc-vault-secrets dump $(SBOMER_SECRET_NAME)-$(APP_ENV);
+      env:
+        - name: VAULT_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-address
+        - name: VAULT_APP_ROLE_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-app-role-id
+        - name: VAULT_APP_SECRET_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-app-secret-id
+        - name: SBOMER_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['sbomer-secret']
+        - name: APP_ENV
+          value: {{ .Values.env }}
+      volumeMounts:
+        - name: secrets-workdir
+          mountPath: /mnt/secrets
+{{- end }}
+  workspaces:
+    - name: data
+      description: Workspace used to store the generated SBOMs
+  volumes:
+    - name: secrets-workdir
+      emptyDir:
+        medium: Memory

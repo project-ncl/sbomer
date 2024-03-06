@@ -21,13 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
+import org.jboss.pnc.dto.ProductMilestone;
+import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.dto.response.AnalyzedArtifact;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.junit.jupiter.api.Test;
@@ -127,4 +132,43 @@ public class PncServiceIT {
         }
     }
 
+    @Test
+    void testFetchProductVersion() throws Exception {
+        log.info("testFetchProductVersion ...");
+        ProductVersion productVersion = service.getProductVersion("316");
+        assertNotNull(productVersion);
+        assertEquals("316", productVersion.getId());
+        assertEquals("7.11", productVersion.getVersion());
+        assertEquals(15, productVersion.getProductMilestones().size());
+    }
+
+    @Test
+    void testFetchProductMilestone() throws Exception {
+        log.info("testFetchProductMilestone ...");
+        ProductMilestone productMilestone = service.getMilestone("2655");
+        assertNotNull(productMilestone);
+        assertEquals("2655", productMilestone.getId());
+        assertEquals("7.11.5.CR3", productMilestone.getVersion());
+        assertEquals("316", productMilestone.getProductVersion().getId());
+        assertEquals("7.11", productMilestone.getProductVersion().getVersion());
+    }
+
+    @Test
+    void testFetchOperation() throws Exception {
+        log.info("testFetchOperation ...");
+        DeliverableAnalyzerOperation operation = service.getDeliverableAnalyzerOperation("A5RPHL7Y3AIAA");
+        assertNotNull(operation);
+        assertEquals("A5RPHL7Y3AIAA", operation.getId());
+        assertEquals(2, operation.getParameters().size());
+        assertTrue(operation.getParameters().containsValue("https://download.com/my-7.11.5.CR3-bin.zip"));
+        assertEquals("2655", operation.getProductMilestone().getId());
+    }
+
+    @Test
+    void testFetchOperationResults() throws Exception {
+        log.info("testFetchOperationResults ...");
+        List<AnalyzedArtifact> artifacts = service.getAllAnalyzedArtifacts("A5RPHL7Y3AIAA");
+        assertNotNull(artifacts);
+        assertEquals(1, artifacts.size());
+    }
 }

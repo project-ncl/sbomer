@@ -29,6 +29,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.cli.feature.sbom.client.SBOMerClient;
 import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
 import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.cli.feature.sbom.model.Stats;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.utils.PaginationParameters;
@@ -52,12 +53,12 @@ public class SBOMerClientFacade {
     @RestClient
     private SBOMerClient sbomerClient;
 
-    public List<SbomGenerationRequest> searchSuccessfulGenerations(String buildId) {
+    public List<SbomGenerationRequest> searchSuccessfulGenerations(String identifier) {
         PaginationParameters pagParams = new PaginationParameters();
         pagParams.setPageIndex(0);
         pagParams.setPageSize(20);
 
-        String rsqlQuery = "buildId=eq=" + buildId + ";status=eq=FINISHED;result=eq=SUCCESS";
+        String rsqlQuery = "identifier=eq=" + identifier + ";status=eq=FINISHED;result=eq=SUCCESS";
         String sortQuery = "creationTime=desc=";
 
         log.info(
@@ -65,7 +66,7 @@ public class SBOMerClientFacade {
                 rsqlQuery,
                 sortQuery);
 
-        Response response = sbomerClient.searchGenerationRequests(buildId, pagParams, rsqlQuery, sortQuery);
+        Response response = sbomerClient.searchGenerationRequests(identifier, pagParams, rsqlQuery, sortQuery);
 
         String json = response.readEntity(String.class);
         TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<Page<SbomGenerationRequest>>() {
@@ -76,14 +77,14 @@ public class SBOMerClientFacade {
                 return new ArrayList<>(sbomRequests.getContent());
             }
         } catch (JsonProcessingException e) {
-            log.warn("Could not find existing successful SBOM Generation Requests for PNC build '{}'", buildId, e);
+            log.warn("Could not find existing successful SBOM Generation Requests for PNC build '{}'", identifier, e);
         }
         return Collections.emptyList();
     }
 
-    public SbomGenerationRequest searchLastSuccessfulGeneration(String buildId) {
+    public SbomGenerationRequest searchLastSuccessfulGeneration(String identifier) {
 
-        List<SbomGenerationRequest> sbomRequests = searchSuccessfulGenerations(buildId);
+        List<SbomGenerationRequest> sbomRequests = searchSuccessfulGenerations(identifier);
         Optional<SbomGenerationRequest> latestSbomRequest = Stream.ofNullable(sbomRequests)
                 .flatMap(Collection::stream)
                 .max(Comparator.comparing(SbomGenerationRequest::getCreationTime));
@@ -123,6 +124,20 @@ public class SBOMerClientFacade {
                 .filter(s -> s.getConfigIndex() == productIndex)
                 .findFirst();
         return matchingSbom.orElse(null);
+    }
+
+    public String getSbomerVersion() {
+        Response response = sbomerClient.getStats();
+        String json = response.readEntity(String.class);
+        TypeReference<Stats> typeReference = new TypeReference<Stats>() {
+        };
+        try {
+            Stats stats = ObjectMapperProvider.json().readValue(json, typeReference);
+            return stats.getVersion();
+        } catch (JsonProcessingException e) {
+            log.warn("Could not find SBOMer version", e);
+        }
+        return null;
     }
 
 }

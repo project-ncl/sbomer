@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -55,6 +56,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TaskRunGenerateDependentResource extends KubernetesDependentResource<TaskRun, GenerationRequest>
         implements BulkDependentResource<TaskRun, GenerationRequest> {
+
+    public static final String TASK_NAME = "sbomer-generate";
 
     /**
      * Parameter holding the environment configuration for a given build.
@@ -121,9 +124,9 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                 SbomGenerationPhase.GENERATE,
                 generationRequest.getMetadata().getName());
 
-        Map<String, String> labels = Labels.defaultLabelsToMap();
+        Map<String, String> labels = Labels.defaultLabelsToMap(GenerationRequestType.BUILD);
 
-        labels.put(Labels.LABEL_BUILD_ID, generationRequest.getBuildId());
+        labels.put(Labels.LABEL_IDENTIFIER, generationRequest.getIdentifier());
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
@@ -172,7 +175,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                         new ParamBuilder().withName(PARAM_COMMAND_INDEX_NAME)
                                 .withNewValue(String.valueOf(index))
                                 .build())
-                .withTaskRef(new TaskRefBuilder().withName("sbomer-generate").build())
+                .withTaskRef(new TaskRefBuilder().withName(TASK_NAME).build())
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withSubPath(generationRequest.getMetadata().getName())
                                 .withName("data")

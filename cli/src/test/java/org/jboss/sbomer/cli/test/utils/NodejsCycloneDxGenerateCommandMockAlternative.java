@@ -6,7 +6,6 @@ import java.nio.file.Path;
 
 import jakarta.enterprise.inject.Alternative;
 
-import org.jboss.sbomer.cli.feature.sbom.command.GradleCycloneDxGenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.NodejsCycloneDxGenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.ProcessCommand;
 

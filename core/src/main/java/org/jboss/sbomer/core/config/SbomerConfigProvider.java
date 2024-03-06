@@ -17,11 +17,15 @@
  */
 package org.jboss.sbomer.core.config;
 
+import java.util.Collections;
+
 import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigBuilder;
@@ -75,6 +79,27 @@ public class SbomerConfigProvider {
                 product.getProcessors().add(0, new DefaultProcessorConfig());
             }
         });
+    }
+
+    /**
+     * Adjusts the provided {@link OperationConfig} by providing default values for not provided elements in generators.
+     *
+     * @param config The {@link OperationConfig} object to be adjusted.
+     */
+    public void adjust(OperationConfig config) {
+        log.debug("Adjusting operation configuration...");
+
+        GeneratorConfig generatorConfig = config.getProduct().getGenerator();
+
+        // Generator configuration was not provided, will use defaults
+        if (generatorConfig == null) {
+            log.debug("No generator provided, will use defaults: '{}'", GeneratorType.CYCLONEDX_OPERATION);
+            generatorConfig = GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build();
+            config.getProduct().setGenerator(generatorConfig);
+        }
+        // Nullify the args and version as they are not used anyway
+        generatorConfig.setArgs(null);
+        generatorConfig.setVersion(null);
     }
 
     private void adjustGenerator(ProductConfig product) {

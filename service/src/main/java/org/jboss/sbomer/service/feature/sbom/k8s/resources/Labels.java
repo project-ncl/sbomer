@@ -21,20 +21,29 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+
 /**
  * Labels used by Tekton resources within the SBOM feature.
  */
 public class Labels {
+    public static final String LABEL_TYPE = "sbomer.jboss.org/generation-request-type";
     public static final String LABEL_STATUS = "sbomer.jboss.org/status";
     public static final String LABEL_PHASE = "sbomer.jboss.org/phase";
-    public static final String LABEL_BUILD_ID = "sbomer.jboss.org/build-id";
+    public static final String LABEL_IDENTIFIER = "sbomer.jboss.org/identifier";
     public static final String LABEL_GENERATION_REQUEST_ID = "sbomer.jboss.org/generation-request-id";
+    // The selector used but the only (atm) reconciler is generic, without the generation request type label, so to
+    // select all types
     public static final String LABEL_SELECTOR = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request";
 
-    public static Map<String, String> defaultLabelsToMap() {
-        return Arrays.asList(LABEL_SELECTOR.split(","))
+    public static Map<String, String> defaultLabelsToMap(GenerationRequestType sbomGenerationType) {
+
+        Map<String, String> labels = Arrays.asList(LABEL_SELECTOR.split(","))
                 .stream()
                 .map(l -> l.split("="))
                 .collect(Collectors.toMap(splitLabel -> splitLabel[0], splitLabel -> splitLabel[1]));
+
+        labels.put(LABEL_TYPE, sbomGenerationType.toName());
+        return labels;
     }
 }

@@ -20,9 +20,11 @@ package org.jboss.sbomer.core.features.sbom.utils;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,21 +40,49 @@ import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.Component.Scope;
+import org.cyclonedx.model.Component.Type;
 import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Hash;
+import org.cyclonedx.model.License;
+import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.model.Hash.Algorithm;
+import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
+import org.cyclonedx.model.Tool;
 import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.common.Strings;
+import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
+import org.jboss.pnc.enums.BuildType;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_LICENSE_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_WEBSITE;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_GIT_URL;
+import static org.jboss.sbomer.core.features.sbom.Constants.PUBLISHER;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
 
 public class SbomUtils {
 
@@ -61,6 +91,253 @@ public class SbomUtils {
 
     public static Version schemaVersion() {
         return Version.VERSION_14;
+    }
+
+    public static Bom createBom() {
+        try {
+            BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), new Bom());
+            return new JsonParser().parse(generator.toJsonString().getBytes());
+        } catch (ParseException e) {
+            log.error("Unable to create a new Bom", e);
+            return null;
+        }
+    }
+
+    public static Component createComponent(
+            String group,
+            String name,
+            String version,
+            String description,
+            String purl,
+            Type type) {
+
+        Component component = new Component();
+
+        if (!Strings.isEmpty(group)) {
+            component.setGroup(group);
+        }
+        if (!Strings.isEmpty(name)) {
+            component.setName(name);
+        }
+        if (!Strings.isEmpty(version)) {
+            component.setVersion(version);
+        }
+        if (!Strings.isEmpty(purl)) {
+            component.setBomRef(purl);
+            component.setPurl(purl);
+        }
+        if (type != null) {
+            component.setType(type);
+        }
+        if (!Strings.isEmpty(description)) {
+            component.setDescription(description);
+        }
+        component.setLicenseChoice(new LicenseChoice());
+        return component;
+    }
+
+    private static void setCoordinates(Component component, String identifier, BuildType buildType) {
+
+        switch (buildType) {
+            case NPM:
+                String[] gv = identifier.split(":");
+                if (gv.length >= 1) {
+                    component.setGroup(gv[0]);
+                    component.setVersion(gv[1]);
+                }
+                break;
+            case MVN:
+            case GRADLE:
+            case SBT:
+            default:
+                String[] gaecv = identifier.split(":");
+
+                if (gaecv.length >= 3) {
+                    component.setGroup(gaecv[0]);
+                    component.setName(gaecv[1]);
+                    component.setVersion(gaecv[3]);
+                }
+        }
+    }
+
+    public static Component setPncBuildMetadata(Component component, Build pncBuild, String pncApiUrl) {
+        if (pncBuild == null) {
+            return component;
+        }
+
+        addExternalReference(
+                component,
+                ExternalReference.Type.BUILD_SYSTEM,
+                "https://" + pncApiUrl + "/pnc-rest/v2/builds/" + pncBuild.getId().toString(),
+                SBOM_RED_HAT_PNC_BUILD_ID);
+
+        addExternalReference(
+                component,
+                ExternalReference.Type.BUILD_META,
+                pncBuild.getEnvironment().getSystemImageRepositoryUrl() + "/"
+                        + pncBuild.getEnvironment().getSystemImageId(),
+                SBOM_RED_HAT_ENVIRONMENT_IMAGE);
+
+        if (!hasExternalReference(component, ExternalReference.Type.VCS)) {
+            addExternalReference(
+                    component,
+                    ExternalReference.Type.VCS,
+                    pncBuild.getScmRepository().getExternalUrl(),
+                    "");
+        }
+
+        addPedigreeCommit(component, pncBuild.getScmUrl() + "#" + pncBuild.getScmTag(), pncBuild.getScmRevision());
+
+        // If the SCM repository is not internal and a commitID was computed, add the pedigree.
+        if (!Strings.isEmpty(pncBuild.getScmRepository().getExternalUrl())
+                && pncBuild.getScmBuildConfigRevisionInternal() != null
+                && !Boolean.valueOf(pncBuild.getScmBuildConfigRevisionInternal())
+                && pncBuild.getScmBuildConfigRevision() != null) {
+
+            addPedigreeCommit(
+                    component,
+                    pncBuild.getScmRepository().getExternalUrl() + "#"
+                            + pncBuild.getBuildConfigRevision().getScmRevision(),
+                    pncBuild.getScmBuildConfigRevision());
+        }
+
+        return component;
+    }
+
+    public static Component setPncOperationMetadata(
+            Component component,
+            DeliverableAnalyzerOperation operation,
+            String pncApiUrl) {
+        if (operation != null) {
+
+            addExternalReference(
+                    component,
+                    ExternalReference.Type.BUILD_SYSTEM,
+                    "https://" + pncApiUrl + "/pnc-rest/v2/operations/deliverable-analyzer/"
+                            + operation.getId().toString(),
+                    SBOM_RED_HAT_PNC_OPERATION_ID);
+        }
+
+        return component;
+    }
+
+    public static Component setBrewBuildMetadata(
+            Component component,
+            String brewBuildId,
+            Optional<String> source,
+            String kojiApiUrl) {
+        if (brewBuildId != null) {
+
+            addExternalReference(
+                    component,
+                    ExternalReference.Type.BUILD_SYSTEM,
+                    kojiApiUrl + "/buildinfo?buildID=" + brewBuildId,
+                    SBOM_RED_HAT_BREW_BUILD_ID);
+
+            if (source.isPresent()) {
+                String scmSource = source.get();
+
+                if (!hasExternalReference(component, ExternalReference.Type.VCS)) {
+                    addExternalReference(component, ExternalReference.Type.VCS, scmSource, "");
+                }
+
+                int hashIndex = scmSource.lastIndexOf('#');
+                if (hashIndex != -1) {
+                    String commit = scmSource.substring(hashIndex + 1);
+                    addPedigreeCommit(component, scmSource, commit);
+                }
+            }
+        }
+        return component;
+    }
+
+    public static void setProductMetadata(Component component, OperationConfig config) {
+        Optional.ofNullable(config.getProduct())
+                .map(ProductConfig::getProcessors)
+                .ifPresent(
+                        processors -> processors.stream()
+                                .filter(RedHatProductProcessorConfig.class::isInstance)
+                                .map(RedHatProductProcessorConfig.class::cast)
+                                .forEach(processorConfig -> {
+                                    addPropertyIfMissing(
+                                            component,
+                                            PROPERTY_ERRATA_PRODUCT_NAME,
+                                            processorConfig.getErrata().getProductName());
+                                    addPropertyIfMissing(
+                                            component,
+                                            PROPERTY_ERRATA_PRODUCT_VERSION,
+                                            processorConfig.getErrata().getProductVersion());
+                                    addPropertyIfMissing(
+                                            component,
+                                            PROPERTY_ERRATA_PRODUCT_VARIANT,
+                                            processorConfig.getErrata().getProductVariant());
+                                }));
+    }
+
+    public static Component createComponent(Artifact artifact, Scope scope, Type type, BuildType buildType) {
+
+        Component component = new Component();
+        if (buildType != null) {
+            setCoordinates(component, artifact.getIdentifier(), buildType);
+        } else {
+            component.setName(artifact.getFilename());
+        }
+        component.setScope(scope);
+        component.setType(type);
+        component.setPurl(artifact.getPurl());
+        component.setBomRef(artifact.getPurl());
+
+        List<Hash> hashes = new ArrayList<>();
+        hashes.add(new Hash(Algorithm.MD5, artifact.getMd5()));
+        hashes.add(new Hash(Algorithm.SHA1, artifact.getSha1()));
+        hashes.add(new Hash(Algorithm.SHA_256, artifact.getSha256()));
+        component.setHashes(hashes);
+
+        if ((component.getVersion() != null && RhVersionPattern.isRhVersion(component.getVersion()))
+                || (component.getPurl() != null && RhVersionPattern.isRhPurl(component.getPurl()))) {
+            SbomUtils.setPublisher(component);
+            SbomUtils.setSupplier(component);
+            SbomUtils.addMrrc(component);
+        }
+        return component;
+    }
+
+    public static Metadata createDefaultSbomerMetadata(Component component, String version) {
+        Metadata metadata = new Metadata();
+        metadata.setComponent(component);
+        metadata.setTimestamp(Date.from(Instant.now()));
+
+        LicenseChoice licenseChoice = new LicenseChoice();
+        License license = new License();
+        license.setId(SBOMER_LICENSE_ID);
+        licenseChoice.setLicenses(List.of(license));
+        metadata.setLicenseChoice(licenseChoice);
+
+        Property vcs = new Property();
+        vcs.setName(ExternalReference.Type.VCS.name());
+        vcs.setValue(SBOMER_GIT_URL);
+        Property website = new Property();
+        website.setName(ExternalReference.Type.WEBSITE.name());
+        website.setValue(SBOMER_WEBSITE);
+        metadata.setProperties(List.of(vcs, website));
+        metadata.setTools(List.of(createTool(version)));
+
+        return metadata;
+    }
+
+    public static Tool createTool(String version) {
+        Tool tool = new Tool();
+        tool.setName(SBOMER_NAME);
+        tool.setVendor(PUBLISHER);
+        if (version != null) {
+            tool.setVersion(version);
+        }
+
+        return tool;
+    }
+
+    public static Dependency createDependency(String ref) {
+        return new Dependency(ref);
     }
 
     public static boolean hasProperty(Component component, String property) {
@@ -97,6 +374,27 @@ public class SbomUtils {
         property.setValue(value != null ? value : "");
         properties.add(property);
         component.setProperties(properties);
+    }
+
+    /**
+     * <p>
+     * Adds a property of a given name in case it's not already there.
+     * </p>
+     *
+     * @param component The {@link Component} to add the property to.
+     * @param property The name of the property.
+     * @param value The value of the property.
+     */
+    public static void addPropertyIfMissing(Component component, String property, String value) {
+        if (!hasProperty(component, property)) {
+            log.info("Adding {} property with value: {}", property, value);
+            addProperty(component, property, value);
+        } else {
+            log.debug(
+                    "Property {} already exist, value: {}",
+                    property,
+                    findPropertyWithNameInComponent(property, component).get().getValue());
+        }
     }
 
     public static void removeProperty(Component component, String name) {
@@ -332,6 +630,28 @@ public class SbomUtils {
     }
 
     /**
+     * Converts the {@link JsonNode} into a runtime {@link OperationConfig} object.
+     *
+     * @param jsonNode The {@link JsonNode} to convert.
+     * @return The converted {@link OperationConfig} or <code>null</code> in case of troubles in converting it.
+     */
+    public static OperationConfig fromJsonOperationConfig(JsonNode jsonNode) {
+        if (jsonNode == null) {
+            return null;
+        }
+
+        try {
+            return ObjectMapperProvider.json()
+                    .readValue(
+                            jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes(),
+                            OperationConfig.class);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
      * Converts the given config {@link Config} into a {@link JsonNode} object.
      *
      * @param config The config {@link Config} to convert
@@ -343,6 +663,25 @@ public class SbomUtils {
             String configuration = ObjectMapperProvider.json()
                     .writerWithDefaultPrettyPrinter()
                     .writeValueAsString(config);
+            return ObjectMapperProvider.json().readTree(configuration);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Converts the given config {@link OperationConfig} into a {@link JsonNode} object.
+     *
+     * @param operationConfig The config {@link OperationConfig} to convert
+     * @return {@link JsonNode} representation of the {@link OperationConfig}.
+     */
+    public static JsonNode toJsonNode(OperationConfig operationConfig) {
+
+        try {
+            String configuration = ObjectMapperProvider.json()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(operationConfig);
             return ObjectMapperProvider.json().readTree(configuration);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage(), e);
@@ -393,4 +732,5 @@ public class SbomUtils {
             removeProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT);
         }
     }
+
 }

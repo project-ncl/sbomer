@@ -33,6 +33,9 @@ sbomer:
       nodejs-cyclonedx:
         default-version: "1.16.1"
         default-args: "--package-lock-only --omit dev --short-PURLs"
+      cyclonedx-operation:
+        default-version: " "
+        default-args: " "
 
   processing:
     enabled: true

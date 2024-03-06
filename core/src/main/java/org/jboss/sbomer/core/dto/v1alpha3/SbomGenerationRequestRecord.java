@@ -15,15 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.k8s.resources;
+package org.jboss.sbomer.core.dto.v1alpha3;
 
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
+import java.time.Instant;
 
-public class EnvDetectResourceDiscriminator extends AbstractResourceDiscriminator {
+import com.fasterxml.jackson.databind.JsonNode;
 
-    @Override
-    protected SbomGenerationPhase getPhase() {
-        return SbomGenerationPhase.DETECTENVINFO;
-    }
-
-}
+public record SbomGenerationRequestRecord(String id, String identifier, JsonNode config, String type, Instant creationTime, String status, String result, String reason) {
+};

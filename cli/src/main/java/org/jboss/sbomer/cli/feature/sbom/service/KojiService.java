@@ -44,6 +44,8 @@ import org.jboss.pnc.build.finder.core.DistributionAnalyzerListener;
 import org.jboss.pnc.build.finder.core.LocalFile;
 import org.jboss.pnc.build.finder.koji.ClientSession;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
+import org.jboss.pnc.dto.Artifact;
+import org.jboss.sbomer.cli.feature.sbom.utils.buildfinder.FinderStatus;
 
 import com.redhat.red.build.koji.KojiClientException;
 
@@ -166,5 +168,35 @@ public class KojiService {
 
     public BuildConfig getConfig() {
         return config;
+    }
+
+    public KojiBuild findBuild(Artifact artifact) {
+
+        if (artifact.getPublicUrl() == null) {
+            return null;
+        }
+
+        try {
+            FinderStatus status = new FinderStatus();
+            log.trace("Searching for artifact '{}' in Brew...", artifact.getPublicUrl());
+            List<KojiBuild> brewBuilds = find(artifact.getPublicUrl(), status, status);
+            if (brewBuilds.size() == 1) {
+                log.trace(
+                        "Found Brew build with id {} of artifact: '{}'",
+                        brewBuilds.get(0).getId(),
+                        artifact.getPublicUrl());
+                return brewBuilds.get(0);
+            } else if (brewBuilds.size() > 1) {
+                String brewBuildIds = brewBuilds.stream().map(KojiBuild::getId).collect(Collectors.joining(", "));
+                log.warn(
+                        "Multiple builds (with ids: {}) where found in Brew of the artifact '{}', picking the first one!",
+                        brewBuildIds,
+                        artifact.getPublicUrl());
+                return brewBuilds.get(0);
+            }
+        } catch (Throwable e) {
+            log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
+        }
+        return null;
     }
 }
