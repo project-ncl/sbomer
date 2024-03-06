@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
@@ -42,6 +43,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
     public static final String RESULT_NAME = "config";
     public static final String PARAM_BUILD_ID_NAME = "build-id";
     public static final String TASK_NAME = "sbomer-init";
+    public static final String PARAM_CONFIG_NAME = "config";
 
     @Inject
     TektonConfig tektonConfig;
@@ -95,6 +97,9 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                 .withParams(
                         new ParamBuilder().withName(PARAM_BUILD_ID_NAME)
                                 .withNewValue(generationRequest.getIdentifier())
+                                .build(),
+                        new ParamBuilder().withName(PARAM_CONFIG_NAME)
+                                .withNewValue(Objects.requireNonNullElse(generationRequest.getConfig(), "{}"))
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName(TASK_NAME).build())
                 .endSpec()

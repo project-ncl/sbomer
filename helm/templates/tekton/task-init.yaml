@@ -10,6 +10,10 @@ spec:
     - name: build-id
       type: string
       description: "PNC build identifier"
+    - name: config
+      type: string
+      description: "Optional configuration in JSON format. If provided will be used as a base for the resulting configuration."
+      default: "{}"
   steps:
     - name: generate
       image: {{ .Values.generator.image.repository }}:{{ .Values.generator.image.tag }}
@@ -56,7 +60,12 @@ spec:
           export QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET="$(cat /mnt/secrets/${SBOMER_SECRET_NAME}-${APP_ENV}/pnc-sbomer-client.secret)"
         fi
 
-        exec /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v sbom auto generate-config --build-id "$(params.build-id)" --format yaml --target "$(results.config.path)"
+        CONFIG_PATH="${HOME}/config.json"
+
+        echo "Storing configuration in the $CONFIG_PATH file"
+        echo '$(params.config)' | tee $CONFIG_PATH
+
+        exec /workdir/.sdkman/candidates/java/17/bin/java -jar ./generator/quarkus-run.jar -v sbom auto generate-config --build-id "$(params.build-id)" --config "${CONFIG_PATH}" --format yaml --target "$(results.config.path)"
 
       volumeMounts:
         - name: secrets-workdir
