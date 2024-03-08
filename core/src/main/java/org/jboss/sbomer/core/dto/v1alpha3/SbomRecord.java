@@ -18,18 +18,22 @@
 package org.jboss.sbomer.core.dto.v1alpha3;
 
 import java.time.Instant;
+import java.util.Map;
+
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+@Schema(name = "V1Alpha3SbomRecord")
 public record SbomRecord(
         String id,
         String identifier,
         String rootPurl,
         Instant creationTime,
-        JsonNode sbom,
+        @Schema(implementation = Map.class) JsonNode sbom,
         Integer configIndex,
         String statusMessage,
-        org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord generationRequest) {
+        SbomGenerationRequestRecord generationRequest) {
 
     public SbomRecord(
             String id,
@@ -55,7 +59,15 @@ public record SbomRecord(
                 sbom,
                 configIndex,
                 statusMessage,
-                new org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord(gId, gIdentifier, gConfig, gType, gCreationTime, gStatus, gResult, gReason));
+                new SbomGenerationRequestRecord(
+                        gId,
+                        gIdentifier,
+                        gConfig,
+                        gType,
+                        gCreationTime,
+                        gStatus,
+                        gResult,
+                        gReason));
 
-            }
-        }
+    }
+}

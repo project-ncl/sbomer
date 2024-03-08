@@ -15,23 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.v1alpha2;
+package org.jboss.sbomer.service.feature.sbom.errors;
 
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.Provider;
 
-import jakarta.annotation.security.PermitAll;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
+@Provider
+public class IllegalArgumentExceptionMapper extends AbstractExceptionMapper<IllegalArgumentException> {
 
-@Path("/api/v1alpha2/stats")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-@ApplicationScoped
-@Tag(name = "v1alpha2", description = "v1alpha2 API endpoints")
-@PermitAll
-public class StatsResources extends org.jboss.sbomer.service.feature.sbom.rest.v1alpha1.StatsResources {
+    @Override
+    Status getStatus() {
+        return Status.BAD_REQUEST;
+    }
 
+    @Override
+    String errorMessage(IllegalArgumentException ex) {
+        return formattedString("Invalid arguments provided: {}", ex.getMessage());
+    }
 }

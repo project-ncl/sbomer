@@ -15,57 +15,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.dto.v1alpha1;
+package org.jboss.sbomer.core.dto;
 
 import java.time.Instant;
-import java.util.Map;
-
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-@Schema(name = "V1Alpha1SbomRecord")
-public record SbomRecord(
-        @Schema(example = "3D4E6A6836AE457") String id,
-        @Schema(example = "A6XHP5F42DYAA") String buildId,
-        @Schema(example = "pkg:maven/io.hawt/project@4.0.0?type=pom") String rootPurl,
+public record BaseSbomRecord(
+        String id,
+        String identifier,
+        String rootPurl,
         Instant creationTime,
-        @Schema(implementation = Map.class) JsonNode sbom,
-        @Schema(example = "0") Integer configIndex,
+        Integer configIndex,
         String statusMessage,
-        org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord generationRequest) {
+        BaseSbomGenerationRequestRecord generationRequest) {
 
-    public SbomRecord(
+    public BaseSbomRecord(
             String id,
-            String buildId,
+            String identifier,
             String rootPurl,
             Instant creationTime,
-            JsonNode sbom,
             Integer configIndex,
             String statusMessage,
             String gId,
-            Instant gCreationTime,
-            String gStatus,
-            String gResult,
-            String gBuildId,
+            String gIdentifier,
             JsonNode gConfig,
-            String gReason) {
+            String gType,
+            Instant gCreationTime) {
         this(
                 id,
-                buildId,
+                identifier,
                 rootPurl,
                 creationTime,
-                sbom,
                 configIndex,
                 statusMessage,
-                new org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord(
-                        gId,
-                        gCreationTime,
-                        gStatus,
-                        gResult,
-                        gBuildId,
-                        gConfig,
-                        gReason));
+                new BaseSbomGenerationRequestRecord(gId, gIdentifier, gConfig, gType, gCreationTime));
     }
 
 };

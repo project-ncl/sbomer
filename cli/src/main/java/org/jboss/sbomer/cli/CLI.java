@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.jboss.sbomer.cli.errors.SbomerExitCodeExceptionMapper;
+
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 
@@ -67,6 +69,8 @@ public class CLI implements QuarkusApplication {
             log.debug("Registering '{}' subcommand", cmd.getClass().getName());
             commandLine.addSubcommand(cmd);
         });
+
+        commandLine.setExitCodeExceptionMapper(new SbomerExitCodeExceptionMapper());
 
         return commandLine.execute(args);
     }

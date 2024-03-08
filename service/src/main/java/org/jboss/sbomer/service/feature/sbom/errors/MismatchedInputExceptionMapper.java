@@ -17,15 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
-import java.util.UUID;
-
-import org.jboss.sbomer.core.errors.ErrorResponse;
-
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,21 +29,16 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Provider
 @Slf4j
-public class MismatchedInputExceptionMapper implements ExceptionMapper<MismatchedInputException> {
+public class MismatchedInputExceptionMapper extends AbstractExceptionMapper<MismatchedInputException> {
+
     @Override
-    public Response toResponse(MismatchedInputException e) {
-        log.error("Received content that cannot be deserialized");
-
-        Response.ResponseBuilder builder = Response.status(400);
-
-        ErrorResponse error = ErrorResponse.builder()
-                .errorId(UUID.randomUUID().toString())
-                .errorType(e.getClass().getSimpleName())
-                .message("An error occurred while deserializing provided content: " + e.getOriginalMessage())
-                .build();
-
-        return builder.entity(error).type(MediaType.APPLICATION_JSON).build();
-
+    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+        log.error("Received content that cannot be deserialized", ex);
+        return responseBuilder.build();
     }
 
+    @Override
+    String errorMessage(MismatchedInputException ex) {
+        return formattedString("An error occurred while deserializing provided content: {}", ex.getOriginalMessage());
+    }
 }

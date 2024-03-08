@@ -15,21 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errors;
+package org.jboss.sbomer.cli.errors.pnc;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.ext.Provider;
-import lombok.extern.slf4j.Slf4j;
+import org.jboss.sbomer.cli.errors.CommandLineException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
-@Slf4j
-@Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
-    @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
+/**
+ * Error indicating that the requested PNC build does not exist in PNC.
+ */
+public class MissingPncBuildException extends CommandLineException {
+    private static final int EXIT_CODE = 33;
 
-        return responseBuilder.build();
+    public MissingPncBuildException(String msg, Object... params) {
+        super(MissingPncBuildException.EXIT_CODE, msg, params);
+    }
+
+    public MissingPncBuildException(ApplicationException e) {
+        super(MissingPncBuildException.EXIT_CODE, e);
     }
 
 }

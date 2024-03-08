@@ -20,12 +20,24 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord;
+import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
+import org.jboss.sbomer.core.config.ConfigSchemaValidator;
+import org.jboss.sbomer.core.config.OperationConfigSchemaValidator;
+import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.dto.BaseSbomRecord;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ValidationException;
+import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
@@ -33,6 +45,9 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.rest.RestUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -50,6 +65,9 @@ import lombok.extern.slf4j.Slf4j;
 public class SbomService {
 
     @Inject
+    SbomerConfig sbomerConfig;
+
+    @Inject
     SbomRepository sbomRepository;
 
     @Inject
@@ -62,7 +80,14 @@ public class SbomService {
     NotificationService notificationService;
 
     @Inject
-    SbomerConfig sbomerConfig;
+
+    protected KubernetesClient kubernetesClient;
+
+    @Inject
+    protected OperationConfigSchemaValidator operationConfigSchemaValidator;
+
+    @Inject
+    protected ConfigSchemaValidator configSchemaValidator;
 
     @WithSpan
     public long countSboms() {
@@ -157,6 +182,103 @@ public class SbomService {
         }
 
         return new Page<>(parameters.getPageIndex(), parameters.getPageSize(), totalPages, count, content);
+    }
+
+    @WithSpan
+    public SbomGenerationRequest generateFromOperation(
+            @SpanAttribute(value = "operationId") String operationId,
+            OperationConfig config) {
+        log.info("New generation request for operation id '{}'", operationId);
+        log.debug("Creating GenerationRequest Kubernetes resource...");
+
+        GenerationRequest req = new GenerationRequestBuilder()
+                .withNewDefaultMetadata(operationId, GenerationRequestType.OPERATION)
+                .endMetadata()
+                .withIdentifier(operationId)
+                .withType(GenerationRequestType.OPERATION)
+                .withStatus(SbomGenerationStatus.NEW)
+                .build();
+
+        if (config != null) {
+            log.debug("Received product configuration...");
+            SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+            sbomerConfigProvider.adjust(config);
+            config.setOperationId(operationId);
+
+            ValidationResult validationResult = operationConfigSchemaValidator.validate(config);
+
+            if (!validationResult.isValid()) {
+                throw new ValidationException("Provided operation config is not valid", validationResult.getErrors());
+            }
+
+            // Because the config is valid, use it and set the status to initialized
+            req.setStatus(SbomGenerationStatus.NEW);
+            try {
+                req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(config));
+            } catch (JsonProcessingException e) {
+                throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
+            }
+        }
+
+        log.debug("ConfigMap to create: '{}'", req);
+
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+
+        kubernetesClient.configMaps().resource(req).create();
+
+        log.debug("ZipGenerationRequest Kubernetes resource '{}' created for operation '{}'", req.getId(), operationId);
+
+        return sbomGenerationRequest;
+    }
+
+    @WithSpan
+    public SbomGenerationRequest generateFromBuild(@SpanAttribute(value = "buildId") String buildId, Config config) {
+        try {
+            MDCUtils.addBuildContext(buildId);
+
+            log.info("New generation request for build id '{}'", buildId);
+            log.debug("Creating GenerationRequest Kubernetes resource...");
+
+            GenerationRequest req = new GenerationRequestBuilder()
+                    .withNewDefaultMetadata(buildId, GenerationRequestType.BUILD)
+                    .endMetadata()
+                    .withIdentifier(buildId)
+                    .withStatus(SbomGenerationStatus.NEW)
+                    .build();
+
+            if (config != null) {
+                log.debug("Received product configuration...");
+
+                SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+                sbomerConfigProvider.adjust(config);
+                config.setBuildId(buildId);
+
+                ValidationResult validationResult = configSchemaValidator.validate(config);
+
+                if (!validationResult.isValid()) {
+                    throw new ValidationException("Provided config is not valid", validationResult.getErrors());
+                }
+
+                // Because the config is valid, use it and set the status to initialized
+                req.setStatus(SbomGenerationStatus.INITIALIZED);
+
+                try {
+                    req.setConfig(ObjectMapperProvider.json().writeValueAsString(config));
+                } catch (JsonProcessingException e) {
+                    throw new ApplicationException("Unable to serialize provided configuration into JSON", e);
+                }
+            }
+
+            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+
+            kubernetesClient.configMaps().resource(req).create();
+
+            log.debug("GenerationRequest Kubernetes resource '{}' created for build '{}'", req.getId(), buildId);
+
+            return sbomGenerationRequest;
+        } finally {
+            MDCUtils.removeBuildContext();
+        }
     }
 
     /**

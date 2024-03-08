@@ -15,21 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errors;
+package org.jboss.sbomer.cli.errors.pnc;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.ext.Provider;
-import lombok.extern.slf4j.Slf4j;
+import org.jboss.sbomer.cli.errors.CommandLineException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
-@Slf4j
-@Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
-    @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
+/**
+ * General error related to PNC.
+ */
+public class GeneralPncException extends CommandLineException {
+    private static final int EXIT_CODE = 30;
 
-        return responseBuilder.build();
+    public GeneralPncException(String msg, Object... params) {
+        super(GeneralPncException.EXIT_CODE, msg, params);
+    }
+
+    public GeneralPncException(ApplicationException e) {
+        super(GeneralPncException.EXIT_CODE, e);
     }
 
 }

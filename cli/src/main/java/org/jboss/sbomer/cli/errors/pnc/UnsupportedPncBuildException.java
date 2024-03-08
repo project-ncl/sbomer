@@ -15,21 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errors;
+package org.jboss.sbomer.cli.errors.pnc;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.ext.Provider;
-import lombok.extern.slf4j.Slf4j;
+import org.jboss.sbomer.cli.errors.CommandLineException;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
-@Slf4j
-@Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
-    @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
+/**
+ * Error indicating that the PNC build type is not yet supported in SBOMer.
+ */
+public class UnsupportedPncBuildException extends CommandLineException {
+    private static final int EXIT_CODE = 32;
 
-        return responseBuilder.build();
+    public UnsupportedPncBuildException(String msg, Object... params) {
+        super(UnsupportedPncBuildException.EXIT_CODE, msg, params);
+    }
+
+    public UnsupportedPncBuildException(ApplicationException e) {
+        super(UnsupportedPncBuildException.EXIT_CODE, e);
     }
 
 }

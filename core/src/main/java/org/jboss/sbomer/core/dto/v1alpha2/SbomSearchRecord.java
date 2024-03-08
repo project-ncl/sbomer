@@ -15,41 +15,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.dto.v1alpha3;
+package org.jboss.sbomer.core.dto.v1alpha2;
 
 import java.time.Instant;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
-public record BaseSbomRecord(
+@Schema(name = "V1Alpha2SbomSearchRecord")
+public record SbomSearchRecord(
         String id,
-        String identifier,
+        String buildId,
         String rootPurl,
         Instant creationTime,
         Integer configIndex,
         String statusMessage,
-        org.jboss.sbomer.core.dto.v1alpha3.BaseSbomGenerationRequestRecord generationRequest) {
+        SbomGenerationRequestRecord generationRequest) {
 
-    public BaseSbomRecord(
+    public SbomSearchRecord(
             String id,
-            String identifier,
+            String buildId,
             String rootPurl,
             Instant creationTime,
             Integer configIndex,
             String statusMessage,
             String gId,
-            String gIdentifier,
+            String gBuildId,
             JsonNode gConfig,
-            String gType,
             Instant gCreationTime) {
         this(
                 id,
-                identifier,
+                buildId,
                 rootPurl,
                 creationTime,
                 configIndex,
                 statusMessage,
-                new org.jboss.sbomer.core.dto.v1alpha3.BaseSbomGenerationRequestRecord(gId, gIdentifier, gConfig, gType, gCreationTime));
+                new SbomGenerationRequestRecord(gId, gBuildId, gConfig, gCreationTime));
     }
 
 };

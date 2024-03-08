@@ -15,21 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errors;
+package org.jboss.sbomer.core.dto;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.ext.Provider;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Instant;
+import java.util.Map;
 
-@Slf4j
-@Provider
-public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
-    @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
-        log.error("Failure occurred while processing request", ex);
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-        return responseBuilder.build();
-    }
+import com.fasterxml.jackson.databind.JsonNode;
 
-}
+public record BaseSbomGenerationRequestRecord(
+        String id,
+        String identifier,
+        @Schema(implementation = Map.class) JsonNode config,
+        String type,
+        Instant creationTime) {
+};

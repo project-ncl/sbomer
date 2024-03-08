@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.time.Instant;
 import java.util.List;
 
-import org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord;
+import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;

@@ -29,8 +29,14 @@ import org.jboss.pnc.dto.BuildConfigurationRevisionRef;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.enums.BuildProgress;
+import org.jboss.pnc.enums.BuildStatus;
+import org.jboss.pnc.enums.BuildType;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 
+/**
+ * Currently unused, but may be in the future.
+ */
 @Alternative
 @Singleton
 public class AlternativePncService extends PncService {
@@ -48,7 +54,11 @@ public class AlternativePncService extends PncService {
                 .scmTag("scmtag")
                 .scmRevision("scmrevision")
                 .scmUrl("scmurl")
-                .buildConfigRevision(BuildConfigurationRevisionRef.refBuilder().id("BCID").build())
+                .buildConfigRevision(
+                        BuildConfigurationRevisionRef.refBuilder().buildType(BuildType.MVN).id("BCID").build())
+                .temporaryBuild(false)
+                .status(BuildStatus.BUILDING)
+                .progress(BuildProgress.IN_PROGRESS)
                 .build();
     }
 

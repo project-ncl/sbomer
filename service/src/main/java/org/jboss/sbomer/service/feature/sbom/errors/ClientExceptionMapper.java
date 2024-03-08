@@ -17,25 +17,25 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.Provider;
-
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
 @Provider
 @Slf4j
-public class ClientExceptionMapper implements ExceptionMapper<ClientException> {
+public class ClientExceptionMapper extends AbstractExceptionMapper<ClientException> {
 
     @Override
     public Response toResponse(ClientException ex) {
         ErrorResponse error = ErrorResponse.builder()
+                .resource(uriInfo.getPath())
                 .errorId(ex.getErrorId())
-                .errorType(ex.getClass().getSimpleName())
+                .error(Status.fromStatusCode(ex.getCode()).getReasonPhrase())
                 .message(ex.getMessage())
                 .errors(ex.getErrors())
                 .build();
