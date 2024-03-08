@@ -36,7 +36,6 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha3Mapper;
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.api.AbstractApiProvider;
 

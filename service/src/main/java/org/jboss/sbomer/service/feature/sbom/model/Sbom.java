@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.model;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 
 import java.time.Instant;
+import java.util.Map;
 
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.exception.ParseException;
@@ -94,8 +95,8 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "sbom")
     @CycloneDxBom
     @ToString.Exclude
-    @Schema(implementation = Void.class) // Workaround for swagger limitation of not being able to digest through a very
-                                         // big schema which is the case if we would use the Bom.class
+    @Schema(implementation = Map.class) // Workaround for swagger limitation of not being able to digest through a very
+                                        // big schema which is the case if we would use the Bom.class
     private JsonNode sbom;
 
     @Column(name = "config_index")

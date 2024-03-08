@@ -30,7 +30,6 @@ import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -45,7 +44,6 @@ import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
-import jakarta.inject.Inject;
 
 @QuarkusTest
 @WithKubernetesTestServer
@@ -53,9 +51,6 @@ public class SBOMResourceRSQIT {
 
     @InjectSpy
     SbomService sbomService;
-
-    @Inject
-    V1Alpha2Mapper v1alpha2Mapper;
 
     @Nested
     class v1alpha1 {
