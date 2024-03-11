@@ -8,6 +8,7 @@ cache:
     tag: latest
 
 service:
+  enabled: true
   route:
     enabled: true
   storage:
@@ -20,3 +21,6 @@ generator:
   image:
     repository: quay.io/rh-newcastle-stage/sbomer-generator
     tag: latest
+
+lb:
+  enabled: true

@@ -1,0 +1,55 @@
+{{ if .Values.lb.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-lb
+{{ include "sbomer.labels" (list . "lb") | indent 2 }}
+data:
+  haproxy.cfg: |
+    global
+      daemon
+      maxconn 256
+
+        # modern configuration https://ssl-config.mozilla.org/#server=haproxy&version=2.9&config=modern&openssl=1.1.1k&guideline=5.7
+        ssl-default-bind-ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+        ssl-default-bind-options prefer-client-ciphers no-sslv3 no-tlsv10 no-tlsv11 no-tlsv12 no-tls-tickets
+
+        ssl-default-server-ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+        ssl-default-server-options no-sslv3 no-tlsv10 no-tlsv11 no-tlsv12 no-tls-tickets
+
+    defaults
+      mode http
+      option httpslog
+      log global
+      timeout connect 5000ms
+      timeout client 50000ms
+      timeout server 50000ms
+
+    frontend sbomer
+      log stdout format raw daemon debug
+      bind *:8080
+      bind *:8443 ssl crt /etc/ssl/certs/sbomer/cert.pem alpn h2,http/1.1
+      # Redirect http to https
+      http-request redirect scheme https unless { ssl_fc }
+      http-response set-header Strict-Transport-Security max-age=63072000
+
+      default_backend servers
+
+    backend servers
+      # Check whether the service is running properly
+      option httpchk
+      http-check connect ssl alpn h2 sni "${SBOMER_DOMAIN}"
+      http-check send meth GET uri /q/health ver HTTP/2 hdr host "${SBOMER_DOMAIN}"
+      http-check expect status 200
+      http-check expect string '"status": "UP"'
+
+      server local "${SBOMER_SERVICE_SERVICE_HOST}:443" maxconn 32 check inter 5s fall 5 rise 10 ssl verify required ca-file /etc/ssl/certs/sbomer/ca.pem verifyhost "${SBOMER_DOMAIN}"
+      server external "${SBOMER_ROUTE_EXTERNAL_HOST}:443" backup maxconn 32 check inter 5s fall 5 rise 10 ssl verify required ca-file /etc/ssl/certs/sbomer/ca.pem verifyhost "${SBOMER_DOMAIN}"
+
+    frontend stats
+      bind *:9901
+      stats enable
+      stats uri /
+        stats refresh 10s
+        stats admin if LOCALHOST
+{{ end }}

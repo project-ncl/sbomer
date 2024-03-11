@@ -12,7 +12,7 @@ spec:
   host: {{ .Values.service.route.host }}
   to:
     kind: Service
-    name: {{ .Release.Name }}-service
+    name: {{ include "sbomer.routeTarget" . }}
     weight: 100
   wildcardPolicy: None
   port:

@@ -1,0 +1,51 @@
+{{ if .Values.lb.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-lb
+{{ include "sbomer.labels" (list . "lb") | indent 2 }}
+spec:
+  serviceName: {{ .Release.Name }}-lb
+  replicas: 2
+  selector:
+    matchLabels:
+{{ include "sbomer.selector" (list . "lb") | indent 6 }}
+  template:
+    metadata:
+{{ include "sbomer.labels" (list . "lb") | indent 6 }}
+    spec:
+      serviceAccountName: {{ include "sbomer.serviceAccountName" . }}
+      containers:
+        - image: haproxy:2.9.6-alpine
+          imagePullPolicy: IfNotPresent
+          name: {{ .Release.Name }}-lb
+          ports:
+            - containerPort: 8443
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 300m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: lb-certs
+              readOnly: true
+              mountPath: "/etc/ssl/certs/sbomer"
+            - name: lb-config
+              readOnly: true
+              mountPath: "/usr/local/etc/haproxy"
+          env:
+            - name: SBOMER_ROUTE_EXTERNAL_HOST
+              value: {{ .Values.service.route.external.host }}
+            - name: SBOMER_DOMAIN
+              value: {{ .Values.service.route.infinibloxHost }}
+      volumes:
+        - name: lb-certs
+          secret:
+            secretName: {{ .Release.Name }}-lb
+        - name: lb-config
+          configMap:
+            name: {{ .Release.Name }}-lb
+{{ end }}
