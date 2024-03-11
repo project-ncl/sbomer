@@ -1,0 +1,14 @@
+{{ if .Values.lb.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-lb
+{{ include "sbomer.labels" (list . "lb") | indent 2 }}
+spec:
+  selector:
+{{ include "sbomer.selector" (list . "lb") | indent 4 }}
+  type: ClusterIP
+  ports:
+    - name: https
+      port: 8443
+{{ end }}

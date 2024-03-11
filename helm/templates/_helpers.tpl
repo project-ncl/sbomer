@@ -6,6 +6,18 @@ Define the name of the cache component
 {{- end -}}
 
 {{/*
+Target route service. In case the loabalancer is enabled, then the route will point
+to the loadbalancer service and if not -- to the main deployment service.
+*/}}
+{{- define "sbomer.routeTarget" -}}
+{{- if .Values.lb.enabled -}}
+{{ .Release.Name }}-lb
+{{- else -}}
+{{ .Release.Name }}-service
+{{- end -}}
+{{- end -}}
+
+{{/*
 SBOMer internal product mapping
 */}}
 {{- define "sbomer.productMapping" -}}

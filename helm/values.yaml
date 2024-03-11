@@ -63,6 +63,7 @@ cache:
     pullPolicy: IfNotPresent
 
 service:
+  enabled: false
   # service.route Controls the Route creation on OpenShift
   route:
     # Disabled by default, enabled only in OpenShift environments
