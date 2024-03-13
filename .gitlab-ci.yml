@@ -32,6 +32,7 @@ ensure-images:
   timeout: 30m
   script:
     - dnf install -y --setopt=tsflags=nodocs skopeo git
+    - git config --global --add safe.directory '*'
     - |
       SHA_SHORT=$(git rev-parse --short HEAD)
 
