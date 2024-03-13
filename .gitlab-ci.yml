@@ -1,7 +1,11 @@
-include:
-  - remote: https://${INTERNAL_GITLAB_CORP_HOST}/paas/gitlab-cicd-templates/-/raw/1.0.0/buildah.yml
-  - remote: https://${INTERNAL_GITLAB_CORP_HOST}/paas/gitlab-cicd-templates/-/raw/1.0.0/image-scan.yml
-  - remote: https://${INTERNAL_GITLAB_CORP_HOST}/paas/gitlab-cicd-templates/-/raw/1.0.0/sonarqube.yml
+default:
+  tags: [openshift]
+
+variables:
+  KUBERNETES_CPU_REQUEST: "100m"
+  KUBERNETES_CPU_LIMIT: "200m"
+  KUBERNETES_MEMORY_REQUEST: "256Mi"
+  KUBERNETES_MEMORY_LIMIT: "512Mi"
 
 .cert-default-scripts: &cert-default-scripts
   - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2022-IT-Root-CA.pem
@@ -19,52 +23,132 @@ include:
     paths:
       - manifest-prev.yaml
       - manifest.yaml
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-default:
-  tags: [openshift]
-
-ensure-images:
-  image:
-    name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
-    entrypoint: [""]
-  stage: .pre
-  resource_group: deploy
-  timeout: 30m
+.build-image:
+  interruptible: true
+  variables:
+    KUBERNETES_CPU_REQUEST: "500m"
+    KUBERNETES_CPU_LIMIT: "500m"
+    KUBERNETES_MEMORY_REQUEST: "768Mi"
+    KUBERNETES_MEMORY_LIMIT: "768Mi"
+    OCI_IMAGE_NAME: ${CI_COMMIT_SHORT_SHA}
+  image: registry.redhat.io/ubi8/buildah:latest
+  stage: build
   script:
-    - dnf install -y --setopt=tsflags=nodocs skopeo git
-    - git config --global --add safe.directory '*'
-    - |
-      SHA_SHORT=$(git rev-parse --short HEAD)
+    - buildah --storage-driver=${STORAGE_DRIVER:-vfs} bud ${BUILD_EXTRA_ARGS:-} --format=${IMAGE_FORMAT:-oci} --tls-verify=${TLS_VERIFY:-true}
+      --no-cache -f ${CONTAINERFILE:-Dockerfile} -t ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} ${BUILD_CONTEXT:-.}
+    - >
+      if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then
+        buildah --storage-driver=${STORAGE_DRIVER:-vfs} push --creds ${QUAY_CREDS_STAGE} ${PUSH_EXTRA_ARGS:-} --tls-verify=${TLS_VERIFY:-true} ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} docker://${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}
+      else
+        echo "Skipping pushing image ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}"
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-      echo "SHA_SHORT=${SHA_SHORT}" > variables.env
-
-      function wait_for_image() {
-        if ! skopeo inspect --creds "${QUAY_CREDS_STAGE}" "docker://${IMAGE_REGISTRY_STAGE}/${1}:${SHA_SHORT}" > "image-manifest-${1}.json"; then
-          sleep 30
-          wait_for_image "${1}"
-        fi
-      }
-
-      for image in "sbomer-service" "sbomer-cache" "sbomer-generator"; do
-        wait_for_image "${image}"
-      done
-  artifacts:
-    name: image-manifests
+build:
+  image:
+    name: registry.access.redhat.com/ubi9/openjdk-17@sha256:816acfb1182efdec1875e260858c0a41e2d6f79ef7f918547fc6f9ad0130c221
+    entrypoint: [""]
+  stage: build
+  cache:
+    key: maven
     paths:
-      - image-manifest-*.json
+      - .m2/repository
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    KUBERNETES_CPU_REQUEST: "1500m"
+    KUBERNETES_CPU_LIMIT: "1500m"
+    KUBERNETES_MEMORY_REQUEST: "5Gi"
+    KUBERNETES_MEMORY_LIMIT: "5Gi"
+    MAVEN_OPTS: >-
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
+
+    MAVEN_CLI_OPTS: >-
+      --batch-mode
+      --errors
+      --fail-at-end
+      --show-version
+      -DinstallAtEnd=true
+      -DdeployAtEnd=true
+      -Dsurefire.useFile=false
+      -Denforcer.skipRules=bannedRepositories
+      --no-transfer-progress
+
+  script:
+    - ./mvnw -s settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
+  artifacts:
+    when: always
     reports:
-      dotenv: variables.env
+      junit:
+        - "**/target/surefire-reports/**/*.xml"
+    paths:
+      - service/target/quarkus-app/
+      - cli/target/quarkus-app/
+
+
+build-image-service:
+  extends:
+    - .build-image
+  variables:
+    OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-service
+    CONTAINERFILE: images/sbomer-service/Containerfile
+  dependencies:
+    - build
+  needs:
+    - job: build
+
+build-image-cache:
+  extends:
+    - .build-image
+  variables:
+    OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-cache
+    CONTAINERFILE: images/sbomer-cache/Containerfile
+  before_script:
+    - mkdir certs
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
+  dependencies:
+    - build
+  needs:
+    - job: build
+
+build-image-generator:
+  extends:
+    - .build-image
+  variables:
+    OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-generator
+    CONTAINERFILE: images/sbomer-generator/Containerfile
+  before_script:
+    - mkdir certs
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o certs/2015-IT-Root-CA.pem
+  dependencies:
+    - build
+  needs:
+    - job: build
 
 deploy-stage:
   <<: *job-deploy
   script:
     - *cert-default-scripts
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest-prev.yaml || true
-    - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_CEE_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
+    - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_CEE_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest.yaml || true
   needs:
-    - job: ensure-images
-  only: [main]
+    - job: build-image-generator
+    - job: build-image-cache
+    - job: build-image-service
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 e2e-stage:
   image:
@@ -79,13 +163,13 @@ e2e-stage:
   variables:
     MAVEN_OPTS: >-
       -Dhttps.protocols=TLSv1.2
-      -Dmaven.repo.local=.m2/repository
-      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
       -Dorg.slf4j.simpleLogger.showDateTime=true
       -Djava.awt.headless=true
+      -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
   script:
     - dnf install -y --setopt=tsflags=nodocs unzip zip
-    - curl -s "https://get.sdkman.io" | bash
+    - curl "https://get.sdkman.io" | bash
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
     - sdk install java 17.0.10-tem
     - sdk install maven 3.9.6
@@ -100,7 +184,8 @@ e2e-stage:
         - "e2e/target/surefire-reports/**/*.xml"
   needs:
     - job: deploy-stage
-  only: [main]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 promote:
   image:
@@ -111,25 +196,25 @@ promote:
   resource_group: deploy
   script:
     - dnf install -y --setopt=tsflags=nodocs skopeo
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-cache:${SHA_SHORT}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-cache:${SHA_SHORT}"
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-service:${SHA_SHORT}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-service:${SHA_SHORT}"
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-generator:${SHA_SHORT}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-generator:${SHA_SHORT}"
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-cache:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-cache:${CI_COMMIT_SHORT_SHA}"
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-service:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-service:${CI_COMMIT_SHORT_SHA}"
+    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-generator:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-generator:${CI_COMMIT_SHORT_SHA}"
   needs:
     - job: e2e-stage
-    - job: ensure-images
-  only: [main]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 deploy-prod:
   <<: *job-deploy
   script:
     - *cert-default-scripts
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest-prev.yaml || true
-    - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_CEE_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
+    - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_CEE_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest.yaml || true
   needs:
     - job: promote
-    - job: ensure-images
-  only: [main]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 pages:
   image:
@@ -149,4 +234,5 @@ pages:
   artifacts:
     paths:
       - public
-  only: [main]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
