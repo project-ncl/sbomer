@@ -55,7 +55,7 @@ Please follow link:https://helm.sh/docs/intro/install/[upstream documentation] t
 
 [source,console]
 ----
-$ helm --kube-context sbomer-local upgrade --install --values https://gitlab.cee.redhat.com/project-ncl/sbomer-support/-/raw/main/helm/dev.yaml sbomer ./helm/
+$ helm --kube-context sbomer-local upgrade --install --values https://gitlab.cee.redhat.com/appsvcs-platform/security/sbomer-support/-/raw/main/helm/dev.yaml sbomer ./helm/
 Release "sbomer" does not exist. Installing it now.
 NAME: sbomer
 LAST DEPLOYED: Fri Jan 12 12:27:09 2024
