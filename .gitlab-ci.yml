@@ -21,7 +21,7 @@ include:
       - manifest.yaml
 
 default:
-  tags: [docker]
+  tags: [openshift]
 
 ensure-images:
   image:
