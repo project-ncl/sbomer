@@ -54,7 +54,7 @@ deploy-stage:
   script:
     - *cert-default-scripts
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest-prev.yaml || true
-    - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
+    - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest.yaml || true
   needs:
     - job: ensure-images
@@ -118,7 +118,7 @@ deploy-prod:
   script:
     - *cert-default-scripts
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest-prev.yaml || true
-    - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_HOST}/project-ncl/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
+    - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${SHA_SHORT} --set cache.image.tag=${SHA_SHORT} --set service.image.tag=${SHA_SHORT} --values "https://${INTERNAL_GITLAB_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
     - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest.yaml || true
   needs:
     - job: promote
