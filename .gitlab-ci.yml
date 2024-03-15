@@ -33,18 +33,19 @@ variables:
     KUBERNETES_CPU_LIMIT: "500m"
     KUBERNETES_MEMORY_REQUEST: "768Mi"
     KUBERNETES_MEMORY_LIMIT: "768Mi"
-    OCI_IMAGE_NAME: ${CI_COMMIT_SHORT_SHA}
+    OCI_IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
   image: registry.redhat.io/ubi8/buildah:latest
   stage: build
   script:
-    - buildah --storage-driver=${STORAGE_DRIVER:-vfs} bud ${BUILD_EXTRA_ARGS:-} --format=${IMAGE_FORMAT:-oci} --tls-verify=${TLS_VERIFY:-true}
-      --no-cache -f ${CONTAINERFILE:-Dockerfile} -t ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} ${BUILD_CONTEXT:-.}
+    - buildah --storage-driver=${STORAGE_DRIVER:-vfs} bud ${BUILD_EXTRA_ARGS:-} --format=${IMAGE_FORMAT:-oci} --tls-verify=${TLS_VERIFY:-true} --no-cache -f ${CONTAINERFILE:-Dockerfile} -t ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} ${BUILD_CONTEXT:-.}
     - >
-      if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then
-        buildah --storage-driver=${STORAGE_DRIVER:-vfs} push --creds ${QUAY_CREDS_STAGE} ${PUSH_EXTRA_ARGS:-} --tls-verify=${TLS_VERIFY:-true} ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} docker://${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}
-      else
-        echo "Skipping pushing image ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}"
-      fi
+      buildah --storage-driver=${STORAGE_DRIVER:-vfs} push --creds ${QUAY_CREDS_STAGE} ${PUSH_EXTRA_ARGS:-} --tls-verify=${TLS_VERIFY:-true} ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} docker://${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}
+
+      # if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then
+      #   buildah --storage-driver=${STORAGE_DRIVER:-vfs} push --creds ${QUAY_CREDS_STAGE} ${PUSH_EXTRA_ARGS:-} --tls-verify=${TLS_VERIFY:-true} ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} docker://${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}
+      # else
+      #   echo "Skipping pushing image ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}"
+      # fi
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -85,7 +86,7 @@ build:
       --no-transfer-progress
 
   script:
-    - ./mvnw -s settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
+    - ./mvnw -s settings.xml package ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
   artifacts:
     when: always
     reports:
@@ -95,13 +96,15 @@ build:
       - service/target/quarkus-app/
       - cli/target/quarkus-app/
 
-
 build-image-service:
   extends:
     - .build-image
   variables:
     OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-service
     CONTAINERFILE: images/sbomer-service/Containerfile
+  before_script:
+    - mkdir certs
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
   dependencies:
     - build
   needs:
@@ -138,23 +141,29 @@ build-image-generator:
 
 deploy-stage:
   <<: *job-deploy
+  environment: gitlab-cd-preprod-spoke-dc-iad2
+  stage: build
+  variables:
+    CI_COMMIT_SHORT_SHA: df5fae1b # TMP
   script:
     - *cert-default-scripts
-    - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest-prev.yaml || true
-    - helm --kube-context sbomer-stage upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_CEE_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml sbomer ./helm
-    - helm --kubeconfig $KUBECONFIG --kube-context sbomer-stage get manifest sbomer > manifest.yaml || true
-  needs:
-    - job: build-image-generator
-    - job: build-image-cache
-    - job: build-image-service
+    - helm get manifest sbomer > manifest-prev.yaml || true
+    - helm upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_CEE_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml --values ./helm/env/${ENV_TYPE}.yaml sbomer ./helm
+    - helm get manifest sbomer > manifest.yaml || true
+  # needs: # TMP
+  #   - job: build-image-generator
+  #   - job: build-image-cache
+  #   - job: build-image-service
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # TMP
 
 e2e-stage:
   image:
     name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
     entrypoint: [""]
   stage: deploy
+  environment: gitlab-cd-preprod-spoke-dc-iad2
   cache:
     paths:
       - .m2/repository

@@ -1,0 +1,9 @@
+
+storage:
+  storageClassName: aws-ebs
+  reclaimPolicyAnnotation: kubernetes.io/reclaimPolicy
+  reclaimPolicy: Delete
+
+cache:
+  image:
+    repository: quay.io/rh-newcastle-stage/sbomer-cache

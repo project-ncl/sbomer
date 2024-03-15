@@ -45,9 +45,14 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
+      annotations:
+        {{ .Values.storage.reclaimPolicyAnnotation }}: {{ .Values.storage.reclaimPolicy }}
+      labels:
+        paas.redhat.com/appcode: PNC-001
     spec:
       accessModes:
         - {{ .Values.cache.storage.accessMode }}
+      storageClassName: {{ .Values.storage.storageClassName }}
       resources:
         requests:
           storage: {{ .Values.cache.storage.size }}

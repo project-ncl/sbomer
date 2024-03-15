@@ -84,3 +84,7 @@ service:
     repository: localhost/sbomer-service
     tag: latest
     pullPolicy: IfNotPresent
+
+
+storage:
+  storageClassName: manual

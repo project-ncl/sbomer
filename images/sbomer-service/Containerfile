@@ -81,6 +81,13 @@ FROM registry.access.redhat.com/ubi9/openjdk-17@sha256:816acfb1182efdec1875e2608
 
 ENV LANGUAGE='en_US:en'
 
+USER root
+
+COPY certs/2022-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
+RUN update-ca-trust
+
+USER default
+
 COPY --chown=185:0 images/sbomer-service/run.sh /deployments/
 CMD /deployments/run.sh
 
