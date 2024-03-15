@@ -1,11 +1,5 @@
 env: prod
 
-cache:
-  storage:
-    accessMode: ReadWriteOnce
-  image:
-    repository: quay.io/rh-newcastle/sbomer-cache
-
 service:
   route: 
     enabled: true

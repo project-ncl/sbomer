@@ -1,0 +1,8 @@
+storage:
+  storageClassName: netapp-nfs
+  reclaimPolicyAnnotation: trident.netapp.io/reclaimPolicy
+  reclaimPolicy: Delete
+
+cache:
+  image:
+    repository: quay.io/rh-newcastle-stage/sbomer-cache
