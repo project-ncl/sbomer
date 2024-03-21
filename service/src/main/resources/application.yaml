@@ -116,7 +116,7 @@ quarkus:
 
   # https://quarkus.io/guides/opentelemetry
   ## Opentelemetry configuration
-  opentelemetry:
+  otel:
     enabled: false
 
 sbomer:

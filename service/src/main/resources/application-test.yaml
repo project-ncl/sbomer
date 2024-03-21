@@ -30,7 +30,7 @@ quarkus:
   operator-sdk:
     start-operator: false
 
-  opentelemetry:
+  otel:
     enabled: false
 sbomer:
   controller:
