@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.util.Map;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -47,10 +48,13 @@ public class TaskRunOperationInitDependentResource
     public static final String RESULT_NAME = "operation-config";
     public static final String PARAM_OPERATION_ID_NAME = "operation-id";
     public static final String PARAM_OPERATION_CONFIG_NAME = "config";
-    public static final String TASK_NAME = "sbomer-operation-init";
+    public static final String TASK_SUFFIX = "-operation-init";
 
     @Inject
     TektonConfig tektonConfig;
+
+    @ConfigProperty(name = "SBOMER_RELEASE", defaultValue = "sbomer")
+    String release;
 
     TaskRunOperationInitDependentResource() {
         super(TaskRun.class);
@@ -110,7 +114,7 @@ public class TaskRunOperationInitDependentResource
                                 .withNewValue(generationRequest.getIdentifier())
                                 .build(),
                         new ParamBuilder().withName(PARAM_OPERATION_CONFIG_NAME).withNewValue(configStr).build())
-                .withTaskRef(new TaskRefBuilder().withName(TASK_NAME).build())
+                .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
                 .endSpec()
                 .build();
 
