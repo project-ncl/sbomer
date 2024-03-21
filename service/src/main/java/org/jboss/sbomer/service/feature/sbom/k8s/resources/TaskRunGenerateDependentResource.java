@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -57,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TaskRunGenerateDependentResource extends KubernetesDependentResource<TaskRun, GenerationRequest>
         implements BulkDependentResource<TaskRun, GenerationRequest> {
 
-    public static final String TASK_NAME = "sbomer-generate";
+    public static final String TASK_SUFFIX = "-generate";
 
     /**
      * Parameter holding the environment configuration for a given build.
@@ -74,6 +75,9 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     public static final String PARAM_COMMAND_INDEX_NAME = "index";
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+
+    @ConfigProperty(name = "SBOMER_RELEASE", defaultValue = "sbomer")
+    String release;
 
     @Inject
     TektonConfig tektonConfig;
@@ -175,12 +179,12 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                         new ParamBuilder().withName(PARAM_COMMAND_INDEX_NAME)
                                 .withNewValue(String.valueOf(index))
                                 .build())
-                .withTaskRef(new TaskRefBuilder().withName(TASK_NAME).build())
+                .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withSubPath(generationRequest.getMetadata().getName())
                                 .withName("data")
                                 .withPersistentVolumeClaim(
-                                        new PersistentVolumeClaimVolumeSourceBuilder().withClaimName("sbomer-sboms")
+                                        new PersistentVolumeClaimVolumeSourceBuilder().withClaimName(release + "-sboms")
                                                 .build())
                                 .build())
                 .endSpec()
