@@ -68,12 +68,7 @@ quarkus:
       verification: none
 
   # https://quarkus.io/guides/opentelemetry
-  opentelemetry:
+  otel:
     enabled: true
-    tracer:
+    traces:
       enabled: true
-      resource-attributes: "${OTLP_RESOURCE_ATTRIBUTES}"
-      exporter:
-        otlp:
-          # Send telemetry data to an opentelemetry-collector
-          endpoint: "${OTLP_EXPORTER_ENDPOINT}"
