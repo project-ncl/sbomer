@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.rest.v1alpha1;
 
-import static org.jboss.sbomer.service.feature.sbom.UserRoles.SYSTEM_USER;
+import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -377,7 +377,7 @@ public class SBOMResource {
 
     @DELETE
     @Path("/requests/{id}")
-    @RolesAllowed(SYSTEM_USER)
+    @RolesAllowed(USER_DELETE_ROLE)
     @Operation(
             summary = "Delete SBOM generation request specified by id",
             description = "Delete the specified SBOM generation request from the database")

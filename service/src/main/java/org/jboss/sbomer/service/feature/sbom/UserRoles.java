@@ -19,6 +19,6 @@ package org.jboss.sbomer.service.feature.sbom;
 
 public class UserRoles {
 
-    public static final String SYSTEM_USER = "system-user";
+    public static final String USER_DELETE_ROLE = "pnc-app-sbom-delete";
 
 }
