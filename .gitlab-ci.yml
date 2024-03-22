@@ -1,28 +1,23 @@
 default:
   tags: [openshift]
 
-variables:
-  KUBERNETES_CPU_REQUEST: "100m"
-  KUBERNETES_CPU_LIMIT: "200m"
-  KUBERNETES_MEMORY_REQUEST: "256Mi"
-  KUBERNETES_MEMORY_LIMIT: "512Mi"
-
 .cert-default-scripts: &cert-default-scripts
   - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2022-IT-Root-CA.pem
   - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2015-IT-Root-CA.pem
   - update-ca-certificates
 
-.job-deploy: &job-deploy
+.deploy:
+  variables:
+    RELEASE_HASH: ${CI_COMMIT_SHORT_SHA}
+    UPSTREAM_ENVIRONMENT_NAME: "${CI_ENVIRONMENT_NAME}"
+    HELM_KUBETOKEN: "${MPP_PIPELINE_TOKEN}"
+    HELM_KUBEAPISERVER: "https://${MPP_PIPELINE_SERVER}"
+    ROUTE_PREFIX: "${MPP_ROUTE_PREFIX}"
+    SBOMER_RELEASE: sbomer
   stage: deploy
-  image:
-    name: alpine/helm:3.14.2
-    entrypoint: [""]
-  artifacts:
-    name: manifests
-    when: always
-    paths:
-      - manifest-prev.yaml
-      - manifest.yaml
+  trigger:
+    project: appsvcs-platform/security/sbomer-helm
+    strategy: depend
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
@@ -39,13 +34,11 @@ variables:
   script:
     - buildah --storage-driver=${STORAGE_DRIVER:-vfs} bud ${BUILD_EXTRA_ARGS:-} --format=${IMAGE_FORMAT:-oci} --tls-verify=${TLS_VERIFY:-true} --no-cache -f ${CONTAINERFILE:-Dockerfile} -t ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} ${BUILD_CONTEXT:-.}
     - >
-      buildah --storage-driver=${STORAGE_DRIVER:-vfs} push --creds ${QUAY_CREDS_STAGE} ${PUSH_EXTRA_ARGS:-} --tls-verify=${TLS_VERIFY:-true} ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} docker://${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}
-
-      # if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then
-      #   buildah --storage-driver=${STORAGE_DRIVER:-vfs} push --creds ${QUAY_CREDS_STAGE} ${PUSH_EXTRA_ARGS:-} --tls-verify=${TLS_VERIFY:-true} ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} docker://${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}
-      # else
-      #   echo "Skipping pushing image ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}"
-      # fi
+      if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then
+        buildah --storage-driver=${STORAGE_DRIVER:-vfs} push --creds ${QUAY_CREDS_STAGE} ${PUSH_EXTRA_ARGS:-} --tls-verify=${TLS_VERIFY:-true} ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest} docker://${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}
+      else
+        echo "Skipping pushing image ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}"
+      fi
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -110,20 +103,6 @@ build-image-service:
   needs:
     - job: build
 
-build-image-cache:
-  extends:
-    - .build-image
-  variables:
-    OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-cache
-    CONTAINERFILE: images/sbomer-cache/Containerfile
-  before_script:
-    - mkdir certs
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
-  dependencies:
-    - build
-  needs:
-    - job: build
-
 build-image-generator:
   extends:
     - .build-image
@@ -140,42 +119,49 @@ build-image-generator:
     - job: build
 
 deploy-stage:
-  <<: *job-deploy
-  environment: gitlab-cd-preprod-spoke-dc-iad2
-  stage: build
+  extends:
+    - .deploy
   variables:
-    CI_COMMIT_SHORT_SHA: df5fae1b # TMP
-  script:
-    - *cert-default-scripts
-    - helm get manifest sbomer > manifest-prev.yaml || true
-    - helm upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_CEE_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/stage.yaml" --values ./helm/env/stage.yaml --values ./helm/env/${ENV_TYPE}.yaml sbomer ./helm
-    - helm get manifest sbomer > manifest.yaml || true
-  # needs: # TMP
-  #   - job: build-image-generator
-  #   - job: build-image-cache
-  #   - job: build-image-service
+    APP_ENV: stage
+  environment: gitlab-cd-preprod-spoke-aws-us-east-1
+  needs:
+    - job: build-image-generator
+    - job: build-image-service
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # TMP
 
 e2e-stage:
   image:
     name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
     entrypoint: [""]
   stage: deploy
-  environment: gitlab-cd-preprod-spoke-dc-iad2
+  environment: gitlab-cd-preprod-spoke-aws-us-east-1
   cache:
     paths:
       - .m2/repository
   resource_group: deploy
   timeout: 20m
   variables:
+    KUBERNETES_CPU_REQUEST: "400m"
+    KUBERNETES_CPU_LIMIT: "400m"
+    KUBERNETES_MEMORY_REQUEST: "1024Mi"
+    KUBERNETES_MEMORY_LIMIT: "1024Mi"
+    MAVEN_CLI_OPTS: >-
+      --batch-mode
+      --errors
+      --fail-at-end
+      --show-version
+      -DinstallAtEnd=true
+      -DdeployAtEnd=true
+      -Dsurefire.useFile=false
+      -Denforcer.skipRules=bannedRepositories
+      --no-transfer-progress
     MAVEN_OPTS: >-
       -Dhttps.protocols=TLSv1.2
       -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
       -Dorg.slf4j.simpleLogger.showDateTime=true
       -Djava.awt.headless=true
-      -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
+      -XX:InitialRAMPercentage=70 -XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
   script:
     - dnf install -y --setopt=tsflags=nodocs unzip zip
     - curl "https://get.sdkman.io" | bash
@@ -186,8 +172,9 @@ e2e-stage:
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
     - keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
-    - ./hack/run-test-e2e.sh -P e2e-stage -DsbomerStageUri="https://${SBOMER_STAGE_HOST}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
+    - ./hack/run-test-e2e.sh ${MAVEN_CLI_OPTS} -s settings.xml -P e2e-stage -DsbomerStageUri="https://sbomer-stage.${MPP_ROUTE_PREFIX}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
   artifacts:
+    when: always
     reports:
       junit:
         - "e2e/target/surefire-reports/**/*.xml"
@@ -200,12 +187,16 @@ promote:
   image:
     name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
     entrypoint: [""]
+  variables:
+    KUBERNETES_CPU_REQUEST: "100m"
+    KUBERNETES_CPU_LIMIT: "100m"
+    KUBERNETES_MEMORY_REQUEST: "256Mi"
+    KUBERNETES_MEMORY_LIMIT: "256Mi"
   stage: deploy
   when: manual
   resource_group: deploy
   script:
     - dnf install -y --setopt=tsflags=nodocs skopeo
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-cache:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-cache:${CI_COMMIT_SHORT_SHA}"
     - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-service:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-service:${CI_COMMIT_SHORT_SHA}"
     - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-generator:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-generator:${CI_COMMIT_SHORT_SHA}"
   needs:
@@ -214,21 +205,23 @@ promote:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 deploy-prod:
-  <<: *job-deploy
-  script:
-    - *cert-default-scripts
-    - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest-prev.yaml || true
-    - helm --kube-context sbomer-prod upgrade --install --wait --timeout 5m0s --set generator.image.tag=${CI_COMMIT_SHORT_SHA} --set cache.image.tag=${CI_COMMIT_SHORT_SHA} --set service.image.tag=${CI_COMMIT_SHORT_SHA} --values "https://${INTERNAL_GITLAB_CEE_HOST}/appsvcs-platform/security/sbomer-support/-/raw/main/helm/prod.yaml" --values ./helm/env/prod.yaml sbomer ./helm
-    - helm --kubeconfig $KUBECONFIG --kube-context sbomer-prod get manifest sbomer > manifest.yaml || true
+  extends:
+    - .deploy
+  variables:
+    APP_ENV: prod
+  environment: gitlab-cd-prod-spoke-aws-us-east-1
   needs:
     - job: promote
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 pages:
   image:
     name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
     entrypoint: [""]
+  variables:
+    KUBERNETES_CPU_REQUEST: "100m"
+    KUBERNETES_CPU_LIMIT: "100m"
+    KUBERNETES_MEMORY_REQUEST: "256Mi"
+    KUBERNETES_MEMORY_LIMIT: "256Mi"
   stage: deploy
   script:
     - dnf install -y --setopt=tsflags=nodocs make gcc-c++
