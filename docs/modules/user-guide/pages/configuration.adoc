@@ -78,7 +78,7 @@ products:
     generator:
       type: maven-domino
       args: "--config-file .domino/cccddd.json --warn-on-missing-scm"
-      version: "0.0.90"
+      version: "0.0.103"
 
   - processors:
       - type: redhat-product
@@ -119,7 +119,7 @@ Currently *default generator* is the CycloneDX Maven Plugin generator.
 === Domino Maven generator
 
 * Type: `maven-domino`
-* Default version: `0.0.100`.
+* Default version: `0.0.103`.
 
 Below you can see the static and default parameters set for the Domino generator.
 
