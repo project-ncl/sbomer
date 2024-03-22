@@ -11,7 +11,7 @@ include:
 .job-deploy: &job-deploy
   stage: deploy
   image:
-    name: alpine/helm:3.14.2
+    name: alpine/helm:3.14.3
     entrypoint: [""]
   artifacts:
     name: manifests
