@@ -24,12 +24,6 @@ if [ "${SCRIPT_DEBUG}" = "true" ] ; then
     echo "Script debugging is enabled"
 fi
 
-# if [ -f "/mnt/secrets/env.sh" ]; then
-#     source /mnt/secrets/env.sh
-# fi
-
-# -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heap-dump.hprof -XX:OnOutOfMemoryError='python /mnt/thread-heap-dump-script/thread_heap_dump_email.py'
-
 export JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError"
 
 exec /usr/local/s2i/run
