@@ -79,7 +79,7 @@ build:
       --no-transfer-progress
 
   script:
-    - ./mvnw -s settings.xml package ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
+    - ./mvnw -s .ci/settings.xml package ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
   artifacts:
     when: always
     reports:
@@ -172,7 +172,7 @@ e2e-stage:
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
     - keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
-    - ./hack/run-test-e2e.sh ${MAVEN_CLI_OPTS} -s settings.xml -P e2e-stage -DsbomerStageUri="https://sbomer-stage.${MPP_ROUTE_PREFIX}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
+    - ./hack/run-test-e2e.sh ${MAVEN_CLI_OPTS} -s .ci/settings.xml -P e2e-stage -DsbomerStageUri="https://sbomer-stage.${MPP_ROUTE_PREFIX}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
   artifacts:
     when: always
     reports:
