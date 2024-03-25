@@ -12,7 +12,7 @@ default:
     UPSTREAM_ENVIRONMENT_NAME: "${CI_ENVIRONMENT_NAME}"
     HELM_KUBETOKEN: "${MPP_PIPELINE_TOKEN}"
     HELM_KUBEAPISERVER: "https://${MPP_PIPELINE_SERVER}"
-    ROUTE_PREFIX: "${MPP_ROUTE_PREFIX}"
+    ROUTE_SUFFIX: "${MPP_ROUTE_SUFFIX}"
     SBOMER_RELEASE: sbomer
   stage: deploy
   trigger:
@@ -172,7 +172,7 @@ e2e-stage:
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
     - keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
-    - ./hack/run-test-e2e.sh ${MAVEN_CLI_OPTS} -s .ci/settings.xml -P e2e-stage -DsbomerStageUri="https://sbomer-stage.${MPP_ROUTE_PREFIX}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
+    - ./hack/run-test-e2e.sh ${MAVEN_CLI_OPTS} -s .ci/settings.xml -P e2e-stage -DsbomerStageUri="https://sbomer-stage.${MPP_ROUTE_SUFFIX}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
   artifacts:
     when: always
     reports:
