@@ -24,13 +24,6 @@ jobs:
       artifact: service
     secrets: inherit
 
-  image-cache:
-    name: "Image / Cache"
-    uses: ./.github/workflows/build-image.yml
-    with:
-      image: sbomer-cache
-    secrets: inherit
-
   image-generator:
     name: "Image / Generator"
     needs: build
