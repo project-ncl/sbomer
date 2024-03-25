@@ -30,4 +30,4 @@ set -x
 
 BUILDER=docker "$SCRIPT_DIR/internal/build-image.sh" "sbomer-service"
 BUILDER=docker "$SCRIPT_DIR/internal/build-image.sh" "sbomer-generator"
-BUILDER=docker "$SCRIPT_DIR/internal/build-image.sh" "sbomer-cache"
+
