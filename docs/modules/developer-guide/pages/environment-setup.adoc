@@ -1,5 +1,5 @@
 = Environment Setup
-:tekton-version: v0.41.3
+:tekton-version: v0.53.3
 
 This page provides a list of actions that needs to be performed and tools that needs to be installed
 in order to develop SBOMer.
@@ -73,19 +73,22 @@ To prepare minikube just run the `./hack/minikube-setup.sh` command.
 [source,console]
 ----
 $ ./hack/minikube-setup.sh
-😄  [sbomer] minikube v1.30.1 on Fedora 39
+😄  [sbomer] minikube v1.32.0 on Arch
 ✨  Using the kvm2 driver based on user configuration
 👍  Starting control plane node sbomer in cluster sbomer
-🔥  Creating kvm2 VM (CPUs=4, Memory=4096MB, Disk=20480MB) ...
-🐳  Preparing Kubernetes v1.24.12 on Docker 20.10.23 ...
+💾  Downloading Kubernetes v1.25.16 preload ...
+    > preloaded-images-k8s-v18-v1...:  388.63 MiB / 388.63 MiB  100.00% 38.33 M
+    > kubeadm.sha256:  64 B / 64 B [-------------------------] 100.00% ? p/s 0s
+    > kubeadm:  42.56 MiB / 42.56 MiB [--------------] 100.00% 1.53 MiB p/s 28s
+
+🐳  Preparing Kubernetes v1.25.16 on Docker 24.0.7 ...
     ▪ Generating certificates and keys ...
     ▪ Booting up control plane ...
     ▪ Configuring RBAC rules ...
 🔗  Configuring bridge CNI (Container Networking Interface) ...
-    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
 🔎  Verifying Kubernetes components...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
 🌟  Enabled addons: storage-provisioner, default-storageclass
-    ▪ Want kubectl v1.24.12? Try 'minikube kubectl -- get pods -A'
 🏄  Done! kubectl is now configured to use "sbomer" cluster and "default" namespace by default
 ----
 
@@ -142,41 +145,6 @@ $ kubectl config use-context sbomer-local
 Switched to context "sbomer-local".
 ----
 
-=== Secrets
-
-We need to create `sbomer-redhatio-pull-secret` pull secret to be able to pull images from Red Hat registry.
-
-==== Red Hat Image Registry Pull Secret
-
-We use image(s) from Red Hat Container Registry. You can authenticate with the registry.redhat.io registry by
-link:https://access.redhat.com/terms-based-registry/#/[generating a token on this page].
-
-Once you generate the token, download the secret. Downloaded secret will have a generated name. We need to adjust it.
-Please edit the file and ensure that the name of the resource is `sbomer-redhatio-pull-secret`. It should look similar to this:
-
-[source,yaml,highlight=2]
-----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: sbomer-redhatio-pull-secret
-  labels:
-    app.kubernetes.io/name: "sbomer"
-data:
-  .dockerconfigjson: AWESOMEBASE64CONTENT===
-type: kubernetes.io/dockerconfigjson
-----
-
-Then apply it.
-
-[source,console]
-----
-$ kubectl apply -f sbomer-redhatio-pull-secret.yaml
-secret/sbomer-redhatio-pull-secret created
-----
-
-==== Quay Pull Secret
-
 === Tekton Installation
 
 We need to install Tekton manually. To be as close as possible to the staging and production deployment we should use
@@ -189,13 +157,18 @@ namespace/tekton-pipelines created
 clusterrole.rbac.authorization.k8s.io/tekton-pipelines-controller-cluster-access created
 clusterrole.rbac.authorization.k8s.io/tekton-pipelines-controller-tenant-access created
 clusterrole.rbac.authorization.k8s.io/tekton-pipelines-webhook-cluster-access created
+clusterrole.rbac.authorization.k8s.io/tekton-events-controller-cluster-access created
 role.rbac.authorization.k8s.io/tekton-pipelines-controller created
+role.rbac.authorization.k8s.io/tekton-pipelines-webhook created
+role.rbac.authorization.k8s.io/tekton-pipelines-events-controller created
+role.rbac.authorization.k8s.io/tekton-pipelines-leader-election created
+role.rbac.authorization.k8s.io/tekton-pipelines-info created
+serviceaccount/tekton-pipelines-controller created
 
 ...
 
-configmap/git-resolver-config created
-configmap/hubresolver-config created
 deployment.apps/tekton-pipelines-remote-resolvers created
+service/tekton-pipelines-remote-resolvers created
 horizontalpodautoscaler.autoscaling/tekton-pipelines-webhook created
 deployment.apps/tekton-pipelines-webhook created
 service/tekton-pipelines-webhook created
