@@ -25,7 +25,6 @@ import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
-import org.jboss.sbomer.service.feature.sbom.features.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
@@ -58,9 +57,6 @@ public class SbomService {
 
     @Inject
     Validator validator;
-
-    @Inject
-    FeatureFlags featureFlags;
 
     @Inject
     NotificationService notificationService;

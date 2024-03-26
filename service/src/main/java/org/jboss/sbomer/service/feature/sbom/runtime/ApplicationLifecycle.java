@@ -40,8 +40,6 @@ public class ApplicationLifecycle {
     FeatureFlags featureFlags;
 
     void onStart(@Observes StartupEvent event) {
-        log.info("SBOMer will run in dry-run mode");
-
         // we need to log startup and shutdown events
         log.info("Application has started");
     }
