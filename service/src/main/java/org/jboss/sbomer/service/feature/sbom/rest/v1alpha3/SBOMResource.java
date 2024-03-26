@@ -35,6 +35,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.utils.PaginationParameters;
+import org.jboss.sbomer.service.feature.sbom.features.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -76,6 +77,9 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
 
     @Inject
     V1Alpha3Mapper mapper;
+
+    @Inject
+    FeatureFlags featureFlags;
 
     @Override
     protected Object mapSbom(Sbom sbom) {
@@ -140,6 +144,12 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
 
     public Response generate(@PathParam("buildId") String buildId, Config config) throws Exception {
+        if (featureFlags.isDryRun()) {
+            log.warn(
+                    "Skipping creating new Generation Request for buildId '{}' because of SBOMer running in dry-run mode",
+                    buildId);
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        }
 
         return super.generate(buildId, config);
     }
@@ -299,6 +309,12 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
 
     public Response generateFromOperation(@PathParam("operationId") String operationId, OperationConfig config)
             throws Exception {
+        if (featureFlags.isDryRun()) {
+            log.warn(
+                    "Skipping creating new Generation Request for operationId '{}' because of SBOMer running in dry-run mode",
+                    operationId);
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        }
 
         log.info("New generation request for operation id '{}'", operationId);
         log.debug("Creating GenerationRequest Kubernetes resource...");

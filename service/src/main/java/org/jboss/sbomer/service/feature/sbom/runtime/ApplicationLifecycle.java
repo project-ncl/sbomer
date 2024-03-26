@@ -19,6 +19,9 @@ package org.jboss.sbomer.service.feature.sbom.runtime;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+
+import org.jboss.sbomer.service.feature.sbom.features.FeatureFlags;
 
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
@@ -33,7 +36,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ApplicationLifecycle {
 
+    @Inject
+    FeatureFlags featureFlags;
+
     void onStart(@Observes StartupEvent event) {
+        log.info("SBOMer will run in dry-run mode");
 
         // we need to log startup and shutdown events
         log.info("Application has started");
