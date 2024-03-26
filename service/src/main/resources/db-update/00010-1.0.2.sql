@@ -41,5 +41,10 @@ BEGIN transaction;
     CREATE INDEX idx_request_identifier ON sbom_generation_request (identifier);
     CREATE INDEX idx_request_type ON sbom_generation_request (type);
 
+    INSERT INTO
+        db_version (version, creation_time)
+    VALUES
+        ('00010', now ());
+
 COMMIT;
 
