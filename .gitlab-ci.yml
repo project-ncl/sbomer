@@ -194,7 +194,6 @@ promote:
     KUBERNETES_MEMORY_REQUEST: "256Mi"
     KUBERNETES_MEMORY_LIMIT: "256Mi"
   stage: deploy
-  when: manual
   resource_group: deploy
   script:
     - dnf install -y --setopt=tsflags=nodocs skopeo
@@ -208,6 +207,7 @@ promote:
 deploy-prod:
   extends:
     - .deploy
+  when: manual
   variables:
     APP_ENV: prod
   environment: gitlab-cd-prod-spoke-aws-us-east-1
