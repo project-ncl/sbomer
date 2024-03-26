@@ -82,7 +82,7 @@ public class NotificationService {
     OperationGenerationFinishedMessageBodyValidator operationValidator;
 
     public void notifyCompleted(List<org.jboss.sbomer.service.feature.sbom.model.Sbom> sboms) {
-        if (!featureFlags.isDryRun()) {
+        if (featureFlags.isDryRun()) {
             log.info("SBOMer running in dry-run mode, notification service won't send the notification");
             return;
         }
