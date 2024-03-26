@@ -38,6 +38,7 @@ import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.utils.PaginationParameters;
+import org.jboss.sbomer.service.feature.sbom.features.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -87,6 +88,9 @@ public class SBOMResource {
 
     @Inject
     protected ConfigSchemaValidator configSchemaValidator;
+
+    @Inject
+    FeatureFlags featureFlags;
 
     @Inject
     protected V1Alpha1Mapper mapper;
@@ -246,6 +250,13 @@ public class SBOMResource {
 
     public Response generate(@PathParam("buildId") String buildId, Config config) throws Exception {
 
+        if (featureFlags.isDryRun()) {
+            log.warn(
+                    "Skipping creating new Generation Request for buildId '{}' because of SBOMer running in dry-run mode",
+                    buildId);
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        }
+
         try {
             MDCUtils.addBuildContext(buildId);
 
@@ -392,6 +403,10 @@ public class SBOMResource {
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
     public Response deleteGenerationRequest(@PathParam("id") final String id) {
+        if (featureFlags.isDryRun()) {
+            log.warn("Skipping deletion of Generation Request '{}' because of SBOMer running in dry-run mode", id);
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        }
 
         try {
             MDCUtils.addProcessContext(id);

@@ -27,6 +27,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.dto.v1alpha3.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
+import org.jboss.sbomer.service.feature.sbom.features.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 
@@ -60,6 +61,9 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
 
     @Inject
     protected V1Alpha2Mapper mapper;
+
+    @Inject
+    FeatureFlags featureFlags;
 
     protected Object mapSbomRecordPage(Page<BaseSbomRecord> sbomRecords) {
         return mapper.toV2SbomRecordPage(sbomRecords);
@@ -202,6 +206,10 @@ public class SBOMResource extends org.jboss.sbomer.service.feature.sbom.rest.v1a
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)), })
     public Response notify(@PathParam("id") String sbomId) throws Exception {
+        if (featureFlags.isDryRun()) {
+            log.warn("Skipping notification for SBOM '{}' because of SBOMer running in dry-run mode", sbomId);
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        }
 
         Sbom sbom = doGetBomById(sbomId);
         sbomService.notifyCompleted(sbom);

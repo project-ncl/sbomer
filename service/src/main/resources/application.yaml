@@ -53,6 +53,19 @@ quarkus:
       group-id: com.fasterxml.jackson.jakarta.rs
       artifact-id: jackson-jakarta-rs-yaml-provider
 
+  # Support for feature-flags
+  unleash:
+    # Disable extension by default
+    active: false
+    # By default we use the 'dev' application name
+    application: dev
+    # Fetch flags every 30s
+    fetch-toggles-interval: 30
+    # Fetch initial update in synchronous way
+    synchronous-fetch-on-initialisation: true
+    # The Unleash server URL
+    url: "https://localhost"
+
   # Default logging settings
   log:
     level: INFO

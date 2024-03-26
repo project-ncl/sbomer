@@ -37,6 +37,7 @@ import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Operation;
+import org.jboss.sbomer.service.feature.sbom.features.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
@@ -66,6 +67,9 @@ public class NotificationService {
     SbomRepository sbomRepository;
 
     @Inject
+    FeatureFlags featureFlags;
+
+    @Inject
     UmbConfig umbConfig;
 
     @Inject
@@ -78,9 +82,13 @@ public class NotificationService {
     OperationGenerationFinishedMessageBodyValidator operationValidator;
 
     public void notifyCompleted(List<org.jboss.sbomer.service.feature.sbom.model.Sbom> sboms) {
+        if (!featureFlags.isDryRun()) {
+            log.info("SBOMer running in dry-run mode, notification service won't send the notification");
+            return;
+        }
 
         if (!umbConfig.isEnabled()) {
-            log.info("UMB feature disabled, notification service won't send a notification");
+            log.info("UMB feature disabled, notification service won't send the notification");
             return;
         }
 
