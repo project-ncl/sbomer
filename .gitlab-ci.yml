@@ -98,6 +98,7 @@ build-image-service:
   before_script:
     - mkdir certs
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:
