@@ -20,7 +20,7 @@
           "creationTime": "2021-09-15T11:26:52.852Z",
           "generationRequest": {
             "id": "AABBCC",
-            "buildId": "QUARKUS",
+            "identifier": "QUARKUS",
             "type": "BUILD",
             "creationTime": "2021-09-15T11:26:52.852Z",
             "config": {

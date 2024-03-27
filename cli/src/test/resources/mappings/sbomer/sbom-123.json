@@ -1,13 +1,13 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha2/sboms/123"
+    "url": "/api/v1alpha3/sboms/123"
   },
   "response": {
     "status": 200,
     "jsonBody": {
       "id": "123",
-      "buildId": "QUARKUS",
+      "identifier": "QUARKUS",
       "rootPurl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
       "configIndex": 0,
       "statusMessage": "FINISHED",
@@ -64,7 +64,7 @@
       },
       "generationRequest": {
         "id": "AABBCC",
-        "buildId": "QUARKUS",
+        "identifier": "QUARKUS",
         "config": {
           "buildId": "QUARKUS",
           "products": [
