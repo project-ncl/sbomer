@@ -23,9 +23,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.cli.feature.sbom.client.SBOMerClient;
-import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
-import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
@@ -59,10 +58,10 @@ public class SBOMerClientTestIT {
         assertNotNull(sbom);
         assertNotNull(sbom.sbom());
         assertEquals("123", sbom.id());
-        assertEquals("QUARKUS", sbom.buildId());
+        assertEquals("QUARKUS", sbom.identifier());
         assertNotNull(sbom.generationRequest());
         assertEquals("AABBCC", sbom.generationRequest().id());
-        assertEquals("QUARKUS", sbom.generationRequest().buildId());
+        assertEquals("QUARKUS", sbom.generationRequest().identifier());
     }
 
     @Test
@@ -83,13 +82,13 @@ public class SBOMerClientTestIT {
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord>> typeReference = new TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord>>() {
+        TypeReference<Page<SbomRecord>> typeReference = new TypeReference<Page<SbomRecord>>() {
         };
         try {
-            Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord> sboms = objectMapper.readValue(json, typeReference);
+            Page<SbomRecord> sboms = objectMapper.readValue(json, typeReference);
             assertNotNull(sboms);
             assertEquals("123", sboms.getContent().iterator().next().id());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().buildId());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().identifier());
         } catch (JsonMappingException e) {
             fail(e.getMessage());
         } catch (JsonProcessingException e) {
@@ -109,14 +108,14 @@ public class SBOMerClientTestIT {
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord>> typeReference = new TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord>>() {
+        TypeReference<Page<SbomRecord>> typeReference = new TypeReference<Page<SbomRecord>>() {
         };
         try {
-            Page<org.jboss.sbomer.core.dto.v1alpha2.SbomRecord> sboms = objectMapper.readValue(json, typeReference);
+            Page<SbomRecord> sboms = objectMapper.readValue(json, typeReference);
             assertNotNull(sboms);
             assertEquals("123", sboms.getContent().iterator().next().id());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().buildId());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().generationRequest().buildId());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().identifier());
+            assertEquals("QUARKUS", sboms.getContent().iterator().next().generationRequest().identifier());
 
         } catch (JsonMappingException e) {
             fail(e.getMessage());
@@ -136,14 +135,13 @@ public class SBOMerClientTestIT {
         String json = response.readEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord>> typeReference = new TypeReference<Page<org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord>>() {
+        TypeReference<Page<SbomGenerationRequestRecord>> typeReference = new TypeReference<Page<SbomGenerationRequestRecord>>() {
         };
         try {
-            Page<org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord> sbomRequests = objectMapper
-                    .readValue(json, typeReference);
+            Page<SbomGenerationRequestRecord> sbomRequests = objectMapper.readValue(json, typeReference);
             assertNotNull(sbomRequests);
             assertEquals("AABBCC", sbomRequests.getContent().iterator().next().id());
-            assertEquals("QUARKUS", sbomRequests.getContent().iterator().next().buildId());
+            assertEquals("QUARKUS", sbomRequests.getContent().iterator().next().identifier());
         } catch (JsonMappingException e) {
             fail(e.getMessage());
         } catch (JsonProcessingException e) {
