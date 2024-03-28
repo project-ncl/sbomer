@@ -49,20 +49,41 @@ If you change under following directories you will be required to rebuild images
 - `core/` (most probably)
 - `images/` (this one is obvious, I guess)
 
-== Setup SBOMer Using Helm
+== Deploy SBOMer Using Helm
 
 Please follow link:https://helm.sh/docs/intro/install/[upstream documentation] to install Helm.
 
+You need to clone the link:https://gitlab.cee.redhat.com/appsvcs-platform/security/sbomer-helm[sbomer-help] repository
+to continue.
+
+[WARNING]
+====
+Always please make syre you use the correct Kubernetes context to prevent damages to environments you didn't want to touch!
+
+This can be done by specifying `--kube-context` option in Helm and `--context` in `kubectl`.
+
+Please refer to the xref:environment-setup.adoc#managing-kubernetes-contexts[setup guide] for more information about managing contexts.
+====
+
+Using the `main` branch run the upgrade command.
+
 [source,console]
 ----
-$ helm --kube-context sbomer-local upgrade --install --values https://gitlab.cee.redhat.com/appsvcs-platform/security/sbomer-support/-/raw/main/helm/dev.yaml sbomer ./helm/
-Release "sbomer" does not exist. Installing it now.
+$ helm sbomer-local upgrade --install  --values env/app/prod.yaml sbomer .
+Release "sbomer" has been upgraded. Happy Helming!
 NAME: sbomer
-LAST DEPLOYED: Fri Jan 12 12:27:09 2024
+LAST DEPLOYED: Thu Mar 28 09:45:49 2024
 NAMESPACE: default
 STATUS: deployed
-REVISION: 1
+REVISION: 3
 TEST SUITE: None
+NOTES:
+This is SBOMer 'sbomer' release.
+
+Application environment: prod.
+Application version: dev.
+Deployment type: dev.
+Deployment target: minikube.
 ----
 
 After some time you should see the `cache` link:https://kubernetes.io/docs/concepts/workloads/controllers/deployment/[Deployment]
