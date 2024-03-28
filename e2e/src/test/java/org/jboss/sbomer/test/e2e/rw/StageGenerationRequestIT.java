@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -54,6 +55,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     static String nodeJsNpmGenerationRequestId;
 
     @Test
+    @Disabled("Disabled until we will have a fix for Domino 0.0.103")
     public void testSuccessfulGenerationMavenBuild() throws IOException {
         mavenGenerationRequestId = requestGeneration(MAVEN_BUILD_ID);
 
