@@ -57,6 +57,11 @@ public class MavenDominoGenerator implements SbomGenerator {
      * Path to the Maven {@code settings.xml} file. Relative to {@link #workDir}.
      */
     Path settingsXmlPath;
+    /**
+     * Location of the Java binary to be used by Domino.
+     */
+    @Builder.Default
+    String dominoJava = "java";
 
     /**
      * Perform validation of the Domino tool.
@@ -116,9 +121,11 @@ public class MavenDominoGenerator implements SbomGenerator {
     private String[] command(Path dominoToolPath, Path workDir, String... args) {
         List<String> cmd = new ArrayList<>();
 
+        log.debug("Using following Java binary to run Domino: '{}'", dominoJava);
+
         cmd.addAll(
                 Arrays.asList(
-                        "java",
+                        dominoJava,
                         "-Xms256m",
                         "-Xmx512m",
                         // Workaround for Domino trying to parse what it shouldn't parse

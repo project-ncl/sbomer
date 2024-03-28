@@ -19,6 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.nio.file.Path;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.cli.feature.sbom.generate.MavenDominoGenerator;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
@@ -42,6 +43,9 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
             converter = PathConverter.class)
     Path dominoDir;
 
+    @ConfigProperty(name = "domino.java.bin", defaultValue = "java")
+    String dominoJava;
+
     @Override
     protected GeneratorType generatorType() {
         return GeneratorType.MAVEN_DOMINO;
@@ -52,6 +56,7 @@ public class MavenDominoGenerateCommand extends AbstractMavenGenerateCommand {
         MavenDominoGenerator generator = MavenDominoGenerator.builder()
                 .withDominoDir(dominoDir)
                 .withDominoVersion(toolVersion())
+                .withDominoJava(dominoJava)
                 .withSettingsXmlPath(settingsXmlPath)
                 .build();
 

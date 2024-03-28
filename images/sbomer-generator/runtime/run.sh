@@ -108,5 +108,10 @@ esac
 # SBOMer environment
 source "${HOME}/env.sh"
 
+# Ensure that we use a specifc version for Domino
+#
+# See: https://issues.redhat.com/browse/SBOMER-69
+export DOMINO_JAVA_BIN="${HOME}/.sdkman/candidates/java/17/bin/java"
+
 echo "Running generation..."
 exec "${HOME}/.sdkman/candidates/java/17/bin/java" -Duser.home=/workdir -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config "${config_path}" --index "${index}"

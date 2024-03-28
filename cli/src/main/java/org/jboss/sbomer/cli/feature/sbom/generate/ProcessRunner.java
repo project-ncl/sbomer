@@ -22,6 +22,7 @@ import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -74,7 +75,7 @@ public class ProcessRunner {
     }
 
     /**
-     * Run the {@link Process} for the
+     * Executes the provided {@code command} in the {@code workDir}.
      *
      * @param workDir The {@link Path} to the working directory
      * @param command The command to execute
