@@ -34,6 +34,4 @@ public interface SbomerConfig {
     List<String> purlQualifiersAllowList();
 
     ControllerConfig controller();
-
-    TektonConfig tekton();
 }

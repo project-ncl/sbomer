@@ -23,7 +23,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
@@ -37,7 +36,6 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.CRUDNoGCKubernetesDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependent;
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @KubernetesDependent(resourceDiscriminator = OperationInitResourceDiscriminator.class)
@@ -49,9 +47,7 @@ public class TaskRunOperationInitDependentResource
     public static final String PARAM_OPERATION_ID_NAME = "operation-id";
     public static final String PARAM_OPERATION_CONFIG_NAME = "config";
     public static final String TASK_SUFFIX = "-operation-init";
-
-    @Inject
-    TektonConfig tektonConfig;
+    public static final String SA_SUFFIX = "-sa";
 
     @ConfigProperty(name = "SBOMER_RELEASE", defaultValue = "sbomer")
     String release;
@@ -108,7 +104,7 @@ public class TaskRunOperationInitDependentResource
                                 .build())
                 .endMetadata()
                 .withNewSpec()
-                .withServiceAccountName(tektonConfig.sa())
+                .withServiceAccountName(release + SA_SUFFIX)
                 .withParams(
                         new ParamBuilder().withName(PARAM_OPERATION_ID_NAME)
                                 .withNewValue(generationRequest.getIdentifier())
