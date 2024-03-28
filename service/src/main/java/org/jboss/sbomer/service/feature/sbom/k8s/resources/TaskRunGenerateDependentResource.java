@@ -29,7 +29,6 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
@@ -59,6 +58,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
         implements BulkDependentResource<TaskRun, GenerationRequest> {
 
     public static final String TASK_SUFFIX = "-generate";
+    public static final String SA_SUFFIX = "-sa";
 
     /**
      * Parameter holding the environment configuration for a given build.
@@ -78,9 +78,6 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
 
     @ConfigProperty(name = "SBOMER_RELEASE", defaultValue = "sbomer")
     String release;
-
-    @Inject
-    TektonConfig tektonConfig;
 
     @Inject
     KubernetesClient kubernetesClient;
@@ -171,7 +168,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
                                 .build())
                 .endMetadata()
                 .withNewSpec()
-                .withServiceAccountName(tektonConfig.sa())
+                .withServiceAccountName(release + SA_SUFFIX)
                 .withTimeout(timeout)
                 .withParams(
                         new ParamBuilder().withName(PARAM_COMMAND_ENV_CONFIG_NAME).withNewValue(envConfigStr).build(),

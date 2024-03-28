@@ -138,11 +138,6 @@ sbomer:
       # Disable UMB feature entirely by default
       enabled: false
 
-  # Tekton-related configuration
-  tekton:
-    # Name of the ServiceAccount used to run Tekton TaskRuns
-    sa: sbomer
-
   controller:
     generation-request:
       # # The directory where the content between TaskRuns (dependent resources) will be

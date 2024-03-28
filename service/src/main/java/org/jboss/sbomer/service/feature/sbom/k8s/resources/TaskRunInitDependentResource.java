@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
-import org.jboss.sbomer.service.feature.sbom.config.TektonConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
@@ -33,7 +32,6 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.CRUDNoGCKubernetesDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependent;
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @KubernetesDependent(resourceDiscriminator = InitResourceDiscriminator.class)
@@ -43,12 +41,10 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
     public static final String RESULT_NAME = "config";
     public static final String PARAM_BUILD_ID_NAME = "build-id";
     public static final String TASK_SUFFIX = "-init";
+    public static final String SA_SUFFIX = "-sa";
 
     @ConfigProperty(name = "SBOMER_RELEASE", defaultValue = "sbomer")
     String release;
-
-    @Inject
-    TektonConfig tektonConfig;
 
     TaskRunInitDependentResource() {
         super(TaskRun.class);
@@ -95,7 +91,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                 .endMetadata()
 
                 .withNewSpec()
-                .withServiceAccountName(tektonConfig.sa())
+                .withServiceAccountName(release + SA_SUFFIX)
                 .withParams(
                         new ParamBuilder().withName(PARAM_BUILD_ID_NAME)
                                 .withNewValue(generationRequest.getIdentifier())
