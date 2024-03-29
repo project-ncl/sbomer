@@ -97,7 +97,7 @@ public class FeatureFlags implements UnleashSubscriber {
                 updateToggles(toggleResponse);
                 break;
             case NOT_CHANGED:
-                log.debug("No changes detected to feature flags");
+                log.trace("No changes detected to feature flags");
                 break;
             default:
                 break;
