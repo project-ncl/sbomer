@@ -79,7 +79,7 @@ build:
       --no-transfer-progress
 
   script:
-    - ./mvnw -s .ci/settings.xml package ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
+    - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
   artifacts:
     when: always
     reports:
