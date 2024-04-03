@@ -46,6 +46,20 @@ public class ErrorResourcesIT {
     SbomService sbomService;
 
     @Test
+    void testHandlingNotFoundResource() {
+        RestAssured.given()
+                .when()
+                .get("/api/alph/sms/doesnotexist")
+                .then()
+                .statusCode(404)
+                .body("resource", CoreMatchers.is("/api/alph/sms/doesnotexist"))
+                .body("errorId", CoreMatchers.isA(String.class))
+                .body("error", CoreMatchers.is("Not Found"))
+                .body("message", CoreMatchers.is("Requested resource '/api/alph/sms/doesnotexist' was not found"))
+                .body("$", Matchers.not(Matchers.hasKey("errors")));
+    }
+
+    @Test
     void testHandlingNotFoundSbom() {
         RestAssured.given()
                 .when()
