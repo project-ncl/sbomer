@@ -20,35 +20,40 @@
 
 set -e
 
-if [ "$#" -ne 1 ]; then
-    echo "Illegal number of parameters, provided $#, required: 1"
+if [ "$#" -ne 2 ]; then
+    echo "Illegal number of parameters, provided $#, required: 2"
     echo
     echo "Usage:"
-    echo "    ${0} [LATEST_RELEASE_COMMIT_HASH]"
+    echo "    ${0} [PREVIOUS_RELEASE_HASH] [LATEST_RELEASE_HASH]"
     echo
     echo "Example:"
-    echo "    ${0} adcc6d1"
+    echo "    ${0} adcc6d1 307f4724"
     exit 1
 fi
 
-git fetch upstream > /dev/null
+KUBE_CONTEXT="${KUBE_CONTEXT:-aws-prod}"
 
-COMMIT=$(git rev-parse --short upstream/main)
+release_from="${1}"
+release_to="${2}"
 
 export TZ=":UTC"
 
-DEPLOYMENT_DATE=$(date -d "$(helm --kube-context sbomer-prod get metadata sbomer | grep DEPLOYED_AT | awk -F': ' '{ print $2 }')" +"%Y-%m-%d %H:%M %Z")
+echo "---- Release history ----"
+helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int history sbomer
 
+DEPLOYMENT_DATE=$(date -d "$(helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int get metadata sbomer | grep DEPLOYED_AT | awk -F': ' '{ print $2 }')" +"%Y-%m-%d %H:%M %Z")
+
+echo
 echo "---- Commits ----"
 
-git log "${1}..${COMMIT}" --oneline --no-merges --pretty="format:%h (%an) %s"
+git log "${release_from}..${release_to}" --oneline --no-merges --pretty="format:%h (%an) %s"
 
 echo
 echo "---- Release Notes Entry ----"
-echo "##:jira-major: :jira-minor: :date: ${DEPLOYMENT_DATE}"
+echo "## :date: ${DEPLOYMENT_DATE}"
 echo "### Changes"
 echo "- TBD"
 echo "### Details"
-echo "- Release \`${COMMIT}\`"
-echo "- [Code](https://github.com/project-ncl/sbomer/tree/${COMMIT})"
-echo "- [Commits](https://github.com/project-ncl/sbomer/compare/${1}...${COMMIT})"
+echo "- Release \`${release_to}\`"
+echo "- [Code](https://github.com/project-ncl/sbomer/tree/${release_to})"
+echo "- [Commits](https://github.com/project-ncl/sbomer/compare/${release_from}...${release_to})"
