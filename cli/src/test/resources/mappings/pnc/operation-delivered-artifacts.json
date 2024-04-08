@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/pnc-rest/v2/deliverable-analyses/A5RPHL7Y3AIAA/analyzed-artifacts?pageIndex=0&pageSize=100"
+    "url": "/pnc-rest/v2/deliverable-analyses/A5RPHL7Y3AIAA/analyzed-artifacts?pageSize=100&pageIndex=0"
   },
   "response": {
     "status": 200,

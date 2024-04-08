@@ -64,7 +64,7 @@
         <version.quarkus-jgit>3.1.0</version.quarkus-jgit>
         <version.quarkus-unleash>1.5.0</version.quarkus-unleash>
         <version.lombok>1.18.30</version.lombok>
-        <version.pnc-rest>2.7.0-SNAPSHOT</version.pnc-rest>
+        <version.pnc-rest>2.8.0-SNAPSHOT</version.pnc-rest>
         <version.tekton-client>1.0.1</version.tekton-client>
         <version.rsql-parser>2.1.0</version.rsql-parser>
         <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
