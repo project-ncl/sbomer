@@ -101,12 +101,12 @@ public abstract class E2EBase {
                 .contentType(ContentType.JSON)
                 .post(String.format("/api/v1alpha2/sboms/generate/build/%s", buildId));
 
-        // We are providing the configuration so the status will jump to INITIALIZED, not NEW
+        // We are providing the configuration so the status will jump to INITIALIZING, not NEW
         response.then()
                 .statusCode(202)
                 .body("buildId", CoreMatchers.is(buildId))
                 .and()
-                .body("status", CoreMatchers.is("INITIALIZED"));
+                .body("status", CoreMatchers.is("INITIALIZING"));
 
         return response.body().path("id").toString();
     }
