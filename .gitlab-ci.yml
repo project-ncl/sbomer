@@ -11,10 +11,12 @@ default:
     RELEASE_HASH: ${CI_COMMIT_SHORT_SHA}
     UPSTREAM_ENVIRONMENT_NAME: "${CI_ENVIRONMENT_NAME}" # TODO: Remove
     GITLAB_ENVIRONMENT: "${CI_ENVIRONMENT_NAME}"
+    HELM_NAMESPACE: "${HELM_NAMESPACE}"
     HELM_KUBETOKEN: "${MPP_PIPELINE_TOKEN}"
     HELM_KUBEAPISERVER: "https://${MPP_PIPELINE_SERVER}"
     ROUTE_SUFFIX: "${MPP_ROUTE_SUFFIX}"
     SBOMER_RELEASE: sbomer
+    HAPROXY_BACKUP_SERVERS: "${HAPROXY_BACKUP_SERVERS}"
   stage: deploy
   trigger:
     project: appsvcs-platform/security/sbomer-helm
@@ -205,7 +207,17 @@ promote:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-deploy-prod:
+deploy-prod-iad2:
+  extends:
+    - .deploy
+  when: manual
+  variables:
+    APP_ENV: prod
+  environment: gitlab-cd-prod-spoke-dc-iad2
+  needs:
+    - job: promote
+
+deploy-prod-aws:
   extends:
     - .deploy
   when: manual
@@ -213,7 +225,7 @@ deploy-prod:
     APP_ENV: prod
   environment: gitlab-cd-prod-spoke-aws-us-east-1
   needs:
-    - job: promote
+    - job: deploy-prod-iad2
 
 pages:
   image:
