@@ -21,13 +21,17 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
-import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.Tool;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
@@ -45,6 +49,10 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+import com.github.packageurl.PackageURLBuilder;
+
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 
@@ -89,6 +97,12 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             throw new ApplicationException("Unable to parse the operation configuration file");
         }
 
+        // Create the empty SBOM
+        Bom bom = createBom();
+        if (bom == null) {
+            throw new ApplicationException("Unable to create a new Bom");
+        }
+
         String deliverableUrl = config.getDeliverableUrls().get(getParent().getIndex());
         log.info(
                 "Generating CycloneDX compliant SBOM for the deliverable: {}, with index: {}, with the provided config: {}",
@@ -96,8 +110,24 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                 getParent().getIndex(),
                 config);
 
+        // Get some metadata about the operation
+        String productName = "";
+        String productMilestone = "";
+        DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(config.getOperationId());
+        if (operation.getProductMilestone() != null) {
+            ProductMilestone milestone = pncService.getMilestone(operation.getProductMilestone().getId());
+            if (milestone != null && milestone.getProductVersion() != null) {
+                ProductVersion productVersion = pncService.getProductVersion(milestone.getProductVersion().getId());
+                productName = productVersion.getProduct().getName().replace(" ", "-").toLowerCase();
+                productMilestone = milestone.getVersion();
+
+                log.info("Retrieved Product: {}, Milestone: {}", productName, productMilestone);
+            }
+        }
+
         // Get all the analyzed artifacts retrieved in the deliverable analyzer operation
         List<AnalyzedArtifact> allAnalyzedArtifacts = pncService.getAllAnalyzedArtifacts(config.getOperationId());
+
         // A single operation might include multiple archives, filter only the ones related to this particular
         // distribution. If no distribution is present, keep them all because it's an old analysis with older and fewer
         // metadata.
@@ -123,43 +153,37 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
 
         // Exclude from the analyzed artifacts' filenames the filenames related to exploded locations (e.g. inside
         // jars). If this is a legacy analysis, keep them all
-        List<AnalyzedArtifact> artifactsToManifest = currentDeliverableArtifacts.stream().filter(a -> {
-            if (isLegacyAnalysis || a.getArchiveFilenames() == null) {
-                return true;
-            }
-
-            List<String> filenames = a.getArchiveFilenames();
-            filenames.removeIf(filename -> filename.contains(".jar!/"));
-            return filenames.size() > 0;
-        }).collect(Collectors.toList());
-
-        String groupId = "<groupId>";
-        String artifactId = "<artifactId>";
-
-        DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(config.getOperationId());
-        if (operation.getProductMilestone() != null) {
-            ProductMilestone milestone = pncService.getMilestone(operation.getProductMilestone().getId());
-            if (milestone != null && milestone.getProductVersion() != null) {
-                ProductVersion productVersion = pncService.getProductVersion(milestone.getProductVersion().getId());
-                groupId = productVersion.getProduct().getName().replace(" ", "-").toLowerCase();
-                artifactId = milestone.getVersion();
-            }
-        }
-
-        log.info("Retrieved Product: {}, Milestone: {}", groupId, artifactId);
+        List<AnalyzedArtifact> artifactsToManifest = filterArtifactsToManifest(
+                currentDeliverableArtifacts,
+                isLegacyAnalysis);
 
         String fileName = extractFilenameFromURL(deliverableUrl);
-        Bom bom = createBom();
-        if (bom == null) {
-            throw new ApplicationException("Unable to create a new Bom");
+        Optional<String> distributionSha256 = artifactsToManifest.stream()
+                .filter(
+                        a -> a.getDistribution() != null
+                                && deliverableUrl.equals(a.getDistribution().getDistributionUrl()))
+                .map(a -> a.getDistribution().getSha256())
+                .findFirst();
+
+        // Create the main component PURL and version, plus description
+        String desc = "SBOM representing the deliverable " + fileName + " with ";
+        String distributionPurl = createGenericPurl(fileName, distributionSha256);
+        String distributionVersion = productMilestone;
+        if (distributionSha256.isPresent()) {
+            distributionVersion = "sha256:" + distributionSha256.get();
+            desc += "checksum " + distributionVersion;
+        } else {
+            desc += "version " + distributionVersion;
         }
 
-        String mainPurl = "pkg:generic/" + fileName + "@" + artifactId + "?operation=" + getParent().getOperationId();
-        String desc = "SBOM representing the deliverable " + fileName + " analyzed with operation "
-                + getParent().getOperationId();
-
-        Component mainComponent = createComponent(null, fileName, artifactId, desc, mainPurl, Type.FILE);
-        Dependency mainDependency = createDependency(mainPurl);
+        Component mainComponent = createComponent(
+                null,
+                fileName,
+                distributionVersion,
+                desc,
+                distributionPurl,
+                Type.FILE);
+        Dependency mainDependency = createDependency(distributionPurl);
 
         setProductMetadata(mainComponent, config);
         setPncOperationMetadata(mainComponent, operation, pncService.getApiUrl());
@@ -167,37 +191,67 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         bom.setMetadata(createDefaultSbomerMetadata(mainComponent, sbomerClientFacade.getSbomerVersion()));
         bom.addDependency(mainDependency);
 
+        Map<String, Component> purlToComponents = new HashMap<String, Component>();
+        Map<String, Dependency> purl256ToDependencies = new HashMap<String, Dependency>();
+        Map<String, Dependency> pathToDependencies = new TreeMap<String, Dependency>();
+
         for (AnalyzedArtifact artifact : artifactsToManifest) {
-            KojiBuild brewBuild = null;
-            BuildType buildType = null;
+            // Create the component if not already created (e.g. the same pom can be a plain .pom or embedded as
+            // pom.xml)
+            if (!purlToComponents.containsKey(artifact.getArtifact().getPurl())) {
+                KojiBuild brewBuild = null;
+                BuildType buildType = null;
 
-            if (artifact.getArtifact().getBuild() != null) {
-                buildType = artifact.getArtifact().getBuild().getBuildConfigRevision().getBuildType();
-            } else if (artifact.getBrewId() != null && artifact.getBrewId() > 0) {
-                brewBuild = kojiService.findBuild(artifact.getArtifact());
-                buildType = BuildType.MVN;
-            } else {
-                log.warn(
-                        "An artifact has been found with no associated build: '{}'. It will be added in the SBOM with generic type.",
-                        artifact.getArtifact().getFilename());
+                if (artifact.getArtifact().getBuild() != null) {
+                    buildType = artifact.getArtifact().getBuild().getBuildConfigRevision().getBuildType();
+                } else if (artifact.getBrewId() != null && artifact.getBrewId() > 0) {
+                    brewBuild = kojiService.findBuild(artifact.getArtifact());
+                    buildType = BuildType.MVN;
+                } else {
+                    log.warn(
+                            "An artifact has been found with no associated build: '{}'. It will be added in the SBOM with generic type.",
+                            artifact.getArtifact().getFilename());
+                }
+
+                // Create a component entry for the artifact
+                Component component = createComponent(artifact.getArtifact(), Scope.REQUIRED, Type.LIBRARY, buildType);
+                setPncBuildMetadata(component, artifact.getArtifact().getBuild(), pncService.getApiUrl());
+
+                if (brewBuild != null) {
+                    setBrewBuildMetadata(
+                            component,
+                            String.valueOf(brewBuild.getBuildInfo().getId()),
+                            brewBuild.getSource(),
+                            kojiService.getConfig().getKojiWebURL().toString());
+                }
+
+                // Add the component to the SBOM and to the internal cache
+                bom.addComponent(component);
+                purlToComponents.put(artifact.getArtifact().getPurl(), component);
+
+                // Create a dependency entry
+                Dependency dependency = createDependency(artifact.getArtifact().getPurl());
+
+                // Add the dependency to the BOM and to the internal caches
+                bom.addDependency(dependency);
+                purl256ToDependencies.put(artifact.getArtifact().getPurl(), dependency);
             }
 
-            Component component = createComponent(artifact.getArtifact(), Scope.REQUIRED, Type.LIBRARY, buildType);
+            // Add the filepath -> dependency data to the cache, which is used to compute the dependency hierarchy.
+            // The same dependency (identified by purl) might be present in multiple locations inside the zip, with
+            // different filepath
+            Dependency dep = purl256ToDependencies.get(artifact.getArtifact().getPurl());
+            Optional.ofNullable(artifact.getArchiveFilenames()).orElse(List.of()).stream().forEach(filename -> {
+                pathToDependencies.put(filename, dep);
+            });
+        }
 
-            setPncBuildMetadata(component, artifact.getArtifact().getBuild(), pncService.getApiUrl());
-
-            if (brewBuild != null) {
-                setBrewBuildMetadata(
-                        component,
-                        String.valueOf(brewBuild.getBuildInfo().getId()),
-                        brewBuild.getSource(),
-                        kojiService.getConfig().getKojiWebURL().toString());
-            }
-
-            Dependency dependency = createDependency(artifact.getArtifact().getPurl());
-            bom.addComponent(component);
-            bom.addDependency(dependency);
-            mainDependency.addDependency(dependency);
+        // Find the parent to set the correct hierarchy, default to the main root dependency
+        for (String key : pathToDependencies.keySet()) {
+            Dependency dependency = pathToDependencies.get(key);
+            Optional<Dependency> maybeParent = findClosestParent(pathToDependencies, key);
+            Dependency parent = maybeParent.isPresent() ? maybeParent.get() : mainDependency;
+            parent.addDependency(dependency);
         }
 
         Path sbomDirPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "bom.json");
@@ -218,6 +272,34 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         return sbomDirPath;
     }
 
+    private List<AnalyzedArtifact> filterArtifactsToManifest(
+            List<AnalyzedArtifact> allArtifacts,
+            boolean isLegacyAnalysis) {
+
+        /*
+         * DO NOT FILTER FILENAMES; KEEP THEM ALL TO SOLVE SHADED COMPONENTS
+         */
+        // List<AnalyzedArtifact> artifactsToManifest = allArtifacts.stream().filter(a -> {
+        // if (isLegacyAnalysis || a.getArchiveFilenames() == null) {
+        // return true;
+        // }
+        // List<String> filenames = a.getArchiveFilenames();
+        // // Remove all the file we don't want to consider now (we only want jar and pom files)
+        // filenames = filterFilenames(filenames);
+        // return filenames.size() > 0;
+        // }).collect(Collectors.toList());
+
+        return allArtifacts;
+    }
+
+    private List<String> filterFilenames(List<String> filenames) {
+        Predicate<String> embeddedFile = s -> s.contains("!/");
+        Predicate<String> allowedFiles = s -> (s.endsWith(".jar") || s.endsWith(".pom") || s.endsWith(".war")
+                || s.endsWith(".ear") || s.endsWith(".zip") || Paths.get(s).getFileName().toString().equals("pom.xml"));
+        filenames.removeIf(embeddedFile.and(allowedFiles.negate()));
+        return filenames;
+    }
+
     private String extractFilenameFromURL(String url) {
         try {
             return Paths.get(new URI(url).getPath()).getFileName().toString();
@@ -226,4 +308,47 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         }
     }
 
+    /*
+     * Creates an inverse map of the artifacts to be manifested, mapping their complete filepath with the associated PNC
+     * artifact. It might be that the same PNC artifact is associated with multiple filenames, if the same file is
+     * present in multiple locations inside the same distribution
+     */
+    private Map<String, AnalyzedArtifact> createInverseMap(List<AnalyzedArtifact> artifactsToManifest) {
+        Map<String, AnalyzedArtifact> inverseMap = artifactsToManifest.stream()
+                .flatMap(a -> a.getArchiveFilenames().stream().map(f -> Map.entry(f, a)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a1, a2) -> a1, TreeMap::new));
+
+        return inverseMap;
+    }
+
+    private String createGenericPurl(String filename, Optional<String> sha256) {
+        try {
+            PackageURLBuilder purlBuilder = PackageURLBuilder.aPackageURL()
+                    .withType(PackageURL.StandardTypes.GENERIC)
+                    .withName(filename);
+            if (sha256.isPresent()) {
+                purlBuilder.withQualifier("checksum", "sha256:" + sha256.get());
+            }
+
+            return purlBuilder.build().toString();
+        } catch (MalformedPackageURLException e) {
+            return "pkg:generic/" + filename;
+        }
+    }
+
+    private Optional<Dependency> findClosestParent(Map<String, Dependency> pathToDependencies, String path) {
+        while (!path.isEmpty()) {
+            // Find parent if it exists
+            int lastIndex = path.lastIndexOf("!/");
+            if (lastIndex != -1) {
+                path = path.substring(0, lastIndex);
+            } else {
+                break; // No more parent
+            }
+            if (pathToDependencies.get(path) != null) {
+                return Optional.of(pathToDependencies.get(path));
+            }
+        }
+        return Optional.empty();
+    }
 }
