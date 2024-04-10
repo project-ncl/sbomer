@@ -132,7 +132,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         // distribution. If no distribution is present, keep them all because it's an old analysis with older and fewer
         // metadata.
         boolean isLegacyAnalysis = allAnalyzedArtifacts.stream().anyMatch(a -> a.getDistribution() == null);
-        List<AnalyzedArtifact> currentDeliverableArtifacts = isLegacyAnalysis ? allAnalyzedArtifacts
+        List<AnalyzedArtifact> artifactsToManifest = isLegacyAnalysis ? allAnalyzedArtifacts
                 : allAnalyzedArtifacts.stream().filter(a -> {
                     return deliverableUrl.equals(a.getDistribution().getDistributionUrl());
                 }).collect(Collectors.toList());
@@ -145,17 +145,11 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         } else {
             log.info(
                     "Retrieved {} artifacts in the specified deliverable: '{}', out of {} total analyzed artifacts in the operation: '{}'",
-                    currentDeliverableArtifacts.size(),
+                    artifactsToManifest.size(),
                     deliverableUrl,
                     allAnalyzedArtifacts.size(),
                     config.getOperationId());
         }
-
-        // Exclude from the analyzed artifacts' filenames the filenames related to exploded locations (e.g. inside
-        // jars). If this is a legacy analysis, keep them all
-        List<AnalyzedArtifact> artifactsToManifest = filterArtifactsToManifest(
-                currentDeliverableArtifacts,
-                isLegacyAnalysis);
 
         String fileName = extractFilenameFromURL(deliverableUrl);
         Optional<String> distributionSha256 = artifactsToManifest.stream()
@@ -272,53 +266,12 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         return sbomDirPath;
     }
 
-    private List<AnalyzedArtifact> filterArtifactsToManifest(
-            List<AnalyzedArtifact> allArtifacts,
-            boolean isLegacyAnalysis) {
-
-        /*
-         * DO NOT FILTER FILENAMES; KEEP THEM ALL TO SOLVE SHADED COMPONENTS
-         */
-        // List<AnalyzedArtifact> artifactsToManifest = allArtifacts.stream().filter(a -> {
-        // if (isLegacyAnalysis || a.getArchiveFilenames() == null) {
-        // return true;
-        // }
-        // List<String> filenames = a.getArchiveFilenames();
-        // // Remove all the file we don't want to consider now (we only want jar and pom files)
-        // filenames = filterFilenames(filenames);
-        // return filenames.size() > 0;
-        // }).collect(Collectors.toList());
-
-        return allArtifacts;
-    }
-
-    private List<String> filterFilenames(List<String> filenames) {
-        Predicate<String> embeddedFile = s -> s.contains("!/");
-        Predicate<String> allowedFiles = s -> (s.endsWith(".jar") || s.endsWith(".pom") || s.endsWith(".war")
-                || s.endsWith(".ear") || s.endsWith(".zip") || Paths.get(s).getFileName().toString().equals("pom.xml"));
-        filenames.removeIf(embeddedFile.and(allowedFiles.negate()));
-        return filenames;
-    }
-
     private String extractFilenameFromURL(String url) {
         try {
             return Paths.get(new URI(url).getPath()).getFileName().toString();
         } catch (Exception e) {
             return null;
         }
-    }
-
-    /*
-     * Creates an inverse map of the artifacts to be manifested, mapping their complete filepath with the associated PNC
-     * artifact. It might be that the same PNC artifact is associated with multiple filenames, if the same file is
-     * present in multiple locations inside the same distribution
-     */
-    private Map<String, AnalyzedArtifact> createInverseMap(List<AnalyzedArtifact> artifactsToManifest) {
-        Map<String, AnalyzedArtifact> inverseMap = artifactsToManifest.stream()
-                .flatMap(a -> a.getArchiveFilenames().stream().map(f -> Map.entry(f, a)))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a1, a2) -> a1, TreeMap::new));
-
-        return inverseMap;
     }
 
     private String createGenericPurl(String filename, Optional<String> sha256) {
