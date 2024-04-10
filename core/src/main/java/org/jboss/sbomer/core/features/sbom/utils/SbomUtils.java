@@ -48,6 +48,7 @@ import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.License;
 import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.model.Hash.Algorithm;
+import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
@@ -132,7 +133,6 @@ public class SbomUtils {
         if (!Strings.isEmpty(description)) {
             component.setDescription(description);
         }
-        component.setLicenseChoice(new LicenseChoice());
         return component;
     }
 
@@ -320,7 +320,13 @@ public class SbomUtils {
         website.setName(ExternalReference.Type.WEBSITE.name());
         website.setValue(SBOMER_WEBSITE);
         metadata.setProperties(List.of(vcs, website));
-        metadata.setTools(List.of(createTool(version)));
+
+        // Set legacy tool info
+        if (Version.VERSION_14.equals(schemaVersion())) {
+            metadata.setTools(List.of(createTool(version)));
+        } else if (Version.VERSION_14.getVersion() < schemaVersion().getVersion()) {
+            metadata.setToolChoice(createToolInformation(version));
+        }
 
         return metadata;
     }
@@ -334,6 +340,19 @@ public class SbomUtils {
         }
 
         return tool;
+    }
+
+    public static ToolInformation createToolInformation(String version) {
+        ToolInformation information = new ToolInformation();
+        Component toolComponent = new Component();
+        toolComponent.setName(SBOMER_NAME);
+        toolComponent.setType(Type.APPLICATION);
+        toolComponent.setAuthor(PUBLISHER);
+        if (version != null) {
+            toolComponent.setVersion(version);
+        }
+        information.setComponents(List.of(toolComponent));
+        return information;
     }
 
     public static Dependency createDependency(String ref) {
