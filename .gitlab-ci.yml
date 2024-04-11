@@ -207,17 +207,17 @@ promote:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-deploy-prod-iad2:
+deploy-prod-aws-us-west-2:
   extends:
     - .deploy
   when: manual
   variables:
     APP_ENV: prod
-  environment: gitlab-cd-prod-spoke-dc-iad2
+  environment: gitlab-cd-prod-spoke-aws-us-west-2
   needs:
     - job: promote
 
-deploy-prod-aws:
+deploy-prod-aws-us-east-1:
   extends:
     - .deploy
   when: manual
@@ -225,7 +225,7 @@ deploy-prod-aws:
     APP_ENV: prod
   environment: gitlab-cd-prod-spoke-aws-us-east-1
   needs:
-    - job: deploy-prod-iad2
+    - job: deploy-prod-aws-us-west-2
 
 pages:
   image:
