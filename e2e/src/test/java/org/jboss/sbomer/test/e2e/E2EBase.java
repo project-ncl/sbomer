@@ -83,7 +83,7 @@ public abstract class E2EBase {
 
         response.then()
                 .statusCode(202)
-                .body("buildId", CoreMatchers.is(buildId))
+                .body("identifier", CoreMatchers.is(buildId))
                 .and()
                 .body("status", CoreMatchers.is("NEW"));
 
@@ -104,7 +104,7 @@ public abstract class E2EBase {
         // We are providing the configuration so the status will jump to INITIALIZING, not NEW
         response.then()
                 .statusCode(202)
-                .body("buildId", CoreMatchers.is(buildId))
+                .body("identifier", CoreMatchers.is(buildId))
                 .and()
                 .body("status", CoreMatchers.is("INITIALIZING"));
 

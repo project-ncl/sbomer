@@ -41,7 +41,6 @@ public class StageStatsIT extends E2EStageBase {
                 .get(String.format("/api/%s/stats", apiVersion));
     }
 
-    @Test
     @ParameterizedTest
     @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
     public void testStats(String version) throws IOException {
