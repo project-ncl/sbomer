@@ -69,7 +69,7 @@ public abstract class E2EBase {
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1alpha2/sboms/requests/%s", generationId));
+                .get(String.format("/api/v1alpha3/sboms/requests/%s", generationId));
     }
 
     public String requestGeneration(String buildId) {
@@ -79,7 +79,7 @@ public abstract class E2EBase {
                 .baseUri(getSbomerBaseUri())
                 .when()
                 .contentType(ContentType.JSON)
-                .post(String.format("/api/v1alpha2/sboms/generate/build/%s", buildId));
+                .post(String.format("/api/v1alpha3/sboms/generate/build/%s", buildId));
 
         response.then()
                 .statusCode(202)
@@ -99,7 +99,7 @@ public abstract class E2EBase {
                 .body(jsonBody)
                 .when()
                 .contentType(ContentType.JSON)
-                .post(String.format("/api/v1alpha2/sboms/generate/build/%s", buildId));
+                .post(String.format("/api/v1alpha3/sboms/generate/build/%s", buildId));
 
         // We are providing the configuration so the status will jump to INITIALIZING, not NEW
         response.then()

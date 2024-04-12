@@ -125,7 +125,7 @@ public class SBOMResource extends AbstractApiProvider {
             summary = "Generate SBOM based on the PNC build",
             description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
     @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
-    @Path("/generate/build/{buildId}")
+    @Path("/sboms/generate/build/{buildId}")
     @APIResponses({ @APIResponse(
             responseCode = "202",
             description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.",
