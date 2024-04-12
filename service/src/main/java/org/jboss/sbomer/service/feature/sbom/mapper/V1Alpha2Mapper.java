@@ -22,7 +22,6 @@ import java.util.List;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
-import org.jboss.sbomer.core.dto.v1alpha2.SbomSearchRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -36,13 +35,9 @@ public interface V1Alpha2Mapper {
     SbomRecord toSbomRecord(Sbom entity);
 
     @Mapping(source = "identifier", target = "buildId")
-    @Mapping(source = "generationRequest.identifier", target = "generationRequest.buildId")
-    SbomSearchRecord toSbomSearchRecord(BaseSbomRecord entity);
-
-    @Mapping(source = "identifier", target = "buildId")
     SbomGenerationRequestRecord toSbomRequestRecord(SbomGenerationRequest entity);
 
-    Page<SbomSearchRecord> toSbomSearchRecordPage(Page<BaseSbomRecord> sboms);
+    Page<BaseSbomRecord> toSbomSearchRecordPage(Page<BaseSbomRecord> sboms);
 
     Page<SbomGenerationRequestRecord> toSbomRequestRecordPage(Page<SbomGenerationRequest> sbomRequests);
 

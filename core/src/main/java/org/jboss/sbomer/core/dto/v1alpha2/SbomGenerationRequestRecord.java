@@ -26,8 +26,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 @Schema(name = "V1Alpha2SbomGenerationRequestRecord")
 public record SbomGenerationRequestRecord(
-        String id,
-        String buildId,
+        @Schema(example = "AA4E6A6836AE457") String id,
+        Instant creationTime,
+        @Schema(example = "FINISHED") String status,
+        @Schema(example = "SUCCESS") String result,
+        @Schema(example = "A6XHP5F42DYAA") String buildId,
         @Schema(implementation = Map.class) JsonNode config,
-        Instant creationTime) {
+        String reason) {
 };
