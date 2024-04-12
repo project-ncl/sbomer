@@ -24,6 +24,8 @@ import org.hamcrest.Matchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -31,17 +33,19 @@ import io.restassured.response.Response;
 
 @Tag("stage")
 public class StageStatsIT extends E2EStageBase {
-    private Response getStats() {
+    private Response getStats(String apiVersion) {
         return RestAssured.given()
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1alpha2/stats"));
+                .get(String.format("/api/%s/stats", apiVersion));
     }
 
     @Test
-    public void testStats() throws IOException {
-        Response stats = getStats();
+    @ParameterizedTest
+    @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
+    public void testStats(String version) throws IOException {
+        Response stats = getStats("v1alpha1");
 
         stats.then()
                 .statusCode(200)
@@ -52,5 +56,4 @@ public class StageStatsIT extends E2EStageBase {
                 .body("uptimeMillis", CoreMatchers.is(Matchers.greaterThan(0)))
                 .body("version", CoreMatchers.isA(String.class));
     }
-
 }
