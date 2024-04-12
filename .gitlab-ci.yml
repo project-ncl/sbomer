@@ -1,29 +1,6 @@
 default:
   tags: [openshift]
 
-.cert-default-scripts: &cert-default-scripts
-  - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2022-IT-Root-CA.pem
-  - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /usr/local/share/ca-certificates/2015-IT-Root-CA.pem
-  - update-ca-certificates
-
-.deploy:
-  variables:
-    RELEASE_HASH: ${CI_COMMIT_SHORT_SHA}
-    UPSTREAM_ENVIRONMENT_NAME: "${CI_ENVIRONMENT_NAME}" # TODO: Remove
-    GITLAB_ENVIRONMENT: "${CI_ENVIRONMENT_NAME}"
-    HELM_NAMESPACE: "${HELM_NAMESPACE}"
-    HELM_KUBETOKEN: "${MPP_PIPELINE_TOKEN}"
-    HELM_KUBEAPISERVER: "https://${MPP_PIPELINE_SERVER}"
-    ROUTE_SUFFIX: "${MPP_ROUTE_SUFFIX}"
-    SBOMER_RELEASE: sbomer
-    HAPROXY_BACKUP_SERVERS: "${HAPROXY_BACKUP_SERVERS}"
-  stage: deploy
-  trigger:
-    project: appsvcs-platform/security/sbomer-helm
-    strategy: depend
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
 .build-image:
   interruptible: true
   variables:
@@ -122,111 +99,6 @@ build-image-generator:
   needs:
     - job: build
 
-deploy-stage:
-  extends:
-    - .deploy
-  variables:
-    APP_ENV: stage
-  environment: gitlab-cd-preprod-spoke-aws-us-east-1
-  needs:
-    - job: build-image-generator
-    - job: build-image-service
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
-e2e-stage:
-  image:
-    name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
-    entrypoint: [""]
-  stage: deploy
-  environment: gitlab-cd-preprod-spoke-aws-us-east-1
-  cache:
-    paths:
-      - .m2/repository
-  resource_group: deploy
-  timeout: 20m
-  variables:
-    KUBERNETES_CPU_REQUEST: "400m"
-    KUBERNETES_CPU_LIMIT: "400m"
-    KUBERNETES_MEMORY_REQUEST: "1024Mi"
-    KUBERNETES_MEMORY_LIMIT: "1024Mi"
-    MAVEN_CLI_OPTS: >-
-      --batch-mode
-      --errors
-      --fail-at-end
-      --show-version
-      -DinstallAtEnd=true
-      -DdeployAtEnd=true
-      -Dsurefire.useFile=false
-      -Denforcer.skipRules=bannedRepositories
-      --no-transfer-progress
-    MAVEN_OPTS: >-
-      -Dhttps.protocols=TLSv1.2
-      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-      -Dorg.slf4j.simpleLogger.showDateTime=true
-      -Djava.awt.headless=true
-      -XX:InitialRAMPercentage=70 -XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
-  script:
-    - dnf install -y --setopt=tsflags=nodocs unzip zip
-    - curl "https://get.sdkman.io" | bash
-    - source "$HOME/.sdkman/bin/sdkman-init.sh"
-    - sdk install java 17.0.10-tem
-    - sdk install maven 3.9.6
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
-    - keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
-    - keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
-    - ./hack/run-test-e2e.sh ${MAVEN_CLI_OPTS} -s .ci/settings.xml -P e2e-stage -DsbomerStageUri="https://sbomer-stage.${MPP_ROUTE_SUFFIX}" -DdatagrepperStageUri="https://${DATAGREPPER_STAGE_HOST}"
-  artifacts:
-    when: always
-    reports:
-      junit:
-        - "e2e/target/surefire-reports/**/*.xml"
-  needs:
-    - job: deploy-stage
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
-promote:
-  image:
-    name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
-    entrypoint: [""]
-  variables:
-    KUBERNETES_CPU_REQUEST: "100m"
-    KUBERNETES_CPU_LIMIT: "100m"
-    KUBERNETES_MEMORY_REQUEST: "256Mi"
-    KUBERNETES_MEMORY_LIMIT: "256Mi"
-  stage: deploy
-  resource_group: deploy
-  script:
-    - dnf install -y --setopt=tsflags=nodocs skopeo
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-service:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-service:${CI_COMMIT_SHORT_SHA}"
-    - skopeo copy --src-creds "${QUAY_CREDS_STAGE}" --dest-creds "${QUAY_CREDS_PROD}" "docker://${IMAGE_REGISTRY_STAGE}/sbomer-generator:${CI_COMMIT_SHORT_SHA}" "docker://${IMAGE_REGISTRY_PROD}/sbomer-generator:${CI_COMMIT_SHORT_SHA}"
-  needs:
-    - job: e2e-stage
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
-deploy-prod-aws-us-west-2:
-  extends:
-    - .deploy
-  when: manual
-  variables:
-    APP_ENV: prod
-  environment: gitlab-cd-prod-spoke-aws-us-west-2
-  needs:
-    - job: promote
-
-deploy-prod-aws-us-east-1:
-  extends:
-    - .deploy
-  when: manual
-  variables:
-    APP_ENV: prod
-  environment: gitlab-cd-prod-spoke-aws-us-east-1
-  needs:
-    - job: deploy-prod-aws-us-west-2
-
 pages:
   image:
     name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
@@ -236,7 +108,7 @@ pages:
     KUBERNETES_CPU_LIMIT: "100m"
     KUBERNETES_MEMORY_REQUEST: "256Mi"
     KUBERNETES_MEMORY_LIMIT: "256Mi"
-  stage: deploy
+  stage: build
   script:
     - dnf install -y --setopt=tsflags=nodocs make gcc-c++
     - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -250,5 +122,19 @@ pages:
   artifacts:
     paths:
       - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy:
+  variables:
+    RELEASE_HASH: ${CI_COMMIT_SHORT_SHA}
+  stage: deploy
+  trigger:
+    project: appsvcs-platform/security/sbomer-helm
+    branch: main
+    strategy: depend
+  needs:
+    - job: build-image-generator
+    - job: build-image-service
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
