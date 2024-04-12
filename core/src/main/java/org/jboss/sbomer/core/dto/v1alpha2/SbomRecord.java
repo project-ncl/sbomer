@@ -39,14 +39,17 @@ public record SbomRecord(
             String id,
             String buildId,
             String rootPurl,
-            JsonNode sbom,
             Instant creationTime,
+            JsonNode sbom,
             Integer configIndex,
             String statusMessage,
             String gId,
+            Instant gCreationTime,
+            String gStatus,
+            String gResult,
             String gBuildId,
             JsonNode gConfig,
-            Instant gCreationTime) {
+            String gReason) {
         this(
                 id,
                 buildId,
@@ -55,7 +58,7 @@ public record SbomRecord(
                 creationTime,
                 configIndex,
                 statusMessage,
-                new SbomGenerationRequestRecord(gId, gBuildId, gConfig, gCreationTime));
+                new SbomGenerationRequestRecord(gId, gCreationTime, gStatus, gResult, gBuildId, gConfig, gReason));
     }
 
 };

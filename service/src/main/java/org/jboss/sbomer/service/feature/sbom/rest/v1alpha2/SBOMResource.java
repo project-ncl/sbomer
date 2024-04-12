@@ -30,7 +30,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
-import org.jboss.sbomer.core.dto.v1alpha2.SbomSearchRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -105,7 +104,7 @@ public class SBOMResource extends AbstractApiProvider {
                     responseCode = "500",
                     description = "Internal server error",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))), })
-    public Page<SbomSearchRecord> searchSboms(
+    public Page<BaseSbomRecord> searchSboms(
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
