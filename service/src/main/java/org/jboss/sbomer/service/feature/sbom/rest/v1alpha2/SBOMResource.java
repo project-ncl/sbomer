@@ -27,9 +27,9 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
+import org.jboss.sbomer.core.dto.v1alpha2.BaseSbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -109,7 +109,7 @@ public class SBOMResource extends AbstractApiProvider {
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
-        Page<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
+        Page<org.jboss.sbomer.core.dto.BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
                 paginationParams.getPageIndex(),
                 paginationParams.getPageSize(),
                 rsqlQuery,
