@@ -55,7 +55,6 @@ public class StageGenerationRequestIT extends E2EStageBase {
     static String nodeJsNpmGenerationRequestId;
 
     @Test
-    @Disabled("Disabled until we will have a fix for Domino 0.0.103")
     public void testSuccessfulGenerationMavenBuild() throws IOException {
         mavenGenerationRequestId = requestGeneration(MAVEN_BUILD_ID);
 
