@@ -122,24 +122,6 @@
       <groupId>org.jboss.pnc</groupId>
       <artifactId>rest-client-jakarta</artifactId>
       <version>${version.pnc-rest}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.jboss.pnc</groupId>
-          <artifactId>pnc-common</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.pnc</groupId>
-      <artifactId>pnc-common</artifactId>
-      <version>${version.pnc-common}</version>
-      <classifier>jakarta</classifier>
-      <exclusions>
-        <exclusion>
-          <groupId>org.commonjava.maven.ext</groupId>
-          <artifactId>pom-manipulation-core</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
