@@ -60,7 +60,6 @@
 
         <version.cyclonedx>8.0.3</version.cyclonedx>
         <version.lombok>1.18.32</version.lombok>
-        <version.pnc-common>2.4.1</version.pnc-common>
         <version.pnc-rest>2.7.5</version.pnc-rest>
         <version.pnc-api>2.5.1</version.pnc-api>
         <version.quarkus-jgit>3.1.0</version.quarkus-jgit>
