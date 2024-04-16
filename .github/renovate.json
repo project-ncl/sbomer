@@ -7,7 +7,7 @@
 	"gitAuthor": "Renovate Bot <bot@renovateapp.com>",
 	"onboarding": false,
 	"platform": "github",
-	"forkProcessing": "enabled",
+	"forkProcessing": "disabled",
 	"requireConfig": "ignored",
 	"branchPrefix": "renovate-bot/",
 	"repositories": [
