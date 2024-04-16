@@ -47,15 +47,13 @@ import org.jboss.pnc.dto.GroupConfigurationRef;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
-import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
+import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.sbomer.core.errors.ApplicationException;
 
-import io.quarkus.oidc.client.Tokens;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.spi.CDI;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,9 +67,6 @@ public class PncService {
     @ConfigProperty(name = "sbomer.pnc.host")
     @Getter
     String apiUrl;
-
-    @ConfigProperty(name = "quarkus.oidc-client.client-enabled")
-    boolean oidcClientEnabled;
 
     BuildClient buildClient;
 
@@ -118,11 +113,6 @@ public class PncService {
     public Configuration getConfiguration() {
 
         ConfigurationBuilder configurationBuilder = Configuration.builder().host(apiUrl).protocol("http");
-
-        if (oidcClientEnabled) {
-            Tokens serviceTokens = CDI.current().select(Tokens.class).get();
-            configurationBuilder.bearerTokenSupplier(() -> serviceTokens.getAccessToken());
-        }
 
         return configurationBuilder.build();
     }
