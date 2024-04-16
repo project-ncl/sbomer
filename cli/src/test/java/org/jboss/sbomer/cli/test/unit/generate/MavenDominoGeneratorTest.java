@@ -97,8 +97,10 @@ public class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-Xms256m",
-                        "-Xmx512m",
+                        "-XX:InitialRAMPercentage=60.0",
+                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:+ExitOnOutOfMemoryError",
+                        "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
                         "/path/to/domino/dir/domino.jar",
@@ -123,8 +125,10 @@ public class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-Xms256m",
-                        "-Xmx512m",
+                        "-XX:InitialRAMPercentage=60.0",
+                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:+ExitOnOutOfMemoryError",
+                        "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
                         "/path/to/domino/dir/domino.jar",
@@ -146,8 +150,10 @@ public class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-Xms256m",
-                        "-Xmx512m",
+                        "-XX:InitialRAMPercentage=60.0",
+                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:+ExitOnOutOfMemoryError",
+                        "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
                         "/path/to/domino/dir/domino.jar",
@@ -170,8 +176,10 @@ public class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-Xms256m",
-                        "-Xmx512m",
+                        "-XX:InitialRAMPercentage=60.0",
+                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:+ExitOnOutOfMemoryError",
+                        "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
                         "/path/to/domino/dir/domino.jar",

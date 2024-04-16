@@ -44,6 +44,11 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
     protected Path doGenerate(String buildCmdOptions) {
         ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
 
+        processBuilder.environment()
+                .put(
+                        "JAVA_TOOL_OPTIONS",
+                        "-XX:InitialRAMPercentage=60.0 -XX:MaxRAMPercentage=60.0 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm");
+
         // Split the build command to be passed to the ProcessBuilder, without separating the options surrounded by
         // quotes
         List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
