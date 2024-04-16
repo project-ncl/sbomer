@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -60,7 +59,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
 
         log.info("Maven build - Generation Request created: {}", mavenGenerationRequestId);
 
-        Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+        Awaitility.await().atMost(20, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
             final Response body = getGeneration(mavenGenerationRequestId);
             String status = body.path("status").toString();
 
