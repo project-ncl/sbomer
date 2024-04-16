@@ -51,7 +51,13 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
         configureProcessEnvironmentVariable(buildCmdOptions, processBuilder);
         configureProcessMainBuildCommands(buildCmdOptions, processBuilder);
 
+        processBuilder.environment()
+                .put(
+                        "JAVA_OPTS",
+                        "-Dorg.gradle.jvmargs=-XX:InitialRAMPercentage=60.0 -XX:MaxRAMPercentage=60.0 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm");
+
         processBuilder.command().add("cyclonedxBom");
+        processBuilder.command().add("--no-daemon");
 
         if (initScriptPath != null) {
             log.debug("Using provided Gradle init script file located at '{}'", initScriptPath);

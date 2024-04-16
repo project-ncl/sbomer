@@ -114,4 +114,4 @@ source "${HOME}/env.sh"
 export DOMINO_JAVA_BIN="${HOME}/.sdkman/candidates/java/17/bin/java"
 
 echo "Running generation..."
-exec "${HOME}/.sdkman/candidates/java/17/bin/java" -Duser.home=/workdir -Xms256m -Xmx512m -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config "${config_path}" --index "${index}"
+exec "${HOME}/.sdkman/candidates/java/17/bin/java" -XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm -Duser.home=/workdir -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config "${config_path}" --index "${index}"

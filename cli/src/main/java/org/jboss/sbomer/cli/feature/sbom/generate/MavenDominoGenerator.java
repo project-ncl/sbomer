@@ -126,8 +126,10 @@ public class MavenDominoGenerator implements SbomGenerator {
         cmd.addAll(
                 Arrays.asList(
                         dominoJava,
-                        "-Xms256m",
-                        "-Xmx512m",
+                        "-XX:InitialRAMPercentage=60.0",
+                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:+ExitOnOutOfMemoryError",
+                        "-XshowSettings:vm",
                         // Workaround for Domino trying to parse what it shouldn't parse
                         "-Dquarkus.args=\"\"",
                         "-jar",
