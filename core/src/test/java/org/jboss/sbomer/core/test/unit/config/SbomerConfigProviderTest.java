@@ -41,7 +41,7 @@ public class SbomerConfigProviderTest {
                 "--batch-mode",
                 defaultGenerationConfig.generators().get(GeneratorType.MAVEN_CYCLONEDX).defaultArgs());
         assertEquals(
-                "--warn-on-missing-scm",
+                "--warn-on-missing-scm --legacy-scm-locator",
                 defaultGenerationConfig.generators().get(GeneratorType.MAVEN_DOMINO).defaultArgs());
         assertEquals("-info", defaultGenerationConfig.generators().get(GeneratorType.GRADLE_CYCLONEDX).defaultArgs());
     }
