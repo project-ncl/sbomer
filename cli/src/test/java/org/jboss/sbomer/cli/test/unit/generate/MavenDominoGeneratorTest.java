@@ -97,8 +97,8 @@ public class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-XX:InitialRAMPercentage=60.0",
-                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:InitialRAMPercentage=50.0",
+                        "-XX:MaxRAMPercentage=50.0",
                         "-XX:+ExitOnOutOfMemoryError",
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
@@ -125,8 +125,8 @@ public class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-XX:InitialRAMPercentage=60.0",
-                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:InitialRAMPercentage=50.0",
+                        "-XX:MaxRAMPercentage=50.0",
                         "-XX:+ExitOnOutOfMemoryError",
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
@@ -150,8 +150,8 @@ public class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-XX:InitialRAMPercentage=60.0",
-                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:InitialRAMPercentage=50.0",
+                        "-XX:MaxRAMPercentage=50.0",
                         "-XX:+ExitOnOutOfMemoryError",
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
@@ -176,8 +176,8 @@ public class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-XX:InitialRAMPercentage=60.0",
-                        "-XX:MaxRAMPercentage=60.0",
+                        "-XX:InitialRAMPercentage=50.0",
+                        "-XX:MaxRAMPercentage=50.0",
                         "-XX:+ExitOnOutOfMemoryError",
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",

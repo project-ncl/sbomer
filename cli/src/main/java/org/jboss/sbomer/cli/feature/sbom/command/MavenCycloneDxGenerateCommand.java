@@ -47,7 +47,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
         processBuilder.environment()
                 .put(
                         "JAVA_TOOL_OPTIONS",
-                        "-XX:InitialRAMPercentage=60.0 -XX:MaxRAMPercentage=60.0 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm");
+                        "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm");
 
         // Split the build command to be passed to the ProcessBuilder, without separating the options surrounded by
         // quotes
