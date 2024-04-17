@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -54,6 +55,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     static String nodeJsNpmGenerationRequestId;
 
     @Test
+    @Disabled("Enable after we craft a custom config with --legacy-scm-locator")
     public void testSuccessfulGenerationMavenBuild() throws IOException {
         mavenGenerationRequestId = requestGeneration(MAVEN_BUILD_ID);
 
