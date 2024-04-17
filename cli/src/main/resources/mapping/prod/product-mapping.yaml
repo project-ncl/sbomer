@@ -36,7 +36,7 @@
             productVariant: 8Base-MW-RHBQ-2.13
       generator:
         type: maven-domino
-        args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm"
+        args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm --legacy-scm-locator"
     # TODO: Enable these when we know what are the Errata Tool coordinates
     # - generator:
     #     type: maven-domino
@@ -57,7 +57,7 @@
             productVariant: 8Base-MW-RHBQ-3.2
       generator:
         type: maven-domino
-        args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm"
+        args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm --legacy-scm-locator"
 "436":
   products:
     - processors:
