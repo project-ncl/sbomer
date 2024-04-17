@@ -34,3 +34,4 @@
             productVariant: 8Base-RHBQ-2.13
       generator:
         type: maven-domino
+        args: "--warn-on-missing-scm --legacy-scm-locator"
