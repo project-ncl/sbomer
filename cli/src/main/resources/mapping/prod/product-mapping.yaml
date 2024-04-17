@@ -26,38 +26,6 @@
             productVariant: 8Base-RHTESTPRODUCT-1.1
       generator:
         type: maven-cyclonedx
-"382":
-  products:
-    - processors:
-        - type: redhat-product
-          errata:
-            productName: RHBQ
-            productVersion: Middleware-RHBQ-2.13
-            productVariant: 8Base-MW-RHBQ-2.13
-      generator:
-        type: maven-domino
-        args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm --legacy-scm-locator"
-    # TODO: Enable these when we know what are the Errata Tool coordinates
-    # - generator:
-    #     type: maven-domino
-    #     args: "--config-file .domino/manifest/quarkus-camel-bom-config.json --warn-on-missing-scm"
-    # - generator:
-    #     type: maven-domino
-    #     args: "--config-file .domino/manifest/quarkus-optaplanner-bom-bom.json --warn-on-missing-scm"
-    # - generator:
-    #     type: maven-domino
-    #     args: "--config-file .domino/manifest/quarkus-qpid-jms-bom-bom.json --warn-on-missing-scm"
-"484":
-  products:
-    - processors:
-        - type: redhat-product
-          errata:
-            productName: RHBQ
-            productVersion: Middleware-RHBQ-3.2
-            productVariant: 8Base-MW-RHBQ-3.2
-      generator:
-        type: maven-domino
-        args: "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm --legacy-scm-locator"
 "436":
   products:
     - processors:
