@@ -23,7 +23,6 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -53,6 +52,11 @@ public class StageStatsIT extends E2EStageBase {
                 .body("resources.generationRequests.total", CoreMatchers.is(Matchers.greaterThanOrEqualTo(0)))
                 .body("uptime", CoreMatchers.isA(String.class))
                 .body("uptimeMillis", CoreMatchers.is(Matchers.greaterThan(0)))
-                .body("version", CoreMatchers.isA(String.class));
+                .body("version", CoreMatchers.isA(String.class))
+                .body("appEnv", CoreMatchers.is("stage"))
+                .body("deployment.target", CoreMatchers.is("aws"))
+                .body("deployment.type", CoreMatchers.is("preprod"))
+                .body("deployment.zone", CoreMatchers.is("us-east-1"))
+                .body("release", CoreMatchers.is("sbomer"));
     }
 }

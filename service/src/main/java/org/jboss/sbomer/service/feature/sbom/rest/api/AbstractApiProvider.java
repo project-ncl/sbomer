@@ -22,7 +22,7 @@ import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -38,6 +38,7 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Consumer;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.Deployment;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.GenerationRequestStats;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Messaging;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Producer;
@@ -75,9 +76,6 @@ public abstract class AbstractApiProvider {
 
     @Inject
     UmbConfig umbConfig;
-
-    @ConfigProperty(name = "quarkus.application.version", defaultValue = "dev")
-    String version;
 
     protected Sbom doGetSbomByPurl(String purl) {
         Sbom sbom = sbomService.findByPurl(purl);
@@ -144,11 +142,32 @@ public abstract class AbstractApiProvider {
         }
 
         Stats stats = Stats.builder()
-                .withVersion(version)
+                .withVersion(
+                        ConfigProvider.getConfig()
+                                .getOptionalValue("quarkus.application.version", String.class)
+                                .orElse("dev"))
                 .withUptime(toUptime(uptimeMillis))
                 .withUptimeMillis(uptimeMillis)
                 .withResources(resources())
                 .withMessaging(messaging)
+                .withRelease(ConfigProvider.getConfig().getOptionalValue("sbomer.release", String.class).orElse("dev"))
+                .withAppEnv(ConfigProvider.getConfig().getOptionalValue("app.env", String.class).orElse("dev"))
+                .withHostname(ConfigProvider.getConfig().getOptionalValue("hostname", String.class).orElse(null))
+                .withDeployment(
+                        Deployment.builder()
+                                .withTarget(
+                                        ConfigProvider.getConfig()
+                                                .getOptionalValue("sbomer.deployment.target", String.class)
+                                                .orElse("dev"))
+                                .withType(
+                                        ConfigProvider.getConfig()
+                                                .getOptionalValue("sbomer.deployment.type", String.class)
+                                                .orElse("dev"))
+                                .withZone(
+                                        ConfigProvider.getConfig()
+                                                .getOptionalValue("sbomer.deployment.zone", String.class)
+                                                .orElse("dev"))
+                                .build())
                 .build();
 
         return stats;

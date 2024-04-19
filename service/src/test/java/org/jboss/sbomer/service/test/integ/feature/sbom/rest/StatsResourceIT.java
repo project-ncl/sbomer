@@ -17,25 +17,52 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.rest;
 
+import java.util.Map;
+
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
-import org.junit.jupiter.api.Test;
+import org.jboss.sbomer.service.test.integ.feature.sbom.rest.StatsResourceIT.CustomConfig;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.QuarkusTestProfile;
+import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.RestAssured;
 
 @QuarkusTest
+@TestProfile(CustomConfig.class)
 @WithKubernetesTestServer
 public class StatsResourceIT {
+    public static class CustomConfig implements QuarkusTestProfile {
+        @Override
+        public Map<String, String> getConfigOverrides() {
+            return Map.of(
+                    "sbomer.release",
+                    "sbomer-abc",
+                    "app.env",
+                    "prod",
+                    "hostname",
+                    "localhost",
+                    "sbomer.deployment.target",
+                    "aws",
+                    "sbomer.deployment.type",
+                    "preprod",
+                    "sbomer.deployment.zone",
+                    "us-east-1");
+        }
+
+    }
 
     @InjectSpy
     SbomService sbomService;
 
-    @Test
-    void testEmptyStatsEndpoint() {
+    @ParameterizedTest
+    @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
+    void testEmptyStatsEndpoint(String apiVersion) {
         RestAssured.given()
                 .when()
                 .get("/api/v1alpha1/stats")
@@ -46,17 +73,24 @@ public class StatsResourceIT {
                 .body("resources.generationRequests.inProgress", CoreMatchers.is(0))
                 .body("uptime", CoreMatchers.isA(String.class))
                 .body("uptimeMillis", CoreMatchers.isA(Integer.class))
-                .body("version", CoreMatchers.isA(String.class));
+                .body("version", CoreMatchers.isA(String.class))
+                .body("appEnv", CoreMatchers.is("prod"))
+                .body("hostname", CoreMatchers.is("localhost"))
+                .body("deployment.target", CoreMatchers.is("aws"))
+                .body("deployment.type", CoreMatchers.is("preprod"))
+                .body("deployment.zone", CoreMatchers.is("us-east-1"))
+                .body("release", CoreMatchers.is("sbomer-abc"));
     }
 
-    @Test
-    void testStatsEndpoint() {
+    @ParameterizedTest
+    @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
+    void testStatsEndpoint(String apiVersion) {
         Mockito.when(sbomService.countSboms()).thenReturn(12l);
         Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
 
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha1/stats")
+                .get(String.format("/api/%s/stats", apiVersion))
                 .then()
                 .statusCode(200)
                 .body("resources.sboms.total", CoreMatchers.is(12))

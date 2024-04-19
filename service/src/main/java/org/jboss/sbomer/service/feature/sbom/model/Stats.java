@@ -17,11 +17,15 @@
  */
 package org.jboss.sbomer.service.feature.sbom.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder(setterPrefix = "with")
+@JsonInclude(Include.NON_EMPTY)
 public class Stats {
 
     /**
@@ -71,10 +75,21 @@ public class Stats {
         long inProgress;
     }
 
+    @Data
+    @Builder(setterPrefix = "with")
+    public static class Deployment {
+        String type;
+        String target;
+        String zone;
+    }
+
     Messaging messaging;
     Resources resources;
+    Deployment deployment;
     long uptimeMillis;
     String uptime;
     String version;
-
+    String release;
+    String appEnv;
+    String hostname;
 }
