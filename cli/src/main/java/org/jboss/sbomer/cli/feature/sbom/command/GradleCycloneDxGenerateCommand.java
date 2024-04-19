@@ -55,7 +55,7 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
         processBuilder.environment()
                 .put(
                         "JAVA_OPTS",
-                        "-Dorg.gradle.jvmargs=-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError");
+                        "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError");
 
         processBuilder.command().add("cyclonedxBom");
         processBuilder.command().add("--no-daemon");
