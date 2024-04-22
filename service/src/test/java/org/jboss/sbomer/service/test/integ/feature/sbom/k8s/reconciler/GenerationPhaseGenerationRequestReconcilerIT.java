@@ -18,8 +18,8 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom.k8s.reconciler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -32,9 +32,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -61,11 +58,13 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunStatusBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.Mock;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.InjectMock;
 import io.quarkus.test.kubernetes.client.KubernetesTestServer;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Class responsible for testing reconciliation workflow for the generation phase.
@@ -100,15 +99,18 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
     KubernetesServer mockServer;
 
     private GenerationRequest dummyGenerationRequest() throws IOException {
-        return new GenerationRequestBuilder().withNewMetadata()
-                .withName("test-generation-request")
-                .endMetadata()
+        GenerationRequest generationRequest = new GenerationRequestBuilder(GenerationRequestType.BUILD)
                 .withIdentifier("AABBCC")
-                .withType(GenerationRequestType.BUILD)
                 .withStatus(SbomGenerationStatus.GENERATING)
                 .withConfig(TestResources.asString("configs/multi-product.yaml"))
                 .withEnvConfig(TestResources.asString("configs/env-config.yaml"))
                 .build();
+
+        // For test we need to set a stable name
+        generationRequest.getMetadata().setName("test-generation-request");
+
+        return generationRequest;
+
     }
 
     private TaskRun dummyTaskRun() {

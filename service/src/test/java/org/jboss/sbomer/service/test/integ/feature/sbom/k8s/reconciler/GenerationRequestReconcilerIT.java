@@ -23,8 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.URL;
 import java.util.List;
 
-import jakarta.inject.Inject;
-
 import org.awaitility.Awaitility;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -38,6 +36,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.javaoperatorsdk.operator.Operator;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 
 @QuarkusTest
 @Disabled("This doesn't work, because we are not starting Tekton properly, we need to think about different ways of running integration tests")
@@ -59,12 +58,7 @@ public class GenerationRequestReconcilerIT {
     void testReconciler() {
         operator.start();
 
-        GenerationRequest request = new GenerationRequestBuilder()
-                .withNewDefaultMetadata("AABBCC", GenerationRequestType.BUILD)
-                .withName("test")
-                .endMetadata()
-                .withIdentifier("AABBCC")
-                .withType(GenerationRequestType.BUILD)
+        GenerationRequest request = new GenerationRequestBuilder(GenerationRequestType.BUILD).withIdentifier("AABBCC")
                 .build();
 
         GenerationRequest created = client.resource(request).create();

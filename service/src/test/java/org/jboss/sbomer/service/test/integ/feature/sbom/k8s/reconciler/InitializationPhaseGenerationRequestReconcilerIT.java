@@ -68,11 +68,7 @@ public class InitializationPhaseGenerationRequestReconcilerIT {
     GenerationRequestReconciler controller;
 
     private GenerationRequest dummyInitializationRequest(SbomGenerationStatus status) throws IOException {
-        return new GenerationRequestBuilder().withNewDefaultMetadata("AABBCC", GenerationRequestType.BUILD)
-                .withName("test")
-                .endMetadata()
-                .withIdentifier("AABBCC")
-                .withType(GenerationRequestType.BUILD)
+        return new GenerationRequestBuilder(GenerationRequestType.BUILD).withIdentifier("AABBCC")
                 .withStatus(status)
                 .build();
     }

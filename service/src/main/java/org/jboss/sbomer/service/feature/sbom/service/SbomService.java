@@ -191,11 +191,8 @@ public class SbomService {
         log.info("New generation request for operation id '{}'", operationId);
         log.debug("Creating GenerationRequest Kubernetes resource...");
 
-        GenerationRequest req = new GenerationRequestBuilder()
-                .withNewDefaultMetadata(operationId, GenerationRequestType.OPERATION)
-                .endMetadata()
+        GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
                 .withIdentifier(operationId)
-                .withType(GenerationRequestType.OPERATION)
                 .withStatus(SbomGenerationStatus.NEW)
                 .build();
 
@@ -239,10 +236,7 @@ public class SbomService {
             log.info("New generation request for build id '{}'", buildId);
             log.debug("Creating GenerationRequest Kubernetes resource...");
 
-            GenerationRequest req = new GenerationRequestBuilder()
-                    .withNewDefaultMetadata(buildId, GenerationRequestType.BUILD)
-                    .endMetadata()
-                    .withIdentifier(buildId)
+            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD).withIdentifier(buildId)
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
