@@ -20,18 +20,31 @@ package org.jboss.sbomer.service.feature.sbom.k8s.model;
 import java.util.Optional;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 
 import io.fabric8.kubernetes.api.builder.VisitableBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 
 public class GenerationRequestBuilder extends GenerationRequestFluent<GenerationRequestBuilder>
         implements VisitableBuilder<GenerationRequest, GenerationRequestBuilder> {
 
+    public GenerationRequestBuilder(GenerationRequestType type) {
+        withId(RandomStringIdGenerator.generate());
+        withType(type);
+    }
+
     @Override
     public GenerationRequest build() {
-        addToData(GenerationRequest.KEY_ID, RandomStringIdGenerator.generate());
+        withNewMetadataLike(
+                new ObjectMetaBuilder().withGenerateName("sbom-request-" + getId().toLowerCase() + "-")
+                        .withLabels(Labels.defaultLabelsToMap(getType()))
+                        .build())
+                .endMetadata();
+
+        addToData(GenerationRequest.KEY_ID, getId());
         addToData(GenerationRequest.KEY_IDENTIFIER, getIdentifier());
         addToData(GenerationRequest.KEY_REASON, getReason());
         addToData(GenerationRequest.KEY_ENV_CONFIG, getEnvConfig());

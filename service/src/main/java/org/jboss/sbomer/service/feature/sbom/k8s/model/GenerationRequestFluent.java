@@ -19,10 +19,8 @@ package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
-import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import io.fabric8.kubernetes.api.model.ConfigMapFluent;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 
 @SuppressWarnings(value = "unchecked")
 public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> extends ConfigMapFluent<A> {
@@ -35,15 +33,6 @@ public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> exten
     private String config;
     private String envConfig;
     private GenerationResult result;
-
-    public ConfigMapFluent<A>.MetadataNested<A> withNewDefaultMetadata(
-            String identifier,
-            GenerationRequestType sbomGenerationType) {
-        return withNewMetadataLike(
-                new ObjectMetaBuilder().withGenerateName("sbom-request-" + identifier.toLowerCase() + "-")
-                        .withLabels(Labels.defaultLabelsToMap(sbomGenerationType))
-                        .build());
-    }
 
     public A withType(GenerationRequestType type) {
         this.type = type;

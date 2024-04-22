@@ -93,11 +93,8 @@ public class PncNotificationHandler {
         if (isSuccessfulPersistentBuild(messageBody)) {
             log.info("Triggering automated SBOM generation for PNC build '{}'' ...", messageBody.getBuild().getId());
 
-            GenerationRequest req = new GenerationRequestBuilder()
-                    .withNewDefaultMetadata(messageBody.getBuild().getId(), GenerationRequestType.BUILD)
-                    .endMetadata()
+            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
                     .withIdentifier(messageBody.getBuild().getId())
-                    .withType(GenerationRequestType.BUILD)
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
@@ -130,11 +127,8 @@ public class PncNotificationHandler {
         if (isFinishedAnalysis(messageBody)) {
 
             log.info("Triggering automated SBOM generation for PNC build '{}'' ...", messageBody.getOperationId());
-            GenerationRequest req = new GenerationRequestBuilder()
-                    .withNewDefaultMetadata(messageBody.getOperationId(), GenerationRequestType.OPERATION)
-                    .endMetadata()
+            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
                     .withIdentifier(messageBody.getOperationId())
-                    .withType(GenerationRequestType.OPERATION)
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
