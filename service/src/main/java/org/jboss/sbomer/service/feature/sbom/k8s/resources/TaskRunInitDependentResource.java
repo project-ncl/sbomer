@@ -26,10 +26,12 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRefBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.CRUDNoGCKubernetesDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependent;
@@ -102,6 +104,13 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                                 .withNewValue(Objects.requireNonNullElse(generationRequest.getConfig(), "{}"))
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
+                .withWorkspaces(
+                        new WorkspaceBindingBuilder().withSubPath(generationRequest.getMetadata().getName())
+                                .withName("data")
+                                .withPersistentVolumeClaim(
+                                        new PersistentVolumeClaimVolumeSourceBuilder().withClaimName(release + "-sboms")
+                                                .build())
+                                .build())
                 .endSpec()
                 .build();
 
