@@ -86,12 +86,14 @@ quarkus:
         ~: false
       format: "%d{HH:mm:ss,SSS} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId}, sampled=%X{sampled} [%c{3.}] (%t) %s%e mdc:[%X]%n"
     file:
+      level: DEBUG
       # Disable file logging
       enable: false
       # Disable JSON logging for files by default
       json:
         ~: false
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+      path: application.log
 
   # Configuration for API viewer under the api/ /endpoint.
   smallrye-openapi:

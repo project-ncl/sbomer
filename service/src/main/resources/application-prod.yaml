@@ -57,12 +57,6 @@ sbomer:
         topic: "${PRODUCER_TOPIC}"
 
 quarkus:
-  log:
-    console:
-      # Enable JSON logging to console in production
-      json:
-        ~: true
-
   oidc:
     enabled: true
     connection-delay: 30S

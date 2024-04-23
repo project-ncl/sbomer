@@ -17,8 +17,9 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.generate;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -82,6 +83,18 @@ public class ProcessRunner {
      * @throws ApplicationException in case the process cannot be started or failed.
      */
     public static void run(Path workDir, String... command) {
+        run(Collections.emptyMap(), workDir, command);
+    }
+
+    /**
+     * Executes the provided {@code command} in the {@code workDir}.
+     *
+     * @param environment A {@link Map} containing environment variables that should be added to the execution.
+     * @param workDir The {@link Path} to the working directory
+     * @param command The command to execute
+     * @throws ApplicationException in case the process cannot be started or failed.
+     */
+    public static void run(Map<String, String> environment, Path workDir, String... command) {
         if (Objects.isNull(command) || command.length == 0) {
             throw new ValidationException(
                     "Command execution validation failed",
@@ -90,12 +103,22 @@ public class ProcessRunner {
 
         ProcessRunner.validateWorkDir(workDir);
 
-        ProcessBuilder pb = new ProcessBuilder().redirectOutput(Redirect.INHERIT).redirectError(Redirect.INHERIT);
+        ProcessBuilder pb = new ProcessBuilder();
+
+        pb.environment().putAll(environment);
+
+        // Handle stdout and stderr together. This means that we
+        // do not distinguish between these two streams in launched commands.
+        // We will log both to stdout.
+        pb.redirectErrorStream(true);
 
         pb.command(command);
-        pb.directory(workDir.toAbsolutePath().toFile());
+        log.info("Command to run: '{}'", pb.command().stream().map(Object::toString).collect(Collectors.joining(" ")));
 
-        log.info("Preparing to execute command: '{}'", pb.command().stream().collect(Collectors.joining(" ")));
+        pb.directory(workDir.toAbsolutePath().toFile());
+        log.info("Working directory: '{}'", pb.directory());
+
+        log.info("Starting execution...");
 
         Process process = null;
 
@@ -103,6 +126,21 @@ public class ProcessRunner {
             process = pb.start();
         } catch (IOException e) {
             throw new ApplicationException("Error while running the command", e);
+        }
+
+        log.info("Starting processing of output...");
+
+        try {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.info(line);
+                }
+            }
+        } catch (IOException e) {
+            log.error(
+                    "An error ocurred while procesing the output of the command. This is not fatal and will be ignored.",
+                    e);
         }
 
         int exitCode = -1;
