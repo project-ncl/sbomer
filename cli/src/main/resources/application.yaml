@@ -41,8 +41,17 @@ quarkus:
       "org.jboss.sbomer":
         level: DEBUG
     console:
+      json:
+        ~: false
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
       stderr: true
+    file:
+      json:
+        ~: false
+      level: DEBUG
+      enable: false
+      path: cli.log
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
   oidc-client:
     client-enabled: true
     auth-server-url: http://localhost:8180/auth/realms/quarkus
@@ -76,9 +85,6 @@ sbomer:
       category:
         "io.quarkus.kubernetes":
           level: DEBUG
-      console:
-        json:
-          ~: false
     oidc-client:
       client-enabled: false
 
@@ -94,7 +100,6 @@ sbomer:
           ~: false
     oidc-client:
       client-enabled: false
-
 
   sbomer:
     pnc:
