@@ -496,13 +496,15 @@ public class SbomUtils {
             if (c.getExternalReferences() != null) {
                 externalRefs.addAll(c.getExternalReferences());
             }
-            ExternalReference reference = null;
-            for (ExternalReference r : externalRefs) {
-                if (r.getType().equals(type)) {
-                    reference = r;
-                    break;
-                }
-            }
+
+            ExternalReference reference = Optional.ofNullable(externalRefs)
+                    .map(Collection::stream)
+                    .orElseGet(Stream::empty)
+                    .filter(ref -> ref.getType().equals(type))
+                    .filter(ref -> Objects.equals(ref.getComment(), comment))
+                    .findFirst()
+                    .orElse(null);
+
             if (reference == null) {
                 reference = new ExternalReference();
                 reference.setType(type);
