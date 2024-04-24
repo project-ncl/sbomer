@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
@@ -56,15 +55,20 @@ import com.github.packageurl.PackageURLBuilder;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createBom;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setBrewBuildMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setProductMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.toJsonNode;
+
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_CHECKSUM;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_URL;
 
 @Slf4j
 @Command(
@@ -181,6 +185,8 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
 
         setProductMetadata(mainComponent, config);
         setPncOperationMetadata(mainComponent, operation, pncService.getApiUrl());
+        addPropertyIfMissing(mainComponent, SBOM_RED_HAT_DELIVERABLE_URL, deliverableUrl);
+        addPropertyIfMissing(mainComponent, SBOM_RED_HAT_DELIVERABLE_CHECKSUM, distributionVersion);
 
         bom.setMetadata(createDefaultSbomerMetadata(mainComponent, sbomerClientFacade.getSbomerVersion()));
         bom.addDependency(mainDependency);
@@ -209,6 +215,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
 
                 // Create a component entry for the artifact
                 Component component = createComponent(artifact.getArtifact(), Scope.REQUIRED, Type.LIBRARY, buildType);
+                setArtifactMetadata(component, artifact.getArtifact(), pncService.getApiUrl());
                 setPncBuildMetadata(component, artifact.getArtifact().getBuild(), pncService.getApiUrl());
 
                 if (brewBuild != null) {

@@ -80,6 +80,7 @@ import static org.jboss.sbomer.core.features.sbom.Constants.PUBLISHER;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_ARTIFACT_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
@@ -201,6 +202,19 @@ public class SbomUtils {
                     pncBuild.getScmBuildConfigRevision());
         }
 
+        return component;
+    }
+
+    public static Component setArtifactMetadata(Component component, Artifact artifact, String pncApiUrl) {
+        if (artifact == null) {
+            return component;
+        }
+
+        addExternalReference(
+                component,
+                ExternalReference.Type.BUILD_SYSTEM,
+                "https://" + pncApiUrl + "/pnc-rest/v2/artifacts/" + artifact.getId().toString(),
+                SBOM_RED_HAT_PNC_ARTIFACT_ID);
         return component;
     }
 
