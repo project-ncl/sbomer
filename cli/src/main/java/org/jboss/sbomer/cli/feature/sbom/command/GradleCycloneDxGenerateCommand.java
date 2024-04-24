@@ -17,23 +17,25 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import static org.jboss.sbomer.core.features.sbom.Constants.GRADLE_PLUGIN_VERSION_ENV_VARIABLE;
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.gradle.GradleCommandLineParser.extractGradleMainBuildCommand;
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.gradle.GradleCommandLineParser.extractGradleMajorVersion;
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.jboss.sbomer.cli.feature.sbom.generate.ProcessRunner;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
-
-import static org.jboss.sbomer.core.features.sbom.Constants.GRADLE_PLUGIN_VERSION_ENV_VARIABLE;
-import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES;
-import static org.jboss.sbomer.core.features.sbom.utils.commandline.gradle.GradleCommandLineParser.extractGradleMainBuildCommand;
-import static org.jboss.sbomer.core.features.sbom.utils.commandline.gradle.GradleCommandLineParser.extractGradleMajorVersion;
 
 @Slf4j
 @Command(
@@ -46,56 +48,41 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
 
     @Override
     protected Path doGenerate(String buildCmdOptions) {
-        ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
+        log.info("Starting SBOM generation using the CycloneDX Gradle plugin...");
 
-        configureProcessEnvironmentVariable(buildCmdOptions, processBuilder);
-        configureProcessMainBuildCommands(buildCmdOptions, processBuilder);
+        Map<String, String> environment = new HashMap<>();
 
-        processBuilder.environment().put("GRADLE_OPTS", "-XshowSettings:vm");
-        processBuilder.environment()
-                .put(
+        configureProcessEnvironmentVariable(buildCmdOptions, environment);
+
+        environment.putAll(
+                Map.of(
+                        "GRADLE_OPTS",
+                        "-XshowSettings:vm",
                         "JAVA_OPTS",
-                        "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError");
+                        "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError"));
 
-        processBuilder.command().add("cyclonedxBom");
-        processBuilder.command().add("--no-daemon");
+        ProcessRunner.run(environment, parent.getWorkdir(), command(buildCmdOptions));
+
+        return Path.of(parent.getWorkdir().toAbsolutePath().toString(), "build", "sbom", "bom.json");
+    }
+
+    private String[] command(String buildCmdOptions) {
+        List<String> cmd = new ArrayList<>();
+
+        configureProcessMainBuildCommands(buildCmdOptions, cmd);
+
+        cmd.add("cyclonedxBom");
+        cmd.add("--no-daemon");
 
         if (initScriptPath != null) {
             log.debug("Using provided Gradle init script file located at '{}'", initScriptPath);
-            processBuilder.command().add("--init-script");
-            processBuilder.command().add(initScriptPath.toString());
+            cmd.add("--init-script");
+            cmd.add(initScriptPath.toString());
         }
 
-        String args = generatorArgs();
-        processBuilder.command().addAll(Arrays.asList(args.split(" ")));
+        cmd.addAll(Arrays.asList(generatorArgs().split(" ")));
 
-        log.info("Working directory: '{}'", parent.getWorkdir());
-        processBuilder.directory(parent.getWorkdir().toFile());
-
-        log.info(
-                "Starting SBOM generation using the CycloneDX Gradle plugin with command: '{}' ...",
-                processBuilder.command().stream().collect(Collectors.joining(" ")));
-        Process process = null;
-
-        try {
-            process = processBuilder.start();
-        } catch (IOException e) { // NOSONAR It's rethrown in the next line
-            throw new ApplicationException("Error while running the command", e);
-        }
-
-        int exitCode = -1;
-
-        try {
-            exitCode = process.waitFor();
-        } catch (InterruptedException e) { // NOSONAR It's rethrown in the next line
-            throw new ApplicationException("Unable to obtain the status for the process", e);
-        }
-
-        if (exitCode != 0) {
-            throw new ApplicationException("SBOM generation failed, see logs above");
-        }
-
-        return Path.of(parent.getWorkdir().toAbsolutePath().toString(), "build", "sbom", "bom.json");
+        return cmd.toArray(new String[cmd.size()]);
     }
 
     @Override
@@ -103,19 +90,19 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
         return GeneratorType.GRADLE_CYCLONEDX;
     }
 
-    private void configureProcessEnvironmentVariable(String buildCmdOptions, ProcessBuilder processBuilder) {
+    private void configureProcessEnvironmentVariable(String buildCmdOptions, Map<String, String> environment) {
         // If there is an hint about the major Gradle version required, use it.
         Optional<Integer> gradleMajorVersion = extractGradleMajorVersion(buildCmdOptions);
         if (!gradleMajorVersion.isPresent() || gradleMajorVersion.get() >= 5) {
-            processBuilder.environment().put(GRADLE_PLUGIN_VERSION_ENV_VARIABLE, toolVersion());
+            environment.put(GRADLE_PLUGIN_VERSION_ENV_VARIABLE, toolVersion());
         } else {
             // If the version is previous 5, force the Gradle CycloneDX plugin version to 1.6.1 for backward
             // compatibility
-            processBuilder.environment().put(GRADLE_PLUGIN_VERSION_ENV_VARIABLE, "1.6.1");
+            environment.put(GRADLE_PLUGIN_VERSION_ENV_VARIABLE, "1.6.1");
         }
     }
 
-    private void configureProcessMainBuildCommands(String buildCmdOptions, ProcessBuilder processBuilder) {
+    private void configureProcessMainBuildCommands(String buildCmdOptions, List<String> cmd) {
         Optional<String> mainGradleBuildCommand = extractGradleMainBuildCommand(buildCmdOptions);
         if (!mainGradleBuildCommand.isPresent()) {
             throw new ApplicationException("Gradle build command is empty.");
@@ -123,7 +110,7 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
 
         List.of(mainGradleBuildCommand.get().split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
                 .stream()
-                .forEach(processBuilder.command()::add);
+                .forEach(cmd::add);
     }
 
 }
