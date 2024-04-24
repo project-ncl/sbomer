@@ -17,12 +17,12 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.List;
 
-import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.cli.feature.sbom.generate.ProcessRunner;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
 import lombok.extern.slf4j.Slf4j;
@@ -41,40 +41,22 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
 
     @Override
     protected Path doGenerate(String buildCmdOptions) {
-        ProcessBuilder processBuilder = new ProcessBuilder().inheritIO();
-        processBuilder.command().add("cyclonedx-npm");
-        processBuilder.command().addAll(Arrays.asList("--output-format", "JSON", "--output-file", BOM_FILE_NAME));
+        log.info("Starting SBOM generation using the CycloneDX NPM plugin...");
 
-        String args = generatorArgs();
-        processBuilder.command().addAll(Arrays.asList(args.split(" ")));
-
-        log.info("Working directory: '{}'", parent.getWorkdir());
-        processBuilder.directory(parent.getWorkdir().toFile());
-
-        log.info(
-                "Starting SBOM generation using the CycloneDX NPM plugin with command: '{}' ...",
-                processBuilder.command().stream().collect(Collectors.joining(" ")));
-        Process process = null;
-
-        try {
-            process = processBuilder.start();
-        } catch (IOException e) { // NOSONAR Wer are rethrowing it below
-            throw new ApplicationException("Error while running the command", e);
-        }
-
-        int exitCode = -1;
-
-        try {
-            exitCode = process.waitFor();
-        } catch (InterruptedException e) { // NOSONAR Wer are rethrowing it below
-            throw new ApplicationException("Unable to obtain the status for the process", e);
-        }
-
-        if (exitCode != 0) {
-            throw new ApplicationException("SBOM generation failed, see logs above");
-        }
+        ProcessRunner.run(parent.getWorkdir(), command(buildCmdOptions));
 
         return Path.of(parent.getWorkdir().toAbsolutePath().toString(), BOM_FILE_NAME);
+    }
+
+    private String[] command(String buildCmdOptions) {
+        List<String> cmd = new ArrayList<>();
+
+        cmd.add("cyclonedx-npm");
+        cmd.addAll(Arrays.asList("--output-format", "JSON", "--output-file", BOM_FILE_NAME));
+
+        cmd.addAll(Arrays.asList(generatorArgs().split(" ")));
+
+        return cmd.toArray(new String[cmd.size()]);
     }
 
     @Override
