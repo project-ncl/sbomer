@@ -25,7 +25,7 @@ default:
 
 build:
   image:
-    name: registry.access.redhat.com/ubi9/openjdk-17@sha256:816acfb1182efdec1875e260858c0a41e2d6f79ef7f918547fc6f9ad0130c221
+    name: registry.access.redhat.com/ubi9/openjdk-17@sha256:75a4e8dc22859514e87c4efc5096ed7a36d8230ed0477ed1e93c24866328ec76
     entrypoint: [""]
   stage: build
   cache:
