@@ -44,6 +44,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setSupplier;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMrrc;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.hasExternalReference;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHash;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setBrewBuildMetadata;
 
@@ -100,6 +101,9 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
                     "Starting processing of Red Hat component '{}' with PNC artifact '{}'...",
                     component.getPurl(),
                     artifact.getId());
+
+            // Add artifact metadata (PNC url)
+            setArtifactMetadata(component, artifact, pncService.getApiUrl());
 
             // Add build-related information, if we found a build in PNC
             if (artifact.getBuild() != null) {

@@ -24,8 +24,11 @@ public class Constants {
     public static final String SBOMER_GIT_URL = "git@github.com:project-ncl/sbomer.git";
     public static final String SBOMER_WEBSITE = "https://github.com/project-ncl/sbomer";
 
+    public static final String SBOM_RED_HAT_DELIVERABLE_URL = "deliverable-url";
+    public static final String SBOM_RED_HAT_DELIVERABLE_CHECKSUM = "deliverable-checksum";
     public static final String SBOM_RED_HAT_PNC_OPERATION_ID = "pnc-operation-id";
     public static final String SBOM_RED_HAT_PNC_BUILD_ID = "pnc-build-id";
+    public static final String SBOM_RED_HAT_PNC_ARTIFACT_ID = "pnc-artifact-id";
     public static final String SBOM_RED_HAT_BREW_BUILD_ID = "brew-build-id";
     public static final String SBOM_RED_HAT_PUBLIC_URL = "public-url";
     public static final String SBOM_RED_HAT_ORIGIN_URL = "origin-url";

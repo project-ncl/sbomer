@@ -244,11 +244,8 @@ public class DefaultProcessCommandIT {
                 ExternalReference.Type.DISTRIBUTION,
                 "https://maven.repository.redhat.com/ga/");
 
-        List<String> systems = getExternalReferences(component, ExternalReference.Type.BUILD_SYSTEM);
-
-        // It should contain only a single, default entry which is not enriched
-        assertEquals(1, systems.size());
-        assertEquals("https://builds.apache.org/", systems.get(0));
+        // The manifest will contain also a non-enriched build system entry
+        assertExternalReference(component, ExternalReference.Type.BUILD_SYSTEM, "https://builds.apache.org/");
 
         assertEquals(0, getExternalReferences(component, ExternalReference.Type.BUILD_META).size());
     }
