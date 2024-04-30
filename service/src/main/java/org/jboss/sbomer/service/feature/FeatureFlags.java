@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.features;
+package org.jboss.sbomer.service.feature;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +30,7 @@ import io.getunleash.Unleash;
 import io.getunleash.event.UnleashSubscriber;
 import io.getunleash.repository.FeatureToggleResponse;
 import io.quarkus.arc.Unremovable;
+import io.vertx.mutiny.core.eventbus.EventBus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.Getter;
@@ -43,7 +44,9 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Slf4j
 public class FeatureFlags implements UnleashSubscriber {
-    private static final String TOGGLE_DRY_RUN = "dry-run";
+    public static final String EVENT_NAME = "feature-flag-state-change";
+    public static final String TOGGLE_DRY_RUN = "dry-run";
+    public static final String TOGGLE_S3_STORAGE = "s3-storage";
 
     /**
      * A map holding all toggle values we are interested in. This is used for logging purposes. We are retrieving the
@@ -54,7 +57,10 @@ public class FeatureFlags implements UnleashSubscriber {
     @Inject
     Unleash unleash;
 
-    /**
+    @Inject
+    EventBus bus;
+
+    /** 
      * Returns {@code true} in case the dry-run mode is enabled.
      *
      * @return {@code true} if dry-run is enabled, {@code false} otherwise
@@ -63,8 +69,17 @@ public class FeatureFlags implements UnleashSubscriber {
         return unleash.isEnabled(TOGGLE_DRY_RUN, false);
     }
 
+    /**
+     * Returns {@code true} if storing logs in S3 bucket is enabled.
+     *
+     * @return {@code true} if s3 support for logs is enabled, {@code false} otherwise
+     */
+    public boolean s3Storage() {
+        return unleash.isEnabled(TOGGLE_S3_STORAGE, false);
+    }
+
     private void updateToggles(final FeatureToggleResponse toggleResponse) {
-        for (String toggleName : Set.of(TOGGLE_DRY_RUN)) {
+        for (String toggleName : Set.of(TOGGLE_DRY_RUN, TOGGLE_S3_STORAGE)) {
             FeatureToggle toggle = toggleResponse.getToggleCollection().getToggle(toggleName);
 
             if (toggle != null) {
@@ -72,6 +87,7 @@ public class FeatureFlags implements UnleashSubscriber {
 
                 if (previousValue == null || previousValue != toggle.isEnabled()) {
                     log.info("Feature toggle {} was just {}", toggleName, toggle.isEnabled() ? "enabled" : "disabled");
+                    bus.publish(EVENT_NAME, Map.of(toggleName, toggle.isEnabled()));
                 }
             } else {
                 log.debug("Feature toggle {} was disabled", toggleName);

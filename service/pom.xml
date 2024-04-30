@@ -42,6 +42,16 @@
       <artifactId>quarkus-operator-sdk</artifactId>
     </dependency>
     <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+      <version>${version.aws}</version>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>aws-crt-client</artifactId>
+      <version>${version.aws}</version>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.sbomer</groupId>
       <artifactId>sbomer-core</artifactId>
       <version>${project.version}</version>
@@ -53,6 +63,10 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-oidc-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-vertx</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkiverse.unleash</groupId>
