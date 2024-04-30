@@ -39,7 +39,7 @@ public class GenerationRequestBuilder extends GenerationRequestFluent<Generation
     @Override
     public GenerationRequest build() {
         withNewMetadataLike(
-                new ObjectMetaBuilder().withGenerateName("sbom-request-" + getId().toLowerCase() + "-")
+                new ObjectMetaBuilder().withName("sbom-request-" + getId().toLowerCase())
                         .withLabels(Labels.defaultLabelsToMap(getType()))
                         .build())
                 .endMetadata();

@@ -59,11 +59,9 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunStatusBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.quarkus.test.InjectMock;
-import io.quarkus.test.Mock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.kubernetes.client.KubernetesTestServer;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
@@ -72,22 +70,6 @@ import jakarta.inject.Inject;
 @QuarkusTest
 @WithKubernetesTestServer
 class GenerationPhaseGenerationRequestReconcilerIT {
-
-    @ApplicationScoped
-    @Mock
-    public static class MockedGenerationRequestControllerConfig implements GenerationRequestControllerConfig {
-
-        @Override
-        public String sbomDir() {
-            throw new UnsupportedOperationException("Unimplemented method 'sbomDir'");
-        }
-
-        @Override
-        public boolean cleanup() {
-            throw new UnsupportedOperationException("Unimplemented method 'cleanup'");
-        }
-
-    }
 
     @InjectMock
     GenerationRequestControllerConfig controllerConfig;
