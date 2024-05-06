@@ -27,6 +27,7 @@ import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
+import org.jboss.sbomer.cli.feature.sbom.client.GitLabClient;
 import org.jboss.sbomer.cli.feature.sbom.client.GitilesClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
@@ -47,29 +48,31 @@ public class ConfigReader {
     @RestClient
     GitilesClient gitilesClient;
 
+    @Inject
+    @RestClient
+    GitLabClient gitLabClient;
+
     @Getter
     ObjectMapper yamlObjectMapper = ObjectMapperProvider.yaml();
 
     @Getter
     ObjectMapper jsonObjectMapper = ObjectMapperProvider.json();
 
-    public Config getConfig(Build build) {
-
-        String scmUrl = build.getScmUrl();
-        String scmTag = build.getScmTag();
-        if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
-            scmUrl = build.getNoRebuildCause().getScmUrl();
-            scmTag = build.getNoRebuildCause().getScmTag();
-        }
+    /**
+     * Retreives the content of the SBOMer config file from a Gerrit server.
+     *
+     * @param scmUrl
+     * @param scmTag
+     * @return
+     */
+    private byte[] getGerritConfigContent(String scmUrl, String scmTag) {
+        log.debug("Using Gerrit config provider");
 
         Pattern pattern = Pattern.compile("gerrit/(.*)\\.git$");
         Matcher matcher = pattern.matcher(scmUrl);
 
         if (!matcher.find()) {
-            throw new ClientException(
-                    "Unable to determine the project from the SCM url: '{}' from PNC build '{}'",
-                    scmUrl,
-                    build.getId());
+            throw new ClientException("Invalid URL '{}' for Gerrit SCM", scmUrl);
         }
 
         String repository = matcher.group(1);
@@ -93,10 +96,77 @@ public class ConfigReader {
             return null;
         }
 
+        return Base64.getDecoder().decode(base64Config);
+    }
+
+    /**
+     * Retreives the content of the SBOMer config file from a GitLab server.
+     *
+     * @param scmUrl
+     * @param scmTag
+     * @return
+     */
+    private byte[] getGitLabConfigContent(String scmUrl, String scmTag) {
+        log.debug("Using GitLab config provider");
+
+        Pattern pattern = Pattern.compile("pnc-workspace/(.*)\\.git$");
+        Matcher matcher = pattern.matcher(scmUrl);
+
+        if (!matcher.find()) {
+            throw new ClientException("Invalid URL '{}' for GitLab SCM", scmUrl);
+        }
+
+        String repository = matcher.group(1);
+
+        log.debug("Found GitLab project: '{}'", repository);
+        log.debug("Fetching file '{}' from the '{}' repository with tag '{}'", CONFIG_PATH, repository, scmTag);
+
         try {
-            return yamlObjectMapper.readValue(Base64.getDecoder().decode(base64Config), Config.class);
+            return gitLabClient.fetchFile(repository, scmTag, CONFIG_PATH).getBytes();
+        } catch (Exception e) {
+            log.debug(
+                    "SBOMer configuration file could not be retrieved in the '{}' repository with '{}' tag, ignoring",
+                    repository,
+                    scmTag,
+                    e);
+
+            return null;
+        }
+
+    }
+
+    public Config getConfig(Build build) {
+
+        String scmUrl = build.getScmUrl();
+        String scmTag = build.getScmTag();
+
+        if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
+            scmUrl = build.getNoRebuildCause().getScmUrl();
+            scmTag = build.getNoRebuildCause().getScmTag();
+        }
+
+        byte[] configContent = null;
+
+        if (scmUrl.contains("gerrit")) {
+            configContent = getGerritConfigContent(scmUrl, scmTag);
+        } else if (scmUrl.contains("gitlab")) {
+            configContent = getGitLabConfigContent(scmUrl, scmTag);
+        } else {
+            throw new ClientException(
+                    "Unable to determine the project from the SCM url: '{}' from PNC build '{}'",
+                    scmUrl,
+                    build.getId());
+        }
+
+        if (configContent == null) {
+            log.warn("Config file not found or failed to retrieve it, ignoring");
+            return null;
+        }
+
+        try {
+            return yamlObjectMapper.readValue(configContent, Config.class);
         } catch (IOException e) {
-            throw new ApplicationException("Could not read configuration file", e);
+            throw new ApplicationException("Unable to parse configuration file", e);
         }
     }
 }
