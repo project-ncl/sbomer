@@ -1,3 +1,7 @@
+include:
+  - project: enterprise-pipelines/gitlab-ci/includes
+    file: SAST/sonarqube.yml
+
 default:
   tags: [openshift]
 
@@ -68,6 +72,18 @@ build:
     paths:
       - service/target/quarkus-app/
       - cli/target/quarkus-app/
+
+sonarqube:
+  stage: static-analysis
+  variables:
+    SONAR_PROJECT_KEY: "SBOMer"
+    SONAR_SCANNER_OPTS: "-Xmx384m"
+    KUBERNETES_CPU_REQUEST: "500m"
+    KUBERNETES_CPU_LIMIT: "500m"
+    KUBERNETES_MEMORY_REQUEST: "768Mi"
+    KUBERNETES_MEMORY_LIMIT: "768Mi"
+    KUBERNETES_EPHEMERAL_STORAGE_REQUEST: "512Mi"
+    KUBERNETES_EPHEMERAL_STORAGE_LIMIT: "1Gi"
 
 build-image-service:
   extends:
