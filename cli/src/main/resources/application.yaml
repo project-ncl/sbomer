@@ -30,6 +30,8 @@ quarkus:
   rest-client:
     "gerrit":
       url: "https://${sbomer.gerrit.host}"
+    "gitlab":
+      url: "https://${sbomer.gitlab.host}"
     "sbomer":
       url: "${sbomer.host}"
 
@@ -60,6 +62,9 @@ sbomer:
     product-mapping: "prod"
   ## Gerrit configuration
   # gerrit:
+  #   host:
+  ## GitLab configuration
+  # gitlab:
   #   host:
   koji:
     hub-url: "https://${sbomer.koji.hub.host}/brewhub"
