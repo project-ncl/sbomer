@@ -89,6 +89,8 @@ sonarqube:
     KUBERNETES_MEMORY_LIMIT: "768Mi"
     KUBERNETES_EPHEMERAL_STORAGE_REQUEST: "512Mi"
     KUBERNETES_EPHEMERAL_STORAGE_LIMIT: "1Gi"
+  needs:
+    - job: build
 
 build-image-service:
   extends:
