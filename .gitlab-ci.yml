@@ -92,6 +92,10 @@ sonarqube:
       -Dorg.slf4j.simpleLogger.showDateTime=true
       -Djava.awt.headless=true
       -XX:InitialRAMPercentage=70 -XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
+  before_script:
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
+    - update-ca-trust
   script:
     - ./mvnw -s .ci/settings.xml sonar:sonar -Dsonar.projectKey=SBOMer
   needs:
