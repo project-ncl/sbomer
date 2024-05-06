@@ -2,6 +2,11 @@ include:
   - project: enterprise-pipelines/gitlab-ci/includes
     file: SAST/sonarqube.yml
 
+stages:
+  - static-analysis
+  - build
+  - deploy
+
 default:
   tags: [openshift]
 
