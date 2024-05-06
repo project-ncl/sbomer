@@ -86,8 +86,14 @@ sonarqube:
     KUBERNETES_CPU_LIMIT: "500m"
     KUBERNETES_MEMORY_REQUEST: "768Mi"
     KUBERNETES_MEMORY_LIMIT: "768Mi"
+    MAVEN_OPTS: >-
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      -XX:InitialRAMPercentage=70 -XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
   script:
-    - ./mvnw -Xmx384m -s .ci/settings.xml sonar:sonar -Dsonar.projectKey=SBOMer
+    - ./mvnw -s .ci/settings.xml sonar:sonar -Dsonar.projectKey=SBOMer
   needs:
     - job: build
 
