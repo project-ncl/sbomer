@@ -3,8 +3,8 @@ include:
     file: SAST/sonarqube.yml
 
 stages:
-  - static-analysis
   - build
+  - static-analysis
   - deploy
 
 default:
