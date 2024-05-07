@@ -1,5 +1,10 @@
+include:
+  - project: enterprise-pipelines/gitlab-ci/includes
+    file: SAST/sonarqube.yml
+
 stages:
   - build
+  - static-analysis
   - deploy
 
 default:
@@ -50,10 +55,6 @@ build:
       -Dorg.slf4j.simpleLogger.showDateTime=true
       -Djava.awt.headless=true
       -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
-    SONAR_SCANNER_OPTS: >-
-      -Djavax.net.ssl.keyStore=/tmp/cacerts
-      -Djavax.net.ssl.keyStorePassword=changeit
-      -Dsonar.verbose=true
     MAVEN_CLI_OPTS: >-
       --batch-mode
       --errors
@@ -66,12 +67,6 @@ build:
       --no-transfer-progress
 
   script:
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o /tmp/2022-IT-Root-CA.pem
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /tmp/2015-IT-Root-CA.pem
-    - cp /usr/lib/jvm/java-17-openjdk/lib/security/cacerts /tmp/
-    - chmod +w /tmp/cacerts
-    - keytool -import -trustcacerts -alias redhat-ca-2022 -file /tmp/2022-IT-Root-CA.pem -keystore /tmp/cacerts -noprompt -storepass changeit
-    - keytool -import -trustcacerts -alias redhat-ca-2015 -file /tmp/2015-IT-Root-CA.pem -keystore /tmp/cacerts -noprompt -storepass changeit
     - ./mvnw -s .ci/settings.xml verify sonar:sonar ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
   artifacts:
     when: always
@@ -79,8 +74,27 @@ build:
       junit:
         - "**/target/surefire-reports/**/*.xml"
     paths:
-      - service/target/quarkus-app/
-      - cli/target/quarkus-app/
+      - service/target
+      - cli/target
+      - core/target
+      - e2e/target
+      - native/cli/runtime/target/classes
+      - native/cli/deployment/target/classes
+
+sonarqube:
+  stage: static-analysis
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    KUBERNETES_CPU_REQUEST: "1000m"
+    KUBERNETES_CPU_LIMIT: "1000m"
+    KUBERNETES_MEMORY_REQUEST: "2Gi"
+    KUBERNETES_MEMORY_LIMIT: "2Gi"
+    SONAR_SCANNER_OPTS: "-Xmx512m"
+  dependencies:
+    - build
+  needs:
+    - job: build
 
 build-image-service:
   extends:
