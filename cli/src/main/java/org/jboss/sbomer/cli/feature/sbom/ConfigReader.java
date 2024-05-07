@@ -22,9 +22,7 @@ import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.feature.sbom.client.GitLabClient;
@@ -36,6 +34,8 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,6 +51,9 @@ public class ConfigReader {
     @Inject
     @RestClient
     GitLabClient gitLabClient;
+
+    @ConfigProperty(name = "sbomer.gitlab.group")
+    String gitLabGroup;
 
     @Getter
     ObjectMapper yamlObjectMapper = ObjectMapperProvider.yaml();
@@ -122,7 +125,7 @@ public class ConfigReader {
         log.debug("Fetching file '{}' from the '{}' repository with tag '{}'", CONFIG_PATH, repository, scmTag);
 
         try {
-            return gitLabClient.fetchFile(repository, scmTag, CONFIG_PATH).getBytes();
+            return gitLabClient.fetchFile(gitLabGroup, repository, scmTag, CONFIG_PATH).getBytes();
         } catch (Exception e) {
             log.debug(
                     "SBOMer configuration file could not be retrieved in the '{}' repository with '{}' tag, ignoring",
