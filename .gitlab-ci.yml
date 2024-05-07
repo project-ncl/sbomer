@@ -1,6 +1,5 @@
 stages:
   - build
-  - static-analysis
   - deploy
 
 default:
@@ -30,7 +29,7 @@ default:
 
 build:
   image:
-    name: registry.access.redhat.com/ubi9/openjdk-17@sha256:75a4e8dc22859514e87c4efc5096ed7a36d8230ed0477ed1e93c24866328ec76
+    name: registry.access.redhat.com/ubi9@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052951021caf429494
     entrypoint: [""]
   stage: build
   cache:
@@ -64,35 +63,6 @@ build:
       --no-transfer-progress
 
   script:
-    - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
-  artifacts:
-    when: always
-    reports:
-      junit:
-        - "**/target/surefire-reports/**/*.xml"
-    paths:
-      - service/target/quarkus-app/
-      - cli/target/quarkus-app/
-
-sonarqube:
-  image:
-    name: registry.access.redhat.com/ubi9@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
-    entrypoint: [""]
-  stage: static-analysis
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  variables:
-    KUBERNETES_CPU_REQUEST: "500m"
-    KUBERNETES_CPU_LIMIT: "500m"
-    KUBERNETES_MEMORY_REQUEST: "768Mi"
-    KUBERNETES_MEMORY_LIMIT: "768Mi"
-    MAVEN_OPTS: >-
-      -Dhttps.protocols=TLSv1.2
-      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-      -Dorg.slf4j.simpleLogger.showDateTime=true
-      -Djava.awt.headless=true
-      -XX:InitialRAMPercentage=70 -XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
-  script:
     - dnf install -y --setopt=tsflags=nodocs unzip zip git
     - curl "https://get.sdkman.io" | bash
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
@@ -101,9 +71,15 @@ sonarqube:
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
     - keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.10-tem/lib/security/cacerts" -noprompt -storepass changeit
-    - ./mvnw -s .ci/settings.xml sonar:sonar -Dsonar.projectKey=SBOMer
-  needs:
-    - job: build
+    - ./mvnw -s .ci/settings.xml verify sonar:sonar -Dsonar.projectKey=SBOMer -Dsonar.java.source=17 ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - "**/target/surefire-reports/**/*.xml"
+    paths:
+      - service/target/quarkus-app/
+      - cli/target/quarkus-app/
 
 build-image-service:
   extends:
