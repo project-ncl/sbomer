@@ -71,7 +71,7 @@ build:
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
     - keytool -import -trustcacerts -alias redhat-ca-2022 -file /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.11-tem/lib/security/cacerts" -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias redhat-ca-2015 -file /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.11-tem/lib/security/cacerts" -noprompt -storepass changeit
-    - ./mvnw -s .ci/settings.xml verify sonar:sonar ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
+    - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
   artifacts:
     when: always
     reports:
