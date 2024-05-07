@@ -190,7 +190,11 @@ public class ConfigReaderIT {
         @Test
         void testConfigDoesNotExist() {
             Mockito.when(
-                    gitLabClient.fetchFile("eclipse/microprofile-graphql", "1.1.0.redhat-00008", ".sbomer/config.yaml"))
+                    gitLabClient.fetchFile(
+                            "pnc-workspace",
+                            "eclipse/microprofile-graphql",
+                            "1.1.0.redhat-00008",
+                            ".sbomer/config.yaml"))
                     .thenThrow(NotFoundException.class);
 
             assertNull(configReader.getConfig(build));
@@ -199,7 +203,11 @@ public class ConfigReaderIT {
         @Test
         void testConfigMultipleProducts() throws IOException {
             Mockito.when(
-                    gitLabClient.fetchFile("eclipse/microprofile-graphql", "1.1.0.redhat-00008", ".sbomer/config.yaml"))
+                    gitLabClient.fetchFile(
+                            "pnc-workspace",
+                            "eclipse/microprofile-graphql",
+                            "1.1.0.redhat-00008",
+                            ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("multi-product.yaml")));
 
             assertNotNull(configReader.getConfig(build));
@@ -208,7 +216,11 @@ public class ConfigReaderIT {
         @Test
         void testInvalidProcessorSlug() throws IOException {
             Mockito.when(
-                    gitLabClient.fetchFile("eclipse/microprofile-graphql", "1.1.0.redhat-00008", ".sbomer/config.yaml"))
+                    gitLabClient.fetchFile(
+                            "pnc-workspace",
+                            "eclipse/microprofile-graphql",
+                            "1.1.0.redhat-00008",
+                            ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("invalid-wrong-processor-slug.yaml")));
 
             ApplicationException ex = assertThrows(ApplicationException.class, () -> {
@@ -224,7 +236,11 @@ public class ConfigReaderIT {
         @Test
         void testInvalidConfig() throws IOException {
             Mockito.when(
-                    gitLabClient.fetchFile("eclipse/microprofile-graphql", "1.1.0.redhat-00008", ".sbomer/config.yaml"))
+                    gitLabClient.fetchFile(
+                            "pnc-workspace",
+                            "eclipse/microprofile-graphql",
+                            "1.1.0.redhat-00008",
+                            ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("invalid-processor-config.yaml")));
 
             ApplicationException ex = assertThrows(ApplicationException.class, () -> {
@@ -238,7 +254,11 @@ public class ConfigReaderIT {
         @Test
         void testOnlyErrataOverride() throws IOException {
             Mockito.when(
-                    gitLabClient.fetchFile("eclipse/microprofile-graphql", "1.1.0.redhat-00008", ".sbomer/config.yaml"))
+                    gitLabClient.fetchFile(
+                            "pnc-workspace",
+                            "eclipse/microprofile-graphql",
+                            "1.1.0.redhat-00008",
+                            ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("single-errata-override.yaml")));
 
             assertNotNull(configReader.getConfig(build));
@@ -247,7 +267,11 @@ public class ConfigReaderIT {
         @Test
         void testOnlyGeneratorOverride() throws IOException {
             Mockito.when(
-                    gitLabClient.fetchFile("eclipse/microprofile-graphql", "1.1.0.redhat-00008", ".sbomer/config.yaml"))
+                    gitLabClient.fetchFile(
+                            "pnc-workspace",
+                            "eclipse/microprofile-graphql",
+                            "1.1.0.redhat-00008",
+                            ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("single-generator-override.yaml")));
 
             Config config = configReader.getConfig(build);

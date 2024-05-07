@@ -64,8 +64,9 @@ sbomer:
   # gerrit:
   #   host:
   ## GitLab configuration
-  # gitlab:
-  #   host:
+  gitlab:
+    #host:
+    group: "pnc-workspace"
   koji:
     hub-url: "https://${sbomer.koji.hub.host}/brewhub"
     web-url: "https://${sbomer.koji.web.host}/brew"
