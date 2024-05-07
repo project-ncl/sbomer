@@ -78,8 +78,8 @@ build:
       - cli/target
       - core/target
       - e2e/target
-      - native/cli/runtime/target/classes
-      - native/cli/deployment/target/classes
+      - native/cli/runtime/target
+      - native/cli/deployment/target
 
 sonarqube:
   stage: static-analysis
