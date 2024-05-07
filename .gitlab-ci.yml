@@ -128,7 +128,7 @@ build-image-generator:
 
 pages:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:770cf07083e1c85ae69c25181a205b7cdef63c11b794c89b3b487d4670b4c328
+    name: registry.access.redhat.com/ubi9@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052951021caf429494
     entrypoint: [""]
   variables:
     KUBERNETES_CPU_REQUEST: "100m"
