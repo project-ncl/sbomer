@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.integ.feature.sbom;
+package org.jboss.sbomer.core.test.feature.sbom.service;
 
 import java.util.Optional;
 
@@ -32,7 +32,7 @@ import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.enums.BuildProgress;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.enums.BuildType;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
+import org.jboss.sbomer.core.features.sbom.service.PncService;
 
 /**
  * Currently unused, but may be in the future.

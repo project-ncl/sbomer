@@ -55,9 +55,6 @@ sbomer:
   ## Hostname of the SBOMer service
   host: http://localhost:8080
   pnc:
-    ## (required)
-    ## Hostname of the PNC service
-    # host:
     ## Product mapping environment, by default production mapping will be used
     product-mapping: "prod"
   ## Gerrit configuration
