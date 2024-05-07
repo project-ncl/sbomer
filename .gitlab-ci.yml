@@ -51,8 +51,8 @@ build:
       -Djava.awt.headless=true
       -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50 -XX:+ExitOnOutOfMemoryError -XshowSettings:vm
     SONAR_SCANNER_OPTS: >-
-      -Djavax.net.ssl.trustStore=/tmp/cacerts
-      -Djavax.net.ssl.trustStorePassword=changeit
+      -Djavax.net.ssl.keyStore=/tmp/cacerts
+      -Djavax.net.ssl.keyStorePassword=changeit
       -Dsonar.verbose=true
     MAVEN_CLI_OPTS: >-
       --batch-mode
@@ -72,7 +72,7 @@ build:
     - chmod +w /tmp/cacerts
     - keytool -import -trustcacerts -alias redhat-ca-2022 -file /tmp/2022-IT-Root-CA.pem -keystore /tmp/cacerts -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias redhat-ca-2015 -file /tmp/2015-IT-Root-CA.pem -keystore /tmp/cacerts -noprompt -storepass changeit
-    - ./mvnw -X -s .ci/settings.xml verify sonar:sonar ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
+    - ./mvnw -s .ci/settings.xml verify sonar:sonar ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
   artifacts:
     when: always
     reports:
