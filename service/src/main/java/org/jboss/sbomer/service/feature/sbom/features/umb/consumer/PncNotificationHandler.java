@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+import java.util.List;
+
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
@@ -30,11 +32,13 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncDelA
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -125,12 +129,33 @@ public class PncNotificationHandler {
         }
 
         if (isFinishedAnalysis(messageBody)) {
-
+            GenerationRequest req = null;
             log.info("Triggering automated SBOM generation for PNC build '{}'' ...", messageBody.getOperationId());
-            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
-                    .withIdentifier(messageBody.getOperationId())
-                    .withStatus(SbomGenerationStatus.NEW)
-                    .build();
+
+            List<SbomGenerationRequest> pendingRequests = SbomGenerationRequest
+                    .find(
+                            "type = ?1 and identifier = ?2 and status = ?3 order by creationTime asc",
+                            GenerationRequestType.OPERATION,
+                            messageBody.getOperationId(),
+                            SbomGenerationStatus.NO_OP)
+                    .list();
+
+            // If there are no pending generation requests create a new ConfigMap
+            if (pendingRequests.isEmpty()) {
+                req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
+                        .withIdentifier(messageBody.getOperationId())
+                        .withStatus(SbomGenerationStatus.NEW)
+                        .build();
+
+            } else {
+                // Otherwise get the oldest pending generation request and create a new ConfigMap with the existing id
+                SbomGenerationRequest pendingRequest = pendingRequests.get(0);
+                req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
+                        .withIdentifier(messageBody.getOperationId())
+                        .withStatus(SbomGenerationStatus.NEW)
+                        .withId(pendingRequest.getId())
+                        .build();
+            }
 
             log.debug("ConfigMap to create: '{}'", req);
 

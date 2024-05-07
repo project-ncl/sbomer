@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils.commandline;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
