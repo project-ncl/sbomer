@@ -21,11 +21,13 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
+import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
 import org.jboss.sbomer.cli.feature.sbom.command.mixin.GeneratorToolMixin;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
 import jakarta.inject.Inject;
@@ -70,7 +72,12 @@ public abstract class AbstractGenerateOperationCommand implements Callable<Integ
         MDCUtils.removeContext();
 
         // Fetch operation information
-        DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(parent.getOperationId());
+        DeliverableAnalyzerOperation operation = null;
+        try {
+            operation = pncService.getDeliverableAnalyzerOperation(parent.getOperationId());
+        } catch (ClientException ex) {
+            throw new GeneralPncException(ex);
+        }
 
         if (operation == null) {
             log.error("Could not fetch the PNC operation with id '{}'", parent.getOperationId());

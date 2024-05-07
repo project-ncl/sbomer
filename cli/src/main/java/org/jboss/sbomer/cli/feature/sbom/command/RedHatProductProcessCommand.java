@@ -25,8 +25,8 @@ import jakarta.inject.Inject;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.service.PncService;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;

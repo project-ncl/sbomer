@@ -29,14 +29,15 @@ import java.util.stream.Collectors;
 
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.sbomer.cli.errors.pnc.MissingPncBuildException;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
@@ -44,6 +45,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.utils.EnvironmentAttributesUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -162,7 +164,12 @@ public class GenerateConfigCommand implements Callable<Integer> {
     private Config mappingConfig(Build build) {
         log.debug("Attempting to fetch configuration from SBOMer internal mapping");
 
-        List<ProductVersionRef> productVersions = pncService.getProductVersions(build.getId());
+        List<ProductVersionRef> productVersions = null;
+        try {
+            productVersions = pncService.getProductVersions(build.getId());
+        } catch (ClientException ex) {
+            throw new GeneralPncException(ex);
+        }
 
         if (productVersions.isEmpty()) {
             log.debug("Could not obtain PNC Product Version information for the '{}' PNC build", build.getId());
@@ -361,7 +368,12 @@ public class GenerateConfigCommand implements Callable<Integer> {
             }
         }
 
-        Build build = pncService.getBuild(this.buildId);
+        Build build = null;
+        try {
+            build = pncService.getBuild(this.buildId);
+        } catch (ClientException ex) {
+            throw new GeneralPncException(ex);
+        }
 
         if (build == null) {
             throw new MissingPncBuildException("Could not retrieve PNC build '{}'", this.buildId);

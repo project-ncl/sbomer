@@ -29,9 +29,11 @@ import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
 
 import jakarta.inject.Inject;
@@ -87,8 +89,14 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
                 && !hasExternalReference(component, ExternalReference.Type.BUILD_SYSTEM, SBOM_RED_HAT_BREW_BUILD_ID)) {
 
             Optional<String> sha256 = getHash(component, Hash.Algorithm.SHA_256);
-            Artifact artifact = pncService
-                    .getArtifact(getParent().getParent().getParent().getBuildId(), component.getPurl(), sha256);
+            Artifact artifact = null;
+
+            try {
+                artifact = pncService
+                        .getArtifact(getParent().getParent().getParent().getBuildId(), component.getPurl(), sha256);
+            } catch (ClientException ex) {
+                throw new GeneralPncException(ex);
+            }
 
             if (artifact == null) {
                 log.warn(

@@ -21,27 +21,26 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
+import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.config.OperationConfigSchemaValidator;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -199,7 +198,12 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
         // 2. Try to use defaults (if possible)
         log.info("Obtaining runtime configuration for operation '{}'", operationId);
 
-        OperationConfig config = mappingConfig(operationConfig);
+        OperationConfig config = null;
+        try {
+            config = mappingConfig(operationConfig);
+        } catch (ClientException ex) {
+            throw new GeneralPncException(ex);
+        }
 
         if (config == null) {
             log.error("Could not obtain product configuration for the '{}' operation, exiting", operationId);

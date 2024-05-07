@@ -40,7 +40,9 @@ import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
+import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -117,20 +119,29 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         // Get some metadata about the operation
         String productName = "";
         String productMilestone = "";
-        DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(config.getOperationId());
-        if (operation.getProductMilestone() != null) {
-            ProductMilestone milestone = pncService.getMilestone(operation.getProductMilestone().getId());
-            if (milestone != null && milestone.getProductVersion() != null) {
-                ProductVersion productVersion = pncService.getProductVersion(milestone.getProductVersion().getId());
-                productName = productVersion.getProduct().getName().replace(" ", "-").toLowerCase();
-                productMilestone = milestone.getVersion();
+        DeliverableAnalyzerOperation operation = null;
+        ProductMilestone milestone = null;
+        ProductVersion productVersion = null;
+        List<AnalyzedArtifact> allAnalyzedArtifacts = null;
 
-                log.info("Retrieved Product: {}, Milestone: {}", productName, productMilestone);
+        try {
+            operation = pncService.getDeliverableAnalyzerOperation(config.getOperationId());
+            if (operation.getProductMilestone() != null) {
+                milestone = pncService.getMilestone(operation.getProductMilestone().getId());
+                if (milestone != null && milestone.getProductVersion() != null) {
+                    productVersion = pncService.getProductVersion(milestone.getProductVersion().getId());
+                    productName = productVersion.getProduct().getName().replace(" ", "-").toLowerCase();
+                    productMilestone = milestone.getVersion();
+
+                    log.info("Retrieved Product: {}, Milestone: {}", productName, productMilestone);
+                }
             }
-        }
 
-        // Get all the analyzed artifacts retrieved in the deliverable analyzer operation
-        List<AnalyzedArtifact> allAnalyzedArtifacts = pncService.getAllAnalyzedArtifacts(config.getOperationId());
+            // Get all the analyzed artifacts retrieved in the deliverable analyzer operation
+            allAnalyzedArtifacts = pncService.getAllAnalyzedArtifacts(config.getOperationId());
+        } catch (ClientException ex) {
+            throw new GeneralPncException(ex);
+        }
 
         // A single operation might include multiple archives, filter only the ones related to this particular
         // distribution. If no distribution is present, keep them all because it's an old analysis with older and fewer
