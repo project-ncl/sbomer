@@ -20,16 +20,24 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
+import org.jboss.sbomer.core.config.DeliverableAnalysisConfigSchemaValidator;
 import org.jboss.sbomer.core.config.OperationConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.runtime.DeliverableAnalysisConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -80,14 +88,19 @@ public class SbomService {
     NotificationService notificationService;
 
     @Inject
-
     protected KubernetesClient kubernetesClient;
 
     @Inject
     protected OperationConfigSchemaValidator operationConfigSchemaValidator;
 
     @Inject
+    protected DeliverableAnalysisConfigSchemaValidator delAnalysisConfigSchemaValidator;
+
+    @Inject
     protected ConfigSchemaValidator configSchemaValidator;
+
+    @Inject
+    protected PncClientsWrapper pncClientsWrapper;
 
     @WithSpan
     public long countSboms() {
@@ -101,8 +114,11 @@ public class SbomService {
 
     @WithSpan
     public long countInProgressSbomGenerationRequests() {
-        return sbomRequestRepository
-                .count("status != ?1 and status != ?2", SbomGenerationStatus.FINISHED, SbomGenerationStatus.FAILED);
+        return sbomRequestRepository.count(
+                "status != ?1 and status != ?2 and status != ?3",
+                SbomGenerationStatus.FINISHED,
+                SbomGenerationStatus.FAILED,
+                SbomGenerationStatus.NO_OP);
     }
 
     @WithSpan
@@ -274,6 +290,77 @@ public class SbomService {
         } finally {
             MDCUtils.removeBuildContext();
         }
+    }
+
+    @WithSpan
+    public SbomGenerationRequest generateNewOperation(DeliverableAnalysisConfig config) {
+        log.info("New deliverable analysis operation request ...");
+
+        if (config != null) {
+            log.debug("Received deliverable analysis configuration...");
+
+            ValidationResult delAnalysisConfigValidationRes = delAnalysisConfigSchemaValidator.validate(config);
+
+            if (!delAnalysisConfigValidationRes.isValid()) {
+                throw new ValidationException(
+                        "Provided deliverable analysis config is not valid",
+                        delAnalysisConfigValidationRes.getErrors());
+            }
+
+            DeliverableAnalyzerOperation operation = null;
+            try {
+                operation = pncClientsWrapper.analyzeDeliverables(config.getMilestoneId(), config.getDeliverableUrls());
+            } catch (ClientException ex) {
+                throw new ApplicationException(
+                        "Operation could not be retrieved because PNC responded with an error",
+                        ex);
+            }
+            log.debug("Creating GenerationRequest Kubernetes resource...");
+
+            // Create a ProductConfig
+            RedHatProductProcessorConfig redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
+                    .withErrata(config.getErrata())
+                    .build();
+            GeneratorConfig generatorConfig = GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build();
+            ProductConfig productConfig = ProductConfig.builder()
+                    .withProcessors(List.of(redHatProductProcessorConfig))
+                    .withGenerator(generatorConfig)
+                    .build();
+
+            // Creating a standard OperationConfig from the DeliverableAnalysisConfig and the new operation received
+            OperationConfig operationConfig = OperationConfig.builder()
+                    .withApiVersion(config.getApiVersion())
+                    .withDeliverableUrls(config.getDeliverableUrls())
+                    .withOperationId(operation.getId())
+                    .withProduct(productConfig)
+                    .build();
+            SbomerConfigProvider.getInstance().adjust(operationConfig);
+
+            ValidationResult operationConfigValidationRes = operationConfigSchemaValidator.validate(operationConfig);
+
+            if (!operationConfigValidationRes.isValid()) {
+                throw new ValidationException(
+                        "Provided operation config is not valid",
+                        operationConfigValidationRes.getErrors());
+            }
+
+            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
+                    .withIdentifier(operation.getId())
+                    .withStatus(SbomGenerationStatus.NO_OP)
+                    .build();
+            try {
+                req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(operationConfig));
+            } catch (JsonProcessingException e) {
+                throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
+            }
+
+            // We actually do not need to create the ConfigMap because it would be a no-operation anyway. We can only
+            // create the placeholder inside the DB with the metadata and wait for the UMB message once the deliverable
+            // analysis from PNC finishes.
+            return SbomGenerationRequest.sync(req);
+        }
+
+        return null;
     }
 
     /**

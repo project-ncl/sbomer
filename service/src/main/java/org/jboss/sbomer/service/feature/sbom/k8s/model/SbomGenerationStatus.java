@@ -18,7 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 public enum SbomGenerationStatus {
-    NEW, INITIALIZING, INITIALIZED, GENERATING, FINISHED, FAILED;
+    NO_OP, NEW, INITIALIZING, INITIALIZED, GENERATING, FINISHED, FAILED;
 
     public static SbomGenerationStatus fromName(String phase) {
         return SbomGenerationStatus.valueOf(phase.toUpperCase());
@@ -29,7 +29,7 @@ public enum SbomGenerationStatus {
     }
 
     public boolean isOlderThan(SbomGenerationStatus desiredStatus) {
-        if (desiredStatus == null) {
+        if (desiredStatus == null || desiredStatus.equals(NO_OP)) {
             return false;
         }
 
