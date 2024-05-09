@@ -48,6 +48,43 @@ To request SBOM generation we need to pass the PNC build id:
 $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/build/[PNC_BUILD_ID]
 ----
 
+=== Requesting ZIP SBOM Generation Manually
+
+[NOTE]
+====
+This should not be required in general. SBOMer generates ZIP SBOMs automatically for successful PNC Deliverable Analysis operations. It can
+still be handy if you want to retry a generation.
+====
+
+To request ZIP SBOM generation we need to pass the PNC deliverable analysis operation id:
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/operation/[PNC_DELIVERABLE_ANALYSIS_OPERATION_ID]
+----
+
+=== Requesting ZIP Analysis Manually
+
+To request a ZIP deliverable analysis in PNC, which will eventually notify SBOMer of its completion and subsequently trigger a ZIP SBOM generation, we need to pass some required information:
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/analysis \ 
+  -H 'accept: application/json' -H 'Content-Type: application/json' \
+  -d '{
+  "apiVersion": "sbomer.jboss.org/v1alpha1",
+  "milestoneId": "$milestoneId",
+  "errata": {
+     "productName": "$productName",
+     "productVersion": "$productVersion",
+     "productVariant": "$productVariant"
+  },
+  "deliverablesUrls": [
+    "$deliverablesUrl"
+  ]
+}'
+----
+
 === Fetching a Specific SBOM
 
 Once the SBOM is generated it becomes available at:

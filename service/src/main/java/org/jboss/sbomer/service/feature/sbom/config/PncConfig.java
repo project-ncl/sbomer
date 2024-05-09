@@ -25,6 +25,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ConfigMapping(prefix = "sbomer.pnc")
 public interface PncConfig {
 
-    @WithDefault("http://localhost:8080/api/v1alpha2/")
+    @WithDefault("localhost")
     String host();
 }

@@ -31,6 +31,10 @@ mp:
 
 sbomer:
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha2/"
+  pnc:
+    ## (required)
+    ## Hostname of the PNC service
+    # host:
 
   purl-qualifiers-allow-list:
     - repository_url
