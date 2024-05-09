@@ -216,7 +216,7 @@ public class PncService {
             log.warn("DeliverableAnalyzerOperation with id '{}' was not found in PNC", operationId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException(
+            throw new GeneralPncException(
                     "DeliverableAnalyzerOperation could not be retrieved because PNC responded with an error",
                     ex);
         }
@@ -242,7 +242,7 @@ public class PncService {
             log.warn("ProductVersion with id '{}' was not found in PNC", productVersionId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException(
+            throw new GeneralPncException(
                     "ProductVersion could not be retrieved because PNC responded with an error",
                     ex);
         }
@@ -269,7 +269,7 @@ public class PncService {
             log.warn("ProductMilestone with id '{}' was not found in PNC", milestoneId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException(
+            throw new GeneralPncException(
                     "ProductMilestone could not be retrieved because PNC responded with an error",
                     ex);
         }
@@ -418,7 +418,7 @@ public class PncService {
         } catch (RemoteResourceNotFoundException ex) {
             throw new ApplicationException("Artifact with purl '{}' was not found in PNC", purl, ex);
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException(
+            throw new GeneralPncException(
                     "Artifact with purl '{}' could not be retrieved because PNC responded with an error",
                     purl,
                     ex);
@@ -444,7 +444,7 @@ public class PncService {
                     reportId,
                     ex);
         } catch (RemoteResourceException ex) {
-            throw new ApplicationException(
+            throw new GeneralPncException(
                     "Analyzed Artifacts for the DeliverableAnalyzerReport '{}' could not be retrieved because PNC responded with an error",
                     reportId,
                     ex);
