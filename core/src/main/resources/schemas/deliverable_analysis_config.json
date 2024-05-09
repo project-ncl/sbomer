@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jboss.org/sbomer/operation-config.json",
-  "title": "SBOMeruser configuration file",
+  "$id": "https://jboss.org/sbomer/deliverables-analysis-operation-config.json",
+  "title": "SBOMer user configuration file",
   "description": "User-provided configuration file to trigger a PNC deliverable analysis operation",
   "type": "object",
   "properties": {
@@ -44,7 +44,7 @@
     }
   }, 
   "required": [
-    "milestoneId, deliverableUrls"
+    "milestoneId", "deliverableUrls"
   ],
   "additionalProperties": false
 }
