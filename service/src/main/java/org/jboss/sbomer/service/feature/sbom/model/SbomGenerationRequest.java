@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.model;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -198,6 +199,17 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                 generationRequest.getMetadata().getName());
 
         return sbomGenerationRequest;
+    }
+
+    @Transactional
+    public static List<SbomGenerationRequest> findPendingRequests(String operationId) {
+        return SbomGenerationRequest
+                .find(
+                        "type = ?1 and identifier = ?2 and status = ?3 order by creationTime asc",
+                        GenerationRequestType.OPERATION,
+                        operationId,
+                        SbomGenerationStatus.NO_OP)
+                .list();
     }
 
     @PrePersist

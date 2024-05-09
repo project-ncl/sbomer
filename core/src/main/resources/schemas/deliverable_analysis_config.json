@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jboss.org/sbomer/operation-config.json",
+  "title": "SBOMeruser configuration file",
+  "description": "User-provided configuration file to trigger a PNC deliverable analysis operation",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "description": "Version of the configuration file",
+      "enum": ["sbomer.jboss.org/v1alpha1"]
+    },
+    "milestoneId": {
+      "description": "PNC milestone identifier",
+      "type": "string"
+    },
+    "errata": {
+      "description": "Product information from Errata Tool",
+      "type": "object",
+      "properties": {
+        "productName": {
+          "description": "Errata Tool product name",
+          "type": "string"
+        },
+        "productVersion": {
+          "description": "Errata Tool product version",
+          "type": "string"
+        },
+        "productVariant": {
+          "description": "Errata Tool product variant",
+          "type": "string"
+        }
+      },
+      "required": ["productName", "productVersion", "productVariant"],
+      "additionalProperties": false
+    },
+    "deliverableUrls": {
+      "description": "List of deliverables urls",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "The deliverable url",
+        "additionalProperties": false
+      }
+    }
+  }, 
+  "required": [
+    "milestoneId, deliverableUrls"
+  ],
+  "additionalProperties": false
+}

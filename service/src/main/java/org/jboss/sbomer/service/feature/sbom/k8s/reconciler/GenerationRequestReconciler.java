@@ -1080,10 +1080,17 @@ public class GenerationRequestReconciler implements Reconciler<GenerationRequest
 
         // This would be unexpected.
         if (action == null) {
-            log.error(
-                    "Unknown status received: '{}'' for GenerationRequest '{}",
-                    generationRequest.getStatus(),
-                    generationRequest.getMetadata().getName());
+            if (generationRequest.getStatus().equals(SbomGenerationStatus.NO_OP)) {
+                log.info(
+                        "No operation status received: '{}' for GenerationRequest '{}', doing nothing!",
+                        generationRequest.getStatus(),
+                        generationRequest.getMetadata().getName());
+            } else {
+                log.error(
+                        "Unknown status received: '{}' for GenerationRequest '{}'",
+                        generationRequest.getStatus(),
+                        generationRequest.getMetadata().getName());
+            }
             return UpdateControl.noUpdate();
         }
 

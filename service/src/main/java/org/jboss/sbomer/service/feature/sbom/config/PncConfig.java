@@ -17,23 +17,14 @@
  */
 package org.jboss.sbomer.service.feature.sbom.config;
 
+import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithDefault;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.util.List;
-
-import io.smallrye.config.ConfigMapping;
-
-/**
- * @author Marek Goldmann
- */
 @ApplicationScoped
-@ConfigMapping(prefix = "sbomer")
-public interface SbomerConfig {
-    String apiUrl();
+@ConfigMapping(prefix = "sbomer.pnc")
+public interface PncConfig {
 
-    List<String> purlQualifiersAllowList();
-
-    ControllerConfig controller();
-
-    PncConfig pnc();
+    @WithDefault("http://localhost:8080/api/v1alpha2/")
+    String host();
 }
