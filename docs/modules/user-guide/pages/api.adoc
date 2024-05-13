@@ -52,8 +52,7 @@ $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/bu
 
 [NOTE]
 ====
-This should not be required in general. SBOMer generates ZIP SBOMs automatically for successful PNC Deliverable Analysis operations. It can
-still be handy if you want to retry a generation.
+This is typically to be used when ZIPs are created outside of PNC builds, e.g. in Jenkins. A new deliverable analysis can be triggered for the specified ZIPs and for a particular milestone. SBOMer will generate the ZIP SBOMs upon receival of the corresponding successful deliverable analysis operation notification.
 ====
 
 To request ZIP SBOM generation we need to pass the PNC deliverable analysis operation id:
