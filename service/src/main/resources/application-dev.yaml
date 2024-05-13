@@ -34,6 +34,11 @@ quarkus:
   otel:
     enabled: false
 
+  http:
+    cors:
+      ~: true
+      origins: "/.*/"
+
 sbomer:
   api-url: "http://localhost:8080/api/v1alpha2/"
   pnc:
