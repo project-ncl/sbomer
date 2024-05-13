@@ -76,3 +76,8 @@ quarkus:
     enabled: true
     traces:
       enabled: true
+
+  http:
+    cors:
+      ~: true
+      origins: "/.*/"

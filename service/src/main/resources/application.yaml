@@ -132,6 +132,11 @@ quarkus:
   otel:
     enabled: false
 
+  http:
+    cors:
+      ~: true
+      origins: "/.*/"
+
 sbomer:
   features:
     umb:

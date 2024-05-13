@@ -32,6 +32,11 @@ quarkus:
 
   otel:
     enabled: false
+
+  http:
+    cors:
+      ~: true
+      origins: "/.*/"
 sbomer:
   controller:
     generation-request:
