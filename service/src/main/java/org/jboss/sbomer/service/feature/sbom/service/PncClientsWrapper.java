@@ -28,6 +28,7 @@ import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 
+import io.quarkus.oidc.client.OidcClient;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -40,6 +41,9 @@ public class PncClientsWrapper {
 
     @Inject
     SbomerConfig sbomerConfig;
+
+    @Inject
+    OidcClient oidcClient;
 
     ProductMilestoneClient productMilestoneClient;
 
@@ -62,7 +66,11 @@ public class PncClientsWrapper {
     public Configuration getConfiguration() {
         ConfigurationBuilder configurationBuilder = Configuration.builder()
                 .host(sbomerConfig.pnc().host())
-                .protocol("http");
+                .protocol("http")
+                // Provide a supplier method which can be repeatedly used by client to generate new bearer token without
+                // caring about expiration.
+                .bearerTokenSupplier(() -> oidcClient.getTokens().await().indefinitely().getAccessToken());
+        ;
         return configurationBuilder.build();
     }
 
