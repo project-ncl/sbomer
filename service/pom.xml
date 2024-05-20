@@ -51,6 +51,10 @@
       <artifactId>quarkus-oidc</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-oidc-client</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.quarkiverse.unleash</groupId>
       <artifactId>quarkus-unleash</artifactId>
       <version>${version.quarkus-unleash}</version>

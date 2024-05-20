@@ -127,6 +127,9 @@ quarkus:
   oidc:
     enabled: false
 
+  oidc-client:
+    client-enabled: false
+
   # https://quarkus.io/guides/opentelemetry
   ## Opentelemetry configuration
   otel:

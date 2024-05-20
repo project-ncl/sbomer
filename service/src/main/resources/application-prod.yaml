@@ -71,6 +71,11 @@ quarkus:
     tls:
       verification: none
 
+  oidc-client:
+    client-enabled: true
+    connection-retry-count: 10
+    client-id: pnc-sbomer
+
   # https://quarkus.io/guides/opentelemetry
   otel:
     enabled: true
