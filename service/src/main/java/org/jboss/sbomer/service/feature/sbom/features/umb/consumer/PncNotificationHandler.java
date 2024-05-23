@@ -24,7 +24,14 @@ import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
+import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
@@ -38,10 +45,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -130,9 +135,9 @@ public class PncNotificationHandler {
         }
 
         if (isFinishedAnalysis(messageBody)) {
-            GenerationRequest req = null;
+
             log.info(
-                    "Triggering automated SBOM generation for PNC deliverable analyzer operation '{}'' ...",
+                    "Triggering automated SBOM generation for PNC deliverable analyzer operation '{}' ...",
                     messageBody.getOperationId());
 
             List<SbomGenerationRequest> pendingRequests = SbomGenerationRequest
@@ -143,36 +148,80 @@ public class PncNotificationHandler {
                     pendingRequests.size(),
                     messageBody.getOperationId());
 
-            // If there are no pending generation requests create a new ConfigMap
-            if (pendingRequests.isEmpty()) {
-                log.info(
-                        "No pending requests found for operation {}, creating a new one!",
-                        messageBody.getOperationId());
-                req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
-                        .withIdentifier(messageBody.getOperationId())
-                        .withStatus(SbomGenerationStatus.NEW)
-                        .build();
+            SbomGenerationRequest pendingRequest = null;
 
-            } else {
-                // Otherwise get the oldest pending generation request and create a new ConfigMap with the existing id
-                SbomGenerationRequest pendingRequest = pendingRequests.get(0);
-                log.info(
-                        "Pending requests found for operation {}, reusing the existing id {}!",
-                        messageBody.getOperationId(),
-                        pendingRequest.getId());
-                req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
-                        .withIdentifier(messageBody.getOperationId())
-                        .withStatus(SbomGenerationStatus.NEW)
-                        .withId(pendingRequest.getId())
-                        .build();
+            // If there are no pending generation requests create a new ConfigMap
+            if (!pendingRequests.isEmpty()) {
+                // Get the oldest pending generation request and create a new ConfigMap with the existing id
+                pendingRequest = pendingRequests.get(0);
             }
 
+            GenerationRequest req = createDelAnalysisGenerationRequest(messageBody, pendingRequest);
+
             log.debug("ConfigMap to create: '{}'", req);
+
+            SbomGenerationRequest.sync(req);
 
             ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
 
             log.info("Request created: {}", cm.getMetadata().getName());
         }
+    }
+
+    private GenerationRequest createDelAnalysisGenerationRequest(
+            PncDelAnalysisNotificationMessageBody messageBody,
+            SbomGenerationRequest pendingRequest) {
+
+        GenerationRequest generationRequest = null;
+        if (pendingRequest == null) {
+            log.info(
+                    "No pending requests found for operation {}, creating a new one from the UMB message body!",
+                    messageBody.getOperationId());
+
+            // Create a ProductConfig
+            ProductConfig productConfig = ProductConfig.builder()
+                    .withProcessors(List.of(DefaultProcessorConfig.builder().build()))
+                    .withGenerator(GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build())
+                    .build();
+
+            // Creating a standard OperationConfig from the DeliverableAnalysisConfig and the new operation received
+            OperationConfig operationConfig = OperationConfig.builder()
+                    .withDeliverableUrls(List.of(messageBody.getDeliverablesUrls()))
+                    .withOperationId(messageBody.getOperationId())
+                    .withProduct(productConfig)
+                    .build();
+            SbomerConfigProvider.getInstance().adjust(operationConfig);
+
+            generationRequest = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
+                    .withIdentifier(messageBody.getOperationId())
+                    .withStatus(SbomGenerationStatus.NEW)
+                    .build();
+
+            try {
+                generationRequest.setConfig(ObjectMapperProvider.yaml().writeValueAsString(operationConfig));
+            } catch (JsonProcessingException e) {
+                throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
+            }
+        } else {
+            log.info(
+                    "Pending requests found for operation {}, reusing the existing id {}!",
+                    messageBody.getOperationId(),
+                    pendingRequest.getId());
+
+            generationRequest = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
+                    .withIdentifier(messageBody.getOperationId())
+                    .withStatus(SbomGenerationStatus.NEW)
+                    .withId(pendingRequest.getId())
+                    .build();
+
+            try {
+                generationRequest.setConfig(
+                        ObjectMapperProvider.yaml().writeValueAsString(pendingRequest.getOperationConfiguration()));
+            } catch (JsonProcessingException e) {
+                throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
+            }
+        }
+        return generationRequest;
     }
 
     private boolean isSuccessfulPersistentBuild(PncBuildNotificationMessageBody msgBody) {
