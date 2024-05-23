@@ -131,13 +131,23 @@ public class PncNotificationHandler {
 
         if (isFinishedAnalysis(messageBody)) {
             GenerationRequest req = null;
-            log.info("Triggering automated SBOM generation for PNC build '{}'' ...", messageBody.getOperationId());
+            log.info(
+                    "Triggering automated SBOM generation for PNC deliverable analyzer operation '{}'' ...",
+                    messageBody.getOperationId());
 
             List<SbomGenerationRequest> pendingRequests = SbomGenerationRequest
                     .findPendingRequests(messageBody.getOperationId());
 
+            log.debug(
+                    "Found {} pending requests for operation {}",
+                    pendingRequests.size(),
+                    messageBody.getOperationId());
+
             // If there are no pending generation requests create a new ConfigMap
             if (pendingRequests.isEmpty()) {
+                log.info(
+                        "No pending requests found for operation {}, creating a new one!",
+                        messageBody.getOperationId());
                 req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
                         .withIdentifier(messageBody.getOperationId())
                         .withStatus(SbomGenerationStatus.NEW)
@@ -146,6 +156,10 @@ public class PncNotificationHandler {
             } else {
                 // Otherwise get the oldest pending generation request and create a new ConfigMap with the existing id
                 SbomGenerationRequest pendingRequest = pendingRequests.get(0);
+                log.info(
+                        "Pending requests found for operation {}, reusing the existing id {}!",
+                        messageBody.getOperationId(),
+                        pendingRequest.getId());
                 req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
                         .withIdentifier(messageBody.getOperationId())
                         .withStatus(SbomGenerationStatus.NEW)
