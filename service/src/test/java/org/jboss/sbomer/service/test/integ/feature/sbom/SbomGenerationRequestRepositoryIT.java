@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +44,8 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -290,4 +293,34 @@ public class SbomGenerationRequestRepositoryIT {
 
     }
 
+    @Test
+    public void testFindPendingOperationRequest() {
+        long beforeInsertionSize = sbomGenerationRequestRepository.count();
+        String _id = "589A58D72C4D452";
+        String _identifier = "BAHVPNKYCYIAA";
+        SbomGenerationRequest request = SbomGenerationRequest.builder()
+                .withId(_id)
+                .withIdentifier(_identifier)
+                .withCreationTime(Instant.now())
+                .withType(GenerationRequestType.OPERATION)
+                .withStatus(SbomGenerationStatus.NO_OP)
+                .build();
+        sbomGenerationRequestRepository.persist(request);
+        long afterInsertionSize = sbomGenerationRequestRepository.count();
+
+        assertEquals(beforeInsertionSize + 1, afterInsertionSize);
+
+        List<SbomGenerationRequest> pendingRequests = SbomGenerationRequest.findPendingRequests(_identifier);
+        assertEquals(1, pendingRequests.size());
+
+        GenerationRequest req = new GenerationRequestBuilder(pendingRequests.get(0).getType())
+                .withIdentifier(pendingRequests.get(0).getIdentifier())
+                .withStatus(SbomGenerationStatus.NEW)
+                .withId(pendingRequests.get(0).getId())
+                .build();
+
+        assertEquals(_id, req.getId());
+        assertEquals(_identifier, req.getIdentifier());
+
+    }
 }
