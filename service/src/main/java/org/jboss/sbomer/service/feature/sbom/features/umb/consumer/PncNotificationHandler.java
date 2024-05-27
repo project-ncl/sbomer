@@ -194,7 +194,7 @@ public class PncNotificationHandler {
 
             generationRequest = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
                     .withIdentifier(messageBody.getOperationId())
-                    .withStatus(SbomGenerationStatus.NEW)
+                    .withStatus(SbomGenerationStatus.INITIALIZED)
                     .build();
 
             try {
@@ -210,7 +210,7 @@ public class PncNotificationHandler {
 
             generationRequest = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
                     .withIdentifier(messageBody.getOperationId())
-                    .withStatus(SbomGenerationStatus.NEW)
+                    .withStatus(SbomGenerationStatus.INITIALIZED)
                     .withId(pendingRequest.getId())
                     .build();
 
