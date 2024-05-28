@@ -38,7 +38,11 @@ public class ExceptionHandler implements IExecutionExceptionHandler {
         cmd.getErr().println();
         cmd.getErr().println(cmd.getColorScheme().errorText("🛑 Ooops, an error occurred!"));
         cmd.getErr().println();
-        cmd.getErr().println(cmd.getColorScheme().errorText(ex.getMessage()));
+
+        if (ex.getMessage() != null) {
+            cmd.getErr().println(cmd.getColorScheme().errorText(ex.getMessage()));
+        }
+
         cmd.getErr().println();
 
         if (ex instanceof ClientException) {
