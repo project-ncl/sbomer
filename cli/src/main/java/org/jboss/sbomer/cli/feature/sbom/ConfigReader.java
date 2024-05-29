@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
@@ -52,8 +53,10 @@ public class ConfigReader {
     @RestClient
     GitLabClient gitLabClient;
 
-    @ConfigProperty(name = "sbomer.gitlab.group")
-    String gitLabGroup;
+    @ConfigProperty(name = "sbomer.gitlab.host", defaultValue = "gitlab.com")
+    @Getter
+    @Setter
+    String gitLabHost;
 
     @Getter
     ObjectMapper yamlObjectMapper = ObjectMapperProvider.yaml();
@@ -112,24 +115,27 @@ public class ConfigReader {
     private byte[] getGitLabConfigContent(String scmUrl, String scmTag) {
         log.debug("Using GitLab config provider");
 
-        Pattern pattern = Pattern.compile("pnc-workspace/(.*)\\.git$");
+        // The group can be different from the standard "pnc-workspace"; the repository can have many nested names
+        // The regexp below will match e.g. both git@gitlab.cee.redhat.com:platform/build-and-release/requirements.git
+        // and https://gitlab.cee.redhat.com/platform/build-and-release/requirements.git
+        Pattern pattern = Pattern.compile(getGitLabHost() + "[:/](.*)\\.git$");
         Matcher matcher = pattern.matcher(scmUrl);
 
         if (!matcher.find()) {
             throw new ClientException("Invalid URL '{}' for GitLab SCM", scmUrl);
         }
 
-        String repository = matcher.group(1);
+        String project = matcher.group(1);
 
-        log.debug("Found GitLab project: '{}'", repository);
-        log.debug("Fetching file '{}' from the '{}' repository with tag '{}'", CONFIG_PATH, repository, scmTag);
+        log.debug("Found GitLab project: '{}'", project);
+        log.debug("Fetching file '{}' from the '{}' repository with tag '{}'", CONFIG_PATH, project, scmTag);
 
         try {
-            return gitLabClient.fetchFile(gitLabGroup, repository, scmTag, CONFIG_PATH).getBytes();
+            return gitLabClient.fetchFile(project, scmTag, CONFIG_PATH).getBytes();
         } catch (Exception e) {
             log.debug(
                     "SBOMer configuration file could not be retrieved in the '{}' repository with '{}' tag, ignoring",
-                    repository,
+                    project,
                     scmTag,
                     e);
 
