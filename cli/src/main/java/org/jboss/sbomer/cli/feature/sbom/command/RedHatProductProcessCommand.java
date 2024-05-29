@@ -20,19 +20,20 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
 
-import jakarta.inject.Inject;
+import java.nio.file.Path;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
+import jakarta.inject.Inject;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
-
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
 
 @Command(
         mixinStandardHelpOptions = true,
@@ -69,5 +70,15 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
         addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_VARIANT, productVariant);
 
         return bom;
+    }
+
+    @Override
+    protected Path manifestPath() {
+        return parent.getParent().getParent().getOutput();
+    }
+
+    @Override
+    protected void addContext() {
+        MDCUtils.addBuildContext(parent.getParent().getParent().getBuildId());
     }
 }

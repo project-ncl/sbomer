@@ -15,27 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.utils;
+package org.jboss.sbomer.cli.feature.sbom.command.process;
 
-import org.cyclonedx.model.Component;
-import org.jboss.pnc.dto.Artifact;
-import org.jboss.sbomer.cli.feature.sbom.processor.DefaultProcessor;
+import java.nio.file.Path;
 
-import jakarta.enterprise.inject.Alternative;
-import lombok.extern.slf4j.Slf4j;
+import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
+
+import lombok.Getter;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ScopeType;
 
-@Alternative
-@Slf4j
 @Command(
         mixinStandardHelpOptions = true,
-        name = "default",
-        description = "Process the SBOM with enrichments applied to known CycloneDX fields")
-public class DefaultProcessCommandMockAlternative extends DefaultProcessor {
+        name = "process",
+        aliases = { "p" },
+        description = "Process SBOM using selected processor",
+        subcommands = { StandaloneDefaultProcessCommand.class },
+        subcommandsRepeatable = true)
+public class StandaloneProcessCommand {
 
-    @Override
-    protected void processBrewBuild(Component component, Artifact artifact) {
-        log.debug("Mocked component '{}' was not built in Brew, cannot add any enrichment!", component.getPurl());
-    }
+    @Getter
+    @Option(
+            names = { "-p", "--path" },
+            description = "Path to generated manifest file in CycloneDX JSON format",
+            converter = PathConverter.class,
+            scope = ScopeType.INHERIT)
+    Path manifestPath;
 
 }

@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.inject.Inject;
-
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
@@ -57,8 +55,9 @@ import org.mockito.Mockito;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -148,7 +147,8 @@ public class DefaultProcessCommandIT {
 
             Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
             String sha = sha256.isPresent() ? sha256.get() : null;
-            Mockito.when(pncService.getArtifact("BBVVCC", purl, sha256)).thenReturn(generateArtifact(purl, sha));
+            Mockito.when(pncService.getArtifact(purl, sha256, Optional.empty(), Optional.empty()))
+                    .thenReturn(generateArtifact(purl, sha));
         }
 
         DefaultProcessCommand spiedCommand = spy(command);
@@ -202,7 +202,12 @@ public class DefaultProcessCommandIT {
                 "98b67e15e3fe39e4f8721bdcfda99f19e570426d8960f73f8d5fe1414ff2fab3" };
 
         for (int i = 0; i < 3; i++) {
-            Mockito.when(pncService.getArtifact("BBVVCC", componentPurls[i], Optional.of(sha256s[i])))
+            Mockito.when(
+                    pncService.getArtifact(
+                            componentPurls[i],
+                            Optional.of(sha256s[i]),
+                            Optional.empty(),
+                            Optional.empty()))
                     .thenReturn(generateArtifact(componentPurls[i], sha256s[i]));
         }
 
@@ -219,9 +224,10 @@ public class DefaultProcessCommandIT {
 
         Mockito.when(
                 pncService.getArtifact(
-                        "BBVVCC",
                         specialPurl,
-                        Optional.of("122dd093db60b5fafcb428b28569aa72993e2a2c63d3d87b7dcc076bdebd8a71")))
+                        Optional.of("122dd093db60b5fafcb428b28569aa72993e2a2c63d3d87b7dcc076bdebd8a71"),
+                        Optional.empty(),
+                        Optional.empty()))
                 .thenReturn(artifact);
 
         DefaultProcessCommand spiedCommand = spy(command);

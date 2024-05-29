@@ -15,27 +15,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.utils;
+package org.jboss.sbomer.cli.feature.sbom.command.process;
 
-import org.cyclonedx.model.Component;
-import org.jboss.pnc.dto.Artifact;
+import java.nio.file.Path;
+
+import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.cli.feature.sbom.command.AbstractProcessCommand;
 import org.jboss.sbomer.cli.feature.sbom.processor.DefaultProcessor;
+import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 
-import jakarta.enterprise.inject.Alternative;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.inject.Inject;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.ParentCommand;
 
-@Alternative
-@Slf4j
 @Command(
         mixinStandardHelpOptions = true,
         name = "default",
         description = "Process the SBOM with enrichments applied to known CycloneDX fields")
-public class DefaultProcessCommandMockAlternative extends DefaultProcessor {
+public class StandaloneDefaultProcessCommand extends AbstractProcessCommand {
+
+    @ParentCommand
+    StandaloneProcessCommand parent;
+
+    @Inject
+    DefaultProcessor defaultProcessor;
 
     @Override
-    protected void processBrewBuild(Component component, Artifact artifact) {
-        log.debug("Mocked component '{}' was not built in Brew, cannot add any enrichment!", component.getPurl());
+    public ProcessorType getImplementationType() {
+        return defaultProcessor.getType();
     }
 
+    @Override
+    public Bom doProcess(Bom bom) {
+        return defaultProcessor.process(bom);
+    }
+
+    @Override
+    protected Path manifestPath() {
+        return parent.getManifestPath();
+    }
 }

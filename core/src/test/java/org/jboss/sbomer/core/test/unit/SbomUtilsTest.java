@@ -25,14 +25,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Component.Type;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
-import org.cyclonedx.model.Component.Type;
+import org.cyclonedx.model.Hash;
+import org.cyclonedx.model.Hash.Algorithm;
+import org.cyclonedx.model.Metadata;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
@@ -316,4 +320,99 @@ public class SbomUtilsTest {
         }
     }
 
+    @Test
+    void testUpdatePurl() {
+        Bom bom = new Bom();
+
+        // Main component in metadata
+        Component main = new Component();
+        main.setPurl("pkg:maven/main-product/asm@9.1.0.redhat-00002?type=jar");
+        main.setVersion("9.1.0.redhat-00002");
+        main.setHashes(List.of(new Hash(Algorithm.SHA1, "2cdf6b457191ed82ef3a9d2e579f6d0aa495a533")));
+
+        // Regular component with old purl (to be updated)
+        Component old = new Component();
+        old.setPurl("pkg:maven/org.objectweb.asm/asm@9.1.0.redhat-00002?type=jar");
+        old.setVersion("9.1.0.redhat-00002");
+        old.setHashes(List.of(new Hash(Algorithm.SHA1, "2cdf6b457191ed82ef3a9d2e579f6d0aa495a533")));
+
+        // Regular component with new metadata (to see if we can handle duplicates)
+        Component duplicate = new Component();
+        duplicate.setPurl("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar");
+        duplicate.setVersion("9.1.0.redhat-00002");
+        duplicate.setHashes(List.of(new Hash(Algorithm.SHA1, "2cdf6b457191ed82ef3a9d2e579f6d0aa495a533")));
+
+        Component other = new Component();
+        other.setPurl("pkg:maven/custom@1.1.0.redhat-00002?type=jar");
+        other.setVersion("1.1.0.redhat-00002");
+        other.setHashes(List.of(new Hash(Algorithm.SHA1, "aaabbbccc")));
+
+        Metadata metadata = new Metadata();
+        metadata.setComponent(main);
+
+        bom.setMetadata(metadata);
+
+        List<Component> components = new ArrayList<>();
+        components.add(old);
+        components.add(duplicate);
+        components.add(other);
+
+        bom.setComponents(components);
+
+        // List of dependencies
+        List<Dependency> dependencies = new ArrayList<>();
+
+        // Main component as a dependency
+        Dependency mainDependency = new Dependency(main.getPurl());
+
+        // All other components added as dependencies to the main component dependency
+        mainDependency.addDependency(new Dependency(old.getPurl()));
+        mainDependency.addDependency(new Dependency(duplicate.getPurl()));
+        mainDependency.addDependency(new Dependency(other.getPurl()));
+
+        // And all components with empty dependency list
+        dependencies.add(mainDependency);
+        dependencies.add(new Dependency(old.getPurl()));
+        dependencies.add(new Dependency(duplicate.getPurl()));
+        dependencies.add(new Dependency(other.getPurl()));
+
+        bom.setDependencies(dependencies);
+
+        SbomUtils.updatePurl(
+                bom,
+                "pkg:maven/org.objectweb.asm/asm@9.1.0.redhat-00002?type=jar",
+                "pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar");
+
+        SbomUtils.updatePurl(
+                bom,
+                "pkg:maven/main-product/asm@9.1.0.redhat-00002?type=jar",
+                "pkg:maven/main-product-updated/asm@9.1.0.redhat-00002?type=jar");
+
+        // We have 2 components after all, not 3, one was duplicate
+        assertEquals(2, bom.getComponents().size());
+        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", bom.getComponents().get(0).getPurl());
+        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", bom.getComponents().get(1).getPurl());
+
+        // Main component's purl should be updated
+        assertEquals(
+                "pkg:maven/main-product-updated/asm@9.1.0.redhat-00002?type=jar",
+                bom.getMetadata().getComponent().getPurl());
+
+        assertEquals(3, bom.getDependencies().size());
+
+        // Dependencies after update
+        assertEquals(
+                "pkg:maven/main-product-updated/asm@9.1.0.redhat-00002?type=jar",
+                bom.getDependencies().get(0).getRef());
+        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", bom.getDependencies().get(1).getRef());
+        assertEquals(0, bom.getDependencies().get(1).getDependencies().size());
+        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", bom.getDependencies().get(2).getRef());
+        assertEquals(0, bom.getDependencies().get(2).getDependencies().size());
+
+        List<Dependency> productDeps = bom.getDependencies().get(0).getDependencies();
+
+        assertEquals(2, productDeps.size());
+        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(0).getRef());
+        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", productDeps.get(1).getRef());
+    }
 }

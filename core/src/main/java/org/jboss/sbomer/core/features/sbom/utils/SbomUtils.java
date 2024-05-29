@@ -17,6 +17,20 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+import static org.jboss.sbomer.core.features.sbom.Constants.PUBLISHER;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_GIT_URL;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_LICENSE_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_WEBSITE;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_ARTIFACT_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -25,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,20 +55,20 @@ import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
+import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
+import org.cyclonedx.model.Hash.Algorithm;
 import org.cyclonedx.model.License;
 import org.cyclonedx.model.LicenseChoice;
-import org.cyclonedx.model.Hash.Algorithm;
-import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.cyclonedx.model.Tool;
+import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.Artifact;
@@ -71,20 +86,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_LICENSE_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_NAME;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_WEBSITE;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_GIT_URL;
-import static org.jboss.sbomer.core.features.sbom.Constants.PUBLISHER;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_ARTIFACT_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
 
 public class SbomUtils {
 
@@ -356,6 +357,102 @@ public class SbomUtils {
         return tool;
     }
 
+    /**
+     * <p>
+     * For a given {@link Bom} update all references for a given purl within the manifest from {@code oldPurl} to
+     * {@code newPurl}.
+     * </p>
+     *
+     * <p>
+     * This includes traversing through components as well as dependencies.
+     * </p>
+     *
+     * <p>
+     * In some cases this will lead to duplicate components and dependencies. This process ensures that there are no
+     * duplicates as well.
+     * </p>
+     *
+     * @param bom
+     * @param oldPurl
+     * @param newPurl
+     */
+    public static void updatePurl(Bom bom, String oldPurl, String newPurl) {
+        // Update main component's purl
+        updatePurl(bom.getMetadata().getComponent(), oldPurl, newPurl);
+
+        // If we have any components (we really should!) then update these purls as well
+        if (bom.getComponents() != null) {
+            // Update all components' purls (if needed)
+            bom.getComponents().forEach(c -> {
+                updatePurl(c, oldPurl, newPurl);
+            });
+
+            // Remove all duplicates from the components
+            bom.setComponents(new ArrayList<>(new LinkedHashSet<>(bom.getComponents())));
+        }
+
+        if (bom.getDependencies() != null) {
+            // Start handling dependencies
+            List<Dependency> dependencies = new ArrayList<>();
+
+            // Update all dependencies
+            bom.getDependencies().forEach(d -> {
+                dependencies.add(updatePurl(d, oldPurl, newPurl));
+            });
+
+            // Remove all duplicates from dependencies
+            bom.setDependencies(new ArrayList<>(new LinkedHashSet<>(dependencies)));
+        }
+    }
+
+    /**
+     * Updates the ref in the depenency and all of it's children, if needed.
+     *
+     * @param dependency
+     * @param oldPurl
+     * @param newPurl
+     * @return
+     */
+    public static Dependency updatePurl(Dependency dependency, String oldPurl, String newPurl) {
+        List<Dependency> dependencies = new ArrayList<>();
+
+        Dependency updatedDependency = dependency;
+
+        // We cannot just update the ref, we need to create entire new Dependency...
+        if (dependency.getRef().equals(oldPurl)) {
+            updatedDependency = SbomUtils.createDependency(newPurl);
+        }
+
+        // Update refs in dependencie as well
+        if (dependency.getDependencies() != null) {
+            dependency.getDependencies().forEach(d -> {
+                dependencies.add(updatePurl(d, oldPurl, newPurl));
+            });
+        }
+
+        // Set updated dependencies back
+        updatedDependency.setDependencies(new ArrayList<>(new LinkedHashSet<>(dependencies)));
+
+        return updatedDependency;
+    }
+
+    /**
+     * Updates the purl for the given component if it matches the old purl.
+     *
+     * @param component
+     * @param oldPurl
+     * @param newPurl
+     * @return
+     */
+    public static boolean updatePurl(Component component, String oldPurl, String newPurl) {
+        if (component.getPurl().equals(oldPurl)) {
+            component.setPurl(newPurl);
+            return true;
+        }
+
+        return false;
+    }
+
     public static ToolInformation createToolInformation(String version) {
         ToolInformation information = new ToolInformation();
         Component toolComponent = new Component();
@@ -379,18 +476,32 @@ public class SbomUtils {
     }
 
     public static boolean hasHash(Component component, Algorithm algorithm) {
-        return component.getHashes() != null && component.getHashes()
-                .stream()
-                .filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))
-                .count() > 0;
+        return getHash(component, algorithm).isPresent();
     }
 
     public static Optional<String> getHash(Component component, Algorithm algorithm) {
-        if (component.getHashes() == null) {
-            return Optional.empty();
+        List<Hash> hashes = null;
+
+        if (component.getHashes() != null) {
+            hashes = component.getHashes();
+        } else {
+            if (component.getExternalReferences() == null) {
+                return Optional.empty();
+            }
+
+            Optional<ExternalReference> buildMetaRefOpt = component.getExternalReferences()
+                    .stream()
+                    .filter(r -> r.getType().equals(ExternalReference.Type.BUILD_META))
+                    .findFirst();
+
+            if (buildMetaRefOpt.isEmpty()) {
+                return Optional.empty();
+            }
+
+            hashes = buildMetaRefOpt.get().getHashes();
         }
-        return component.getHashes()
-                .stream()
+
+        return hashes.stream()
                 .filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))
                 .map(h -> h.getValue())
                 .findFirst();

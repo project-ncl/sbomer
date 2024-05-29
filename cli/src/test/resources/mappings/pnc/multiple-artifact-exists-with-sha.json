@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/pnc-rest/v2/artifacts?pageSize=100&pageIndex=0&q=purl%3D%3D%22pkg%3Amaven%2Forg.jboss.logging%2Fcommons-logging-jboss-logging%4013.0.0.Final-redhat-1?type%3Djar%22"
+    "url": "/pnc-rest/v2/artifacts?pageSize=100&pageIndex=0&q=purl%3D%3D%22pkg%3Amaven%2Forg.jboss.logging%2Fcommons-logging-jboss-logging%4013.0.0.Final-redhat-1?type%3Djar%22%2Csha256%3D%3Dcccc"
   },
   "response": {
     "status": 200,
@@ -16,7 +16,7 @@
           "deployPath": "/org/jboss/logging/commons-logging-jboss-logging/13.0.0.Final-redhat-1/commons-logging-jboss-logging-13.0.0.Final-redhat-1.jar",
           "deployUrl": "https://indy",
           "filename": "commons-logging-jboss-logging-13.0.0.Final-redhat-1.jar",
-          "id": "643534523",
+          "id": "312123",
           "identifier": "org.jboss.logging:commons-logging-jboss-logging:jar:13.0.0.Final-redhat-1",
           "importDate": "2018-10-29T21:56:22.900Z",
           "md5": "d97849379b5a00b5a5bc3154fff658fd",
@@ -27,7 +27,7 @@
           "purl": "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar",
           "qualityLevelReason": null,
           "sha1": "aaaa",
-          "sha256": "asfsasdg",
+          "sha256": "bbbb",
           "size": 17614,
           "targetRepository": {
             "id": "1789",
