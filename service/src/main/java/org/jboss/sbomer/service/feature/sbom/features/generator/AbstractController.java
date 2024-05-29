@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.generator;
 
-import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationRequestReconciler.EVENT_SOURCE_NAME;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,6 +62,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class AbstractController implements Reconciler<GenerationRequest>,
         EventSourceInitializer<GenerationRequest>, Cleaner<GenerationRequest> {
+
+    public static final String EVENT_SOURCE_NAME = "GenerationRequestEventSource";
 
     @Inject
     SbomRepository sbomRepository;
