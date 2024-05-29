@@ -39,6 +39,8 @@ import org.jboss.sbomer.cli.feature.sbom.client.GitilesClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -187,12 +189,16 @@ public class ConfigReaderIT {
                 .scmTag("1.1.0.redhat-00008")
                 .build();
 
+        @BeforeEach
+        public void configureGitLabHost() {
+            configReader.setGitLabHost("gitlab.cee.redhat.com");
+        }
+
         @Test
         void testConfigDoesNotExist() {
             Mockito.when(
                     gitLabClient.fetchFile(
-                            "pnc-workspace",
-                            "eclipse/microprofile-graphql",
+                            "pnc-workspace/eclipse/microprofile-graphql",
                             "1.1.0.redhat-00008",
                             ".sbomer/config.yaml"))
                     .thenThrow(NotFoundException.class);
@@ -204,8 +210,7 @@ public class ConfigReaderIT {
         void testConfigMultipleProducts() throws IOException {
             Mockito.when(
                     gitLabClient.fetchFile(
-                            "pnc-workspace",
-                            "eclipse/microprofile-graphql",
+                            "pnc-workspace/eclipse/microprofile-graphql",
                             "1.1.0.redhat-00008",
                             ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("multi-product.yaml")));
@@ -217,8 +222,7 @@ public class ConfigReaderIT {
         void testInvalidProcessorSlug() throws IOException {
             Mockito.when(
                     gitLabClient.fetchFile(
-                            "pnc-workspace",
-                            "eclipse/microprofile-graphql",
+                            "pnc-workspace/eclipse/microprofile-graphql",
                             "1.1.0.redhat-00008",
                             ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("invalid-wrong-processor-slug.yaml")));
@@ -237,8 +241,7 @@ public class ConfigReaderIT {
         void testInvalidConfig() throws IOException {
             Mockito.when(
                     gitLabClient.fetchFile(
-                            "pnc-workspace",
-                            "eclipse/microprofile-graphql",
+                            "pnc-workspace/eclipse/microprofile-graphql",
                             "1.1.0.redhat-00008",
                             ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("invalid-processor-config.yaml")));
@@ -255,8 +258,7 @@ public class ConfigReaderIT {
         void testOnlyErrataOverride() throws IOException {
             Mockito.when(
                     gitLabClient.fetchFile(
-                            "pnc-workspace",
-                            "eclipse/microprofile-graphql",
+                            "pnc-workspace/eclipse/microprofile-graphql",
                             "1.1.0.redhat-00008",
                             ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("single-errata-override.yaml")));
@@ -268,8 +270,7 @@ public class ConfigReaderIT {
         void testOnlyGeneratorOverride() throws IOException {
             Mockito.when(
                     gitLabClient.fetchFile(
-                            "pnc-workspace",
-                            "eclipse/microprofile-graphql",
+                            "pnc-workspace/eclipse/microprofile-graphql",
                             "1.1.0.redhat-00008",
                             ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("single-generator-override.yaml")));
@@ -282,6 +283,52 @@ public class ConfigReaderIT {
             ProductConfig productConfig = config.getProducts().get(0);
             assertEquals(0, productConfig.getProcessors().size());
             assertEquals("0.0.88", productConfig.getGenerator().getVersion());
+        }
+
+        @Test
+        void testMoreGitLabUrls() throws IOException {
+
+            Build build2 = Build.builder()
+                    .id("ARYT3LBXDVYACCC")
+                    .scmUrl("git@gitlab.cee.redhat.com:platform/build-and-release/requirements.git")
+                    .scmTag("1.3.0.redhat-00013")
+                    .build();
+
+            Build build3 = Build.builder()
+                    .id("BBYT3LBXDVYACCC")
+                    .scmUrl("https://gitlab.cee.redhat.com/platform/build-and-release/requirements.git")
+                    .scmTag("0.3.0.redhat-00003")
+                    .build();
+
+            Build build4 = Build.builder()
+                    .id("DDYT3LBXDVYACCC")
+                    .scmUrl("https://gitlab.cee.redhat.com/fuse-hawtio/hawtio-mirror.git")
+                    .scmTag("1.2.3.redhat-00003")
+                    .build();
+
+            Mockito.when(
+                    gitLabClient.fetchFile(
+                            "platform/build-and-release/requirements",
+                            "1.3.0.redhat-00013",
+                            ".sbomer/config.yaml"))
+                    .thenReturn(new String(getTestConfigAsBytes("multi-product.yaml")));
+
+            assertNotNull(configReader.getConfig(build2));
+
+            Mockito.when(
+                    gitLabClient.fetchFile(
+                            "platform/build-and-release/requirements",
+                            "0.3.0.redhat-00003",
+                            ".sbomer/config.yaml"))
+                    .thenReturn(new String(getTestConfigAsBytes("multi-product.yaml")));
+
+            assertNotNull(configReader.getConfig(build3));
+
+            Mockito.when(
+                    gitLabClient.fetchFile("fuse-hawtio/hawtio-mirror", "1.2.3.redhat-00003", ".sbomer/config.yaml"))
+                    .thenReturn(new String(getTestConfigAsBytes("multi-product.yaml")));
+
+            assertNotNull(configReader.getConfig(build4));
         }
     }
 }

@@ -35,10 +35,9 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @Path("/")
 public interface GitLabClient {
     /**
-     * Fetch content of the file at the provided {@code path} in the Gerrit {@code project} identified by the
+     * Fetch content of the file at the provided {@code path} in the Gitlab {@code project} identified by the
      * {@code ref}.
      *
-     * @param group The group name
      * @param project The project name in format: [namespace]/[repo]
      * @param ref The reference, for example a tag: {@code 1.0.0.Final}
      * @param path The path to the file
@@ -47,9 +46,8 @@ public interface GitLabClient {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN)
-    @Path("/{group}/{project}/-/raw/{ref}/{path}")
+    @Path("/{project}/-/raw/{ref}/{path}")
     String fetchFile(
-            @PathParam("group") String group,
             @PathParam("project") String project,
             @PathParam("ref") String ref,
             @PathParam("path") String path);
