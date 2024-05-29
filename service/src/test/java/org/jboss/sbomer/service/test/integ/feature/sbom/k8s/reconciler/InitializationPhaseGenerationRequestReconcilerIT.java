@@ -37,7 +37,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationRequestReconciler;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.BuildController;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ import io.quarkus.test.junit.QuarkusTest;
 public class InitializationPhaseGenerationRequestReconcilerIT {
 
     @Inject
-    GenerationRequestReconciler controller;
+    BuildController controller;
 
     private GenerationRequest dummyInitializationRequest(SbomGenerationStatus status) throws IOException {
         return new GenerationRequestBuilder(GenerationRequestType.BUILD).withIdentifier("AABBCC")

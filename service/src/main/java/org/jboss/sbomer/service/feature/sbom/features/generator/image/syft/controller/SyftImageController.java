@@ -17,12 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.controller;
 
-import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationRequestReconciler.EVENT_SOURCE_NAME;
+import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
 
 import java.nio.file.Path;
 import java.util.Set;
 
 import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
@@ -40,6 +41,23 @@ import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * <p>
+ * Reconciler working on the {@link GenerationRequest} entity and the {@link GenerationRequestType#CONTAINERIMAGE} type.
+ * </p>
+ *
+ * <p>
+ * This reconciler acts only on resources marked with following labels (all of them must exist on the resource):
+ *
+ * <ul>
+ * <li>{@code app.kubernetes.io/part-of=sbomer}</li>
+ * <li>{@code app.kubernetes.io/component=sbom}</li>
+ * <li>{@code app.kubernetes.io/managed-by=sbom}</li>
+ * <li>{@code sbomer.jboss.org/generation-request}</li>
+ * <li>{@code sbomer.jboss.org/generation-request-type}</li>
+ * </ul>
+ * </p>
+ */
 @ControllerConfiguration(
         labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=containerimage",
         namespaces = { Constants.WATCH_CURRENT_NAMESPACE },

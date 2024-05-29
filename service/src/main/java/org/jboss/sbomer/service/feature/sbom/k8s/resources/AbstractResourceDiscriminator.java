@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
-import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationRequestReconciler.EVENT_SOURCE_NAME;
+import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.BuildController.EVENT_SOURCE_NAME;
 
 import java.util.Optional;
 

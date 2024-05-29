@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
-import static org.jboss.sbomer.service.feature.sbom.k8s.reconciler.GenerationRequestReconciler.EVENT_SOURCE_NAME;
+import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,6 +33,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -59,7 +60,6 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.tekton.pipeline.v1beta1.Param;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunResult;
@@ -75,7 +75,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- * Reconciler working on the {@link GenerationRequest} being a {@link io.fabric8.kubernetes.api.model.ConfigMap}.
+ * Reconciler working on the {@link GenerationRequest} entity and the {@link GenerationRequestType#BUILD} type.
  * </p>
  *
  * <p>
@@ -86,11 +86,12 @@ import lombok.extern.slf4j.Slf4j;
  * <li>{@code app.kubernetes.io/component=sbom}</li>
  * <li>{@code app.kubernetes.io/managed-by=sbom}</li>
  * <li>{@code sbomer.jboss.org/generation-request}</li>
+ * <li>{@code sbomer.jboss.org/generation-request-type}</li>
  * </ul>
  * </p>
  */
 @ControllerConfiguration(
-        labelSelector = Labels.LABEL_SELECTOR,
+        labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=build",
         namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
         dependents = {
                 @Dependent(
@@ -100,23 +101,13 @@ import lombok.extern.slf4j.Slf4j;
                 @Dependent(
                         type = TaskRunGenerateDependentResource.class,
                         reconcilePrecondition = IsBuildTypeInitializedCondition.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME),
-                @Dependent(
-                        type = TaskRunOperationInitDependentResource.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME,
-                        reconcilePrecondition = OperationConfigMissingCondition.class),
-                @Dependent(
-                        type = TaskRunOperationGenerateDependentResource.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME,
-                        reconcilePrecondition = OperationConfigAvailableCondition.class) })
+                        useEventSourceWithName = EVENT_SOURCE_NAME) })
 @Slf4j
-public class GenerationRequestReconciler extends AbstractController {
-
-    public static final String EVENT_SOURCE_NAME = "GenerationRequestEventSource";
+public class BuildController extends AbstractController {
 
     List<TaskRunGenerateDependentResource> generations = new ArrayList<>();
 
-    public GenerationRequestReconciler() {
+    public BuildController() {
 
     }
 
@@ -125,9 +116,6 @@ public class GenerationRequestReconciler extends AbstractController {
 
     @Inject
     SbomRepository sbomRepository;
-
-    @Inject
-    KubernetesClient kubernetesClient;
 
     @Inject
     NotificationService notificationService;
@@ -141,30 +129,15 @@ public class GenerationRequestReconciler extends AbstractController {
             GenerationResult result,
             String reason) {
 
-        if (GenerationRequestType.BUILD.equals(generationRequest.getType())) {
+        if (generationRequest.getStatus() != null) {
+            String label = switch (generationRequest.getStatus()) {
+                case INITIALIZING -> SbomGenerationPhase.INIT.name().toLowerCase();
+                case GENERATING -> SbomGenerationPhase.GENERATE.name().toLowerCase();
+                default -> null;
+            };
 
-            if (generationRequest.getStatus() != null) {
-                String label = switch (generationRequest.getStatus()) {
-                    case INITIALIZING -> SbomGenerationPhase.INIT.name().toLowerCase();
-                    case GENERATING -> SbomGenerationPhase.GENERATE.name().toLowerCase();
-                    default -> null;
-                };
-
-                if (label != null) {
-                    generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
-                }
-            }
-        } else {
-            if (generationRequest.getStatus() != null) {
-                String label = switch (generationRequest.getStatus()) {
-                    case INITIALIZING -> SbomGenerationPhase.OPERATIONINIT.name().toLowerCase();
-                    case GENERATING -> SbomGenerationPhase.OPERATIONGENERATE.name().toLowerCase();
-                    default -> null;
-                };
-
-                if (label != null) {
-                    generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
-                }
+            if (label != null) {
+                generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
             }
         }
 
@@ -455,327 +428,6 @@ public class GenerationRequestReconciler extends AbstractController {
         return updateRequest(generationRequest, SbomGenerationStatus.FAILED, result, reason);
     }
 
-    /**
-     * <p>
-     * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#INITIALIZING} or
-     * {@link SbomGenerationStatus#INITIALIZED} if it was really fast :)
-     * </p>
-     *
-     * <p>
-     * For the {@link SbomGenerationStatus#NEW} state we don't need to do anything, just wait.
-     * </p>
-     *
-     * @param generationRequest
-     * @param secondaryResources
-     * @return Action to take on the {@link GenerationRequest} resource.
-     */
-    private UpdateControl<GenerationRequest> reconcileOperationNew(
-            GenerationRequest generationRequest,
-            Set<TaskRun> secondaryResources) {
-
-        log.debug("ReconcileOperationNew ...");
-
-        TaskRun initTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.OPERATIONINIT);
-
-        if (initTaskRun == null) {
-            return UpdateControl.noUpdate();
-        }
-
-        return updateRequest(generationRequest, SbomGenerationStatus.INITIALIZING, null, null);
-    }
-
-    /**
-     * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#INITIALIZED}
-     *
-     * @param secondaryResources
-     * @param generationRequest
-     *
-     * @return
-     */
-    private UpdateControl<GenerationRequest> reconcileOperationInitializing(
-            GenerationRequest generationRequest,
-            Set<TaskRun> secondaryResources) {
-
-        log.debug("ReconcileOperationInitializing ...");
-
-        TaskRun initTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.OPERATIONINIT);
-
-        if (initTaskRun == null) {
-            log.error(
-                    "There is no initialization TaskRun related to GenerationRequest '{}'",
-                    generationRequest.getName());
-
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Configuration initialization failed. Unable to find related TaskRun. See logs for more information.");
-        }
-
-        if (!isFinished(initTaskRun)) {
-            return UpdateControl.noUpdate();
-        }
-
-        if (isSuccessful(initTaskRun)) {
-            setOperationConfig(generationRequest, initTaskRun);
-            return updateRequest(generationRequest, SbomGenerationStatus.INITIALIZED, null, null);
-        }
-
-        StringBuilder sb = new StringBuilder("Configuration initialization failed. ");
-
-        GenerationResult result = GenerationResult.ERR_SYSTEM;
-
-        if (initTaskRun.getStatus() != null && initTaskRun.getStatus().getSteps() != null
-                && !initTaskRun.getStatus().getSteps().isEmpty()
-                && initTaskRun.getStatus().getSteps().get(0).getTerminated() != null) {
-
-            Optional<GenerationResult> optResult = GenerationResult
-                    .fromCode(initTaskRun.getStatus().getSteps().get(0).getTerminated().getExitCode());
-
-            if (optResult.isPresent()) {
-                result = optResult.get();
-
-                // At this point the config generation failed, let's try to provide more info on the failure
-                switch (result) {
-                    case ERR_GENERAL:
-                        sb.append("General error occurred. ");
-                        break;
-                    case ERR_CONFIG_INVALID:
-                        sb.append("Configuration validation failed. ");
-                        break;
-                    case ERR_CONFIG_MISSING:
-                        sb.append("Could not find configuration. ");
-                        break;
-                    case ERR_SYSTEM:
-                        sb.append("System error occurred. ");
-                        break;
-                    default:
-                        // In case we don't have a mapped exit code, we assume it is a system error
-                        result = GenerationResult.ERR_SYSTEM;
-                        sb.append("Unexpected error occurred. ");
-                        break;
-                }
-            } else {
-                log.warn(
-                        "Unknown exit code received from the finished '{}' TaskRun: {}",
-                        initTaskRun.getMetadata().getName(),
-                        initTaskRun.getStatus().getSteps().get(0).getTerminated().getExitCode());
-                result = GenerationResult.ERR_SYSTEM;
-                sb.append("Unknown exit code received. ");
-            }
-        } else {
-            sb.append("System failure. ");
-        }
-
-        String reason = sb.append("See logs for more information.").toString();
-
-        log.warn("GenerationRequest '{}' failed. {}", generationRequest.getName(), reason);
-
-        return updateRequest(generationRequest, SbomGenerationStatus.FAILED, result, reason);
-    }
-
-    /**
-     * Possible next statuses: {@link SbomGenerationStatus#PREPARING}
-     *
-     * @param secondaryResources
-     * @param generationRequest
-     *
-     * @return
-     */
-    private UpdateControl<GenerationRequest> reconcileOperationInitialized(
-            GenerationRequest generationRequest,
-            Set<TaskRun> secondaryResources) {
-
-        log.debug("ReconcileOperationInitialized ...");
-
-        OperationConfig config = generationRequest.toOperationConfig();
-        if (config == null) {
-            log.error(
-                    "Product configuration from GenerationRequest '{}' could not be read",
-                    generationRequest.getName());
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. Could not read product configuration");
-        }
-
-        if (generationRequest.getDeliverableUrls() == null || generationRequest.getDeliverableUrls().isEmpty()) {
-            log.error("There are no deliverables to process in GenerationRequest '{}'", generationRequest.getName());
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. No deliverable available");
-        }
-
-        Set<TaskRun> generateTaskRuns = findTaskRuns(secondaryResources, SbomGenerationPhase.OPERATIONGENERATE);
-        if (generateTaskRuns.isEmpty()) {
-            return UpdateControl.noUpdate();
-        }
-
-        return updateRequest(generationRequest, SbomGenerationStatus.GENERATING, null, null);
-    }
-
-    /**
-     * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#FINISHED}
-     *
-     * @param secondaryResources
-     * @param generationRequest
-     *
-     * @return
-     */
-    private UpdateControl<GenerationRequest> reconcileOperationGenerating(
-            GenerationRequest generationRequest,
-            Set<TaskRun> secondaryResources) {
-
-        log.debug("ReconcileOperationGenerating ...");
-
-        OperationConfig config = generationRequest.toOperationConfig();
-        if (config == null) {
-            log.error(
-                    "Product configuration from GenerationRequest '{}' could not be read",
-                    generationRequest.getName());
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. Could not read product configuration");
-        }
-
-        if (generationRequest.getDeliverableUrls() == null || generationRequest.getDeliverableUrls().isEmpty()) {
-            log.error("There are no deliverables to process in GenerationRequest '{}'", generationRequest.getName());
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. No deliverable available");
-        }
-
-        Set<TaskRun> generateTaskRuns = findTaskRuns(secondaryResources, SbomGenerationPhase.OPERATIONGENERATE);
-
-        // This should not happen, because if we updated already the status to SbomGenerationStatus.GENERATING, then
-        // there was a TaskRun already. But it could be deleted manually(?). In such case we set the status to FAILED.
-        if (generateTaskRuns.isEmpty()) {
-            log.error(
-                    "Marking GenerationRequest '{}' as failed: no generation TaskRuns were found, but at least one was expected.",
-                    generationRequest.getName());
-
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. Expected one or more running TaskRun related to generation. None found. See logs for more information.");
-        }
-
-        log.debug(
-                "Found {} TaskRuns related to GenerationRequest '{}'",
-                generateTaskRuns.size(),
-                generationRequest.getName());
-
-        // Check for still running tasks
-        List<TaskRun> stillRunning = generateTaskRuns.stream().filter(tr -> !isFinished(tr)).toList();
-
-        // If there are tasks that hasn't finished yet, we need to wait.
-        if (!stillRunning.isEmpty()) {
-            log.debug(
-                    "Skipping update of GenerationRequest '{}', because {} TaskRuns are still running: {}",
-                    generationRequest.getName(),
-                    stillRunning.size(),
-                    stillRunning.stream().map(tr -> tr.getMetadata().getName()).toArray());
-            return UpdateControl.noUpdate();
-        }
-
-        // Get list of failed TaskRuns
-        List<TaskRun> failedTaskRuns = generateTaskRuns.stream().filter(tr -> !isSuccessful(tr)).toList();
-
-        // If all tasks finished successfully
-        if (failedTaskRuns.isEmpty()) {
-
-            List<Sbom> sboms = storeOperationSboms(generationRequest);
-            notificationService.notifyOperationCompleted(sboms);
-
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FINISHED,
-                    GenerationResult.SUCCESS,
-                    String.format(
-                            "Generation finished successfully. Generated SBOMs: %s",
-                            sboms.stream().map(sbom -> sbom.getId()).toArray()));
-        }
-
-        StringBuilder sb = new StringBuilder("Generation failed. ");
-        GenerationResult result = GenerationResult.ERR_SYSTEM;
-
-        for (TaskRun taskRun : failedTaskRuns) {
-            Param deliverableIndexParam = getParamValue(
-                    taskRun,
-                    TaskRunOperationGenerateDependentResource.PARAM_COMMAND_DELIVERABLE_INDEX_NAME);
-
-            sb.append("Deliverable with index '")
-                    .append(deliverableIndexParam.getValue().getStringVal())
-                    .append("' (TaskRun '")
-                    .append(taskRun.getMetadata().getName())
-                    .append("') failed: ");
-
-            if (taskRun.getStatus() != null && taskRun.getStatus().getSteps() != null
-                    && !taskRun.getStatus().getSteps().isEmpty()
-                    && taskRun.getStatus().getSteps().get(0).getTerminated() != null) {
-
-                Optional<GenerationResult> optResult = GenerationResult
-                        .fromCode(taskRun.getStatus().getSteps().get(0).getTerminated().getExitCode());
-
-                if (optResult.isPresent()) {
-                    result = optResult.get();
-                }
-
-                switch (result) {
-                    case ERR_GENERAL:
-                        sb.append("general error occurred. ");
-                        break;
-                    case ERR_CONFIG_INVALID:
-                        sb.append("product configuration failure. ");
-                        break;
-                    case ERR_INDEX_INVALID:
-                        Param param = getParamValue(taskRun, "index");
-
-                        if (param == null) {
-                            sb.append("could not find the 'index' parameter. ");
-                        } else {
-                            sb.append("invalid product index: ")
-                                    .append(deliverableIndexParam.getValue().getStringVal())
-                                    .append(" (should be between 1 and ")
-                                    .append(config.getDeliverableUrls().size())
-                                    .append("). ");
-                        }
-
-                        break;
-                    case ERR_GENERATION:
-                        sb.append("an error occurred while generating the SBOM. ");
-                        break;
-                    default:
-                        result = GenerationResult.ERR_SYSTEM;
-                        sb.append("unexpected error occurred. ");
-                        break;
-                }
-            } else {
-                sb.append("system failure. ");
-            }
-
-        }
-
-        // When we have more than one task failed, we need set the result to be a multi-failure
-        if (failedTaskRuns.size() > 1) {
-            result = GenerationResult.ERR_MULTI;
-        }
-
-        String reason = sb.append("See logs for more information.").toString();
-
-        log.warn("Marking GenerationRequest '{}' as failed. Reason: {}", generationRequest.getName(), reason);
-
-        return updateRequest(generationRequest, SbomGenerationStatus.FAILED, result, reason);
-    }
-
     private Param getParamValue(TaskRun taskRun, String paramName) {
         Optional<Param> param = taskRun.getSpec()
                 .getParams()
@@ -842,55 +494,29 @@ public class GenerationRequestReconciler extends AbstractController {
                 generationRequest.getMetadata().getName(),
                 generationRequest.getStatus());
 
-        if (GenerationRequestType.BUILD.equals(generationRequest.getType())) {
+        MDCUtils.addBuildContext(generationRequest.getIdentifier());
 
-            MDCUtils.addBuildContext(generationRequest.getIdentifier());
-
-            switch (generationRequest.getStatus()) {
-                case NEW:
-                    action = reconcileNew(generationRequest, secondaryResources);
-                    break;
-                case INITIALIZING:
-                    action = reconcileInitializing(generationRequest, secondaryResources);
-                    break;
-                case INITIALIZED:
-                    action = reconcileInitialized(generationRequest, secondaryResources);
-                    break;
-                case GENERATING:
-                    action = reconcileGenerating(generationRequest, secondaryResources);
-                    break;
-                case FINISHED:
-                    action = reconcileFinished(generationRequest, secondaryResources);
-                    break;
-                case FAILED:
-                    action = reconcileFailed(generationRequest, secondaryResources);
-                    break;
-                default:
-                    break;
-            }
-
-        } else {
-            switch (generationRequest.getStatus()) {
-                case NEW:
-                    action = reconcileOperationNew(generationRequest, secondaryResources);
-                    break;
-                case INITIALIZING:
-                    action = reconcileOperationInitializing(generationRequest, secondaryResources);
-                    break;
-                case INITIALIZED:
-                    action = reconcileOperationInitialized(generationRequest, secondaryResources);
-                    break;
-                case GENERATING:
-                    action = reconcileOperationGenerating(generationRequest, secondaryResources);
-                    break;
-                case FINISHED:
-                    action = reconcileFinished(generationRequest, secondaryResources);
-                    break;
-                case FAILED:
-                    action = reconcileFailed(generationRequest, secondaryResources);
-                    break;
-                default:
-            }
+        switch (generationRequest.getStatus()) {
+            case NEW:
+                action = reconcileNew(generationRequest, secondaryResources);
+                break;
+            case INITIALIZING:
+                action = reconcileInitializing(generationRequest, secondaryResources);
+                break;
+            case INITIALIZED:
+                action = reconcileInitialized(generationRequest, secondaryResources);
+                break;
+            case GENERATING:
+                action = reconcileGenerating(generationRequest, secondaryResources);
+                break;
+            case FINISHED:
+                action = reconcileFinished(generationRequest, secondaryResources);
+                break;
+            case FAILED:
+                action = reconcileFailed(generationRequest, secondaryResources);
+                break;
+            default:
+                break;
         }
 
         // This would be unexpected.
