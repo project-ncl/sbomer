@@ -15,27 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.utils;
+package org.jboss.sbomer.cli.feature.sbom.command.adjust;
 
-import org.cyclonedx.model.Component;
-import org.jboss.pnc.dto.Artifact;
-import org.jboss.sbomer.cli.feature.sbom.processor.DefaultProcessor;
+import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
-import jakarta.enterprise.inject.Alternative;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.inject.Inject;
 import picocli.CommandLine.Command;
 
-@Alternative
-@Slf4j
 @Command(
         mixinStandardHelpOptions = true,
-        name = "default",
-        description = "Process the SBOM with enrichments applied to known CycloneDX fields")
-public class DefaultProcessCommandMockAlternative extends DefaultProcessor {
+        name = "syft-image",
+        description = "Adjust the Syft manifest output for a container image")
+public class SyftImageAdjustCommand extends AbstractAdjustCommand {
+
+    @Inject
+    SyftImageAdjuster adjuster;
 
     @Override
-    protected void processBrewBuild(Component component, Artifact artifact) {
-        log.debug("Mocked component '{}' was not built in Brew, cannot add any enrichment!", component.getPurl());
+    protected GeneratorType getGeneratorType() {
+        return GeneratorType.IMAGE_SYFT;
     }
 
+    @Override
+    protected Bom doAdjust(Bom bom) {
+        return adjuster.adjust(bom);
+    }
 }

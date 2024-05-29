@@ -349,11 +349,9 @@ public class SBOMResource extends AbstractApiProvider {
                     responseCode = "500",
                     description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
-
     public Response generateNewOperation(DeliverableAnalysisConfig config) throws Exception {
 
         return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateNewOperation(config))).build();
 
     }
-
 }

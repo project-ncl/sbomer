@@ -17,10 +17,11 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
-import jakarta.inject.Inject;
-
 import org.jboss.sbomer.cli.FeatureTopCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.adjust.AdjustCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.process.StandaloneProcessCommand;
 
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -31,7 +32,8 @@ import picocli.CommandLine.Spec;
         name = "sbom",
         aliases = { "s" },
         description = "SBOM generation",
-        subcommands = { AutoCommand.class, GenerateCommand.class, GenerateOperationCommand.class })
+        subcommands = { AutoCommand.class, GenerateCommand.class, GenerateOperationCommand.class,
+                StandaloneProcessCommand.class, AdjustCommand.class })
 public class SbomCommand implements FeatureTopCommand {
 
     @Spec

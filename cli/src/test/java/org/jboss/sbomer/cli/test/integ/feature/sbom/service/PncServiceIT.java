@@ -54,8 +54,9 @@ public class PncServiceIT {
     void testFetchArtifact() throws Exception {
         log.info("testFetchArtifact ...");
         Artifact fromPNC = service.getArtifact(
-                "AA",
                 "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@1.0.0.Final-redhat-1?type=jar",
+                Optional.empty(),
+                Optional.empty(),
                 Optional.empty());
         assertNotNull(fromPNC);
         assertEquals("312123", fromPNC.getId());
@@ -63,7 +64,7 @@ public class PncServiceIT {
 
     @Test
     void testFetchNonExistingArtifact() throws Exception {
-        assertNull(service.getArtifact("AA", "purlnonexisting", Optional.empty()));
+        assertNull(service.getArtifact("purlnonexisting", Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
     @Test
@@ -101,35 +102,11 @@ public class PncServiceIT {
     void testFetchDuplicatedArtifactNoSha256() throws Exception {
         log.info("testFetchDuplicatedArtifact ...");
         String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
-        try {
-            service.getArtifact("AA", purl, Optional.empty());
-        } catch (IllegalStateException ise) {
-            assertEquals(
-                    "No sha256 was provided, and there should exist only one artifact with purl " + purl,
-                    ise.getMessage());
-        }
-    }
 
-    @Test
-    void testFetchDuplicatedArtifactMatchingSha256() throws Exception {
-        log.info("testFetchDuplicatedArtifactMatchingSha256 ...");
-        String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
-        String sha256 = "cccc";
-        Artifact fromPNC = service.getArtifact("AA", purl, Optional.of(sha256));
-        assertNotNull(fromPNC);
-        assertEquals("412123", fromPNC.getId());
-    }
+        Artifact artifact = service.getArtifact(purl, Optional.empty(), Optional.empty(), Optional.empty());
 
-    @Test
-    void testFetchDuplicatedArtifactNonMatchingSha256() throws Exception {
-        log.info("testFetchDuplicatedArtifactNonMatchingSha256 ...");
-        String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
-        String sha256 = "xxxx";
-        try {
-            service.getArtifact("AA", purl, Optional.of(sha256));
-        } catch (IllegalStateException ise) {
-            assertEquals("No matching artifact found with purl " + purl + " and sha256 " + sha256, ise.getMessage());
-        }
+        assertEquals("asfsasdg", artifact.getSha256());
+        assertEquals("643534523", artifact.getId());
     }
 
     @Test

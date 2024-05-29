@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
 import org.jboss.pnc.client.Configuration;
@@ -68,6 +69,8 @@ public class PncService {
     @Getter
     String apiUrl;
 
+    ArtifactClient artifactClient;
+
     BuildClient buildClient;
 
     BuildConfigurationClient buildConfigurationClient;
@@ -84,6 +87,7 @@ public class PncService {
 
     @PostConstruct
     void init() {
+        artifactClient = new ArtifactClient(getConfiguration());
         buildClient = new BuildClient(getConfiguration());
         buildConfigurationClient = new BuildConfigurationClient(getConfiguration());
         groupConfigurationClient = new GroupConfigurationClient(getConfiguration());
@@ -95,6 +99,7 @@ public class PncService {
 
     @PreDestroy
     void cleanup() {
+        artifactClient.close();
         buildClient.close();
         buildConfigurationClient.close();
         groupConfigurationClient.close();
@@ -354,75 +359,75 @@ public class PncService {
         return productVersions;
     }
 
-    /**
-     * Fetch information about the PNC {@link Artifact} identified by the particular purl and sha256 if available.
-     *
-     * @param sha256
-     * @param purl
-     * @return The {@link Artifact} object or {@code null} if it cannot be found.
-     */
-    public Artifact getArtifact(String buildId, String purl, Optional<String> sha256) {
-        log.debug(
-                "Fetching artifact from PNC for purl '{}' and sha256 '{}'",
-                purl,
-                sha256.isPresent() ? sha256.get() : null);
+    public Artifact getArtifact(String purl, Optional<String> sha256, Optional<String> sha1, Optional<String> md5) {
+        if (purl == null && sha256.orElse(null) == null && sha1.orElse(null) == null && md5.orElse(null) == null) {
+            log.debug("No meaningful values provided for searching an artifact, returning nothing");
 
-        try {
-            // Fetch all artifacts via purl (always available)
-            String artifactQuery = "purl==\"" + purl + "\"";
+            return null;
+        }
+
+        List<String> query = new ArrayList<>();
+
+        // Purl was provided, so let's use it, hashes will be used to filter out results, if there are multiple
+        // artifacts returned
+        if (purl != null) {
             // We need to make a small tweak to find the NPM purls because PNC does not like the % in the purl
             if (purl.startsWith("pkg:npm/%40redhat/")) {
-                artifactQuery = "purl=like=\"" + purl.replace("pkg:npm/%40redhat/", "pkg:npm/?40redhat/") + "\"";
+                query.add("purl=like=\"" + purl.replace("pkg:npm/%40redhat/", "pkg:npm/?40redhat/") + "\"");
+            } else {
+                query.add("purl==\"" + purl + "\"");
             }
-            RemoteCollection<Artifact> artifacts = buildClient
-                    .getDependencyArtifacts(buildId, Optional.empty(), Optional.of(artifactQuery));
-            if (artifacts.size() == 0) {
-                // If the artifact is not a dependency of the provided buildId, it might be a built artifact from the
-                // buildId
-                artifacts = buildClient.getBuiltArtifacts(buildId, Optional.empty(), Optional.of(artifactQuery));
-            }
+        }
 
-            if (artifacts.size() == 0) {
-                log.debug("Artifact with purl '{}' was not found in PNC", purl);
-                return null;
-            } else if (artifacts.size() > 1) {
-                // In case of multiple matches by purl, if no sha256 is provided, return error
-                if (sha256.isEmpty()) {
-                    throw new IllegalStateException(
-                            "No sha256 was provided, and there should exist only one artifact with purl " + purl);
-                }
-                // In case of provided sha256, filter all artifacts
-                List<Artifact> filteredArtifacts = artifacts.getAll()
-                        .stream()
-                        .peek(
-                                a -> log.info(
-                                        "Filtering the retrieved artifact having purl: '{}', id: {}, sha256: '{}' by the SBOM detected sha256: '{}'",
-                                        a.getPurl(),
-                                        a.getId(),
-                                        a.getSha256(),
-                                        sha256.get()))
-                        .filter(a -> a.getSha256().equals(sha256.get()))
-                        .peek(a -> log.info("Artifact with id: {} matched.", a.getId()))
-                        .collect(Collectors.toList());
+        if (sha256.isPresent()) {
+            query.add("sha256==" + sha256.get());
+        }
 
-                if (filteredArtifacts.size() == 0) {
-                    throw new IllegalStateException(
-                            "No matching artifact found with purl " + purl + " and sha256 " + sha256.get());
-                }
-                // Return first one matching (to handle duplicates in PNC)
-                log.info("Returning the first matching artifact with id: {}", filteredArtifacts.get(0).getId());
-                return filteredArtifacts.get(0);
-            }
-            // Only one matching artifact was found, all good
-            return artifacts.iterator().next();
-        } catch (RemoteResourceNotFoundException ex) {
-            throw new ApplicationException("Artifact with purl '{}' was not found in PNC", purl, ex);
+        if (sha1.isPresent()) {
+            query.add("sha1==" + sha1.get());
+        }
+
+        if (md5.isPresent()) {
+            query.add("sha1==" + md5.get());
+        }
+
+        // If query was not provided and no hashes are provided either
+        if (query.isEmpty()) {
+            log.debug("No query provided and not hashes available either, impossible to query for artifact");
+
+            return null;
+        }
+
+        String rsql = String.join(",", query);
+
+        log.debug("Using following rsql query to search for an artifact: '{}'", rsql);
+
+        RemoteCollection<Artifact> remoteArtifacts;
+
+        try {
+            remoteArtifacts = artifactClient.getAll(null, null, null, Optional.empty(), Optional.of(rsql));
+
         } catch (RemoteResourceException ex) {
             throw new GeneralPncException(
-                    "Artifact with purl '{}' could not be retrieved because PNC responded with an error",
-                    purl,
+                    "Querying artifact failed, PNC responded with an error, query: query: '{}'",
+                    rsql,
                     ex);
         }
+
+        if (remoteArtifacts.size() == 0) {
+            log.debug("No artifact found, returning nothing");
+            return null;
+        }
+
+        if (remoteArtifacts.size() > 1) {
+            log.debug("Found {} results, returning first", remoteArtifacts.size());
+        }
+
+        if (remoteArtifacts.size() == 1) {
+            log.debug("Single artifact found, returning it!");
+        }
+
+        return remoteArtifacts.iterator().next();
     }
 
     /**

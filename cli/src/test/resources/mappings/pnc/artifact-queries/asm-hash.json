@@ -1,0 +1,121 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/artifacts?pageSize=100&pageIndex=0&q=sha1%3D%3D2cdf6b457191ed82ef3a9d2e579f6d0aa495a533"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "pageIndex": 0,
+      "pageSize": 50,
+      "totalPages": 1,
+      "totalHits": 1,
+      "content": [
+        {
+          "id": "7429724",
+          "identifier": "org.ow2.asm:asm:jar:9.1.0.redhat-00002",
+          "purl": "pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar",
+          "artifactQuality": "NEW",
+          "buildCategory": "STANDARD",
+          "md5": "5837ea599ca93f52ca338c073466a650",
+          "sha1": "2cdf6b457191ed82ef3a9d2e579f6d0aa495a533",
+          "sha256": "799609fa88a6b3c5f7686f16cb6b7e5eccf7ba1788c13cc4ad9b35c77c26e318",
+          "filename": "asm-9.1.0.redhat-00002.jar",
+          "deployPath": "/org/ow2/asm/asm/9.1.0.redhat-00002/asm-9.1.0.redhat-00002.jar",
+          "importDate": null,
+          "originUrl": null,
+          "size": 127573,
+          "deployUrl": "https://indy-gateway.indy.svc.cluster.local/api/content/maven/hosted/pnc-builds/org/ow2/asm/asm/9.1.0.redhat-00002/asm-9.1.0.redhat-00002.jar",
+          "publicUrl": "https://indy.psi.redhat.com/api/content/maven/hosted/pnc-builds/org/ow2/asm/asm/9.1.0.redhat-00002/asm-9.1.0.redhat-00002.jar",
+          "creationTime": null,
+          "modificationTime": "2023-11-21T15:19:45.943Z",
+          "qualityLevelReason": "Added as delivered artifact for milestone 2538",
+          "targetRepository": {
+            "id": "3550",
+            "temporaryRepo": false,
+            "identifier": "indy-maven",
+            "repositoryType": "MAVEN",
+            "repositoryPath": "/api/content/maven/hosted/pnc-builds/"
+          },
+          "build": {
+            "id": "APT4PH2ILMAAA",
+            "submitTime": "2022-02-15T13:14:44.897Z",
+            "startTime": "2022-02-15T13:14:44.902Z",
+            "endTime": "2022-02-15T13:19:28.427Z",
+            "progress": "FINISHED",
+            "status": "SUCCESS",
+            "buildContentId": "build-APT4PH2ILMAAA",
+            "temporaryBuild": false,
+            "alignmentPreference": null,
+            "scmUrl": "https://code.engineering.redhat.com/gerrit/asm.git",
+            "scmRevision": "37ac9118ebb0f4ab95a7a70a50ab5b6b697833b8",
+            "scmTag": "9.1.0.redhat-00002",
+            "buildOutputChecksum": "1184128f875a89de3ff2524778c7fff7",
+            "lastUpdateTime": "2022-02-15T13:19:28.669Z",
+            "scmBuildConfigRevision": null,
+            "scmBuildConfigRevisionInternal": null,
+            "project": {
+              "id": "10",
+              "name": "asm",
+              "description": null,
+              "issueTrackerUrl": null,
+              "projectUrl": "http://asm.ow2.org/",
+              "engineeringTeam": null,
+              "technicalLeader": null
+            },
+            "scmRepository": {
+              "id": "442",
+              "internalUrl": "git@gitlab.cee.redhat.com:pnc-workspace/asm/asm.git",
+              "externalUrl": "https://gitlab.ow2.org/asm/asm.git",
+              "preBuildSyncEnabled": true
+            },
+            "environment": {
+              "id": "301",
+              "name": "OpenJDK 11.0; Mvn 3.6.0; Gradle 6.8.3; Kotlin 1.4.32",
+              "description": "OpenJDK 11.0; Mvn 3.6.0; Gradle 6.8.3; Kotlin 1.4.32 [builder-rhel-7-j11-mvn3.6.0-gradle6.8.3-kotlin1.4.32:1.0.3]",
+              "systemImageRepositoryUrl": "quay.io/rh-newcastle",
+              "systemImageId": "builder-rhel-7-j11-mvn3.6.0-gradle6.8.3-kotlin1.4.32:1.0.3",
+              "attributes": {
+                "MAVEN": "3.6.0",
+                "JDK": "11",
+                "OS": "Linux",
+                "DEPRECATION_REPLACEMENT": "455",
+                "GRADLE": "6.8.3",
+                "Kotlin": "1.4.32"
+              },
+              "systemImageType": "DOCKER_IMAGE",
+              "deprecated": true,
+              "hidden": false
+            },
+            "attributes": {
+              "BREW_BUILD_VERSION": "9.1.0.redhat-00002",
+              "BUILD_OUTPUT_OK": "true",
+              "BREW_BUILD_NAME": "org.ow2.asm:asm"
+            },
+            "user": { "id": "225", "username": "eleandro" },
+            "buildConfigRevision": {
+              "id": "7214",
+              "rev": 2578014,
+              "name": "asm-9.1.0",
+              "buildScript": "gradle --info  build publish -x test",
+              "scmRevision": "5a0c71f88bc4e52b8b4b2bd1d66bdcaf166ac152",
+              "creationTime": "2022-02-15T11:47:41.540Z",
+              "modificationTime": "2022-02-15T13:14:41.705Z",
+              "buildType": "GRADLE",
+              "defaultAlignmentParams": "--info -DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DignoreUnresolvableDependencies=true",
+              "brewPullActive": false
+            },
+            "productMilestone": null,
+            "groupBuild": null,
+            "noRebuildCause": null
+          },
+          "creationUser": null,
+          "modificationUser": { "id": "48", "username": "mstefank" }
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -18,7 +18,7 @@
 package org.jboss.sbomer.core.features.sbom.enums;
 
 public enum GenerationRequestType {
-    BUILD, OPERATION;
+    BUILD, OPERATION, CONTAINERIMAGE;
 
     public static GenerationRequestType fromName(String type) {
         return GenerationRequestType.valueOf(type.toUpperCase());

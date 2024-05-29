@@ -22,9 +22,17 @@ set -o pipefail
 
 SBOMER_JDK_VERSION="17.0.10-tem"
 NODEJS_VERSION="lts/iron"
+SYFT_VERSION="1.4.1"
 
 # SBOMer functions
 source "${HOME}/func.sh"
+
+function install_syft() {
+    local version=${1}
+
+    mkdir -p ${HOME}/syft
+    curl -s -L https://github.com/anchore/syft/releases/download/v${version}/syft_${version}_linux_amd64.tar.gz | tar xvz -C "${HOME}/syft"
+}
 
 install_sdk
 install_nvm
@@ -32,6 +40,7 @@ install_nvm
 # Activate nvm and sdk
 source "${HOME}/.bashrc"
 
+install_syft "${SYFT_VERSION}"
 # Install Java 17 -- required to run SBOMer itself
 install_java "${SBOMER_JDK_VERSION}"
 # Install nodejs -- it will be done only once

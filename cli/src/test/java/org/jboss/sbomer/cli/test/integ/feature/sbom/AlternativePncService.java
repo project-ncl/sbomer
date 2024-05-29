@@ -19,9 +19,6 @@ package org.jboss.sbomer.cli.test.integ.feature.sbom;
 
 import java.util.Optional;
 
-import jakarta.enterprise.inject.Alternative;
-import jakarta.inject.Singleton;
-
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
@@ -33,6 +30,9 @@ import org.jboss.pnc.enums.BuildProgress;
 import org.jboss.pnc.enums.BuildStatus;
 import org.jboss.pnc.enums.BuildType;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
+
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Singleton;
 
 /**
  * Currently unused, but may be in the future.
@@ -71,7 +71,7 @@ public class AlternativePncService extends PncService {
     }
 
     @Override
-    public Artifact getArtifact(String buildId, String purl, Optional<String> sha256) {
+    public Artifact getArtifact(String purl, Optional<String> sha256, Optional<String> sha1, Optional<String> md5) {
         return Artifact.builder()
                 .id("AA1122")
                 .md5("md5")

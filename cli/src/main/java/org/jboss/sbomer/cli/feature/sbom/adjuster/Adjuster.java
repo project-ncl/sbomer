@@ -15,21 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.enums;
+package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.cyclonedx.model.Bom;
 
-/**
- * Supported generator implementations.
- *
- * @author Marek Goldmann
- */
-public enum GeneratorType {
-    @JsonProperty("maven-cyclonedx")
-    MAVEN_CYCLONEDX, @JsonProperty("maven-domino")
-    MAVEN_DOMINO, @JsonProperty("gradle-cyclonedx")
-    GRADLE_CYCLONEDX, @JsonProperty("nodejs-cyclonedx")
-    NODEJS_CYCLONEDX, @JsonProperty("cyclonedx-operation")
-    CYCLONEDX_OPERATION, @JsonProperty("image-syft")
-    IMAGE_SYFT
+public interface Adjuster {
+    public default Bom adjust(Bom bom) {
+        return bom;
+    }
 }

@@ -15,26 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.command;
+package org.jboss.sbomer.cli.feature.sbom.command.adjust;
 
-import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import org.cyclonedx.model.Bom;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
-import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
+import picocli.CommandLine.ParentCommand;
 
 @Slf4j
-public abstract class AbstractProcessCommand implements Callable<Integer> {
+public abstract class AbstractAdjustCommand implements Callable<Integer> {
 
-    @Inject
-    protected PncService pncService;
+    @ParentCommand
+    AdjustCommand parent;
 
     @Override
     public Integer call() throws Exception {
@@ -45,26 +43,21 @@ public abstract class AbstractProcessCommand implements Callable<Integer> {
             // Call the hook to set a context, if needed.
             addContext();
 
-            // Fetch manifest on the given path.
-            Bom bom = SbomUtils.fromPath(manifestPath());
+            Bom bom = SbomUtils.fromPath(parent.getPath());
 
-            log.info("Starting {} processor", getImplementationType());
+            log.info("Starting {} adjuster", getGeneratorType());
 
-            // Process it.
-            Bom processedBom = doProcess(bom);
+            Bom adjustedBom = doAdjust(bom);
 
-            log.debug("{} processor finished", getImplementationType());
+            log.debug("{} adjuster finished", getGeneratorType());
 
-            // And save the processed manifest on the same path.
-            SbomUtils.toPath(processedBom, manifestPath());
+            SbomUtils.toPath(adjustedBom, parent.getOutputPath());
 
             return CommandLine.ExitCode.OK;
         } finally {
             MDCUtils.removeContext();
         }
     }
-
-    protected abstract ProcessorType getImplementationType();
 
     /**
      * Optionally adds a MDC context. The {@link MDCUtils} class can be used for this purpose.
@@ -73,18 +66,8 @@ public abstract class AbstractProcessCommand implements Callable<Integer> {
 
     }
 
-    /**
-     * Processor implementation.
-     *
-     * @param bom Processed manifest.
-     * @return
-     */
-    protected abstract Bom doProcess(Bom bom);
+    protected abstract GeneratorType getGeneratorType();
 
-    /**
-     * Path to the CycloneDX manifest that should be processed.
-     *
-     * @return
-     */
-    protected abstract Path manifestPath();
+    protected abstract Bom doAdjust(Bom bom);
+
 }
