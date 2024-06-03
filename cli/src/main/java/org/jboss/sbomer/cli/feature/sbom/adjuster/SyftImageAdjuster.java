@@ -49,7 +49,6 @@ public class SyftImageAdjuster implements Adjuster {
                     "Moving '{}' properties from metadata to main component",
                     bom.getMetadata().getProperties().size());
 
-            System.out.println(bom.getMetadata().getProperties().toString());
             productComponent.getProperties().addAll(bom.getMetadata().getProperties());
             bom.getMetadata().setProperties(null);
         }
