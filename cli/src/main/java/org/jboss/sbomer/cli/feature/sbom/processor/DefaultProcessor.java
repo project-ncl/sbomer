@@ -42,6 +42,7 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -134,9 +135,13 @@ public class DefaultProcessor implements Processor {
                     component.getPurl(),
                     artifact.getId());
 
-            setPublisher(component);
-            setSupplier(component);
-            addMrrc(component);
+            // In case this is a RH artifact, add more properties.
+            if (RhVersionPattern.isRhVersion(component.getVersion())
+                    || RhVersionPattern.isRhPurl(component.getPurl())) {
+                setPublisher(component);
+                setSupplier(component);
+                addMrrc(component);
+            }
 
             // Add artifact metadata (PNC url)
             setArtifactMetadata(component, artifact, pncService.getApiUrl());
