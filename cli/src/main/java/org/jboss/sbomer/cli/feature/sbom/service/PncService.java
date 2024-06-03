@@ -419,15 +419,13 @@ public class PncService {
             return null;
         }
 
-        if (remoteArtifacts.size() > 1) {
-            log.debug("Found {} results, returning first", remoteArtifacts.size());
-        }
-
         if (remoteArtifacts.size() == 1) {
             log.debug("Single artifact found, returning it!");
+            return remoteArtifacts.iterator().next();
         }
 
-        return remoteArtifacts.iterator().next();
+        log.debug("Found {} results, returning newest one", remoteArtifacts.size());
+        return remoteArtifacts.getAll().stream().skip(remoteArtifacts.size() - 1).findFirst().get();
     }
 
     /**

@@ -105,8 +105,8 @@ public class PncServiceIT {
 
         Artifact artifact = service.getArtifact(purl, Optional.empty(), Optional.empty(), Optional.empty());
 
-        assertEquals("asfsasdg", artifact.getSha256());
-        assertEquals("643534523", artifact.getId());
+        assertEquals("cccc", artifact.getSha256());
+        assertEquals("412123", artifact.getId());
     }
 
     @Test
