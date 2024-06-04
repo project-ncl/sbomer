@@ -125,6 +125,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param bom
      * @return
      */
+    @Transactional
     protected Sbom storeSbom(GenerationRequest generationRequest, Bom bom) {
         // First, update the status of the GenerationRequest entity.
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
