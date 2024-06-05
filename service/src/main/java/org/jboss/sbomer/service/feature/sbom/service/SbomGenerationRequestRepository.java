@@ -53,4 +53,9 @@ public class SbomGenerationRequestRepository extends CriteriaAwareRepository<Sbo
         flush();
     }
 
+    @Transactional
+    public SbomGenerationRequest save(SbomGenerationRequest generationRequest) {
+        persistAndFlush(generationRequest);
+        return generationRequest;
+    }
 }

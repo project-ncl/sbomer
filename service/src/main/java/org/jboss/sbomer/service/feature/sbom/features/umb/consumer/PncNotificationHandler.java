@@ -31,6 +31,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
@@ -40,6 +41,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -47,6 +49,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -63,6 +66,9 @@ public class PncNotificationHandler {
 
     @Inject
     KubernetesClient kubernetesClient;
+
+    @Inject
+    SbomGenerationRequestRepository sbomGenerationRequestRepository;
 
     public void handle(Message<String> message, GenerationRequestType type) throws JsonProcessingException {
         switch (type) {
@@ -134,38 +140,74 @@ public class PncNotificationHandler {
             return;
         }
 
-        if (isFinishedAnalysis(messageBody)) {
-
-            log.info(
-                    "Triggering automated SBOM generation for PNC deliverable analyzer operation '{}' ...",
-                    messageBody.getOperationId());
-
-            List<SbomGenerationRequest> pendingRequests = SbomGenerationRequest
-                    .findPendingRequests(messageBody.getOperationId());
-
+        if (!isFinishedAnalysis(messageBody)) {
             log.debug(
-                    "Found {} pending requests for operation {}",
-                    pendingRequests.size(),
+                    "The '{}' deliverable analyzer operation is still in progress, skipping...",
                     messageBody.getOperationId());
+            return;
+        }
 
-            SbomGenerationRequest pendingRequest = null;
+        List<SbomGenerationRequest> pendingRequests = SbomGenerationRequest
+                .findPendingRequests(messageBody.getOperationId());
 
-            // If there are no pending generation requests create a new ConfigMap
+        log.debug("Found {} pending requests for operation '{}'", pendingRequests.size(), messageBody.getOperationId());
+
+        // Operation failed. Not good, propagate then the failure to our records as well.
+        if (!messageBody.getResult().isSuccess()) {
+
+            log.warn("Deliverable analyzer operation '{}' failed in PNC", messageBody.getOperationId());
+
+            // We have some pending request for given operation. At this point there is no GenerationRequest created.
+            // We need to update the pending request's status to failed.
             if (!pendingRequests.isEmpty()) {
-                // Get the oldest pending generation request and create a new ConfigMap with the existing id
-                pendingRequest = pendingRequests.get(0);
+                String lastId = pendingRequests.get(0).getId();
+
+                log.warn(
+                        "Found {} SbomGenerationRequests for this operation, setting status as failed for last request '{}' accordingly",
+                        pendingRequests.size(),
+                        lastId);
+
+                failOperationRequest(lastId);
             }
 
-            GenerationRequest req = createDelAnalysisGenerationRequest(messageBody, pendingRequest);
-
-            log.debug("ConfigMap to create: '{}'", req);
-
-            SbomGenerationRequest.sync(req);
-
-            ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
-
-            log.info("Request created: {}", cm.getMetadata().getName());
+            // If there are no pending requests, we just ignore the message.
+            return;
         }
+
+        log.info(
+                "Triggering automated SBOM generation for PNC deliverable analyzer operation '{}' ...",
+                messageBody.getOperationId());
+
+        SbomGenerationRequest pendingRequest = null;
+
+        // If there are no pending generation requests create a new ConfigMap
+        if (!pendingRequests.isEmpty()) {
+            // Get the oldest pending generation request and create a new ConfigMap with the existing id
+            pendingRequest = pendingRequests.get(0);
+        }
+
+        GenerationRequest req = createDelAnalysisGenerationRequest(messageBody, pendingRequest);
+
+        log.debug("ConfigMap to create: '{}'", req);
+
+        SbomGenerationRequest.sync(req);
+
+        ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
+
+        log.info("Request created: {}", cm.getMetadata().getName());
+
+    }
+
+    @Transactional
+    protected void failOperationRequest(String id) {
+        SbomGenerationRequest pendingRequest = sbomGenerationRequestRepository.findById(id);
+
+        pendingRequest.setStatus(SbomGenerationStatus.FAILED);
+        pendingRequest.setResult(GenerationResult.ERR_GENERAL);
+        pendingRequest.setReason("Deliverable analyzer operation failed in PNC");
+
+        // Save the status update
+        sbomGenerationRequestRepository.save(pendingRequest);
     }
 
     private GenerationRequest createDelAnalysisGenerationRequest(
@@ -247,9 +289,10 @@ public class PncNotificationHandler {
 
     private boolean isFinishedAnalysis(PncDelAnalysisNotificationMessageBody msgBody) {
         log.info(
-                "Received UMB message notification operation {}, with status {} and deliverable urls {}",
+                "Received UMB message notification operation {}, with status {} and result {} and deliverable urls {}",
                 msgBody.getOperationId(),
                 msgBody.getStatus(),
+                msgBody.getResult(),
                 String.join(";", msgBody.getDeliverablesUrls()));
 
         if (ProgressStatus.FINISHED.equals(msgBody.getStatus())) {

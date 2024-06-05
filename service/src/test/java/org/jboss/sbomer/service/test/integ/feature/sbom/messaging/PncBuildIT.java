@@ -30,6 +30,7 @@ import org.awaitility.Awaitility;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.eclipse.microprofile.reactive.messaging.spi.Connector;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
@@ -38,6 +39,9 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuil
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncDelAnalysisNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -71,6 +75,9 @@ class PncBuildIT {
 
     @Inject
     KubernetesClient kubernetesClient;
+
+    @Inject
+    SbomGenerationRequestRepository sbomGenerationRequestRepository;
 
     @Inject
     @Connector("smallrye-in-memory")
@@ -163,6 +170,43 @@ class PncBuildIT {
         assertEquals(buildMsgBody.getMilestoneId(), "2712");
     }
 
+    @Test
+    public void testUMBConsumerFailedDelAnalysisOperation() throws Exception {
+        log.info("Running testUMBConsumerFailedDelAnalysisOperation...");
+
+        // Prepare initial NO_OP request.
+        SbomGenerationRequest request = SbomGenerationRequest.builder()
+                .withId("FAILEDOPERATION")
+                .withIdentifier("BAQZMQOS7YIAA")
+                .withType(GenerationRequestType.OPERATION)
+                .withStatus(SbomGenerationStatus.NO_OP)
+                .build();
+
+        sbomGenerationRequestRepository.save(request);
+
+        InMemorySource<Message<String>> builds = connector.source("builds");
+        Message<String> txgMsg = prepareFailedPNCDelAnalysisMsg();
+
+        // Send the message to notify that the build failed.
+        builds.send(txgMsg);
+
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
+            SbomGenerationRequest updated = sbomGenerationRequestRepository.findById("FAILEDOPERATION");
+
+            if (updated != null && updated.getStatus().equals(SbomGenerationStatus.FAILED)) {
+                return true;
+            }
+
+            return false;
+        });
+
+        SbomGenerationRequest updatedRequest = sbomGenerationRequestRepository.findById("FAILEDOPERATION");
+
+        assertEquals(SbomGenerationStatus.FAILED, updatedRequest.getStatus());
+        assertEquals("Deliverable analyzer operation failed in PNC", updatedRequest.getReason());
+        assertEquals(GenerationResult.ERR_GENERAL, updatedRequest.getResult());
+    }
+
     private Message<String> preparePNCBuildMsg() throws IOException {
         JsonObject headers = new JsonObject();
 
@@ -201,6 +245,26 @@ class PncBuildIT {
         headers.put("producer", "PNC");
 
         return AmqpMessageHelper.toMessage(TestResources.asString("payloads/umb-pnc-del-analysis-body.json"), headers);
+    }
+
+    private Message<String> prepareFailedPNCDelAnalysisMsg() throws IOException {
+        JsonObject headers = new JsonObject();
+        headers.put("type", "DeliverableAnalysisStateChange");
+        headers.put("attribute", "deliverable-analysis-state-change");
+        headers.put("name", "org.kie-kie-jpmml-integration-7.67.0.Final-7.13.3");
+        headers.put("milestoneId", "2712");
+        headers.put("operationId", "A6DFVW2SACIAA");
+        headers.put("status", "FINISHED");
+        headers.put("JMSXUserID", "projectnewcastle");
+        headers.put("amq6100_originalDestination", "topic://VirtualTopic.eng.pnc.builds");
+        headers.put("correlationId", "a420416c-d184-4ced-9277-500667305139");
+        headers.put("destination", "/topic/VirtualTopic.eng.pnc.builds");
+        headers.put("messageId", "ID:orch-70-z4tx6-43917-1678809685060-25:1:8557:1:1");
+        headers.put("persistent", "true");
+        headers.put("producer", "PNC");
+
+        return AmqpMessageHelper
+                .toMessage(TestResources.asString("payloads/umb-pnc-failed-del-analysis-body.json"), headers);
     }
 
 }
