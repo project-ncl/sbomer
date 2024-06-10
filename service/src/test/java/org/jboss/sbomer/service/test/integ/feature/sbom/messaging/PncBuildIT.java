@@ -42,6 +42,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
+import org.jboss.sbomer.service.test.PncWireMock;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -60,6 +61,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
 @QuarkusTestResource(AmqpTestResourceLifecycleManager.class)
+@QuarkusTestResource(PncWireMock.class)
 @Slf4j
 @WithKubernetesTestServer
 class PncBuildIT {

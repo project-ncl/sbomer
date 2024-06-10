@@ -28,6 +28,7 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.pnc.PncService;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;

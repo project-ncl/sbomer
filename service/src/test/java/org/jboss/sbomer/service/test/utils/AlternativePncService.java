@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.integ.feature.sbom;
+package org.jboss.sbomer.service.test.utils;
 
 import java.util.Optional;
 

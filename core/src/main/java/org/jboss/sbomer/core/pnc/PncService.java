@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.service;
+package org.jboss.sbomer.core.pnc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
@@ -48,13 +47,11 @@ import org.jboss.pnc.dto.GroupConfigurationRef;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
+import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
-import org.jboss.sbomer.cli.errors.pnc.GeneralPncException;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.ClientException;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,10 +59,8 @@ import lombok.extern.slf4j.Slf4j;
  * A service to interact with the PNC build system.
  */
 @Slf4j
-@ApplicationScoped
 public class PncService {
 
-    @ConfigProperty(name = "sbomer.pnc.host")
     @Getter
     String apiUrl;
 
@@ -85,8 +80,9 @@ public class PncService {
 
     DeliverableAnalyzerReportClient deliverableAnalyzerReportClient;
 
-    @PostConstruct
-    void init() {
+    public PncService(String apiUrl) {
+        this.apiUrl = apiUrl;
+
         artifactClient = new ArtifactClient(getConfiguration());
         buildClient = new BuildClient(getConfiguration());
         buildConfigurationClient = new BuildConfigurationClient(getConfiguration());
@@ -97,8 +93,7 @@ public class PncService {
         deliverableAnalyzerReportClient = new DeliverableAnalyzerReportClient(getConfiguration());
     }
 
-    @PreDestroy
-    void cleanup() {
+    public void close() {
         artifactClient.close();
         buildClient.close();
         buildConfigurationClient.close();
@@ -142,7 +137,7 @@ public class PncService {
             log.warn("Build with id '{}' was not found in PNC", buildId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new GeneralPncException("Build could not be retrieved because PNC responded with an error", ex);
+            throw new ClientException("Build could not be retrieved because PNC responded with an error", ex);
         }
     }
 
@@ -167,7 +162,7 @@ public class PncService {
             log.warn("BuildConfig with id '{}' was not found in PNC", buildConfigId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new GeneralPncException("BuildConfig could not be retrieved because PNC responded with an error", ex);
+            throw new ClientException("BuildConfig could not be retrieved because PNC responded with an error", ex);
         }
     }
 
@@ -192,7 +187,7 @@ public class PncService {
             log.warn("GroupConfiguration with id '{}' was not found in PNC", groupConfigId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new GeneralPncException(
+            throw new ClientException(
                     "GroupConfiguration could not be retrieved because PNC responded with an error",
                     ex);
         }
@@ -221,7 +216,7 @@ public class PncService {
             log.warn("DeliverableAnalyzerOperation with id '{}' was not found in PNC", operationId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new GeneralPncException(
+            throw new ClientException(
                     "DeliverableAnalyzerOperation could not be retrieved because PNC responded with an error",
                     ex);
         }
@@ -247,9 +242,7 @@ public class PncService {
             log.warn("ProductVersion with id '{}' was not found in PNC", productVersionId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new GeneralPncException(
-                    "ProductVersion could not be retrieved because PNC responded with an error",
-                    ex);
+            throw new ClientException("ProductVersion could not be retrieved because PNC responded with an error", ex);
         }
     }
 
@@ -274,7 +267,7 @@ public class PncService {
             log.warn("ProductMilestone with id '{}' was not found in PNC", milestoneId);
             return null;
         } catch (RemoteResourceException ex) {
-            throw new GeneralPncException(
+            throw new ClientException(
                     "ProductMilestone could not be retrieved because PNC responded with an error",
                     ex);
         }
@@ -408,10 +401,7 @@ public class PncService {
             remoteArtifacts = artifactClient.getAll(null, null, null, Optional.empty(), Optional.of(rsql));
 
         } catch (RemoteResourceException ex) {
-            throw new GeneralPncException(
-                    "Querying artifact failed, PNC responded with an error, query: '{}'",
-                    rsql,
-                    ex);
+            throw new ClientException("Querying artifact failed, PNC responded with an error, query: '{}'", rsql, ex);
         }
 
         if (remoteArtifacts.size() == 0) {
@@ -447,9 +437,34 @@ public class PncService {
                     reportId,
                     ex);
         } catch (RemoteResourceException ex) {
-            throw new GeneralPncException(
+            throw new ClientException(
                     "Analyzed Artifacts for the DeliverableAnalyzerReport '{}' could not be retrieved because PNC responded with an error",
                     reportId,
+                    ex);
+        }
+    }
+
+    /**
+     * Triggers a new Deliverable Analysis operation in PNC for the specified milestone and urls.
+     *
+     * @param milestoneId The milestone identifier for the new deliverable analysis operation
+     * @param deliverableUrls The list of deliverable URLs to be analyzed
+     * @return The {@link DeliverableAnalyzerOperation} object identifying the new operation
+     */
+    public DeliverableAnalyzerOperation analyzeDeliverables(String milestoneId, List<String> deliverableUrls) {
+        DeliverablesAnalysisRequest request = DeliverablesAnalysisRequest.builder()
+                .deliverablesUrls(deliverableUrls)
+                .runAsScratchAnalysis(false)
+                .build();
+        try {
+            log.info(
+                    "Triggering new deliverable analysis operation for the milestone {} and urls '{}'",
+                    milestoneId,
+                    deliverableUrls);
+            return productMilestoneClient.analyzeDeliverables(milestoneId, request);
+        } catch (RemoteResourceException ex) {
+            throw new ClientException(
+                    "A Deliverable Analysis Operation could not be started because PNC responded with an error",
                     ex);
         }
     }

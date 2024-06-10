@@ -22,8 +22,10 @@ import java.util.List;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
+import org.jboss.pnc.api.enums.OperationResult;
 import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
+import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
@@ -34,6 +36,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.pnc.PncService;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncDelAnalysisNotificationMessageBody;
@@ -69,6 +72,9 @@ public class PncNotificationHandler {
 
     @Inject
     SbomGenerationRequestRepository sbomGenerationRequestRepository;
+
+    @Inject
+    PncService pncService;
 
     public void handle(Message<String> message, GenerationRequestType type) throws JsonProcessingException {
         switch (type) {
@@ -153,8 +159,7 @@ public class PncNotificationHandler {
         log.debug("Found {} pending requests for operation '{}'", pendingRequests.size(), messageBody.getOperationId());
 
         // Operation failed. Not good, propagate then the failure to our records as well.
-        if (!messageBody.getResult().isSuccess()) {
-
+        if (!isSuccessfullAnalysis(messageBody)) {
             log.warn("Deliverable analyzer operation '{}' failed in PNC", messageBody.getOperationId());
 
             // We have some pending request for given operation. At this point there is no GenerationRequest created.
@@ -289,13 +294,22 @@ public class PncNotificationHandler {
 
     private boolean isFinishedAnalysis(PncDelAnalysisNotificationMessageBody msgBody) {
         log.info(
-                "Received UMB message notification operation {}, with status {} and result {} and deliverable urls {}",
+                "Received UMB message notification operation {}, with status {} and deliverable urls {}",
                 msgBody.getOperationId(),
                 msgBody.getStatus(),
-                msgBody.getResult(),
                 String.join(";", msgBody.getDeliverablesUrls()));
 
         if (ProgressStatus.FINISHED.equals(msgBody.getStatus())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isSuccessfullAnalysis(PncDelAnalysisNotificationMessageBody msgBody) {
+        DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(msgBody.getOperationId());
+
+        if (OperationResult.SUCCESSFUL.equals(operation.getResult())) {
             return true;
         }
 
