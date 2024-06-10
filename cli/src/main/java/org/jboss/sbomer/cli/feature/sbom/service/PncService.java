@@ -388,7 +388,7 @@ public class PncService {
         }
 
         if (md5.isPresent()) {
-            query.add("sha1==" + md5.get());
+            query.add("md5==" + md5.get());
         }
 
         // If query was not provided and no hashes are provided either

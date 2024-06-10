@@ -155,12 +155,17 @@ public class DefaultProcessor implements Processor {
 
                 setPncBuildMetadata(component, artifact.getBuild(), pncService.getApiUrl());
             } else {
-                // Lookup the build in Brew, as the artifact was found in PNC but without a build attached
-                log.debug(
-                        "Component '{}' was not built in PNC, will search in Brew the corresponding artifact '{}'",
-                        component.getPurl(),
-                        artifact.getPublicUrl());
-                processBrewBuild(component, artifact);
+                if (RhVersionPattern.isRhVersion(component.getVersion())) {
+                    // Lookup the build in Brew, as the artifact was found in PNC but without a build attached
+                    log.debug(
+                            "Component '{}' was not built in PNC, will search in Brew the corresponding artifact '{}'",
+                            component.getPurl(),
+                            artifact.getPublicUrl());
+                    processBrewBuild(component, artifact);
+                } else {
+                    log.warn(
+                            "Component '{}' was not built in PNC nor it is a RH artifact, this component won't be enriched, skipping");
+                }
             }
         } else {
             log.debug(
