@@ -18,7 +18,6 @@
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model;
 
 import org.jboss.pnc.api.enums.ProgressStatus;
-import org.jboss.pnc.api.enums.ResultStatus;
 
 import lombok.Data;
 
@@ -29,5 +28,4 @@ public class PncDelAnalysisNotificationMessageBody {
     String milestoneId;
     String operationId;
     ProgressStatus status;
-    ResultStatus result;
 }

@@ -42,6 +42,7 @@ import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
+import org.jboss.sbomer.core.pnc.PncService;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -100,7 +101,7 @@ public class SbomService {
     protected ConfigSchemaValidator configSchemaValidator;
 
     @Inject
-    protected PncClientsWrapper pncClientsWrapper;
+    protected PncService pncService;
 
     @WithSpan
     public long countSboms() {
@@ -309,7 +310,7 @@ public class SbomService {
 
             DeliverableAnalyzerOperation operation = null;
             try {
-                operation = pncClientsWrapper.analyzeDeliverables(config.getMilestoneId(), config.getDeliverableUrls());
+                operation = pncService.analyzeDeliverables(config.getMilestoneId(), config.getDeliverableUrls());
             } catch (ClientException ex) {
                 throw new ApplicationException(
                         "Operation could not be retrieved because PNC responded with an error",

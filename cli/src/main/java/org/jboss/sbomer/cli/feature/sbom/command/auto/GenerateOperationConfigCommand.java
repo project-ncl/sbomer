@@ -28,7 +28,6 @@ import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.OperationConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
@@ -36,6 +35,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.pnc.PncService;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;

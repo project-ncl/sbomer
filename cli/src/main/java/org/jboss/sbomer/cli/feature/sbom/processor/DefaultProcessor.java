@@ -40,10 +40,10 @@ import org.cyclonedx.model.Hash;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.pnc.PncService;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
