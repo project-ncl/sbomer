@@ -164,7 +164,8 @@ public class DefaultProcessor implements Processor {
                     processBrewBuild(component, artifact);
                 } else {
                     log.warn(
-                            "Component '{}' was not built in PNC nor it is a RH artifact, this component won't be enriched, skipping");
+                            "Component '{}' was not built in PNC nor it is a RH artifact, this component won't be enriched, skipping",
+                            component.getPurl());
                 }
             }
         } else {
