@@ -122,12 +122,19 @@ public class DefaultProcessor implements Processor {
                 String oldPurl = component.getPurl();
                 String newPurl = artifact.getPurl();
 
-                // It looks like we found the artifact with a hash-only query, but the purl query failed on us.
-                // This means that the purl most probably is incorrect in the manifest, so let's update it.
-                log.debug("Updating component's purl from '{}' to '{}'", oldPurl, newPurl);
-                component.setPurl(newPurl);
+                if (newPurl == null) {
+                    log.warn(
+                            "The PNC artifact '{}' does not have a purl set, we cannot update the purl in the component, leaving it as is: '{}'",
+                            artifact.getId(),
+                            oldPurl);
+                } else {
+                    // It looks like we found the artifact with a hash-only query, but the purl query failed on us.
+                    // This means that the purl most probably is incorrect in the manifest, so let's update it.
+                    log.debug("Updating component's purl from '{}' to '{}'", oldPurl, newPurl);
+                    component.setPurl(newPurl);
 
-                purlRelocations.put(oldPurl, newPurl);
+                    purlRelocations.put(oldPurl, newPurl);
+                }
             }
 
             log.info(

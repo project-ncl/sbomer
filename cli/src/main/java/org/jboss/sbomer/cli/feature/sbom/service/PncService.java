@@ -409,7 +409,7 @@ public class PncService {
 
         } catch (RemoteResourceException ex) {
             throw new GeneralPncException(
-                    "Querying artifact failed, PNC responded with an error, query: query: '{}'",
+                    "Querying artifact failed, PNC responded with an error, query: '{}'",
                     rsql,
                     ex);
         }
