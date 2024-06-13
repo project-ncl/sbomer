@@ -31,6 +31,7 @@ module.exports = merge(common('development'), {
     host: HOST,
     port: PORT,
     historyApiFallback: true,
+    allowedHosts: ['localhost', 'sbomer-prod', 'sbomer-stage'],
     open: true,
     static: {
       directory: path.resolve(__dirname, 'dist'),

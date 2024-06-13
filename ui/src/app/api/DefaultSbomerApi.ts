@@ -17,7 +17,6 @@
 ///
 
 import { GenerateForPncParams, SbomerApi, SbomerGenerationRequest, SbomerStats } from '../types';
-import { logger } from '@app/logger';
 
 type Options = {
   baseUrl: string;
@@ -30,13 +29,19 @@ export class DefaultSbomerApi implements SbomerApi {
 
   public static getInstance(): SbomerApi {
     if (!DefaultSbomerApi._instance) {
-      const sbomerHost = process.env.REACT_APP_SBOMER_HOST || 'sbomer.pnc.engineering.redhat.com'; // Temporary
+      var sbomerHost = process.env.REACT_APP_SBOMER_HOST;
 
       if (!sbomerHost) {
-        logger.error("The 'SBOMER_HOST' environment variable is not set, unable to instantiate SBOMer API client");
-      } else {
-        DefaultSbomerApi._instance = new DefaultSbomerApi({ baseUrl: `https://${sbomerHost}` });
+        const url = window.location.href;
+
+        if (url.includes('stage')) {
+          sbomerHost = 'sbomer-stage.pnc.engineering.redhat.com';
+        } else {
+          sbomerHost = 'sbomer.pnc.engineering.redhat.com';
+        }
       }
+
+      DefaultSbomerApi._instance = new DefaultSbomerApi({ baseUrl: `https://${sbomerHost}` });
     }
 
     return DefaultSbomerApi._instance;
