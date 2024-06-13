@@ -6,6 +6,9 @@ on:
       image:
         required: true
         type: string
+      path:
+        required: true
+        type: string
       artifact:
         type: string
       push:
@@ -49,7 +52,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist-${{ inputs.artifact }}
-          path: ${{ inputs.artifact }}/target/quarkus-app
+          path: ${{ inputs.path }}
 
       - name: Prepare temporary directory
         run: mkdir -p ${{ github.workspace }}/tmp/buildah

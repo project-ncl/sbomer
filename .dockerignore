@@ -3,3 +3,4 @@
 !images/*
 !cli/target/*
 !service/target/*
+!ui/dist/*

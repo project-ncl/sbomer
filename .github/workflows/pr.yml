@@ -15,6 +15,11 @@ jobs:
     uses: ./.github/workflows/build-code.yml
     secrets: inherit
 
+  build-ui:
+    name: "UI"
+    uses: ./.github/workflows/build-ui.yml
+    secrets: inherit
+
   image-service:
     name: "Image / Service"
     needs: build
@@ -22,6 +27,7 @@ jobs:
     with:
       image: sbomer-service
       artifact: service
+      path: service/target/quarkus-app
     secrets: inherit
 
   image-generator:
@@ -31,4 +37,15 @@ jobs:
     with:
       image: sbomer-generator
       artifact: cli
+      path: cli/target/quarkus-app
+    secrets: inherit
+
+  image-ui:
+    name: "Image / UI"
+    needs: build
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image: sbomer-ui
+      artifact: ui
+      path: ui/dist
     secrets: inherit

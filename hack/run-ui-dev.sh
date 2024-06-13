@@ -20,15 +20,11 @@
 
 set -e
 
-# This file builds all container images using Docker.
-
 SCRIPT_DIR=$(dirname "$0")
-
-"$SCRIPT_DIR/run-maven.sh" package -DskipTests
 
 set -x
 
-BUILDER=docker "$SCRIPT_DIR/internal/build-image.sh" "sbomer-service"
-BUILDER=docker "$SCRIPT_DIR/internal/build-image.sh" "sbomer-generator"
-BUILDER=docker "$SCRIPT_DIR/internal/build-image.sh" "sbomer-ui"
+pushd "${SCRIPT_DIR}/../ui" > /dev/null
+npm run start:dev "$@"
+popd > /dev/null
 
