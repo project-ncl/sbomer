@@ -30,4 +30,5 @@ set -x
 
 BUILDER=podman "$SCRIPT_DIR/internal/build-image.sh" "sbomer-service"
 BUILDER=podman "$SCRIPT_DIR/internal/build-image.sh" "sbomer-generator"
+BUILDER=podman "$SCRIPT_DIR/internal/build-image.sh" "sbomer-ui"
 

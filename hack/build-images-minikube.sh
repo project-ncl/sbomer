@@ -32,3 +32,4 @@ SCRIPT_DIR=$(dirname "$0")
 
 BUILDER=minikube "$SCRIPT_DIR/internal/build-image.sh" "sbomer-service"
 BUILDER=minikube "$SCRIPT_DIR/internal/build-image.sh" "sbomer-generator"
+BUILDER=minikube "$SCRIPT_DIR/internal/build-image.sh" "sbomer-ui"
