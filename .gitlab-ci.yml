@@ -165,7 +165,7 @@ build-image-ui:
 
 pages:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:d7158916ab85c7463d33f89d45d26c70d064aaa28debe219fa088b8110194663
+    name: registry.access.redhat.com/ubi9@sha256:d98fdae16212df566150ac975cab860cd8d2cb1b322ed9966d09a13e219112e9
     entrypoint: [""]
   variables:
     KUBERNETES_CPU_REQUEST: "100m"
