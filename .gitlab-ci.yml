@@ -81,6 +81,32 @@ build:
       - native/cli/runtime/target
       - native/cli/deployment/target
 
+build-ui:
+  image:
+    name: registry.access.redhat.com/ubi9/nodejs-20-minimal@sha256:a8aec5686aac896105ce426a3933ec9b90fd4c3f8daeed53dfcecb2000c2613e
+    entrypoint: [""]
+  stage: build
+  cache:
+    key: ui
+    paths:
+      - ui/node_modules
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    KUBERNETES_CPU_REQUEST: "1000m"
+    KUBERNETES_CPU_LIMIT: "1000m"
+    KUBERNETES_MEMORY_REQUEST: "2Gi"
+    KUBERNETES_MEMORY_LIMIT: "2Gi"
+  script:
+    - cd ui
+    - npm install
+    - npm run build
+  artifacts:
+    when: always
+    paths:
+      - ui/dist
+
 sonarqube:
   stage: static-analysis
   rules:
@@ -125,6 +151,17 @@ build-image-generator:
     - build
   needs:
     - job: build
+
+build-image-ui:
+  extends:
+    - .build-image
+  variables:
+    OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-ui
+    CONTAINERFILE: images/sbomer-ui/Containerfile
+  dependencies:
+    - build-ui
+  needs:
+    - job: build-ui
 
 pages:
   image:
