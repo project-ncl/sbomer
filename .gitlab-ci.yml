@@ -99,6 +99,8 @@ build-ui:
     KUBERNETES_MEMORY_REQUEST: "2Gi"
     KUBERNETES_MEMORY_LIMIT: "2Gi"
   script:
+    - export REACT_APP_SBOMER_RELEASE=${CI_COMMIT_SHORT_SHA}
+    - export REACT_APP_SBOMER_BUILD_TIMESTAMP=$(date +%s)
     - cd ui
     - npm install
     - npm run build

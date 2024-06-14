@@ -41,6 +41,14 @@ module.exports = (env) => {
           ],
         },
         {
+          test: /\.(svg|jpg|jpeg|png|gif)$/i,
+          type: 'asset/resource',
+          include: [path.resolve(__dirname, 'src/assets')],
+          generator: {
+            filename: 'assets/[hash][ext][query]',
+          },
+        },
+        {
           test: /\.(svg|ttf|eot|woff|woff2)$/,
           type: 'asset/resource',
           // only process modules with this loader
@@ -74,20 +82,20 @@ module.exports = (env) => {
           include: (input) => input.indexOf(BG_IMAGES_DIRNAME) > -1,
           type: 'asset/inline',
         },
-        {
-          test: /\.svg$/,
-          // only process SVG modules with this loader when they don't live under a 'bgimages',
-          // 'fonts', or 'pficon' directory, those are handled with other loaders
-          include: (input) =>
-            input.indexOf(BG_IMAGES_DIRNAME) === -1 &&
-            input.indexOf('fonts') === -1 &&
-            input.indexOf('background-filter') === -1 &&
-            input.indexOf('pficon') === -1,
-          use: {
-            loader: 'raw-loader',
-            options: {},
-          },
-        },
+        // {
+        //   test: /\.svg$/,
+        //   // only process SVG modules with this loader when they don't live under a 'bgimages',
+        //   // 'fonts', or 'pficon' directory, those are handled with other loaders
+        //   include: (input) =>
+        //     input.indexOf(BG_IMAGES_DIRNAME) === -1 &&
+        //     input.indexOf('fonts') === -1 &&
+        //     input.indexOf('background-filter') === -1 &&
+        //     input.indexOf('pficon') === -1,
+        //   use: {
+        //     loader: 'raw-loader',
+        //     options: {},
+        //   },
+        // },
         {
           test: /\.(jpg|jpeg|png|gif)$/i,
           include: [
