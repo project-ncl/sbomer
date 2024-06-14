@@ -20,28 +20,31 @@
 
 set -e
 
-if [ "$#" -ne 2 ]; then
-    echo "Illegal number of parameters, provided $#, required: 2"
+if [ "$#" -ne 1 ]; then
+    echo "Illegal number of parameters, provided $#, required: 1"
     echo
     echo "Usage:"
-    echo "    ${0} [PREVIOUS_RELEASE_HASH] [LATEST_RELEASE_HASH]"
+    echo "    ${0} [RELEASE_NUMBER]"
     echo
     echo "Example:"
-    echo "    ${0} adcc6d1 307f4724"
+    echo "    ${0} 29"
     exit 1
 fi
 
 KUBE_CONTEXT="${KUBE_CONTEXT:-aws-prod}"
 
-release_from="${1}"
-release_to="${2}"
+revision="${1}"
+prev_revision=$((revision - 1))
 
 export TZ=":UTC"
 
 echo "---- Release history ----"
 helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int history sbomer
 
-DEPLOYMENT_DATE=$(date -d "$(helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int get metadata sbomer | grep DEPLOYED_AT | awk -F': ' '{ print $2 }')" +"%Y-%m-%d %H:%M %Z")
+DEPLOYMENT_DATE=$(date -d "$(helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int get metadata sbomer --revision ${revision} | grep DEPLOYED_AT | awk -F': ' '{ print $2 }')" +"%Y-%m-%d %H:%M %Z")
+
+release_to=$(helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int get notes sbomer --revision "${revision}" | grep "Application version" | awk -F': ' '{ print $2 }' | sed 's/[\.\ ]//g')
+release_from=$(helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int get notes sbomer --revision "${prev_revision}" | grep "Application version" | awk -F': ' '{ print $2 }' | sed 's/[\.\ ]//g')
 
 echo
 echo "---- Commits ----"
@@ -55,5 +58,6 @@ echo "### Changes"
 echo "- TBD"
 echo "### Details"
 echo "- Release \`${release_to}\`"
+echo "- Revision ${revision}"
 echo "- [Code](https://github.com/project-ncl/sbomer/tree/${release_to})"
 echo "- [Commits](https://github.com/project-ncl/sbomer/compare/${release_from}...${release_to})"
