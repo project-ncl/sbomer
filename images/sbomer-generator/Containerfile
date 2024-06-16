@@ -1,7 +1,7 @@
 # https://catalog.redhat.com/software/containers/ubi9/618326f8c0d15aff4912fe0b
 FROM registry.access.redhat.com/ubi9@sha256:d98fdae16212df566150ac975cab860cd8d2cb1b322ed9966d09a13e219112e9
 
-RUN INSTALL_PKGS="jq wget unzip zip git" && \
+RUN INSTALL_PKGS="jq wget unzip zip git skopeo" && \
     dnf --disableplugin=subscription-manager -y --nodocs --setopt=install_weak_deps=0 install $INSTALL_PKGS && \
     dnf clean all && \
     rm -rf /var/cache/* /var/log/dnf* /var/log/yum.*

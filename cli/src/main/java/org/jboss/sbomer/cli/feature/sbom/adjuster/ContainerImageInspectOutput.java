@@ -17,12 +17,23 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.cyclonedx.model.Bom;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public interface Adjuster {
-    public default Bom adjust(Bom bom, Path workDir) {
-        return bom;
-    }
+import lombok.Data;
+
+@Data
+public class ContainerImageInspectOutput {
+    @JsonProperty("Name")
+    String name;
+    @JsonProperty("Digest")
+    String digest;
+    @JsonProperty("Os")
+    String os;
+    @JsonProperty("Architecture")
+    String architecture;
+    @JsonProperty("Labels")
+    Map<String, String> labels = new HashMap<>();
 }
