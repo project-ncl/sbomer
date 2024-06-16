@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command.adjust;
 
+import java.nio.file.Path;
+
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
@@ -39,7 +41,7 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
     }
 
     @Override
-    protected Bom doAdjust(Bom bom) {
-        return adjuster.adjust(bom);
+    protected Bom doAdjust(Bom bom, Path workDir) {
+        return adjuster.adjust(bom, workDir);
     }
 }

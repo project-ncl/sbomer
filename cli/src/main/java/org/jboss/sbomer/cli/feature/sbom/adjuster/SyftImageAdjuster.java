@@ -17,13 +17,18 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Property;
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
 
@@ -34,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SyftImageAdjuster implements Adjuster {
     @Override
-    public Bom adjust(Bom bom) {
+    public Bom adjust(Bom bom, Path workDir) {
         Component productComponent = bom.getMetadata().getComponent();
 
         // Initialize properties for main component, if not done so yet
@@ -72,16 +77,73 @@ public class SyftImageAdjuster implements Adjuster {
         });
 
         // Set the purl for the main component
-        productComponent.setPurl(
-                new StringBuilder("pkg:oci/").append(productComponent.getName().split("/")[2])
-                        .append("@")
-                        .append(UrlUtils.urlencode(productComponent.getVersion()))
-                        .toString());
+        productComponent.setPurl(generateImagePurl(productComponent, workDir));
 
         // Populate dependencies section with components
         populateDependencies(bom);
 
         return bom;
+    }
+
+    private String generateImagePurl(Component component, Path workDir) {
+        String tag = null;
+        ContainerImageInspectOutput inspectData = null;
+
+        try {
+            inspectData = ObjectMapperProvider.json()
+                    .readValue(
+                            Path.of(workDir.toAbsolutePath().toString(), "skopeo.json").toFile(),
+                            ContainerImageInspectOutput.class);
+
+        } catch (IOException e) {
+            throw new ApplicationException("Could not read 'skopeo inpect' output", e);
+        }
+
+        // 7.4.17
+        Optional<Property> versionOpt = SbomUtils
+                .findPropertyWithNameInComponent("sbomer:image:labels:version", component);
+
+        if (versionOpt.isEmpty()) {
+            throw new ApplicationException(
+                    "The 'version' label was not found within the container image, cannot proceed");
+        }
+
+        // 5.1717585311
+        Optional<Property> releaseOpt = SbomUtils
+                .findPropertyWithNameInComponent("sbomer:image:labels:release", component);
+
+        if (releaseOpt.isEmpty()) {
+            throw new ApplicationException(
+                    "The 'release' label was not found within the container image, cannot proceed");
+        }
+
+        tag = versionOpt.get().getValue() + "-" + releaseOpt.get().getValue();
+
+        // Split the name, if required
+        String[] componentNameParts = component.getName().split("/");
+
+        StringBuilder builder = new StringBuilder("pkg:oci/") //
+                .append(componentNameParts[componentNameParts.length - 1])
+                .append("@")
+                .append(UrlUtils.urlencode(inspectData.getDigest()))
+                .append("?")
+                .append("repository_url=")
+                .append(componentNameParts[0]) // This should be the registry the image was pulled from
+                .append("&")
+                .append("os=")
+                .append(inspectData.getOs())
+                .append("&")
+                .append("arch=")
+                .append(inspectData.getArchitecture())
+                .append("&")
+                .append("tag=")
+                .append(tag);
+
+        String purl = builder.toString();
+
+        log.debug("Generated purl: '{}'", purl);
+
+        return purl;
     }
 
     private void populateDependencies(Bom bom) {

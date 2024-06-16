@@ -22,7 +22,7 @@ set -o pipefail
 
 SBOMER_JDK_VERSION="17.0.10-tem"
 NODEJS_VERSION="lts/iron"
-SYFT_VERSION="1.4.1"
+SYFT_VERSION="1.7.0"
 
 # SBOMer functions
 source "${HOME}/func.sh"
