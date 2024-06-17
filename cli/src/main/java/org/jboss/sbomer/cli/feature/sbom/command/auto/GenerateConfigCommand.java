@@ -65,8 +65,8 @@ import picocli.CommandLine.Option;
         description = "Generates the runtime configuration used for automation for a given PNC build")
 public class GenerateConfigCommand implements Callable<Integer> {
 
-    public static enum ConfigFormat {
-        yaml, json;
+    public enum ConfigFormat {
+        YAML, JSON;
     }
 
     @Option(
@@ -417,7 +417,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
         log.debug("Using {} format", format);
 
-        if (format.equals(ConfigFormat.json)) {
+        if (format.equals(ConfigFormat.JSON)) {
 
             configuration = configReader.getJsonObjectMapper()
                     .writerWithDefaultPrettyPrinter()
