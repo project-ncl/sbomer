@@ -95,10 +95,10 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             throw new ApplicationException("Unable to parse the operation configuration file");
         } catch (DatabindException e) {
             log.error("Unable to deserialize the configuration file", e);
-            throw new ApplicationException("Unable to parse the operation configuration file");
+            throw new ApplicationException("Unable to deserialize the configuration file");
         } catch (IOException e) {
             log.error("Unable to read configuration file", e);
-            throw new ApplicationException("Unable to parse the operation configuration file");
+            throw new ApplicationException("Unable to read configuration file");
         }
 
         // Create the empty SBOM
