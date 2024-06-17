@@ -260,7 +260,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
                 // Clone the source code related to the build
                 doClone(scmUrl, scmTag, parent.getWorkdir(), isForce);
             } catch (ApplicationException e) {
-                throw new GitCloneException(e);
+                throw new GitCloneException("Unable to clone repository '{}'", scmUrl, e);
             }
 
             // In case the original build command script contains profiles, projects list or system properties

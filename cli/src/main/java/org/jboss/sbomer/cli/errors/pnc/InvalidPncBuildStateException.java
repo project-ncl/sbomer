@@ -23,7 +23,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 /**
  * Error indicating a failure related to the build progress or status received from PNC.
  */
-public class InvalidPncBuildStateException extends CommandLineException {
+public class InvalidPncBuildStateException extends ApplicationException implements CommandLineException {
     private static final int EXIT_CODE = 31;
 
     @Override
@@ -33,10 +33,6 @@ public class InvalidPncBuildStateException extends CommandLineException {
 
     public InvalidPncBuildStateException(String msg, Object... params) {
         super(msg, params);
-    }
-
-    public InvalidPncBuildStateException(ApplicationException e) {
-        super(e);
     }
 
 }

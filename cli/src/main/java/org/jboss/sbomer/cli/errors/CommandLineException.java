@@ -17,25 +17,14 @@
  */
 package org.jboss.sbomer.cli.errors;
 
-import org.jboss.sbomer.core.errors.ApplicationException;
-
 /**
  * <p>
  * This exception can be used to indicate a failure in the CLI. Provided {@code exitCode} will be used when the CLI
  * finishes.
  * </p>
  */
-public abstract class CommandLineException extends ApplicationException {
-    public int getExitCode() {
+public interface CommandLineException {
+    public default int getExitCode() {
         return 1;
     }
-
-    public CommandLineException(ApplicationException ex) {
-        super(ex.getMessage());
-    }
-
-    public CommandLineException(String msg, Object... params) {
-        super(msg, params);
-    }
-
 }
