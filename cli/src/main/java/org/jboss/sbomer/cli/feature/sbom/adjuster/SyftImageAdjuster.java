@@ -59,14 +59,16 @@ public class SyftImageAdjuster implements Adjuster {
         }
 
         // Remove all components that are not on the paths we are interested in
-        bom.getComponents().removeIf(c -> {
-            return c.getProperties()
-                    .stream()
-                    // TODO: this is hardocded and needs to be customizable
-                    .filter(p -> p.getName().equals("syft:location:0:path") && p.getValue().startsWith("/opt"))
-                    .findAny()
-                    .isEmpty();
-        });
+        bom.getComponents()
+                .removeIf(
+                        c -> c.getProperties()
+                                .stream()
+                                // TODO: this is hardocded and needs to be customizable
+                                .filter(
+                                        p -> p.getName().equals("syft:location:0:path")
+                                                && p.getValue().startsWith("/opt"))
+                                .findAny()
+                                .isEmpty());
 
         // Cleanup main component
         cleanupComponent(productComponent);
