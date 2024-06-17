@@ -45,9 +45,7 @@ public class ExceptionHandler implements IExecutionExceptionHandler {
 
         cmd.getErr().println();
 
-        if (ex instanceof ClientException) {
-            ClientException apiEx = (ClientException) ex;
-
+        if (ex instanceof ClientException apiEx) {
             cmd.getErr().println(cmd.getColorScheme().errorText((apiEx.getErrorId())));
             cmd.getErr().println();
 
