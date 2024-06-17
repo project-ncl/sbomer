@@ -32,7 +32,7 @@ export const GenerationRequestTable = () => {
   }
 
   if (loading) {
-    <Skeleton screenreaderText="Loading data..." />;
+    return <Skeleton screenreaderText="Loading data..." />;
   }
 
   if (!value) {
