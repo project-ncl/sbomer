@@ -26,11 +26,9 @@ import java.nio.file.Path;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
-import jakarta.inject.Inject;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
@@ -52,9 +50,6 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
 
     @ParentCommand
     ProcessCommand parent;
-
-    @Inject
-    protected PncService pncService;
 
     @Override
     public ProcessorType getImplementationType() {
