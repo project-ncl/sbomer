@@ -208,9 +208,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
                 .withProducts(new ArrayList<>())
                 .build();
 
-        configs.forEach(cfg -> {
-            config.getProducts().addAll(cfg.getProducts());
-        });
+        configs.forEach(cfg -> config.getProducts().addAll(cfg.getProducts()));
 
         log.info(
                 "Found {} products in the internal SBOMer mapping for build ID '{}'",
@@ -241,6 +239,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
                 break;
             case NPM:
                 envConfig = EnvironmentAttributesUtils.getNvmCompliantAttributes(buildEnvAttributes);
+                break;
             default:
                 break;
         }
@@ -305,7 +304,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
         DefaultGeneratorConfig defaultGeneratorConfig = sbomerConfigProvider.getDefaultGenerationConfig()
                 .forGenerator(generatorType);
 
-        Config config = Config.builder()
+        return Config.builder()
                 .withBuildId(build.getId())
                 .withProducts(
                         List.of(
@@ -319,8 +318,6 @@ public class GenerateConfigCommand implements Callable<Integer> {
                                         .withProcessors(List.of(DefaultProcessorConfig.builder().build()))
                                         .build()))
                 .build();
-
-        return config;
     }
 
     /**
@@ -351,14 +348,12 @@ public class GenerateConfigCommand implements Callable<Integer> {
             }
         }
 
-        if (config != null) {
-            if (!Objects.equals(this.buildId, config.getBuildId())) {
-                log.error(
-                        "Provided PNC build identifier '{}' does not match the build identifier in the configuration provided as well: '{}'",
-                        this.buildId,
-                        config.getBuildId());
-                return GenerationResult.ERR_CONFIG_INVALID.getCode();
-            }
+        if (config != null && !Objects.equals(this.buildId, config.getBuildId())) {
+            log.error(
+                    "Provided PNC build identifier '{}' does not match the build identifier in the configuration provided as well: '{}'",
+                    this.buildId,
+                    config.getBuildId());
+            return GenerationResult.ERR_CONFIG_INVALID.getCode();
         }
 
         Build build = pncService.getBuild(this.buildId);
@@ -405,9 +400,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
         if (!result.isValid()) {
             log.error("Configuration is not valid!");
 
-            result.getErrors().forEach(msg -> {
-                log.error(msg);
-            });
+            result.getErrors().forEach(msg -> log.error(msg));
             return GenerationResult.ERR_CONFIG_INVALID.getCode();
         }
 
@@ -432,7 +425,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
             Files.writeString(target, configuration);
             log.info("Configuration saved as '{}' file", target.toAbsolutePath());
         } else {
-            System.out.println(configuration);
+            System.out.println(configuration); // NOSONAR This is what we want, it's a CLI
         }
 
         return GenerationResult.SUCCESS.getCode();
