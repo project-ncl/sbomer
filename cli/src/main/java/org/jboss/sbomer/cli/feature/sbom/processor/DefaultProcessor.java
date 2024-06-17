@@ -183,11 +183,7 @@ public class DefaultProcessor implements Processor {
     }
 
     private boolean hasAnyHash(Optional<String> sha256, Optional<String> sha1, Optional<String> md5) {
-        if (sha256.orElse(null) == null && sha1.orElse(null) == null && md5.orElse(null) == null) {
-            return false;
-        }
-
-        return true;
+        return (sha256.orElse(null) != null || sha1.orElse(null) != null || md5.orElse(null) != null);
     }
 
     protected void processBrewBuild(Component component, Artifact artifact) {
