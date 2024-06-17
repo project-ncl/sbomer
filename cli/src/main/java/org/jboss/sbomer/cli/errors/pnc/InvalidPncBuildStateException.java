@@ -26,12 +26,17 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 public class InvalidPncBuildStateException extends CommandLineException {
     private static final int EXIT_CODE = 31;
 
+    @Override
+    public int getExitCode() {
+        return InvalidPncBuildStateException.EXIT_CODE;
+    }
+
     public InvalidPncBuildStateException(String msg, Object... params) {
-        super(InvalidPncBuildStateException.EXIT_CODE, msg, params);
+        super(msg, params);
     }
 
     public InvalidPncBuildStateException(ApplicationException e) {
-        super(InvalidPncBuildStateException.EXIT_CODE, e);
+        super(e);
     }
 
 }
