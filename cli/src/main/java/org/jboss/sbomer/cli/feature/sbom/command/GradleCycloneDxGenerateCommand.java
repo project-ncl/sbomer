@@ -79,7 +79,7 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
 
         try {
             process = processBuilder.start();
-        } catch (IOException e) {
+        } catch (IOException e) { // NOSONAR It's rethrown in the next line
             throw new ApplicationException("Error while running the command", e);
         }
 
@@ -87,7 +87,7 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
 
         try {
             exitCode = process.waitFor();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e) { // NOSONAR It's rethrown in the next line
             throw new ApplicationException("Unable to obtain the status for the process", e);
         }
 
@@ -95,9 +95,7 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
             throw new ApplicationException("SBOM generation failed, see logs above");
         }
 
-        Path sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "build", "sbom", "bom.json");
-
-        return sbomPath;
+        return Path.of(parent.getWorkdir().toAbsolutePath().toString(), "build", "sbom", "bom.json");
     }
 
     @Override
