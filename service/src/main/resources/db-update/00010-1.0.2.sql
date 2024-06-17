@@ -34,7 +34,7 @@ BEGIN transaction;
     ALTER TABLE sbom_generation_request RENAME COLUMN build_id TO identifier;
     ALTER TABLE sbom_generation_request ADD COLUMN type character varying(20);
 
-    UPDATE sbom_generation_request SET type = 'BUILD';
+    UPDATE sbom_generation_request SET type = 'BUILD'; -- NOSONAR We had to update all records
     ALTER TABLE sbom_generation_request ALTER COLUMN type SET NOT NULL;
 
     CREATE INDEX idx_sbom_identifier ON sbom (identifier);
