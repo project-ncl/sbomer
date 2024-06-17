@@ -74,7 +74,7 @@ export const GenerationRequestModal = ({ request }: { request: SbomerGenerationR
             <DescriptionListTerm>Created</DescriptionListTerm>
             <DescriptionListDescription>
               <Timestamp date={request.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                {timestampToHumanReadable(Date.now() - request.creationTime.getTime())} ago
+                {timestampToHumanReadable(Date.now() - request.creationTime.getTime(), false, 'ago')}
               </Timestamp>
             </DescriptionListDescription>
           </DescriptionListGroup>

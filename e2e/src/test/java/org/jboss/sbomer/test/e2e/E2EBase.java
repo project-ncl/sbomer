@@ -17,6 +17,10 @@
  */
 package org.jboss.sbomer.test.e2e;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 import org.hamcrest.CoreMatchers;
 
 import io.restassured.RestAssured;
@@ -84,6 +88,31 @@ public abstract class E2EBase {
         response.then()
                 .statusCode(202)
                 .body("identifier", CoreMatchers.is(buildId))
+                .and()
+                .body("status", CoreMatchers.is("NEW"));
+
+        return response.body().path("id").toString();
+    }
+
+    public String requestContainerImageGeneration(String image)
+            throws UnsupportedEncodingException, MalformedURLException, URISyntaxException {
+        log.info("Requesting SBOM for container image: '{}'", image);
+
+        Response response = RestAssured.given()
+                .urlEncodingEnabled(false)
+                .baseUri(getSbomerBaseUri())
+                .log()
+                .all()
+                .when()
+                .contentType(ContentType.JSON)
+                .urlEncodingEnabled(true)
+                .post("/api/v1alpha3/generator/syft/image/{image}", image);
+
+        response.then()
+                .log()
+                .all()
+                .statusCode(202)
+                .body("identifier", CoreMatchers.is(image))
                 .and()
                 .body("status", CoreMatchers.is("NEW"));
 

@@ -52,7 +52,7 @@ const GenerationRequestResults = new Map<
  * @param seconds Decides whether seconds should be displayed.
  * @returns A human readable time.
  */
-export function timestampToHumanReadable(millis: number, seconds?: false): string {
+export function timestampToHumanReadable(millis: number, seconds?: false, suffix?: string): string {
   var secs = millis / 1000;
   var d = Math.floor(secs / 3600 / 24);
   var h = Math.floor((secs - d * 3600 * 24) / 3600);
@@ -64,11 +64,21 @@ export function timestampToHumanReadable(millis: number, seconds?: false): strin
   var mDisplay = m > 0 ? m + (m == 1 ? ' minute ' : ' minutes ') : '';
   var sDisplay = s > 0 ? s + (s == 1 ? ' second' : ' seconds') : '';
 
-  if (seconds) {
-    return dDisplay + hDisplay + mDisplay + sDisplay;
+  if (secs < 60) {
+    return 'just now';
   }
 
-  return dDisplay + hDisplay + mDisplay;
+  var hrd = dDisplay + hDisplay + mDisplay;
+
+  if (seconds) {
+    hrd += seconds;
+  }
+
+  if (suffix) {
+    hrd += ' ' + suffix;
+  }
+
+  return hrd;
 }
 
 export function typeToDescription(request: SbomerGenerationRequest): string {

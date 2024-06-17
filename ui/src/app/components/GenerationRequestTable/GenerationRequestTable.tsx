@@ -17,6 +17,8 @@ import { GenerationRequestModal } from '../GenerationRequestModal/GenerationRequ
 
 const columnNames = {
   id: 'ID',
+  type: 'Type',
+  identifier: 'Identifier',
   status: 'Status',
   creationTime: 'Created',
 };
@@ -57,6 +59,7 @@ export const GenerationRequestTable = () => {
         <Thead>
           <Tr>
             <Th>{columnNames.status}</Th>
+            <Th>{columnNames.type}</Th>
             <Th>{columnNames.id}</Th>
             <Th>{columnNames.creationTime}</Th>
           </Tr>
@@ -81,12 +84,17 @@ export const GenerationRequestTable = () => {
                   {/* <span className="pf-v5-c-timestamp pf-m-help-text">{request.status}</span> */}
                 </Tooltip>
               </Td>
+              <Td dataLabel={columnNames.type}>
+                <Tooltip isContentLeftAligned={true} content={<code>{request.identifier}</code>}>
+                  <span className="pf-v5-c-timestamp pf-m-help-text">{request.type}</span>
+                </Tooltip>
+              </Td>
               <Td dataLabel={columnNames.id}>
                 <GenerationRequestModal request={request} />
               </Td>
               <Td dataLabel={columnNames.creationTime}>
                 <Timestamp date={request.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - request.creationTime.getTime())} ago
+                  {timestampToHumanReadable(Date.now() - request.creationTime.getTime(), false, 'ago')}
                 </Timestamp>
               </Td>
             </Tr>
