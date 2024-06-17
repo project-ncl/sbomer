@@ -60,10 +60,6 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
         processBuilder.command().add("-DoutputFormat=json");
         processBuilder.command().add("-DoutputName=bom");
 
-        // This is ignored currently, see https://github.com/CycloneDX/cyclonedx-maven-plugin/pull/321
-        // Leaving it here so we can decide what to do in the future
-        // builder.command().add(String.format("-DoutputDirectory=%s", directory.toString()));
-
         if (settingsXmlPath != null) {
             log.debug("Using provided Maven settings.xml configuration file located at '{}'", settingsXmlPath);
             processBuilder.command().add("--settings");
@@ -83,7 +79,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
 
         try {
             process = processBuilder.start();
-        } catch (IOException e) {
+        } catch (IOException e) { // NOSONAR It is being rethrown below
             throw new ApplicationException("Error while running the command", e);
         }
 
@@ -91,7 +87,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
 
         try {
             exitCode = process.waitFor();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e) { // NOSONAR It is being rethrown below
             throw new ApplicationException("Unable to obtain the status for the process", e);
         }
 
@@ -99,9 +95,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
             throw new ApplicationException("SBOM generation failed, see logs above");
         }
 
-        Path sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "target", "bom.json");
-
-        return sbomPath;
+        return Path.of(parent.getWorkdir().toAbsolutePath().toString(), "target", "bom.json");
     }
 
     @Override
