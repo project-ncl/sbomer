@@ -171,7 +171,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
                     String numericPart = parent.getWorkdir()
                             .toAbsolutePath()
                             .toString()
-                            .replaceAll(".*/[^-]*-(\\d+)$", "$1");
+                            .replaceAll(".*/[^-]*-(\\d+)$", "$1"); // NOSONAR We control the path, it's safe
                     Integer productIndex = Integer.parseInt(numericPart);
 
                     // Get the runtime configuration related to the ProductConfig with the current index being processed
