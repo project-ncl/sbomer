@@ -191,9 +191,9 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         bom.setMetadata(createDefaultSbomerMetadata(mainComponent, sbomerClientFacade.getSbomerVersion()));
         bom.addDependency(mainDependency);
 
-        Map<String, Component> purlToComponents = new HashMap<String, Component>();
-        Map<String, Dependency> purl256ToDependencies = new HashMap<String, Dependency>();
-        Map<String, Dependency> pathToDependencies = new TreeMap<String, Dependency>();
+        Map<String, Component> purlToComponents = new HashMap<>();
+        Map<String, Dependency> purl256ToDependencies = new HashMap<>();
+        Map<String, Dependency> pathToDependencies = new TreeMap<>();
 
         for (AnalyzedArtifact artifact : artifactsToManifest) {
             // Create the component if not already created (e.g. the same pom can be a plain .pom or embedded as
