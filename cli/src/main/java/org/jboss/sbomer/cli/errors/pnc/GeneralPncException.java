@@ -26,12 +26,17 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 public class GeneralPncException extends CommandLineException {
     private static final int EXIT_CODE = 30;
 
+    @Override
+    public int getExitCode() {
+        return GeneralPncException.EXIT_CODE;
+    }
+
     public GeneralPncException(String msg, Object... params) {
-        super(GeneralPncException.EXIT_CODE, msg, params);
+        super(msg, params);
     }
 
     public GeneralPncException(ApplicationException e) {
-        super(GeneralPncException.EXIT_CODE, e);
+        super(e);
     }
 
 }

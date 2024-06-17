@@ -23,12 +23,17 @@ public class GitCloneException extends CommandLineException {
 
     private static final int EXIT_CODE = 200;
 
+    @Override
+    public int getExitCode() {
+        return GitCloneException.EXIT_CODE;
+    }
+
     public GitCloneException(String msg, Object... params) {
-        super(GitCloneException.EXIT_CODE, msg, params);
+        super(msg, params);
     }
 
     public GitCloneException(ApplicationException e) {
-        super(GitCloneException.EXIT_CODE, e);
+        super(e);
     }
 
 }

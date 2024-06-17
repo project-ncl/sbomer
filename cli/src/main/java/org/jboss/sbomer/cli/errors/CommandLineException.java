@@ -26,26 +26,12 @@ import org.jboss.sbomer.core.errors.ApplicationException;
  * </p>
  */
 public abstract class CommandLineException extends ApplicationException {
-    private int exitCode = 1;
-
     public int getExitCode() {
-        return exitCode;
+        return 1;
     }
 
     public CommandLineException(ApplicationException ex) {
         super(ex.getMessage());
-    }
-
-    public CommandLineException(int exitCode, ApplicationException ex) {
-        super(ex.getMessage());
-
-        this.exitCode = exitCode;
-    }
-
-    public CommandLineException(int exitCode, String msg, Object... params) {
-        super(msg, params);
-
-        this.exitCode = exitCode;
     }
 
     public CommandLineException(String msg, Object... params) {

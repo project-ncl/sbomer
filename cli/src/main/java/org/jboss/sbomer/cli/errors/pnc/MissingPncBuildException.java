@@ -26,12 +26,17 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 public class MissingPncBuildException extends CommandLineException {
     private static final int EXIT_CODE = 33;
 
+    @Override
+    public int getExitCode() {
+        return MissingPncBuildException.EXIT_CODE;
+    }
+
     public MissingPncBuildException(String msg, Object... params) {
-        super(MissingPncBuildException.EXIT_CODE, msg, params);
+        super(msg, params);
     }
 
     public MissingPncBuildException(ApplicationException e) {
-        super(MissingPncBuildException.EXIT_CODE, e);
+        super(e);
     }
 
 }
