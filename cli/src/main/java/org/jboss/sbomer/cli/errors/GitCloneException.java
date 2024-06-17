@@ -19,7 +19,7 @@ package org.jboss.sbomer.cli.errors;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 
-public class GitCloneException extends CommandLineException {
+public class GitCloneException extends ApplicationException implements CommandLineException {
 
     private static final int EXIT_CODE = 200;
 
@@ -30,10 +30,6 @@ public class GitCloneException extends CommandLineException {
 
     public GitCloneException(String msg, Object... params) {
         super(msg, params);
-    }
-
-    public GitCloneException(ApplicationException e) {
-        super(e);
     }
 
 }

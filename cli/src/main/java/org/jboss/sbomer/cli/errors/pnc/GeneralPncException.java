@@ -23,7 +23,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 /**
  * General error related to PNC.
  */
-public class GeneralPncException extends CommandLineException {
+public class GeneralPncException extends ApplicationException implements CommandLineException {
     private static final int EXIT_CODE = 30;
 
     @Override
@@ -33,10 +33,6 @@ public class GeneralPncException extends CommandLineException {
 
     public GeneralPncException(String msg, Object... params) {
         super(msg, params);
-    }
-
-    public GeneralPncException(ApplicationException e) {
-        super(e);
     }
 
 }
