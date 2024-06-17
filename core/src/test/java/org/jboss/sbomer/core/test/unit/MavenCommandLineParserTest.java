@@ -55,6 +55,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5852")
     public void windupMtrCliTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAC.sh");
 
@@ -75,6 +76,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
+    @SuppressWarnings("java:S5852")
     public void windupWebParentTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAE.sh");
 
