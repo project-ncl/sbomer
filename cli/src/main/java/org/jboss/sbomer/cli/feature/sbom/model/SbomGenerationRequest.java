@@ -42,6 +42,8 @@ import lombok.extern.jackson.Jacksonized;
 @Builder
 @Jacksonized
 @JsonIgnoreProperties(ignoreUnknown = true)
+// We use lombok to generate setters and getters
+@SuppressWarnings("java:S1068")
 public class SbomGenerationRequest {
 
     private String id;

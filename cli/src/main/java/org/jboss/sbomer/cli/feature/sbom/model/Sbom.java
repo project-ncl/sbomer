@@ -33,6 +33,9 @@ import lombok.extern.jackson.Jacksonized;
 @Builder
 @Jacksonized
 @JsonIgnoreProperties(ignoreUnknown = true)
+// We use lombok to generate setters and getters and leave the field
+// name
+@SuppressWarnings({ "java:S1068", "java:S1700" })
 public class Sbom {
     private String id;
     private String identifier;
