@@ -58,7 +58,7 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
 
         try {
             process = processBuilder.start();
-        } catch (IOException e) {
+        } catch (IOException e) { // NOSONAR Wer are rethrowing it below
             throw new ApplicationException("Error while running the command", e);
         }
 
@@ -66,7 +66,7 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
 
         try {
             exitCode = process.waitFor();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e) { // NOSONAR Wer are rethrowing it below
             throw new ApplicationException("Unable to obtain the status for the process", e);
         }
 
@@ -74,9 +74,7 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
             throw new ApplicationException("SBOM generation failed, see logs above");
         }
 
-        Path sbomPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), BOM_FILE_NAME);
-
-        return sbomPath;
+        return Path.of(parent.getWorkdir().toAbsolutePath().toString(), BOM_FILE_NAME);
     }
 
     @Override
