@@ -140,13 +140,15 @@ export const GenerationRequestModal = ({ request }: { request: SbomerGenerationR
           </CodeBlockCode>
         </CodeBlock>
       </Modal>
-      <a
+
+      <Button
+        variant="link"
         onClick={() => {
           setShowModal(true);
         }}
       >
         <pre>{request.id}</pre>
-      </a>
+      </Button>
     </>
   );
 };
