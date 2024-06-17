@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
@@ -32,8 +30,8 @@ import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.cli.feature.sbom.service.PncService;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.config.OperationConfigSchemaValidator;
+import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -41,7 +39,6 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +58,7 @@ import picocli.CommandLine.Option;
 public class GenerateOperationConfigCommand implements Callable<Integer> {
 
     public static enum ConfigFormat {
-        yaml, json;
+        YAML, JSON;
     }
 
     @Option(
@@ -219,9 +216,7 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
         if (!result.isValid()) {
             log.error("Configuration is not valid!");
 
-            result.getErrors().forEach(msg -> {
-                log.error(msg);
-            });
+            result.getErrors().forEach(msg -> log.error(msg));
             return GenerationResult.ERR_CONFIG_INVALID.getCode();
         }
 
@@ -231,7 +226,7 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
 
         log.debug("Using {} format", format);
 
-        if (format.equals(ConfigFormat.json)) {
+        if (format.equals(ConfigFormat.JSON)) {
 
             configuration = configReader.getJsonObjectMapper()
                     .writerWithDefaultPrettyPrinter()
@@ -246,7 +241,7 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
             Files.writeString(target, configuration);
             log.info("Configuration saved as '{}' file", target.toAbsolutePath());
         } else {
-            System.out.println(configuration);
+            System.out.println(configuration); // NOSONAR This is what we want, it's a CLI
         }
 
         return GenerationResult.SUCCESS.getCode();
