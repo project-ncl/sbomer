@@ -109,7 +109,7 @@ public abstract class AbstractApiProvider {
     }
 
     protected SbomGenerationRequest doGetSbomGenerationRequestById(String generationRequestId) {
-        SbomGenerationRequest generationRequest = PanacheEntityBase.findById(generationRequestId);
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId); // NOSONAR
 
         if (generationRequest == null) {
             throw new NotFoundException("Generation request with id '{}' could not be found", generationRequestId);
