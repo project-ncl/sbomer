@@ -66,7 +66,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     public static final String EVENT_SOURCE_NAME = "GenerationRequestEventSource";
 
     @Inject
-    SbomRepository sbomRepository;
+    protected SbomRepository sbomRepository;
 
     @Inject
     protected GenerationRequestControllerConfig controllerConfig;
