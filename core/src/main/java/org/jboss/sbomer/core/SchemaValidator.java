@@ -36,7 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SchemaValidator {
 
-    public SchemaValidator() {
+    private SchemaValidator() {
+        // This is a utlity class and should not be instantiated
     }
 
     @Data
@@ -85,9 +86,7 @@ public class SchemaValidator {
         if (!validationResult.isValid()) {
             log.error("Validation failed!");
 
-            validationResult.getErrors().forEach(msg -> {
-                log.error(msg);
-            });
+            validationResult.getErrors().forEach(msg -> log.error(msg));
         }
 
         return validationResult;
