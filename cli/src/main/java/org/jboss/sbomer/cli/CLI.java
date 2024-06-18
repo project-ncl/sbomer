@@ -61,7 +61,6 @@ public class CLI implements QuarkusApplication {
     @ActivateRequestContext
     public int run(String... args) throws Exception {
         CommandLine commandLine = new CommandLine(this, factory).setExecutionExceptionHandler(new ExceptionHandler())
-                .setCaseInsensitiveEnumValuesAllowed(true)
                 .setExecutionStrategy(new RunOnlyCallable())
                 .setCommandName("sbomerctl");
 
@@ -71,6 +70,7 @@ public class CLI implements QuarkusApplication {
         });
 
         commandLine.setExitCodeExceptionMapper(new SbomerExitCodeExceptionMapper());
+        commandLine.setCaseInsensitiveEnumValuesAllowed(true);
 
         return commandLine.execute(args);
     }
