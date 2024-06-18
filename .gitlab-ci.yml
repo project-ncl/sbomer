@@ -77,7 +77,7 @@ build:
     - keytool -import -trustcacerts -alias 2022-IT-Root-CA -file certs/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.11-tem/lib/security/cacerts" -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias 2015-IT-Root-CA -file certs/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.11-tem/lib/security/cacerts" -noprompt -storepass changeit
   script:
-    - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA} jacoco:report sonar:sonar -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=${SONAR_HOST_URL}
+    - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA} jacoco:report sonar:sonar -Dsonar.projectKey=SBOMer
   artifacts:
     when: always
     reports:
