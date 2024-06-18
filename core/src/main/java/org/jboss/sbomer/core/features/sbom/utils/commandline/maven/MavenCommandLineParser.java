@@ -176,7 +176,7 @@ public class MavenCommandLineParser {
 
         String projectList = projects.stream().collect(Collectors.joining(","));
         // Remove single and double quotes if the string starts and ends with them
-        projectList = projectList.replaceAll("^['\"]|['\"]$", "").trim();
+        projectList = projectList.replaceAll("(^['\"])|(['\"]$)", "").trim();
         // Finally remove all spaces inside the string
         projectList = projectList.replaceAll("\\s+", "");
 
