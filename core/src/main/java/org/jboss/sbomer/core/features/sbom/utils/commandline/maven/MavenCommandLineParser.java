@@ -49,7 +49,13 @@ public class MavenCommandLineParser {
 
     // In case system properties are something like -DnpmArgs="--strict-ssl=false --noproxy=${noproxy}", do not split
     public static final String SPLIT_BY_SPACE_HONORING_DOUBLE_QUOTES = "\\s+(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
-    public static final String SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES = "\\s+(?=(?:[^'\"]*['\"][^'\"]*['\"])*[^'\"]*$)";
+    public static final String SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES = "\\s+(?=(?:[^'\"]*['\"][^'\"]*['\"])*[^'\"]*$)"; // NOSONAR
+                                                                                                                                   // We
+                                                                                                                                   // do
+                                                                                                                                   // not
+                                                                                                                                   // expect
+                                                                                                                                   // large
+                                                                                                                                   // inputs
 
     @ToString.Exclude
     private CommandLineParser parser;
