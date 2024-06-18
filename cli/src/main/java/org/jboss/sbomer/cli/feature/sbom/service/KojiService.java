@@ -95,7 +95,7 @@ public class KojiService {
 
         try {
             return awaitResults(finderTask);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) { // NOSONAR We are rethrowing it.
             log.debug("Analysis failed due to {}", e);
             throw e.getCause();
         }
@@ -158,6 +158,7 @@ public class KojiService {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 log.warn("Sleeping while awaiting results was interrupted", e);
+                Thread.currentThread().interrupt();
             }
         }
         if (finderTask.isDone()) {
