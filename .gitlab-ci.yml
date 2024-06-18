@@ -72,6 +72,7 @@ build:
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o certs/2015-IT-Root-CA.pem
     - curl -s "https://get.sdkman.io" | bash
     - echo "sdkman_auto_answer=true" > $HOME/.sdkman/etc/config
+    - source "$HOME/.sdkman/bin/sdkman-init.sh"
     - sdk install java 17.0.11-tem
     - keytool -import -trustcacerts -alias 2022-IT-Root-CA -file certs/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.11-tem/lib/security/cacerts" -noprompt -storepass changeit
     - keytool -import -trustcacerts -alias 2015-IT-Root-CA -file certs/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.11-tem/lib/security/cacerts" -noprompt -storepass changeit
