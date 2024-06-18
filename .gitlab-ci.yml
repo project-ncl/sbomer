@@ -1,6 +1,6 @@
-include:
-  - project: enterprise-pipelines/gitlab-ci/includes
-    file: SAST/sonarqube.yml
+# include:
+#   - project: enterprise-pipelines/gitlab-ci/includes
+#     file: SAST/sonarqube.yml
 
 stages:
   - build
@@ -67,7 +67,7 @@ build:
       --no-transfer-progress
 
   script:
-    - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA}
+    - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA} jacoco:report sonar:sonar -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=${SONAR_HOST_URL}
   artifacts:
     when: always
     reports:
@@ -109,20 +109,20 @@ build-ui:
     paths:
       - ui/dist
 
-sonarqube:
-  stage: static-analysis
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  variables:
-    KUBERNETES_CPU_REQUEST: "1000m"
-    KUBERNETES_CPU_LIMIT: "1000m"
-    KUBERNETES_MEMORY_REQUEST: "2Gi"
-    KUBERNETES_MEMORY_LIMIT: "2Gi"
-    SONAR_SCANNER_OPTS: "-Xmx512m"
-  dependencies:
-    - build
-  needs:
-    - job: build
+# sonarqube:
+#   stage: static-analysis
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+#   variables:
+#     KUBERNETES_CPU_REQUEST: "1000m"
+#     KUBERNETES_CPU_LIMIT: "1000m"
+#     KUBERNETES_MEMORY_REQUEST: "2Gi"
+#     KUBERNETES_MEMORY_LIMIT: "2Gi"
+#     SONAR_SCANNER_OPTS: "-Xmx512m"
+#   dependencies:
+#     - build
+#   needs:
+#     - job: build
 
 build-image-service:
   extends:
