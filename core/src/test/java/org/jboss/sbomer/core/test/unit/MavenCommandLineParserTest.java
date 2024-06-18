@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 
@@ -34,11 +35,11 @@ public class MavenCommandLineParserTest {
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
         assertEquals(2, lineParser.getProfiles().size());
-        assertEquals(2, lineParser.getProperties().size());
+        assertEquals(1, lineParser.getProperties().size());
         assertEquals(0, lineParser.getProjects().size());
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DskipTests"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Pmtr,mta"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DnpmRegistryURL=\"$npmRegistryURL\""));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-DnpmRegistryURL=\"$npmRegistryURL\""));
     }
 
     @Test
@@ -61,15 +62,15 @@ public class MavenCommandLineParserTest {
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
         assertEquals(1, lineParser.getProfiles().size());
-        assertEquals(7, lineParser.getProperties().size());
+        assertEquals(3, lineParser.getProperties().size());
         assertEquals(0, lineParser.getProjects().size());
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DskipTests=true"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Pmtr"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DskipThemeWindup=true"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyHost=${proxyServer}"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPort=${proxyPort}"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyUser=${proxyUsername}"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPassword=${accessToken}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyHost=${proxyServer}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPort=${proxyPort}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyUser=${proxyUsername}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPassword=${accessToken}"));
         assertTrue(
                 lineParser.getRebuiltMvnCommandScript()
                         .contains("-Dorg.apache.maven.user-settings=/usr/share/maven/conf/settings.xml"));
@@ -82,23 +83,21 @@ public class MavenCommandLineParserTest {
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
         assertEquals(0, lineParser.getProfiles().size());
-        assertEquals(10, lineParser.getProperties().size());
+        assertEquals(5, lineParser.getProperties().size());
         assertEquals(1, lineParser.getProjects().size());
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-pl !tests,!tests/wildfly-dist"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DskipTests"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Ddownstream=mtr"));
         assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dwebpack.environment=production "));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyHost=${proxyServer}"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPort=${proxyPort}"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyUser=${proxyUsername}"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPassword=${accessToken}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyHost=${proxyServer}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPort=${proxyPort}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyUser=${proxyUsername}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPassword=${accessToken}"));
         assertTrue(
                 lineParser.getRebuiltMvnCommandScript()
                         .contains("-Dorg.apache.maven.user-settings=/usr/share/maven/conf/settings.xml"));
-        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DnpmRegistryURL=\"$npmRegistryURL\""));
-        assertTrue(
-                lineParser.getRebuiltMvnCommandScript()
-                        .contains("-DnpmArgs=\"--strict-ssl=false --noproxy=${noproxy}\""));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-DnpmRegistryURL=\"$npmRegistryURL\""));
+        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DnpmArgs=\"--strict-ssl=false\""));
     }
 
     @Test
@@ -186,5 +185,22 @@ public class MavenCommandLineParserTest {
         assertEquals(
                 "mvn -C  -Dmaven.test.failure.ignore=true -DversionIncrementalSuffix=redhat -DrepoReportingRemoval=true",
                 lineParser.getRebuiltMvnCommandScript());
+    }
+
+    @Test
+    public void tackleDoubleMvnCommandTest() throws IOException, IllegalArgumentException {
+        String script = TestResources.asString("maven/BAZAPVSUDEYAE.sh");
+
+        MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
+        assertEquals(0, lineParser.getProfiles().size());
+        assertEquals(3, lineParser.getProperties().size());
+        assertEquals(0, lineParser.getProjects().size());
+        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-DskipTests=true"));
+        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dtycho.strictVersions=false"));
+        assertTrue(lineParser.getRebuiltMvnCommandScript().contains("-Dtycho.disableP2Mirrors=true"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyHost=${proxyServer}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPort=${proxyPort}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyUser=${proxyUsername}"));
+        assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPassword=${accessToken}"));
     }
 }
