@@ -42,8 +42,6 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationS
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.IsBuildTypeCondition;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.IsBuildTypeInitializedCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.OperationConfigAvailableCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.OperationConfigMissingCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
@@ -104,16 +102,6 @@ import lombok.extern.slf4j.Slf4j;
 public class OperationController extends AbstractController {
 
     List<TaskRunGenerateDependentResource> generations = new ArrayList<>();
-
-    public OperationController() {
-
-    }
-
-    @Inject
-    GenerationRequestControllerConfig controllerConfig;
-
-    @Inject
-    SbomRepository sbomRepository;
 
     @Inject
     NotificationService notificationService;
@@ -391,7 +379,7 @@ public class OperationController extends AbstractController {
                     GenerationResult.SUCCESS,
                     String.format(
                             "Generation finished successfully. Generated SBOMs: %s",
-                            sboms.stream().map(sbom -> sbom.getId()).toArray()));
+                            sboms.stream().map(Sbom::getId).toArray()));
         }
 
         StringBuilder sb = new StringBuilder("Generation failed. ");
