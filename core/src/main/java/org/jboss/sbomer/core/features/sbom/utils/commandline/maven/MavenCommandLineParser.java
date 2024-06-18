@@ -28,6 +28,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenC
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addSystemPropertyOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -217,25 +218,57 @@ public class MavenCommandLineParser {
         for (org.apache.commons.cli.Option option : cmd.getOptions()) {
             if (opt.equals(option.getOpt()) || opt.equals(option.getLongOpt())) {
                 List<String> values = option.getValuesList();
+
                 if (values.size() > 2) {
-                    // use the first argument as the key and concatenate all the remaining ones as one single value,
-                    // concatenating them back with the option separator
-                    props.put(
-                            values.get(0),
-                            values.stream()
-                                    .skip(1)
-                                    .collect(Collectors.joining(String.valueOf(option.getValueSeparator()))));
+                    // Concatenate all values except the first one
+                    String concatenatedValues = values.stream()
+                            .skip(1)
+                            .collect(Collectors.joining(String.valueOf(option.getValueSeparator())));
+
+                    // Trim surrounding quotes, filter out tokens containing '$', and re-add quotes if needed
+                    concatenatedValues = trimAndFilterValues(concatenatedValues);
+                    if (concatenatedValues.isEmpty())
+                        continue;
+
+                    props.put(values.get(0), concatenatedValues);
                 } else if (values.size() == 2) {
-                    // use the first 2 arguments as the key/value pair
-                    props.put(values.get(0), values.get(1));
+                    // Only include if the second value does not contain '$'
+                    if (!values.get(1).contains("$")) {
+                        props.put(values.get(0), values.get(1));
+                    }
                 } else if (values.size() == 1) {
-                    // no explicit value, handle it as a boolean
+                    // Treat single value as a boolean flag
                     props.put(values.get(0), "true");
                 }
             }
         }
 
         return props;
+    }
+
+    private String trimAndFilterValues(String concatenatedValues) {
+        boolean surroundedByDoubleQuotes = concatenatedValues.startsWith("\"") && concatenatedValues.endsWith("\"");
+        boolean surroundedBySingleQuotes = concatenatedValues.startsWith("'") && concatenatedValues.endsWith("'");
+
+        // Remove surrounding quotes
+        if (surroundedByDoubleQuotes || surroundedBySingleQuotes) {
+            concatenatedValues = concatenatedValues.substring(1, concatenatedValues.length() - 1);
+        }
+
+        // Filter out tokens containing '$' and rejoin
+        concatenatedValues = Arrays.stream(concatenatedValues.split(" "))
+                .filter(token -> !token.contains("$"))
+                .collect(Collectors.joining(" "))
+                .trim();
+
+        // Re-add quotes if they were originally present
+        if (surroundedByDoubleQuotes) {
+            concatenatedValues = "\"" + concatenatedValues + "\"";
+        } else if (surroundedBySingleQuotes) {
+            concatenatedValues = "'" + concatenatedValues + "'";
+        }
+
+        return concatenatedValues;
     }
 
     private List<String> parseCommaSeparatedValues(String value) {
