@@ -73,6 +73,16 @@
         <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
         <version.build-finder>2.3.0</version.build-finder>
         <version.mapstruct>1.5.5.Final</version.mapstruct>
+
+        <!-- Sonar -->
+        <sonar.java.source>17</sonar.java.source>
+        <sonar.coverage.jacoco.xmlReportPaths>**/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.cpd.exclusions>**/import.sql</sonar.cpd.exclusions>
+        <sonar.issue.ignore.multicriteria>i1</sonar.issue.ignore.multicriteria>
+        <!-- Sonar: Allow for injection -->
+        <sonar.issue.ignore.multicriteria.i1.ruleKey>java:S6813</sonar.issue.ignore.multicriteria.i1.ruleKey>
+        <sonar.issue.ignore.multicriteria.i1.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.i1.resourceKey>
+
     </properties>
 
     <dependencyManagement>
