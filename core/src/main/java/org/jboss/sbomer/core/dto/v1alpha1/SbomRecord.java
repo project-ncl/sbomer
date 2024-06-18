@@ -68,4 +68,4 @@ public record SbomRecord(
                         gReason));
     }
 
-};
+}

@@ -33,4 +33,4 @@ public record SbomGenerationRequestRecord(
         String status,
         String result,
         String reason) {
-};
+}

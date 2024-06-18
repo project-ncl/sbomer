@@ -52,4 +52,4 @@ public record BaseSbomRecord(
                 new BaseSbomGenerationRequestRecord(gId, gIdentifier, gConfig, gType, gCreationTime));
     }
 
-};
+}

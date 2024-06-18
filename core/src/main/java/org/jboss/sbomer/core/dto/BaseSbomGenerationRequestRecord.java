@@ -30,4 +30,4 @@ public record BaseSbomGenerationRequestRecord(
         @Schema(implementation = Map.class) JsonNode config,
         String type,
         Instant creationTime) {
-};
+}
