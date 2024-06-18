@@ -24,7 +24,7 @@ import java.util.List;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
+import org.jboss.sbomer.service.feature.sbom.rest.criteria.AbstractCriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
@@ -106,8 +106,8 @@ public class CustomPredicateSortBuilder<T> {
             throw new IllegalArgumentException(msg);
         }
 
-        if (CriteriaAwareRepository.ASC.equals(comparison.getOperator())
-                || CriteriaAwareRepository.DESC.equals(comparison.getOperator())) {
+        if (AbstractCriteriaAwareRepository.ASC.equals(comparison.getOperator())
+                || AbstractCriteriaAwareRepository.DESC.equals(comparison.getOperator())) {
 
             return createOrder(comparison, startRoot, entity, entityManager, misc);
         }
@@ -130,9 +130,9 @@ public class CustomPredicateSortBuilder<T> {
 
         Path<?> path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, ema, tools);
 
-        if (operator.equals(CriteriaAwareRepository.ASC)) {
+        if (operator.equals(AbstractCriteriaAwareRepository.ASC)) {
             return List.of(builder.asc(path));
-        } else if (operator.equals(CriteriaAwareRepository.DESC)) {
+        } else if (operator.equals(AbstractCriteriaAwareRepository.DESC)) {
             return List.of(builder.desc(path));
         }
 
@@ -152,12 +152,12 @@ public class CustomPredicateSortBuilder<T> {
             String[] sortTokens = sort.split(";");
             for (int i = 0; i < sortTokens.length; i++) {
                 var token = sortTokens[i];
-                if (token.contains(CriteriaAwareRepository.ASC.getSymbol())) {
-                    token = token.replaceFirst(CriteriaAwareRepository.ASC.getSymbol(), "");
-                    compliantSort.append(token).append(CriteriaAwareRepository.ASC.getSymbol()).append(token);
-                } else if (token.contains(CriteriaAwareRepository.DESC.getSymbol())) {
-                    token = token.replaceFirst(CriteriaAwareRepository.DESC.getSymbol(), "");
-                    compliantSort.append(token).append(CriteriaAwareRepository.DESC.getSymbol()).append(token);
+                if (token.contains(AbstractCriteriaAwareRepository.ASC.getSymbol())) {
+                    token = token.replaceFirst(AbstractCriteriaAwareRepository.ASC.getSymbol(), "");
+                    compliantSort.append(token).append(AbstractCriteriaAwareRepository.ASC.getSymbol()).append(token);
+                } else if (token.contains(AbstractCriteriaAwareRepository.DESC.getSymbol())) {
+                    token = token.replaceFirst(AbstractCriteriaAwareRepository.DESC.getSymbol(), "");
+                    compliantSort.append(token).append(AbstractCriteriaAwareRepository.DESC.getSymbol()).append(token);
                 } else {
                     compliantSort.append(token);
                 }

@@ -49,6 +49,7 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
@@ -108,7 +109,7 @@ public abstract class AbstractApiProvider {
     }
 
     protected SbomGenerationRequest doGetSbomGenerationRequestById(String generationRequestId) {
-        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId);
+        SbomGenerationRequest generationRequest = PanacheEntityBase.findById(generationRequestId);
 
         if (generationRequest == null) {
             throw new NotFoundException("Generation request with id '{}' could not be found", generationRequestId);

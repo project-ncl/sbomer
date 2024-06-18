@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.rest.criteria.AbstractCriteriaAwareRepository;
 import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
@@ -122,9 +123,9 @@ public class CustomPredicateBuilder<T> {
 
         Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, ema, misc);
 
-        if ((CriteriaAwareRepository.IS_NULL.equals(comparison.getOperator())
+        if ((AbstractCriteriaAwareRepository.IS_NULL.equals(comparison.getOperator())
                 && Enum.class.isAssignableFrom(propertyPath.getJavaType())
-                || (CriteriaAwareRepository.IS_EQUAL.equals(comparison.getOperator())
+                || (AbstractCriteriaAwareRepository.IS_EQUAL.equals(comparison.getOperator())
                         && Enum.class.isAssignableFrom(propertyPath.getJavaType())))) {
 
             log.debug(

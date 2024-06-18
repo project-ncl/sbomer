@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.rest.criteria.AbstractCriteriaAwareRepository;
 import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
@@ -50,7 +51,7 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
 
         Path path = PredicateBuilder.findPropertyPath(cn.getSelector(), root, ema, tools);
 
-        if (operator.equals(CriteriaAwareRepository.IS_NULL)) {
+        if (operator.equals(AbstractCriteriaAwareRepository.IS_NULL)) {
             Object argument = cn.getArguments().get(0);
             if (argument instanceof String) {
                 if (Boolean.parseBoolean((String) argument)) {
@@ -59,7 +60,7 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
                     return builder.isNotNull(path);
                 }
             }
-        } else if (operator.equals(CriteriaAwareRepository.IS_EQUAL)) {
+        } else if (operator.equals(AbstractCriteriaAwareRepository.IS_EQUAL)) {
             Object argument = cn.getArguments().get(0);
             if (argument instanceof String) {
 

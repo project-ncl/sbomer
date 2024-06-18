@@ -44,10 +44,10 @@ public class SbomGenerationRequestRepository extends CriteriaAwareRepository<Sbo
             throw new NotFoundException("Could not find any SBOM generation request with id '{}'", id);
         }
 
-        long sbomsDeletedCount = Sbom.delete("generationRequest.id = :id", Parameters.with("id", id));
+        long sbomsDeletedCount = Sbom.delete("generationRequest.id = :id", Parameters.with("id", id)); // NOSONAR
         log.info("Deleted {} SBOMs associated with the Generation Request with id: '{}'", sbomsDeletedCount, id);
 
-        SbomGenerationRequest.delete("id = :id", Parameters.with("id", id));
+        SbomGenerationRequest.delete("id = :id", Parameters.with("id", id)); // NOSONAR
         log.info("Deleted the SBOM Generation Request with id: '{}'", id);
 
         flush();

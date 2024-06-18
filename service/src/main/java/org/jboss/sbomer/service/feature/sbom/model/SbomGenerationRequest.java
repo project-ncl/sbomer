@@ -145,7 +145,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
      */
     @Transactional
     public static SbomGenerationRequest sync(GenerationRequest generationRequest) {
-        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.findById(generationRequest.getId());
+        SbomGenerationRequest sbomGenerationRequest = PanacheEntityBase.findById(generationRequest.getId());
 
         // Create the entity if it's not there
         if (sbomGenerationRequest == null) {
@@ -203,7 +203,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
     @Transactional
     public static List<SbomGenerationRequest> findPendingRequests(String operationId) {
-        return SbomGenerationRequest
+        return PanacheEntityBase
                 .find(
                         "type = ?1 and identifier = ?2 and status = ?3 order by creationTime asc",
                         GenerationRequestType.OPERATION,
