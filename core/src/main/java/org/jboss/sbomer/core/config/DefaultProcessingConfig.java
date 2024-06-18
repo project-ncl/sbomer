@@ -57,18 +57,4 @@ public interface DefaultProcessingConfig {
      */
     List<ProcessorConfig> defaultProcessors();
 
-    // /**
-    // * Creates a {@link ProcessingExecConfig} out of the configured default processors.
-    // *
-    // * @return The {@link ProcessingExecConfig} object.
-    // */
-    // default ProcessingExecConfig defaultExecConfig() {
-    // return ProcessingExecConfig.builder()
-    // .processors(
-    // defaultProcessors().stream()
-    // .map(p -> ProcessorExec.builder().processor(p.name()).build())
-    // .toList())
-    // .build();
-    // }
-
 }
