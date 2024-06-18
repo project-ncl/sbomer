@@ -33,4 +33,4 @@ public record SbomGenerationRequestRecord(
         @Schema(example = "A6XHP5F42DYAA") String buildId,
         @Schema(implementation = Map.class) JsonNode config,
         String reason) {
-};
+}
