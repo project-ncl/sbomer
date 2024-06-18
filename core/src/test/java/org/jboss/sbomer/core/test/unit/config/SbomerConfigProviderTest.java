@@ -22,7 +22,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class SbomerConfigProviderTest {
+class SbomerConfigProviderTest {
 
     /**
      * Ensure default settings for generation.

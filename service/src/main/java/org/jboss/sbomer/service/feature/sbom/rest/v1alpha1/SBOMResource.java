@@ -132,16 +132,15 @@ public class SBOMResource extends AbstractApiProvider {
                     @ExampleObject(
                             name = "Order SBOMs by creation time in descending order",
                             value = "creationTime=desc=") })
-    @APIResponses({
-            @APIResponse(responseCode = "200", description = "List of SBOMs in the system for a specified RSQL query."),
-            @APIResponse(
-                    responseCode = "400",
-                    description = "Failed while parsing the provided RSQL string, please verify the correct syntax.",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))), })
+    @APIResponse(responseCode = "200", description = "List of SBOMs in the system for a specified RSQL query.")
+    @APIResponse(
+            responseCode = "400",
+            description = "Failed while parsing the provided RSQL string, please verify the correct syntax.",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public Page<SbomRecord> searchSboms(
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery,
@@ -160,24 +159,22 @@ public class SBOMResource extends AbstractApiProvider {
     @Path("/sboms/{id}")
     @Operation(summary = "Get specific SBOM", description = "Get specific SBOM with the provided ID.")
     @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
-    @APIResponses({ //
-            @APIResponse(
-                    responseCode = "200",
-                    description = "The SBOM",
-                    content = @Content(schema = @Schema(implementation = SbomRecord.class))),
-            @APIResponse(
-                    responseCode = "400",
-                    description = "Could not parse provided arguments",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @APIResponse(
-                    responseCode = "404",
-                    description = "Requested SBOM could not be found",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))), //
-    })
+    @APIResponse(
+            responseCode = "200",
+            description = "The SBOM",
+            content = @Content(schema = @Schema(implementation = SbomRecord.class)))
+    @APIResponse(
+            responseCode = "400",
+            description = "Could not parse provided arguments",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "404",
+            description = "Requested SBOM could not be found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public SbomRecord getSbomById(@PathParam("id") String sbomId) {
         return mapper.toSbomRecord(doGetSbomById(sbomId));
     }
@@ -188,23 +185,22 @@ public class SBOMResource extends AbstractApiProvider {
             summary = "Get the BOM content of particular SBOM",
             description = "Get the BOM content of particular SBOM")
     @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
-    @APIResponses({ //
-            @APIResponse(
-                    responseCode = "200",
-                    description = "The BOM in CycloneDX format",
-                    content = @Content(schema = @Schema(implementation = Map.class))),
-            @APIResponse(
-                    responseCode = "400",
-                    description = "Could not parse provided arguments",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @APIResponse(
-                    responseCode = "404",
-                    description = "Requested SBOM could not be found",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))), })
+    @APIResponse(
+            responseCode = "200",
+            description = "The BOM in CycloneDX format",
+            content = @Content(schema = @Schema(implementation = Map.class)))
+    @APIResponse(
+            responseCode = "400",
+            description = "Could not parse provided arguments",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "404",
+            description = "Requested SBOM could not be found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public JsonNode getBomById(@PathParam("id") String sbomId) {
         return doGetBomById(sbomId);
     }
@@ -216,19 +212,17 @@ public class SBOMResource extends AbstractApiProvider {
             description = "SBOM base generation for a particular PNC build Id offloaded to the service.")
     @Parameter(name = "buildId", description = "PNC build identifier", example = "ARYT3LBXDVYAC")
     @Path("/sboms/generate/build/{buildId}")
-    @APIResponses({ @APIResponse(
+    @APIResponse(
             responseCode = "202",
-            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes."),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @APIResponse(
-                    responseCode = "400",
-                    description = "Could not parse provided arguments",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-
-    })
+            description = "Schedules generation of a SBOM for a particular PNC buildId. This is an asynchronous call. It does execute the generation behind the scenes.")
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "400",
+            description = "Could not parse provided arguments",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public Response generate(@PathParam("buildId") String buildId, Config config) throws Exception {
         if (featureFlags.isDryRun()) {
             log.warn(
@@ -258,18 +252,17 @@ public class SBOMResource extends AbstractApiProvider {
                     @ExampleObject(
                             name = "Order generation requests by creation time in descending order",
                             value = "creationTime=desc=") })
-    @APIResponses({
-            @APIResponse(
-                    responseCode = "200",
-                    description = "List of SBOM generation requests in the system for a specified RSQL query."),
-            @APIResponse(
-                    responseCode = "400",
-                    description = "Failed while parsing the provided RSQL string, please verify the correct syntax.",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))), })
+    @APIResponse(
+            responseCode = "200",
+            description = "List of SBOM generation requests in the system for a specified RSQL query.")
+    @APIResponse(
+            responseCode = "400",
+            description = "Failed while parsing the provided RSQL string, please verify the correct syntax.",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public Page<SbomGenerationRequestRecord> searchGenerationRequests(
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery,
@@ -290,16 +283,16 @@ public class SBOMResource extends AbstractApiProvider {
             summary = "Get specific SBOM generation request",
             description = "Get specific SBOM generation request with the provided ID.")
     @Parameter(name = "id", description = "SBOM generation request identifier", example = "88CA2291D4014C6")
-    @APIResponses({ @APIResponse(responseCode = "200", description = "The generation request"),
-            @APIResponse(responseCode = "400", description = "Could not parse provided arguments"),
-            @APIResponse(
-                    responseCode = "404",
-                    description = "Requested generation request could not be found",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+    @APIResponse(responseCode = "200", description = "The generation request")
+    @APIResponse(responseCode = "400", description = "Could not parse provided arguments")
+    @APIResponse(
+            responseCode = "404",
+            description = "Requested generation request could not be found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public SbomGenerationRequestRecord getGenerationRequestById(@PathParam("id") String generationRequestId) {
         return mapper.toSbomRequestRecord(doGetSbomGenerationRequestById(generationRequestId));
     }
@@ -311,15 +304,14 @@ public class SBOMResource extends AbstractApiProvider {
             summary = "Delete SBOM generation request specified by id",
             description = "Delete the specified SBOM generation request from the database")
     @Parameter(name = "id", description = "The SBOM request identifier")
-    @APIResponses({
-            @APIResponse(
-                    responseCode = "404",
-                    description = "Specified SBOM generation request could not be found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    @APIResponse(
+            responseCode = "404",
+            description = "Specified SBOM generation request could not be found",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response deleteGenerationRequest(@PathParam("id") final String id) {
         if (featureFlags.isDryRun()) {
             log.warn("Skipping deletion of Generation Request '{}' because of SBOMer running in dry-run mode", id);

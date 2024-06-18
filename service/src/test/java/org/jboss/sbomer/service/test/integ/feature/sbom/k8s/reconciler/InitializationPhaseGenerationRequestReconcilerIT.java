@@ -62,7 +62,7 @@ import io.quarkus.test.junit.QuarkusTest;
  * Class responsible for testing reconciliation workflow for the initialization phase.
  */
 @QuarkusTest
-public class InitializationPhaseGenerationRequestReconcilerIT {
+class InitializationPhaseGenerationRequestReconcilerIT {
 
     @Inject
     BuildController controller;

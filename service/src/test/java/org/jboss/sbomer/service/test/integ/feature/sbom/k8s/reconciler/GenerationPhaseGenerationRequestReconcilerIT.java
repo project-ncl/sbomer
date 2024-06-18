@@ -71,7 +71,7 @@ import jakarta.inject.Inject;
  */
 @QuarkusTest
 @WithKubernetesTestServer
-public class GenerationPhaseGenerationRequestReconcilerIT {
+class GenerationPhaseGenerationRequestReconcilerIT {
 
     @ApplicationScoped
     @Mock
@@ -154,7 +154,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
     }
 
     @Test
-    public void testMissingGenerationTaskRuns() throws Exception {
+    void testMissingGenerationTaskRuns() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         UpdateControl<GenerationRequest> updateControl = controller
@@ -169,7 +169,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
     }
 
     @Test
-    public void testSingleTaskRunWithNoStatus() throws Exception {
+    void testSingleTaskRunWithNoStatus() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
         UpdateControl<GenerationRequest> updateControl = controller
                 .reconcile(request, mockContext(Set.of(dummyTaskRun())));
@@ -178,7 +178,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
     }
 
     @Test
-    public void testSingleInProgressTaskRun() throws Exception {
+    void testSingleInProgressTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         TaskRun taskRun = dummyTaskRun();
@@ -192,7 +192,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
     }
 
     @Test
-    public void testMultipleInProgressTaskRun() throws Exception {
+    void testMultipleInProgressTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new LinkedHashSet<>();
@@ -215,7 +215,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
      * @throws Exception
      */
     @Test
-    public void testOneFailedTaskRun() throws Exception {
+    void testOneFailedTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new LinkedHashSet<>();
@@ -240,7 +240,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
      * @throws Exception
      */
     @Test
-    public void testOneSucceededTaskRun() throws Exception {
+    void testOneSucceededTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new LinkedHashSet<>();
@@ -265,7 +265,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
      * @throws Exception
      */
     @Test
-    public void testAllFailedTaskRun() throws Exception {
+    void testAllFailedTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new LinkedHashSet<>();
@@ -292,7 +292,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
      * @throws Exception
      */
     @Test
-    public void testFailedProductConfigTaskRun() throws Exception {
+    void testFailedProductConfigTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new HashSet<>();
@@ -318,7 +318,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
      * @throws Exception
      */
     @Test
-    public void testFailedInvalidIndexTaskRun() throws Exception {
+    void testFailedInvalidIndexTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new HashSet<>();
@@ -344,7 +344,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
      * @throws Exception
      */
     @Test
-    public void testFailedWhileGeneratingSbomTaskRun() throws Exception {
+    void testFailedWhileGeneratingSbomTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new HashSet<>();
@@ -370,7 +370,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
      * @throws Exception
      */
     @Test
-    public void testFailedGeneralErrorTaskRun() throws Exception {
+    void testFailedGeneralErrorTaskRun() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new HashSet<>();
@@ -391,7 +391,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
     }
 
     @Test
-    public void testFailedMultipleReasons() throws Exception {
+    void testFailedMultipleReasons() throws Exception {
         GenerationRequest request = dummyGenerationRequest();
 
         Set<TaskRun> secondaryTaskRuns = new HashSet<>();
@@ -418,7 +418,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
     }
 
     @Test
-    public void testFailedWithCleanup(@TempDir Path tempDir) throws Exception {
+    void testFailedWithCleanup(@TempDir Path tempDir) throws Exception {
         when(controllerConfig.cleanup()).thenReturn(true);
         when(controllerConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
 
@@ -447,7 +447,7 @@ public class GenerationPhaseGenerationRequestReconcilerIT {
     }
 
     @Test
-    public void testFailedWithoutCleanup(@TempDir Path tempDir) throws Exception {
+    void testFailedWithoutCleanup(@TempDir Path tempDir) throws Exception {
         when(controllerConfig.cleanup()).thenReturn(false);
         when(controllerConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
 

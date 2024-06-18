@@ -31,7 +31,7 @@ import io.quarkus.test.junit.main.QuarkusMainTest;
  * General tests that apply to all generation commands.
  */
 @QuarkusMainTest
-public class BaseGenerateCommandIT {
+class BaseGenerateCommandIT {
     @Test
     @DisplayName("Should fail in case of build not found in PNC")
     void shouldFailForMissingBuild(QuarkusMainLauncher launcher) {

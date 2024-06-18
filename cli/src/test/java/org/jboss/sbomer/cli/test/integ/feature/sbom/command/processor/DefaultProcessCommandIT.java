@@ -62,7 +62,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @QuarkusTest
-public class DefaultProcessCommandIT {
+class DefaultProcessCommandIT {
     @Inject
     ObjectMapper objectMapper;
 

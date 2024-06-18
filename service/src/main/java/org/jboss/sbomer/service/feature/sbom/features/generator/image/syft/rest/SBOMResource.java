@@ -67,15 +67,14 @@ public class SBOMResource {
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
     @Operation(summary = "", description = "")
     @Path("/image/{name}")
-    @APIResponses({
-            @APIResponse(
-                    responseCode = "202",
-                    description = "Requests manifest generation for a given container image.",
-                    content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class))),
-            @APIResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)) })
+    @APIResponse(
+            responseCode = "202",
+            description = "Requests manifest generation for a given container image.",
+            content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateFromContainerImage(@PathParam("name") String imageName, Config config) throws Exception {
         log.info("Requesting new manifest generation for container image: '{}'", imageName);
 

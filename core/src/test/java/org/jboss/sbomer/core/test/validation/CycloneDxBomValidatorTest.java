@@ -32,9 +32,9 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBomValidator;
 import org.junit.jupiter.api.Test;
 
-public class CycloneDxBomValidatorTest {
+class CycloneDxBomValidatorTest {
     @Test
-    public void testBomValidation() {
+    void testBomValidation() {
         HibernateConstraintValidatorContext context = mock(HibernateConstraintValidatorContext.class);
         // ConstraintValidatorContext context = mock(HibernateConstraintValidatorContext.class);
         when(context.unwrap(HibernateConstraintValidatorContext.class)).thenReturn(context);

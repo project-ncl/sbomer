@@ -20,7 +20,7 @@ package org.jboss.sbomer.cli.test.integ.feature.sbom.command;
 import io.quarkus.test.junit.main.QuarkusMainTest;
 
 @QuarkusMainTest
-public class CycloneDXPluginMavenGenerateCommandIT {
+class CycloneDXPluginMavenGenerateCommandIT {
 
     // @Test
     // // @Disabled("Figure out how to run a generation integration test")

@@ -44,7 +44,7 @@ import jakarta.ws.rs.core.Response.Status;
 
 @QuarkusTest
 @QuarkusTestResource(ServiceWireMock.class)
-public class SBOMerClientTestIT {
+class SBOMerClientTestIT {
 
     @Inject
     @RestClient

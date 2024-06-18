@@ -9,7 +9,7 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Test;
 
-public class SkopeoInspectTest {
+class SkopeoInspectTest {
     @Test
     void parseSkopeoOutput() throws IOException {
         String rawData = TestResources.asString("skopeo.json");

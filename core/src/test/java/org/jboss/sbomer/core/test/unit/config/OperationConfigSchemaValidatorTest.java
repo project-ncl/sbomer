@@ -20,7 +20,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class OperationConfigSchemaValidatorTest {
+class OperationConfigSchemaValidatorTest {
     OperationConfigSchemaValidator validator = new OperationConfigSchemaValidator();
 
     private OperationConfig minimalRuntimeOperationConfig() {

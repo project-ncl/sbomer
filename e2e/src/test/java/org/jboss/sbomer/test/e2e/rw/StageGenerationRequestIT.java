@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Tag("stage")
 @Execution(ExecutionMode.CONCURRENT)
-public class StageGenerationRequestIT extends E2EStageBase {
+class StageGenerationRequestIT extends E2EStageBase {
 
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "requests", fileName);
@@ -54,7 +54,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     static String nodeJsNpmGenerationRequestId;
 
     @Test
-    public void testSuccessfulGenerationMavenBuild() throws IOException {
+    void testSuccessfulGenerationMavenBuild() throws IOException {
         mavenGenerationRequestId = requestGeneration(MAVEN_BUILD_ID);
 
         log.info("Maven build - Generation Request created: {}", mavenGenerationRequestId);
@@ -90,7 +90,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     }
 
     @Test
-    public void testSuccessfulGenerationGradle5Build() throws IOException {
+    void testSuccessfulGenerationGradle5Build() throws IOException {
         String requestBody = Files.readString(sbomPath(GRADLE_5_BUILD_ID + ".json"));
         gradle5GenerationRequestId = requestGenerationWithConfiguration(GRADLE_5_BUILD_ID, requestBody);
 
@@ -126,7 +126,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     }
 
     @Test
-    public void testSuccessfulGenerationGradle4Build() throws IOException {
+    void testSuccessfulGenerationGradle4Build() throws IOException {
         String requestBody = Files.readString(sbomPath(GRADLE_4_BUILD_ID + ".json"));
         gradle4GenerationRequestId = requestGenerationWithConfiguration(GRADLE_4_BUILD_ID, requestBody);
 
@@ -162,7 +162,7 @@ public class StageGenerationRequestIT extends E2EStageBase {
     }
 
     @Test
-    public void testSuccessfulGenerationNodeJsNpmBuild() throws IOException {
+    void testSuccessfulGenerationNodeJsNpmBuild() throws IOException {
         String requestBody = Files.readString(sbomPath(NODEJS_NPM_BUILD_ID + ".json"));
         nodeJsNpmGenerationRequestId = requestGenerationWithConfiguration(NODEJS_NPM_BUILD_ID, requestBody);
 

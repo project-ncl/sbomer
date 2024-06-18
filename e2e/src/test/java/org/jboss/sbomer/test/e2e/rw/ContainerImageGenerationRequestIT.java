@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Execution(ExecutionMode.CONCURRENT)
-public class ContainerImageGenerationRequestIT extends E2EStageBase {
+class ContainerImageGenerationRequestIT extends E2EStageBase {
 
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "requests", fileName);
@@ -45,7 +45,7 @@ public class ContainerImageGenerationRequestIT extends E2EStageBase {
     static String generationRequestId;
 
     @Test
-    public void testSuccessfulGenerationForContainerImage() throws IOException, URISyntaxException {
+    void testSuccessfulGenerationForContainerImage() throws IOException, URISyntaxException {
         generationRequestId = requestContainerImageGeneration(JWS_IMAGE);
 
         log.info("JWS container image - Generation Request created: {}", generationRequestId);

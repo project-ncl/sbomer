@@ -38,7 +38,7 @@ import io.quarkus.test.junit.main.QuarkusMainTest;
 @QuarkusMainTest
 @QuarkusTestResource(PncWireMock.class)
 @TestProfile(CustomPncServiceProfile.class)
-public class RedHatProductProcessCommandIT {
+class RedHatProductProcessCommandIT {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {
         @Override
         public Set<Class<?>> getEnabledAlternatives() {

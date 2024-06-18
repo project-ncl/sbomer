@@ -62,7 +62,7 @@ import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 @ApplicationScoped
 @QuarkusTransactionalTest
 @WithKubernetesTestServer
-public class SbomGenerationRequestRepositoryIT {
+class SbomGenerationRequestRepositoryIT {
 
     @Inject
     Validator validator;
@@ -183,7 +183,7 @@ public class SbomGenerationRequestRepositoryIT {
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    void init() throws Exception {
         Sbom sbom = createSBOM();
         Sbom operationSbom = createOperationSBOM();
         sbomRepository.saveSbom(sbom);
@@ -191,7 +191,7 @@ public class SbomGenerationRequestRepositoryIT {
     }
 
     @Test
-    public void testRSQL() {
+    void testRSQL() {
         SbomGenerationRequest request = sbomGenerationRequestRepository.search(
                 QueryParameters.builder().rsqlQuery("identifier=eq=" + BUILD_ID).pageIndex(0).pageSize(1).build())
                 .get(0);
@@ -224,7 +224,7 @@ public class SbomGenerationRequestRepositoryIT {
     }
 
     @Test
-    public void testPagination() {
+    void testPagination() {
         Page<SbomGenerationRequest> pagedRequest = sbomService
                 .searchSbomRequestsByQueryPaginated(0, 10, "identifier=eq=" + BUILD_ID, null);
 
@@ -241,7 +241,7 @@ public class SbomGenerationRequestRepositoryIT {
     }
 
     @Test
-    public void testFindByIdSbomGenerationRequest() {
+    void testFindByIdSbomGenerationRequest() {
         SbomGenerationRequest request = SbomGenerationRequest.findById(REQUEST_ID);
 
         assertEquals(REQUEST_ID, request.getId());
@@ -249,7 +249,7 @@ public class SbomGenerationRequestRepositoryIT {
     }
 
     @Test
-    public void testFindByOperationIdSbomGenerationRequest() {
+    void testFindByOperationIdSbomGenerationRequest() {
         SbomGenerationRequest request = SbomGenerationRequest.findById(OPERATION_REQUEST_ID);
 
         assertEquals(OPERATION_REQUEST_ID, request.getId());
@@ -257,7 +257,7 @@ public class SbomGenerationRequestRepositoryIT {
     }
 
     @Test
-    public void testDeleteSbomGenerationRequest() throws Exception {
+    void testDeleteSbomGenerationRequest() throws Exception {
         Config runtimeConfig = createRuntimeConfig(BUILD_ID_2_DELETE);
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
@@ -294,7 +294,7 @@ public class SbomGenerationRequestRepositoryIT {
     }
 
     @Test
-    public void testFindPendingOperationRequest() {
+    void testFindPendingOperationRequest() {
         long beforeInsertionSize = sbomGenerationRequestRepository.count();
         String _id = "589A58D72C4D452";
         String _identifier = "BAHVPNKYCYIAA";

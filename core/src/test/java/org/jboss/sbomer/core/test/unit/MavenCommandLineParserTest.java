@@ -26,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
-public class MavenCommandLineParserTest {
+class MavenCommandLineParserTest {
 
     @Test
-    public void windupParentTest() throws IOException, IllegalArgumentException {
+    void windupParentTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAM.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -42,7 +42,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
-    public void windupRulesetsTest() throws IOException, IllegalArgumentException {
+    void windupRulesetsTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAA.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -56,7 +56,7 @@ public class MavenCommandLineParserTest {
 
     @Test
     @SuppressWarnings({ "java:S5852", "java:S2068" })
-    public void windupMtrCliTest() throws IOException, IllegalArgumentException {
+    void windupMtrCliTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAC.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -77,7 +77,7 @@ public class MavenCommandLineParserTest {
 
     @Test
     @SuppressWarnings({ "java:S5852", "java:S2068" })
-    public void windupWebParentTest() throws IOException, IllegalArgumentException {
+    void windupWebParentTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAE.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -102,7 +102,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
-    public void windupOpenShiftParentTest() throws IOException, IllegalArgumentException {
+    void windupOpenShiftParentTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAG.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -115,7 +115,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
-    public void windupMtrWebDistributionTest() throws IOException, IllegalArgumentException {
+    void windupMtrWebDistributionTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAI.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -133,7 +133,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
-    public void windupMtrMavenPluginTest() throws IOException, IllegalArgumentException {
+    void windupMtrMavenPluginTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSDRQAK.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -146,7 +146,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
-    public void windupOperatorTest() throws IOException, IllegalArgumentException {
+    void windupOperatorTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSLRQAA.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -161,7 +161,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
-    public void tackleDivaCoreTest() throws IOException, IllegalArgumentException {
+    void tackleDivaCoreTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/AY6LV5YSLRQAC.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -172,7 +172,7 @@ public class MavenCommandLineParserTest {
     }
 
     @Test
-    public void jwsTomcatTest() throws IOException, IllegalArgumentException {
+    void jwsTomcatTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/A3L53ZF72MYAA.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);

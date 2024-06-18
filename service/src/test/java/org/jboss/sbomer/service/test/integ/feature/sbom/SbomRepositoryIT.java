@@ -51,7 +51,7 @@ import jakarta.validation.Validator;
 
 @QuarkusTransactionalTest
 @WithKubernetesTestServer
-public class SbomRepositoryIT {
+class SbomRepositoryIT {
 
     @Inject
     Validator validator;
@@ -60,7 +60,7 @@ public class SbomRepositoryIT {
     SbomRepository sbomRepository;
 
     @Test
-    public void testNonNullRootComponents() {
+    void testNonNullRootComponents() {
         String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
 
@@ -71,7 +71,7 @@ public class SbomRepositoryIT {
     }
 
     @Test
-    public void testValidBom() throws JsonProcessingException, JsonMappingException {
+    void testValidBom() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = sbom.getCycloneDxBom();
@@ -96,7 +96,7 @@ public class SbomRepositoryIT {
     }
 
     @Test
-    public void testValidConfiguration() throws JsonProcessingException, JsonMappingException {
+    void testValidConfiguration() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 
@@ -134,7 +134,7 @@ public class SbomRepositoryIT {
     }
 
     @Test
-    public void testFindByIdSbom() {
+    void testFindByIdSbom() {
         Sbom sbom = sbomRepository.findById("416640206274228224");
 
         assertEquals("416640206274228224", sbom.getId());
@@ -143,7 +143,7 @@ public class SbomRepositoryIT {
     }
 
     @Test
-    public void testNonNullRootOperationComponents() {
+    void testNonNullRootOperationComponents() {
         String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
 
@@ -152,7 +152,7 @@ public class SbomRepositoryIT {
     }
 
     @Test
-    public void testValidOperationBom() throws JsonProcessingException, JsonMappingException {
+    void testValidOperationBom() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = sbom.getCycloneDxBom();
@@ -178,7 +178,7 @@ public class SbomRepositoryIT {
     }
 
     @Test
-    public void testValidOperationConfiguration() throws JsonProcessingException, JsonMappingException {
+    void testValidOperationConfiguration() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 
@@ -217,7 +217,7 @@ public class SbomRepositoryIT {
     }
 
     @Test
-    public void testFindByIdOperationSbom() {
+    void testFindByIdOperationSbom() {
         Sbom sbom = sbomRepository.findById("816640206274228223");
 
         assertEquals("816640206274228223", sbom.getId());

@@ -43,7 +43,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @WithKubernetesTestServer
-public class GenerationFinishedMessageBodyIT {
+class GenerationFinishedMessageBodyIT {
 
     @Inject
     GenerationFinishedMessageBodyValidator validator;

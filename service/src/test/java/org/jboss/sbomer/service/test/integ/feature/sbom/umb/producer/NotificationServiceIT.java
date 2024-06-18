@@ -51,7 +51,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(UmbProducerEnabled.class)
-public class NotificationServiceIT {
+class NotificationServiceIT {
 
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "sboms", fileName);

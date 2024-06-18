@@ -36,7 +36,7 @@ import io.restassured.RestAssured;
 @QuarkusTest
 @TestProfile(CustomConfig.class)
 @WithKubernetesTestServer
-public class StatsResourceIT {
+class StatsResourceIT {
     public static class CustomConfig implements QuarkusTestProfile {
         @Override
         public Map<String, String> getConfigOverrides() {

@@ -40,7 +40,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @Disabled("This doesn't work, because we are not starting Tekton properly, we need to think about different ways of running integration tests")
-public class GenerationRequestReconcilerIT {
+class GenerationRequestReconcilerIT {
     @Inject
     Operator operator;
 

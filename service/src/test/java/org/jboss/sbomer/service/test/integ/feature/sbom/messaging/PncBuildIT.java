@@ -58,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 @QuarkusTestResource(AmqpTestResourceLifecycleManager.class)
 @Slf4j
 @WithKubernetesTestServer
-public class PncBuildIT {
+class PncBuildIT {
 
     @Inject
     AmqpMessageConsumer consumer;
@@ -77,7 +77,7 @@ public class PncBuildIT {
     InMemoryConnector connector;
 
     @Test
-    public void testUMBProducerPNCBuild() throws Exception {
+    void testUMBProducerPNCBuild() throws Exception {
         log.info("Running testUMBProducerPNCBuild...");
 
         InMemorySource<Message<String>> builds = connector.source("builds");
@@ -120,7 +120,7 @@ public class PncBuildIT {
     }
 
     @Test
-    public void testUMBProducerDelAnalysisOperation() throws Exception {
+    void testUMBProducerDelAnalysisOperation() throws Exception {
         log.info("Running testUMBProducerDelAnalysisOperation...");
 
         InMemorySource<Message<String>> builds = connector.source("builds");

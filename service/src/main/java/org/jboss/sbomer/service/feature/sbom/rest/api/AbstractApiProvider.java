@@ -120,7 +120,7 @@ public abstract class AbstractApiProvider {
     @Path("/stats")
     @GET
     @Operation(summary = "Get service runtime information", description = "Service information and statistics.")
-    @APIResponses({ @APIResponse(responseCode = "200", description = "Available runtime information.") })
+    @APIResponse(responseCode = "200", description = "Available runtime information.")
     public Stats getStats() {
         long uptimeMillis = getUptimeMillis();
 
@@ -207,10 +207,9 @@ public abstract class AbstractApiProvider {
             summary = "Delete SBOM generation request specified by id",
             description = "Delete the specified SBOM generation request from the database")
     @Parameter(name = "id", description = "The SBOM request identifier")
-    @APIResponses({
-            @APIResponse(responseCode = "200", description = "SBOM generation request was successfully deleted"),
-            @APIResponse(responseCode = "404", description = "Specified SBOM generation request could not be found"),
-            @APIResponse(responseCode = "500", description = "Internal server error") })
+    @APIResponse(responseCode = "200", description = "SBOM generation request was successfully deleted")
+    @APIResponse(responseCode = "404", description = "Specified SBOM generation request could not be found")
+    @APIResponse(responseCode = "500", description = "Internal server error")
     public Response deleteGenerationRequest(@PathParam("id") final String id) {
 
         try {

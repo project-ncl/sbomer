@@ -28,7 +28,7 @@ import io.quarkus.test.junit.main.LaunchResult;
 import io.quarkus.test.junit.main.QuarkusMainTest;
 
 @QuarkusMainTest
-public class CliIT {
+class CliIT {
     @Test
     @DisplayName("Should run the command without any options and print help")
     @Launch(exitCode = 2)

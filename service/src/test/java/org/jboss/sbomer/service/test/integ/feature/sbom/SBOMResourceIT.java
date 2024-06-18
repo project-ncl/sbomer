@@ -38,13 +38,13 @@ import io.restassured.http.ContentType;
 
 @QuarkusTest
 @WithKubernetesTestServer
-public class SBOMResourceIT {
+class SBOMResourceIT {
 
     @InjectSpy
     SbomService sbomService;
 
     @Test
-    public void testExistenceOfSbomsEndpoint() {
+    void testExistenceOfSbomsEndpoint() {
         Mockito.when(sbomService.searchSbomsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
         given().when()
                 .get("/api/v1alpha2/sboms")
@@ -56,13 +56,13 @@ public class SBOMResourceIT {
     }
 
     @Test
-    public void testListSbomsPageParams() {
+    void testListSbomsPageParams() {
         Mockito.when(sbomService.searchSbomsByQueryPaginated(1, 20, null, null)).thenReturn(new Page<>());
         given().when().get("/api/v1alpha2/sboms?pageIndex=1&pageSize=20").then().statusCode(200);
     }
 
     @Test
-    public void testGetSbomByIdShouldNotFailForMissing() throws IOException {
+    void testGetSbomByIdShouldNotFailForMissing() throws IOException {
         given().when()
                 .contentType(ContentType.JSON)
                 .request("GET", "/api/v1alpha2/sboms/5644785")
@@ -74,7 +74,7 @@ public class SBOMResourceIT {
     }
 
     @Test
-    public void testGetSbomById() throws IOException {
+    void testGetSbomById() throws IOException {
         Sbom sbom = new Sbom();
         sbom.setIdentifier("AAAABBBB");
         sbom.setId("12345");
@@ -92,7 +92,7 @@ public class SBOMResourceIT {
     }
 
     @Test
-    public void testGetSbomById_V3() throws IOException {
+    void testGetSbomById_V3() throws IOException {
         Sbom sbom = new Sbom();
         sbom.setIdentifier("AAAABBBB");
         sbom.setId("12345");
@@ -110,7 +110,7 @@ public class SBOMResourceIT {
     }
 
     @Test
-    public void testGetBomById() throws IOException {
+    void testGetBomById() throws IOException {
         Sbom sbom = new Sbom();
         sbom.setIdentifier("AAAABBBB");
         sbom.setId("12345");
@@ -134,7 +134,7 @@ public class SBOMResourceIT {
     }
 
     @Test
-    public void testGetSbomByIdShouldHandleIncorrecInput() throws IOException {
+    void testGetSbomByIdShouldHandleIncorrecInput() throws IOException {
         given().when()
                 .contentType(ContentType.JSON)
                 .request("GET", "/api/v1alpha2/sboms/fgETHHG4785")
@@ -146,7 +146,7 @@ public class SBOMResourceIT {
     }
 
     @Test
-    public void ensureValidLicense() throws IOException {
+    void ensureValidLicense() throws IOException {
 
         Sbom sbom = new Sbom();
         sbom.setIdentifier("AAAABBBB");
@@ -175,7 +175,7 @@ public class SBOMResourceIT {
     // * @throws IOException
     // */
     // @Test
-    // public void shouldStartGenerationForAGivenPncBuild() throws IOException {
+    // void shouldStartGenerationForAGivenPncBuild() throws IOException {
     // Sbom sbom = new Sbom();
     // sbom.setBuildId("AABBCC");
     // sbom.setId(416640206274228224L);

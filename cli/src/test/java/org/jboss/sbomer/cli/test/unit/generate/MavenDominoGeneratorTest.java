@@ -35,7 +35,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
-public class MavenDominoGeneratorTest {
+class MavenDominoGeneratorTest {
 
     final Path dominoDir = Path.of("/path/to/domino/dir");
     final Path workDir = Path.of("work/dir");

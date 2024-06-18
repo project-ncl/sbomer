@@ -14,7 +14,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ErrataConfig;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class DeliverableAnalysisConfigSchemaValidatorTest {
+class DeliverableAnalysisConfigSchemaValidatorTest {
     DeliverableAnalysisConfigSchemaValidator validator = new DeliverableAnalysisConfigSchemaValidator();
 
     private DeliverableAnalysisConfig minimalDeliverableAnalysisConfig() {

@@ -22,7 +22,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class ConfigSchemaValidatorTest {
+class ConfigSchemaValidatorTest {
     ConfigSchemaValidator validator = new ConfigSchemaValidator();
 
     private Config minimalRuntimeConfig() {

@@ -11,7 +11,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.junit.jupiter.api.Test;
 
-public class ProductConfigTest {
+class ProductConfigTest {
 
     @Test
     void testGenerateCommand() {

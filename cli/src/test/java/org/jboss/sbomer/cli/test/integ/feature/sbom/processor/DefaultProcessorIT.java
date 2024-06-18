@@ -23,7 +23,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @QuarkusTestResource(PncWireMock.class)
-public class DefaultProcessorIT {
+class DefaultProcessorIT {
 
     @Inject
     DefaultProcessor defaultProcessor;

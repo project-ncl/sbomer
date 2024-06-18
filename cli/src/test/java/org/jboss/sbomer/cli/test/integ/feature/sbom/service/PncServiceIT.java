@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @QuarkusTest
 @QuarkusTestResource(PncWireMock.class)
-public class PncServiceIT {
+class PncServiceIT {
 
     @Inject
     PncService service;

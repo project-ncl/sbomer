@@ -31,7 +31,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
 @Tag("stage")
-public class StageStatsIT extends E2EStageBase {
+class StageStatsIT extends E2EStageBase {
     private Response getStats(String apiVersion) {
         return RestAssured.given()
                 .baseUri(getSbomerBaseUri())
@@ -42,7 +42,7 @@ public class StageStatsIT extends E2EStageBase {
 
     @ParameterizedTest
     @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
-    public void testStats(String version) throws IOException {
+    void testStats(String version) throws IOException {
         Response stats = getStats("v1alpha1");
 
         stats.then()

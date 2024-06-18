@@ -43,7 +43,7 @@ import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
 @QuarkusTestResource(PncWireMock.class)
-public class RedHatProductProcessCommandIT {
+class RedHatProductProcessCommandIT {
     @Inject
     RedHatProductProcessCommand command;
 

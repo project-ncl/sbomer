@@ -47,7 +47,7 @@ import io.restassured.path.json.JsonPath;
 
 @QuarkusTest
 @WithKubernetesTestServer
-public class SBOMResourceRSQIT {
+class SBOMResourceRSQIT {
 
     @InjectSpy
     SbomService sbomService;
@@ -192,7 +192,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchPagination() throws Exception {
+    void testRSQLSearchPagination() throws Exception {
         // One page, one result
         int pageIndex = 0;
         int pageSizeLarge = 50;
@@ -293,7 +293,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchV1Alpha1() throws Exception {
+    void testRSQLSearchV1Alpha1() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
 
@@ -429,7 +429,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchV1Alpha2() throws Exception {
+    void testRSQLSearchV1Alpha2() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
 
@@ -566,7 +566,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchV1Alpha3() throws Exception {
+    void testRSQLSearchV1Alpha3() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
 
@@ -703,7 +703,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testLegacyRSQLSearch() throws Exception {
+    void testLegacyRSQLSearch() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
 
@@ -750,7 +750,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchNotNullValues() throws Exception {
+    void testRSQLSearchNotNullValues() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
         Page<Sbom> pagedSboms = initializeOneResultPaginated(pageIndex, pageSize);
@@ -777,7 +777,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchNullValues() throws Exception {
+    void testRSQLSearchNullValues() throws Exception {
         int pageIndex = 0;
         int pageSize = 50;
         Page<Sbom> pagedSboms = initializeOneResultPaginated(pageIndex, pageSize);
@@ -802,7 +802,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchNotAllowedProperty() {
+    void testRSQLSearchNotAllowedProperty() {
         given().when()
                 .contentType(ContentType.JSON)
                 .request("GET", "/api/v1alpha1/sboms?query=sbom==null")
@@ -819,7 +819,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchAndLogicalNode() throws Exception {
+    void testRSQLSearchAndLogicalNode() throws Exception {
 
         int pageIndex = 0;
         int pageSize = 50;
@@ -898,7 +898,7 @@ public class SBOMResourceRSQIT {
     }
 
     @Test
-    public void testRSQLSearchAndLogicalNodeWithSorting() throws Exception {
+    void testRSQLSearchAndLogicalNodeWithSorting() throws Exception {
 
         int pageIndex = 0;
         int pageSize = 20;

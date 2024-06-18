@@ -51,7 +51,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
 
 @QuarkusTest
-public class ConfigReaderIT {
+class ConfigReaderIT {
 
     @Inject
     ConfigReader configReader;
@@ -190,7 +190,7 @@ public class ConfigReaderIT {
                 .build();
 
         @BeforeEach
-        public void configureGitLabHost() {
+        void configureGitLabHost() {
             configReader.setGitLabHost("gitlab.cee.redhat.com");
         }
 

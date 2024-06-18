@@ -40,7 +40,7 @@ import jakarta.ws.rs.core.Response;
  */
 @QuarkusTest
 @WithKubernetesTestServer
-public class ErrorResourcesIT {
+class ErrorResourcesIT {
 
     @InjectSpy
     SbomService sbomService;

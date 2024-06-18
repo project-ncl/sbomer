@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @QuarkusTest
 @WithKubernetesTestServer
 @Slf4j
-public class SBOMServiceTestIT {
+class SBOMServiceTestIT {
 
     @Inject
     SbomService sbomService;
@@ -58,7 +58,7 @@ public class SBOMServiceTestIT {
     private static final String INITIAL_BUILD_ID = "ARYT3LBXDVYAC";
 
     @Test
-    public void testGetBaseSbom() throws IOException {
+    void testGetBaseSbom() throws IOException {
         log.info("testGetBaseSbom ...");
         String rsqlQuery = "identifier=eq=" + INITIAL_BUILD_ID;
         Collection<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(0, 1, rsqlQuery, null)
@@ -67,7 +67,7 @@ public class SBOMServiceTestIT {
     }
 
     @Test
-    public void testListBaseSboms() throws IOException {
+    void testListBaseSboms() throws IOException {
         log.info("testListBaseSboms ...");
 
         Sbom dummySbom = new Sbom();
@@ -98,13 +98,13 @@ public class SBOMServiceTestIT {
     @Nested
     class GetByPurl {
         @Test
-        public void testGetSbomByPurlNotFound() {
+        void testGetSbomByPurlNotFound() {
             Sbom sbom = sbomService.findByPurl("doesntexist");
             assertNull(sbom);
         }
 
         @Test
-        public void testGetSbomByPurl() {
+        void testGetSbomByPurl() {
             SbomRepository sbomRepositorySpy = spy(ClientProxy.unwrap(sbomRepository));
             QuarkusMock.installMockForInstance(sbomRepositorySpy, sbomRepository);
 
