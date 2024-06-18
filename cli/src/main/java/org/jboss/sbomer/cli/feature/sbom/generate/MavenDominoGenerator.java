@@ -72,15 +72,15 @@ public class MavenDominoGenerator implements SbomGenerator {
     private Path dominoToolPath() {
         log.debug("Validating Domino tool...");
 
+        String message = "Domino validation failed";
+
         if (dominoDir == null) {
-            throw new ValidationException(
-                    "Domino validation failed",
-                    Collections.singletonList("No Domino directory provided"));
+            throw new ValidationException(message, Collections.singletonList("No Domino directory provided"));
         }
 
         if (!Files.exists(dominoDir)) {
             throw new ValidationException(
-                    "Domino validation failed",
+                    message,
                     Collections
                             .singletonList(String.format("Provided domino directory '%s' doesn't exist", dominoDir)));
         }
@@ -95,7 +95,7 @@ public class MavenDominoGenerator implements SbomGenerator {
 
         if (!Files.exists(dominoPath)) {
             throw new ValidationException(
-                    "Domino validation failed",
+                    message,
                     Collections.singletonList(String.format("Domino could not be found on path '%s'", dominoPath)));
         }
 
