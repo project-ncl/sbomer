@@ -54,7 +54,7 @@ public class ProductConfig {
         return Optional.ofNullable(processors)
                 .map(Collection::stream)
                 .orElseGet(Stream::empty)
-                .anyMatch(processor -> processor instanceof DefaultProcessorConfig);
+                .anyMatch(DefaultProcessorConfig.class::isInstance);
     }
 
     @JsonIgnore
@@ -82,12 +82,10 @@ public class ProductConfig {
             command.add(generator.getArgs());
         }
 
-        if (processors.size() > 0) {
+        if (!processors.isEmpty()) {
             command.add("process");
 
-            processors.forEach(processor -> {
-                command.addAll(processor.toCommand());
-            });
+            processors.forEach(processor -> command.addAll(processor.toCommand()));
         }
 
         return command;
