@@ -20,7 +20,11 @@ package org.jboss.sbomer.test.e2e;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
+import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 
 import io.restassured.RestAssured;
@@ -55,17 +59,65 @@ public abstract class E2EBase {
         return uri;
     }
 
-    public Response givenLastCompleteUmbMessageForGeneration(String generationRequestId) {
-        log.info("Finding last UMB message available for the request: {}", generationRequestId);
+    protected void waitForGeneration(String generationRequestId) {
+        waitForGeneration(generationRequestId, 20, TimeUnit.MINUTES);
+    }
 
-        return RestAssured.given()
-                .baseUri(getDatagrepperBaseUri())
-                .param("delta", "43200") // 12 hours in seconds
-                .param("topic", "/topic/VirtualTopic.eng.pnc.sbom.complete")
-                .param("contains", "\"generationRequest\":{\"id\":\"" + generationRequestId + "\"}")
-                .param("rows_per_page", 1)
-                .param("order", "desc")
-                .get("/raw");
+    protected void waitForGeneration(String generationRequestId, long time, TimeUnit unit) {
+        Awaitility.await().atMost(time, unit).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+            final Response response = getGeneration(generationRequestId);
+            final String status = response.body().jsonPath().getString("status");
+
+            log.info(
+                    "GenerationRequest '{}' (type: '{}', identifier: '{}') current status: {}",
+                    generationRequestId,
+                    response.body().jsonPath().getString("type"),
+                    response.body().jsonPath().getString("identifier"),
+                    status);
+
+            if (status.equals("FAILED")) {
+                log.error("GenerationRequest '{}' failed: {}", generationRequestId, response.asPrettyString());
+                throw new Exception(String.format("GenerationRequest '%s' failed, see logs above"));
+            }
+
+            return status.equals("FINISHED");
+        });
+
+        log.info("GenerationRequest '{}' successfully finished", generationRequestId);
+    }
+
+    public void lastCompleteUmbMessageResponse(String generationRequestId, Consumer<Response> consumer) {
+        AtomicReference<Response> atomicResponse = new AtomicReference<>();
+
+        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
+
+            log.info("Finding last UMB message available for GenerationRquest: '{}'", generationRequestId);
+
+            Response response = RestAssured.given()
+                    .baseUri(getDatagrepperBaseUri())
+                    .param("delta", "43200") // 12 hours in seconds
+                    .param("topic", "/topic/VirtualTopic.eng.pnc.sbom.complete")
+                    .param("contains", "\"generationRequest\":{\"id\":\"" + generationRequestId + "\"}")
+                    .param("rows_per_page", 1)
+                    .param("order", "desc")
+                    .get("/raw");
+
+            if (response.body().jsonPath().getInt("count") == 0) {
+                log.debug("No UMB messages found for GenerationRquest '{}'", generationRequestId);
+                return false;
+            }
+
+            log.info(
+                    "Message with ID '{}' found for GenerationRquest: '{}'!",
+                    response.body().jsonPath().getString("msg_id"),
+                    generationRequestId);
+
+            atomicResponse.set(response);
+
+            return true;
+        });
+
+        consumer.accept(atomicResponse.get());
     }
 
     public Response getGeneration(String generationId) {

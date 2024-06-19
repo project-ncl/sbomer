@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 
-import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
 import org.junit.jupiter.api.Tag;
@@ -31,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
-import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -48,78 +45,44 @@ class StageGenerationRequestIT extends E2EStageBase {
     private final static String GRADLE_4_BUILD_ID = "A3LCEFCLLVYAA";
     private final static String NODEJS_NPM_BUILD_ID = "A4WLAOY3BJIAA";
 
-    static String mavenGenerationRequestId;
-    static String gradle5GenerationRequestId;
-    static String gradle4GenerationRequestId;
-    static String nodeJsNpmGenerationRequestId;
-
     @Test
     void testSuccessfulGenerationMavenBuild() throws IOException {
-        mavenGenerationRequestId = requestGeneration(MAVEN_BUILD_ID);
+        String generationRequestId = requestGeneration(MAVEN_BUILD_ID);
 
-        log.info("Maven build - Generation Request created: {}", mavenGenerationRequestId);
+        log.info("Maven build - Generation Request created: {}", generationRequestId);
 
-        Awaitility.await().atMost(20, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            final Response body = getGeneration(mavenGenerationRequestId);
-            String status = body.path("status").toString();
-
-            log.info("Maven build - Current generation request status: {}", status);
-
-            if (status.equals("FAILED")) {
-                log.error("Maven build - Generation failed: {}", body.asPrettyString());
-                throw new Exception("Maven build - Generation failed!");
-            }
-
-            return status.equals("FINISHED");
-        });
+        waitForGeneration(generationRequestId);
 
         log.info("Maven build finished, waiting for UMB message");
 
-        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            givenLastCompleteUmbMessageForGeneration(mavenGenerationRequestId).then()
-                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(mavenGenerationRequestId))
+        lastCompleteUmbMessageResponse(generationRequestId, resp -> {
+            resp.then()
+                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
                     .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(MAVEN_BUILD_ID))
                     .body("raw_messages[0].msg.build.id", CoreMatchers.is(MAVEN_BUILD_ID))
-                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(mavenGenerationRequestId));
-
-            return true;
+                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
         });
 
         log.info("Maven build passed");
-
     }
 
     @Test
     void testSuccessfulGenerationGradle5Build() throws IOException {
         String requestBody = Files.readString(sbomPath(GRADLE_5_BUILD_ID + ".json"));
-        gradle5GenerationRequestId = requestGenerationWithConfiguration(GRADLE_5_BUILD_ID, requestBody);
+        String generationRequestId = requestGenerationWithConfiguration(GRADLE_5_BUILD_ID, requestBody);
 
-        log.info("Gradle 5 build - Generation Request created: {}", gradle5GenerationRequestId);
+        log.info("Gradle 5 build - Generation Request created: {}", generationRequestId);
 
-        Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            final Response body = getGeneration(gradle5GenerationRequestId);
-            String status = body.path("status").toString();
-
-            log.info("Gradle 5 build - Current generation request status: {}", status);
-
-            if (status.equals("FAILED")) {
-                log.error("Gradle 5 build - generation failed: {}", body.asPrettyString());
-                throw new Exception("Gradle 5 build - Generation failed!");
-            }
-
-            return status.equals("FINISHED");
-        });
+        waitForGeneration(generationRequestId);
 
         log.info("Gradle 5 build finished, waiting for UMB message");
 
-        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            givenLastCompleteUmbMessageForGeneration(gradle5GenerationRequestId).then()
-                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(gradle5GenerationRequestId))
+        lastCompleteUmbMessageResponse(generationRequestId, resp -> {
+            resp.then()
+                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
                     .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(GRADLE_5_BUILD_ID))
                     .body("raw_messages[0].msg.build.id", CoreMatchers.is(GRADLE_5_BUILD_ID))
-                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(gradle5GenerationRequestId));
-
-            return true;
+                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
         });
 
         log.info("Gradle 5 build passed");
@@ -128,23 +91,11 @@ class StageGenerationRequestIT extends E2EStageBase {
     @Test
     void testSuccessfulGenerationGradle4Build() throws IOException {
         String requestBody = Files.readString(sbomPath(GRADLE_4_BUILD_ID + ".json"));
-        gradle4GenerationRequestId = requestGenerationWithConfiguration(GRADLE_4_BUILD_ID, requestBody);
+        String generationRequestId = requestGenerationWithConfiguration(GRADLE_4_BUILD_ID, requestBody);
 
-        log.info("Gradle 4 build - Generation Request created: {}", gradle4GenerationRequestId);
+        log.info("Gradle 4 build - Generation Request created: {}", generationRequestId);
 
-        Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            final Response body = getGeneration(gradle4GenerationRequestId);
-            String status = body.path("status").toString();
-
-            log.info("Gradle 4 build - Current generation request status: {}", status);
-
-            if (status.equals("FAILED")) {
-                log.error("Gradle 4 build - generation failed: {}", body.asPrettyString());
-                throw new Exception("Gradle 4 build - Generation failed!");
-            }
-
-            return status.equals("FINISHED");
-        });
+        waitForGeneration(generationRequestId);
 
         // log.info("Gradle 4 build finished, waiting for UMB message");
 
@@ -164,38 +115,20 @@ class StageGenerationRequestIT extends E2EStageBase {
     @Test
     void testSuccessfulGenerationNodeJsNpmBuild() throws IOException {
         String requestBody = Files.readString(sbomPath(NODEJS_NPM_BUILD_ID + ".json"));
-        nodeJsNpmGenerationRequestId = requestGenerationWithConfiguration(NODEJS_NPM_BUILD_ID, requestBody);
+        String generationRequestId = requestGenerationWithConfiguration(NODEJS_NPM_BUILD_ID, requestBody);
 
-        log.info("NodeJs NPM build - Generation Request created: {}", nodeJsNpmGenerationRequestId);
+        log.info("NodeJs NPM build - Generation Request created: {}", generationRequestId);
 
-        Awaitility.await().atMost(10, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            final Response body = getGeneration(nodeJsNpmGenerationRequestId);
-            String status = body.path("status").toString();
-
-            log.info("NodeJs NPM build - Current generation request status: {}", status);
-
-            if (status.equals("FAILED")) {
-                log.error("NodeJs NPM build - generation failed: {}", body.asPrettyString());
-                throw new Exception("NodeJs NPM build - Generation failed!");
-            }
-
-            return status.equals("FINISHED");
-        });
+        waitForGeneration(generationRequestId);
 
         log.info("NodeJs NPM build finished, waiting for UMB message");
 
-        Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            givenLastCompleteUmbMessageForGeneration(nodeJsNpmGenerationRequestId).then()
-                    .body(
-                            "raw_messages[0].headers.generation_request_id",
-                            CoreMatchers.is(nodeJsNpmGenerationRequestId))
+        lastCompleteUmbMessageResponse(generationRequestId, resp -> {
+            resp.then()
+                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
                     .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
                     .body("raw_messages[0].msg.build.id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
-                    .body(
-                            "raw_messages[0].msg.sbom.generationRequest.id",
-                            CoreMatchers.is(nodeJsNpmGenerationRequestId));
-
-            return true;
+                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
         });
 
         log.info("NodeJs NPM build passed");
