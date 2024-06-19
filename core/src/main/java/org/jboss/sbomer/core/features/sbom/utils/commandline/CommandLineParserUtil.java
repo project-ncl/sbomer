@@ -30,6 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommandLineParserUtil {
 
+    private CommandLineParserUtil() {
+        // This is a utility class
+    }
+
     public static String getLaunderedCommandScript(Build build) {
         String buildCmdOptions = "";
         if (org.jboss.pnc.enums.BuildType.MVN.equals(build.getBuildConfigRevision().getBuildType())) {

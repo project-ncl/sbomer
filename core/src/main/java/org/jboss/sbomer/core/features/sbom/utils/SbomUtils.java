@@ -89,6 +89,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SbomUtils {
 
+    private SbomUtils() {
+        // This is a utility class
+    }
+
     private static final Logger log = LoggerFactory.getLogger(SbomUtils.class);
     private static Pattern gitProtocolPattern = Pattern.compile("git@(.+):(.+)", Pattern.CASE_INSENSITIVE);
 

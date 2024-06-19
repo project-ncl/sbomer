@@ -19,6 +19,10 @@ package org.jboss.sbomer.core.features.sbom;
 
 public class Constants {
 
+    private Constants() {
+        // This is a utlity class
+    }
+
     public static final String SBOMER_NAME = "SBOMer";
     public static final String SBOMER_LICENSE_ID = "Apache-2.0";
     public static final String SBOMER_GIT_URL = "git@github.com:project-ncl/sbomer.git";

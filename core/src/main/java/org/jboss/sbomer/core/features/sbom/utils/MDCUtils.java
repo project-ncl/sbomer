@@ -26,6 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MDCUtils {
 
+    private MDCUtils() {
+        // This is a utility class
+    }
+
     public static void addProcessContext(String processContext) {
         String current = MDC.get(MDCKeys.PROCESS_CONTEXT_KEY);
         if (Strings.isEmpty(current)) {

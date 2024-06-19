@@ -25,6 +25,10 @@ import java.util.regex.Pattern;
 
 public class EnvironmentAttributesUtils {
 
+    private EnvironmentAttributesUtils() {
+        // This is a utlity class
+    }
+
     private static final String MAVEN_ATTRIBUTE_KEY = "MAVEN";
     private static final String GRADLE_ATTRIBUTE_KEY = "GRADLE";
     private static final String JDK_ATTRIBUTE_KEY = "JDK";

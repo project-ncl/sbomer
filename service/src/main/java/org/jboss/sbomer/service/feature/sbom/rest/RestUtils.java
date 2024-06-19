@@ -27,6 +27,10 @@ import org.hibernate.validator.engine.HibernateConstraintViolation;
 import org.yaml.snakeyaml.parser.ParserException;
 
 public class RestUtils {
+    private RestUtils() {
+        // This is a utility class
+    }
+
     /**
      * Converts Hibernate Validator violations in a readable list of messages.
      *
