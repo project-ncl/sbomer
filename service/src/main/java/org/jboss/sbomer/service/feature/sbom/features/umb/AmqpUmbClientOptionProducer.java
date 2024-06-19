@@ -59,7 +59,7 @@ public class AmqpUmbClientOptionProducer {
 
         return new AmqpClientOptions().setSsl(true)
                 .setConnectTimeout(30 * 1000)
-                .setReconnectInterval(5 * 1000)
+                .setReconnectInterval(5L * 1000)
                 .setPfxKeyCertOptions(new PfxOptions().setPath(path).setPassword(password));
     }
 }
