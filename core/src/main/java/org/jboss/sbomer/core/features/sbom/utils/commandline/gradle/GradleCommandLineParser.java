@@ -30,6 +30,10 @@ import lombok.ToString;
 @ToString
 public class GradleCommandLineParser {
 
+    private GradleCommandLineParser() {
+        // This is a utility class
+    }
+
     private static final String GRADLE_MAJOR_VERSION_REGEX_PREFIX = Constants.GRADLE_MAJOR_VERSION_COMMAND_PREFIX
             + "(\\d+)#(.*)";
     private static final Pattern GRADLE_MAJOR_VERSION_PREFIX_PATTERN = Pattern

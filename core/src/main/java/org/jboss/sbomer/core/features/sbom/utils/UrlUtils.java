@@ -28,6 +28,10 @@ import com.github.packageurl.PackageURL;
 
 public class UrlUtils {
 
+    private UrlUtils() {
+        // This is a utility class
+    }
+
     public static final String UTF_8 = "utf-8";
 
     public static String urlencode(String value) {

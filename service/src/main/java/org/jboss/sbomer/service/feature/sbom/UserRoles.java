@@ -21,4 +21,7 @@ public class UserRoles {
 
     public static final String USER_DELETE_ROLE = "pnc-app-sbomer-delete";
 
+    private UserRoles() {
+        // This is a utility class
+    }
 }

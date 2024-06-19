@@ -35,6 +35,10 @@ public class MavenCommandOptions {
     public static final String[] NO_ARGS_OPTIONS = { ALSO_MAKE_OPTION, ALSO_MAKE_DEPENDENTS_OPTION,
             STRICT_CHECKSUM_OPTION, LAX_CHECKSUM_OPTION, NON_RECURSIVE_OPTION };
 
+    private MavenCommandOptions() {
+        // This is a utility class
+    }
+
     /**
      * Add ineffective maven command options kept for backward compatibility
      *

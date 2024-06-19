@@ -36,6 +36,10 @@ public class Labels {
     // select all types
     public static final String LABEL_SELECTOR = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request";
 
+    private Labels() {
+        // This is a utility class
+    }
+
     public static Map<String, String> defaultLabelsToMap(GenerationRequestType sbomGenerationType) {
 
         Map<String, String> labels = Arrays.asList(LABEL_SELECTOR.split(","))

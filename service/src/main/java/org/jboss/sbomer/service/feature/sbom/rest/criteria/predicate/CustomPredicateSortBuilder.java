@@ -43,6 +43,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CustomPredicateSortBuilder<T> {
 
+    private CustomPredicateSortBuilder() {
+        // This is a utility class
+    }
+
     public static <T> Collection<Order> createExpression(
             LogicalNode logical,
             Root<?> root,

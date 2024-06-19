@@ -23,6 +23,10 @@ import io.quarkus.util.GlobUtil;
 
 public class RhVersionPattern {
 
+    private RhVersionPattern() {
+        // This is a utility class
+    }
+
     private static final String RH_VERSION_SUFFIX = "?redhat-*";
     private static final Pattern RH_VERSION_SUFFIX_PATTERN = Pattern
             .compile(GlobUtil.toRegexPattern(RH_VERSION_SUFFIX));

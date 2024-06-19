@@ -23,7 +23,6 @@ import java.util.List;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.criteria.AbstractCriteriaAwareRepository;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
@@ -40,6 +39,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CustomPredicateBuilder<T> {
+
+    private CustomPredicateBuilder() {
+        // This is a utility class
+    }
 
     public static <T> Predicate createPredicate(
             LogicalNode logical,
