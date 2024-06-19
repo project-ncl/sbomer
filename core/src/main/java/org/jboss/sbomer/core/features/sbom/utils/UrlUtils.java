@@ -22,6 +22,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
@@ -73,9 +74,17 @@ public class UrlUtils {
                 return purl;
             }
 
-            qualifiers.keySet().removeAll(allowList);
-            return packageURL.toString();
+            // Qualifiers are not modifable, we need to recreate the purl with new map of qualifiers
+            TreeMap<String, String> modifableQualifiers = new TreeMap<>(qualifiers);
+            modifableQualifiers.keySet().removeAll(allowList);
 
+            return new PackageURL(
+                    packageURL.getType(),
+                    packageURL.getNamespace(),
+                    packageURL.getName(),
+                    packageURL.getVersion(),
+                    modifableQualifiers,
+                    packageURL.getSubpath()).toString();
         } catch (MalformedPackageURLException e) {
             // Just return the originally provided purl
             return purl;

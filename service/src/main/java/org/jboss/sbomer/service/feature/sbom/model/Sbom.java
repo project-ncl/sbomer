@@ -22,8 +22,8 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 import java.time.Instant;
 import java.util.Map;
 
-import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.exception.ParseException;
+import org.cyclonedx.generators.BomGeneratorFactory;
 import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.parsers.JsonParser;
