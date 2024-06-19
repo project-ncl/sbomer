@@ -425,7 +425,7 @@ public class PncService {
         }
 
         log.debug("Found {} results, returning newest one", remoteArtifacts.size());
-        return remoteArtifacts.getAll().stream().skip(remoteArtifacts.size() - 1).findFirst().get();
+        return remoteArtifacts.getAll().stream().skip(remoteArtifacts.size() - 1L).findFirst().get();
     }
 
     /**

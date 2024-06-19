@@ -192,8 +192,7 @@ public class SbomUtils {
 
         // If the SCM repository is not internal and a commitID was computed, add the pedigree.
         if (!Strings.isEmpty(pncBuild.getScmRepository().getExternalUrl())
-                && pncBuild.getScmBuildConfigRevisionInternal() != null
-                && !Boolean.valueOf(pncBuild.getScmBuildConfigRevisionInternal())
+                && pncBuild.getScmBuildConfigRevisionInternal() != null && !pncBuild.getScmBuildConfigRevisionInternal()
                 && pncBuild.getScmBuildConfigRevision() != null) {
 
             addPedigreeCommit(
@@ -537,7 +536,8 @@ public class SbomUtils {
             log.debug(
                     "Property {} already exist, value: {}",
                     property,
-                    findPropertyWithNameInComponent(property, component).get().getValue());
+                    findPropertyWithNameInComponent(property, component).get().getValue()); // NOSONAR It's checked
+                                                                                            // above
         }
     }
 
