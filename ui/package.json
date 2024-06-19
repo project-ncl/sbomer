@@ -31,7 +31,7 @@
     "@testing-library/user-event": "14.5.2",
     "@types/jest": "^29.5.3",
     "@types/react-router-dom": "^5.3.3",
-    "@types/victory": "^33.1.5",
+    "@types/victory": "^35.0.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "copy-webpack-plugin": "^11.0.0",
