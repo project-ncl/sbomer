@@ -21,15 +21,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 
-import org.awaitility.Awaitility;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
-import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -42,27 +39,13 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
 
     private final static String JWS_IMAGE = "registry.redhat.io/jboss-webserver-5/jws58-openjdk17-openshift-rhel8@sha256:f63b27a29c032843941b15567ebd1f37f540160e8066ac74c05367134c2ff3aa";
 
-    static String generationRequestId;
-
     @Test
     void testSuccessfulGenerationForContainerImage() throws IOException, URISyntaxException {
-        generationRequestId = requestContainerImageGeneration(JWS_IMAGE);
+        String generationRequestId = requestContainerImageGeneration(JWS_IMAGE);
 
         log.info("JWS container image - Generation Request created: {}", generationRequestId);
 
-        Awaitility.await().atMost(20, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            final Response body = getGeneration(generationRequestId);
-            String status = body.path("status").toString();
-
-            log.info("JWS container image - generation request {} status: {}", generationRequestId, status);
-
-            if (status.equals("FAILED")) {
-                log.error("JWS container image - Generation failed: {}", body.asPrettyString());
-                throw new Exception("JWS container image - Generation failed!");
-            }
-
-            return status.equals("FINISHED");
-        });
+        waitForGeneration(generationRequestId);
 
         // TODO: We don't send UMB messages just yet
         // log.info("JWS container image finished, waiting for UMB message");
