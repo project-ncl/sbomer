@@ -21,19 +21,23 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-
 import org.jboss.pnc.build.finder.core.BuildConfig;
 import org.jboss.pnc.build.finder.core.BuildSystem;
 import org.jboss.pnc.build.finder.core.ChecksumType;
+import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 
+import io.quarkus.runtime.ShutdownEvent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Produces;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -58,7 +62,7 @@ public class BuildFinderConfigProvider {
     private static final List<String> DEFAULT_ARCHIVE_TYPES = Collections
             .unmodifiableList(List.of("jar", "xml", "pom", "so", "dll", "dylib"));
     private static final List<Pattern> DEFAULT_EXCLUDES = Collections
-            .unmodifiableList(List.of(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$")));
+            .unmodifiableList(List.of(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$"))); // NOSONAR This is OK
     private static final Set<ChecksumType> DEFAULT_CHECKSUM_TYPES = Collections
             .unmodifiableSet(Set.of(ChecksumType.sha1, ChecksumType.sha256, ChecksumType.md5));
     private static final List<BuildSystem> DEFAULT_BUILD_SYSTEMS = Collections
@@ -104,10 +108,22 @@ public class BuildFinderConfigProvider {
         config.setKojiNumThreads(DEFAULT_KOJI_NUM_THREADS);
 
         // The output-directory option specifies the directory to use for output.
-        config.setOutputDirectory(Files.createTempDirectory("sbomer-").toAbsolutePath().toString());
+        Path tempDir = Files.createTempDirectory(
+                "sbomer-",
+                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
+        config.setOutputDirectory(tempDir.toAbsolutePath().toString());
 
         setKojiHubURL(config);
         setKojiWebURL(config);
+    }
+
+    /**
+     * Ensures that the content of temporary directory is removed after we shutdown the application.
+     * 
+     * @param event
+     */
+    void cleanup(@Observes ShutdownEvent event) {
+        FileUtils.rmdir(Path.of(config.getOutputDirectory()));
     }
 
     /**
