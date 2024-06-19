@@ -119,7 +119,7 @@ public class BuildFinderConfigProvider {
 
     /**
      * Ensures that the content of temporary directory is removed after we shutdown the application.
-     * 
+     *
      * @param event
      */
     void cleanup(@Observes ShutdownEvent event) {
