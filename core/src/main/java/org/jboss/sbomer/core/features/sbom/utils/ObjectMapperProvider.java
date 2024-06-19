@@ -36,8 +36,8 @@ public class ObjectMapperProvider {
             new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
                     .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)
                     .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR))
-                            .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
-                            .setSerializationInclusion(Include.NON_NULL);
+            .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
+            .setSerializationInclusion(Include.NON_NULL);
 
     static ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
             .registerModule(new JavaTimeModule())

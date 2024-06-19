@@ -48,9 +48,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.cyclonedx.BomGeneratorFactory;
-import org.cyclonedx.CycloneDxSchema.Version;
+import org.cyclonedx.Version;
 import org.cyclonedx.exception.ParseException;
+import org.cyclonedx.generators.BomGeneratorFactory;
 import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
