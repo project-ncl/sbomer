@@ -62,10 +62,10 @@ public class CustomPredicateSortBuilder<T> {
 
             log.debug("Creating Orders from all children nodes.");
 
-            if (node instanceof LogicalNode) {
-                orders.addAll(createExpression((LogicalNode) node, root, entity, entityManager, misc));
-            } else if (node instanceof ComparisonNode) {
-                orders.addAll(createExpression((ComparisonNode) node, root, entity, entityManager, misc));
+            if (node instanceof LogicalNode ln) {
+                orders.addAll(createExpression(ln, root, entity, entityManager, misc));
+            } else if (node instanceof ComparisonNode cn) {
+                orders.addAll(createExpression(cn, root, entity, entityManager, misc));
             } else {
                 throw new IllegalArgumentException("Unknown expression type: " + node.getClass());
             }

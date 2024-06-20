@@ -43,8 +43,8 @@ public class ArtifactJsonPropertyValidator implements ConstraintValidator<Artifa
         }
 
         try {
-            if (value instanceof ObjectNode) {
-                mapper.readTree(((ObjectNode) value).asText());
+            if (value instanceof ObjectNode on) {
+                mapper.readTree(on.asText());
             } else {
                 mapper.readTree(((TextNode) value).toString());
             }

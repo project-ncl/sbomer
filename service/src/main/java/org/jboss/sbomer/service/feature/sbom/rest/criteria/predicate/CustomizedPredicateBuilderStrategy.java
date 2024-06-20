@@ -20,7 +20,6 @@ package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.rest.criteria.AbstractCriteriaAwareRepository;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;
@@ -53,8 +52,8 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
 
         if (operator.equals(AbstractCriteriaAwareRepository.IS_NULL)) {
             Object argument = cn.getArguments().get(0);
-            if (argument instanceof String) {
-                if (Boolean.parseBoolean((String) argument)) {
+            if (argument instanceof String strArg) {
+                if (Boolean.parseBoolean(strArg)) {
                     return builder.isNull(path);
                 } else {
                     return builder.isNotNull(path);
@@ -62,19 +61,19 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
             }
         } else if (operator.equals(AbstractCriteriaAwareRepository.IS_EQUAL)) {
             Object argument = cn.getArguments().get(0);
-            if (argument instanceof String) {
+            if (argument instanceof String strArg) {
 
                 if (Enum.class.isAssignableFrom(path.getJavaType())) {
                     if (path.getJavaType().equals(GenerationResult.class)) {
                         try {
-                            GenerationResult result = GenerationResult.valueOf(((String) argument).toUpperCase());
+                            GenerationResult result = GenerationResult.valueOf(strArg.toUpperCase());
                             return builder.equal(path, result);
                         } catch (IllegalArgumentException ex) {
                             throw new IllegalArgumentException("Unknown value: " + argument + " for GenerationResult");
                         }
                     } else if (path.getJavaType().equals(SbomGenerationStatus.class)) {
                         try {
-                            SbomGenerationStatus status = SbomGenerationStatus.fromName((String) argument);
+                            SbomGenerationStatus status = SbomGenerationStatus.fromName(strArg);
                             return builder.equal(path, status);
                         } catch (IllegalArgumentException ex) {
                             throw new IllegalArgumentException(
