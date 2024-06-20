@@ -86,12 +86,9 @@ public class OperationConfigMissingCondition implements Condition<TaskRun, Gener
         return secondaryResources.stream().anyMatch(taskRun -> {
             Map<String, String> labels = taskRun.getMetadata().getLabels();
 
-            if (labels != null && Objects
-                    .equals(labels.get(Labels.LABEL_PHASE), SbomGenerationPhase.OPERATIONINIT.name().toLowerCase())) {
-                return true;
-            }
+            return labels != null && Objects
+                    .equals(labels.get(Labels.LABEL_PHASE), SbomGenerationPhase.OPERATIONINIT.name().toLowerCase());
 
-            return false;
         });
     }
 
