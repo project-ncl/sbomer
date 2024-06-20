@@ -60,7 +60,7 @@ public class FeatureFlags implements UnleashSubscriber {
     @Inject
     EventBus bus;
 
-    /** 
+    /**
      * Returns {@code true} in case the dry-run mode is enabled.
      *
      * @return {@code true} if dry-run is enabled, {@code false} otherwise
