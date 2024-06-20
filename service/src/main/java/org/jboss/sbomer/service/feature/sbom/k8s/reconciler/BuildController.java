@@ -33,10 +33,10 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
-import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
@@ -45,12 +45,9 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.IsBuildTypeCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.IsBuildTypeInitializedCondition;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.OperationConfigAvailableCondition;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.OperationConfigMissingCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
-import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunOperationGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunOperationInitDependentResource;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
@@ -110,6 +107,9 @@ public class BuildController extends AbstractController {
     public BuildController() {
 
     }
+
+    @Inject
+    S3StorageHandler s3LogHandler;
 
     @Inject
     GenerationRequestControllerConfig controllerConfig;
@@ -335,6 +335,7 @@ public class BuildController extends AbstractController {
         if (failedTaskRuns.isEmpty()) {
             try {
                 sboms = storeSboms(generationRequest);
+                s3LogHandler.storeFiles(generationRequest);
             } catch (ValidationException e) {
                 // There was an error when validating the entity, most probably the SBOM is not valid
                 log.error("Unable to validate generated SBOM", e);
