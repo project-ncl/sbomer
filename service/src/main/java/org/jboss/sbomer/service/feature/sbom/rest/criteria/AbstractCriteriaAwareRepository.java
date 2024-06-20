@@ -50,8 +50,8 @@ public abstract class AbstractCriteriaAwareRepository<T> implements PanacheRepos
     protected static final RSQLParser predicateParser;
     protected static final RSQLParser sortParser;
 
-    public final static ComparisonOperator IS_NULL = new ComparisonOperator("=isnull=");
-    public final static ComparisonOperator IS_EQUAL = new ComparisonOperator("=eq=");
+    public static final ComparisonOperator IS_NULL = new ComparisonOperator("=isnull=");
+    public static final ComparisonOperator IS_EQUAL = new ComparisonOperator("=eq=");
 
     public static final ComparisonOperator ASC = new ComparisonOperator("=asc=", true);
     public static final ComparisonOperator DESC = new ComparisonOperator("=desc=", true);

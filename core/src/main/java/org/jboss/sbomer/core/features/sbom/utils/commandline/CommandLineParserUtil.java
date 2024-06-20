@@ -65,7 +65,7 @@ public class CommandLineParserUtil {
         return buildCmdOptions;
     }
 
-    private final static Optional<String> getVersionFromBuildAttributes(Build build) {
+    private static final Optional<String> getVersionFromBuildAttributes(Build build) {
         Map<String, String> attributes = build.getAttributes();
         return attributes != null && !attributes.isEmpty()
                 && attributes.containsKey(Constants.BUILD_ATTRIBUTES_BREW_BUILD_VERSION)
