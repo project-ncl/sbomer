@@ -36,6 +36,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -100,6 +101,9 @@ import lombok.extern.slf4j.Slf4j;
 public class OperationController extends AbstractController {
 
     List<TaskRunGenerateDependentResource> generations = new ArrayList<>();
+
+    @Inject
+    S3StorageHandler s3LogHandler;
 
     @Inject
     NotificationService notificationService;
@@ -571,6 +575,8 @@ public class OperationController extends AbstractController {
             // And store it in the database
             sboms.add(sbomRepository.saveSbom(sbom));
         }
+
+        s3LogHandler.storeFiles(generationRequest);
 
         return sboms;
     }
