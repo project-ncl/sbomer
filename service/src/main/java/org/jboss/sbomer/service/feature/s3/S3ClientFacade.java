@@ -94,7 +94,8 @@ public class S3ClientFacade {
     }
 
     /**
-     * Ensure that we have a S3 client initialized and ready. Validates configuration required to instantiate the client.
+     * Ensure that we have a S3 client initialized and ready. Validates configuration required to instantiate the
+     * client.
      */
     public void ensureClient() {
         if (client != null) {
