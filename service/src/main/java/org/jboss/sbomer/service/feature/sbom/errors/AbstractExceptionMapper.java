@@ -111,14 +111,12 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
     void copyHeaders(T ex, ResponseBuilder builder) {
         Response response = null;
 
-        if (ex instanceof Failure) {
-            Failure failure = (Failure) ex;
-            response = failure.getResponse();
+        if (ex instanceof Failure fex) {
+            response = fex.getResponse();
         }
 
-        if (ex instanceof WebApplicationException) {
-            WebApplicationException wax = (WebApplicationException) ex;
-            response = wax.getResponse();
+        if (ex instanceof WebApplicationException waex) {
+            response = waex.getResponse();
         }
 
         if (response == null) {

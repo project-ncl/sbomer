@@ -60,10 +60,10 @@ public class CustomPredicateBuilder<T> {
 
             log.debug("Creating Predicates from all children nodes.");
 
-            if (node instanceof LogicalNode) {
-                predicates.add(createPredicate((LogicalNode) node, root, entity, ema, misc));
-            } else if (node instanceof ComparisonNode) {
-                predicates.add(createPredicate((ComparisonNode) node, root, entity, ema, misc));
+            if (node instanceof LogicalNode ln) {
+                predicates.add(createPredicate(ln, root, entity, ema, misc));
+            } else if (node instanceof ComparisonNode cn) {
+                predicates.add(createPredicate(cn, root, entity, ema, misc));
             } else {
                 throw new IllegalArgumentException("Unknown expression type: " + node.getClass());
             }

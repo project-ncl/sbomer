@@ -63,10 +63,10 @@ public class CustomizedJpaPredicateSortVisitor<T> {
     }
 
     public Collection<Order> accept(Node node, EntityManagerAdapter ema) {
-        if (node instanceof AndNode) {
-            return visit((AndNode) node, ema);
-        } else if (node instanceof OrNode) {
-            return visit((OrNode) node, ema);
+        if (node instanceof AndNode an) {
+            return visit(an, ema);
+        } else if (node instanceof OrNode on) {
+            return visit(on, ema);
         } else {
             return visit((ComparisonNode) node, ema);
         }

@@ -31,8 +31,8 @@ public class SbomerExitCodeExceptionMapper implements IExitCodeExceptionMapper {
      */
     @Override
     public int getExitCode(Throwable exception) {
-        if (exception instanceof CommandLineException) {
-            return ((CommandLineException) exception).getExitCode();
+        if (exception instanceof CommandLineException clex) {
+            return clex.getExitCode();
         }
 
         if (exception instanceof UnmatchedArgumentException) {
