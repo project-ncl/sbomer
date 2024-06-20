@@ -280,16 +280,13 @@ public class PncNotificationHandler {
                 msgBody.getBuild().getProgress(),
                 msgBody.getBuild().getBuildConfigRevision().getBuildType());
 
-        if (!msgBody.getBuild().isTemporaryBuild() && ProgressStatus.FINISHED.equals(msgBody.getBuild().getProgress())
+        return !msgBody.getBuild().isTemporaryBuild()
+                && ProgressStatus.FINISHED.equals(msgBody.getBuild().getProgress())
                 && (BuildStatus.SUCCESS.equals(msgBody.getBuild().getStatus())
                         || BuildStatus.NO_REBUILD_REQUIRED.equals(msgBody.getBuild().getStatus()))
                 && (BuildType.MVN.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())
                         || BuildType.GRADLE.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())
-                        || BuildType.NPM.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType()))) {
-            return true;
-        }
-
-        return false;
+                        || BuildType.NPM.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType()));
     }
 
     private boolean isFinishedAnalysis(PncDelAnalysisNotificationMessageBody msgBody) {
@@ -299,20 +296,12 @@ public class PncNotificationHandler {
                 msgBody.getStatus(),
                 String.join(";", msgBody.getDeliverablesUrls()));
 
-        if (ProgressStatus.FINISHED.equals(msgBody.getStatus())) {
-            return true;
-        }
-
-        return false;
+        return ProgressStatus.FINISHED.equals(msgBody.getStatus());
     }
 
     private boolean isSuccessfullAnalysis(PncDelAnalysisNotificationMessageBody msgBody) {
         DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(msgBody.getOperationId());
 
-        if (OperationResult.SUCCESSFUL.equals(operation.getResult())) {
-            return true;
-        }
-
-        return false;
+        return OperationResult.SUCCESSFUL.equals(operation.getResult());
     }
 }

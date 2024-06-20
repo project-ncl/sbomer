@@ -37,11 +37,6 @@ public enum SbomGenerationStatus {
     }
 
     public boolean isFinal() {
-        if (this.equals(FAILED) || this.equals(FINISHED)) {
-            return true;
-        }
-
-        return false;
-
+        return this.equals(FAILED) || this.equals(FINISHED);
     }
 }

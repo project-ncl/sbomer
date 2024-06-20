@@ -42,6 +42,6 @@ public class ClientExceptionMapper implements ExceptionMapper<ClientException> {
 
         log.error(error.toString(), ex);
 
-        return Response.status(ex.getDefaultCode()).entity(error).type(MediaType.APPLICATION_JSON).build();
+        return Response.status(ex.getCode()).entity(error).type(MediaType.APPLICATION_JSON).build();
     }
 }

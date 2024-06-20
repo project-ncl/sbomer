@@ -365,12 +365,9 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     }
 
     private boolean isValidBuild(Build build) {
-        if (!build.getTemporaryBuild() && org.jboss.pnc.enums.BuildProgress.FINISHED.equals(build.getProgress())
+        return !build.getTemporaryBuild() && org.jboss.pnc.enums.BuildProgress.FINISHED.equals(build.getProgress())
                 && (org.jboss.pnc.enums.BuildStatus.SUCCESS.equals(build.getStatus())
-                        || org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus()))) {
-            return true;
-        }
-        return false;
+                        || org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus()));
     }
 
     private boolean isValidBuildType(Build build) {

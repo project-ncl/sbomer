@@ -103,13 +103,14 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return The {@link Set} containing {@link TaskRun} or empty set if not found.
      */
     protected Set<TaskRun> findTaskRuns(Set<TaskRun> taskRuns, SbomGenerationPhase phase) {
-        return taskRuns.stream().filter(tr -> {
-            if (Objects.equals(tr.getMetadata().getLabels().get(Labels.LABEL_PHASE), phase.name().toLowerCase())) {
-                return true;
-            }
+        return taskRuns.stream()
+                .filter(
+                        tr -> Objects.equals(
+                                tr.getMetadata().getLabels().get(Labels.LABEL_PHASE),
+                                phase.name().toLowerCase())
 
-            return false;
-        }).collect(Collectors.toCollection(LinkedHashSet::new));
+                )
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
