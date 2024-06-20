@@ -52,37 +52,37 @@ public class Constants {
     public static final String SUPPLIER_URL = "https://www.redhat.com";
     public static final String MRRC_URL = "https://maven.repository.redhat.com/ga/";
 
-    public final static String PROPERTY_ERRATA_PRODUCT_NAME = "errata-tool-product-name";
-    public final static String PROPERTY_ERRATA_PRODUCT_VERSION = "errata-tool-product-version";
-    public final static String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
+    public static final String PROPERTY_ERRATA_PRODUCT_NAME = "errata-tool-product-name";
+    public static final String PROPERTY_ERRATA_PRODUCT_VERSION = "errata-tool-product-version";
+    public static final String PROPERTY_ERRATA_PRODUCT_VARIANT = "errata-tool-product-variant";
 
-    public final static String BUILD_ATTRIBUTES_BREW_BUILD_VERSION = "BREW_BUILD_VERSION";
-    public final static String GRADLE_MAJOR_VERSION_COMMAND_PREFIX = "GRADLE_MAJOR_VERSION=";
-    public final static String GRADLE_PLUGIN_VERSION_ENV_VARIABLE = "PLUGIN_VERSION";
+    public static final String BUILD_ATTRIBUTES_BREW_BUILD_VERSION = "BREW_BUILD_VERSION";
+    public static final String GRADLE_MAJOR_VERSION_COMMAND_PREFIX = "GRADLE_MAJOR_VERSION=";
+    public static final String GRADLE_PLUGIN_VERSION_ENV_VARIABLE = "PLUGIN_VERSION";
 
     /**
      * The label name that identifies the particular Sbom resource.
      */
-    public static String TEKTON_LABEL_SBOM_ID = "sbomer.jboss.org/sbom-id";
+    public static final String TEKTON_LABEL_SBOM_ID = "sbomer.jboss.org/sbom-id";
 
     /**
      * The label name that identifies the particular Sbom build id.
      */
-    public static String TEKTON_LABEL_SBOM_BUILD_ID = "sbomer.jboss.org/sbom-build-id";
+    public static final String TEKTON_LABEL_SBOM_BUILD_ID = "sbomer.jboss.org/sbom-build-id";
 
     /**
      * Default Kubernetes label: app.kubernetes.io/part-of
      */
-    public static String TEKTON_LABEL_NAME_APP_PART_OF = "app.kubernetes.io/part-of";
+    public static final String TEKTON_LABEL_NAME_APP_PART_OF = "app.kubernetes.io/part-of";
 
     /**
      * Value for the default Kubernetes label: app.kubernetes.io/part-of: sbomer
      */
-    public static String TEKTON_LABEL_VALUE_APP_PART_OF = "sbomer";
+    public static final String TEKTON_LABEL_VALUE_APP_PART_OF = "sbomer";
 
     /**
      * The suffix which is used in a Task Run name to identify the number of retry attempt
      */
-    public static String TEKTON_TASK_RUN_NAME_SUFFIX_RETRY_ATTEMPT = "retry";
+    public static final String TEKTON_TASK_RUN_NAME_SUFFIX_RETRY_ATTEMPT = "retry";
 
 }
