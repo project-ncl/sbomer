@@ -98,7 +98,7 @@ public class ProcessRunner {
         if (Objects.isNull(command) || command.length == 0) {
             throw new ValidationException(
                     "Command execution validation failed",
-                    Collections.singletonList(String.format("No command to provided")));
+                    Collections.singletonList("No command to provided"));
         }
 
         ProcessRunner.validateWorkDir(workDir);

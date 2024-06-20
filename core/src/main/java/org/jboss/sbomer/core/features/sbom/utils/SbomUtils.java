@@ -570,11 +570,11 @@ public class SbomUtils {
     }
 
     public static boolean hasExternalReference(Component c, ExternalReference.Type type) {
-        return getExternalReferences(c, type).size() > 0;
+        return !getExternalReferences(c, type).isEmpty();
     }
 
     public static boolean hasExternalReference(Component c, ExternalReference.Type type, String comment) {
-        return getExternalReferences(c, type, comment).size() > 0;
+        return !getExternalReferences(c, type, comment).isEmpty();
     }
 
     public static List<ExternalReference> getExternalReferences(Component c, ExternalReference.Type type) {

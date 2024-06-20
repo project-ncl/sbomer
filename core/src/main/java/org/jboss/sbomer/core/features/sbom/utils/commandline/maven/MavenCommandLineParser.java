@@ -170,14 +170,14 @@ public class MavenCommandLineParser {
     }
 
     private String rebuildProfilesCmd() {
-        if (profiles.size() == 0) {
+        if (profiles.isEmpty()) {
             return "";
         }
         return " -" + PROFILES_OPTION + profiles.stream().collect(Collectors.joining(","));
     }
 
     private String rebuildProjectsCmd() {
-        if (projects.size() == 0) {
+        if (projects.isEmpty()) {
             return " ";
         }
 
@@ -191,14 +191,14 @@ public class MavenCommandLineParser {
     }
 
     private String rebuildNoArgsCmd() {
-        if (noArgsOptions.size() == 0) {
+        if (noArgsOptions.isEmpty()) {
             return "";
         }
         return " -" + noArgsOptions.stream().collect(Collectors.joining(" -"));
     }
 
     private String rebuildSystemPropertiesCmd() {
-        if (properties.size() == 0) {
+        if (properties.isEmpty()) {
             return " ";
         }
 

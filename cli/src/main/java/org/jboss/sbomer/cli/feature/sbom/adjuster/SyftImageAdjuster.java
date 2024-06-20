@@ -74,7 +74,7 @@ public class SyftImageAdjuster implements Adjuster {
         cleanupComponent(productComponent);
 
         // ...and all other components
-        bom.getComponents().forEach(component -> cleanupComponent(component));
+        bom.getComponents().forEach(this::cleanupComponent);
 
         // Set the purl for the main component
         productComponent.setPurl(generateImagePurl(productComponent, workDir));
