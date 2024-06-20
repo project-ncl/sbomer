@@ -217,9 +217,7 @@ public class DefaultProcessor implements Processor {
         }
 
         // If there are any purl relcoations, process these.
-        purlRelocations.forEach((oldPurl, newPurl) -> {
-            SbomUtils.updatePurl(bom, oldPurl, newPurl);
-        });
+        purlRelocations.forEach((oldPurl, newPurl) -> SbomUtils.updatePurl(bom, oldPurl, newPurl));
 
         return bom;
     }
