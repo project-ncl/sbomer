@@ -50,9 +50,10 @@ public class ExceptionHandler implements IExecutionExceptionHandler {
             cmd.getErr().println();
 
             if (apiEx.getErrors() != null) {
-                apiEx.getErrors().forEach((String m) -> {
-                    cmd.getErr().println(cmd.getColorScheme().errorText(String.format("  * %s", m)));
-                });
+                apiEx.getErrors()
+                        .forEach(
+                                (String m) -> cmd.getErr()
+                                        .println(cmd.getColorScheme().errorText(String.format("  * %s", m))));
             }
         }
 

@@ -386,9 +386,7 @@ public class SbomUtils {
         // If we have any components (we really should!) then update these purls as well
         if (bom.getComponents() != null) {
             // Update all components' purls (if needed)
-            bom.getComponents().forEach(c -> {
-                updatePurl(c, oldPurl, newPurl);
-            });
+            bom.getComponents().forEach(c -> updatePurl(c, oldPurl, newPurl));
 
             // Remove all duplicates from the components
             bom.setComponents(new ArrayList<>(new LinkedHashSet<>(bom.getComponents())));
@@ -399,9 +397,7 @@ public class SbomUtils {
             List<Dependency> dependencies = new ArrayList<>();
 
             // Update all dependencies
-            bom.getDependencies().forEach(d -> {
-                dependencies.add(updatePurl(d, oldPurl, newPurl));
-            });
+            bom.getDependencies().forEach(d -> dependencies.add(updatePurl(d, oldPurl, newPurl)));
 
             // Remove all duplicates from dependencies
             bom.setDependencies(new ArrayList<>(new LinkedHashSet<>(dependencies)));

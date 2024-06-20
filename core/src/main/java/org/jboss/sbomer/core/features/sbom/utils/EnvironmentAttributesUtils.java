@@ -100,11 +100,15 @@ public class EnvironmentAttributesUtils {
             return Optional.empty();
         }
 
-        Optional<String> javaVersion = environmentAttributes.entrySet().stream().filter(entry -> {
-            return entry.getKey().contains(JDK_ATTRIBUTE_KEY) && !entry.getValue().contains("Mandrel");
-        }).map(entry -> {
-            return entry.getValue().replace("OpenJDK", "").replace("OracleJDK", "").replace("Oracle JDK", "");
-        }).findFirst();
+        Optional<String> javaVersion = environmentAttributes.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().contains(JDK_ATTRIBUTE_KEY) && !entry.getValue().contains("Mandrel"))
+                .map(
+                        entry -> entry.getValue()
+                                .replace("OpenJDK", "")
+                                .replace("OracleJDK", "")
+                                .replace("Oracle JDK", ""))
+                .findFirst();
 
         if (javaVersion.isPresent()) {
             String javaVersionString = javaVersion.get().trim();

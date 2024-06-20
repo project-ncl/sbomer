@@ -203,9 +203,7 @@ public class MavenCommandLineParser {
         }
 
         StringBuilder sb = new StringBuilder();
-        properties.forEach((key, value) -> {
-            sb.append(" -" + SYSTEM_PROPERTIES_OPTION + key + "=" + value);
-        });
+        properties.forEach((key, value) -> sb.append(" -" + SYSTEM_PROPERTIES_OPTION + key + "=" + value));
         return sb.toString();
     }
 
