@@ -598,9 +598,7 @@ public class OperationController extends AbstractController {
             Path sbomPath = Path.of(
                     controllerConfig.sbomDir(),
                     generationRequest.getMetadata().getName(),
-
-                    generationRequest.getMetadata().getName() + "-" + SbomGenerationPhase.GENERATE.ordinal() + "-"
-                            + SbomGenerationPhase.GENERATE.name().toLowerCase() + "-" + i,
+                    SbomGenerationPhase.GENERATE.name().toLowerCase(),
                     "bom.json");
 
             // Read the generated SBOM JSON file
@@ -620,59 +618,6 @@ public class OperationController extends AbstractController {
         }
 
         return sboms;
-    }
-
-    private Config setConfig(GenerationRequest generationRequest, TaskRun taskRun) {
-        log.debug("Handling result of the initialization task");
-
-        if (taskRun.getStatus() == null) {
-            throw new ApplicationException(
-                    "TaskRun '{}' does not have status sub-resource despite it is expected",
-                    taskRun.getMetadata().getName());
-
-        }
-
-        if (taskRun.getStatus().getTaskResults() == null || taskRun.getStatus().getTaskResults().isEmpty()) {
-            throw new ApplicationException(
-                    "TaskRun '{}' does not have any results despite it is expected to have one",
-                    taskRun.getMetadata().getName());
-        }
-
-        Optional<TaskRunResult> configResult = taskRun.getStatus()
-                .getTaskResults()
-                .stream()
-                .filter(result -> Objects.equals(result.getName(), TaskRunInitDependentResource.RESULT_NAME))
-                .findFirst();
-
-        if (configResult.isEmpty()) {
-            throw new ApplicationException(
-                    "Could not find the '{}' result within the TaskRun '{}'",
-                    TaskRunInitDependentResource.RESULT_NAME,
-                    taskRun.getMetadata().getName());
-        }
-
-        String configVal = configResult.get().getValue().getStringVal();
-        Config config;
-
-        try {
-            config = objectMapper.readValue(configVal.getBytes(), Config.class);
-        } catch (IOException e) {
-            throw new ApplicationException(
-                    "Could not parse the '{}' result within the TaskRun '{}': {}",
-                    TaskRunInitDependentResource.RESULT_NAME,
-                    taskRun.getMetadata().getName(),
-                    configVal);
-        }
-
-        log.debug("Runtime config from TaskRun '{}' parsed: {}", taskRun.getMetadata().getName(), config);
-
-        try {
-            generationRequest.setConfig(objectMapper.writeValueAsString(config));
-        } catch (JsonProcessingException e) {
-            log.error("Unable to serialize product configuration", e);
-        }
-
-        return config;
     }
 
     private OperationConfig setOperationConfig(GenerationRequest generationRequest, TaskRun taskRun) {
