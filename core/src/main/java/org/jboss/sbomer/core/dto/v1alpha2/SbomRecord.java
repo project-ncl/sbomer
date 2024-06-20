@@ -61,4 +61,4 @@ public record SbomRecord(
                 new SbomGenerationRequestRecord(gId, gCreationTime, gStatus, gResult, gBuildId, gConfig, gReason));
     }
 
-};
+}

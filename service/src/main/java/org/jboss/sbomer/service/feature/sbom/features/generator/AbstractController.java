@@ -154,7 +154,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      */
     protected boolean isFinished(TaskRun taskRun) {
         if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
-                && taskRun.getStatus().getConditions().size() > 0
+                && !taskRun.getStatus().getConditions().isEmpty()
                 && (Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")
                         || Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "False"))) {
 
@@ -180,7 +180,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         }
 
         if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
-                && taskRun.getStatus().getConditions().size() > 0
+                && !taskRun.getStatus().getConditions().isEmpty()
                 && Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")) {
             log.trace("TaskRun '{}' finished successfully", taskRun.getMetadata().getName());
             return true;

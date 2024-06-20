@@ -99,7 +99,7 @@ public class ConfigReader {
                     scmTag,
                     e);
 
-            return null;
+            return new byte[0];
         }
 
         return Base64.getDecoder().decode(base64Config);
@@ -139,7 +139,7 @@ public class ConfigReader {
                     scmTag,
                     e);
 
-            return null;
+            return new byte[0];
         }
 
     }
@@ -167,7 +167,7 @@ public class ConfigReader {
                     build.getId());
         }
 
-        if (configContent == null) {
+        if (configContent.length == 0) {
             log.warn("Config file not found or failed to retrieve it, ignoring");
             return null;
         }

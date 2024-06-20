@@ -18,8 +18,12 @@
 package org.jboss.sbomer.core.errors;
 
 public class NotFoundException extends ClientException {
+    @Override
+    public int getCode() {
+        return 404;
+    }
 
     public NotFoundException(String message, Object... params) {
-        super(404, message, params);
+        super(message, params);
     }
 }

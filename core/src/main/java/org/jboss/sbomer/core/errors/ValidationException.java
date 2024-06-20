@@ -20,9 +20,13 @@ package org.jboss.sbomer.core.errors;
 import java.util.List;
 
 public class ValidationException extends ClientException {
+    @Override
+    public int getCode() {
+        return 422;
+    }
 
     public ValidationException(String message, List<String> errors, Object... params) {
-        super(422, message, errors, params);
+        super(message, errors, params);
     }
 
 }

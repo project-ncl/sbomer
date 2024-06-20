@@ -21,40 +21,29 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
-@Getter
-@Setter
 @ToString
 public class ClientException extends ApplicationException {
-    int code = 400;
+    final int defaultCode = 400;
+    @Getter
     List<String> errors;
+
+    @Getter
     String errorId;
+
+    public int getCode() {
+        return defaultCode;
+    }
 
     public ClientException(String message, Object... params) {
         super(message, params);
         this.errorId = UUID.randomUUID().toString();
     }
 
-    public ClientException(int code, String message, Object... params) {
+    public ClientException(String message, List<String> errors, Object... params) {
         super(message, params);
-        this.code = code;
-        this.errorId = UUID.randomUUID().toString();
-    }
-
-    public ClientException(int code, String message, List<String> errors, Object... params) {
-        super(message, params);
-        this.code = code;
         this.errors = errors;
         this.errorId = UUID.randomUUID().toString();
     }
-
-    public static ClientException fromResponse(int code, ErrorResponse error) {
-        ClientException ex = new ClientException(code, error.getMessage(), error.getErrors());
-        ex.setErrorId(error.getErrorId());
-
-        return ex;
-    }
-
 }
