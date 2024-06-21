@@ -242,9 +242,10 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             // The same dependency (identified by purl) might be present in multiple locations inside the zip, with
             // different filepath
             Dependency dep = purl256ToDependencies.get(artifact.getArtifact().getPurl());
-            Optional.ofNullable(artifact.getArchiveFilenames()).orElse(List.of()).stream().forEach(filename -> 
-                pathToDependencies.put(filename, dep)
-            );
+            Optional.ofNullable(artifact.getArchiveFilenames())
+                    .orElse(List.of())
+                    .stream()
+                    .forEach(filename -> pathToDependencies.put(filename, dep));
         }
 
         // Find the parent to set the correct hierarchy, default to the main root dependency
