@@ -24,9 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.errors.ServiceUnavailableException;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -44,6 +48,9 @@ public class S3StorageHandler {
 
     @Inject
     S3ClientFacade client;
+
+    @Inject
+    SbomService sbomService;
 
     /**
      * Returns all paths to files found under a given {@code rootDirectory}.
@@ -132,5 +139,49 @@ public class S3StorageHandler {
             String key = path.replaceFirst(generationRootDir.getAbsolutePath(), generationRequest.getId());
             client.upload(path, key);
         });
+    }
+
+    /**
+     * Returns list of paths within the S3 bucket to log files for a given {@link GenerationRequest} identifier.
+     *
+     * @param generationRequestId
+     * @return
+     */
+    public List<String> listLogFilesInBucket(String generationRequestId) {
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId);
+
+        if (generationRequest == null) {
+            throw new NotFoundException("GenerationRequest with id '{}' could not be found", generationRequestId);
+        }
+
+        if (!generationRequest.getStatus().isFinal()) {
+            throw new ServiceUnavailableException(
+                    "Log files cannot be returned, because the GenerationRequest '{}' did not finsh yet",
+                    generationRequestId);
+        }
+
+        return client.logFileNames(generationRequestId);
+    }
+
+    /**
+     * Get log file for a given {@link GenerationRequest} and the requested path.
+     *
+     * @param generationRequestId
+     * @return
+     */
+    public String getLog(String generationRequestId, String path) {
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId);
+
+        if (generationRequest == null) {
+            throw new NotFoundException("GenerationRequest with id '{}' could not be found", generationRequestId);
+        }
+
+        if (!generationRequest.getStatus().isFinal()) {
+            throw new ServiceUnavailableException(
+                    "Log files cannot be returned, because the GenerationRequest '{}' did not finsh yet",
+                    generationRequestId);
+        }
+
+        return client.log(generationRequestId, path);
     }
 }

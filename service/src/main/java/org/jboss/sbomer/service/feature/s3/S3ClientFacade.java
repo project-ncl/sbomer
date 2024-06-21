@@ -19,7 +19,9 @@
 package org.jboss.sbomer.service.feature.s3;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +29,7 @@ import java.util.Set;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.feature.FeatureFlags;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.GenerationRequest;
 
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.vertx.ConsumeEvent;
@@ -37,7 +40,11 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 @ApplicationScoped
 @Slf4j
@@ -158,5 +165,48 @@ public class S3ClientFacade {
         } catch (SdkException e) {
             throw new ApplicationException("An error ocurred when uploading '{}' file to S3", path, e);
         }
+    }
+
+    /**
+     * Returns list of paths within the S3 bucket to log files for a given {@link GenerationRequest} identifier.
+     *
+     * @param generationRequestId
+     * @return
+     */
+    public List<String> logFileNames(String generationRequestId) {
+        ListObjectsV2Request req = ListObjectsV2Request.builder()
+                .bucket(bucketName())
+                .prefix(generationRequestId)
+                .build();
+
+        ListObjectsV2Response objects = client.listObjectsV2(req);
+
+        List<String> paths = new ArrayList<>();
+
+        for (S3Object object : objects.contents()) {
+            log.debug("Found: '{}'", object.key());
+
+            if (object.key().contains("/logs/")) {
+                paths.add(object.key().replaceAll(generationRequestId + "/", ""));
+            }
+        }
+
+        return paths;
+    }
+
+    /**
+     * Returns list of paths within the S3 bucket to log files for a given {@link GenerationRequest} identifier.
+     *
+     * @param generationRequestId
+     * @return
+     */
+    public String log(String generationRequestId, String path) {
+
+        GetObjectRequest req = GetObjectRequest.builder()
+                .bucket(bucketName())
+                .key(generationRequestId + "/" + path)
+                .build();
+
+        return client.getObjectAsBytes(req).asUtf8String();
     }
 }
