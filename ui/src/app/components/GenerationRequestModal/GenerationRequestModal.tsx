@@ -7,6 +7,7 @@ import {
   timestampToHumanReadable,
   typeToDescription,
 } from '@app/utils/Utils';
+import { LazyLog } from '@melloware/react-logviewer';
 import {
   Button,
   CodeBlock,
@@ -20,18 +21,61 @@ import {
   Label,
   Modal,
   ModalVariant,
+  Skeleton,
+  Tab,
+  TabContent,
+  TabTitleText,
+  Tabs,
   Text,
   TextContent,
   TextVariants,
   Timestamp,
   TimestampTooltipVariant,
+  Title,
   Tooltip,
 } from '@patternfly/react-core';
 import React, { useState } from 'react';
 
+const Logs = ({ request }: { request: SbomerGenerationRequest }) => {
+  const fileNames = ['generate/0/logs/output.log', 'init/logs/output.log'];
+  const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
+
+  const handleTabClick = (
+    event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
+    tabIndex: string | number,
+  ) => {
+    setActiveTabKey(tabIndex);
+  };
+
+  return (
+    <>
+      <Title headingLevel="h2">Logs</Title>
+      <Tabs id={`${request.id}-logs`} activeKey={activeTabKey} onSelect={handleTabClick} mountOnEnter>
+        {fileNames.map((fileName, index) => (
+          <Tab eventKey={index} title={<TabTitleText>{fileName}</TabTitleText>}>
+            <TabContent id={`log-${index}-${fileName}`}>
+              <LazyLog
+                loadingComponent={<Skeleton screenreaderText={`Loading ${fileName} log...`} />}
+                follow
+                caseInsensitive
+                enableHotKeys
+                enableSearch
+                extraLines={1}
+                height="520"
+                onLineContentClick={function noRefCheck() {}}
+                selectableLines
+                url={`http://localhost:8080/api/v1alpha3/sbom/requests/${request.id}/logs/${encodeURIComponent(fileName)}`}
+              />
+            </TabContent>
+          </Tab>
+        ))}
+      </Tabs>
+    </>
+  );
+};
+
 export const GenerationRequestModal = ({ request }: { request: SbomerGenerationRequest }) => {
   const [showModal, setShowModal] = useState(false);
-  const [showModalJSON, setShowModalJSON] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const onToggle = (isExpanded) => {
@@ -43,7 +87,6 @@ export const GenerationRequestModal = ({ request }: { request: SbomerGenerationR
    */
   const closeModal = () => {
     setShowModal(false);
-    setShowModalJSON(false);
   };
 
   return (
@@ -122,7 +165,9 @@ export const GenerationRequestModal = ({ request }: { request: SbomerGenerationR
           </DescriptionListGroup>
         </DescriptionList>
         <br />
-        <CodeBlock style={{}}>
+        <Logs request={request} />
+        <br />
+        <CodeBlock>
           <ExpandableSectionToggle
             isExpanded={isExpanded}
             onToggle={onToggle}
