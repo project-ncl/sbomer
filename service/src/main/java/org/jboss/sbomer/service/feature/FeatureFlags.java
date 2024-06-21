@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,6 +61,9 @@ public class FeatureFlags implements UnleashSubscriber {
     @Inject
     EventBus bus;
 
+    @ConfigProperty(name = "SBOMER_FEATURE_S3_STORAGE_ENABLED", defaultValue = "false")
+    boolean s3StorageEnabled;
+
     /**
      * Returns {@code true} in case the dry-run mode is enabled.
      *
@@ -75,7 +79,7 @@ public class FeatureFlags implements UnleashSubscriber {
      * @return {@code true} if s3 support for logs is enabled, {@code false} otherwise
      */
     public boolean s3Storage() {
-        return unleash.isEnabled(TOGGLE_S3_STORAGE, false);
+        return unleash.isEnabled(TOGGLE_S3_STORAGE, s3StorageEnabled);
     }
 
     private void updateToggles(final FeatureToggleResponse toggleResponse) {

@@ -21,6 +21,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -52,6 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @PermitAll
 @Slf4j
+@Tag(name = "v1alpha3")
 public class SBOMResource {
     @Inject
     V1Alpha3Mapper mapper;
