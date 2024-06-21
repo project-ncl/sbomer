@@ -18,6 +18,7 @@
 package org.jboss.sbomer.core.pnc;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -414,8 +415,16 @@ public class PncService {
             return remoteArtifacts.iterator().next();
         }
 
+        // First try to select artifacts with an associated build
+        Collection<Artifact> allArtifacts = remoteArtifacts.getAll();
+        Optional<Artifact> artifact = allArtifacts.stream().filter(a -> a.getBuild() != null).findFirst();
+        if (artifact.isPresent()) {
+            log.debug("Found {} results, returning the artifact associated with a build", remoteArtifacts.size());
+            return artifact.get();
+        }
+        // If no artifact has a build, return the newest one
         log.debug("Found {} results, returning newest one", remoteArtifacts.size());
-        return remoteArtifacts.getAll().stream().skip(remoteArtifacts.size() - 1L).findFirst().get();
+        return allArtifacts.stream().skip(allArtifacts.size() - 1L).findFirst().get();
     }
 
     /**

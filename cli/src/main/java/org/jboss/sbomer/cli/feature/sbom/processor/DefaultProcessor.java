@@ -20,6 +20,7 @@ package org.jboss.sbomer.cli.feature.sbom.processor;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addHashIfMissing;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMrrc;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHash;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.hasExternalReference;
@@ -28,6 +29,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setBrewBuildMe
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPublisher;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setSupplier;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.updatePurl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +44,6 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.pnc.PncService;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -137,6 +138,11 @@ public class DefaultProcessor implements Processor {
                 }
             }
 
+            // Make sure the component has hashes
+            addHashIfMissing(component, artifact.getMd5(), Hash.Algorithm.MD5);
+            addHashIfMissing(component, artifact.getSha1(), Hash.Algorithm.SHA1);
+            addHashIfMissing(component, artifact.getSha256(), Hash.Algorithm.SHA_256);
+
             log.info(
                     "Starting processing of Red Hat component '{}' with PNC artifact '{}'...",
                     component.getPurl(),
@@ -217,7 +223,7 @@ public class DefaultProcessor implements Processor {
         }
 
         // If there are any purl relcoations, process these.
-        purlRelocations.forEach((oldPurl, newPurl) -> SbomUtils.updatePurl(bom, oldPurl, newPurl));
+        purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
         return bom;
     }

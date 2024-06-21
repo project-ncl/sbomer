@@ -506,6 +506,22 @@ public class SbomUtils {
                 .findFirst();
     }
 
+    public static void addHashIfMissing(Component component, String hash, Algorithm algorithm) {
+
+        List<Hash> hashes = new ArrayList<Hash>();
+        if (component.getHashes() != null) {
+            hashes.addAll(component.getHashes());
+        }
+        // If there isn't already the same algorithm present (do not override), add it
+        if (!hashes.stream()
+                .filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))
+                .findAny()
+                .isPresent()) {
+            hashes.add(new Hash(algorithm.getSpec(), hash));
+            component.setHashes(hashes);
+        }
+    }
+
     public static void addProperty(Component component, String key, String value) {
         log.debug("addProperty {}: {}", key, value);
         List<Property> properties = new ArrayList<Property>();
