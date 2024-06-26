@@ -16,6 +16,15 @@
 /// limitations under the License.
 ///
 
+
+/** @public */
+export type SbomerErrorResponse = {
+  errorId: string;
+  error: string;
+  resource: string;
+  message: string;
+};
+
 /** @public */
 export type SbomerStats = {
   version: string;
@@ -72,11 +81,16 @@ export type GenerateForPncParams = {
 };
 
 export type SbomerApi = {
+  getBaseUrl(): string;
   stats(): Promise<SbomerStats>;
+  getLogPaths(generationRequestId: string): Promise<Array<string>>;
+
   getGenerationRequests(pagination: {
     pageSize: number;
     pageIndex: number;
   }): Promise<{ data: SbomerGenerationRequest[]; total: number }>;
+
+  getGenerationRequest(id: string): Promise<SbomerGenerationRequest>;
 
   generateForPncBuild({ buildId, config }: GenerateForPncParams): Promise<SbomerGenerationRequest>;
 };

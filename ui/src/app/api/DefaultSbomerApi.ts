@@ -16,7 +16,14 @@
 /// limitations under the License.
 ///
 
-import { GenerateForPncParams, SbomerApi, SbomerGenerationRequest, SbomerStats } from '../types';
+import axios, { Axios, AxiosError } from 'axios';
+import {
+  GenerateForPncParams,
+  SbomerApi,
+  SbomerErrorResponse as SbomerError,
+  SbomerGenerationRequest,
+  SbomerStats,
+} from '../types';
 
 type Options = {
   baseUrl: string;
@@ -25,30 +32,62 @@ type Options = {
 export class DefaultSbomerApi implements SbomerApi {
   private readonly baseUrl: string;
 
+  private client: Axios;
   private static _instance: DefaultSbomerApi;
 
   public static getInstance(): SbomerApi {
     if (!DefaultSbomerApi._instance) {
-      var sbomerHost = process.env.REACT_APP_SBOMER_HOST;
+      var sbomerUrl = process.env.REACT_APP_SBOMER_URL;
 
-      if (!sbomerHost) {
+      if (!sbomerUrl) {
         const url = window.location.href;
 
         if (url.includes('stage')) {
-          sbomerHost = 'sbomer-stage.pnc.engineering.redhat.com';
+          sbomerUrl = 'https://sbomer-stage.pnc.engineering.redhat.com';
         } else {
-          sbomerHost = 'sbomer.pnc.engineering.redhat.com';
+          sbomerUrl = 'https://sbomer.pnc.engineering.redhat.com';
         }
       }
 
-      DefaultSbomerApi._instance = new DefaultSbomerApi({ baseUrl: `https://${sbomerHost}` });
+      DefaultSbomerApi._instance = new DefaultSbomerApi({ baseUrl: sbomerUrl });
     }
 
     return DefaultSbomerApi._instance;
   }
 
+  public getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
   constructor(options: Options) {
     this.baseUrl = options.baseUrl;
+    this.client = axios.create({
+      baseURL: options.baseUrl,
+    });
+
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error: AxiosError) => {
+        return Promise.reject(error);
+      },
+    );
+  }
+
+  async getLogPaths(generationRequestId: string): Promise<Array<string>> {
+    const response = await this.client.get(`/api/v1alpha3/sboms/requests/${generationRequestId}/logs`);
+
+    if (response.status != 200) {
+      throw new Error(
+        'Failed to retrieve log paths for GenerationRequest ' +
+          generationRequestId +
+          ', got ' +
+          response.status +
+          " response: '" +
+          response.data +
+          "'",
+      );
+    }
+    return response.data as Array<string>;
   }
 
   async stats(): Promise<SbomerStats> {
@@ -88,6 +127,30 @@ export class DefaultSbomerApi implements SbomerApi {
     });
 
     return { data: requests, total: data.totalHits };
+  }
+
+  async getGenerationRequest(id: string): Promise<SbomerGenerationRequest> {
+    const request = await this.client
+      .get<SbomerGenerationRequest>(`/api/v1alpha3/sboms/requests/${id}`)
+      .then((response) => {
+        return response.data as SbomerGenerationRequest;
+      });
+    //   .catch((error) => {
+    //     var msg = 'Unable to retrieve generation request with ID ' + id + '.';
+
+    //     if (error.response) {
+    //       const err = error.response.data as SbomerError;
+
+    //       msg += ' ' + err.message + '. Error ID: ' + err.errorId;
+
+    //       throw err;
+    //     }
+
+    //     throw new Error(msg);
+    //   }
+    // );
+
+    return request;
   }
 
   async generateForPncBuild({ buildId, config }: GenerateForPncParams): Promise<SbomerGenerationRequest> {

@@ -29,6 +29,7 @@ const GenerationRequestStatuses = new Map<
   { description?: string; color: React.ComponentProps<typeof Label>['color'] }
 >([
   ['FAILED', { description: 'Failed', color: 'red' }],
+  ['GENERATING', { description: 'In progress', color: 'blue' }],
   ['FINISHED', { description: 'Successfully finished', color: 'green' }],
 ]);
 
@@ -38,11 +39,11 @@ const GenerationRequestResults = new Map<
 >([
   ['ERR_CONFIG_MISSING', { description: 'Missing configuration', color: 'red' }],
   ['ERR_GENERAL', { description: 'General error', color: 'red' }],
-  ['ERR_CONFIG_INVALID', { color: 'red' }],
-  ['ERR_INDEX_INVALID', { color: 'red' }],
-  ['ERR_GENERATION', { color: 'red' }],
-  ['ERR_SYSTEM', { color: 'red' }],
-  ['ERR_MULTI', { color: 'red' }],
+  ['ERR_CONFIG_INVALID', { description: 'Invalid configuration', color: 'red' }],
+  ['ERR_INDEX_INVALID', { description: 'Invalid product index', color: 'red' }],
+  ['ERR_GENERATION', { description: 'Generation failure', color: 'red' }],
+  ['ERR_SYSTEM', { description: 'System error', color: 'red' }],
+  ['ERR_MULTI', { description: 'Multiple errors', color: 'red' }],
   ['SUCCESS', { description: 'Success', color: 'green' }],
 ]);
 
@@ -94,6 +95,10 @@ export function statusToDescription(request: SbomerGenerationRequest): string {
 }
 
 export function resultToDescription(request: SbomerGenerationRequest): string {
+  if (request.result == null) {
+    return 'In progress';
+  }
+
   var resolved = GenerationRequestResults.get(request.result);
 
   return resolved?.description ?? request.result;

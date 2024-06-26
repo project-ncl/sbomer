@@ -61,7 +61,7 @@ public class SBOMResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
     @Operation(summary = "List all log file paths for a given GenerationRequest", description = "")
-    @Path("/sbom/requests/{id}/logs")
+    @Path("/sboms/requests/{id}/logs")
     @APIResponse(
             responseCode = "200",
             description = "List of paths to log files available for a given GenerationRequest")
@@ -94,7 +94,7 @@ public class SBOMResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
     @Operation(summary = "Fetch generation log on a specified path", description = "")
-    @Path("/sbom/requests/{id}/logs/{path}")
+    @Path("/sboms/requests/{id}/logs/{path}")
     @APIResponse(
             responseCode = "200",
             description = "Requests manifest generation for a given container image.",

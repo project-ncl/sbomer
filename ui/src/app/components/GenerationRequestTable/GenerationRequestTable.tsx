@@ -1,8 +1,4 @@
-import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import React, { useState } from 'react';
-import { useGenerationRequests } from './useGenerationRequests';
-import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
-import { SbomerGenerationRequest } from '@app/types';
+import { statusToColor, statusToDescription, timestampToHumanReadable } from '@app/utils/Utils';
 import {
   Label,
   Pagination,
@@ -12,8 +8,11 @@ import {
   TimestampTooltipVariant,
   Tooltip,
 } from '@patternfly/react-core';
-import { statusToColor, timestampToHumanReadable } from '@app/utils/Utils';
-import { GenerationRequestModal } from '../GenerationRequestModal/GenerationRequestModal';
+import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
+import { useGenerationRequests } from './useGenerationRequests';
 
 const columnNames = {
   id: 'ID',
@@ -24,8 +23,19 @@ const columnNames = {
 };
 
 export const GenerationRequestTable = () => {
-  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize, retry }] =
+  const history = useHistory();
+
+  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] =
     useGenerationRequests();
+
+  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
+    setPageIndex(newPage - 1);
+  };
+
+  const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
+    setPageSize(newPerPage);
+    setPageIndex(0);
+  };
 
   if (error) {
     return <ErrorSection />;
@@ -38,19 +48,6 @@ export const GenerationRequestTable = () => {
   if (!value) {
     return null;
   }
-
-  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
-    setPageIndex(newPage - 1);
-  };
-
-  const onPerPageSelect = (
-    _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
-    newPerPage: number,
-    newPage: number,
-  ) => {
-    setPageSize(newPerPage);
-    setPageIndex(newPage - 1);
-  };
 
   return (
     <>
@@ -66,7 +63,7 @@ export const GenerationRequestTable = () => {
         </Thead>
         <Tbody>
           {value.map((request) => (
-            <Tr key={request.id}>
+            <Tr key={request.id} isClickable onRowClick={() => history.push('/requests/' + request.id)}>
               <Td dataLabel={columnNames.status}>
                 <Tooltip
                   isContentLeftAligned={true}
@@ -79,7 +76,9 @@ export const GenerationRequestTable = () => {
                     </div>
                   }
                 >
-                  <Label color={statusToColor(request)}>{request.status}</Label>
+                  <Label style={{ cursor: 'pointer' }} color={statusToColor(request)}>
+                    {statusToDescription(request)}
+                  </Label>
 
                   {/* <span className="pf-v5-c-timestamp pf-m-help-text">{request.status}</span> */}
                 </Tooltip>
@@ -90,7 +89,7 @@ export const GenerationRequestTable = () => {
                 </Tooltip>
               </Td>
               <Td dataLabel={columnNames.id}>
-                <GenerationRequestModal request={request} />
+                <pre>{request.id}</pre>
               </Td>
               <Td dataLabel={columnNames.creationTime}>
                 <Timestamp date={request.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>

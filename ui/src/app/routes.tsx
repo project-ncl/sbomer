@@ -1,8 +1,11 @@
 import { Dashboard } from '@app/components/Pages/Dashboard/Dashboard';
-import { NotFound } from '@app/components/Pages/NotFound/NotFound';
+import { NotFoundPage } from '@app/components/Pages/NotFound/NotFoundPage';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
+import { EmptyState } from '@patternfly/react-core';
 import * as React from 'react';
 import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-dom';
+import { GenerationRequestsPage } from './components/Pages/GenerationRequests/GenerationRequestsPage';
+import { GenerationRequestPage } from './components/Pages/GenerationRequests/GenerationRequestPage';
 
 let routeFocusTimer: number;
 export interface IAppRoute {
@@ -30,7 +33,27 @@ const routes: AppRouteConfig[] = [
     label: 'Dashboard',
     path: '/',
     title: 'SBOMer | Dashboard',
-  }
+  },
+  // {
+  //   component: EmptyState,
+  //   exact: true,
+  //   label: 'Manifests',
+  //   path: '/manifests',
+  //   title: 'SBOMer | Manifess',
+  // },
+  {
+    component: GenerationRequestsPage,
+    exact: true,
+    label: 'Generation Requests',
+    path: '/requests',
+    title: 'SBOMer | Generation Requests',
+  },
+  {
+    component: GenerationRequestPage,
+    exact: false,
+    path: '/requests/:id',
+    title: 'SBOMer | Generation Request',
+  },
   // {
   //   component: Support,
   //   exact: true,
@@ -72,7 +95,7 @@ const RouteWithTitleUpdates = ({ component: Component, title, ...rest }: IAppRou
 
 const PageNotFound = ({ title }: { title: string }) => {
   useDocumentTitle(title);
-  return <Route component={NotFound} />;
+  return <Route component={NotFoundPage} />;
 };
 
 const flattenedRoutes: IAppRoute[] = routes.reduce(

@@ -1,4 +1,3 @@
-import { GenerationRequestTable } from '@app/components/GenerationRequestTable/GenerationRequestTable';
 import { AboutSection } from '@app/components/Sections/AboutSection/AboutSection';
 import { StatsSection } from '@app/components/Sections/StatsSection/StatsSection';
 import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
@@ -13,14 +12,11 @@ const Dashboard: React.FunctionComponent = () => {
             SBOMer
           </Title>
         </GridItem>
-        <GridItem span={12}>
+        <GridItem span={6}>
           <AboutSection />
         </GridItem>
-        <GridItem span={12}>
+        <GridItem span={6}>
           <StatsSection />
-        </GridItem>
-        <GridItem span={12}>
-          <GenerationRequestTable />
         </GridItem>
       </Grid>
     </PageSection>
