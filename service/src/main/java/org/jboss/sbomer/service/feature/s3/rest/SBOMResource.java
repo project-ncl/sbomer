@@ -24,7 +24,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.ServiceUnavailableException;
 import org.jboss.sbomer.service.feature.FeatureFlags;
@@ -79,7 +78,7 @@ public class SBOMResource {
             description = "Content cannot be returned at this time",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public Response getLog(@PathParam("id") String generationRequestId) throws Exception {
-        if (!featureFlags.isS3StorageEnabled()) {
+        if (!featureFlags.s3Storage()) {
             throw new ServiceUnavailableException("S3 feature is disabled currently, try again later");
         }
 
@@ -105,7 +104,7 @@ public class SBOMResource {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response getLog(@PathParam("id") String generationRequestId, @PathParam("path") String path)
             throws Exception {
-        if (!featureFlags.isS3StorageEnabled()) {
+        if (!featureFlags.s3Storage()) {
             throw new ServiceUnavailableException("S3 feature is disabled currently, try again later");
         }
 

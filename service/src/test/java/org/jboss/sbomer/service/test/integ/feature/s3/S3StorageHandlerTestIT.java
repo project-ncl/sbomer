@@ -59,5 +59,4 @@ public class S3StorageHandlerTestIT {
                 "S3 client cannot be instantiated, following env variables are missing: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_REGION, BUCKET_NAME]",
                 ex.getMessage());
     }
-
 }
