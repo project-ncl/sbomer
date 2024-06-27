@@ -34,7 +34,6 @@ import io.quarkus.arc.Unremovable;
 import io.vertx.mutiny.core.eventbus.EventBus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,7 +41,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @ApplicationScoped
 @Unremovable
-@Getter
 @Slf4j
 public class FeatureFlags implements UnleashSubscriber {
     public static final String EVENT_NAME = "feature-flag-state-change";
