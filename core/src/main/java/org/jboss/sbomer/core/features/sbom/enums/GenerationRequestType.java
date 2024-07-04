@@ -17,11 +17,49 @@
  */
 package org.jboss.sbomer.core.features.sbom.enums;
 
+import java.util.List;
+
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
+import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
+
+import lombok.Getter;
+
 public enum GenerationRequestType {
-    BUILD, OPERATION, CONTAINERIMAGE;
+    BUILD(PncBuildConfig.class, "config.json"),
+    OPERATION(OperationConfig.class, "operation_config.json"),
+    CONTAINERIMAGE(SyftImageConfig.class, "syft-image-config.json"),
+    ANALYSIS(DeliverableAnalysisConfig.class, "deliverable_analysis_config.json");
+
+    @Getter
+    Class<? extends Config> implementation;
+
+    @Getter
+    String schema;
+
+    GenerationRequestType(Class<? extends Config> implementation, String schema) {
+        this.implementation = implementation;
+        this.schema = schema;
+    }
 
     public static GenerationRequestType fromName(String type) {
         return GenerationRequestType.valueOf(type.toUpperCase());
+    }
+
+    public static String schemaFile(Class<? extends Config> clazz) {
+        GenerationRequestType type = List.of(GenerationRequestType.values())
+                .stream()
+                .filter(t -> t.getImplementation().equals(clazz))
+                .findFirst()
+                .orElse(null);
+
+        if (type == null) {
+            return null;
+        }
+
+        return type.getSchema();
     }
 
     public String toName() {

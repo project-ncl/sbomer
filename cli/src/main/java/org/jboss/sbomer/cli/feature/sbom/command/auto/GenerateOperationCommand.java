@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.pnc.PncService;

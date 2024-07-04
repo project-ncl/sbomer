@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -54,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @KubernetesDependent(resourceDiscriminator = GenerateResourceDiscriminator.class)
 @Slf4j
-public class TaskRunGenerateDependentResource extends KubernetesDependentResource<TaskRun, GenerationRequest>
+public class TaskRunGenerateBuildDependentResource extends KubernetesDependentResource<TaskRun, GenerationRequest>
         implements BulkDependentResource<TaskRun, GenerationRequest> {
 
     public static final String TASK_SUFFIX = "-generate";
@@ -85,26 +84,17 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     @Inject
     TektonClient tektonClient;
 
-    TaskRunGenerateDependentResource() {
+    TaskRunGenerateBuildDependentResource() {
         super(TaskRun.class);
     }
 
-    public TaskRunGenerateDependentResource(Class<TaskRun> resourceType) {
+    public TaskRunGenerateBuildDependentResource(Class<TaskRun> resourceType) {
         super(TaskRun.class);
     }
 
     @Override
     public Map<String, TaskRun> desiredResources(GenerationRequest primary, Context<GenerationRequest> context) {
-        Config config;
-
-        try {
-            config = objectMapper.readValue(primary.getConfig().getBytes(), Config.class);
-        } catch (IOException e) {
-            throw new ApplicationException(
-                    "Unable to parse configuration from GenerationRequest '{}': {}",
-                    primary.getMetadata().getName(),
-                    primary.getConfig());
-        }
+        PncBuildConfig config = primary.getConfig(PncBuildConfig.class);
 
         Map<String, TaskRun> taskRuns = new HashMap<>(config.getProducts().size());
 
@@ -116,7 +106,7 @@ public class TaskRunGenerateDependentResource extends KubernetesDependentResourc
     }
 
     private TaskRun desired(
-            Config config,
+            PncBuildConfig config,
             int index,
             GenerationRequest generationRequest,
             Context<GenerationRequest> context) {

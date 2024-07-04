@@ -29,8 +29,7 @@ import java.util.Set;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
@@ -45,7 +44,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.OperationConfigAvailableCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.OperationConfigMissingCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
-import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunOperationGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunOperationInitDependentResource;
@@ -99,9 +97,6 @@ import lombok.extern.slf4j.Slf4j;
                         reconcilePrecondition = OperationConfigAvailableCondition.class) })
 @Slf4j
 public class OperationController extends AbstractController {
-
-    List<TaskRunGenerateDependentResource> generations = new ArrayList<>();
-
     @Inject
     S3StorageHandler s3LogHandler;
 
@@ -268,7 +263,8 @@ public class OperationController extends AbstractController {
 
         log.debug("ReconcileOperationInitialized ...");
 
-        OperationConfig config = generationRequest.toOperationConfig();
+        OperationConfig config = generationRequest.getConfig(OperationConfig.class);
+
         if (config == null) {
             log.error(
                     "Product configuration from GenerationRequest '{}' could not be read",
@@ -280,7 +276,7 @@ public class OperationController extends AbstractController {
                     "Generation failed. Could not read product configuration");
         }
 
-        if (generationRequest.getDeliverableUrls() == null || generationRequest.getDeliverableUrls().isEmpty()) {
+        if (config.getDeliverableUrls() == null || config.getDeliverableUrls().isEmpty()) {
             log.error("There are no deliverables to process in GenerationRequest '{}'", generationRequest.getName());
             return updateRequest(
                     generationRequest,
@@ -303,7 +299,7 @@ public class OperationController extends AbstractController {
      * @param secondaryResources
      * @param generationRequest
      *
-     * @return
+     * @returnw
      */
     protected UpdateControl<GenerationRequest> reconcileGenerating(
             GenerationRequest generationRequest,
@@ -311,7 +307,8 @@ public class OperationController extends AbstractController {
 
         log.debug("ReconcileOperationGenerating ...");
 
-        OperationConfig config = generationRequest.toOperationConfig();
+        OperationConfig config = generationRequest.getConfig(OperationConfig.class);
+
         if (config == null) {
             log.error(
                     "Product configuration from GenerationRequest '{}' could not be read",
@@ -323,7 +320,7 @@ public class OperationController extends AbstractController {
                     "Generation failed. Could not read product configuration");
         }
 
-        if (generationRequest.getDeliverableUrls() == null || generationRequest.getDeliverableUrls().isEmpty()) {
+        if (config.getDeliverableUrls() == null || config.getDeliverableUrls().isEmpty()) {
             log.error("There are no deliverables to process in GenerationRequest '{}'", generationRequest.getName());
             return updateRequest(
                     generationRequest,
@@ -547,7 +544,7 @@ public class OperationController extends AbstractController {
                 "Reading all generated SBOMs for the GenerationRequest '{}'",
                 generationRequest.getMetadata().getName());
 
-        OperationConfig config = SbomUtils.fromJsonOperationConfig(sbomGenerationRequest.getConfig());
+        OperationConfig config = generationRequest.getConfig(OperationConfig.class);
 
         List<Sbom> sboms = new ArrayList<>();
 
@@ -577,45 +574,6 @@ public class OperationController extends AbstractController {
         }
 
         s3LogHandler.storeFiles(generationRequest);
-
-        return sboms;
-    }
-
-    protected List<Sbom> storeSboms(GenerationRequest generationRequest) {
-        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
-
-        log.info(
-                "Reading all generated SBOMs for the GenerationRequest '{}'",
-                generationRequest.getMetadata().getName());
-
-        Config config = SbomUtils.fromJsonConfig(sbomGenerationRequest.getConfig());
-
-        List<Sbom> sboms = new ArrayList<>();
-
-        for (int i = 0; i < config.getProducts().size(); i++) {
-            log.info("Reading SBOM for index '{}'", i);
-
-            Path sbomPath = Path.of(
-                    controllerConfig.sbomDir(),
-                    generationRequest.getMetadata().getName(),
-                    SbomGenerationPhase.GENERATE.name().toLowerCase(),
-                    "bom.json");
-
-            // Read the generated SBOM JSON file
-            Bom bom = SbomUtils.fromPath(sbomPath);
-
-            // Create the Sbom entity
-            Sbom sbom = Sbom.builder()
-                    .withId(RandomStringIdGenerator.generate())
-                    .withIdentifier(generationRequest.getIdentifier())
-                    .withSbom(SbomUtils.toJsonNode(bom))
-                    .withGenerationRequest(sbomGenerationRequest)
-                    .withConfigIndex(i)
-                    .build();
-
-            // And store it in the database
-            sboms.add(sbomRepository.saveSbom(sbom));
-        }
 
         return sboms;
     }

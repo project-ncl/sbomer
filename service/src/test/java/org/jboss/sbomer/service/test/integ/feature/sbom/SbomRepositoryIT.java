@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
@@ -101,16 +103,13 @@ class SbomRepositoryIT {
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 
         assertEquals("416640206274228224", sbom.getId());
-        assertEquals("ARYT3LBXDVYAC", sbom.getGenerationRequest().getConfiguration().getBuildId());
+        assertEquals("ARYT3LBXDVYAC", ((PncBuildConfig) sbom.getGenerationRequest().getConfig()).getBuildId());
 
-        GeneratorConfig generatorConfig = sbom.getGenerationRequest()
-                .getConfiguration()
-                .getProducts()
+        GeneratorConfig generatorConfig = ((PncBuildConfig) sbom.getGenerationRequest().getConfig()).getProducts()
                 .iterator()
                 .next()
                 .getGenerator();
-        List<ProcessorConfig> processorConfigs = sbom.getGenerationRequest()
-                .getConfiguration()
+        List<ProcessorConfig> processorConfigs = ((PncBuildConfig) sbom.getGenerationRequest().getConfig())
                 .getProducts()
                 .iterator()
                 .next()
@@ -183,14 +182,11 @@ class SbomRepositoryIT {
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 
         assertEquals("816640206274228223", sbom.getId());
-        assertEquals("OPBGCD23DVYAC", sbom.getGenerationRequest().getOperationConfiguration().getOperationId());
+        assertEquals("OPBGCD23DVYAC", ((OperationConfig) sbom.getGenerationRequest().getConfig()).getOperationId());
 
-        GeneratorConfig generatorConfig = sbom.getGenerationRequest()
-                .getOperationConfiguration()
-                .getProduct()
+        GeneratorConfig generatorConfig = ((OperationConfig) sbom.getGenerationRequest().getConfig()).getProduct()
                 .getGenerator();
-        List<ProcessorConfig> processorConfigs = sbom.getGenerationRequest()
-                .getOperationConfiguration()
+        List<ProcessorConfig> processorConfigs = ((OperationConfig) sbom.getGenerationRequest().getConfig())
                 .getProduct()
                 .getProcessors();
         assertEquals(GeneratorType.CYCLONEDX_OPERATION, generatorConfig.getType());

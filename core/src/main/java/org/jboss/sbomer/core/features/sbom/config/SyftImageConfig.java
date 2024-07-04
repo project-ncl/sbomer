@@ -15,51 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.config.runtime;
+package org.jboss.sbomer.core.features.sbom.config;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
-/**
- * SBOMer configuration file to trigger a new PNC deliverable analysis.
- *
- * @author Andrea Vibelli
- */
-@Getter
-@Setter
-@Builder(setterPrefix = "with")
+@Data
+@SuperBuilder(setterPrefix = "with")
 @Jacksonized
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-public class DeliverableAnalysisConfig {
-
-    /**
-     * The API version of the configuration file. In case of breaking changes this value will be used to detect the
-     * correct (de)serializer.
-     */
+@EqualsAndHashCode(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonTypeName("syft-image")
+public class SyftImageConfig extends Config {
     @Builder.Default
-    String apiVersion = "sbomer.jboss.org/v1alpha1";
+    List<String> directories = List.of("/opt");
 
-    /**
-     * Milestone identifier for the new deliverable analysis within PNC.
-     */
-    String milestoneId;
-
-    /**
-     * Product configuration Errata metadata.
-     */
-    ErrataConfig errata;
-
-    /**
-     * Deliverables entries for the given operation.
-     */
-    List<String> deliverableUrls;
+    @JsonIgnore
+    @Override
+    public boolean isEmpty() {
+        return this.equals(new SyftImageConfig());
+    }
 }

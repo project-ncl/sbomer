@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Builder;
@@ -58,7 +61,7 @@ public class ProductConfig {
     }
 
     @JsonIgnore
-    public List<String> generateCommand(Config config) {
+    public List<String> generateCommand(PncBuildConfig config) {
         List<String> command = new ArrayList<>();
 
         // We're running the command under the sbomer feature.

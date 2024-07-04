@@ -44,6 +44,7 @@ import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
@@ -177,7 +178,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
 
                     // Get the runtime configuration related to the ProductConfig with the current index being processed
                     // here
-                    List<ProductConfig> productConfigs = sbomRequest.getConfiguration().getProducts();
+                    List<ProductConfig> productConfigs = ((PncBuildConfig) sbomRequest.getConfig()).getProducts();
                     if (productConfigs != null && productIndex >= 0 && productIndex < productConfigs.size()) {
 
                         // Let's verify that the configuration provided to the generator is the same, otherwise do the

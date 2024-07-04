@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -45,7 +46,7 @@ public record SbomRecord(
             String statusMessage,
             String gId,
             String gIdentifier,
-            JsonNode gConfig,
+            Config gConfig,
             String gType,
             Instant gCreationTime,
             String gStatus,

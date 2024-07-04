@@ -37,7 +37,8 @@ import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
@@ -107,14 +108,14 @@ public class GenerateConfigCommand implements Callable<Integer> {
     @Inject
     ProductVersionMapper productVersionMapper;
 
-    private Config productConfig(Build build) {
+    private PncBuildConfig productConfig(Build build) {
         log.info("Obtaining runtime configuration for build '{}'", build.getId());
 
         // 1. Find if we can obtain the configuration from the file, if not found
         // 2. Find if we can find configuration in the mapper
         // 3. Try to use defaults (if possible)
 
-        Config config = clientConfig(build);
+        PncBuildConfig config = clientConfig(build);
 
         // Client configuration found, use it!
         if (config != null) {
@@ -139,10 +140,10 @@ public class GenerateConfigCommand implements Callable<Integer> {
      *
      * @return {@link Config} object if the configuration could be retrieved or {@code null} otherwise.
      */
-    private Config clientConfig(Build build) {
+    private PncBuildConfig clientConfig(Build build) {
         log.debug("Attempting to fetch configuration from source code repository");
 
-        Config config = configReader.getConfig(build);
+        PncBuildConfig config = (PncBuildConfig) configReader.getConfig(build);
 
         if (config == null) {
             log.debug("Configuration file not found in the source code repository");
@@ -159,7 +160,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
      *
      * @return {@link Config} object if the configuration could be retrieved or {@code null} otherwise.
      */
-    private Config mappingConfig(Build build) {
+    private PncBuildConfig mappingConfig(Build build) {
         log.debug("Attempting to fetch configuration from SBOMer internal mapping");
 
         List<ProductVersionRef> productVersions = pncService.getProductVersions(build.getId());
@@ -169,14 +170,14 @@ public class GenerateConfigCommand implements Callable<Integer> {
             return null;
         }
 
-        List<Config> configs = new ArrayList<>();
+        List<PncBuildConfig> configs = new ArrayList<>();
 
         productVersions.forEach(productVersion -> {
             log.debug(
                     "Trying to find configuration in internal mapping for product version {}",
                     productVersion.getId());
 
-            Config config = productVersionMapper.getMapping().get(productVersion.getId());
+            PncBuildConfig config = productVersionMapper.getMapping().get(productVersion.getId());
 
             if (config == null) {
                 log.debug(
@@ -202,7 +203,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
                 configs.size(),
                 build.getId());
 
-        Config config = Config.builder()
+        PncBuildConfig config = PncBuildConfig.builder()
                 .withBuildId(build.getId())
                 .withApiVersion("sbomer.jboss.org/v1alpha1")
                 .withProducts(new ArrayList<>())
@@ -282,17 +283,17 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
     /**
      * <p>
-     * Prepares a default configuration ({@link Config}) for a given build identifier.
+     * Prepares a default configuration ({@link PncBuildConfig}) for a given build identifier.
      * </p>
      *
      * <p>
      * Retrieves the build information, specifically the build type assigned to the build and based on it a
-     * {@link Config} object is generated with default values.
+     * {@link IConfBuildConfigig} object is generated with default values.
      * </p>
      *
-     * @return {@link Config} with default values
+     * @return {@link PncBuildConfig} with default values
      */
-    private Config initializeDefaultConfig(Build build) {
+    private PncBuildConfig initializeDefaultConfig(Build build) {
         GeneratorType generatorType = GenerateConfigCommand
                 .buildTypeToGeneratoType(build.getBuildConfigRevision().getBuildType());
 
@@ -304,7 +305,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
         DefaultGeneratorConfig defaultGeneratorConfig = sbomerConfigProvider.getDefaultGenerationConfig()
                 .forGenerator(generatorType);
 
-        return Config.builder()
+        return PncBuildConfig.builder()
                 .withBuildId(build.getId())
                 .withProducts(
                         List.of(
@@ -333,12 +334,12 @@ public class GenerateConfigCommand implements Callable<Integer> {
         MDCUtils.removeContext();
         MDCUtils.addBuildContext(this.buildId);
 
-        Config config = null;
+        PncBuildConfig config = null;
 
         if (this.configPath != null) {
             log.debug("Trying to deserialize provided config at '{}'", this.configPath);
 
-            config = ObjectMapperProvider.yaml().readValue(this.configPath.toFile(), Config.class);
+            config = ObjectMapperProvider.yaml().readValue(this.configPath.toFile(), PncBuildConfig.class);
 
             if (config.isEmpty()) {
                 log.debug("Deserialized configuration is empty, will generate one.");

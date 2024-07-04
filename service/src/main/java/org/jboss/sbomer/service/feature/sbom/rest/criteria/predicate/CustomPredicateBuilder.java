@@ -109,7 +109,10 @@ public class CustomPredicateBuilder<T> {
             throw new IllegalArgumentException(msg);
         }
 
-        if (startRoot.getJavaType().equals(SbomGenerationRequest.class) && comparison.getSelector().equals("config")) {
+        if (startRoot.getJavaType().equals(SbomGenerationRequest.class) && comparison.getSelector().equals("config")) { // TODO
+                                                                                                                        // change
+                                                                                                                        // to
+                                                                                                                        // Config
             String msg = "RSQL on field SbomGenerationRequest.config with type JsonNode is not supported!";
             log.error(msg);
             throw new IllegalArgumentException(msg);

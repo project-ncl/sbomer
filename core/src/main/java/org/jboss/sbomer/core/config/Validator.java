@@ -23,8 +23,8 @@ public interface Validator<T> {
     /**
      * Performs validation of a given object according to the JSON schema.
      *
-     * @param t The {@link T} object to validate.
+     * @param config The T object to validate.
      * @return a {@link ValidationResult} object.
      */
-    public ValidationResult validate(T t);
+    public ValidationResult validate(T config);
 }

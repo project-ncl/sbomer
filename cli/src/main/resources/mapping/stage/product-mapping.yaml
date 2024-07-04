@@ -17,6 +17,7 @@
 #
 
 "416":
+  type: pnc-build
   products:
     - processors:
         - type: redhat-product
@@ -25,6 +26,7 @@
             productVersion: RHEL-8-RHTESTPRODUCT-1.1
             productVariant: 8Base-RHTESTPRODUCT-1.1
 "417":
+  type: pnc-build
   products:
     - processors:
         - type: redhat-product

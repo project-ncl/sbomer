@@ -29,10 +29,10 @@ import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.ProductVersionMapper;
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.config.OperationConfigSchemaValidator;
+import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.pnc.PncService;
@@ -90,7 +90,7 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
     PncService pncService;
 
     @Inject
-    OperationConfigSchemaValidator configSchemaValidator;
+    ConfigSchemaValidator configSchemaValidator;
 
     @Inject
     ProductVersionMapper productVersionMapper;
@@ -132,7 +132,8 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
                     return null;
                 }
 
-                Config config = productVersionMapper.getMapping().get(milestone.getProductVersion().getId());
+                PncBuildConfig config = productVersionMapper.getMapping().get(milestone.getProductVersion().getId());
+
                 if (config == null) {
                     log.debug(
                             "Configuration not found in SBOMer internal mapping for product version: {}",

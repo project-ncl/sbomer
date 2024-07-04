@@ -1,8 +1,8 @@
 package org.jboss.sbomer.core.test.unit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -10,11 +10,11 @@ import java.util.List;
 
 import org.jboss.sbomer.core.config.DefaultGenerationConfig;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ErrataConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
@@ -49,7 +49,7 @@ class SbomerConfigProviderTest {
     @Nested
     class ConfigAdjusting {
 
-        private Config minimalRuntimeConfig() {
+        private PncBuildConfig minimalRuntimeConfig() {
             List<ProcessorConfig> processors = new ArrayList<>();
 
             processors.add(
@@ -68,7 +68,7 @@ class SbomerConfigProviderTest {
 
                     .build();
 
-            return Config.builder().withBuildId("AABBCC").withProducts(List.of(productConfig)).build();
+            return PncBuildConfig.builder().withBuildId("AABBCC").withProducts(List.of(productConfig)).build();
         }
 
         private OperationConfig minimalRuntimeOperationConfig() {
@@ -95,13 +95,13 @@ class SbomerConfigProviderTest {
 
         @Test
         void shouldNotFailOnEmptyProducts() {
-            Config config = Config.builder().withBuildId("ABCDEFG").build();
+            PncBuildConfig config = PncBuildConfig.builder().withBuildId("ABCDEFG").build();
             SbomerConfigProvider.getInstance().adjust(config);
         }
 
         @Test
         void shouldProvideDefaultValues() {
-            Config config = minimalRuntimeConfig();
+            PncBuildConfig config = minimalRuntimeConfig();
             SbomerConfigProvider.getInstance().adjust(config);
 
             ProductConfig product = config.getProducts().get(0);
@@ -116,7 +116,7 @@ class SbomerConfigProviderTest {
 
         @Test
         void shouldNotAdjustExplicitGeneratorVersion() {
-            Config config = minimalRuntimeConfig();
+            PncBuildConfig config = minimalRuntimeConfig();
 
             config.getProducts().get(0).getGenerator().setVersion("1.1.1");
 
@@ -133,7 +133,7 @@ class SbomerConfigProviderTest {
 
         @Test
         void shouldNotAdjustExplicitGeneratorArgs() {
-            Config config = minimalRuntimeConfig();
+            PncBuildConfig config = minimalRuntimeConfig();
 
             config.getProducts().get(0).getGenerator().setArgs("--custom-args");
 
@@ -150,7 +150,7 @@ class SbomerConfigProviderTest {
 
         @Test
         void shouldNotAddTwiceDefaultProcessor() {
-            Config config = minimalRuntimeConfig();
+            PncBuildConfig config = minimalRuntimeConfig();
 
             config.getProducts().get(0).getProcessors().add(0, DefaultProcessorConfig.builder().build());
 

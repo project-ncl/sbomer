@@ -24,6 +24,7 @@
             "creationTime": "2021-09-15T11:26:52.852Z",
             "config": {
               "buildId": "QUARKUS",
+              "type": "pnc-build",
               "products": [
                 {
                   "generator": {

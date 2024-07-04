@@ -23,17 +23,16 @@ import java.util.Set;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
-import org.jboss.sbomer.core.config.DeliverableAnalysisConfigSchemaValidator;
-import org.jboss.sbomer.core.config.OperationConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ValidationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.DeliverableAnalysisConfig;
+import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
+import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -90,12 +89,6 @@ public class SbomService {
 
     @Inject
     protected KubernetesClient kubernetesClient;
-
-    @Inject
-    protected OperationConfigSchemaValidator operationConfigSchemaValidator;
-
-    @Inject
-    protected DeliverableAnalysisConfigSchemaValidator delAnalysisConfigSchemaValidator;
 
     @Inject
     protected ConfigSchemaValidator configSchemaValidator;
@@ -177,6 +170,7 @@ public class SbomService {
                 .build();
 
         List<SbomGenerationRequest> content = sbomRequestRepository.search(parameters);
+
         Long count = sbomRequestRepository.countByRsqlQuery(parameters.getRsqlQuery());
 
         return toPage(content, parameters, count);
@@ -202,6 +196,39 @@ public class SbomService {
     }
 
     @WithSpan
+    public SbomGenerationRequest generateSyftImage(
+            @SpanAttribute(value = "image") String imageName,
+            SyftImageConfig config) {
+
+        log.info("New generation request for container image '{}'", imageName);
+
+        if (config != null) {
+            log.debug("Validating provided configuration...");
+            ValidationResult result = configSchemaValidator.validate(config);
+
+            if (!result.isValid()) {
+                throw new ClientException("Provided 'syft-image' configuration is not valid", result.getErrors());
+            }
+        }
+
+        log.debug("Creating GenerationRequest Kubernetes resource...");
+
+        GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.CONTAINERIMAGE)
+                .withIdentifier(imageName)
+                .withStatus(SbomGenerationStatus.NEW)
+                .withConfig(config)
+                .build();
+
+        log.debug("ConfigMap to create: '{}'", req);
+
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+
+        kubernetesClient.configMaps().resource(req).create();
+
+        return sbomGenerationRequest;
+    }
+
+    @WithSpan
     public SbomGenerationRequest generateFromOperation(
             @SpanAttribute(value = "operationId") String operationId,
             OperationConfig config) {
@@ -219,7 +246,7 @@ public class SbomService {
             sbomerConfigProvider.adjust(config);
             config.setOperationId(operationId);
 
-            ValidationResult validationResult = operationConfigSchemaValidator.validate(config);
+            ValidationResult validationResult = configSchemaValidator.validate(config);
 
             if (!validationResult.isValid()) {
                 throw new ValidationException("Provided operation config is not valid", validationResult.getErrors());
@@ -246,7 +273,9 @@ public class SbomService {
     }
 
     @WithSpan
-    public SbomGenerationRequest generateFromBuild(@SpanAttribute(value = "buildId") String buildId, Config config) {
+    public SbomGenerationRequest generateFromBuild(
+            @SpanAttribute(value = "buildId") String buildId,
+            PncBuildConfig config) {
         try {
             MDCUtils.addBuildContext(buildId);
 
@@ -257,7 +286,7 @@ public class SbomService {
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
-            if (config != null) {
+            if (config != null && !config.isEmpty()) {
                 log.debug("Received product configuration...");
 
                 SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
@@ -300,7 +329,7 @@ public class SbomService {
         if (config != null) {
             log.debug("Received deliverable analysis configuration...");
 
-            ValidationResult delAnalysisConfigValidationRes = delAnalysisConfigSchemaValidator.validate(config);
+            ValidationResult delAnalysisConfigValidationRes = configSchemaValidator.validate(config);
 
             if (!delAnalysisConfigValidationRes.isValid()) {
                 throw new ValidationException(
@@ -337,7 +366,7 @@ public class SbomService {
                     .build();
             SbomerConfigProvider.getInstance().adjust(operationConfig);
 
-            ValidationResult operationConfigValidationRes = operationConfigSchemaValidator.validate(operationConfig);
+            ValidationResult operationConfigValidationRes = configSchemaValidator.validate(operationConfig);
 
             if (!operationConfigValidationRes.isValid()) {
                 throw new ValidationException(

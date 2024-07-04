@@ -17,6 +17,7 @@
           "type": "BUILD",
           "config": {
             "buildId": "QUARKUS",
+            "type": "pnc-build",
             "products": [
               {
                 "generator": {

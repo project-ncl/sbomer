@@ -32,7 +32,7 @@ import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.dto.v1alpha1.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha1.SbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.utils.PaginationParameters;
@@ -222,7 +222,7 @@ public class SBOMResource extends AbstractApiProvider {
             responseCode = "400",
             description = "Could not parse provided arguments",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    public Response generate(@PathParam("buildId") String buildId, Config config) throws Exception {
+    public Response generate(@PathParam("buildId") String buildId, PncBuildConfig config) throws Exception {
         if (featureFlags.isDryRun()) {
             log.warn(
                     "Skipping creating new Generation Request for buildId '{}' because of SBOMer running in dry-run mode",

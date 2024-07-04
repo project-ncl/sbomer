@@ -9,6 +9,10 @@
       "description": "Version of the configuration file",
       "enum": ["sbomer.jboss.org/v1alpha1"]
     },
+    "type": {
+      "description": "Configuration type",
+      "enum": ["analysis"]
+    },
     "milestoneId": {
       "description": "PNC milestone identifier",
       "type": "string"
@@ -44,7 +48,7 @@
     }
   }, 
   "required": [
-    "milestoneId", "deliverableUrls"
+    "milestoneId", "deliverableUrls", "type"
   ],
   "additionalProperties": false
 }

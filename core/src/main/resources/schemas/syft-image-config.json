@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jboss.org/sbomer/config.json",
+  "title": "SBOMer Syft image configuration file",
+  "description": "Configuration file to influence the Syft image generator",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "description": "Version of the configuration file",
+      "enum": ["sbomer.jboss.org/v1alpha1"]
+    },
+    "type": {
+      "description": "Configuration type",
+      "enum": ["syft-image"]
+    },
+    "directories": {
+      "description": "Directories to scan",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["type"],
+  "additionalProperties": false
+}

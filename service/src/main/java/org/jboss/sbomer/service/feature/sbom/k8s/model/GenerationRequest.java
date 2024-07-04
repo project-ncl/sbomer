@@ -17,12 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -132,12 +130,42 @@ public class GenerationRequest extends ConfigMap {
     }
 
     @JsonIgnore
-    public String getConfig() {
-        return getData().get(KEY_CONFIG);
+    public Config getConfig() {
+        String configData = getData().get(KEY_CONFIG);
+        return Config.fromString(configData);
+    }
+
+    @JsonIgnore
+    public <T extends Config> T getConfig(Class<T> clazz) {
+        String configData = getData().get(KEY_CONFIG);
+        return Config.fromString(configData, clazz);
+    }
+
+    @JsonIgnore
+    public String getJsonConfig() {
+        Config config = this.getConfig();
+
+        if (config == null) {
+            return null;
+        }
+
+        return config.toJson();
     }
 
     public void setConfig(String config) {
         getData().put(KEY_CONFIG, config);
+    }
+
+    public void setConfig(Config config) {
+        try {
+            getData().put(KEY_CONFIG, ObjectMapperProvider.json().writeValueAsString(config));
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException(
+                    "Cannot convert configuration into a JSON string: '{}'",
+                    this.getMetadata().getName(),
+                    config,
+                    e);
+        }
     }
 
     @JsonIgnore
@@ -198,30 +226,6 @@ public class GenerationRequest extends ConfigMap {
     }
 
     @JsonIgnore
-    public List<String> getDeliverableUrls() {
-        OperationConfig operationConfig = toOperationConfig();
-        if (operationConfig == null) {
-            return null;
-        }
-        return operationConfig.getDeliverableUrls();
-    }
-
-    public void setDeliverableUrls(List<String> deliverableUrls) {
-        if (deliverableUrls == null) {
-            return;
-        }
-        OperationConfig operationConfig = toOperationConfig();
-        if (operationConfig != null) {
-            operationConfig.setDeliverableUrls(deliverableUrls);
-        }
-        try {
-            setConfig(ObjectMapperProvider.yaml().writeValueAsString(operationConfig));
-        } catch (JsonProcessingException e) {
-            log.warn(e.getMessage(), e);
-        }
-    }
-
-    @JsonIgnore
     public String dependentResourceName(SbomGenerationPhase phase) {
         return this.getMetadata().getName() + "-" + phase.ordinal() + "-" + phase.name().toLowerCase();
     }
@@ -229,43 +233,6 @@ public class GenerationRequest extends ConfigMap {
     @JsonIgnore
     public String getName() {
         return getMetadata().getName();
-    }
-
-    @JsonIgnore
-    public Config toConfig() {
-        if (getConfig() == null) {
-            return null;
-        }
-
-        if (GenerationRequestType.BUILD.equals(getType())) {
-            try {
-                return ObjectMapperProvider.yaml().readValue(getConfig().toString().getBytes(), Config.class);
-            } catch (IOException e) {
-                log.warn(e.getMessage(), e);
-                return null;
-            }
-        }
-        log.warn("A Config was asked, but the SbomGenerationType ({}) is not compatible with it!", getType());
-        return null;
-    }
-
-    @JsonIgnore
-    public OperationConfig toOperationConfig() {
-        if (getConfig() == null) {
-            return null;
-        }
-
-        if (GenerationRequestType.OPERATION.equals(getType())) {
-
-            try {
-                return ObjectMapperProvider.yaml().readValue(getConfig().toString().getBytes(), OperationConfig.class);
-            } catch (IOException e) {
-                log.warn(e.getMessage(), e);
-                return null;
-            }
-        }
-        log.warn("An OperationConfig was asked, but the SbomGenerationType ({}) is not compatible with it!", getType());
-        return null;
     }
 
 }

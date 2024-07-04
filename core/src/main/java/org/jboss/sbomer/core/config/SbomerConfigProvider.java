@@ -17,12 +17,11 @@
  */
 package org.jboss.sbomer.core.config;
 
-import java.util.Collections;
-
 import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
@@ -65,7 +64,7 @@ public class SbomerConfigProvider {
      *
      * @param config The {@link Config} object to be adjusted.
      */
-    public void adjust(Config config) {
+    public void adjust(PncBuildConfig config) {
         log.debug("Adjusting configuration...");
 
         config.getProducts().forEach(product -> {

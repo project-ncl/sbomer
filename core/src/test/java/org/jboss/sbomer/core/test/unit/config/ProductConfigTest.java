@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ class ProductConfigTest {
 
     @Test
     void testGenerateCommand() {
-        Config config = Config.builder()
+        PncBuildConfig config = PncBuildConfig.builder()
                 .withBuildId("AABBCC")
                 .withProducts(
                         List.of(

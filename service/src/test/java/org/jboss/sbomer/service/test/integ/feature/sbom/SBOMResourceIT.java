@@ -169,36 +169,83 @@ class SBOMResourceIT {
                 .body("metadata.component.licenses[0].license.id", CoreMatchers.equalTo("Apache-2.0"));
     }
 
-    // /**
-    // * It should return a stub for the {@link Sbom} object, where the sbom field is empty.
-    // *
-    // * @throws IOException
-    // */
-    // @Test
-    // void shouldStartGenerationForAGivenPncBuild() throws IOException {
-    // Sbom sbom = new Sbom();
-    // sbom.setBuildId("AABBCC");
-    // sbom.setId(416640206274228224L);
-    // sbom.setType(SbomType.BUILD_TIME);
-    // sbom.setGenerationTime(Instant.now());
-    // sbom.setGenerator(GeneratorType.MAVEN_CYCLONEDX);
+    /**
+     * It should return a valid response for a generation request for PNC build without any config provided.
+     */
+    @Test
+    void shouldStartGenerationForAGivenPncBuild() {
+        given().when()
+                .contentType(ContentType.JSON)
+                .request("POST", "/api/v1alpha3/sboms/generate/build/AABBCC")
+                .then()
+                .statusCode(202)
+                .body("id", CoreMatchers.any(String.class))
+                .and()
+                .body("identifier", CoreMatchers.equalTo("AABBCC"))
+                .and()
+                .body("type", CoreMatchers.equalTo("BUILD"))
+                .and()
+                .body("status", CoreMatchers.is("NEW"));
+    }
 
-    // Mockito.when(generationService.generate("AABBCC", GeneratorType.MAVEN_CYCLONEDX)).thenReturn(sbom);
+    @Test
+    void shouldStartGenerationForAGivenPncBuildWithEmptyJsonConfig() {
+        given().body("{}")
+                .when()
+                .contentType(ContentType.JSON)
+                .request("POST", "/api/v1alpha3/sboms/generate/build/AABBCC")
+                .then()
+                .statusCode(202)
+                .body("id", CoreMatchers.any(String.class))
+                .and()
+                .body("identifier", CoreMatchers.equalTo("AABBCC"))
+                .and()
+                .body("type", CoreMatchers.equalTo("BUILD"))
+                .and()
+                .body("status", CoreMatchers.is("NEW"));
+    }
 
-    // given().when()
-    // .contentType(ContentType.JSON)
-    // .request("POST", "/api/v1alpha2/sboms/generate/build/AABBCC")
-    // .then()
-    // .statusCode(202)
-    // .body("id", CoreMatchers.any(Long.class))
-    // .and()
-    // .body("buildId", CoreMatchers.equalTo("AABBCC"))
-    // .and()
-    // .body("sbom", CoreMatchers.nullValue())
-    // .and()
-    // .body("generator", CoreMatchers.is("CYCLONEDX"))
-    // .and()
-    // .body("processor", CoreMatchers.nullValue());
-    // }
+    /**
+     * Invalid properties are ignored.
+     */
+    @Test
+    void shouldStartGenerationForAGivenPncBuildWithInvalidJsonConfig() {
+        given().body("{\"df\": \"123\"}")
+                .when()
+                .contentType(ContentType.JSON)
+                .request("POST", "/api/v1alpha3/sboms/generate/build/AABBCC")
+                .then()
+                .statusCode(202)
+                .body("id", CoreMatchers.any(String.class))
+                .and()
+                .body("identifier", CoreMatchers.equalTo("AABBCC"))
+                .and()
+                .body("type", CoreMatchers.equalTo("BUILD"))
+                .and()
+                .body("status", CoreMatchers.is("NEW"));
+    }
+
+    /**
+     * Invalid configs cause failures.
+     */
+    @Test
+    void shouldStartGenerationForAGivenPncBuildWithInvalidConfigType() {
+        given().body("{\"type\": \"operation\"}")
+                .when()
+                .log()
+                .all()
+                .contentType(ContentType.JSON)
+                .request("POST", "/api/v1alpha3/sboms/generate/build/AABBCC")
+                .then()
+                .statusCode(500)
+                .body(
+                        "message",
+                        CoreMatchers.is(
+                                "An error occurred while deserializing provided content: Could not resolve type id 'operation' as a subtype of `org.jboss.sbomer.core.features.sbom.config.PncBuildConfig`: Class `org.jboss.sbomer.core.features.sbom.config.OperationConfig` not subtype of `org.jboss.sbomer.core.features.sbom.config.PncBuildConfig`"))
+                .and()
+                .body("errorId", CoreMatchers.isA(String.class))
+                .and()
+                .body("error", CoreMatchers.equalTo("Internal Server Error"));
+    }
 
 }

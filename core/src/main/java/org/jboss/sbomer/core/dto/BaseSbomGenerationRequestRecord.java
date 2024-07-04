@@ -21,13 +21,12 @@ import java.time.Instant;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 
 public record BaseSbomGenerationRequestRecord(
         String id,
         String identifier,
-        @Schema(implementation = Map.class) JsonNode config,
+        @Schema(implementation = Map.class) Config config,
         String type,
         Instant creationTime) {
 }
