@@ -20,8 +20,7 @@ package org.jboss.sbomer.core.dto.v1alpha2;
 import java.time.Instant;
 
 import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 
 public record BaseSbomRecord(
         String id,
@@ -41,7 +40,7 @@ public record BaseSbomRecord(
             String statusMessage,
             String gId,
             String gIdentifier,
-            JsonNode gConfig,
+            Config gConfig,
             String gType,
             Instant gCreationTime) {
         this(

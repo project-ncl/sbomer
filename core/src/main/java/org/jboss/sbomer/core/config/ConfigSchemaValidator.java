@@ -24,10 +24,8 @@ import java.nio.charset.StandardCharsets;
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -48,19 +46,16 @@ public class ConfigSchemaValidator implements Validator<Config> {
             throw new ApplicationException("No configuration provided");
         }
 
+        String schemaFile = GenerationRequestType.schemaFile(config.getClass());
         String schema;
 
         try {
-            InputStream is = SchemaValidator.class.getClassLoader().getResourceAsStream("schemas/config.json");
+            InputStream is = SchemaValidator.class.getClassLoader().getResourceAsStream("schemas/" + schemaFile);
             schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);
         }
 
-        try {
-            return SchemaValidator.validate(schema, ObjectMapperProvider.json().writeValueAsString(config));
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException("An error occurred while converting configuration file into JSON", e);
-        }
+        return SchemaValidator.validate(schema, config.toJson());
     }
 }

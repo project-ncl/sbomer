@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
 import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +28,8 @@ import java.util.Set;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
@@ -46,9 +45,8 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.IsBuildTypeCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition.IsBuildTypeInitializedCondition;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
-import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateDependentResource;
+import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunGenerateBuildDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
-import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunOperationInitDependentResource;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -96,13 +94,13 @@ import lombok.extern.slf4j.Slf4j;
                         reconcilePrecondition = IsBuildTypeCondition.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME),
                 @Dependent(
-                        type = TaskRunGenerateDependentResource.class,
+                        type = TaskRunGenerateBuildDependentResource.class,
                         reconcilePrecondition = IsBuildTypeInitializedCondition.class,
                         useEventSourceWithName = EVENT_SOURCE_NAME) })
 @Slf4j
 public class BuildController extends AbstractController {
 
-    List<TaskRunGenerateDependentResource> generations = new ArrayList<>();
+    List<TaskRunGenerateBuildDependentResource> generations = new ArrayList<>();
 
     public BuildController() {
 
@@ -250,7 +248,8 @@ public class BuildController extends AbstractController {
             Set<TaskRun> secondaryResources) {
 
         log.debug("ReconcileInitialized ...");
-        Config config = generationRequest.toConfig();
+        PncBuildConfig config = generationRequest.getConfig(PncBuildConfig.class);
+
         if (config == null) {
 
             log.error(
@@ -278,7 +277,7 @@ public class BuildController extends AbstractController {
 
         log.debug("ReconcileGenerating ...");
 
-        Config config = generationRequest.toConfig();
+        PncBuildConfig config = generationRequest.getConfig(PncBuildConfig.class);
 
         if (config == null) {
             log.error(
@@ -551,7 +550,7 @@ public class BuildController extends AbstractController {
                 "Reading all generated SBOMs for the GenerationRequest '{}'",
                 generationRequest.getMetadata().getName());
 
-        Config config = SbomUtils.fromJsonConfig(sbomGenerationRequest.getConfig());
+        PncBuildConfig config = generationRequest.getConfig(PncBuildConfig.class);
 
         List<Sbom> sboms = new ArrayList<>();
 
@@ -614,17 +613,19 @@ public class BuildController extends AbstractController {
         }
 
         String configVal = configResult.get().getValue().getStringVal();
-        Config config;
+        // PncBuildConfig config = generationRequest.getConfig(PncBuildConfig.class);
 
-        try {
-            config = objectMapper.readValue(configVal.getBytes(), Config.class);
-        } catch (IOException e) {
-            throw new ApplicationException(
-                    "Could not parse the '{}' result within the TaskRun '{}': {}",
-                    TaskRunInitDependentResource.RESULT_NAME,
-                    taskRun.getMetadata().getName(),
-                    configVal);
-        }
+        Config config = Config.fromString(configVal);
+
+        // try {
+        // config = objectMapper.readValue(configVal.getBytes(), Config.class);
+        // } catch (IOException e) {
+        // throw new ApplicationException(
+        // "Could not parse the '{}' result within the TaskRun '{}': {}",
+        // TaskRunInitDependentResource.RESULT_NAME,
+        // taskRun.getMetadata().getName(),
+        // configVal);
+        // }
 
         log.debug("Runtime config from TaskRun '{}' parsed: {}", taskRun.getMetadata().getName(), config);
 

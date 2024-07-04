@@ -1,5 +1,6 @@
 # Single product with generator configuration override.
 # Product configuration will be fetched from PNC, and if not available, no generation will be performed.
+type: pnc-build
 products:
   - generator:
       type: maven-domino

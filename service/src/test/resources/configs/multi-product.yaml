@@ -1,6 +1,7 @@
 # Multi-product example where a single build (configuration) in PNC can build more than
 # one product.
 apiVersion: sbomer.jboss.org/v1alpha1
+type: pnc-build
 products:
   - processors:
       - type: redhat-product

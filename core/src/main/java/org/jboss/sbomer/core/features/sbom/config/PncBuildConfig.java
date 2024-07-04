@@ -15,21 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.config.runtime;
+package org.jboss.sbomer.core.features.sbom.config;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
@@ -38,23 +41,15 @@ import lombok.extern.jackson.Jacksonized;
  *
  * @author Marek Goldmann
  */
-@Getter
-@Setter
-@Builder(setterPrefix = "with")
+@Data
+@SuperBuilder(setterPrefix = "with")
 @Jacksonized
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-@EqualsAndHashCode
-public class Config {
-
-    /**
-     * The API version of the configuration file. In case of breaking changes this value will be used to detect the
-     * correct (de)serializer.
-     */
-    @Builder.Default
-    String apiVersion = "sbomer.jboss.org/v1alpha1";
-
+@EqualsAndHashCode(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonTypeName("pnc-build")
+public class PncBuildConfig extends Config {
     /**
      * Build identifier within PNC.
      */
@@ -71,13 +66,9 @@ public class Config {
     @Builder.Default
     List<ProductConfig> products = new ArrayList<>();
 
-    /**
-     * Checks whether current object is an empty one.
-     *
-     * @return
-     */
     @JsonIgnore
+    @Override
     public boolean isEmpty() {
-        return this.equals(new Config());
+        return this.equals(new PncBuildConfig());
     }
 }

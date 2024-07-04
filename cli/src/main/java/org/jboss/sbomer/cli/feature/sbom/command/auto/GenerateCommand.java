@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
@@ -100,10 +100,10 @@ public class GenerateCommand implements Callable<Integer> {
         }
 
         // It is able to read both: JSON and YAML config files
-        Config config;
+        PncBuildConfig config;
 
         try {
-            config = objectMapper.readValue(configPath.toAbsolutePath().toFile(), Config.class);
+            config = objectMapper.readValue(configPath.toAbsolutePath().toFile(), PncBuildConfig.class);
         } catch (StreamReadException e) {
             log.error("Unable to parse the configuration file", e);
             return GenerationResult.ERR_CONFIG_INVALID.getCode();
@@ -162,7 +162,7 @@ public class GenerateCommand implements Callable<Integer> {
         return GenerationResult.SUCCESS.getCode();
     }
 
-    private void generateSbom(Config config, ProductConfig product, int i) {
+    private void generateSbom(PncBuildConfig config, ProductConfig product, int i) {
         log.debug("Product: '{}'", product.toString());
 
         List<String> command = product.generateCommand(config);

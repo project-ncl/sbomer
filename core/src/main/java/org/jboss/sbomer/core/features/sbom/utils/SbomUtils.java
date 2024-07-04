@@ -76,8 +76,9 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.enums.BuildType;
 import org.jboss.sbomer.core.features.sbom.Constants;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.slf4j.Logger;
@@ -775,7 +776,7 @@ public class SbomUtils {
      * @param jsonNode The {@link JsonNode} to convert.
      * @return The converted {@link Config} or <code>null</code> in case of troubles in converting it.
      */
-    public static Config fromJsonConfig(JsonNode jsonNode) {
+    public static PncBuildConfig fromJsonBuildConfig(JsonNode jsonNode) {
         if (jsonNode == null) {
             return null;
         }
@@ -784,7 +785,7 @@ public class SbomUtils {
             return ObjectMapperProvider.json()
                     .readValue(
                             jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes(),
-                            Config.class);
+                            PncBuildConfig.class);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;

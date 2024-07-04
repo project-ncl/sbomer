@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -86,12 +86,12 @@ public class TaskRunOperationGenerateDependentResource extends KubernetesDepende
 
     @Override
     public Map<String, TaskRun> desiredResources(GenerationRequest primary, Context<GenerationRequest> context) {
-        OperationConfig config = primary.toOperationConfig();
+        OperationConfig config = primary.getConfig(OperationConfig.class);
+
         if (config == null) {
             throw new ApplicationException(
-                    "Unable to parse configuration from GenerationRequest '{}': {}",
-                    primary.getMetadata().getName(),
-                    primary.getConfig());
+                    "No operation configuration found within '{}' Generation Request",
+                    primary.getMetadata().getName());
         }
 
         Map<String, TaskRun> taskRuns = new HashMap<>(config.getDeliverableUrls().size());

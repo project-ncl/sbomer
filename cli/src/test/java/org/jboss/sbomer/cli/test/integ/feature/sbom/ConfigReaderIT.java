@@ -28,18 +28,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.NotFoundException;
-
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.feature.sbom.ConfigReader;
 import org.jboss.sbomer.cli.feature.sbom.client.GitLabClient;
 import org.jboss.sbomer.cli.feature.sbom.client.GitilesClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,8 +44,10 @@ import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 
 @QuarkusTest
 class ConfigReaderIT {
@@ -169,7 +168,9 @@ class ConfigReaderIT {
             assertNotNull(config);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
 
-            ProductConfig productConfig = config.getProducts().get(0);
+            assertTrue(config instanceof PncBuildConfig);
+
+            ProductConfig productConfig = ((PncBuildConfig) config).getProducts().get(0);
             assertEquals(0, productConfig.getProcessors().size());
             assertEquals("0.0.88", productConfig.getGenerator().getVersion());
         }
@@ -278,9 +279,10 @@ class ConfigReaderIT {
             Config config = configReader.getConfig(build);
 
             assertNotNull(config);
+            assertTrue(config instanceof PncBuildConfig);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
 
-            ProductConfig productConfig = config.getProducts().get(0);
+            ProductConfig productConfig = ((PncBuildConfig) config).getProducts().get(0);
             assertEquals(0, productConfig.getProcessors().size());
             assertEquals("0.0.88", productConfig.getGenerator().getVersion());
         }

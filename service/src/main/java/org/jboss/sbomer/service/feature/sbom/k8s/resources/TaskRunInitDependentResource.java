@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -93,7 +94,6 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                                 .withUid(generationRequest.getMetadata().getUid())
                                 .build())
                 .endMetadata()
-
                 .withNewSpec()
                 .withServiceAccountName(release + SA_SUFFIX)
                 .withParams(
@@ -101,7 +101,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                                 .withNewValue(generationRequest.getIdentifier())
                                 .build(),
                         new ParamBuilder().withName(PARAM_CONFIG_NAME)
-                                .withNewValue(Objects.requireNonNullElse(generationRequest.getConfig(), "{}"))
+                                .withNewValue(Objects.requireNonNullElse(generationRequest.getJsonConfig(), "{}"))
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
                 .withWorkspaces(
@@ -113,6 +113,5 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                                 .build())
                 .endSpec()
                 .build();
-
     }
 }

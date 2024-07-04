@@ -1,6 +1,7 @@
 # Single product with errata configuration override.
 # Default configuration for the generator will be used.
 apiVersion: sbomer.jboss.org/v1alpha1
+type: pnc-build
 products:
   - processors:
       - type: redhat-product

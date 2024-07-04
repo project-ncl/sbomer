@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler.condition;
 
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 
@@ -41,7 +41,8 @@ public class OperationConfigAvailableCondition implements Condition<TaskRun, Gen
         }
 
         // If the configurations are available, reconcile
-        OperationConfig operationConfig = primary.toOperationConfig();
+        OperationConfig operationConfig = primary.getConfig(OperationConfig.class);
+
         if (operationConfig != null && operationConfig.getDeliverableUrls() != null
                 && !operationConfig.getDeliverableUrls().isEmpty()) {
             log.debug("OperationConfigAvailableCondition is met: true");

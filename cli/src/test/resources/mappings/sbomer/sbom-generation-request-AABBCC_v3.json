@@ -10,6 +10,7 @@
       "identifier": "QUARKUS",
       "type": "BUILD",
       "config": {
+        "type": "pnc-build",
         "buildId": "QUARKUS",
         "products": [
           {

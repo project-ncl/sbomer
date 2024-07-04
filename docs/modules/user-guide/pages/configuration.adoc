@@ -27,6 +27,8 @@ Below you can see an example configuration file.
 ----
 # Optional, can be omitted. If not provided -- latest version will be assumed.
 apiVersion: sbomer.jboss.org/v1alpha1
+# Configuration type, can be one of: pnc-build, syft-image, analysis, operation
+type: pnc-build
 # Array of products
 products:
   - processors:
@@ -68,6 +70,7 @@ in PNC can build more than one product. In the example below have two products d
 [source,yaml]
 ----
 apiVersion: sbomer.jboss.org/v1alpha1
+type: pnc-build
 products:
   - processors:
       - type: redhat-product
@@ -97,6 +100,7 @@ A single product (most common use case) where only the required configuration fo
 [source,yaml]
 ----
 apiVersion: sbomer.jboss.org/v1alpha1
+type: pnc-build
 products:
   - processors:
       - type: redhat-product

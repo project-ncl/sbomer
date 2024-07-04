@@ -21,13 +21,12 @@ import java.time.Instant;
 import java.util.List;
 
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.criteria.Join;
@@ -56,7 +55,7 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
                             root.<String> get("statusMessage"),
                             generationRequest.<String> get("id"),
                             generationRequest.<String> get("identifier").alias("gIdentifier"),
-                            generationRequest.<JsonNode> get("config"),
+                            generationRequest.<Config> get("config"),
                             generationRequest.<GenerationRequestType> get("type").as(String.class),
                             generationRequest.<Instant> get("creationTime")));
         });

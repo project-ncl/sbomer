@@ -21,8 +21,7 @@ import java.time.Instant;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 
 @Schema(name = "V1Alpha1SbomGenerationRequestRecord")
 public record SbomGenerationRequestRecord(
@@ -31,6 +30,6 @@ public record SbomGenerationRequestRecord(
         @Schema(example = "FINISHED") String status,
         @Schema(example = "SUCCESS") String result,
         @Schema(example = "A6XHP5F42DYAA") String buildId,
-        @Schema(implementation = Map.class) JsonNode config,
+        @Schema(implementation = Map.class) Config config,
         String reason) {
 }

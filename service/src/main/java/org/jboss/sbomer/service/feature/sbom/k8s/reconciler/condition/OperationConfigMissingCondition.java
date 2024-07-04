@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -55,7 +55,8 @@ public class OperationConfigMissingCondition implements Condition<TaskRun, Gener
         // TaskRunOperationInitDependentResource.
         // Here, an OperationConfig is needed along with the list of DeliverablesConfig (both may or may not be
         // provided)
-        OperationConfig operationConfig = primary.toOperationConfig();
+        OperationConfig operationConfig = primary.getConfig(OperationConfig.class);
+
         if (operationConfig == null || operationConfig.getDeliverableUrls() == null
                 || operationConfig.getDeliverableUrls().isEmpty()) {
             log.debug("OperationConfigMissingCondition is met: true");

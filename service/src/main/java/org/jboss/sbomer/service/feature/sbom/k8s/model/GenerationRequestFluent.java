@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
+import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 
@@ -90,6 +91,16 @@ public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> exten
 
     public A withConfig(String config) {
         this.config = config;
+        return (A) this;
+    }
+
+    public A withConfig(Config config) {
+        if (config == null) {
+            this.config = null;
+        } else {
+            this.config = config.toJson();
+        }
+
         return (A) this;
     }
 

@@ -17,6 +17,7 @@
 #
 
 "15":
+  type: pnc-build
   products:
     - processors:
         - type: redhat-product
@@ -27,6 +28,7 @@
       generator:
         type: maven-cyclonedx
 "436":
+  type: pnc-build
   products:
     - processors:
         - type: redhat-product

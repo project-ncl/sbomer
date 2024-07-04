@@ -52,6 +52,7 @@ VALUES (
 		'It succeeded',
 		'{
 "buildId": "ARYT3LBXDVYAC",
+"type": "pnc-build",
 "products": [
 {
 "generator": {
@@ -79,7 +80,7 @@ VALUES (
       "maven": "3.9.6",
       "java": "17"
     }
-}',
+}' FORMAT JSON,
   'BUILD'
 	);
 
@@ -3007,6 +3008,7 @@ VALUES (
 		'',
 		'{
   "apiVersion": "sbomer.jboss.org/v1alpha1",
+  "type": "operation",
   "operationId": "OPBGCD23DVYAC",
   "product": {
     "processors": [
@@ -3023,7 +3025,7 @@ VALUES (
       "type": "cyclonedx-operation"
     }
   }
-}',
+}' FORMAT JSON,
   'OPERATION'
 	);
 

@@ -21,16 +21,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Getter;
 
 /**
@@ -38,6 +37,7 @@ import lombok.Getter;
  * Bean providing a mapping between a PNC Product Version and other systems for a given build.
  * </p>
  *
+ * TODO: Ensure that PncBuildConfig is the only type we should support
  */
 @ApplicationScoped
 public class ProductVersionMapper {
@@ -47,7 +47,7 @@ public class ProductVersionMapper {
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
-    public static class Mapping extends HashMap<String, Config> {
+    public static class Mapping extends HashMap<String, PncBuildConfig> {
 
     }
 

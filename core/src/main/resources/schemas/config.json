@@ -51,6 +51,10 @@
       "description": "Version of the configuration file",
       "enum": ["sbomer.jboss.org/v1alpha1"]
     },
+    "type": {
+      "description": "Configuration type",
+      "enum": ["pnc-build"]
+    },
     "buildId": {
       "description": "PNC build identifier",
       "type": "string"
@@ -118,6 +122,6 @@
       }
     }
   },
-  "required": ["products"],
+  "required": ["products", "type"],
   "additionalProperties": false
 }

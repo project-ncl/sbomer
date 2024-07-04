@@ -1,5 +1,6 @@
 # Single-product example.
 apiVersion: sbomer.jboss.org/v1alpha1
+type: pnc-build
 product:
   - processors:
       - type: redhat-product

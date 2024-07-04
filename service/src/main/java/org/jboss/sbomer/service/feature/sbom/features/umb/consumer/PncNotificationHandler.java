@@ -28,9 +28,9 @@ import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -262,8 +262,7 @@ public class PncNotificationHandler {
                     .build();
 
             try {
-                generationRequest.setConfig(
-                        ObjectMapperProvider.yaml().writeValueAsString(pendingRequest.getOperationConfiguration()));
+                generationRequest.setConfig(ObjectMapperProvider.yaml().writeValueAsString(pendingRequest.getConfig()));
             } catch (JsonProcessingException e) {
                 throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
             }

@@ -1,3 +1,4 @@
+type: pnc-build
 products:
   - processors:
       - type: redhat-product

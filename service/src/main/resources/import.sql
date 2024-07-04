@@ -52,6 +52,7 @@ VALUES (
 		'It succeeded',
 		'{
 "buildId": "ARYT3LBXDVYAC",
+"type": "pnc-build",
 "products": [
 {
 "generator": {
@@ -3007,6 +3008,7 @@ VALUES (
 		'',
 		'{
   "apiVersion": "sbomer.jboss.org/v1alpha1",
+  "type": "operation",
   "operationId": "OPBGCD23DVYAC",
   "product": {
     "processors": [

@@ -27,17 +27,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.validation.Validator;
-
-import jakarta.annotation.PostConstruct;
 import org.cyclonedx.model.Bom;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ErrataConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.GeneratorConfig;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -58,6 +54,10 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.panache.common.Parameters;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.validation.Validator;
 
 @ApplicationScoped
 @QuarkusTransactionalTest
@@ -109,7 +109,7 @@ class SbomGenerationRequestRepositoryIT {
                 .withProcessors(List.of(defaultProcessorConfig, redHatProductProcessorConfig))
                 .build();
 
-        return Config.builder()
+        return PncBuildConfig.builder()
                 .withApiVersion("sbomer.jboss.org/v1alpha1")
                 .withBuildId(buildId)
                 .withProducts(List.of(productConfig))
@@ -145,7 +145,7 @@ class SbomGenerationRequestRepositoryIT {
         Config runtimeConfig = createRuntimeConfig(BUILD_ID);
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
-                .withConfig(SbomUtils.toJsonNode(runtimeConfig))
+                .withConfig(runtimeConfig)
                 .withId(REQUEST_ID)
                 .withIdentifier(BUILD_ID)
                 .withType(GenerationRequestType.BUILD)
@@ -166,7 +166,7 @@ class SbomGenerationRequestRepositoryIT {
         OperationConfig runtimeConfig = createRuntimeOperationConfig(OPERATION_ID);
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
-                .withConfig(SbomUtils.toJsonNode(runtimeConfig))
+                .withConfig(runtimeConfig)
                 .withId(OPERATION_REQUEST_ID)
                 .withIdentifier(OPERATION_ID)
                 .withType(GenerationRequestType.OPERATION)
@@ -261,7 +261,7 @@ class SbomGenerationRequestRepositoryIT {
         Config runtimeConfig = createRuntimeConfig(BUILD_ID_2_DELETE);
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
-                .withConfig(SbomUtils.toJsonNode(runtimeConfig))
+                .withConfig(runtimeConfig)
                 .withId(REQUEST_ID_2_DELETE)
                 .withIdentifier(BUILD_ID_2_DELETE)
                 .withType(GenerationRequestType.BUILD)

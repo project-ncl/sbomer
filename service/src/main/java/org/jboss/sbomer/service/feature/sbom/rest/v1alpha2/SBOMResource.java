@@ -25,13 +25,12 @@ import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.dto.v1alpha2.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha2.SbomRecord;
-import org.jboss.sbomer.core.dto.v1alpha2.BaseSbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
+import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.FeatureFlags;
@@ -136,7 +135,7 @@ public class SBOMResource extends AbstractApiProvider {
             responseCode = "400",
             description = "Could not parse provided arguments",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    public Response generate(@PathParam("buildId") String buildId, Config config) throws Exception {
+    public Response generate(@PathParam("buildId") String buildId, PncBuildConfig config) throws Exception {
         return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateFromBuild(buildId, config))).build();
     }
 

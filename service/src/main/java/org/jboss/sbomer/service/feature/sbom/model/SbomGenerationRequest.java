@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.model;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -26,22 +25,14 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.jboss.pnc.common.Strings;
-import org.jboss.resteasy.spi.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.config.runtime.Config;
-import org.jboss.sbomer.core.features.sbom.config.runtime.OperationConfig;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -106,35 +97,11 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @Column(name = "config")
     @ToString.Exclude
     @Schema(implementation = Map.class)
-    private JsonNode config;
+    private Config config;
 
     @Column(name = "reason", nullable = true, updatable = true)
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
-
-    /**
-     * Returns the config {@link Config}.
-     *
-     * In case the runtime config is not available or parsable, returns <code>null</code>.
-     *
-     * @return The {@link Config} object
-     */
-    @JsonIgnore
-    public Config getConfiguration() {
-        return SbomUtils.fromJsonConfig(config);
-    }
-
-    /**
-     * Returns the operation config {@link OperationConfig}.
-     *
-     * In case the runtime config is not available or parsable, returns <code>null</code>.
-     *
-     * @return The {@link OperationConfig} object
-     */
-    @JsonIgnore
-    public OperationConfig getOperationConfiguration() {
-        return SbomUtils.fromJsonOperationConfig(config);
-    }
 
     /**
      * Method to sync the {@link GenerationRequest} Kubernetes resource with the {@link SbomGenerationRequest} entity in
@@ -166,29 +133,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         sbomGenerationRequest.setReason(generationRequest.getReason());
         // And result
         sbomGenerationRequest.setResult(generationRequest.getResult());
-
-        // Update config, if available
-        if (!Strings.isEmpty(generationRequest.getConfig())) {
-            try {
-                if (GenerationRequestType.BUILD.equals(generationRequest.getType())) {
-                    sbomGenerationRequest.setConfig(
-                            SbomUtils.toJsonNode(
-                                    ObjectMapperProvider.yaml()
-                                            .readValue(generationRequest.getConfig().getBytes(), Config.class)));
-                } else {
-                    sbomGenerationRequest.setConfig(
-                            SbomUtils.toJsonNode(
-                                    ObjectMapperProvider.yaml()
-                                            .readValue(
-                                                    generationRequest.getConfig().getBytes(),
-                                                    OperationConfig.class)));
-                }
-            } catch (IOException e) {
-                throw new ApplicationException("Could not convert configuration to store in the database", e);
-            }
-        } else {
-            sbomGenerationRequest.setConfig(MissingNode.getInstance());
-        }
+        // And config
+        sbomGenerationRequest.setConfig(generationRequest.getConfig());
 
         // Store it in the database
         sbomGenerationRequest.persistAndFlush();
