@@ -288,7 +288,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
      *
      * <p>
      * Retrieves the build information, specifically the build type assigned to the build and based on it a
-     * {@link IConfBuildConfigig} object is generated with default values.
+     * {@link PncBuildConfig} object is generated with default values.
      * </p>
      *
      * @return {@link PncBuildConfig} with default values

@@ -63,6 +63,27 @@ FROM
 WHERE
     sbom_generation_request.id = subquery.id;
 
+-- Update 'syft-image'
+WITH
+    subquery AS (
+        SELECT
+            id,
+            config || jsonb_build_object ('type', 'syft-image') AS cfg
+        FROM
+            sbom_generation_request
+        WHERE
+            config IS NOT NULL
+            AND jsonb_typeof (config) = 'object'
+            AND type = 'CONTAINERIMAGE'
+    )
+UPDATE sbom_generation_request
+SET
+    config = cfg
+FROM
+    subquery
+WHERE
+    sbom_generation_request.id = subquery.id;
+
 INSERT INTO
     db_version (version, creation_time)
 VALUES
