@@ -32,12 +32,25 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 
-@ApplicationScoped
 @Slf4j
 public class SyftImageAdjuster implements Adjuster {
+    List<String> paths;
+
+    public SyftImageAdjuster(List<String> paths) {
+        this.paths = paths;
+    }
+
+    private boolean isOnPath(String path) {
+        // In case we haven't provided paths to filter, add all found artifacts.
+        if (paths.isEmpty()) {
+            return true;
+        }
+
+        return paths.stream().anyMatch(prefix -> path.startsWith(prefix));
+    }
+
     @Override
     public Bom adjust(Bom bom, Path workDir) {
         Component productComponent = bom.getMetadata().getComponent();
@@ -63,10 +76,7 @@ public class SyftImageAdjuster implements Adjuster {
                 .removeIf(
                         c -> c.getProperties()
                                 .stream()
-                                // TODO: this is hardocded and needs to be customizable
-                                .filter(
-                                        p -> p.getName().equals("syft:location:0:path")
-                                                && p.getValue().startsWith("/opt"))
+                                .filter(p -> p.getName().equals("syft:location:0:path") && isOnPath(p.getValue()))
                                 .findAny()
                                 .isEmpty());
 

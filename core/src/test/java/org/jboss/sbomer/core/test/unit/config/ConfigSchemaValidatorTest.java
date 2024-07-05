@@ -228,7 +228,7 @@ class ConfigSchemaValidatorTest {
         void shouldAllowDirectories() {
             SyftImageConfig config = minimalConfig();
 
-            config.setDirectories(List.of("/var", "/opt"));
+            config.setPaths(List.of("/var", "/opt"));
 
             ValidationResult result = validator.validate(config);
             assertTrue(result.isValid());

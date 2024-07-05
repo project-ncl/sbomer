@@ -18,13 +18,15 @@
 package org.jboss.sbomer.cli.feature.sbom.command.adjust;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
-import jakarta.inject.Inject;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 @Command(
         mixinStandardHelpOptions = true,
@@ -32,8 +34,8 @@ import picocli.CommandLine.Command;
         description = "Adjust the Syft manifest output for a container image")
 public class SyftImageAdjustCommand extends AbstractAdjustCommand {
 
-    @Inject
-    SyftImageAdjuster adjuster;
+    @Option(names = "--path-filter")
+    List<String> paths = new ArrayList<>();
 
     @Override
     protected GeneratorType getGeneratorType() {
@@ -42,6 +44,8 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
 
     @Override
     protected Bom doAdjust(Bom bom, Path workDir) {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(paths);
+
         return adjuster.adjust(bom, workDir);
     }
 }
