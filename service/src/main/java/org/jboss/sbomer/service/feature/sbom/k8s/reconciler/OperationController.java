@@ -299,7 +299,7 @@ public class OperationController extends AbstractController {
      * @param secondaryResources
      * @param generationRequest
      *
-     * @returnw
+     * @return {@link UpdateControl} according to the target state of processing
      */
     protected UpdateControl<GenerationRequest> reconcileGenerating(
             GenerationRequest generationRequest,
