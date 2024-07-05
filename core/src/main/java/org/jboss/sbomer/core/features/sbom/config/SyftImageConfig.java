@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.core.features.sbom.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -41,12 +42,11 @@ import lombok.extern.jackson.Jacksonized;
 @JsonTypeName("syft-image")
 public class SyftImageConfig extends Config {
     /**
-     * List of paths within the container image filesystem. If an artifact was detected on (or under) given path it will
-     * be added to the resulting manifest. In case the list is empty -- all artifacts will be added. By default
-     * artifacts under {@code /opt} will be added.
+     * List of paths within the container image filesystem. If populated, only components located under given paths will
+     * be added to manifest.
      */
     @Builder.Default
-    List<String> paths = List.of("/opt");
+    List<String> paths = new ArrayList<>();
 
     @JsonIgnore
     @Override

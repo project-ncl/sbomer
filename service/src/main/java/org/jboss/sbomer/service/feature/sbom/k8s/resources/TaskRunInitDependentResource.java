@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;

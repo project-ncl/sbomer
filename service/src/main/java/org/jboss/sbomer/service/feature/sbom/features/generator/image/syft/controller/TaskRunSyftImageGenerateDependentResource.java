@@ -18,7 +18,9 @@
 package org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.controller;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -109,7 +111,10 @@ public class TaskRunSyftImageGenerateDependentResource
                                 .build(),
                         new ParamBuilder().withName(PARAM_PATHS)
                                 .withValue(
-                                        new ParamValue(generationRequest.getConfig(SyftImageConfig.class).getPaths()))
+                                        new ParamValue(
+                                                Objects.requireNonNullElse(
+                                                        generationRequest.getConfig(SyftImageConfig.class).getPaths(),
+                                                        Collections.emptyList())))
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
 

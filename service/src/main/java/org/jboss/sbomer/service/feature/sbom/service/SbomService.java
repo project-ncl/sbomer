@@ -209,6 +209,8 @@ public class SbomService {
             if (!result.isValid()) {
                 throw new ClientException("Provided 'syft-image' configuration is not valid", result.getErrors());
             }
+        } else {
+            config = new SyftImageConfig();
         }
 
         log.debug("Creating GenerationRequest Kubernetes resource...");
