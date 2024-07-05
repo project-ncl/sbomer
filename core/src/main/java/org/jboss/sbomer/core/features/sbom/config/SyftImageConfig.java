@@ -40,8 +40,13 @@ import lombok.extern.jackson.Jacksonized;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName("syft-image")
 public class SyftImageConfig extends Config {
+    /**
+     * List of paths within the container image filesystem. If an artifact was detected on (or under) given path it will
+     * be added to the resulting manifest. In case the list is empty -- all artifacts will be added. By default
+     * artifacts under {@code /opt} will be added.
+     */
     @Builder.Default
-    List<String> directories = List.of("/opt");
+    List<String> paths = List.of("/opt");
 
     @JsonIgnore
     @Override

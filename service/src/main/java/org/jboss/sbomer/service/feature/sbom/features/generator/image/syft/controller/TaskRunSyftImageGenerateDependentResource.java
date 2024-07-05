@@ -18,11 +18,11 @@
 package org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.controller;
 
 import java.text.ParseException;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -107,7 +107,10 @@ public class TaskRunSyftImageGenerateDependentResource
                         new ParamBuilder().withName(PARAM_COMMAND_CONTAINER_IMAGE)
                                 .withNewValue(generationRequest.getIdentifier())
                                 .build(),
-                        new ParamBuilder().withName(PARAM_PATHS).withValue(new ParamValue(List.of("/opt"))).build()) // TODO
+                        new ParamBuilder().withName(PARAM_PATHS)
+                                .withValue(
+                                        new ParamValue(generationRequest.getConfig(SyftImageConfig.class).getPaths()))
+                                .build())
                 .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
 
                 .withWorkspaces(
