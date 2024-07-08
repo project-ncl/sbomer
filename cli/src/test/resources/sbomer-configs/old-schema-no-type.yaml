@@ -1,0 +1,13 @@
+# Single product using old schema with no type specified.
+apiVersion: sbomer.jboss.org/v1alpha1
+products:
+  - processors:
+      - type: redhat-product
+        errata:
+          productName: "RHBQ"
+          productVersion: "RHEL-8-RHBQ-2.13"
+          productVariant: "8Base-RHBQ-2.13"
+    generator:
+      type: maven-domino
+      args: "--config-file .domino/quarkus-bom-config.json"
+      version: "1111"
