@@ -332,5 +332,25 @@ class ConfigReaderIT {
 
             assertNotNull(configReader.getConfig(build4));
         }
+
+        @Test
+        void testOldSchemaBeforeTypes() throws IOException {
+            Mockito.when(
+                    gitLabClient.fetchFile(
+                            "pnc-workspace/eclipse/microprofile-graphql",
+                            "1.1.0.redhat-00008",
+                            ".sbomer/config.yaml"))
+                    .thenReturn(new String(getTestConfigAsBytes("old-schema-no-type.yaml")));
+
+            Config config = configReader.getConfig(build);
+
+            assertNotNull(config);
+            assertTrue(config instanceof PncBuildConfig);
+            assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
+
+            ProductConfig productConfig = ((PncBuildConfig) config).getProducts().get(0);
+            assertEquals(1, productConfig.getProcessors().size());
+            assertEquals("1111", productConfig.getGenerator().getVersion());
+        }
     }
 }
