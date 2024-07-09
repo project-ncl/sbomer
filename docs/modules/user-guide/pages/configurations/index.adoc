@@ -1,0 +1,29 @@
+= Configurations
+
+Configurations are responsible for providing information to SBOMer about given content
+which should be used as a source for manifest generation. There can be many different sources:
+
+* PNC build (a successful build in PNC),
+* Container image (a container image available in a registry),
+* PNC deliverable analysis (generation based on finished deliverable analysis),
+* PNC operation (requesting a deliverable analysis and generating a manigest based on the outcome)
+
+Each source requires different parameters to be provided. Additionally there can be multiple generators
+supporting a given source. Configurations can help with defining the required combination of above.
+
+Currently available configuration types:
+
+* xref:configurations/pnc-build.adoc[]
+* xref:configurations/syft-image.adoc[]
+
+== Schema
+
+Each configuration type is validated according to a schema.
+
+[source,yaml]
+----
+apiVersion: sbomer.jboss.org/v1alpha1
+type: [CONFIGURATION_TYPE]
+# Content below is dependent on the type above.
+# Please refer to the specific configuration types.
+----

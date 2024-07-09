@@ -1,0 +1,19 @@
+= REST API
+
+SBOMer exposes a REST API which is documented using Swagger. You can access it at the `/api` endpoint.
+
+Ready to view OpenAPI resources are available directly from the running instance:
+
+- link:{sbomer-url}/api/[Swagger UI]
+- link:{sbomer-url}/q/openapi[OpenAPI definition] in YAML format. The link:{sbomer-url}/q/openapi?format=json[JSON version is here].
+
+== Versioning
+
+The API is versioned. Latest version is `{sbomer-latest-api-version}` and it is available at `/api/{sbomer-latest-api-version}` context path.
+
+NOTE: We do follow guidelines related to API versioning as described in the link:https://kubernetes.io/docs/reference/using-api/#api-versioning[Kubernetes documentation].
+We do plan to transition to stable versions as the service matures.
+
+== Authentication and Authorization
+
+Currently there is no authentication or authorization required to use this service. This may change in the future.

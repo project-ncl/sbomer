@@ -1,0 +1,9 @@
+= Processors
+
+include::ROOT:partial$wip.adoc[]
+
+We do have currently following processors:
+
+* xref:processors/default.adoc[]
+* xref:processors/redhat-product.adoc[]
+

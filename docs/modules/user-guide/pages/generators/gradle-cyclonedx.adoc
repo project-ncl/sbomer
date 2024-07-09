@@ -1,0 +1,4 @@
+= Gradle CycloneDX Plugin
+
+include::ROOT:partial$wip.adoc[]
+
