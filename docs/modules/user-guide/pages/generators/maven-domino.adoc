@@ -1,0 +1,43 @@
+= Domino Maven
+:generator-slug: maven-domino
+
+SBOMer generator using the link:https://github.com/quarkusio/quarkus-platform-bom-generator[Domino tool].
+This generator uses source code as an input for the generation.
+
+== Configuration
+
+[source,yaml]
+----
+type: maven-domino
+args: "[ARGS]"
+version: "[VERSION]"
+----
+
+=== `args`
+
+**Defaults**
+
+[source,console]
+----
+--include-non-managed --warn-on-missing-scm
+----
+
+**Custom arguments**
+
+Run the `java -jar domino.jar report --help` command to get a list of all possible options for Domino.
+
+=== `version`
+
+Default version: `0.0.107`.
+
+== Execution
+
+Below you can find the command that will be running the generator:
+
+[source,console]
+----
+$ java -jar domino.jar report --project-dir=[DIR] --output-file=[OUTPUT_DIR]/bom.json --manifest -s [PATH_TO_SETTINGS_XML_FILE] [ARGS]
+----
+
+
+

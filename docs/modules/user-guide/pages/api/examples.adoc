@@ -1,26 +1,4 @@
-= SBOMer REST API
-:navtitle: REST API
-
-SBOMer exposes a REST API which is documented using Swagger. You can access it at the `/api` endpoint of any SBOMer deployment.
-
-Ready to view OpenAPI resources are available directly from the running instance:
-
-- link:{sbomer-url}/api/[Swagger UI]
-- link:{sbomer-url}/q/openapi[OpenAPI definition] in YAML format. The link:{sbomer-url}/q/openapi?format=json[JSON version is here].
-
-
-== Versioning
-
-The API is versioned. Latest version is `{sbomer-latest-api-version}` and it is available at `/api/{sbomer-latest-api-version}` context path.
-
-[WARNING]
-====
-SBOMer is in heavy development. You may expect frequent changes to the API.
-====
-
-== Authentication and Authorization
-
-Currently there is no authentication or authorization required to use this service. This may change in the future.
+= Examples
 
 == Basic SBOM Operations
 
@@ -72,6 +50,7 @@ $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/an
   -H 'accept: application/json' -H 'Content-Type: application/json' \
   -d '{
   "apiVersion": "sbomer.jboss.org/v1alpha1",
+  "type": "analysis",
   "milestoneId": "$milestoneId",
   "errata": {
      "productName": "$productName",

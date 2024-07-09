@@ -1,0 +1,16 @@
+= Default
+
+Default processor is used on every manifest generation. It's responsiblity is to
+enrich information about components within the manifest with information that can be found
+in PNC and Brew systems.
+
+This processor is added by default to all generations.
+
+== Configuration
+
+There are no configuration options for this processor.
+
+[source,yaml]
+----
+type: default
+----

@@ -1,0 +1,41 @@
+= CycloneDX Maven Plugin
+
+include::ROOT:partial$wip.adoc[]
+
+SBOMer generator using the link:https://github.com/CycloneDX/cyclonedx-maven-pluginr[CycloneDX Maven Plugin].
+
+
+== Configuration
+
+[source,yaml]
+----
+type: maven-cyclonedx
+args: "[ARGS]"
+version: "[VERSION]"
+----
+
+=== `args`
+
+*Defaults*
+
+[source,console]
+----
+--batch-mode
+----
+
+*Custom arguments*
+
+See the link:https://github.com/CycloneDX/cyclonedx-maven-plugin[plugin readme] for more
+information on what other options can be passed to the tool.
+
+=== `version`
+
+Default version: `2.7.9`.
+
+== Execution
+
+[source,console]
+----
+$ mvn org.cyclonedx:cyclonedx-maven-plugin:[VERSION]:makeAggregateBom -DoutputFormat=json -DoutputName=bom --settings [PATH_TO_SETTINGS_XML_FILE] [ARGS]
+----
+

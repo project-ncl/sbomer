@@ -1,4 +1,48 @@
-= About
+= User Guide
 
-include::ROOT:partial$wip.adoc[]
+Welcome to SBOMer user guide! Here you will learn how to use SBOMer and
+its features.
 
+== Main Concepts
+
+Within SBOMer we can define a few concepts. It may be beneficioal to becoma familiar with them.
+
+xref:generators/index.adoc[Generators]::
+Generators are responsible for base manifest generations. These are mostly external tools that
+are abstracted within SBOMer. We can influence the generation process by supplying parameters to
+generators.
+
+Adjusters::
+Adjusters are repsponsible for taking the output of generators and
+ensuring the format and the content of the manifest is consumable by SBOMer. Some features of adjusters
+are exposed via configuration, but in most cases this is a technical implementation on the
+SBOMer side. Not every generator needs an adjuster. In many cases the output of generator is taken as-is.
++
+Adjusters are not exposed to end users directly.
+
+xref:processors/index.adoc[Processors]::
+Processors take the generated manifest (optionally adjusted) and enrich the metadata. This means that the manifest
+is populated with information about components that we can find by various tools and services. Depending
+on the component type, different tools and services will be queried. For a single manifest, multiple
+processors can be run.
+
+xref:configurations/index.adoc[Configurations]::
+Configurations bind generators and processors with the information about the content that should be
+used as the source for the manifest generation.
+
+== Interaction With SBOMer
+
+There are two main ways you can interact with the service: *UI* and *REST API*.
+
+Use cases for these two differ. REST API is mostly dedicated to
+programmatic access whereas UI makes service usage easier to humans.
+
+=== UI
+
+NOTE: Not every aspect of the REST API is exposed in the UI.
+
+UI can be accessed at link:{sbomer-url}[].
+
+=== REST API
+
+We have dedicated a separate place for REST API, xref:api/index.adoc[take a look here]!

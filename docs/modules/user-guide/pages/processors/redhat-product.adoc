@@ -1,0 +1,16 @@
+= Red Hat Product
+
+This processor adds Red Hat product information metadata into the main component of the SBOM.
+
+== Configuration
+
+This processor requires the product coordinates from the Errata tool.
+
+[source,yaml]
+----
+type: redhat-product
+errata:
+  productName: [ET_PRODUCT_NAME] # required
+  productVersion: [ET_PRODUCT_VERSION] # required
+  productVariant: [ET_PRODUCT_VARIANT] # required
+----

@@ -1,0 +1,25 @@
+= Syft Image
+:config-slug: syft-image
+
+In case the `syft-image` configuration is provided, the xref:generators/syft-image.adoc[] generator will be used.
+
+== Elements
+
+=== `paths`
+
+List of paths within the container image that should be used to filter components found by Syft.
+If the path to component (for example a JAR file) is located on one of the paths provided in the configuration file
+it will be retained. Every component located outsude of given paths will be removed from the manifest.
+
+== Example
+
+[source,yaml]
+----
+apiVersion: sbomer.jboss.org/v1alpha1
+type: syft-image
+paths:
+    - "/opt"
+----
+
+If we have two components: `/opt/product/content/first.jar` and `/var/lib/product/content/second.jar` detected in the image
+we will only add `/opt/product/content/first.jar` to the manifest and the `/var/lib/product/content/second.jar` will be skipped.
