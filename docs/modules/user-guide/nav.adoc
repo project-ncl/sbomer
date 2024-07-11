@@ -13,3 +13,4 @@
 ** xref:api/index.adoc[]
 *** xref:api/rsql.adoc[]
 *** xref:api/examples.adoc[]
+** xref:umb.adoc[]

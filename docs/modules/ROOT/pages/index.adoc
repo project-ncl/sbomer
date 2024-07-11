@@ -9,9 +9,9 @@ Once a build in Project Newcastle build system (PNC) finishes SBOMer receives a 
 fact and the Software Bill of Materials (SBOM) generation process is started automatically.
 
 Generated SBOM is stored in the SBOMer database and a notification
-is sent on the UMB so that other systems will be aware of it.
+is sent on the xref:user-guide:umb.adoc[UMB] so that other systems will be aware of it.
 
-SBOMs can be fetched from the SBOMer using the xref:user-guide:api.adoc[REST API].
+SBOMs can be fetched from the SBOMer using the xref:user-guide:api/index.adoc[REST API].
 
 == Resources
 
