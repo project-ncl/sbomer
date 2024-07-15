@@ -39,6 +39,18 @@ Depending on the type of the build the content of the message varies. Current sc
 (in link:https://json-schema.org/[JSON Schema] format) can be
 link:https://github.com/project-ncl/sbomer/tree/main/service/src/main/resources/schemas[found here].
 
+==== Resending Generation Finished Messages
+
+Sometimes it may be handy to have an option to resend the notification to UMB about a particular
+manifest. For this purpose we do expose an endpoint in the xref:api/index.adoc[SBOMer API].
+
+Assuming you have the manifest identifier, you can use curl to request notification resend:
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/[SBOM_ID]/notify
+----
+
 == Consumed Messages
 
 Currently SBOMer consumes messages sent by the PNC build system. We are accepting messages
@@ -64,3 +76,4 @@ only finished messages. Such events can result in one of following options:
 
 A new generation request creation takes place in case there is no generation request associated with the
 operation identifier received. In case there is such a generation request -- its status will be updated.
+

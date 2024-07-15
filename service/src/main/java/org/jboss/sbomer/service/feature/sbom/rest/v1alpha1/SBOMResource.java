@@ -227,7 +227,7 @@ public class SBOMResource extends AbstractApiProvider {
             log.warn(
                     "Skipping creating new Generation Request for buildId '{}' because of SBOMer running in dry-run mode",
                     buildId);
-            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
 
         return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateFromBuild(buildId, config))).build();
@@ -314,7 +314,7 @@ public class SBOMResource extends AbstractApiProvider {
     public Response deleteGenerationRequest(@PathParam("id") final String id) {
         if (featureFlags.isDryRun()) {
             log.warn("Skipping deletion of Generation Request '{}' because of SBOMer running in dry-run mode", id);
-            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
 
         try {

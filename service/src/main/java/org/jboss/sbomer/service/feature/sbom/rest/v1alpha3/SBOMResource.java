@@ -208,7 +208,7 @@ public class SBOMResource extends AbstractApiProvider {
             log.warn(
                     "Skipping creating new Generation Request for buildId '{}' because of SBOMer running in dry-run mode",
                     buildId);
-            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
 
         return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateFromBuild(buildId, config))).build();

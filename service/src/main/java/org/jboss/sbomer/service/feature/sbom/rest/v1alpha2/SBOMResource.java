@@ -33,9 +33,7 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
-import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha2Mapper;
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.api.AbstractApiProvider;
 
@@ -57,8 +55,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1alpha2")
 @Produces(MediaType.APPLICATION_JSON)
@@ -66,14 +62,10 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Tag(name = "v1alpha2", description = "v1alpha2 API endpoints (deprecated)")
 @PermitAll
-@Slf4j
 public class SBOMResource extends AbstractApiProvider {
 
     @Inject
     protected V1Alpha2Mapper mapper;
-
-    @Inject
-    FeatureFlags featureFlags;
 
     @GET
     @Path("/sboms")
@@ -285,32 +277,6 @@ public class SBOMResource extends AbstractApiProvider {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public SbomGenerationRequestRecord getGenerationRequestById(@PathParam("id") String generationRequestId) {
         return mapper.toSbomRequestRecord(doGetSbomGenerationRequestById(generationRequestId));
-    }
-
-    @POST
-    @Operation(
-            summary = "Resend UMB notification message for a completed SBOM",
-            description = "Force the resending of the UMB notification message for an already generated SBOM.")
-    @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
-    @Path("/sboms/{id}/notify")
-    @APIResponse(responseCode = "200")
-    @APIResponse(
-            responseCode = "404",
-            description = "Requested SBOM could not be found",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response notify(@PathParam("id") String sbomId) throws Exception {
-        if (featureFlags.isDryRun()) {
-            log.warn("Skipping notification for SBOM '{}' because of SBOMer running in dry-run mode", sbomId);
-            return Response.status(Status.METHOD_NOT_ALLOWED).build();
-        }
-
-        Sbom sbom = doGetSbomById(sbomId);
-        sbomService.notifyCompleted(sbom);
-        return Response.ok().build();
     }
 
 }
