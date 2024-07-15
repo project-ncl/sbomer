@@ -55,7 +55,7 @@
     "react-docgen-typescript-loader": "^3.7.2",
     "react-router-dom": "^5.3.4",
     "regenerator-runtime": "^0.14.0",
-    "rimraf": "^5.0.7",
+    "rimraf": "^6.0.0",
     "style-loader": "^4.0.0",
     "svg-url-loader": "^8.0.0",
     "terser-webpack-plugin": "^5.3.10",
