@@ -33,14 +33,17 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.feature.FeatureFlags;
+import org.jboss.sbomer.service.feature.errors.FeatureConfigurationException;
+import org.jboss.sbomer.service.feature.errors.FeatureNotAvailableException;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Operation;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Operation;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.OperationGenerationFinishedMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.BomFormat;
@@ -83,27 +86,25 @@ public class NotificationService {
 
     public void notifyCompleted(List<org.jboss.sbomer.service.feature.sbom.model.Sbom> sboms) {
         if (featureFlags.isDryRun()) {
-            log.info("SBOMer running in dry-run mode, notification service won't send the notification");
-            return;
+            throw new FeatureNotAvailableException(
+                    "SBOMer running in dry-run mode, notification service won't send the notification");
         }
 
         if (!umbConfig.isEnabled()) {
-            log.info("UMB feature disabled, notification service won't send the notification");
-            return;
+            throw new FeatureNotAvailableException(
+                    "UMB feature disabled, notification service won't send the notification");
         }
 
         if (!umbConfig.producer().isEnabled()) {
-            log.info("UMB feature to produce notification messages disabled");
-            return;
+            throw new FeatureNotAvailableException("UMB feature to produce notification messages disabled");
         }
 
         if (!umbConfig.producer().topic().isPresent()) {
-            log.info("UMB produce topic not specified");
-            return;
+            throw new FeatureConfigurationException("UMB produce topic not specified");
         }
 
         if (sboms == null || sboms.isEmpty()) {
-            log.info("No SBOMs provided to send notifications for");
+            log.warn("No SBOMs provided to send notifications for");
             return;
         }
 
@@ -111,19 +112,17 @@ public class NotificationService {
             org.cyclonedx.model.Bom bom = fromJsonNode(sbom.getSbom());
 
             if (bom == null) {
-                log.warn(
+                throw new ApplicationException(
                         "Could not find a valid bom for SBOM id '{}', skipping sending UMB notification",
                         sbom.getId());
-                return;
             }
 
             Component component = bom.getMetadata().getComponent();
 
             if (component == null) {
-                log.warn(
+                throw new ApplicationException(
                         "Could not find root metadata component for SBOM id '{}', skipping sending UMB notification",
                         sbom.getId());
-                return;
             }
 
             /**
@@ -132,11 +131,10 @@ public class NotificationService {
              * Skips sending UMB messages for manifests not related to a product build.
              */
             if (getProductConfiguration(bom) == null) {
-                log.info(
+                throw new ApplicationException(
                         "Could not retrieve product configuration from the main component (purl = '{}') in the '{}' SBOM, skipping sending UMB notification",
                         component.getPurl(),
                         sbom.getId());
-                return;
             }
 
             GenerationFinishedMessageBody msg = createGenerationFinishedMessage(sbom, bom);
@@ -147,7 +145,7 @@ public class NotificationService {
 
                 amqpMessageProducer.notify(msg);
             } else {
-                log.warn(
+                throw new ApplicationException(
                         "GenerationFinishedMessage is NOT valid, NOT sending it to the topic! Validation errors: {}",
                         String.join("; ", result.getErrors()));
             }

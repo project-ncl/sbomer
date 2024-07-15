@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
@@ -165,7 +167,13 @@ class NotificationServiceIT {
         // Remove all product properties
         sbom.setSbom(SbomUtils.removeErrataProperties(sbom.getSbom()));
 
-        notificationService.notifyCompleted(List.of(sbom));
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
+            notificationService.notifyCompleted(List.of(sbom));
+        });
+
+        assertEquals(
+                "Could not retrieve product configuration from the main component (purl = 'pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar') in the '416640206274228333' SBOM, skipping sending UMB notification",
+                ex.getMessage());
 
         verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));
     }

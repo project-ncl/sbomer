@@ -31,7 +31,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ConfigMapping(prefix = "sbomer.features.umb")
 public interface UmbConfig {
 
-    interface UmbConsumerConfig {
+    public interface UmbConsumerConfig {
         /**
          * Enables the UMB consumer feature
          *
@@ -47,7 +47,7 @@ public interface UmbConfig {
         Optional<String> topic();
     }
 
-    interface UmbProducerConfig {
+    public interface UmbProducerConfig {
         /**
          * Enables the UMB producer feature
          *

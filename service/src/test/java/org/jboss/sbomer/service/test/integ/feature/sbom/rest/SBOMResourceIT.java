@@ -15,18 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.test.integ.feature.sbom;
+package org.jboss.sbomer.service.test.integ.feature.sbom.rest;
 
 import static io.restassured.RestAssured.given;
 
 import java.io.IOException;
+import java.util.Optional;
 
+import org.cyclonedx.model.Bom;
+import org.eclipse.microprofile.config.Config;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
+import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig.UmbProducerConfig;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,14 +44,43 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.smallrye.config.SmallRyeConfig;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
 @QuarkusTest
 @WithKubernetesTestServer
 class SBOMResourceIT {
+    public static class UmbConfigProducer {
+        @Inject
+        Config config;
+
+        @Produces
+        @ApplicationScoped
+        @io.quarkus.test.Mock
+        UmbConfig umbConfig() {
+            UmbConfig umbConfig = config.unwrap(SmallRyeConfig.class).getConfigMapping(UmbConfig.class);
+            UmbConfig umbConfigSpy = Mockito.spy(umbConfig);
+
+            UmbProducerConfig producerConfig = Mockito.mock(UmbProducerConfig.class);
+            Mockito.when(producerConfig.isEnabled()).thenReturn(true);
+            Mockito.when(producerConfig.topic()).thenReturn(Optional.of("/Vitualtopic/dummy"));
+
+            Mockito.when(umbConfigSpy.isEnabled()).thenReturn(true);
+            Mockito.when(umbConfigSpy.producer()).thenReturn(producerConfig);
+
+            return umbConfigSpy;
+        }
+    }
 
     @InjectSpy
     SbomService sbomService;
+
+    // @InjectSpy
+    // UmbConfig umbConfig;
 
     @Test
     void testExistenceOfSbomsEndpoint() {
@@ -248,4 +287,34 @@ class SBOMResourceIT {
                 .body("error", CoreMatchers.equalTo("Internal Server Error"));
     }
 
+    /**
+     * Tests UMB notification resend.
+     *
+     * See {@link UmbConfigProducer} above.
+     *
+     * @param apiVersion
+     * @throws IOException
+     */
+    @ParameterizedTest
+    @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
+    void testUmbNotificationResend(String apiVersion) throws IOException {
+        Bom bom = SbomUtils.fromString(TestResources.asString("sboms/sbom_with_errata.json"));
+
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
+                .withId("AABB")
+                .withIdentifier("BIDBID")
+                .withStatus(SbomGenerationStatus.FINISHED)
+                .build();
+
+        Sbom sbom = new Sbom();
+        sbom.setIdentifier("BIDBID");
+        sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
+        sbom.setId("416640206274228333");
+        sbom.setSbom(SbomUtils.toJsonNode(bom));
+        sbom.setGenerationRequest(generationRequest);
+
+        Mockito.when(sbomService.get("BIDBID")).thenReturn(sbom);
+
+        RestAssured.given().when().post("/api/" + apiVersion + "/sboms/BIDBID/notify").then().statusCode(200);
+    }
 }

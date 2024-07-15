@@ -24,13 +24,14 @@ import java.time.Duration;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
@@ -49,15 +50,19 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class AbstractApiProvider {
 
     @Inject
@@ -74,6 +79,9 @@ public abstract class AbstractApiProvider {
 
     @Inject
     AmqpMessageProducer messageProducer;
+
+    @Inject
+    FeatureFlags featureFlags;
 
     @Inject
     UmbConfig umbConfig;
@@ -221,5 +229,31 @@ public abstract class AbstractApiProvider {
         } finally {
             MDCUtils.removeProcessContext();
         }
+    }
+
+    @POST
+    @Operation(
+            summary = "Resend UMB notification message for a completed SBOM",
+            description = "Force the resending of the UMB notification message for an already generated SBOM.")
+    @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
+    @Path("/sboms/{id}/notify")
+    @APIResponse(responseCode = "200")
+    @APIResponse(
+            responseCode = "404",
+            description = "Requested SBOM could not be found",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    public Response notify(@PathParam("id") String sbomId) throws Exception {
+        if (featureFlags.isDryRun()) {
+            log.warn("Skipping notification for SBOM '{}' because of SBOMer running in dry-run mode", sbomId);
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
+        }
+
+        Sbom sbom = doGetSbomById(sbomId);
+        sbomService.notifyCompleted(sbom);
+        return Response.ok().build();
     }
 }
