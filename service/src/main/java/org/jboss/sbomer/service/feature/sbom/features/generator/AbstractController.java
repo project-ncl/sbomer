@@ -35,6 +35,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.errors.FeatureNotAvailableException;
+import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -79,6 +80,9 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
     @Inject
     NotificationService notificationService;
+
+    @Inject
+    S3StorageHandler s3LogHandler;
 
     protected abstract UpdateControl<GenerationRequest> updateRequest(
             GenerationRequest generationRequest,
@@ -306,6 +310,8 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
             Set<TaskRun> secondaryResources) {
         log.debug("Reconcile FAILED for '{}'...", generationRequest.getName());
 
+        s3LogHandler.storeFiles(generationRequest);
+
         // In case the generation request failed, we need to clean up resources so that these are not left forever.
         // We have all the data elsewhere (logs, cause) so it's safe to do so.
         cleanupFinishedGenerationRequest(generationRequest);
@@ -334,6 +340,8 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         } catch (FeatureNotAvailableException e) {
             log.warn(e.getMessage(), e);
         }
+
+        s3LogHandler.storeFiles(generationRequest);
 
         // At this point al the work is finished and we can clean up the GenerationRequest Kubernetes resource.
         cleanupFinishedGenerationRequest(generationRequest);
