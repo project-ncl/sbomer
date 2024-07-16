@@ -106,9 +106,6 @@ public class BuildController extends AbstractController {
     }
 
     @Inject
-    S3StorageHandler s3LogHandler;
-
-    @Inject
     GenerationRequestControllerConfig controllerConfig;
 
     @Inject
@@ -330,7 +327,6 @@ public class BuildController extends AbstractController {
         if (failedTaskRuns.isEmpty()) {
             try {
                 sboms = storeSboms(generationRequest);
-                s3LogHandler.storeFiles(generationRequest);
             } catch (ValidationException e) {
                 // There was an error when validating the entity, most probably the SBOM is not valid
                 log.error("Unable to validate generated SBOM", e);
