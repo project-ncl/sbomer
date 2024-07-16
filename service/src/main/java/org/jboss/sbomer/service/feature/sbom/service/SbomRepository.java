@@ -23,6 +23,7 @@ import java.util.List;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
@@ -59,6 +60,16 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
                             generationRequest.<GenerationRequestType> get("type").as(String.class),
                             generationRequest.<Instant> get("creationTime")));
         });
+    }
+
+    /**
+     * Returns list of manifests which are the output of the {@link GenerationRequest} with the provided identifier.
+     *
+     * @param generationRequestId
+     * @return
+     */
+    public List<Sbom> findSbomsByGenerationRequest(String generationRequestId) {
+        return find("generationRequest.id = ?1", generationRequestId).list();
     }
 
     @Transactional
