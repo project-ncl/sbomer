@@ -48,6 +48,12 @@ public class SyftImageConfig extends Config {
     @Builder.Default
     List<String> paths = new ArrayList<>();
 
+    /**
+     * Flag to indicate whether RPMs should be added to manifest.
+     */
+    @Builder.Default
+    boolean rpms = false;
+
     @JsonIgnore
     @Override
     public boolean isEmpty() {

@@ -11,6 +11,11 @@ List of paths within the container image that should be used to filter component
 If the path to component (for example a JAR file) is located on one of the paths provided in the configuration file
 it will be retained. Every component located outsude of given paths will be removed from the manifest.
 
+=== `rpms`
+
+A flag whether RPM packages should be added to generated manifest. By default this flag is set to `false` which means
+that no RPM packagaes will be added to manifest.
+
 == Example
 
 [source,yaml]
@@ -23,3 +28,14 @@ paths:
 
 If we have two components: `/opt/product/content/first.jar` and `/var/lib/product/content/second.jar` detected in the image
 we will only add `/opt/product/content/first.jar` to the manifest and the `/var/lib/product/content/second.jar` will be skipped.
+
+[source,yaml]
+----
+apiVersion: sbomer.jboss.org/v1alpha1
+type: syft-image
+rpms: true
+paths:
+    - "/opt"
+----
+
+This example is similar to the above one with one difference: all RPM packages will be added to the manifest.

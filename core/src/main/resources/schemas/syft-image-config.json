@@ -13,6 +13,10 @@
       "description": "Configuration type",
       "enum": ["syft-image"]
     },
+    "rpms": {
+      "description": "Flag to indicate whether RPMs should be added to manifest",
+      "type": "boolean"
+    },
     "paths": {
       "description": "All files located in the container image filesystem under given paths will be added to the resulting manifest. If this option is skipped, all found artifacts will be added.",
       "type": "array",

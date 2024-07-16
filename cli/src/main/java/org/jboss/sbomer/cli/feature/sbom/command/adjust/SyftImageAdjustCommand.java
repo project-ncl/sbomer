@@ -37,6 +37,9 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
     @Option(names = "--path-filter")
     List<String> paths = new ArrayList<>();
 
+    @Option(names = "--rpms", defaultValue = "false", negatable = true)
+    private boolean rpms;
+
     @Override
     protected GeneratorType getGeneratorType() {
         return GeneratorType.IMAGE_SYFT;
@@ -44,7 +47,7 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
 
     @Override
     protected Bom doAdjust(Bom bom, Path workDir) {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(paths);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(paths, rpms);
 
         return adjuster.adjust(bom, workDir);
     }

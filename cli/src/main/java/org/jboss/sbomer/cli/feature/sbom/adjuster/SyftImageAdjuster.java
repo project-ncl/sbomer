@@ -37,14 +37,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SyftImageAdjuster implements Adjuster {
     List<String> paths;
+    boolean includeRpms;
 
-    public SyftImageAdjuster(List<String> paths) {
+    public SyftImageAdjuster(List<String> paths, boolean includeRpms) {
         this.paths = paths;
+        this.includeRpms = includeRpms;
     }
 
     private boolean isOnPath(String path) {
         // In case we haven't provided paths to filter, add all found artifacts.
-        if (paths.isEmpty()) {
+        if (paths == null || paths.isEmpty()) {
             return true;
         }
 
@@ -71,14 +73,29 @@ public class SyftImageAdjuster implements Adjuster {
             bom.getMetadata().setProperties(null);
         }
 
-        // Remove all components that are not on the paths we are interested in
-        bom.getComponents()
-                .removeIf(
-                        c -> c.getProperties()
-                                .stream()
-                                .filter(p -> p.getName().equals("syft:location:0:path") && isOnPath(p.getValue()))
-                                .findAny()
-                                .isEmpty());
+        // Remove components from manifest according to 'paths' and 'includeRpms' parameters
+        bom.getComponents().removeIf(c -> {
+
+            // Handle RPMs
+            if (c.getPurl() != null && c.getPurl().startsWith("pkg:rpm")) {
+                // Remove all components that are RPMs if the includeRpms is not set to true
+                return !includeRpms;
+            } else {
+                // Handle everything else
+
+                // If paths are not specified, include everything
+                if (paths == null || paths.isEmpty()) {
+                    return false;
+                }
+
+                // Remove all components that are not on the paths we are interested in
+                return c.getProperties()
+                        .stream()
+                        .filter(p -> p.getName().equals("syft:location:0:path") && isOnPath(p.getValue()))
+                        .findAny()
+                        .isEmpty();
+            }
+        });
 
         // Cleanup main component
         cleanupComponent(productComponent);
