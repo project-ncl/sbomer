@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,7 +34,9 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.errors.FeatureNotAvailableException;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -73,6 +76,9 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
     @Inject
     KubernetesClient kubernetesClient;
+
+    @Inject
+    NotificationService notificationService;
 
     protected abstract UpdateControl<GenerationRequest> updateRequest(
             GenerationRequest generationRequest,
@@ -322,7 +328,13 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         log.debug("Reconcile FINISHED for '{}'...", generationRequest.getName());
 
-        // notificationService.notifyCompleted(sboms);
+        try {
+            List<Sbom> sboms = sbomRepository.findSbomsByGenerationRequest(generationRequest.getId());
+            notificationService.notifyCompleted(sboms);
+        } catch (FeatureNotAvailableException e) {
+            log.warn(e.getMessage(), e);
+        }
+
         // At this point al the work is finished and we can clean up the GenerationRequest Kubernetes resource.
         cleanupFinishedGenerationRequest(generationRequest);
 

@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -139,6 +140,18 @@ class SbomRepositoryIT {
         assertEquals("416640206274228224", sbom.getId());
         assertEquals("ARYT3LBXDVYAC", sbom.getIdentifier());
         assertEquals(GenerationRequestType.BUILD, sbom.getGenerationRequest().getType());
+    }
+
+    @Test
+    void testFindByGenerationIdEmpty() {
+        List<Sbom> sboms = sbomRepository.findSbomsByGenerationRequest("NOTTHERE");
+        assertTrue(sboms.isEmpty());
+    }
+
+    @Test
+    void testFindByGenerationIdSingle() {
+        List<Sbom> sboms = sbomRepository.findSbomsByGenerationRequest("AASSBB");
+        assertEquals(1, sboms.size());
     }
 
     @Test

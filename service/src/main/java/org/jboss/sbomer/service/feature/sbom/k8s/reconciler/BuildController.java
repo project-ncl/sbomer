@@ -38,7 +38,6 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -114,9 +113,6 @@ public class BuildController extends AbstractController {
 
     @Inject
     SbomRepository sbomRepository;
-
-    @Inject
-    NotificationService notificationService;
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
@@ -345,9 +341,6 @@ public class BuildController extends AbstractController {
                         GenerationResult.ERR_GENERATION,
                         "Generation failed. One or more generated SBOMs failed validation. See logs for more information.");
             }
-
-            // TODO: Move this to reconcileFinished method
-            notificationService.notifyCompleted(sboms);
 
             return updateRequest(
                     generationRequest,
