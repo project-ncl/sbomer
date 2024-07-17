@@ -40,6 +40,7 @@ import org.jboss.sbomer.service.feature.errors.FeatureNotAvailableException;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
+import org.jboss.sbomer.service.feature.sbom.features.umb.NotificationException;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
@@ -112,7 +113,7 @@ public class NotificationService {
             org.cyclonedx.model.Bom bom = fromJsonNode(sbom.getSbom());
 
             if (bom == null) {
-                throw new ApplicationException(
+                throw new NotificationException(
                         "Could not find a valid bom for SBOM id '{}', skipping sending UMB notification",
                         sbom.getId());
             }
@@ -120,7 +121,7 @@ public class NotificationService {
             Component component = bom.getMetadata().getComponent();
 
             if (component == null) {
-                throw new ApplicationException(
+                throw new NotificationException(
                         "Could not find root metadata component for SBOM id '{}', skipping sending UMB notification",
                         sbom.getId());
             }
@@ -131,7 +132,7 @@ public class NotificationService {
              * Skips sending UMB messages for manifests not related to a product build.
              */
             if (getProductConfiguration(bom) == null) {
-                throw new ApplicationException(
+                throw new NotificationException(
                         "Could not retrieve product configuration from the main component (purl = '{}') in the '{}' SBOM, skipping sending UMB notification",
                         component.getPurl(),
                         sbom.getId());
@@ -145,7 +146,7 @@ public class NotificationService {
 
                 amqpMessageProducer.notify(msg);
             } else {
-                throw new ApplicationException(
+                throw new NotificationException(
                         "GenerationFinishedMessage is NOT valid, NOT sending it to the topic! Validation errors: {}",
                         String.join("; ", result.getErrors()));
             }
@@ -255,8 +256,8 @@ public class NotificationService {
         Optional<ExternalReference> pncBuildSystemRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
-                .findFirst();
+                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
+                        .findFirst();
 
         Build buildPayload = Build.builder()
                 .id(sbom.getIdentifier())
@@ -307,8 +308,8 @@ public class NotificationService {
         Optional<ExternalReference> pncOperationRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_OPERATION_ID))
-                .findFirst();
+                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_OPERATION_ID))
+                        .findFirst();
 
         Operation operationPayload = Operation.builder()
                 .id(sbom.getIdentifier())
