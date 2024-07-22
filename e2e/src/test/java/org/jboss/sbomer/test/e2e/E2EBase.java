@@ -77,7 +77,8 @@ public abstract class E2EBase {
 
             if (status.equals("FAILED")) {
                 log.error("GenerationRequest '{}' failed: {}", generationRequestId, response.asPrettyString());
-                throw new Exception(String.format("GenerationRequest '%s' failed, see logs above"));
+                throw new Exception(
+                        String.format("GenerationRequest '%s' failed, see logs above", generationRequestId));
             }
 
             return status.equals("FINISHED");

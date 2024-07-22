@@ -146,6 +146,8 @@ public class SyftImageController extends AbstractController {
                         + SbomGenerationPhase.GENERATE.name().toLowerCase(),
                 "bom.json");
 
+        log.debug("Reading manifest from '{}'...", sbomPath.toAbsolutePath());
+
         // Read the generated SBOM JSON file
         Bom bom = SbomUtils.fromPath(sbomPath);
 

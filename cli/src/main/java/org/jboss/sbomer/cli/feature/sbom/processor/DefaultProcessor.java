@@ -46,19 +46,19 @@ import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
 import org.jboss.sbomer.core.pnc.PncService;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
-@ApplicationScoped
 @Slf4j
 public class DefaultProcessor implements Processor {
 
-    @Inject
     protected PncService pncService;
 
-    @Inject
     protected KojiService kojiService;
+
+    public DefaultProcessor(PncService pncService, KojiService kojiService) {
+        this.pncService = pncService;
+        this.kojiService = kojiService;
+    }
 
     private Map<String, String> purlRelocations = new HashMap<>();
 

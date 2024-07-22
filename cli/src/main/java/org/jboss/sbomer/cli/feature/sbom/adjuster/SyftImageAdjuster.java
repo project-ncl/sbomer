@@ -32,6 +32,9 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
 
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -55,6 +58,8 @@ public class SyftImageAdjuster implements Adjuster {
 
     @Override
     public Bom adjust(Bom bom, Path workDir) {
+        log.debug("Starting adjustment of the manifest, configuration paths: {}, includeRpms: {}", paths, includeRpms);
+
         Component productComponent = bom.getMetadata().getComponent();
 
         // Initialize properties for main component, if not done so yet
@@ -73,27 +78,53 @@ public class SyftImageAdjuster implements Adjuster {
             bom.getMetadata().setProperties(null);
         }
 
+        log.debug("There are {} components to be adjusted", bom.getComponents().size());
+
         // Remove components from manifest according to 'paths' and 'includeRpms' parameters
         bom.getComponents().removeIf(c -> {
 
+            if (c.getPurl() == null) {
+                log.debug(
+                        "Component (of type '{}', cpe: '{}') does not have purl assigned, marked for removal",
+                        c.getType(),
+                        c.getCpe());
+                return true;
+            }
+
+            PackageURL purl = null;
+
+            try {
+                purl = new PackageURL(c.getPurl());
+            } catch (MalformedPackageURLException e) {
+                throw new ApplicationException("Unable to parse provided purl: '{}'", c.getPurl(), e);
+            }
+
+            log.debug("Handling component '{}'", purl);
+
             // Handle RPMs
-            if (c.getPurl() != null && c.getPurl().startsWith("pkg:rpm")) {
+            if (purl.getType().equals("rpm")) {
                 // Remove all components that are RPMs if the includeRpms is not set to true
+                log.debug("Component is of type RPM, to be removed: {}", purl, !includeRpms);
                 return !includeRpms;
             } else {
                 // Handle everything else
 
                 // If paths are not specified, include everything
                 if (paths == null || paths.isEmpty()) {
+                    log.debug("No paths provided, component won't be removed");
                     return false;
                 }
 
                 // Remove all components that are not on the paths we are interested in
-                return c.getProperties()
+                boolean onPath = c.getProperties()
                         .stream()
                         .filter(p -> p.getName().equals("syft:location:0:path") && isOnPath(p.getValue()))
                         .findAny()
                         .isEmpty();
+
+                log.debug("Component on path: {}", onPath);
+
+                return onPath;
             }
         });
 

@@ -1,0 +1,5796 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "serialNumber": "urn:uuid:a1f25706-c8b3-4c71-9bcd-129d60b958dc",
+    "version": 1,
+    "metadata": {
+      "timestamp": "2024-07-18T11:20:17Z",
+      "component": {
+        "type": "container",
+        "name": "registry.redhat.io/jboss-webserver-5/jws58-openjdk17-openshift-rhel8",
+        "version": "sha256:f63b27a29c032843941b15567ebd1f37f540160e8066ac74c05367134c2ff3aa",
+        "purl": "pkg:oci/jws58-openjdk17-openshift-rhel8@sha256%3Af63b27a29c032843941b15567ebd1f37f540160e8066ac74c05367134c2ff3aa?repository_url=registry.redhat.io&os=linux&arch=amd64&tag=5.8.0-5",
+        "properties": [
+          {
+            "name": "sbomer:image:labels:architecture",
+            "value": "x86_64"
+          },
+          {
+            "name": "sbomer:image:labels:build-date",
+            "value": "2024-05-30T12:02:31"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.component",
+            "value": "jboss-webserver-58-openjdk17-rhel8-openshift-container"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.deployments-dir",
+            "value": "/opt/jws-5.8/tomcat/webapps"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.dev-mode",
+            "value": "DEBUG:true"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.dev-mode.port",
+            "value": "JPDA_ADDRESS:8000"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.license_terms",
+            "value": "https://www.redhat.com/agreements"
+          },
+          {
+            "name": "sbomer:image:labels:description",
+            "value": "Red Hat JBoss Web Server 5.8 - Tomcat 9 OpenShift container image with OpenJDK17 on UBI8"
+          },
+          {
+            "name": "sbomer:image:labels:distribution-scope",
+            "value": "public"
+          },
+          {
+            "name": "sbomer:image:labels:io.buildah.version",
+            "value": "1.29.0"
+          },
+          {
+            "name": "sbomer:image:labels:io.cekit.version",
+            "value": "4.12.0"
+          },
+          {
+            "name": "sbomer:image:labels:io.fabric8.s2i.version.jolokia",
+            "value": "1.7.1.redhat-00001"
+          },
+          {
+            "name": "sbomer:image:labels:io.fabric8.s2i.version.maven",
+            "value": "3.6"
+          },
+          {
+            "name": "sbomer:image:labels:io.k8s.description",
+            "value": "Platform for building and running web applications on JBoss Web Server 5.8 with OpenJDK17 - Tomcat v9"
+          },
+          {
+            "name": "sbomer:image:labels:io.k8s.display-name",
+            "value": "JBoss Web Server 5.8 OpenJDK17"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.expose-services",
+            "value": "8080:http"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.s2i.destination",
+            "value": "/tmp"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.s2i.scripts-url",
+            "value": "image:///usr/local/s2i"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.tags",
+            "value": "builder,java,tomcat9"
+          },
+          {
+            "name": "sbomer:image:labels:maintainer",
+            "value": "szappis@redhat.com"
+          },
+          {
+            "name": "sbomer:image:labels:name",
+            "value": "jboss-webserver-5/jws58-openjdk17-rhel8-openshift"
+          },
+          {
+            "name": "sbomer:image:labels:org.jboss.container.deployments-dir",
+            "value": "/deployments"
+          },
+          {
+            "name": "sbomer:image:labels:org.jboss.deployments-dir",
+            "value": "/opt/jws-5.8/tomcat/webapps"
+          },
+          {
+            "name": "sbomer:image:labels:org.jboss.product",
+            "value": "webserver-tomcat9"
+          },
+          {
+            "name": "sbomer:image:labels:org.jboss.product.openjdk.version",
+            "value": "17"
+          },
+          {
+            "name": "sbomer:image:labels:org.jboss.product.version",
+            "value": "5.8.0"
+          },
+          {
+            "name": "sbomer:image:labels:org.jboss.product.webserver-tomcat9.version",
+            "value": "5.8.0"
+          },
+          {
+            "name": "sbomer:image:labels:release",
+            "value": "5"
+          },
+          {
+            "name": "sbomer:image:labels:summary",
+            "value": "Red Hat JBoss Web Server 5.8 - Tomcat 9 OpenShift container image with OpenJDK17 on UBI8"
+          },
+          {
+            "name": "sbomer:image:labels:url",
+            "value": "https://access.redhat.com/containers/#/registry.access.redhat.com/jboss-webserver-5/jws58-openjdk17-rhel8-openshift/images/5.8.0-5"
+          },
+          {
+            "name": "sbomer:image:labels:vcs-ref",
+            "value": "e74ae74becd2837a739e3b8c58c7b68fdccefc74"
+          },
+          {
+            "name": "sbomer:image:labels:vcs-type",
+            "value": "git"
+          },
+          {
+            "name": "sbomer:image:labels:vendor",
+            "value": "Red Hat, Inc."
+          },
+          {
+            "name": "sbomer:image:labels:version",
+            "value": "5.8.0"
+          }
+        ]
+      }
+    },
+    "components": [
+      {
+        "type": "library",
+        "author": "James Henstridge <james@daa.com.au>",
+        "name": "PyGObject",
+        "version": "3.28.3",
+        "licenses": [
+          {
+            "license": {
+              "name": "GNU LGPL"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/PyGObject@3.28.3",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/pygobject-3.28.3-py3.6.egg-info"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Anorov <anorov.vorona@gmail.com>",
+        "name": "PySocks",
+        "version": "1.6.8",
+        "licenses": [
+          {
+            "license": {
+              "name": "BSD"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/PySocks@1.6.8",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/PySocks-1.6.8-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Kirill Simonov <xi@resolvent.net>",
+        "name": "PyYAML",
+        "version": "3.12",
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/PyYAML@3.12",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/PyYAML-3.12-py3.6.egg-info"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "ROOT",
+        "purl": "pkg:maven/ROOT/ROOT?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "fc5abe900888db79a1d610ce3df0760a3a8dc52a"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/deployments/ROOT.war"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "annotations-api",
+        "version": "1.3.FR",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-annotations-api/annotations-api@1.3.FR?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "b25a5795ab4b78e169a8c59b44e2564d3f5b9041"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/annotations-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "aopalliance",
+        "version": "1.0",
+        "purl": "pkg:maven/aopalliance/aopalliance@1.0?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "99ea87be3df266d730d1c2e0a31ed1671b26935e"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/aopalliance.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "atinject",
+        "version": "1.0.0.v20091030",
+        "purl": "pkg:maven/atinject/atinject@1.0.0.v20091030?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "1d0f446305722612fffd1094e0e22c5377b9c549"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/atinject.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "bootstrap",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.catalina.startup.Bootstrap/bootstrap@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "730c682fb6a47068a6db5a7d222204c2d22e417b"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/bin/bootstrap.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "catalina",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-catalina/catalina@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "7d62849a3a247c37b9a717530a8b10e0735e01c7"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/catalina.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "catalina-ant",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/catalina-ant/catalina-ant@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "ca0d6e1ef7d9a1e920fe6e7a5c210984380fe1ea"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/catalina-ant.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "catalina-ha",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-catalina-ha/catalina-ha@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "5aa4280fae43cd3e49321493f7a8b33ca27fe0e3"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/catalina-ha.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "catalina-ssi",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-ssi/catalina-ssi@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "78873827a94a4ec8c718befefe1723a979212bd5"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/catalina-ssi.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "catalina-storeconfig",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-storeconfig/catalina-storeconfig@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "685010b788e81642ae22a562ca0825ddb0d62629"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/catalina-storeconfig.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "catalina-tribes",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-tribes/catalina-tribes@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "67ec429f9d772895256305b012351afe15b96d33"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/catalina-tribes.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Mark Pilgrim <mark@diveintomark.org>",
+        "name": "chardet",
+        "version": "3.0.4",
+        "licenses": [
+          {
+            "license": {
+              "name": "LGPL"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/chardet@3.0.4",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/chardet-3.0.4-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "io.prometheus.jmx",
+        "name": "collector",
+        "version": "0.12.0",
+        "purl": "pkg:maven/io.prometheus.jmx/collector@0.12.0?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "6af8c269d895fa40380c6064e647552d91970513"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/collector.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "io.prometheus.jmx",
+        "name": "collector",
+        "version": "0.12.0",
+        "purl": "pkg:maven/io.prometheus.jmx/collector@0.12.0?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "commons-cli",
+        "name": "commons-cli",
+        "version": "1.3.1.redhat-2",
+        "purl": "pkg:maven/commons-cli/commons-cli@1.3.1.redhat-2?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-vault.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "commons-cli",
+        "name": "commons-cli",
+        "version": "1.4",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/commons-cli/commons-cli@1.4?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "03126c1d2495c84ab86ee29d09f5f2bf6559f363"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/commons-cli.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "commons-codec",
+        "name": "commons-codec",
+        "version": "1.11",
+        "purl": "pkg:maven/commons-codec/commons-codec@1.11?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "commons-codec",
+        "name": "commons-codec",
+        "version": "1.13",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/commons-codec/commons-codec@1.13?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "556ac0533eb83292dcda94b0f4112552807534c0"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/commons-codec.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "commons-io",
+        "name": "commons-io",
+        "version": "2.6",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/commons-io/commons-io@2.6?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "1bfb99e84a550e4e513996e7b88a7e8e905a34ff"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/commons-io.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.commons",
+        "name": "commons-lang3",
+        "version": "3.9",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.commons/commons-lang3@3.9?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "02d9587c125e41452f15576414332f9cc08e2d0d"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/apache-commons-lang3.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "dbus-python",
+        "version": "1.2.4",
+        "licenses": [
+          {
+            "license": {
+              "name": "Expat (MIT/X11)"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/dbus-python@1.2.4",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/dbus_python-1.2.4-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Michele Simionato <michele.simionato@gmail.com>",
+        "name": "decorator",
+        "version": "4.2.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "new BSD License"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/decorator@4.2.1",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/decorator-4.2.1-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.eclipse.jdt.core.compiler",
+        "name": "ecj",
+        "version": "4.20.0.redhat-00002",
+        "licenses": [
+          {
+            "license": {
+              "name": "Eclipse Public License v1.0",
+              "url": "http://www.eclipse.org/org/documents/epl-v10.php"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.eclipse.jdt.core.compiler/ecj@4.20.0.redhat-00002?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "a89c4cce222e2ad6d9a62638ad3ed3ab59a8cbe4"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/ecj-4.20.0.redhat-00002.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "el-api",
+        "version": "3.0.FR",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-el-api/el-api@3.0.FR?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "b04dbb88b93fa3d0f6fa850403fd9550d6f44827"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/el-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Harald Hoyer, Arnaldo Carvalho de Melo, David Sommerseth <davids@redhat.com>",
+        "name": "ethtool",
+        "version": "0.14",
+        "licenses": [
+          {
+            "license": {
+              "id": "GPL-2.0-only"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/ethtool@0.14",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/ethtool-0.14-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "com.google.guava",
+        "name": "failureaccess",
+        "version": "1.0.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.google.guava/failureaccess@1.0.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "d05d28abe1525c7c0cca37af173cb1704f8dbd84"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/guava/failureaccess.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "file",
+        "version": "3.3.4",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/file/file@3.3.4?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "30af385a6664b17321905c1fc03dead0bba57e49"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-wagon/file.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.geronimo.specs",
+        "name": "geronimo-annotation_1.3_spec",
+        "version": "1.0",
+        "purl": "pkg:maven/org.apache.geronimo.specs/geronimo-annotation_1.3_spec@1.0?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "9140fb1f545c5cc6e8568ff55d4949abe7d204d0"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/geronimo-annotation.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "google-guice",
+        "version": "4.2.2",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.google.inject/google-guice@4.2.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "0022c28795965594c335739221476f405e589a24"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/guice/google-guice.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "google-guice-no_aop",
+        "version": "4.2.2",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.google.inject/google-guice-no_aop@4.2.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "2a910114da19f27c501c7641334992a4ccc2bc6d"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/guice/google-guice-no_aop.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "The GnuPG hackers <gnupg-devel@gnupg.org>",
+        "name": "gpg",
+        "version": "1.13.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "LGPL2.1+ (the library), GPL2+ (tests and examples)"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/gpg@1.13.1",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/gpg-1.13.1-py3.6.egg-info"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "com.google.guava",
+        "name": "guava",
+        "version": "28.1-jre",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.google.guava/guava@28.1-jre?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "a128348fcd87f99ec5c3753586cb7199ae2a59bd"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/guava/guava.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "http",
+        "version": "3.3.4",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/http/http@3.3.4?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "043d4a9d5936b0345a369d23bb5876cb7d1a59b5"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-wagon/http.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "http-shared",
+        "version": "3.3.4",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/http-shared/http-shared@3.3.4?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "b2e9f14a4d6091e001e5ad4a1b5c78b2e116caae"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-wagon/http-shared.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.httpcomponents",
+        "name": "httpclient",
+        "version": "4.5.10",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.httpcomponents/httpclient@4.5.10?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "b2cb908cbca12012827e0ac40eb7d1baeb378f74"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/httpcomponents/httpclient.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.httpcomponents",
+        "name": "httpcore",
+        "version": "4.4.12",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.httpcomponents/httpcore@4.4.12?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "d0e3382717b8d93e04ba886b0314c69f4fd9ce9c"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/httpcomponents/httpcore.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.httpcomponents",
+        "name": "httpcore-nio",
+        "version": "4.4.12",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.httpcomponents/httpcore-nio@4.4.12?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "c0c41aea1b49f04c84a1585b4c4a080edc06ba60"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/httpcomponents/httpcore-nio.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Kim Davies <kim@cynosure.com.au>",
+        "name": "idna",
+        "version": "2.5",
+        "licenses": [
+          {
+            "license": {
+              "name": "BSD-like"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/idna@2.5",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/idna-2.5-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Paramjit Oberoi <param@cs.wisc.edu>",
+        "name": "iniparse",
+        "version": "0.4",
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/iniparse@0.4",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/iniparse-0.4-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "interpolation",
+        "version": "1.26.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.codehaus.plexus.interpolation/interpolation@1.26.0?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "2795fe7052edcd64ccd9bd01ed0b36b5e46521f6"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/plexus/interpolation.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "jakarta.enterprise",
+        "name": "jakarta.enterprise.cdi-api",
+        "version": "2.0.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://repository.jboss.org/licenses/apache-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/jakarta.enterprise/jakarta.enterprise.cdi-api@2.0.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "56dd0515db54dd657a70e310f6c19e3239eaa484"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/cdi-api/jakarta.enterprise.cdi-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.fusesource.jansi",
+        "name": "jansi",
+        "version": "1.18",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.fusesource.jansi/jansi@1.18?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "d1c83e05f4c5d37b6a8f69b53df560279929590f"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/jansi/jansi.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "jasper",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-jasper/jasper@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "baf16668cb49c953645473194e58a01c8be8c9ba"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/jasper.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "jasper-el",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-jasper-el/jasper-el@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "801dd712e4c5ad89e1d7e2a6614e71c48f596705"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/jasper-el.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "jaspic-api",
+        "version": "1.1.FR",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-jaspic-api/jaspic-api@1.1.FR?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "5e98cb9fb608c75151d64674af84b9cd05377c0a"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/jaspic-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jasypt",
+        "name": "jasypt",
+        "version": "1.9.2.redhat-1",
+        "licenses": [
+          {
+            "license": {
+              "name": "The Apache Software License, Version 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.jasypt/jasypt@1.9.2.redhat-1?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-vault.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jboss.logging",
+        "name": "jboss-logging",
+        "version": "3.4.1.Final-redhat-00001",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.jboss.logging/jboss-logging@3.4.1.Final-redhat-00001?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "7f1a9caa3ec73ac216359c5b7b9ecfa66fe7f9b2"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/jboss-logging.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.slf4j",
+        "name": "jcl-over-slf4j",
+        "version": "1.7.28",
+        "purl": "pkg:maven/org.slf4j/jcl-over-slf4j@1.7.28?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "65251aa118f5135838662a625c8decfee6332b42"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/slf4j/jcl-over-slf4j.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "io.prometheus.jmx",
+        "name": "jmx_prometheus_javaagent",
+        "version": "0.12.0",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/io.prometheus.jmx/jmx_prometheus_javaagent@0.12.0?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "16d0e0f421c609febb71aa570a6ca5dbbd607d27"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jolokia",
+        "name": "jolokia-core",
+        "version": "1.6.2",
+        "purl": "pkg:maven/org.jolokia/jolokia-core@1.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "86a69ed8aa8d7d1e61bb02656d6e71c41e6526a8"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/jolokia-jvm-agent/jolokia-core.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jolokia",
+        "name": "jolokia-core",
+        "version": "1.6.2",
+        "purl": "pkg:maven/org.jolokia/jolokia-core@1.6.2?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/jolokia-jvm-agent/jolokia-jvm.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jolokia",
+        "name": "jolokia-jvm",
+        "version": "1.6.2",
+        "purl": "pkg:maven/org.jolokia/jolokia-jvm@1.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "cdc04e1766ef289868f2f4293417bb4c47626cbe"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/jolokia-jvm-agent/jolokia-jvm.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "jrt-fs",
+        "version": "17.0.11",
+        "purl": "pkg:maven/jrt-fs/jrt-fs@17.0.11?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "b0f84803d617f110b6e3e6b82e885b3b89ff48e2"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/jvm/java-17-openjdk-17.0.11.0.9-2.el8.x86_64/lib/jrt-fs.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "com.googlecode.json-simple",
+        "name": "json-simple",
+        "version": "1.1.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "The Apache Software License, Version 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/com.googlecode.json-simple/json-simple@1.1.1?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/jolokia-jvm-agent/jolokia-jvm.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jsoup",
+        "name": "jsoup",
+        "version": "1.12.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://jsoup.org/license"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.jsoup/jsoup@1.12.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "e11148ca3b802ce2f1dad4917c8ac54c944152f5"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/jsoup/jsoup.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "jsp-api",
+        "version": "2.3.FR",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-jsp-api/jsp-api@2.3.FR?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "da1b1b2cb2d995ca028d85d224aacd7cbdc33e85"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/jsp-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "jsr",
+        "version": "305",
+        "purl": "pkg:maven/jsr/jsr@305?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "8d6eeefe1779a6f2db0db0a0ab8c8d44e7aba7ee"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/jsr-305.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "RPM Software Management <rpm-ecosystem@lists.rpm.org>",
+        "name": "libcomps",
+        "version": "0.1.18",
+        "licenses": [
+          {
+            "license": {
+              "name": "GPLv2+"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/libcomps@0.1.18",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/libcomps-0.1.18-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-artifact",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-artifact@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "2086d8d3ddcf1aaca7abecb30e649b3d26fadf75"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-artifact.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-builder-support",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-builder-support@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "6181d5df1a75325a8f53cf89c328da72cb73cd02"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-builder-support.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-compat",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-compat@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "ab596b57c93763d60107d5c211f6617697ac6c3f"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-compat.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-core",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-core@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "8e4bb82748e0321c7b7146bd5674a9db9ade7936"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-core.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-embedder",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-embedder@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "0dd4de1bfa22b5190b51d38b13199e878321231d"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-embedder.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-model",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-model@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "230333a83f6b83d47333a90c59a85712e1b4d14c"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-model.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-model-builder",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-model-builder@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "05493e40d42f73d3af738575a652d70bc666c132"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-model-builder.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-plugin-api",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-plugin-api@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "a7be018578304502dcf0914dfc054008a9d75956"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-plugin-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-repository-metadata",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-repository-metadata@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "eb2e218f5ba24d7a964ac20a29977c5a70394022"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-repository-metadata.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.resolver",
+        "name": "maven-resolver-api",
+        "version": "1.4.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven.resolver/maven-resolver-api@1.4.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "bc24411b69b860fee5a8b3f71ae85f0b0e898d4d"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-resolver/maven-resolver-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.resolver",
+        "name": "maven-resolver-connector-basic",
+        "version": "1.4.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven.resolver/maven-resolver-connector-basic@1.4.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "9106da5cbcd78d410dabd70b1e64e466bc64eae7"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-resolver/maven-resolver-connector-basic.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.resolver",
+        "name": "maven-resolver-impl",
+        "version": "1.4.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven.resolver/maven-resolver-impl@1.4.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "6a5c20222790cd31f0cbebe59ecd95cbceb50599"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-resolver/maven-resolver-impl.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-resolver-provider",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-resolver-provider@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "5feb6a0a0e313b5883a5cb1b829e7c73b11e7dfa"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-resolver-provider.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.resolver",
+        "name": "maven-resolver-spi",
+        "version": "1.4.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven.resolver/maven-resolver-spi@1.4.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "26d90c7a11c769975e0b64587fd8f2ddb450bc56"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-resolver/maven-resolver-spi.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.resolver",
+        "name": "maven-resolver-transport-wagon",
+        "version": "1.4.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven.resolver/maven-resolver-transport-wagon@1.4.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "385305e8854ea82d7a6e6facb1ca6e3d1539f629"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-resolver/maven-resolver-transport-wagon.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.resolver",
+        "name": "maven-resolver-util",
+        "version": "1.4.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven.resolver/maven-resolver-util@1.4.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "9af27fe74f55e15dff5787485d72862d9355096e"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-resolver/maven-resolver-util.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-settings",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-settings@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "f59ac0f346a8902574bc368b80c08d4cd88bc9f5"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-settings.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-settings-builder",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-settings-builder@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "12d7fbb0588de84a705e7f7c012d61ab440f1b97"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-settings-builder.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.shared",
+        "name": "maven-shared-utils",
+        "version": "3.2.1",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven.shared/maven-shared-utils@3.2.1?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "e52fa17704071b5a79721a45759868980c0e250f"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-shared-utils/maven-shared-utils.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven",
+        "name": "maven-slf4j-provider",
+        "version": "3.6.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.maven/maven-slf4j-provider@3.6.2?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "51afd2a226a6b67bd3dc307a3a050106aaf7c691"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven/maven-slf4j-provider.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jboss.mod_cluster",
+        "name": "mod_cluster-container-spi",
+        "version": "1.4.5.Final-redhat-00001",
+        "purl": "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-spi@1.4.5.Final-redhat-00001?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "91f81fc2bf99e1d4f8f658be38c102d9e38fee75"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/mod_cluster-container-spi.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jboss.mod_cluster",
+        "name": "mod_cluster-container-tomcat",
+        "version": "1.4.5.Final-redhat-00001",
+        "purl": "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat@1.4.5.Final-redhat-00001?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "5e381eaa945a3eacefd612f874f784073971d659"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/mod_cluster-container-tomcat.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jboss.mod_cluster",
+        "name": "mod_cluster-container-tomcat85",
+        "version": "1.4.5.Final-redhat-00001",
+        "purl": "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat85@1.4.5.Final-redhat-00001?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/mod_cluster-container-tomcat9.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "mod_cluster-container-tomcat9",
+        "version": "1.4.5.Final-redhat-00001",
+        "purl": "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat9@1.4.5.Final-redhat-00001?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "abd3269040cb790c047cef2dc1c17bd1703d80d3"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/mod_cluster-container-tomcat9.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jboss.mod_cluster",
+        "name": "mod_cluster-core",
+        "version": "1.4.5.Final-redhat-00001",
+        "purl": "pkg:maven/org.jboss.mod_cluster/mod_cluster-core@1.4.5.Final-redhat-00001?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "84e91b26784c064d1597a7e5c9076a29edf5036b"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/mod_cluster-core.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jboss.mod_cluster",
+        "name": "mod_cluster-load-spi",
+        "version": "1.4.5.Final-redhat-00001",
+        "purl": "pkg:maven/org.jboss.mod_cluster/mod_cluster-load-spi@1.4.5.Final-redhat-00001?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "7fdf66ba0c0d72fecb3114e3f42b7936ec939840"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/mod_cluster-load-spi.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.eclipse.sisu",
+        "name": "org.eclipse.sisu.inject",
+        "version": "0.3.4",
+        "purl": "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.inject@0.3.4?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "250e8788d4f1ee1242cb5f0054daf9d78d6dc42a"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/org.eclipse.sisu.inject.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.eclipse.sisu",
+        "name": "org.eclipse.sisu.plexus",
+        "version": "0.3.4",
+        "purl": "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.3.4?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "2241ce1601d16b1181aef6e16591fa1a808352dc"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/org.eclipse.sisu.plexus.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "The pip developers <python-virtualenv@groups.google.com>",
+        "name": "pip",
+        "version": "9.0.3",
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/pip@9.0.3",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/pip-9.0.3.dist-info/METADATA"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.sonatype.plexus",
+        "name": "plexus-cipher",
+        "version": "1.7",
+        "purl": "pkg:maven/org.sonatype.plexus/plexus-cipher@1.7?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "e22b0f6cf51f37208a71c0bb3fd87c7d1fcb03a8"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/plexus/plexus-cipher.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.codehaus.plexus",
+        "name": "plexus-classworlds",
+        "version": "2.6.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.codehaus.plexus/plexus-classworlds@2.6.0?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "3549acd01d9c42e392e0f9452a8c1d8080d42a49"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/plexus-classworlds.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.codehaus.plexus",
+        "name": "plexus-component-annotations",
+        "version": "2.1.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.codehaus.plexus/plexus-component-annotations@2.1.0?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "dd7b22a34d12c6bdcc204a56969e1509a7bc46ae"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/plexus-containers/plexus-component-annotations.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.codehaus.plexus",
+        "name": "plexus-interpolation",
+        "version": "1.26",
+        "purl": "pkg:maven/org.codehaus.plexus/plexus-interpolation@1.26?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/plexus/interpolation.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.sonatype.plexus",
+        "name": "plexus-sec-dispatcher",
+        "version": "1.4",
+        "purl": "pkg:maven/org.sonatype.plexus/plexus-sec-dispatcher@1.4?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "3341015061990ae49bff8bc08f40e289a770ffdb"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/plexus/plexus-sec-dispatcher.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.codehaus.plexus",
+        "name": "plexus-utils",
+        "version": "3.3.0",
+        "purl": "pkg:maven/org.codehaus.plexus/plexus-utils@3.3.0?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/plexus/utils.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "provider-api",
+        "version": "3.3.4",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/provider-api/provider-api@3.3.4?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "7b6e3ef4e827c394f47a96039aedeb169743bbc9"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-wagon/provider-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Sebastien Martini <seb@dbzteam.org>",
+        "name": "pyinotify",
+        "version": "0.9.6",
+        "licenses": [
+          {
+            "license": {
+              "name": "MIT License"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/pyinotify@0.9.6",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/pyinotify-0.9.6-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Paul Ganssle <dateutil@python.org>",
+        "name": "python-dateutil",
+        "version": "2.6.1",
+        "licenses": [
+          {
+            "license": {
+              "name": "Simplified BSD"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/python-dateutil@2.6.1",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/python_dateutil-2.6.1-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Kenneth Reitz <me@kennethreitz.org>",
+        "name": "requests",
+        "version": "2.20.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "Apache 2.0"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/requests@2.20.0",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/requests-2.20.0-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.jsr-305",
+        "name": "ri",
+        "version": "0.1-SNAPSHOT",
+        "purl": "pkg:maven/org.jsr-305/ri@0.1-SNAPSHOT?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/jsr-305.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "UNKNOWN <rpm-maint@lists.rpm.org>",
+        "name": "rpm",
+        "version": "4.14.3",
+        "licenses": [
+          {
+            "license": {
+              "name": "UNKNOWN"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/rpm@4.14.3",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/rpm-4.14.3-py3.6.egg-info"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "servlet-api",
+        "version": "4.0.FR",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-servlet-api/servlet-api@4.0.FR?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "9d565bea98f0ba65d30bac9fcc4e2596e424f7e9"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/servlet-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Python Packaging Authority <distutils-sig@python.org>",
+        "name": "setuptools",
+        "version": "39.2.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "UNKNOWN"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/setuptools@39.2.0",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/setuptools-39.2.0.dist-info/METADATA"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "io.prometheus",
+        "name": "simpleclient",
+        "version": "0.6.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "The Apache Software License, Version 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/io.prometheus/simpleclient@0.6.0?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "io.prometheus",
+        "name": "simpleclient_common",
+        "version": "0.6.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "The Apache Software License, Version 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/io.prometheus/simpleclient_common@0.6.0?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "io.prometheus",
+        "name": "simpleclient_hotspot",
+        "version": "0.6.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "The Apache Software License, Version 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/io.prometheus/simpleclient_hotspot@0.6.0?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "io.prometheus",
+        "name": "simpleclient_httpserver",
+        "version": "0.6.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "The Apache Software License, Version 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/io.prometheus/simpleclient_httpserver@0.6.0?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Benjamin Peterson <benjamin@python.org>",
+        "name": "six",
+        "version": "1.11.0",
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/six@1.11.0",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/six-1.11.0.dist-info/METADATA"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.slf4j",
+        "name": "slf4j-api",
+        "version": "1.7.28",
+        "purl": "pkg:maven/org.slf4j/slf4j-api@1.7.28?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "15db827c8b9c377230d6803c9281389e65a5ad4d"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/slf4j/slf4j-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.slf4j",
+        "name": "slf4j-nop",
+        "version": "1.7.28",
+        "purl": "pkg:maven/org.slf4j/slf4j-nop@1.7.28?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "4c0e36b6c03f1c05521052adef2d3d503c9d4196"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/slf4j/slf4j-nop.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.slf4j",
+        "name": "slf4j-simple",
+        "version": "1.7.28",
+        "purl": "pkg:maven/org.slf4j/slf4j-simple@1.7.28?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "4495e9d31c8dde7c95ad847d4b94e1bb365eb20e"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/slf4j/slf4j-simple.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.yaml",
+        "name": "snakeyaml",
+        "version": "1.32",
+        "licenses": [
+          {
+            "license": {
+              "name": "Apache License, Version 2.0",
+              "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.yaml/snakeyaml@1.32?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Adrian Likins <alikins@redhat.com>",
+        "name": "subscription-manager",
+        "version": "1.28.42",
+        "licenses": [
+          {
+            "license": {
+              "name": "GPLv2"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/subscription-manager@1.28.42",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/subscription_manager-1.28.42-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Chris Snyder <chainsaw@redhat.com>",
+        "name": "syspurpose",
+        "version": "1.28.42",
+        "licenses": [
+          {
+            "license": {
+              "name": "GPLv2"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/syspurpose@1.28.42",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/syspurpose-1.28.42-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "systemd developers <systemd-devel@lists.freedesktop.org>",
+        "name": "systemd-python",
+        "version": "234",
+        "licenses": [
+          {
+            "license": {
+              "name": "LGPLv2+"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/systemd-python@234",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib64/python3.6/site-packages/systemd_python-234-py3.6.egg-info"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-api",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-api@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "1397b61a397e3fb642495d13ab04b20d71489080"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-coyote",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-coyote@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "d7825dcdfa7f5aabcb79d9298df5495f2cba152a"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-coyote.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-dbcp",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-dbcp@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "b5587bdb40eda75b845db422ee2b905c9759c438"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-dbcp.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-cs",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-cs@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "f96f9925844f6faad8995a243da29e6441227140"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-cs.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-de",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-de@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "b5661a63926e8a026523ab8699e593bd388051ed"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-de.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-es",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-es@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "8f30186ef7263e75deb9b8a1137a2e7336505e27"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-es.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-fr",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-fr@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "5696b716a89edece8576e0d91f6bab56197efaa2"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-fr.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-ja",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-ja@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "e434142bcba50fd688fcbdd10f0d37893db56b4c"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-ja.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-ko",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-ko@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "00d476683757e01106ba0879991aec5a30225246"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-ko.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-pt-BR",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-pt-BR@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "71be6a737913f85ea24aba43fab4fbf2677b51ec"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-pt-BR.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-ru",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-ru@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "5aa50c76ae39491f9105aeda12561d3cbaada80b"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-ru.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-i18n-zh-CN",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-i18n-zh-CN@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "4c982b302f51a13ba9e3095c7c7f29eb004ffc0f"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-i18n-zh-CN.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-jdbc",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-jdbc@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "c02d6a32533a0e99372956c13bb93c545888c044"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-jdbc.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-jni",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-jni@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "12386251b1bbb8be009fc1cfdfb46a65950644c0"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-jni.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-juli",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-juli@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "38ce5b56932e025c1b2e11db37a647b25e4e1469"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/bin/tomcat-juli.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-util",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-util@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "f2133c28e8c8b736db95d5ff5be651faf4743a6f"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-util.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-util-scan",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-util-scan@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "d75793f455885efd5975acfb5e0547d6bfc4eeaa"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-util-scan.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-vault",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ],
+        "purl": "pkg:maven/tomcat-vault/tomcat-vault?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "7bde5d08137a5d7530095537b423a61cd976259b"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-vault.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "tomcat-websocket",
+        "version": "9.0.87.redhat-00003",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat/tomcat-websocket@9.0.87.redhat-00003?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "4d8e56db3f774ab914333e1de727e35d0f8db360"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/tomcat-websocket.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "author": "Andrey Petrov <andrey.petrov@shazow.net>",
+        "name": "urllib3",
+        "version": "1.24.2",
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ],
+        "purl": "pkg:pypi/urllib3@1.24.2",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "python"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/lib/python3.6/site-packages/urllib3-1.24.2-py3.6.egg-info/PKG-INFO"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "utils",
+        "version": "3.3.0",
+        "licenses": [
+          {
+            "license": {
+              "name": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.codehaus.plexus.utils/utils@3.3.0?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "94b7109d599d211f5a39f22a32cce95cc37f3a9d"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/plexus/utils.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.wagon",
+        "name": "wagon-file",
+        "version": "3.3.4",
+        "purl": "pkg:maven/org.apache.maven.wagon/wagon-file@3.3.4?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-wagon/file.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.wagon",
+        "name": "wagon-http",
+        "version": "3.3.4",
+        "purl": "pkg:maven/org.apache.maven.wagon/wagon-http@3.3.4?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-wagon/http.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.wagon",
+        "name": "wagon-http-shared",
+        "version": "3.3.4",
+        "purl": "pkg:maven/org.apache.maven.wagon/wagon-http-shared@3.3.4?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-wagon/http-shared.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "group": "org.apache.maven.wagon",
+        "name": "wagon-provider-api",
+        "version": "3.3.4",
+        "purl": "pkg:maven/org.apache.maven.wagon/wagon-provider-api@3.3.4?type=jar",
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/usr/share/java/maven-wagon/provider-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "websocket-api",
+        "version": "1.1.FR",
+        "licenses": [
+          {
+            "license": {
+              "name": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+          }
+        ],
+        "purl": "pkg:maven/org.apache.tomcat-websocket-api/websocket-api@1.1.FR?type=jar",
+        "externalReferences": [
+          {
+            "type": "build-meta",
+            "url": "",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "3e5ce5ea9c582516176798932742a861e6d07cbc"
+              }
+            ]
+          }
+        ],
+        "properties": [
+          {
+            "name": "sbomer:package:language",
+            "value": "java"
+          },
+          {
+            "name": "sbomer:package:type",
+            "value": "java-archive"
+          },
+          {
+            "name": "sbomer:location:0:path",
+            "value": "/opt/jws-5.8/tomcat/lib/websocket-api.jar"
+          }
+        ]
+      },
+      {
+        "type": "operating-system",
+        "name": "rhel",
+        "version": "8.10",
+        "description": "Red Hat Enterprise Linux 8.10 (Ootpa)",
+        "swid": {
+          "tagId": "rhel",
+          "name": "rhel",
+          "version": "8.10"
+        },
+        "externalReferences": [
+          {
+            "type": "issue-tracker",
+            "url": "https://bugzilla.redhat.com/"
+          },
+          {
+            "type": "website",
+            "url": "https://www.redhat.com/"
+          }
+        ]
+      }
+    ],
+    "dependencies": [
+      {
+        "ref": "pkg:oci/jws58-openjdk17-openshift-rhel8@sha256%3Af63b27a29c032843941b15567ebd1f37f540160e8066ac74c05367134c2ff3aa?repository_url=registry.redhat.io&os=linux&arch=amd64&tag=5.8.0-5",
+        "dependsOn": [
+          "pkg:pypi/PyGObject@3.28.3",
+          "pkg:pypi/PySocks@1.6.8",
+          "pkg:pypi/PyYAML@3.12",
+          "pkg:maven/ROOT/ROOT?type=jar",
+          "pkg:maven/org.apache.tomcat-annotations-api/annotations-api@1.3.FR?type=jar",
+          "pkg:maven/aopalliance/aopalliance@1.0?type=jar",
+          "pkg:maven/atinject/atinject@1.0.0.v20091030?type=jar",
+          "pkg:maven/org.apache.catalina.startup.Bootstrap/bootstrap@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat-catalina/catalina@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/catalina-ant/catalina-ant@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat-catalina-ha/catalina-ha@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat-ssi/catalina-ssi@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat-storeconfig/catalina-storeconfig@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat-tribes/catalina-tribes@9.0.87.redhat-00003?type=jar",
+          "pkg:pypi/chardet@3.0.4",
+          "pkg:maven/io.prometheus.jmx/collector@0.12.0?type=jar",
+          "pkg:maven/commons-cli/commons-cli@1.3.1.redhat-2?type=jar",
+          "pkg:maven/commons-cli/commons-cli@1.4?type=jar",
+          "pkg:maven/commons-codec/commons-codec@1.11?type=jar",
+          "pkg:maven/commons-codec/commons-codec@1.13?type=jar",
+          "pkg:maven/commons-io/commons-io@2.6?type=jar",
+          "pkg:maven/org.apache.commons/commons-lang3@3.9?type=jar",
+          "pkg:pypi/dbus-python@1.2.4",
+          "pkg:pypi/decorator@4.2.1",
+          "pkg:maven/org.eclipse.jdt.core.compiler/ecj@4.20.0.redhat-00002?type=jar",
+          "pkg:maven/org.apache.tomcat-el-api/el-api@3.0.FR?type=jar",
+          "pkg:pypi/ethtool@0.14",
+          "pkg:maven/com.google.guava/failureaccess@1.0.1?type=jar",
+          "pkg:maven/file/file@3.3.4?type=jar",
+          "pkg:maven/org.apache.geronimo.specs/geronimo-annotation_1.3_spec@1.0?type=jar",
+          "pkg:maven/com.google.inject/google-guice@4.2.2?type=jar",
+          "pkg:maven/com.google.inject/google-guice-no_aop@4.2.2?type=jar",
+          "pkg:pypi/gpg@1.13.1",
+          "pkg:maven/com.google.guava/guava@28.1-jre?type=jar",
+          "pkg:maven/http/http@3.3.4?type=jar",
+          "pkg:maven/http-shared/http-shared@3.3.4?type=jar",
+          "pkg:maven/org.apache.httpcomponents/httpclient@4.5.10?type=jar",
+          "pkg:maven/org.apache.httpcomponents/httpcore@4.4.12?type=jar",
+          "pkg:maven/org.apache.httpcomponents/httpcore-nio@4.4.12?type=jar",
+          "pkg:pypi/idna@2.5",
+          "pkg:pypi/iniparse@0.4",
+          "pkg:maven/org.codehaus.plexus.interpolation/interpolation@1.26.0?type=jar",
+          "pkg:maven/jakarta.enterprise/jakarta.enterprise.cdi-api@2.0.1?type=jar",
+          "pkg:maven/org.fusesource.jansi/jansi@1.18?type=jar",
+          "pkg:maven/org.apache.tomcat-jasper/jasper@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat-jasper-el/jasper-el@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat-jaspic-api/jaspic-api@1.1.FR?type=jar",
+          "pkg:maven/org.jasypt/jasypt@1.9.2.redhat-1?type=jar",
+          "pkg:maven/org.jboss.logging/jboss-logging@3.4.1.Final-redhat-00001?type=jar",
+          "pkg:maven/org.slf4j/jcl-over-slf4j@1.7.28?type=jar",
+          "pkg:maven/io.prometheus.jmx/jmx_prometheus_javaagent@0.12.0?type=jar",
+          "pkg:maven/org.jolokia/jolokia-core@1.6.2?type=jar",
+          "pkg:maven/org.jolokia/jolokia-jvm@1.6.2?type=jar",
+          "pkg:maven/jrt-fs/jrt-fs@17.0.11?type=jar",
+          "pkg:maven/com.googlecode.json-simple/json-simple@1.1.1?type=jar",
+          "pkg:maven/org.jsoup/jsoup@1.12.1?type=jar",
+          "pkg:maven/org.apache.tomcat-jsp-api/jsp-api@2.3.FR?type=jar",
+          "pkg:maven/jsr/jsr@305?type=jar",
+          "pkg:pypi/libcomps@0.1.18",
+          "pkg:maven/org.apache.maven/maven-artifact@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-builder-support@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-compat@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-core@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-embedder@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-model@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-model-builder@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-plugin-api@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-repository-metadata@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven.resolver/maven-resolver-api@1.4.1?type=jar",
+          "pkg:maven/org.apache.maven.resolver/maven-resolver-connector-basic@1.4.1?type=jar",
+          "pkg:maven/org.apache.maven.resolver/maven-resolver-impl@1.4.1?type=jar",
+          "pkg:maven/org.apache.maven/maven-resolver-provider@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven.resolver/maven-resolver-spi@1.4.1?type=jar",
+          "pkg:maven/org.apache.maven.resolver/maven-resolver-transport-wagon@1.4.1?type=jar",
+          "pkg:maven/org.apache.maven.resolver/maven-resolver-util@1.4.1?type=jar",
+          "pkg:maven/org.apache.maven/maven-settings@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven/maven-settings-builder@3.6.2?type=jar",
+          "pkg:maven/org.apache.maven.shared/maven-shared-utils@3.2.1?type=jar",
+          "pkg:maven/org.apache.maven/maven-slf4j-provider@3.6.2?type=jar",
+          "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-spi@1.4.5.Final-redhat-00001?type=jar",
+          "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat@1.4.5.Final-redhat-00001?type=jar",
+          "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat85@1.4.5.Final-redhat-00001?type=jar",
+          "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat9@1.4.5.Final-redhat-00001?type=jar",
+          "pkg:maven/org.jboss.mod_cluster/mod_cluster-core@1.4.5.Final-redhat-00001?type=jar",
+          "pkg:maven/org.jboss.mod_cluster/mod_cluster-load-spi@1.4.5.Final-redhat-00001?type=jar",
+          "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.inject@0.3.4?type=jar",
+          "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.3.4?type=jar",
+          "pkg:pypi/pip@9.0.3",
+          "pkg:maven/org.sonatype.plexus/plexus-cipher@1.7?type=jar",
+          "pkg:maven/org.codehaus.plexus/plexus-classworlds@2.6.0?type=jar",
+          "pkg:maven/org.codehaus.plexus/plexus-component-annotations@2.1.0?type=jar",
+          "pkg:maven/org.codehaus.plexus/plexus-interpolation@1.26?type=jar",
+          "pkg:maven/org.sonatype.plexus/plexus-sec-dispatcher@1.4?type=jar",
+          "pkg:maven/org.codehaus.plexus/plexus-utils@3.3.0?type=jar",
+          "pkg:maven/provider-api/provider-api@3.3.4?type=jar",
+          "pkg:pypi/pyinotify@0.9.6",
+          "pkg:pypi/python-dateutil@2.6.1",
+          "pkg:pypi/requests@2.20.0",
+          "pkg:maven/org.jsr-305/ri@0.1-SNAPSHOT?type=jar",
+          "pkg:pypi/rpm@4.14.3",
+          "pkg:maven/org.apache.tomcat-servlet-api/servlet-api@4.0.FR?type=jar",
+          "pkg:pypi/setuptools@39.2.0",
+          "pkg:maven/io.prometheus/simpleclient@0.6.0?type=jar",
+          "pkg:maven/io.prometheus/simpleclient_common@0.6.0?type=jar",
+          "pkg:maven/io.prometheus/simpleclient_hotspot@0.6.0?type=jar",
+          "pkg:maven/io.prometheus/simpleclient_httpserver@0.6.0?type=jar",
+          "pkg:pypi/six@1.11.0",
+          "pkg:maven/org.slf4j/slf4j-api@1.7.28?type=jar",
+          "pkg:maven/org.slf4j/slf4j-nop@1.7.28?type=jar",
+          "pkg:maven/org.slf4j/slf4j-simple@1.7.28?type=jar",
+          "pkg:maven/org.yaml/snakeyaml@1.32?type=jar",
+          "pkg:pypi/subscription-manager@1.28.42",
+          "pkg:pypi/syspurpose@1.28.42",
+          "pkg:pypi/systemd-python@234",
+          "pkg:maven/org.apache.tomcat/tomcat-api@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-coyote@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-dbcp@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-cs@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-de@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-es@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-fr@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-ja@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-ko@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-pt-BR@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-ru@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-i18n-zh-CN@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-jdbc@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-jni@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-juli@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-util@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-util-scan@9.0.87.redhat-00003?type=jar",
+          "pkg:maven/tomcat-vault/tomcat-vault?type=jar",
+          "pkg:maven/org.apache.tomcat/tomcat-websocket@9.0.87.redhat-00003?type=jar",
+          "pkg:pypi/urllib3@1.24.2",
+          "pkg:maven/org.codehaus.plexus.utils/utils@3.3.0?type=jar",
+          "pkg:maven/org.apache.maven.wagon/wagon-file@3.3.4?type=jar",
+          "pkg:maven/org.apache.maven.wagon/wagon-http@3.3.4?type=jar",
+          "pkg:maven/org.apache.maven.wagon/wagon-http-shared@3.3.4?type=jar",
+          "pkg:maven/org.apache.maven.wagon/wagon-provider-api@3.3.4?type=jar",
+          "pkg:maven/org.apache.tomcat-websocket-api/websocket-api@1.1.FR?type=jar",
+          null
+        ]
+      },
+      {
+        "ref": "pkg:pypi/PyGObject@3.28.3",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/PySocks@1.6.8",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/PyYAML@3.12",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/ROOT/ROOT?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-annotations-api/annotations-api@1.3.FR?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/aopalliance/aopalliance@1.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/atinject/atinject@1.0.0.v20091030?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.catalina.startup.Bootstrap/bootstrap@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-catalina/catalina@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/catalina-ant/catalina-ant@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-catalina-ha/catalina-ha@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-ssi/catalina-ssi@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-storeconfig/catalina-storeconfig@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-tribes/catalina-tribes@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/chardet@3.0.4",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/io.prometheus.jmx/collector@0.12.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/commons-cli/commons-cli@1.3.1.redhat-2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/commons-cli/commons-cli@1.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/commons-codec/commons-codec@1.11?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/commons-codec/commons-codec@1.13?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/commons-io/commons-io@2.6?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.commons/commons-lang3@3.9?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/dbus-python@1.2.4",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/decorator@4.2.1",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.eclipse.jdt.core.compiler/ecj@4.20.0.redhat-00002?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-el-api/el-api@3.0.FR?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/ethtool@0.14",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.google.guava/failureaccess@1.0.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/file/file@3.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.geronimo.specs/geronimo-annotation_1.3_spec@1.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.google.inject/google-guice@4.2.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.google.inject/google-guice-no_aop@4.2.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/gpg@1.13.1",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.google.guava/guava@28.1-jre?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/http/http@3.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/http-shared/http-shared@3.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.httpcomponents/httpclient@4.5.10?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.httpcomponents/httpcore@4.4.12?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.httpcomponents/httpcore-nio@4.4.12?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/idna@2.5",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/iniparse@0.4",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.codehaus.plexus.interpolation/interpolation@1.26.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/jakarta.enterprise/jakarta.enterprise.cdi-api@2.0.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.fusesource.jansi/jansi@1.18?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-jasper/jasper@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-jasper-el/jasper-el@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-jaspic-api/jaspic-api@1.1.FR?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jasypt/jasypt@1.9.2.redhat-1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jboss.logging/jboss-logging@3.4.1.Final-redhat-00001?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.slf4j/jcl-over-slf4j@1.7.28?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/io.prometheus.jmx/jmx_prometheus_javaagent@0.12.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jolokia/jolokia-core@1.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jolokia/jolokia-jvm@1.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/jrt-fs/jrt-fs@17.0.11?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/com.googlecode.json-simple/json-simple@1.1.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jsoup/jsoup@1.12.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-jsp-api/jsp-api@2.3.FR?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/jsr/jsr@305?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/libcomps@0.1.18",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-artifact@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-builder-support@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-compat@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-core@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-embedder@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-model@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-model-builder@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-plugin-api@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-repository-metadata@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.resolver/maven-resolver-api@1.4.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.resolver/maven-resolver-connector-basic@1.4.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.resolver/maven-resolver-impl@1.4.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-resolver-provider@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.resolver/maven-resolver-spi@1.4.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.resolver/maven-resolver-transport-wagon@1.4.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.resolver/maven-resolver-util@1.4.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-settings@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-settings-builder@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.shared/maven-shared-utils@3.2.1?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven/maven-slf4j-provider@3.6.2?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-spi@1.4.5.Final-redhat-00001?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat@1.4.5.Final-redhat-00001?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat85@1.4.5.Final-redhat-00001?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jboss.mod_cluster/mod_cluster-container-tomcat9@1.4.5.Final-redhat-00001?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jboss.mod_cluster/mod_cluster-core@1.4.5.Final-redhat-00001?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jboss.mod_cluster/mod_cluster-load-spi@1.4.5.Final-redhat-00001?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.inject@0.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/pip@9.0.3",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.sonatype.plexus/plexus-cipher@1.7?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.codehaus.plexus/plexus-classworlds@2.6.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.codehaus.plexus/plexus-component-annotations@2.1.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.codehaus.plexus/plexus-interpolation@1.26?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.sonatype.plexus/plexus-sec-dispatcher@1.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.codehaus.plexus/plexus-utils@3.3.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/provider-api/provider-api@3.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/pyinotify@0.9.6",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/python-dateutil@2.6.1",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/requests@2.20.0",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.jsr-305/ri@0.1-SNAPSHOT?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/rpm@4.14.3",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-servlet-api/servlet-api@4.0.FR?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/setuptools@39.2.0",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/io.prometheus/simpleclient@0.6.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/io.prometheus/simpleclient_common@0.6.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/io.prometheus/simpleclient_hotspot@0.6.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/io.prometheus/simpleclient_httpserver@0.6.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/six@1.11.0",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.slf4j/slf4j-api@1.7.28?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.slf4j/slf4j-nop@1.7.28?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.slf4j/slf4j-simple@1.7.28?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.yaml/snakeyaml@1.32?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/subscription-manager@1.28.42",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/syspurpose@1.28.42",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/systemd-python@234",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-api@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-coyote@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-dbcp@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-cs@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-de@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-es@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-fr@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-ja@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-ko@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-pt-BR@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-ru@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-i18n-zh-CN@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-jdbc@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-jni@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-juli@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-util@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-util-scan@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/tomcat-vault/tomcat-vault?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat/tomcat-websocket@9.0.87.redhat-00003?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:pypi/urllib3@1.24.2",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.codehaus.plexus.utils/utils@3.3.0?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.wagon/wagon-file@3.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.wagon/wagon-http@3.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.wagon/wagon-http-shared@3.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.maven.wagon/wagon-provider-api@3.3.4?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": "pkg:maven/org.apache.tomcat-websocket-api/websocket-api@1.1.FR?type=jar",
+        "dependsOn": []
+      },
+      {
+        "ref": null,
+        "dependsOn": []
+      }
+    ]
+  }
+  

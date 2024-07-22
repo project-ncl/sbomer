@@ -33,7 +33,6 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.errors.FeatureConfigurationException;
 import org.jboss.sbomer.service.feature.errors.FeatureNotAvailableException;
@@ -256,8 +255,8 @@ public class NotificationService {
         Optional<ExternalReference> pncBuildSystemRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
-                        .findFirst();
+                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
+                .findFirst();
 
         Build buildPayload = Build.builder()
                 .id(sbom.getIdentifier())
@@ -308,8 +307,8 @@ public class NotificationService {
         Optional<ExternalReference> pncOperationRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_OPERATION_ID))
-                        .findFirst();
+                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_OPERATION_ID))
+                .findFirst();
 
         Operation operationPayload = Operation.builder()
                 .id(sbom.getIdentifier())
