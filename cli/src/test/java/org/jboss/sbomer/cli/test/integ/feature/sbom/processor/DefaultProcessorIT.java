@@ -11,9 +11,13 @@ import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
 import org.cyclonedx.model.Metadata;
 import org.jboss.sbomer.cli.feature.sbom.processor.DefaultProcessor;
+import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.pnc.PncService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -25,8 +29,15 @@ import jakarta.inject.Inject;
 @QuarkusTestResource(PncWireMock.class)
 class DefaultProcessorIT {
 
-    @Inject
     DefaultProcessor defaultProcessor;
+
+    @Inject
+    PncService pncService;
+
+    @BeforeEach
+    void init() {
+        this.defaultProcessor = new DefaultProcessor(pncService, Mockito.mock(KojiService.class));
+    }
 
     @Test
     void testProcessing() throws JsonProcessingException {
@@ -54,5 +65,4 @@ class DefaultProcessorIT {
                 "https://localhost:12388/pnc-rest/v2/builds/APT4PH2ILMAAA",
                 SbomUtils.getExternalReferences(component, Type.BUILD_SYSTEM, "pnc-build-id").get(0).getUrl());
     }
-
 }

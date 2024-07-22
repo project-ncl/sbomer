@@ -33,6 +33,7 @@ import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPE
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -86,7 +87,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SbomUtils {
 
@@ -722,6 +722,17 @@ public class SbomUtils {
     }
 
     /**
+     * Converts the given CycloneDX {@link Bom} into a JSON {@link String} object.
+     *
+     * @param bom The CycloneDX {@link Bom} to convert
+     * @return {@link String} representation of the {@link Bom}.
+     */
+    public static String toJson(Bom bom) {
+        BomJsonGenerator generator = BomGeneratorFactory.createJson(SbomUtils.schemaVersion(), bom);
+        return generator.toJsonString();
+    }
+
+    /**
      * Converts the {@link JsonNode} into a CycloneDX {@link Bom} object.
      *
      * @param jsonNode The {@link JsonNode} to convert.
@@ -752,10 +763,7 @@ public class SbomUtils {
 
     public static void toPath(Bom bom, Path path) {
         try {
-            new ObjectMapper().writeValue(path.toFile(), SbomUtils.toJsonNode(bom));
-
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage(), e);
+            Files.writeString(path, SbomUtils.toJson(bom));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

@@ -15,27 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.test.utils;
+package org.jboss.sbomer.cli.feature.sbom.command.process;
 
-import org.cyclonedx.model.Component;
-import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.cli.feature.sbom.processor.DefaultProcessor;
+import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
+import org.jboss.sbomer.core.pnc.PncService;
 
-import jakarta.enterprise.inject.Alternative;
+import io.quarkus.arc.DefaultBean;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import picocli.CommandLine.Command;
 
-@Alternative
+@ApplicationScoped
 @Slf4j
-@Command(
-        mixinStandardHelpOptions = true,
-        name = "default",
-        description = "Process the SBOM with enrichments applied to known CycloneDX fields")
-public class DefaultProcessCommandMockAlternative extends DefaultProcessor {
+public class DefaultProcessorProducer {
 
-    @Override
-    protected void processBrewBuild(Component component, Artifact artifact) {
-        log.debug("Mocked component '{}' was not built in Brew, cannot add any enrichment!", component.getPurl());
+    @Inject
+    PncService pncService;
+
+    @Inject
+    KojiService kojiService;
+
+    @Produces
+    @DefaultBean
+    @ApplicationScoped
+    public DefaultProcessor produceDefaultPRocessor() {
+        log.debug("Creating new Default Processor bean...");
+        return new DefaultProcessor(pncService, kojiService);
     }
 
 }

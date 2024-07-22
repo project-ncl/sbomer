@@ -23,7 +23,8 @@ import java.util.Set;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.jboss.sbomer.cli.test.integ.DefaultProcessCommandIT.CustomPncServiceProfile;
-import org.jboss.sbomer.cli.test.utils.DefaultProcessCommandMockAlternative;
+import org.jboss.sbomer.cli.test.utils.KojiServiceAlternative;
+import org.jboss.sbomer.cli.test.utils.KojiSessionAlternative;
 import org.jboss.sbomer.cli.test.utils.MavenCycloneDxGenerateCommandMockAlternative;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.junit.jupiter.api.Assertions;
@@ -46,8 +47,10 @@ class DefaultProcessCommandIT {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {
         @Override
         public Set<Class<?>> getEnabledAlternatives() {
-            return Set
-                    .of(MavenCycloneDxGenerateCommandMockAlternative.class, DefaultProcessCommandMockAlternative.class);
+            return Set.of(
+                    MavenCycloneDxGenerateCommandMockAlternative.class,
+                    KojiServiceAlternative.class,
+                    KojiSessionAlternative.class);
         }
     }
 
