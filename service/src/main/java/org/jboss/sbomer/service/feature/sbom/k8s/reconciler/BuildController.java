@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -35,7 +36,6 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -65,6 +65,7 @@ import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -106,9 +107,11 @@ public class BuildController extends AbstractController {
     }
 
     @Inject
+    @Setter
     GenerationRequestControllerConfig controllerConfig;
 
     @Inject
+    @Setter
     SbomRepository sbomRepository;
 
     ObjectMapper objectMapper = ObjectMapperProvider.yaml();
@@ -344,7 +347,7 @@ public class BuildController extends AbstractController {
                     GenerationResult.SUCCESS,
                     String.format(
                             "Generation finished successfully. Generated SBOMs: %s",
-                            sboms.stream().map(sbom -> sbom.getId()).toArray()));
+                            sboms.stream().map(sbom -> sbom.getId()).collect(Collectors.joining(", "))));
         }
 
         StringBuilder sb = new StringBuilder("Generation failed. ");

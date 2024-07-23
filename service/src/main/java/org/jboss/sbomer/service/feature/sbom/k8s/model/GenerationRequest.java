@@ -218,6 +218,8 @@ public class GenerationRequest extends ConfigMap {
 
     public void setStatus(SbomGenerationStatus status) {
         if (status == null) {
+            getData().remove(KEY_STATUS);
+            getMetadata().getLabels().remove(Labels.LABEL_STATUS);
             return;
         }
 
