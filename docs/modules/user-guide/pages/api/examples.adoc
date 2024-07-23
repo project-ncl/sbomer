@@ -57,8 +57,8 @@ $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/an
      "productVersion": "$productVersion",
      "productVariant": "$productVariant"
   },
-  "deliverablesUrls": [
-    "$deliverablesUrl"
+  "deliverableUrls": [
+    "$deliverableUrl1", "$deliverableUrl2"
   ]
 }'
 ----
