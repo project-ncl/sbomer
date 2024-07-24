@@ -16,7 +16,6 @@
 /// limitations under the License.
 ///
 
-
 /** @public */
 export type SbomerErrorResponse = {
   errorId: string;
@@ -75,6 +74,24 @@ export class SbomerGenerationRequest {
   }
 }
 
+export class SbomerSbom {
+  public id: string;
+  public identifier: string;
+  public rootPurl: string;
+  public creationTime: Date;
+  public generationRequest: SbomerGenerationRequest;
+  public sbom: string;
+
+  constructor(payload: any) {
+    this.id = payload.id;
+    this.identifier = payload.identifier;
+    this.rootPurl = payload.rootPurl;
+    this.creationTime = new Date(payload.creationTime);
+    this.generationRequest = new SbomerGenerationRequest(payload.generationRequest);
+    this.sbom = payload.sbom;
+  }
+}
+
 export type GenerateForPncParams = {
   buildId: string;
   config?: string;
@@ -90,7 +107,12 @@ export type SbomerApi = {
     pageIndex: number;
   }): Promise<{ data: SbomerGenerationRequest[]; total: number }>;
 
+  getSboms(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerSbom[]; total: number }>;
+  getSbomsForRequest(generationRequestId: string): Promise<{ data: SbomerSbom[]; total: number }>;
+
   getGenerationRequest(id: string): Promise<SbomerGenerationRequest>;
+
+  getSbom(id: string): Promise<SbomerSbom>;
 
   generateForPncBuild({ buildId, config }: GenerateForPncParams): Promise<SbomerGenerationRequest>;
 };

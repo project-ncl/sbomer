@@ -20,12 +20,12 @@ import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
 import { useCallback } from 'react';
 import { useAsyncRetry } from 'react-use';
 
-export function useGenerationRequest(id: string) {
+export function useManifest(id: string) {
   const sbomerApi = DefaultSbomerApi.getInstance();
-  const getGenerationRequest = useCallback(
+  const getManifest = useCallback(
     async (id: string) => {
       try {
-        return await sbomerApi.getGenerationRequest(id);
+        return await sbomerApi.getSbom(id);
       } catch (e) {
         return Promise.reject(e);
       }
@@ -39,10 +39,10 @@ export function useGenerationRequest(id: string) {
     error,
   } = useAsyncRetry(
     () =>
-      getGenerationRequest(id).then((data) => {
+      getManifest(id).then((data) => {
         return data;
       }),
-    [getGenerationRequest, id],
+    [getManifest, id],
   );
 
   return [

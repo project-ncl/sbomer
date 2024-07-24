@@ -17,39 +17,51 @@
 ///
 
 import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
-import { useCallback } from 'react';
-import { useAsyncRetry } from 'react-use';
+import { useCallback, useState } from 'react';
+import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 
-export function useGenerationRequest(id: string) {
+export function useGenerationRequests() {
   const sbomerApi = DefaultSbomerApi.getInstance();
-  const getGenerationRequest = useCallback(
-    async (id: string) => {
+  const [total, setTotal] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const getSboms = useCallback(
+    async ({ pageSize, pageIndex }: { pageSize: number; pageIndex: number }) => {
       try {
-        return await sbomerApi.getGenerationRequest(id);
+        return await sbomerApi.getSboms({ pageSize, pageIndex });
       } catch (e) {
         return Promise.reject(e);
       }
     },
-    [id],
+    [pageIndex, pageSize],
   );
 
-  const {
-    loading,
-    value: request,
-    error,
-  } = useAsyncRetry(
+  const { loading, value, error, retry } = useAsyncRetry(
     () =>
-      getGenerationRequest(id).then((data) => {
-        return data;
+      getSboms({
+        pageSize: pageSize,
+        pageIndex: pageIndex,
+      }).then((data) => {
+        setTotal(data.total);
+        return data.data;
       }),
-    [getGenerationRequest, id],
+    [pageIndex, pageSize],
   );
 
   return [
     {
-      request,
+      pageIndex,
+      pageSize,
+      total,
+      value,
       loading,
       error,
+    },
+    {
+      setPageIndex,
+      setPageSize,
+      retry,
     },
   ] as const;
 }

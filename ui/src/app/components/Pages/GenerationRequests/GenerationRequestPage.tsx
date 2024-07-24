@@ -5,6 +5,7 @@ import { resultToDescription, statusToColor, statusToDescription, typeToDescript
 import { LazyLog } from '@melloware/react-logviewer';
 import {
   Alert,
+  Button,
   ClipboardCopyButton,
   CodeBlock,
   CodeBlockAction,
@@ -17,6 +18,8 @@ import {
   Grid,
   GridItem,
   Label,
+  List,
+  ListItem,
   PageSection,
   Panel,
   PanelMain,
@@ -32,10 +35,12 @@ import {
   Title,
   Tooltip,
 } from '@patternfly/react-core';
+import { ExternalLinkSquareAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useGenerationRequest } from './useGenerationRequest';
+import { useGenerationRequestManifests } from './useGenerationRequestManifests';
 
 const Logs = ({ request }: { request: SbomerGenerationRequest }) => {
   const [{ logPaths, loading, error }] = useGenerationRequestsLogPaths(request);
@@ -79,6 +84,45 @@ const Logs = ({ request }: { request: SbomerGenerationRequest }) => {
           </Tab>
         ))}
       </Tabs>
+    </>
+  );
+};
+
+const GeneratedManifests = ({ request }: { request: SbomerGenerationRequest }) => {
+  const [{ manifests, total, loading, error }] = useGenerationRequestManifests(request.id);
+
+  if (error) {
+    return (
+      <Alert isExpandable variant="warning" title="Unable to retrieve list of generated manifests">
+        <p>{error.message}</p>
+      </Alert>
+    );
+  }
+
+  if (loading) {
+    return <Skeleton screenreaderText="Loading..." />;
+  }
+
+  if (!manifests || total == 0) {
+    return <Alert variant="info" title="No manifests available" />;
+  }
+
+  return (
+    <>
+      <List>
+        {manifests.map((manifest) => (
+          <ListItem>
+            <Button
+              variant="link"
+              icon={<ExternalLinkSquareAltIcon />}
+              iconPosition="end"
+              component={(props: any) => <Link {...props} to={`/manifests/${manifest.id}`} />}
+            >
+              {manifest.id}
+            </Button>
+          </ListItem>
+        ))}
+      </List>
     </>
   );
 };
@@ -183,6 +227,18 @@ const GenerationRequestPage: React.FunctionComponent = () => {
               <DescriptionListDescription>{request.reason}</DescriptionListDescription>
             </DescriptionListGroup>
           </DescriptionList>
+
+          <br />
+
+          <Panel>
+            <PanelMain>
+              <PanelMainBody>
+                <Title headingLevel="h2">Generated Manifests</Title>
+                <br />
+                <GeneratedManifests request={request} />
+              </PanelMainBody>
+            </PanelMain>
+          </Panel>
 
           <br />
 

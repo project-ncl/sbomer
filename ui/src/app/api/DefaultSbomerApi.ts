@@ -17,13 +17,7 @@
 ///
 
 import axios, { Axios, AxiosError } from 'axios';
-import {
-  GenerateForPncParams,
-  SbomerApi,
-  SbomerErrorResponse as SbomerError,
-  SbomerGenerationRequest,
-  SbomerStats,
-} from '../types';
+import { GenerateForPncParams, SbomerApi, SbomerGenerationRequest, SbomerSbom, SbomerStats } from '../types';
 
 type Options = {
   baseUrl: string;
@@ -71,6 +65,62 @@ export class DefaultSbomerApi implements SbomerApi {
         return Promise.reject(error);
       },
     );
+  }
+
+  async getSboms(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerSbom[]; total: number }> {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1alpha3/sboms?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+    );
+
+    if (response.status != 200) {
+      const body = await response.text();
+
+      throw new Error('Failed fetching manifests from SBOMer, got: ' + response.status + " response: '" + body + "'");
+    }
+
+    const data = await response.json();
+
+    const sboms: SbomerSbom[] = [];
+
+    if (data.content) {
+      data.content.forEach((sbom: any) => {
+        sboms.push(new SbomerSbom(sbom));
+      });
+    }
+
+    return { data: sboms, total: data.totalHits };
+  }
+
+  async getSbomsForRequest(generationRequestId: string): Promise<{ data: SbomerSbom[]; total: number }> {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1alpha3/sboms?query=generationRequest.id==${generationRequestId}&pageSize=20&pageIndex=0`,
+    );
+
+    if (response.status != 200) {
+      const body = await response.text();
+
+      throw new Error('Failed fetching manifests from SBOMer, got: ' + response.status + " response: '" + body + "'");
+    }
+
+    const data = await response.json();
+
+    const sboms: SbomerSbom[] = [];
+
+    if (data.content) {
+      data.content.forEach((sbom: any) => {
+        sboms.push(new SbomerSbom(sbom));
+      });
+    }
+
+    return { data: sboms, total: data.totalHits };
+  }
+
+  async getSbom(id: string): Promise<SbomerSbom> {
+    const request = await this.client.get<SbomerSbom>(`/api/v1alpha3/sboms/${id}`).then((response) => {
+      return response.data as SbomerSbom;
+    });
+
+    return request;
   }
 
   async getLogPaths(generationRequestId: string): Promise<Array<string>> {
@@ -122,9 +172,11 @@ export class DefaultSbomerApi implements SbomerApi {
 
     const requests: SbomerGenerationRequest[] = [];
 
-    data.content.forEach((request: any) => {
-      requests.push(new SbomerGenerationRequest(request));
-    });
+    if (data.content) {
+      data.content.forEach((request: any) => {
+        requests.push(new SbomerGenerationRequest(request));
+      });
+    }
 
     return { data: requests, total: data.totalHits };
   }
@@ -135,20 +187,6 @@ export class DefaultSbomerApi implements SbomerApi {
       .then((response) => {
         return response.data as SbomerGenerationRequest;
       });
-    //   .catch((error) => {
-    //     var msg = 'Unable to retrieve generation request with ID ' + id + '.';
-
-    //     if (error.response) {
-    //       const err = error.response.data as SbomerError;
-
-    //       msg += ' ' + err.message + '. Error ID: ' + err.errorId;
-
-    //       throw err;
-    //     }
-
-    //     throw new Error(msg);
-    //   }
-    // );
 
     return request;
   }
