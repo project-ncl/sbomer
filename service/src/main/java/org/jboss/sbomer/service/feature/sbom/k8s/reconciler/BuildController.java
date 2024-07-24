@@ -353,8 +353,15 @@ public class BuildController extends AbstractController {
                             sboms.stream().map(sbom -> sbom.getId()).collect(Collectors.joining(", "))));
         }
 
-        StringBuilder sb = new StringBuilder("Generation failed. ");
+        StringBuilder sb = new StringBuilder("Generation request failed. ");
         GenerationResult result = GenerationResult.ERR_SYSTEM;
+
+        // If number of failed generations is the same as number of products it means that all generations failed
+        if (failedTaskRuns.size() == generateTaskRuns.size()) {
+            sb.append("All tasks failed. ");
+        } else {
+            sb.append("Some tasks failed. ");
+        }
 
         for (TaskRun taskRun : failedTaskRuns) {
             Param productIndexParam = getParamValue(taskRun, "index");
