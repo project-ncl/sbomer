@@ -1,11 +1,12 @@
 import { Dashboard } from '@app/components/Pages/Dashboard/Dashboard';
 import { NotFoundPage } from '@app/components/Pages/NotFound/NotFoundPage';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
-import { EmptyState } from '@patternfly/react-core';
 import * as React from 'react';
 import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-dom';
-import { GenerationRequestsPage } from './components/Pages/GenerationRequests/GenerationRequestsPage';
 import { GenerationRequestPage } from './components/Pages/GenerationRequests/GenerationRequestPage';
+import { GenerationRequestsPage } from './components/Pages/GenerationRequests/GenerationRequestsPage';
+import { ManifestsPage } from './components/Pages/Manifests/ManifestsPage';
+import { ManifestPage } from './components/Pages/Manifests/ManifestPage';
 
 let routeFocusTimer: number;
 export interface IAppRoute {
@@ -53,6 +54,19 @@ const routes: AppRouteConfig[] = [
     exact: false,
     path: '/requests/:id',
     title: 'SBOMer | Generation Request',
+  },
+  {
+    component: ManifestsPage,
+    exact: true,
+    label: 'Manifests',
+    path: '/manifests',
+    title: 'SBOMer | Manifests',
+  },
+  {
+    component: ManifestPage,
+    exact: false,
+    path: '/manifests/:id',
+    title: 'SBOMer | Manifest',
   },
   // {
   //   component: Support,

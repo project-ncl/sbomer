@@ -25,6 +25,11 @@ export const AboutSection = () => {
                   Generation Requests
                 </Button>
               </ActionListItem>
+              <ActionListItem>
+                <Button variant="secondary" size="lg" component={(props: any) => <Link {...props} to="manifests" />}>
+                  Manifests
+                </Button>
+              </ActionListItem>
             </ActionList>
           </GridItem>
         </Grid>
