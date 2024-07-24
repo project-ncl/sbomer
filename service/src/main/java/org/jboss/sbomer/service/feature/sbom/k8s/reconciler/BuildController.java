@@ -322,7 +322,10 @@ public class BuildController extends AbstractController {
         }
 
         // Get list of failed TaskRuns
-        List<TaskRun> failedTaskRuns = generateTaskRuns.stream().filter(tr -> isSuccessful(tr) == false).toList();
+        List<TaskRun> failedTaskRuns = generateTaskRuns.stream()
+                .filter(tr -> isSuccessful(tr) == false)
+                .sorted((tr1, tr2) -> tr1.getMetadata().getName().compareTo(tr2.getMetadata().getName()))
+                .toList();
 
         List<Sbom> sboms = null;
 
