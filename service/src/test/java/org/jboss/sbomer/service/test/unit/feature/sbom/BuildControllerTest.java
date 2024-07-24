@@ -32,6 +32,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import io.fabric8.knative.internal.pkg.apis.ConditionBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
+import io.fabric8.tekton.pipeline.v1beta1.ParamValue;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -43,6 +45,20 @@ public class BuildControllerTest {
         return new GenerationRequestBuilder(GenerationRequestType.BUILD).withId("CUSTOMID")
                 .withStatus(SbomGenerationStatus.GENERATING)
                 .withConfig(Config.fromString("{}", PncBuildConfig.class))
+                .build();
+    }
+
+    private TaskRun taskRun(String name, String index, String condition) {
+        return new TaskRunBuilder().withNewMetadata()
+                .withName(name)
+                .withLabels(Map.of(Labels.LABEL_PHASE, "generate"))
+                .endMetadata()
+                .withNewStatus()
+                .withConditions(new ConditionBuilder().withStatus(condition).build())
+                .endStatus()
+                .withNewSpec()
+                .withParams(new ParamBuilder().withName("index").withValue(new ParamValue(index)).build())
+                .endSpec()
                 .build();
     }
 
@@ -123,22 +139,8 @@ public class BuildControllerTest {
 
         bc.setSbomRepository(sbomRepository);
 
-        TaskRun taskRun1 = new TaskRunBuilder().withNewMetadata()
-                .withName("tr1")
-                .withLabels(Map.of(Labels.LABEL_PHASE, "generate"))
-                .endMetadata()
-                .withNewStatus()
-                .withConditions(new ConditionBuilder().withStatus("True").build())
-                .endStatus()
-                .build();
-        TaskRun taskRun2 = new TaskRunBuilder().withNewMetadata()
-                .withName("tr2")
-                .withLabels(Map.of(Labels.LABEL_PHASE, "generate"))
-                .endMetadata()
-                .withNewStatus()
-                .withConditions(new ConditionBuilder().withStatus("True").build())
-                .endStatus()
-                .build();
+        TaskRun taskRun1 = taskRun("tr1", "0", "True");
+        TaskRun taskRun2 = taskRun("tr2", "1", "True");
 
         SbomGenerationRequest request = new SbomGenerationRequest();
         request.setStatus(SbomGenerationStatus.GENERATING);
@@ -162,7 +164,58 @@ public class BuildControllerTest {
 
                 assertEquals(SbomGenerationStatus.FINISHED, generationRequest.getStatus());
                 assertEquals("FINISHED", generationRequest.getMetadata().getLabels().get(Labels.LABEL_STATUS));
-                assertEquals("Generation finished successfully. Generated SBOMs: AAAID1, AAAID2", generationRequest.getReason());
+                assertEquals(
+                        "Generation finished successfully. Generated SBOMs: AAAID1, AAAID2",
+                        generationRequest.getReason());
+
+                assertFalse(control.isNoUpdate());
+                assertFalse(control.isUpdateStatus());
+                assertTrue(control.isUpdateResource());
+            }
+        }
+    }
+
+    @Test
+    void testOneProductFailed() throws Exception {
+        BuildController bc = new BuildController();
+
+        GenerationRequestControllerConfig controllerConfig = Mockito.mock(GenerationRequestControllerConfig.class);
+        when(controllerConfig.sbomDir()).thenReturn("/a/dir");
+
+        bc.setControllerConfig(controllerConfig);
+
+        @SuppressWarnings("unchecked")
+        Context<GenerationRequest> contextMock = Mockito.mock(Context.class);
+
+        TaskRun taskRun1 = taskRun("tr1", "0", "True");
+        TaskRun taskRun2 = taskRun("tr2", "1", "False");
+        TaskRun taskRun3 = taskRun("tr3", "2", "False");
+
+        SbomGenerationRequest request = new SbomGenerationRequest();
+        request.setStatus(SbomGenerationStatus.GENERATING);
+
+        // Mock syncing with DB
+        try (MockedStatic<SbomGenerationRequest> sbomGenerationRequest = Mockito
+                .mockStatic(SbomGenerationRequest.class)) {
+            sbomGenerationRequest.when(() -> SbomGenerationRequest.sync(any())).thenReturn(request);
+
+            try (MockedStatic<SbomUtils> utils = Mockito.mockStatic(SbomUtils.class)) {
+                utils.when(() -> SbomUtils.fromPath(any())).thenReturn(new Bom());
+
+                when(contextMock.getSecondaryResources(TaskRun.class)).thenReturn(Set.of(taskRun1, taskRun2, taskRun3));
+
+                GenerationRequest generationRequest = generationRequest();
+
+                generationRequest.setConfig(
+                        Config.fromString(TestResources.asString("configs/multi-product.yaml"), PncBuildConfig.class));
+
+                UpdateControl<GenerationRequest> control = bc.reconcile(generationRequest, contextMock);
+
+                assertEquals(SbomGenerationStatus.FAILED, generationRequest.getStatus());
+                assertEquals("FAILED", generationRequest.getMetadata().getLabels().get(Labels.LABEL_STATUS));
+                assertEquals(
+                        "Generation failed. Product with index '1' (TaskRun 'tr2') failed: system failure. Product with index '2' (TaskRun 'tr3') failed: system failure. See logs for more information.",
+                        generationRequest.getReason());
 
                 assertFalse(control.isNoUpdate());
                 assertFalse(control.isUpdateStatus());
