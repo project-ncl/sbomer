@@ -263,7 +263,7 @@ class GenerationPhaseGenerationRequestReconcilerIT {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
         assertEquals(
-                "Generation failed. Product with index '0' (TaskRun 'generation-task-run-0') failed: system failure. Product with index '1' (TaskRun 'generation-task-run-1') failed: system failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: system failure. Product with index '3' (TaskRun 'generation-task-run-3') failed: system failure. Product with index '4' (TaskRun 'generation-task-run-4') failed: system failure. See logs for more information.",
+                "Generation request failed. All tasks failed. Product with index '0' (TaskRun 'generation-task-run-0') failed: system failure. Product with index '1' (TaskRun 'generation-task-run-1') failed: system failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: system failure. Product with index '3' (TaskRun 'generation-task-run-3') failed: system failure. Product with index '4' (TaskRun 'generation-task-run-4') failed: system failure. See logs for more information.",
                 updateControl.getResource().getReason());
         assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().getResult());
     }
@@ -289,7 +289,7 @@ class GenerationPhaseGenerationRequestReconcilerIT {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
         assertEquals(
-                "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. See logs for more information.",
+                "Generation request failed. All tasks failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. See logs for more information.",
                 updateControl.getResource().getReason());
         assertEquals(GenerationResult.ERR_CONFIG_INVALID, updateControl.getResource().getResult());
     }
@@ -315,7 +315,7 @@ class GenerationPhaseGenerationRequestReconcilerIT {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
         assertEquals(
-                "Generation failed. Product with index '123' (TaskRun 'generation-task-run-123') failed: invalid product index: 123 (should be between 1 and 2). See logs for more information.",
+                "Generation request failed. All tasks failed. Product with index '123' (TaskRun 'generation-task-run-123') failed: invalid product index: 123 (should be between 1 and 2). See logs for more information.",
                 updateControl.getResource().getReason());
         assertEquals(GenerationResult.ERR_INDEX_INVALID, updateControl.getResource().getResult());
     }
@@ -341,7 +341,7 @@ class GenerationPhaseGenerationRequestReconcilerIT {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
         assertEquals(
-                "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: an error occurred while generating the SBOM. See logs for more information.",
+                "Generation request failed. All tasks failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: an error occurred while generating the SBOM. See logs for more information.",
                 updateControl.getResource().getReason());
         assertEquals(GenerationResult.ERR_GENERATION, updateControl.getResource().getResult());
     }
@@ -367,7 +367,7 @@ class GenerationPhaseGenerationRequestReconcilerIT {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
         assertEquals(
-                "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: general error occurred. See logs for more information.",
+                "Generation request failed. All tasks failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: general error occurred. See logs for more information.",
                 updateControl.getResource().getReason());
         assertEquals(GenerationResult.ERR_GENERAL, updateControl.getResource().getResult());
     }
@@ -394,7 +394,7 @@ class GenerationPhaseGenerationRequestReconcilerIT {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
         assertEquals(
-                "Generation failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: invalid product index: 2 (should be between 1 and 2). See logs for more information.",
+                "Generation request failed. All tasks failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: invalid product index: 2 (should be between 1 and 2). See logs for more information.",
                 updateControl.getResource().getReason());
         assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().getResult());
     }
