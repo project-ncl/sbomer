@@ -177,7 +177,7 @@ public class GenerateOperationCommand implements Callable<Integer> {
         command.add(configPath.toAbsolutePath().toString());
 
         command.add("--index");
-        command.add(String.valueOf(index));
+        command.add(String.valueOf(i));
 
         command.add("--workdir");
         command.add(workdir.toAbsolutePath().toString());
