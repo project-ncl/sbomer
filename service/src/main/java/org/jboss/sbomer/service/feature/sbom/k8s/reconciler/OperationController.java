@@ -553,8 +553,8 @@ public class OperationController extends AbstractController {
             Path sbomPath = Path.of(
                     controllerConfig.sbomDir(),
                     generationRequest.getMetadata().getName(),
-                    generationRequest.getMetadata().getName() + "-" + SbomGenerationPhase.OPERATIONGENERATE.ordinal()
-                            + "-" + SbomGenerationPhase.OPERATIONGENERATE.name().toLowerCase() + "-" + i,
+                    SbomGenerationPhase.GENERATE.name().toLowerCase(),
+                    String.valueOf(i),
                     "bom.json");
 
             // Read the generated SBOM JSON file

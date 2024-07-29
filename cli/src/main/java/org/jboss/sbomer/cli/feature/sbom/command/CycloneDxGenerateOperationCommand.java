@@ -19,6 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -256,9 +257,15 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             parent.addDependency(dependency);
         }
 
-        Path sbomDirPath = Path.of(parent.getWorkdir().toAbsolutePath().toString(), "bom.json");
+        Path sbomDirPath = Path.of(
+                parent.getWorkdir().toAbsolutePath().toString(),
+                String.valueOf(getParent().getIndex()),
+                "bom.json");
 
         try {
+            // Create all non-existent parent directories
+            Files.createDirectories(sbomDirPath.getParent());
+
             ObjectMapperProvider.json()
                     .writerWithDefaultPrettyPrinter()
                     .writeValue(sbomDirPath.toFile(), toJsonNode(bom));
