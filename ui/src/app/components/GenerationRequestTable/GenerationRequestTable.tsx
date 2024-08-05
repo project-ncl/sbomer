@@ -11,6 +11,7 @@ import {
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useGenerationRequests } from './useGenerationRequests';
 
@@ -24,17 +25,23 @@ const columnNames = {
 
 export const GenerationRequestTable = () => {
   const history = useHistory();
+  const paramPage = useSearchParam('page') || 1;
+  const paramPageSize = useSearchParam('pageSize') || 10;
 
-  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] =
-    useGenerationRequests();
+  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useGenerationRequests(
+    +paramPage - 1,
+    +paramPageSize,
+  );
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPageIndex(newPage - 1);
+    history.push({ search: `?page=${newPage}&pageSize=${pageSize}` });
   };
 
   const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
     setPageSize(newPerPage);
     setPageIndex(0);
+    history.push({ search: `?page=1&pageSize=${pageSize}` });
   };
 
   if (error) {
