@@ -41,7 +41,7 @@ export const GenerationRequestTable = () => {
   const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
     setPageSize(newPerPage);
     setPageIndex(0);
-    history.push({ search: `?page=1&pageSize=${pageSize}` });
+    history.push({ search: `?page=1&pageSize=${newPerPage}` });
   };
 
   if (error) {
