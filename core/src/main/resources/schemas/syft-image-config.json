@@ -1,9 +1,51 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jboss.org/sbomer/config.json",
+  "$id": "https://jboss.org/sbomer/syft-image-config.json",
   "title": "SBOMer Syft image configuration file",
   "description": "Configuration file to influence the Syft image generator",
   "type": "object",
+  "$defs": {
+    "processor-default": {
+      "$id": "/schemas/processors/default",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "default"
+        }
+      }
+    },
+    "processor-redhat-product": {
+      "$id": "/schemas/processors/redhat-product",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "redhat-product"
+        },
+        "errata": {
+          "description": "Product information from Errata Tool",
+          "type": "object",
+          "properties": {
+            "productName": {
+              "description": "Errata Tool product name",
+              "type": "string"
+            },
+            "productVersion": {
+              "description": "Errata Tool product version",
+              "type": "string"
+            },
+            "productVariant": {
+              "description": "Errata Tool product variant",
+              "type": "string"
+            }
+          },
+          "required": ["productName", "productVersion", "productVariant"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["errata"],
+      "additionalProperties": false
+    }
+  },
   "properties": {
     "apiVersion": {
       "description": "Version of the configuration file",
@@ -21,6 +63,21 @@
       "description": "All files located in the container image filesystem under given paths will be added to the resulting manifest. If this option is skipped, all found artifacts will be added.",
       "type": "array",
       "items": { "type": "string" }
+    },
+    "processors": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/processor-default"
+        },
+        {
+          "$ref": "#/$defs/processor-redhat-product"
+        }
+      ],
+      "items": false
     }
   },
   "required": ["type"],

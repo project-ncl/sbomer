@@ -1,7 +1,7 @@
 = Syft Image
 :config-slug: syft-image
 
-In case the `syft-image` configuration is provided, the xref:generators/syft-image.adoc[] generator will be used.
+In case the `syft-image` configuration is provided, the xref:generators/syft.adoc[] generator will be used.
 
 == Elements
 

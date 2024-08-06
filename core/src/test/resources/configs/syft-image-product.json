@@ -1,0 +1,14 @@
+{
+  "type": "syft-image",
+  "processors": [
+    { "type": "default" },
+    {
+      "type": "redhat-product",
+      "errata": {
+        "productName": "pName",
+        "productVersion": "pVersion",
+        "productVariant": "pVariant"
+      }
+    }
+  ]
+}
