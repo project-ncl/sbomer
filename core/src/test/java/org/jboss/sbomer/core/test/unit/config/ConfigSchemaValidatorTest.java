@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.hamcrest.MatcherAssert;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -24,6 +26,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -229,6 +232,51 @@ class ConfigSchemaValidatorTest {
             SyftImageConfig config = minimalConfig();
 
             config.setPaths(List.of("/var", "/opt"));
+
+            ValidationResult result = validator.validate(config);
+            assertTrue(result.isValid());
+            assertTrue(result.getErrors().isEmpty());
+        }
+
+        @Test
+        void shouldAllowProcessors() {
+            SyftImageConfig config = minimalConfig();
+
+            config.setProcessors(
+                    List.of(
+                            DefaultProcessorConfig.builder().build(),
+                            RedHatProductProcessorConfig.builder()
+                                    .withErrata(
+                                            ErrataConfig.builder()
+                                                    .productName("NA")
+                                                    .productVersion("VE")
+                                                    .productVariant("VA")
+                                                    .build())
+                                    .build()));
+
+            ValidationResult result = validator.validate(config);
+            assertTrue(result.isValid());
+            assertTrue(result.getErrors().isEmpty());
+        }
+
+        @Test
+        void validatePlainConfig() throws IOException {
+            String content = TestResources.asString("configs/syft-image-plain.json");
+
+            Config config = Config.fromString(content);
+
+            ValidationResult result = validator.validate(config);
+            assertTrue(result.isValid());
+            assertTrue(result.getErrors().isEmpty());
+        }
+
+        @Test
+        void validateProductConfig() throws IOException {
+            String content = TestResources.asString("configs/syft-image-product.json");
+
+            SyftImageConfig config = Config.fromString(content, SyftImageConfig.class);
+
+            assertEquals(2, config.getProcessors().size());
 
             ValidationResult result = validator.validate(config);
             assertTrue(result.isValid());

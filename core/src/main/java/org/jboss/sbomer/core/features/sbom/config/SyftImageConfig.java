@@ -20,6 +20,8 @@ package org.jboss.sbomer.core.features.sbom.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -53,6 +55,12 @@ public class SyftImageConfig extends Config {
      */
     @Builder.Default
     boolean rpms = false;
+
+    /**
+     * Processors configuration.
+     */
+    @Builder.Default
+    List<ProcessorConfig> processors = new ArrayList<>();
 
     @JsonIgnore
     @Override

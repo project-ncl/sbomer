@@ -3,7 +3,7 @@
 *** xref:generators/maven-domino.adoc[]
 *** xref:generators/maven-cyclonedx.adoc[]
 *** xref:generators/gradle-cyclonedx.adoc[]
-*** xref:generators/syft-image.adoc[]
+*** xref:generators/syft.adoc[]
 ** xref:processors/index.adoc[]
 *** xref:processors/default.adoc[]
 *** xref:processors/redhat-product.adoc[]

@@ -7,4 +7,4 @@ We do have currently following generators:
 * xref:generators/maven-domino.adoc[]
 * xref:generators/maven-cyclonedx.adoc[]
 * xref:generators/gradle-cyclonedx.adoc[]
-* xref:generators/syft-image.adoc[]
+* xref:generators/syft.adoc[]
