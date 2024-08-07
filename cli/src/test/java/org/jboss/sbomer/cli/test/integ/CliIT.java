@@ -18,8 +18,8 @@
 package org.jboss.sbomer.cli.test.integ;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,8 +33,8 @@ class CliIT {
     @DisplayName("Should run the command without any options and print help")
     @Launch(exitCode = 2)
     void shouldPrintUsageOnWrongCommand(LaunchResult result) throws Exception {
-        assertThat(result.getErrorStream(), Matchers.hasItem("Usage: sbomerctl [-hvV] [COMMAND]"));
-        assertThat(result.getErrorStream(), Matchers.hasItem("  sbom, s  SBOM generation"));
+        assertThat(result.getErrorOutput(), containsString("Usage: sbomerctl [-hvV] [COMMAND]"));
+        assertThat(result.getErrorOutput(), containsString("  sbom, s  SBOM generation"));
     }
 
 }
