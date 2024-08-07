@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
 public class ServiceWireMock implements QuarkusTestResourceLifecycleManager {
@@ -31,9 +32,9 @@ public class ServiceWireMock implements QuarkusTestResourceLifecycleManager {
 
     @Override
     public Map<String, String> start() {
-        wireMockServer = new WireMockServer(12377);
+        wireMockServer = new WireMockServer(new WireMockConfiguration().dynamicPort());
         wireMockServer.start();
-        Map<String, String> configs = new HashMap<String, String>();
+        Map<String, String> configs = new HashMap<>();
         configs.put("sbomer.host", wireMockServer.baseUrl());
         configs.put("quarkus.application.version", "test-version-1.0.0");
         return Collections.unmodifiableMap(configs);
