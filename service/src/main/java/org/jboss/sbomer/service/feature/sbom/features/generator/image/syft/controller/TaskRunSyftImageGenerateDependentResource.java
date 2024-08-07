@@ -54,11 +54,12 @@ public class TaskRunSyftImageGenerateDependentResource
 
     public static final String PARAM_COMMAND_CONTAINER_IMAGE = "image";
     public static final String PARAM_PATHS = "paths";
+    public static final String PARAM_PROCESSORS = "processors";
     public static final String TASK_SUFFIX = "-generate-image-syft";
     public static final String SA_SUFFIX = "-sa";
 
     @ConfigProperty(name = "SBOMER_RELEASE", defaultValue = "sbomer")
-    String release;
+    protected String release;
 
     @Inject
     KubernetesClient client;
@@ -108,6 +109,9 @@ public class TaskRunSyftImageGenerateDependentResource
                 .withParams(
                         new ParamBuilder().withName(PARAM_COMMAND_CONTAINER_IMAGE)
                                 .withNewValue(generationRequest.getIdentifier())
+                                .build(),
+                        new ParamBuilder().withName(PARAM_PROCESSORS)
+                                .withNewValue(generationRequest.getConfig().toProcessorsCommand())
                                 .build(),
                         new ParamBuilder().withName(PARAM_PATHS)
                                 .withValue(

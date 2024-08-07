@@ -18,6 +18,9 @@
 package org.jboss.sbomer.core.features.sbom.config;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -62,6 +65,55 @@ public abstract class Config {
      */
     @JsonIgnore
     public abstract boolean isEmpty();
+
+    /**
+     * <p>
+     * Returns commands to be run to process the manifest.
+     * </p>
+     *
+     * @return List of string that form a command to be run by the CLI.
+     */
+    @JsonIgnore
+    protected List<String> processCommand() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * <p>
+     * Returns a command that represents the parameters that should be passed to the process command. This basically
+     * translates all the configured processors and it's parameters into a string that can be executed via CLI.
+     * </p>
+     *
+     * <p>
+     * By default it returns only {@code default} which represents the default processors that is used in every
+     * manifest.
+     * </p>
+     *
+     * <p>
+     * Please note that this is not used by all generators! Some generators use similar approach, see
+     * {@see ProductConfig#generateCommand(PncBuildConfig))}. This process may be unified at some point.
+     * </p>
+     *
+     * @return A command (parameters) that wil be passed to the standalone process command.
+     */
+    @JsonIgnore
+    public String toProcessorsCommand() {
+        List<String> command = processCommand();
+
+        // If there are no processors, make sure the default one is run.
+        if (command.isEmpty()) {
+            return "default";
+        }
+
+        // Convert the list of strings into a single command ensuring that we handle quotes correctly.
+        return command.stream().map(param -> {
+            if (param.contains(" ")) {
+                return "\"" + param + "\"";
+            }
+
+            return param;
+        }).collect(Collectors.joining(" "));
+    }
 
     public String toJson() {
         try {

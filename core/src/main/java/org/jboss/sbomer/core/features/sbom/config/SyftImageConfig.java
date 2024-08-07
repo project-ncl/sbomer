@@ -20,6 +20,7 @@ package org.jboss.sbomer.core.features.sbom.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -66,5 +67,24 @@ public class SyftImageConfig extends Config {
     @Override
     public boolean isEmpty() {
         return this.equals(new SyftImageConfig());
+    }
+
+    @Override
+    @JsonIgnore
+    protected List<String> processCommand() {
+        List<String> command = new ArrayList<>();
+
+        DefaultProcessorConfig defaultProcessorConfig = new DefaultProcessorConfig();
+
+        // If the default processor is not there, add it.
+        // This ensures that even after we initialize the object, for examle after deserialziation,
+        // we will have the default processor added, so that the correct command can be instantiated.
+        if (!processors.contains(defaultProcessorConfig)) {
+            processors.add(0, defaultProcessorConfig);
+        }
+
+        processors.forEach(processor -> command.addAll(processor.toCommand()));
+
+        return command;
     }
 }

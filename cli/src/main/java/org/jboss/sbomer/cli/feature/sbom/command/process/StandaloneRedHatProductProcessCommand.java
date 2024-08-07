@@ -15,14 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.cli.feature.sbom.command;
+package org.jboss.sbomer.cli.feature.sbom.command.process;
 
 import java.nio.file.Path;
 
 import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.cli.feature.sbom.command.AbstractProcessCommand;
 import org.jboss.sbomer.cli.feature.sbom.processor.RedHatProductProcessor;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
-import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -32,7 +32,7 @@ import picocli.CommandLine.ParentCommand;
         mixinStandardHelpOptions = true,
         name = "redhat-product",
         description = "Process the SBOM with Red Hat product enrichment")
-public class RedHatProductProcessCommand extends AbstractProcessCommand {
+public class StandaloneRedHatProductProcessCommand extends AbstractProcessCommand {
 
     @Option(names = { "--productName" }, description = "Product name in Errata Tool.", required = true)
     String productName;
@@ -44,7 +44,7 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
     String productVariant;
 
     @ParentCommand
-    ProcessCommand parent;
+    StandaloneProcessCommand parent;
 
     @Override
     public ProcessorType getImplementationType() {
@@ -58,11 +58,6 @@ public class RedHatProductProcessCommand extends AbstractProcessCommand {
 
     @Override
     protected Path manifestPath() {
-        return parent.getParent().getParent().getOutput();
-    }
-
-    @Override
-    protected void addContext() {
-        MDCUtils.addBuildContext(parent.getParent().getParent().getBuildId());
+        return parent.getManifestPath();
     }
 }
