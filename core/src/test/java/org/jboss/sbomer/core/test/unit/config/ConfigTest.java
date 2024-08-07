@@ -3,11 +3,15 @@ package org.jboss.sbomer.core.test.unit.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.io.IOException;
+
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
+import org.jboss.sbomer.core.test.TestResources;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 public class ConfigTest {
@@ -47,5 +51,28 @@ public class ConfigTest {
     @Test
     void shouldConvertToPncBuildConfig() {
         assertEquals(new PncBuildConfig(), Config.fromString("{\"type\": \"pnc-build\"}"));
+    }
+
+    @Nested
+    class SyftImageConfigTest {
+
+        @Test
+        void shouldAddDefaultProcessor() {
+            assertEquals("default", new SyftImageConfig().toProcessorsCommand());
+        }
+
+        @Test
+        void shouldReturnValidProcessorCommand() throws IOException {
+            assertEquals(
+                    "default",
+                    Config.fromString(TestResources.asString("configs/syft-image-plain.json")).toProcessorsCommand());
+        }
+
+        @Test
+        void shouldReturnValidProcessorCommandForRhProduct() throws IOException {
+            assertEquals(
+                    "default redhat-product --productName pName --productVersion pVersion --productVariant pVariant",
+                    Config.fromString(TestResources.asString("configs/syft-image-product.json")).toProcessorsCommand());
+        }
     }
 }

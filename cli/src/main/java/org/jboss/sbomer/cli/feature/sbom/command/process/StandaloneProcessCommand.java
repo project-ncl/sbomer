@@ -31,7 +31,7 @@ import picocli.CommandLine.ScopeType;
         name = "process",
         aliases = { "p" },
         description = "Process SBOM using selected processor",
-        subcommands = { StandaloneDefaultProcessCommand.class },
+        subcommands = { StandaloneDefaultProcessCommand.class, StandaloneRedHatProductProcessCommand.class },
         subcommandsRepeatable = true)
 public class StandaloneProcessCommand {
 
