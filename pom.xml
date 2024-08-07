@@ -43,6 +43,8 @@
     </modules>
 
     <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -74,6 +76,7 @@
         <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
         <version.build-finder>2.3.0</version.build-finder>
         <version.mapstruct>1.5.5.Final</version.mapstruct>
+        <version.jandex-maven-plugin>3.1.8</version.jandex-maven-plugin>
 
         <!-- Sonar -->
         <sonar.java.source>17</sonar.java.source>
@@ -119,6 +122,11 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>io.smallrye</groupId>
+                    <artifactId>jandex-maven-plugin</artifactId>
+                    <version>${version.jandex-maven-plugin}</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -190,6 +198,7 @@
                 </executions>
                 <configuration>
                     <configFile>${maven.multiModuleProjectDirectory}/eclipse-codeStyle.xml</configFile>
+                    <lineEnding>LF</lineEnding>
                 </configuration>
             </plugin>
             <plugin>
