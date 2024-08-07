@@ -16,6 +16,10 @@ it will be retained. Every component located outsude of given paths will be remo
 A flag whether RPM packages should be added to generated manifest. By default this flag is set to `false` which means
 that no RPM packagaes will be added to manifest.
 
+=== `processors`
+
+An array of xref:processors/index.adoc[processors]. The xref:processors/default.adoc[Default] processor is run always. Others are optional.
+
 == Example
 
 [source,yaml]
@@ -39,3 +43,18 @@ paths:
 ----
 
 This example is similar to the above one with one difference: all RPM packages will be added to the manifest.
+
+[source,yaml]
+----
+apiVersion: sbomer.jboss.org/v1alpha1
+type: syft-image
+processors:
+    - type: default
+    - type: redhat-product
+      errata:
+          productName: pName
+          productVersion: pVersion
+          productVariant: pVariant
+----
+
+This example specifies the xref:processors/index.adoc[processors] that should be run once the manifest is created.
