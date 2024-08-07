@@ -20,6 +20,7 @@ package org.jboss.sbomer.cli.feature.sbom.provider;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -106,11 +107,12 @@ public class BuildFinderConfigProvider {
         config.setKojiMulticallSize(DEFAULT_KOJI_MULTICALL_SIZE);
         // The koji-num-threads option sets the number of Koji threads.
         config.setKojiNumThreads(DEFAULT_KOJI_NUM_THREADS);
-
         // The output-directory option specifies the directory to use for output.
-        Path tempDir = Files.createTempDirectory(
-                "sbomer-",
-                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
+        Path tempDir = FileSystems.getDefault().supportedFileAttributeViews().contains("posix")
+                ? Files.createTempDirectory(
+                        "sbomer-",
+                        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")))
+                : Files.createTempDirectory("sbomer-");
         config.setOutputDirectory(tempDir.toAbsolutePath().toString());
 
         setKojiHubURL(config);
