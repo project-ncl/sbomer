@@ -22,6 +22,7 @@ import java.util.Map;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
 public class PncWireMock implements QuarkusTestResourceLifecycleManager {
@@ -30,7 +31,7 @@ public class PncWireMock implements QuarkusTestResourceLifecycleManager {
 
     @Override
     public Map<String, String> start() {
-        wireMockServer = new WireMockServer(12388);
+        wireMockServer = new WireMockServer(new WireMockConfiguration().dynamicPort());
         wireMockServer.start();
 
         return Collections.singletonMap("sbomer.pnc.host", wireMockServer.baseUrl().substring(7));

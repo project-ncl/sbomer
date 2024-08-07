@@ -1,5 +1,7 @@
 package org.jboss.sbomer.cli.test.integ.feature.sbom.processor;
 
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
@@ -61,8 +63,8 @@ class DefaultProcessorIT {
         assertEquals("Red Hat", component.getPublisher());
         assertEquals("Red Hat", component.getPublisher());
 
-        assertEquals(
-                "https://localhost:12388/pnc-rest/v2/builds/APT4PH2ILMAAA",
-                SbomUtils.getExternalReferences(component, Type.BUILD_SYSTEM, "pnc-build-id").get(0).getUrl());
+        assertThat(
+                SbomUtils.getExternalReferences(component, Type.BUILD_SYSTEM, "pnc-build-id").get(0).getUrl(),
+                matchesPattern("^https://localhost:\\d+/pnc-rest/v2/builds/APT4PH2ILMAAA$"));
     }
 }
