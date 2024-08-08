@@ -18,8 +18,10 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
 import static io.restassured.RestAssured.given;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.net.URLEncoder;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -107,9 +109,11 @@ class SBOMResourceRSQIT {
 
         @Nested
         class GetByPurl {
-
-            static String PURL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom";
-            static String PURL_WITH_REPOSITORY_URL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom";
+            static final String PURL = URLEncoder
+                    .encode("pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom", UTF_8);
+            static final String PURL_WITH_REPOSITORY_URL = URLEncoder.encode(
+                    "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?repository_url=https://maven.repository.redhat.com/ga/&type=pom",
+                    UTF_8);
 
             @Test
             void testFetchSbomByPurl() throws Exception {
@@ -162,10 +166,7 @@ class SBOMResourceRSQIT {
                         .statusCode(404)
                         .body("errorId", CoreMatchers.isA(String.class))
                         .body("error", CoreMatchers.is("Not Found"))
-                        .body(
-                                "message",
-                                CoreMatchers.is(
-                                        "SBOM with purl = 'pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom' couldn't be found"))
+                        .body("message", CoreMatchers.is("SBOM with purl = 'pkg%3Amaven%2Forg.apache.logging.log4j%2Flog4j%402.19.0.redhat-00001%3Ftype%3Dpom' couldn't be found"))
                         .body("$", Matchers.not(Matchers.hasKey("errors")));
             }
 
