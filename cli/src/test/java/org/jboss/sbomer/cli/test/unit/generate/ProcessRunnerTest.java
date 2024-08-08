@@ -19,6 +19,7 @@ package org.jboss.sbomer.cli.test.unit.generate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +64,10 @@ class ProcessRunnerTest {
 
         assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
-        assertEquals("Provided working directory 'surely/doesnt/exist' does not exist", thrown.getErrors().get(0));
+        assertEquals(
+                "Provided working directory '" + String.join(File.separator, "surely", "doesnt", "exist")
+                        + "' does not exist",
+                thrown.getErrors().get(0));
     }
 
     @Test

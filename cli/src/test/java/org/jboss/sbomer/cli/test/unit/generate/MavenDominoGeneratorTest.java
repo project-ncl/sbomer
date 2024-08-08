@@ -17,8 +17,11 @@
  */
 package org.jboss.sbomer.cli.test.unit.generate;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -59,7 +62,9 @@ class MavenDominoGeneratorTest {
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
-        assertEquals("Provided domino directory 'some/dir' doesn't exist", thrown.getErrors().get(0));
+        assertEquals(
+                "Provided domino directory 'some" + File.separator + "dir' doesn't exist",
+                thrown.getErrors().get(0));
     }
 
     @Test
@@ -71,7 +76,7 @@ class MavenDominoGeneratorTest {
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
         assertEquals(
-                String.format("Domino could not be found on path '%s/domino.jar'", wrongDir),
+                String.format("Domino could not be found on path '%s%sdomino.jar'", wrongDir, File.separator),
                 thrown.getErrors().get(0));
     }
 
@@ -84,7 +89,7 @@ class MavenDominoGeneratorTest {
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
         assertEquals(
-                String.format("Domino could not be found on path '%s/domino-1.2.3.jar'", dominoDir),
+                String.format("Domino could not be found on path '%s%sdomino-1.2.3.jar'", dominoDir, File.separator),
                 thrown.getErrors().get(0));
     }
 
@@ -94,8 +99,9 @@ class MavenDominoGeneratorTest {
 
         List<String> cmd = generate(generator, dominoDir, workDir);
 
-        assertEquals(
-                Arrays.asList(
+        assertThat(
+                cmd,
+                contains(
                         "java",
                         "-XX:InitialRAMPercentage=50.0",
                         "-XX:MaxRAMPercentage=50.0",
@@ -103,12 +109,11 @@ class MavenDominoGeneratorTest {
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
-                        "/path/to/domino/dir/domino.jar",
+                        String.join(File.separator, "", "path", "to", "domino", "dir", "domino.jar"),
                         "report",
-                        "--project-dir=work/dir",
+                        "--project-dir=work" + File.separator + "dir",
                         "--output-file=bom.json",
-                        "--manifest"),
-                cmd);
+                        "--manifest"));
     }
 
     @Test
@@ -131,9 +136,9 @@ class MavenDominoGeneratorTest {
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
-                        "/path/to/domino/dir/domino.jar",
+                        String.join(File.separator, "", "path", "to", "domino", "dir", "domino.jar"),
                         "report",
-                        "--project-dir=work/dir",
+                        "--project-dir=work" + File.separator + "dir",
                         "--output-file=bom.json",
                         "--manifest",
                         "-s",
@@ -156,9 +161,9 @@ class MavenDominoGeneratorTest {
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
-                        "/path/to/domino/dir/domino.jar",
+                        String.join(File.separator, "", "path", "to", "domino", "dir", "domino.jar"),
                         "report",
-                        "--project-dir=work/dir",
+                        "--project-dir=work" + File.separator + "dir",
                         "--output-file=bom.json",
                         "--manifest",
                         "one-arg",
@@ -182,9 +187,9 @@ class MavenDominoGeneratorTest {
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
-                        "/path/to/domino/dir/domino.jar",
+                        String.join(File.separator, "", "path", "to", "domino", "dir", "domino.jar"),
                         "report",
-                        "--project-dir=work/dir",
+                        "--project-dir=work" + File.separator + "dir",
                         "--output-file=bom.json",
                         "--manifest"),
                 cmd);
@@ -212,7 +217,7 @@ class MavenDominoGeneratorTest {
 
         }
 
-        assertEquals(Path.of("work/dir"), workDirCaptor.getValue());
+        assertEquals(workDir, workDirCaptor.getValue());
 
         return Arrays.asList(commandCaptor.getValue());
     }
