@@ -19,6 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.nio.file.Path;
 
+import io.quarkus.logging.Log;
 import picocli.CommandLine.ITypeConverter;
 
 public class PathConverter implements ITypeConverter<Path> {
@@ -33,6 +34,12 @@ public class PathConverter implements ITypeConverter<Path> {
             return null;
         }
 
-        return Path.of(path.replaceFirst("~", System.getenv("HOME")));
+        String userHome = System.getProperty("user.home");
+
+        if (userHome == null || !path.startsWith("~")) {
+            return Path.of(path);
+        }
+
+        return Path.of(userHome + path.substring(1));
     }
 }
