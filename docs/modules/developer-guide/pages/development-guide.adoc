@@ -53,7 +53,7 @@ If you change under following directories you will be required to rebuild images
 
 Please follow link:https://helm.sh/docs/intro/install/[upstream documentation] to install Helm.
 
-You need to clone the link:https://gitlab.cee.redhat.com/appsvcs-platform/security/sbomer-helm[sbomer-help] repository
+You need to clone the link:https://gitlab.cee.redhat.com/appsvcs-platform/security/sbomer-helm[sbomer-helm] repository
 to continue.
 
 [WARNING]
@@ -69,7 +69,7 @@ Using the `main` branch run the upgrade command.
 
 [source,console]
 ----
-$ helm sbomer-local upgrade --install  --values env/app/prod.yaml sbomer .
+$ helm --kube-context sbomer-local upgrade --install --values env/app/prod.yaml sbomer .
 Release "sbomer" has been upgraded. Happy Helming!
 NAME: sbomer
 LAST DEPLOYED: Thu Mar 28 09:45:49 2024
