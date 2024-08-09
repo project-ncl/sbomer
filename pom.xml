@@ -57,8 +57,8 @@
     https://github.com/quarkiverse/quarkus-operator-sdk/blob/main/pom.xml#L15 for the Quarkus
     Operator SDK extension version defined below ("version.quarkus-operator-sdk").
     -->
-    <version.quarkus-platform>3.11.0</version.quarkus-platform>
-    <version.quarkus-operator-sdk>6.7.1</version.quarkus-operator-sdk>
+    <version.quarkus-platform>3.13.0</version.quarkus-platform>
+    <version.quarkus-operator-sdk>6.7.2</version.quarkus-operator-sdk>
 
     <version.cyclonedx>9.0.4</version.cyclonedx>
     <version.lombok>1.18.32</version.lombok>

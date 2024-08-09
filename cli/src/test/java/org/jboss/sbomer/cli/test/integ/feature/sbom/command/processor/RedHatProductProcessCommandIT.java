@@ -25,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 
-import jakarta.inject.Inject;
-
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.command.RedHatProductProcessCommand;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
@@ -38,11 +36,12 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 
 @QuarkusTest
-@QuarkusTestResource(PncWireMock.class)
+@WithTestResource(PncWireMock.class)
 class RedHatProductProcessCommandIT {
     @Inject
     RedHatProductProcessCommand command;
