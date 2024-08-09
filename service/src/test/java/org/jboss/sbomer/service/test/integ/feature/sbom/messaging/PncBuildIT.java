@@ -49,7 +49,7 @@ import org.mockito.ArgumentCaptor;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -60,8 +60,8 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
-@QuarkusTestResource(AmqpTestResourceLifecycleManager.class)
-@QuarkusTestResource(PncWireMock.class)
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
+@WithTestResource(PncWireMock.class)
 @Slf4j
 @WithKubernetesTestServer
 class PncBuildIT {
