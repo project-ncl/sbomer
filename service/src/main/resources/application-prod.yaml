@@ -30,7 +30,7 @@ mp:
         host: "${UMB_BROKER_HOST}"
 
 sbomer:
-  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha2/"
+  api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha3/"
   pnc:
     ## (required)
     ## Hostname of the PNC service

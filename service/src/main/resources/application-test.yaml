@@ -42,7 +42,7 @@ sbomer:
     generation-request:
       sbom-dir: "/tmp/sbomer"
 
-  api-url: "http://localhost:8080/api/v1alpha2/"
+  api-url: "http://localhost:8080/api/v1alpha3/"
   pnc:
     ## (required)
     ## Hostname of the PNC service
