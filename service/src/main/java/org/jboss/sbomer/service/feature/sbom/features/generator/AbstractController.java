@@ -60,6 +60,7 @@ import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -329,6 +330,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param secondaryResources
      * @return
      */
+    @ActivateRequestContext
     protected UpdateControl<GenerationRequest> reconcileFinished(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
