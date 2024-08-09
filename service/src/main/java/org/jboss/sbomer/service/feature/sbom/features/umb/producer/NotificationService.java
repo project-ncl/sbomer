@@ -101,7 +101,7 @@ public class NotificationService {
         }
 
         if (!umbConfig.producer().topic().isPresent()) {
-            throw new FeatureConfigurationException("UMB produce topic not specified");
+            throw new FeatureConfigurationException("UMB producer topic not specified");
         }
 
         if (sboms == null || sboms.isEmpty()) {
