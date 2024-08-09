@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -34,6 +35,7 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
@@ -44,7 +46,10 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer.NotificationServiceIT.UmbProducerEnabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.WithTestResource;
@@ -58,6 +63,9 @@ import jakarta.inject.Inject;
 @TestProfile(UmbProducerEnabled.class)
 @WithTestResource(AmqpTestResourceLifecycleManager.class)
 class NotificationServiceIT {
+
+    @InjectMock
+    FeatureFlags featureFlags;
 
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "sboms", fileName);
@@ -134,6 +142,8 @@ class NotificationServiceIT {
 
     @Test
     void shouldSuccessfullyNotifyForContainerImage() throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.CONTAINERIMAGE))).thenReturn(true);
+
         ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(GenerationFinishedMessageBody.class);
 
@@ -188,6 +198,8 @@ class NotificationServiceIT {
 
     @Test
     void shouldSuccessfullyNotifyForBuild() throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.BUILD))).thenReturn(true);
+
         ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(GenerationFinishedMessageBody.class);
 
@@ -252,6 +264,8 @@ class NotificationServiceIT {
 
     @Test
     void shouldSuccessfullyNotifyForOperation() throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.OPERATION))).thenReturn(true);
+
         ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(GenerationFinishedMessageBody.class);
 
@@ -331,6 +345,25 @@ class NotificationServiceIT {
 
         assertEquals(
                 "Could not retrieve product configuration from the main component (purl = 'pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar') in the '416640206274228333' SBOM, skipping sending UMB notification",
+                ex.getMessage());
+
+        verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));
+    }
+
+    @ParameterizedTest
+    @EnumSource(GenerationRequestType.class)
+    void shouldSkipNotificationIfTypeIsDisabled(GenerationRequestType type) throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(type))).thenReturn(false);
+
+        Sbom sbom = createSBOM();
+        sbom.getGenerationRequest().setType(type);
+
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
+            notificationService.notifyCompleted(List.of(sbom));
+        });
+
+        assertEquals(
+                "Notifications for '" + type.toString() + "' type are disabled, notification service won't send it",
                 ex.getMessage());
 
         verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));
