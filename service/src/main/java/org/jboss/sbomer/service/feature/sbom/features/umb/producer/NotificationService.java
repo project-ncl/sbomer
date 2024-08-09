@@ -138,6 +138,13 @@ public class NotificationService {
                         sbom.getId());
             }
 
+            // Check whether we should send UMB notification for a given type.
+            if (!featureFlags.shouldNotify(sbom.getGenerationRequest().getType())) {
+                throw new FeatureNotAvailableException(
+                        "Notifications for '{}' type are disabled, notification service won't send it",
+                        sbom.getGenerationRequest().getType());
+            }
+
             GenerationFinishedMessageBody msg = createGenerationFinishedMessage(sbom, bom);
 
             ValidationResult result = validator.validate(msg);
