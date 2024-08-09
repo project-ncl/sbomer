@@ -4,6 +4,65 @@
   "title": "UMB message",
   "description": "A UMB message sent after the SBOM generation process is done",
   "type": "object",
+  "$defs": {
+    "generation-requests": {
+      "build": {
+        "$id": "/schemas/requests/build",
+        "type": "object",
+        "properties": {
+          "system": {
+            "description": "Build System",
+            "enum": ["pnc"]
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique operation identifier"
+          },
+          "link": {
+            "type": "string",
+            "description": "Link to the build system's API for the operation"
+          }
+        },
+        "required": ["id", "link", "system"],
+        "additionalProperties": false
+      },
+      "containerimage": {
+        "$id": "/schemas/requests/containerimage",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "operation": {
+        "$id": "/schemas/requests/operation",
+        "type": "object",
+        "properties": {
+          "system": {
+            "description": "Build System",
+            "enum": ["pnc"]
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique operation identifier"
+          },
+          "link": {
+            "type": "string",
+            "description": "Link to the build system's API for the operation"
+          },
+          "deliverable": {
+            "type": "string",
+            "description": "The identifier of the deliverable"
+          }
+        },
+        "required": ["id", "system", "link", "deliverable"],
+        "additionalProperties": false
+      }
+    }
+  },
   "properties": {
     "purl": {
       "description": "A package URL to uniquely identify the main component",
@@ -38,22 +97,12 @@
     "build": {
       "type": "object",
       "description": "Build information",
-      "properties": {
-        "system": {
-          "description": "Build system identifier",
-          "enum": ["pnc"]
-        },
-        "id": {
-          "description": "Build identifier",
-          "type": "string"
-        },
-        "link": {
-          "description": "Link representing the resource in the build system",
-          "type": "string"
-        }
-      },
-      "required": ["system", "id", "link"],
-      "additionalProperties": false
+      "$ref": "#/$defs/generation-requests/build"
+    },
+    "operation": {
+      "type": "object",
+      "description": "Operation information",
+      "$ref": "#/$defs/generation-requests/operation"
     },
     "sbom": {
       "type": "object",
@@ -70,12 +119,51 @@
         "generationRequest": {
           "type": "object",
           "description": "SBOM generation request",
-          "properties": {
-            "id": {
-              "description": "SBOM generation request identifier",
-              "type": "string"
+          "allOf": [
+            {
+              "properties": {
+                "id": {
+                  "description": "SBOM generation request identifier",
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "oneOf": [
+                {
+                  "properties": {
+                    "type": {
+                      "const": "BUILD"
+                    },
+                    "build": {
+                      "$ref": "#/$defs/generation-requests/build"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "type": {
+                      "const": "CONTAINERIMAGE"
+                    },
+                    "containerimage": {
+                      "$ref": "#/$defs/generation-requests/containerimage"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "type": {
+                      "const": "OPERATION"
+                    },
+                    "operation": {
+                      "$ref": "#/$defs/generation-requests/operation"
+                    }
+                  }
+                }
+              ]
             }
-          }
+          ],
+          "required": ["id", "type"]
         },
         "bom": {
           "type": "object",
@@ -102,6 +190,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["purl", "productConfig", "sbom", "build"],
+  "required": ["purl", "productConfig", "sbom"],
   "additionalProperties": false
 }

@@ -370,7 +370,7 @@ public class OperationController extends AbstractController {
         if (failedTaskRuns.isEmpty()) {
 
             List<Sbom> sboms = storeOperationSboms(generationRequest);
-            notificationService.notifyOperationCompleted(sboms);
+            notificationService.notifyCompleted(sboms);
 
             return updateRequest(
                     generationRequest,

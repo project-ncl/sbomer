@@ -19,9 +19,11 @@ package org.jboss.sbomer.test.e2e.rw;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -41,27 +43,28 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
 
     @Test
     void testSuccessfulGenerationForContainerImage() throws IOException, URISyntaxException {
-        String generationRequestId = requestContainerImageGeneration(JWS_IMAGE);
+        String requestBody = Files.readString(sbomPath("jws-image.json"));
+        String generationRequestId = requestContainerImageGeneration(JWS_IMAGE, requestBody);
 
         log.info("JWS container image - Generation Request created: {}", generationRequestId);
 
         waitForGeneration(generationRequestId);
 
-        // TODO: We don't send UMB messages just yet
-        // log.info("JWS container image finished, waiting for UMB message");
+        log.info("JWS container image finished, waiting for UMB message");
 
-        // Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-        // givenLastCompleteUmbMessageForGeneration(generationRequestId).then()
-        // .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
-        // .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(JWS_IMAGE))
-        // .body("raw_messages[0].msg.build.id", CoreMatchers.is(JWS_IMAGE))
-        // .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+        lastCompleteUmbMessageResponse(generationRequestId, resp -> {
+            resp.then()
+                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
+                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(JWS_IMAGE))
+                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId))
+                    .body("raw_messages[0].msg.sbom.generationRequest.type", CoreMatchers.is("CONTAINERIMAGE"))
+                    .body(
+                            "raw_messages[0].msg.sbom.generationRequest.containerimage.name",
+                            CoreMatchers.is(generationRequestId));
 
-        // return true;
-        // });
+        });
 
         log.info("JWS container image passed");
-
     }
 
 }

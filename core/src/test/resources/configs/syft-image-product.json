@@ -1,4 +1,5 @@
 {
+  "apiVersion": "sbomer.jboss.org/v1alpha1",
   "type": "syft-image",
   "processors": [
     { "type": "default" },

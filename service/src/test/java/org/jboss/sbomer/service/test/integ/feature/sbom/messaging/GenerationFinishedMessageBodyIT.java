@@ -26,15 +26,19 @@ import java.util.Collections;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig.ErrataProductConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.GenerationFinishedMessageBodyValidator;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Build.BuildSystem;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Operation;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.Bom;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.BomFormat;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.OperationGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.PncBuildGenerationRequest;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.common.WithTestResource;
@@ -50,7 +54,14 @@ class GenerationFinishedMessageBodyIT {
     @Inject
     GenerationFinishedMessageBodyValidator validator;
 
-    private GenerationFinishedMessageBody genValidMessageBody() {
+    private GenerationFinishedMessageBody genValidOperationMessageBody() {
+        Operation operation = Operation.builder()
+                .id("AWY5AHXBLAQAA")
+                .buildSystem(Operation.BuildSystem.PNC)
+                .link("http://orch.psi.redhat.com/pnc-rest/v2/operations/deliverable-analyzer/AWY5AHXBLAQAA")
+                .deliverable("http://my-first-deliverable.zip")
+                .build();
+
         return GenerationFinishedMessageBody.builder()
                 .purl("as")
                 .productConfig(
@@ -72,13 +83,53 @@ class GenerationFinishedMessageBodyIT {
                                                 .version("1.4")
                                                 .link("https://sbomer/api/v1alpha2/sboms/429305915731435500/bom")
                                                 .build())
+                                .generationRequest(
+                                        OperationGenerationRequest.builder()
+                                                .id("AAA")
+                                                .type(GenerationRequestType.OPERATION)
+                                                .operation(operation)
+                                                .build())
                                 .build())
-                .build(
-                        Build.builder()
-                                .id("AWY5AHXBLAQAA")
-                                .buildSystem(BuildSystem.PNC)
-                                .link("https://orch.psi.redhat.com/pnc-rest/v2/builds/AWY5AHXBLAQAA")
+                .operation(operation)
+                .build();
+    }
+
+    private GenerationFinishedMessageBody genValidMessageBody() {
+        Build build = Build.builder()
+                .id("AWY5AHXBLAQAA")
+                .buildSystem(BuildSystem.PNC)
+                .link("https://orch.psi.redhat.com/pnc-rest/v2/builds/AWY5AHXBLAQAA")
+                .build();
+
+        return GenerationFinishedMessageBody.builder()
+                .purl("as")
+                .productConfig(
+                        ProductConfig.builder()
+                                .errataTool(
+                                        ErrataProductConfig.builder()
+                                                .productName("BLAH")
+                                                .productVersion("AABB")
+                                                .productVariant("DDDD")
+                                                .build())
                                 .build())
+                .sbom(
+                        Sbom.builder()
+                                .id("429305915731435500")
+                                .link("https://sbomer/api/v1alpha2/sboms/429305915731435500")
+                                .bom(
+                                        Bom.builder()
+                                                .format(BomFormat.CYCLONEDX)
+                                                .version("1.4")
+                                                .link("https://sbomer/api/v1alpha2/sboms/429305915731435500/bom")
+                                                .build())
+                                .generationRequest(
+                                        PncBuildGenerationRequest.builder()
+                                                .id("AAA")
+                                                .type(GenerationRequestType.BUILD)
+                                                .build(build)
+                                                .build())
+                                .build())
+                .build(build)
                 .build();
     }
 
@@ -87,7 +138,7 @@ class GenerationFinishedMessageBodyIT {
         GenerationFinishedMessageBody message = GenerationFinishedMessageBody.builder().build();
         ValidationResult result = validator.validate(message);
 
-        assertEquals(4, result.getErrors().size());
+        assertEquals(3, result.getErrors().size());
         assertFalse(result.isValid());
 
         MatcherAssert.assertThat(
@@ -95,8 +146,7 @@ class GenerationFinishedMessageBodyIT {
                 CoreMatchers.hasItems(
                         "#: Instance does not have required property \"purl\"",
                         "#: Instance does not have required property \"productConfig\"",
-                        "#: Instance does not have required property \"sbom\"",
-                        "#: Instance does not have required property \"build\""));
+                        "#: Instance does not have required property \"sbom\""));
 
     }
 
@@ -105,20 +155,28 @@ class GenerationFinishedMessageBodyIT {
         GenerationFinishedMessageBody message = GenerationFinishedMessageBody.builder().purl("as").build();
         ValidationResult result = validator.validate(message);
 
-        assertEquals(3, result.getErrors().size());
+        assertEquals(2, result.getErrors().size());
         assertFalse(result.isValid());
 
         MatcherAssert.assertThat(
                 result.getErrors(),
                 CoreMatchers.hasItems(
                         "#: Instance does not have required property \"productConfig\"",
-                        "#: Instance does not have required property \"sbom\"",
-                        "#: Instance does not have required property \"build\""));
+                        "#: Instance does not have required property \"sbom\""));
     }
 
     @Test
-    void testValid() {
+    void testValidBuild() {
         GenerationFinishedMessageBody message = genValidMessageBody();
+        ValidationResult result = validator.validate(message);
+
+        assertEquals(Collections.emptyList(), result.getErrors());
+        assertTrue(result.isValid());
+    }
+
+    @Test
+    void testValidOperation() {
+        GenerationFinishedMessageBody message = genValidOperationMessageBody();
         ValidationResult result = validator.validate(message);
 
         assertEquals(Collections.emptyList(), result.getErrors());

@@ -25,6 +25,7 @@ import java.util.Optional;
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.config.Config;
 import org.hamcrest.CoreMatchers;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -305,6 +306,7 @@ class SBOMResourceIT {
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withId("AABB")
+                .withType(GenerationRequestType.BUILD)
                 .withIdentifier("BIDBID")
                 .withStatus(SbomGenerationStatus.FINISHED)
                 .build();
