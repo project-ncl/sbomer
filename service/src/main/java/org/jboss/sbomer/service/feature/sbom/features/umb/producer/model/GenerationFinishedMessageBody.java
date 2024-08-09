@@ -58,8 +58,17 @@ public class GenerationFinishedMessageBody {
 
     /**
      * Build details.
+     *
+     * @deprecated Should be used via sbom.generationRequest.build
      */
     Build build;
+
+    /**
+     * Operation details.
+     *
+     * @deprecated Should be used via sbom.generationRequest.operation
+     */
+    Operation operation;
 
     /**
      * Convenience method to convert the message into a JSON {@link String}.

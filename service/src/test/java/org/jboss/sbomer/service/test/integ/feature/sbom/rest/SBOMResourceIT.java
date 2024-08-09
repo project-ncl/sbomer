@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom.rest;
 
 import static io.restassured.RestAssured.given;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -25,9 +26,11 @@ import java.util.Optional;
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.config.Config;
 import org.hamcrest.CoreMatchers;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig.UmbProducerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -41,6 +44,7 @@ import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -79,8 +83,8 @@ class SBOMResourceIT {
     @InjectSpy
     SbomService sbomService;
 
-    // @InjectSpy
-    // UmbConfig umbConfig;
+    @InjectMock
+    FeatureFlags featureFlags;
 
     @Test
     void testExistenceOfSbomsEndpoint() {
@@ -298,10 +302,13 @@ class SBOMResourceIT {
     @ParameterizedTest
     @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
     void testUmbNotificationResend(String apiVersion) throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.BUILD))).thenReturn(true);
+
         Bom bom = SbomUtils.fromString(TestResources.asString("sboms/sbom_with_errata.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withId("AABB")
+                .withType(GenerationRequestType.BUILD)
                 .withIdentifier("BIDBID")
                 .withStatus(SbomGenerationStatus.FINISHED)
                 .build();

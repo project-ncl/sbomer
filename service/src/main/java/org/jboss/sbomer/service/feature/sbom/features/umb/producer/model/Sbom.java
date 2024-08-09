@@ -17,10 +17,14 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.producer.model;
 
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @Builder
@@ -40,9 +44,32 @@ public class Sbom {
     }
 
     @Data
-    @Builder
-    public static class GenerationRequest {
+    @SuperBuilder
+    @EqualsAndHashCode(callSuper = true)
+    public static class OperationGenerationRequest extends GenerationRequest {
+        Operation operation;
+    }
+
+    @Data
+    @SuperBuilder
+    @EqualsAndHashCode(callSuper = true)
+    public static class PncBuildGenerationRequest extends GenerationRequest {
+        Build build;
+    }
+
+    @Data
+    @SuperBuilder
+    @EqualsAndHashCode(callSuper = true)
+    public static class ContainerImageGenerationRequest extends GenerationRequest {
+        @JsonProperty("containerimage")
+        Image containerImage;
+    }
+
+    @Data
+    @SuperBuilder
+    public abstract static class GenerationRequest {
         String id;
+        GenerationRequestType type;
     }
 
     String id;

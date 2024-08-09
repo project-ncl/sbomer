@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -32,7 +33,9 @@ import java.util.Map;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
@@ -42,7 +45,10 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer.NotificationServiceIT.UmbProducerEnabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -54,6 +60,9 @@ import jakarta.inject.Inject;
 @QuarkusTest
 @TestProfile(UmbProducerEnabled.class)
 class NotificationServiceIT {
+
+    @InjectMock
+    FeatureFlags featureFlags;
 
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "sboms", fileName);
@@ -71,11 +80,31 @@ class NotificationServiceIT {
         }
     }
 
+    private Sbom createOperationSBOM() throws IOException {
+        Bom bom = SbomUtils.fromPath(NotificationServiceIT.sbomPath("complete_operation_sbom.json"));
+
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
+                .withId("AABB")
+                .withType(GenerationRequestType.OPERATION)
+                .withIdentifier("OPID")
+                .withStatus(SbomGenerationStatus.FINISHED)
+                .build();
+
+        Sbom sbom = new Sbom();
+        sbom.setIdentifier("OPID");
+        sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
+        sbom.setId("416640206274228333");
+        sbom.setSbom(SbomUtils.toJsonNode(bom));
+        sbom.setGenerationRequest(generationRequest);
+        return sbom;
+    }
+
     private Sbom createSBOM() throws IOException {
         Bom bom = SbomUtils.fromPath(NotificationServiceIT.sbomPath("sbom_with_errata.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withId("AABB")
+                .withType(GenerationRequestType.BUILD)
                 .withIdentifier("BIDBID")
                 .withStatus(SbomGenerationStatus.FINISHED)
                 .build();
@@ -109,7 +138,65 @@ class NotificationServiceIT {
     }
 
     @Test
-    void shouldSuccessfullyNotify() throws IOException {
+    void shouldSuccessfullyNotifyForContainerImage() throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.CONTAINERIMAGE))).thenReturn(true);
+
+        ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
+                .forClass(GenerationFinishedMessageBody.class);
+
+        // Reusing the manifest for a PNC build, doesn't matter
+        Sbom sbom = createSBOM();
+        sbom.getGenerationRequest().setType(GenerationRequestType.CONTAINERIMAGE);
+        sbom.getGenerationRequest().setIdentifier("registry/a-container-image");
+
+        notificationService.notifyCompleted(List.of(sbom));
+
+        verify(amqpMessageProducer, times(1)).notify(argumentCaptor.capture());
+        List<GenerationFinishedMessageBody> messages = argumentCaptor.getAllValues();
+
+        JsonObject expected = JsonObject.of(
+                "purl",
+                "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+                "productConfig",
+                JsonObject.of(
+                        "errataTool",
+                        JsonObject.of(
+                                "productName",
+                                "RHTESTPRODUCT",
+                                "productVersion",
+                                "RHEL-8-RHTESTPRODUCT-1.1",
+                                "productVariant",
+                                "8Base-RHTESTPRODUCT-1.1")),
+                "sbom",
+                JsonObject.of(
+                        "id",
+                        "416640206274228333",
+                        "link",
+                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
+                        "bom",
+                        JsonObject.of(
+                                "format",
+                                "cyclonedx",
+                                "version",
+                                "1.4",
+                                "link",
+                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
+                        "generationRequest",
+                        JsonObject.of(
+                                "id",
+                                "AABB",
+                                "type",
+                                "CONTAINERIMAGE",
+                                "containerimage",
+                                JsonObject.of("name", "registry/a-container-image"))));
+
+        assertEquals(expected, JsonObject.mapFrom(messages.get(0)));
+    }
+
+    @Test
+    void shouldSuccessfullyNotifyForBuild() throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.BUILD))).thenReturn(true);
+
         ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(GenerationFinishedMessageBody.class);
 
@@ -136,7 +223,7 @@ class NotificationServiceIT {
                         "id",
                         "416640206274228333",
                         "link",
-                        "http://localhost:8080/api/v1alpha2/sboms/416640206274228333",
+                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
                         "bom",
                         JsonObject.of(
                                 "format",
@@ -144,9 +231,21 @@ class NotificationServiceIT {
                                 "version",
                                 "1.4",
                                 "link",
-                                "http://localhost:8080/api/v1alpha2/sboms/416640206274228333/bom"),
+                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
                         "generationRequest",
-                        JsonObject.of("id", "AABB")),
+                        JsonObject.of(
+                                "id",
+                                "AABB",
+                                "type",
+                                "BUILD",
+                                "build",
+                                JsonObject.of(
+                                        "id",
+                                        "BIDBID",
+                                        "link",
+                                        "https://orch.psi.redhat.com/pnc-rest/v2/builds/AY2GVQCXDRQAA",
+                                        "system",
+                                        "pnc"))),
                 "build",
                 JsonObject.of(
                         "id",
@@ -158,6 +257,76 @@ class NotificationServiceIT {
 
         assertEquals(expected, JsonObject.mapFrom(messages.get(0)));
         assertEquals(expected, JsonObject.mapFrom(messages.get(1)));
+    }
+
+    @Test
+    void shouldSuccessfullyNotifyForOperation() throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.OPERATION))).thenReturn(true);
+
+        ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
+                .forClass(GenerationFinishedMessageBody.class);
+
+        notificationService.notifyCompleted(List.of(createOperationSBOM()));
+
+        verify(amqpMessageProducer, times(1)).notify(argumentCaptor.capture());
+
+        List<GenerationFinishedMessageBody> messages = argumentCaptor.getAllValues();
+
+        JsonObject expected = JsonObject.of(
+                "purl",
+                "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=A5RPHL7Y3AIAA",
+                "productConfig",
+                JsonObject.of(
+                        "errataTool",
+                        JsonObject.of(
+                                "productName",
+                                "RHTESTPRODUCT",
+                                "productVersion",
+                                "RHEL-8-RHTESTPRODUCT-1.1",
+                                "productVariant",
+                                "8Base-RHTESTPRODUCT-1.1")),
+                "sbom",
+                JsonObject.of(
+                        "id",
+                        "416640206274228333",
+                        "link",
+                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
+                        "bom",
+                        JsonObject.of(
+                                "format",
+                                "cyclonedx",
+                                "version",
+                                "1.4",
+                                "link",
+                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
+                        "generationRequest",
+                        JsonObject.of(
+                                "id",
+                                "AABB",
+                                "type",
+                                "OPERATION",
+                                "operation",
+                                JsonObject.of(
+                                        "id",
+                                        "OPID",
+                                        "link",
+                                        "http://orch.com/pnc-rest/v2/operations/deliverable-analyzer/A5RPHL7Y3AIAA",
+                                        "system",
+                                        "pnc",
+                                        "deliverable",
+                                        "7.11.5.CR3"))),
+                "operation",
+                JsonObject.of(
+                        "id",
+                        "OPID",
+                        "link",
+                        "http://orch.com/pnc-rest/v2/operations/deliverable-analyzer/A5RPHL7Y3AIAA",
+                        "system",
+                        "pnc",
+                        "deliverable",
+                        "7.11.5.CR3"));
+
+        assertEquals(expected, JsonObject.mapFrom(messages.get(0)));
     }
 
     @Test
@@ -173,6 +342,25 @@ class NotificationServiceIT {
 
         assertEquals(
                 "Could not retrieve product configuration from the main component (purl = 'pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar') in the '416640206274228333' SBOM, skipping sending UMB notification",
+                ex.getMessage());
+
+        verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));
+    }
+
+    @ParameterizedTest
+    @EnumSource(GenerationRequestType.class)
+    void shouldSkipNotificationIfTypeIsDisabled(GenerationRequestType type) throws IOException {
+        Mockito.when(featureFlags.shouldNotify(eq(type))).thenReturn(false);
+
+        Sbom sbom = createSBOM();
+        sbom.getGenerationRequest().setType(type);
+
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
+            notificationService.notifyCompleted(List.of(sbom));
+        });
+
+        assertEquals(
+                "Notifications for '" + type.toString() + "' type are disabled, notification service won't send it",
                 ex.getMessage());
 
         verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));

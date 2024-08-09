@@ -25,12 +25,15 @@ import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.GenerationFinishedMessageBody;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.OperationGenerationFinishedMessageBody;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.ContainerImageGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.OperationGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.PncBuildGenerationRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.arc.Unremovable;
 import io.smallrye.reactive.messaging.amqp.OutgoingAmqpMetadata;
+import io.smallrye.reactive.messaging.amqp.OutgoingAmqpMetadata.OutgoingAmqpMetadataBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -88,11 +91,38 @@ public class AmqpMessageProducer {
             return;
         }
 
+        OutgoingAmqpMetadataBuilder metadataBuilder = OutgoingAmqpMetadata.builder();
+
+        // Add main generation request identifier
+        metadataBuilder.withApplicationProperty("generation_request_id", msg.getSbom().getGenerationRequest().getId());
+
+        // Add headers specific to the generation request type
+        switch (msg.getSbom().getGenerationRequest().getType()) {
+            case BUILD:
+                metadataBuilder.withApplicationProperty(
+                        "pnc_build_id",
+                        ((PncBuildGenerationRequest) msg.getSbom().getGenerationRequest()).getBuild().getId());
+                break;
+            case CONTAINERIMAGE:
+                metadataBuilder.withApplicationProperty(
+                        "container_image",
+                        ((ContainerImageGenerationRequest) msg.getSbom().getGenerationRequest()).getContainerImage()
+                                .getName());
+                break;
+            case OPERATION:
+                metadataBuilder.withApplicationProperty(
+                        "operation_id",
+                        ((OperationGenerationRequest) msg.getSbom().getGenerationRequest()).getOperation().getId());
+                break;
+            default:
+                break;
+        }
+
         log.info(
-                "Sending notification for finished SBOM generation (Generation request: '{}', SBOM id: '{}', PNC build id: '{}') using the AMQP producer",
+                "Sending notification for finished SBOM generation (Generation request: '{}', type: '{}', SBOM id: '{}') using the AMQP producer",
                 msg.getSbom().getGenerationRequest().getId(),
-                msg.getSbom().getId(),
-                msg.getBuild().getId());
+                msg.getSbom().getGenerationRequest().getType(),
+                msg.getSbom().getId());
 
         emitter.get().send(Message.of(data, () -> {
             ackedMessages.incrementAndGet();
@@ -105,70 +135,7 @@ public class AmqpMessageProducer {
 
             nackedMessages.incrementAndGet();
             return CompletableFuture.completedFuture(null);
-        })
-                .addMetadata(
-                        OutgoingAmqpMetadata.builder()
-                                .withApplicationProperty(
-                                        "generation_request_id",
-                                        msg.getSbom().getGenerationRequest().getId())
-                                .withApplicationProperty("pnc_build_id", msg.getBuild().getId())
-                                .build()));
-    }
-
-    /**
-     * Publish the provided {@link OperationGenerationFinishedMessageBody} {@code msg} to the channel by using an
-     * {@link Emitter} and wait for the acknowledgement.
-     *
-     * @param msg the {@link OperationGenerationFinishedMessageBody} message body to send
-     */
-    public void notify(OperationGenerationFinishedMessageBody msg) {
-        if (emitter.isUnsatisfied()) {
-            log.error("About to send an operation generation finished notification, but could not obtain the emitter");
-            return;
-        }
-
-        if (msg == null) {
-            log.warn("A message body was expected, but got null, not sending anything");
-            return;
-        }
-
-        String data = null;
-
-        try {
-            data = ObjectMapperProvider.json().writeValueAsString(msg);
-            log.debug(data);
-        } catch (JsonProcessingException e) {
-            // TODO: This is a fatal failure, other systems may depend on it, handle it better!
-            log.error("Unable to convert message content into JSON, this is unexpected", e);
-            return;
-        }
-
-        log.info(
-                "Sending notification for finished SBOM operation generation (Generation request: '{}', SBOM id: '{}', PNC operation id: '{}', Deliverable: '{}') using the AMQP producer",
-                msg.getSbom().getGenerationRequest().getId(),
-                msg.getSbom().getId(),
-                msg.getOperation().getId(),
-                msg.getOperation().getDeliverable());
-
-        emitter.get().send(Message.of(data, () -> {
-            ackedMessages.incrementAndGet();
-            log.debug("Notification for SBOM id '{}' was ACKed", msg.getSbom().getId());
-
-            return CompletableFuture.completedFuture(null);
-        }, reason -> {
-            log.error("Notification for SBOM id '{}' was NACKed", msg.getSbom().getId());
-            log.error("Got NACK", reason);
-
-            nackedMessages.incrementAndGet();
-            return CompletableFuture.completedFuture(null);
-        })
-                .addMetadata(
-                        OutgoingAmqpMetadata.builder()
-                                .withApplicationProperty(
-                                        "generation_request_id",
-                                        msg.getSbom().getGenerationRequest().getId())
-                                .withApplicationProperty("pnc_operation_id", msg.getOperation().getId())
-                                .build()));
+        }).addMetadata(metadataBuilder.build()));
     }
 
     public int getAckedMessages() {

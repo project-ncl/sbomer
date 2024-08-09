@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,6 +48,12 @@ public class FeatureFlags implements UnleashSubscriber {
     public static final String TOGGLE_DRY_RUN = "dry-run";
     public static final String TOGGLE_S3_STORAGE = "s3-storage";
 
+    // UMB notifications
+    public static final String TOGGLE_NOTIFY_CONTAINERIMAGE = "notify-containerimage";
+    public static final String TOGGLE_NOTIFY_BUILD = "notify-build";
+    public static final String TOGGLE_NOTIFY_OPERATION = "notify-operation";
+    public static final String TOGGLE_NOTIFY_ANALYSIS = "notify-analysis";
+
     /**
      * A map holding all toggle values we are interested in. This is used for logging purposes. We are retrieving the
      * state of the toggle via {@link Unleash} object instead.
@@ -61,6 +68,9 @@ public class FeatureFlags implements UnleashSubscriber {
 
     @ConfigProperty(name = "SBOMER_FEATURE_S3_STORAGE_ENABLED", defaultValue = "false")
     boolean s3StorageEnabled;
+
+    @ConfigProperty(name = "SBOMER_FEATURE_NOTIFY_CONTAINERIMAGE_ENABLED", defaultValue = "false")
+    boolean notifyContainerImage;
 
     /**
      * Returns {@code true} in case the dry-run mode is enabled.
@@ -80,8 +90,35 @@ public class FeatureFlags implements UnleashSubscriber {
         return unleash.isEnabled(TOGGLE_S3_STORAGE, s3StorageEnabled);
     }
 
+    /**
+     * Returns {@code true} if we should send a UMB message for a successfully generated manifest where the generation
+     * request source is of a given type.
+     *
+     * @return {@code true} if the message should be send, {@code false} otherwise
+     */
+    public boolean shouldNotify(GenerationRequestType type) {
+        switch (type) {
+            case BUILD:
+                return unleash.isEnabled(TOGGLE_NOTIFY_BUILD, false);
+            case CONTAINERIMAGE:
+                return unleash.isEnabled(TOGGLE_NOTIFY_CONTAINERIMAGE, notifyContainerImage);
+            case OPERATION:
+                return unleash.isEnabled(TOGGLE_NOTIFY_OPERATION, false);
+            case ANALYSIS:
+                return unleash.isEnabled(TOGGLE_NOTIFY_ANALYSIS, false);
+        }
+
+        return false;
+    }
+
     private void updateToggles(final FeatureToggleResponse toggleResponse) {
-        for (String toggleName : Set.of(TOGGLE_DRY_RUN, TOGGLE_S3_STORAGE)) {
+        for (String toggleName : Set.of(
+                TOGGLE_DRY_RUN,
+                TOGGLE_S3_STORAGE,
+                TOGGLE_NOTIFY_CONTAINERIMAGE,
+                TOGGLE_NOTIFY_BUILD,
+                TOGGLE_NOTIFY_OPERATION,
+                TOGGLE_NOTIFY_ANALYSIS)) {
             FeatureToggle toggle = toggleResponse.getToggleCollection().getToggle(toggleName);
 
             if (toggle != null) {
