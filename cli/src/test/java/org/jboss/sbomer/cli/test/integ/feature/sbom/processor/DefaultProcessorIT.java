@@ -1,7 +1,7 @@
 package org.jboss.sbomer.cli.test.integ.feature.sbom.processor;
 
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
@@ -23,12 +23,12 @@ import org.mockito.Mockito;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-@QuarkusTestResource(PncWireMock.class)
+@WithTestResource(PncWireMock.class)
 class DefaultProcessorIT {
 
     DefaultProcessor defaultProcessor;

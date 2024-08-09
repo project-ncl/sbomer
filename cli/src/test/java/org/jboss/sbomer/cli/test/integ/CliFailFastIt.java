@@ -29,7 +29,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.main.LaunchResult;
@@ -37,7 +37,7 @@ import io.quarkus.test.junit.main.QuarkusMainLauncher;
 import io.quarkus.test.junit.main.QuarkusMainTest;
 
 @QuarkusMainTest
-@QuarkusTestResource(PncWireMock.class)
+@WithTestResource(PncWireMock.class)
 @TestProfile(CustomPncServiceProfile.class)
 public class CliFailFastIt {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {

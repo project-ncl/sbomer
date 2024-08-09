@@ -37,14 +37,14 @@ import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.jboss.sbomer.core.pnc.PncService;
 import org.junit.jupiter.api.Test;
 
-import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @QuarkusTest
-@QuarkusTestResource(PncWireMock.class)
+@WithTestResource(PncWireMock.class)
 class PncServiceIT {
 
     @Inject

@@ -24,14 +24,14 @@ import java.util.List;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 
-import io.quarkus.config.yaml.runtime.ApplicationYamlConfigSourceLoader;
+import io.smallrye.config.source.yaml.YamlConfigSourceLoader;
 
 /**
  * Adds support for configuration file stored in the user home directory under the {@code $HOME/.sbomer/config.yaml}.
  * The configuration file extension could be {@code .yaml} or {@code .yml}.
  *
  */
-public class InUserHomeFileSystemLoader extends ApplicationYamlConfigSourceLoader implements ConfigSourceProvider {
+public class InUserHomeFileSystemLoader extends YamlConfigSourceLoader implements ConfigSourceProvider {
 
     @Override
     public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
