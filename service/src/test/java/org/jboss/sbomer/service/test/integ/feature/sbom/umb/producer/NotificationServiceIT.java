@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
@@ -74,11 +75,31 @@ class NotificationServiceIT {
         }
     }
 
+    private Sbom createOperationSBOM() throws IOException {
+        Bom bom = SbomUtils.fromPath(NotificationServiceIT.sbomPath("complete_operation_sbom.json"));
+
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
+                .withId("AABB")
+                .withType(GenerationRequestType.OPERATION)
+                .withIdentifier("OPID")
+                .withStatus(SbomGenerationStatus.FINISHED)
+                .build();
+
+        Sbom sbom = new Sbom();
+        sbom.setIdentifier("OPID");
+        sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
+        sbom.setId("416640206274228333");
+        sbom.setSbom(SbomUtils.toJsonNode(bom));
+        sbom.setGenerationRequest(generationRequest);
+        return sbom;
+    }
+
     private Sbom createSBOM() throws IOException {
         Bom bom = SbomUtils.fromPath(NotificationServiceIT.sbomPath("sbom_with_errata.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withId("AABB")
+                .withType(GenerationRequestType.BUILD)
                 .withIdentifier("BIDBID")
                 .withStatus(SbomGenerationStatus.FINISHED)
                 .build();
@@ -112,7 +133,61 @@ class NotificationServiceIT {
     }
 
     @Test
-    void shouldSuccessfullyNotify() throws IOException {
+    void shouldSuccessfullyNotifyForContainerImage() throws IOException {
+        ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
+                .forClass(GenerationFinishedMessageBody.class);
+
+        // Reusing the manifest for a PNC build, doesn't matter
+        Sbom sbom = createSBOM();
+        sbom.getGenerationRequest().setType(GenerationRequestType.CONTAINERIMAGE);
+        sbom.getGenerationRequest().setIdentifier("registry/a-container-image");
+
+        notificationService.notifyCompleted(List.of(sbom));
+
+        verify(amqpMessageProducer, times(1)).notify(argumentCaptor.capture());
+        List<GenerationFinishedMessageBody> messages = argumentCaptor.getAllValues();
+
+        JsonObject expected = JsonObject.of(
+                "purl",
+                "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+                "productConfig",
+                JsonObject.of(
+                        "errataTool",
+                        JsonObject.of(
+                                "productName",
+                                "RHTESTPRODUCT",
+                                "productVersion",
+                                "RHEL-8-RHTESTPRODUCT-1.1",
+                                "productVariant",
+                                "8Base-RHTESTPRODUCT-1.1")),
+                "sbom",
+                JsonObject.of(
+                        "id",
+                        "416640206274228333",
+                        "link",
+                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
+                        "bom",
+                        JsonObject.of(
+                                "format",
+                                "cyclonedx",
+                                "version",
+                                "1.4",
+                                "link",
+                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
+                        "generationRequest",
+                        JsonObject.of(
+                                "id",
+                                "AABB",
+                                "type",
+                                "CONTAINERIMAGE",
+                                "containerimage",
+                                JsonObject.of("name", "registry/a-container-image"))));
+
+        assertEquals(expected, JsonObject.mapFrom(messages.get(0)));
+    }
+
+    @Test
+    void shouldSuccessfullyNotifyForBuild() throws IOException {
         ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(GenerationFinishedMessageBody.class);
 
@@ -139,7 +214,7 @@ class NotificationServiceIT {
                         "id",
                         "416640206274228333",
                         "link",
-                        "http://localhost:8080/api/v1alpha2/sboms/416640206274228333",
+                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
                         "bom",
                         JsonObject.of(
                                 "format",
@@ -147,9 +222,21 @@ class NotificationServiceIT {
                                 "version",
                                 "1.4",
                                 "link",
-                                "http://localhost:8080/api/v1alpha2/sboms/416640206274228333/bom"),
+                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
                         "generationRequest",
-                        JsonObject.of("id", "AABB")),
+                        JsonObject.of(
+                                "id",
+                                "AABB",
+                                "type",
+                                "BUILD",
+                                "build",
+                                JsonObject.of(
+                                        "id",
+                                        "BIDBID",
+                                        "link",
+                                        "https://orch.psi.redhat.com/pnc-rest/v2/builds/AY2GVQCXDRQAA",
+                                        "system",
+                                        "pnc"))),
                 "build",
                 JsonObject.of(
                         "id",
@@ -161,6 +248,74 @@ class NotificationServiceIT {
 
         assertEquals(expected, JsonObject.mapFrom(messages.get(0)));
         assertEquals(expected, JsonObject.mapFrom(messages.get(1)));
+    }
+
+    @Test
+    void shouldSuccessfullyNotifyForOperation() throws IOException {
+        ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
+                .forClass(GenerationFinishedMessageBody.class);
+
+        notificationService.notifyCompleted(List.of(createOperationSBOM()));
+
+        verify(amqpMessageProducer, times(1)).notify(argumentCaptor.capture());
+
+        List<GenerationFinishedMessageBody> messages = argumentCaptor.getAllValues();
+
+        JsonObject expected = JsonObject.of(
+                "purl",
+                "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=A5RPHL7Y3AIAA",
+                "productConfig",
+                JsonObject.of(
+                        "errataTool",
+                        JsonObject.of(
+                                "productName",
+                                "RHTESTPRODUCT",
+                                "productVersion",
+                                "RHEL-8-RHTESTPRODUCT-1.1",
+                                "productVariant",
+                                "8Base-RHTESTPRODUCT-1.1")),
+                "sbom",
+                JsonObject.of(
+                        "id",
+                        "416640206274228333",
+                        "link",
+                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
+                        "bom",
+                        JsonObject.of(
+                                "format",
+                                "cyclonedx",
+                                "version",
+                                "1.4",
+                                "link",
+                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
+                        "generationRequest",
+                        JsonObject.of(
+                                "id",
+                                "AABB",
+                                "type",
+                                "OPERATION",
+                                "operation",
+                                JsonObject.of(
+                                        "id",
+                                        "OPID",
+                                        "link",
+                                        "http://orch.com/pnc-rest/v2/operations/deliverable-analyzer/A5RPHL7Y3AIAA",
+                                        "system",
+                                        "pnc",
+                                        "deliverable",
+                                        "7.11.5.CR3"))),
+                "operation",
+                JsonObject.of(
+                        "id",
+                        "OPID",
+                        "link",
+                        "http://orch.com/pnc-rest/v2/operations/deliverable-analyzer/A5RPHL7Y3AIAA",
+                        "system",
+                        "pnc",
+                        "deliverable",
+                        "7.11.5.CR3"));
+
+        assertEquals(expected, JsonObject.mapFrom(messages.get(0)));
     }
 
     @Test

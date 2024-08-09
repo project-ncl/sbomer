@@ -147,9 +147,9 @@ public abstract class E2EBase {
         return response.body().path("id").toString();
     }
 
-    public String requestContainerImageGeneration(String image)
+    public String requestContainerImageGeneration(String image, String jsonBody)
             throws UnsupportedEncodingException, MalformedURLException, URISyntaxException {
-        log.info("Requesting SBOM for container image: '{}'", image);
+        log.info("Requesting SBOM for container image: '{}', with jsonBody: '{}'", image, jsonBody);
 
         Response response = RestAssured.given()
                 .urlEncodingEnabled(false)
@@ -158,6 +158,7 @@ public abstract class E2EBase {
                 .all()
                 .when()
                 .contentType(ContentType.JSON)
+                .body(jsonBody)
                 .urlEncodingEnabled(true)
                 .post("/api/v1alpha3/generator/syft/image/{image}", image);
 
