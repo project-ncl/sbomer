@@ -41,6 +41,7 @@ public class TokensAlternative {
                 Duration.ofNanos(Long.MAX_VALUE),
                 "refresh-token",
                 Long.MAX_VALUE,
-                JsonObject.of());
+                JsonObject.of(),
+                "client-id");
     }
 }
