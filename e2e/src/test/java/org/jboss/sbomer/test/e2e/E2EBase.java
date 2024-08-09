@@ -20,6 +20,7 @@ package org.jboss.sbomer.test.e2e;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -27,13 +28,40 @@ import java.util.function.Consumer;
 import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class E2EBase {
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class GenerationRequest {
+        String id;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Sbom {
+        GenerationRequest generationRequest;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Message {
+        Sbom sbom;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class RawMessage {
+        Message msg;
+    }
+
     public abstract String datagrepperUriPropertyName();
 
     public abstract String sbomerUriPropertyName();
@@ -98,12 +126,27 @@ public abstract class E2EBase {
                     .baseUri(getDatagrepperBaseUri())
                     .param("delta", "43200") // 12 hours in seconds
                     .param("topic", "/topic/VirtualTopic.eng.pnc.sbom.complete")
-                    .param("contains", "\"generationRequest\":{\"id\":\"" + generationRequestId + "\"}")
-                    .param("rows_per_page", 1)
                     .param("order", "desc")
                     .get("/raw");
 
             if (response.body().jsonPath().getInt("count") == 0) {
+                log.debug("No UMB messages found");
+                return false;
+            }
+
+            Optional<RawMessage> rawMessageOpt = response.body()
+                    .jsonPath()
+                    .getList("raw_messages", RawMessage.class)
+                    .stream()
+                    .filter(
+                            message -> message.getMsg()
+                                    .getSbom()
+                                    .getGenerationRequest()
+                                    .getId()
+                                    .equals(generationRequestId))
+                    .findAny();
+
+            if (rawMessageOpt.isEmpty()) {
                 log.debug("No UMB messages found for GenerationRquest '{}'", generationRequestId);
                 return false;
             }

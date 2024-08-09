@@ -69,6 +69,9 @@ public class FeatureFlags implements UnleashSubscriber {
     @ConfigProperty(name = "SBOMER_FEATURE_S3_STORAGE_ENABLED", defaultValue = "false")
     boolean s3StorageEnabled;
 
+    @ConfigProperty(name = "SBOMER_FEATURE_NOTIFY_CONTAINERIMAGE_ENABLED", defaultValue = "false")
+    boolean notifyContainerImage;
+
     /**
      * Returns {@code true} in case the dry-run mode is enabled.
      *
@@ -98,7 +101,7 @@ public class FeatureFlags implements UnleashSubscriber {
             case BUILD:
                 return unleash.isEnabled(TOGGLE_NOTIFY_BUILD, false);
             case CONTAINERIMAGE:
-                return unleash.isEnabled(TOGGLE_NOTIFY_CONTAINERIMAGE, false);
+                return unleash.isEnabled(TOGGLE_NOTIFY_CONTAINERIMAGE, notifyContainerImage);
             case OPERATION:
                 return unleash.isEnabled(TOGGLE_NOTIFY_OPERATION, false);
             case ANALYSIS:
