@@ -15,7 +15,19 @@ Please install required tools.
 
 SBOMer is developed using JDK 17.
 
-You can use link:https://sdkman.io/[SDKMAN!] to install and manage JDKs:
+You can use link:https://sdkman.io/[SDKMAN!] to install and manage JDKs.
+
+==== Automatic Setup
+
+To install java 17.0.12-tem using SDKMAN! run the `./hack/sdkman-setup.sh` command.
+
+The script automatically sets `sdkman_auto_env=true` in [filename]`$HOME/.sdkman/etc/config` so that SDKMAN! will switch
+to the correct JDK upon entering the project root directory due to the presence of the [filename]`.sdkmanrc` file in
+that directory.
+
+==== Manual Setup
+
+To install java 17.0.12-tem manually using SDKMAN! follow these steps.
 
 [source,console]
 ----
@@ -189,4 +201,3 @@ $ ./hack/minikube-delete.sh
 🔥  Deleting "sbomer" in kvm2 ...
 💀  Removed all traces of the "sbomer" cluster.
 ----
-
