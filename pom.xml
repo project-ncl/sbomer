@@ -76,7 +76,7 @@
     <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
     <version.build-finder>2.3.0</version.build-finder>
     <version.mapstruct>1.5.5.Final</version.mapstruct>
-    <version.jandex-maven-plugin>3.1.8</version.jandex-maven-plugin>
+    <version.jandex-maven-plugin>3.2.2</version.jandex-maven-plugin>
 
     <!-- Sonar -->
     <sonar.java.source>17</sonar.java.source>
