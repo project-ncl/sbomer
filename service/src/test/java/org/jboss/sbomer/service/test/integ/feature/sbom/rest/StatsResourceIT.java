@@ -21,11 +21,13 @@ import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.jboss.sbomer.service.test.integ.feature.sbom.rest.StatsResourceIT.CustomConfig;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
@@ -35,6 +37,7 @@ import io.restassured.RestAssured;
 
 @QuarkusTest
 @TestProfile(CustomConfig.class)
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 @WithKubernetesTestServer
 class StatsResourceIT {
     public static class CustomConfig implements QuarkusTestProfile {

@@ -25,11 +25,13 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageCo
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 
 @QuarkusTest
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 class AmqpMessageConsumerIT {
     @Inject
     AmqpMessageConsumer consumer;

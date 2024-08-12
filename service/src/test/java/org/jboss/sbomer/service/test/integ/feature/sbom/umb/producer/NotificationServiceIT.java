@@ -40,11 +40,13 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Generat
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer.NotificationServiceIT.UmbProducerEnabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
@@ -53,6 +55,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(UmbProducerEnabled.class)
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 class NotificationServiceIT {
 
     static Path sbomPath(String fileName) {

@@ -38,6 +38,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.test.integ.feature.s3.S3FeatureIT.S3ClientConfig;
+import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -45,6 +46,7 @@ import org.junit.jupiter.api.io.TempDir;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.quarkus.panache.mock.PanacheMock;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
@@ -56,6 +58,7 @@ import io.restassured.http.ContentType;
 
 @QuarkusTest
 @TestProfile(S3ClientConfig.class)
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 public class S3FeatureIT {
 
     @InjectSpy

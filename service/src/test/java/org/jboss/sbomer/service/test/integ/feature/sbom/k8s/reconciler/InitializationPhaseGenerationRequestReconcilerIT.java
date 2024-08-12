@@ -40,6 +40,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.BuildController;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentResource;
+import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -56,12 +57,14 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunResultBuilder;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunStatusBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 
 /**
  * Class responsible for testing reconciliation workflow for the initialization phase.
  */
 @QuarkusTest
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 class InitializationPhaseGenerationRequestReconcilerIT {
 
     @Inject

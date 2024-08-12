@@ -37,12 +37,14 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.Bo
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.BomFormat;
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import jakarta.inject.Inject;
 
 @QuarkusTest
 @WithKubernetesTestServer
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 class GenerationFinishedMessageBodyIT {
 
     @Inject

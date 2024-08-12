@@ -33,11 +33,13 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import io.quarkus.arc.ClientProxy;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -46,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
 @WithKubernetesTestServer
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 @Slf4j
 class SBOMServiceTestIT {
 
