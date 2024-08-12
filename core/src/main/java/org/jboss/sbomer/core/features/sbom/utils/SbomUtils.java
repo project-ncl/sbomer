@@ -50,6 +50,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.cyclonedx.Version;
+import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.generators.BomGeneratorFactory;
 import org.cyclonedx.generators.json.BomJsonGenerator;
@@ -105,7 +106,7 @@ public class SbomUtils {
         try {
             BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), new Bom());
             return new JsonParser().parse(generator.toJsonString().getBytes());
-        } catch (ParseException e) {
+        } catch (ParseException | GeneratorException e) {
             log.error("Unable to create a new Bom", e);
             return null;
         }
@@ -726,8 +727,9 @@ public class SbomUtils {
      *
      * @param bom The CycloneDX {@link Bom} to convert
      * @return {@link String} representation of the {@link Bom}.
+     * @throws GeneratorException
      */
-    public static String toJson(Bom bom) {
+    public static String toJson(Bom bom) throws GeneratorException {
         BomJsonGenerator generator = BomGeneratorFactory.createJson(SbomUtils.schemaVersion(), bom);
         return generator.toJsonString();
     }
@@ -764,7 +766,7 @@ public class SbomUtils {
     public static void toPath(Bom bom, Path path) {
         try {
             Files.writeString(path, SbomUtils.toJson(bom));
-        } catch (IOException e) {
+        } catch (IOException | GeneratorException e) {
             log.error(e.getMessage(), e);
         }
     }
