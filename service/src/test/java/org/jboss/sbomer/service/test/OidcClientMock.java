@@ -32,7 +32,15 @@ public class OidcClientMock implements OidcClient {
     @Override
     public Uni<Tokens> getTokens(Map<String, String> additionalGrantParameters) {
         return Uni.createFrom()
-                .item(new Tokens("accessToken", 1L, Duration.of(5, ChronoUnit.MINUTES), "refreshToken", 1L, null));
+                .item(
+                        new Tokens(
+                                "accessToken",
+                                1L,
+                                Duration.of(5, ChronoUnit.MINUTES),
+                                "refreshToken",
+                                1L,
+                                null,
+                                "client-id"));
     }
 
     @Override

@@ -20,9 +20,11 @@ package org.jboss.sbomer.cli.test.integ.feature.sbom.command;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.main.LaunchResult;
 import io.quarkus.test.junit.main.QuarkusMainLauncher;
 import io.quarkus.test.junit.main.QuarkusMainTest;
@@ -31,6 +33,7 @@ import io.quarkus.test.junit.main.QuarkusMainTest;
  * General tests that apply to all generation commands.
  */
 @QuarkusMainTest
+@WithTestResource(PncWireMock.class)
 class BaseGenerateCommandIT {
     @Test
     @DisplayName("Should fail in case of build not found in PNC")

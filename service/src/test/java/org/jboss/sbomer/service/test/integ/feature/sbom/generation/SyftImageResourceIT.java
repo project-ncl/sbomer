@@ -4,9 +4,11 @@ import static io.restassured.RestAssured.given;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -14,6 +16,7 @@ import io.restassured.http.ContentType;
 
 @QuarkusTest
 @WithKubernetesTestServer
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 class SyftImageResourceIT {
 
     @InjectSpy

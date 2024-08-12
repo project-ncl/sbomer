@@ -34,6 +34,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -41,6 +42,7 @@ import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -53,6 +55,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @WithKubernetesTestServer
+@WithTestResource(AmqpTestResourceLifecycleManager.class)
 class SBOMResourceIT {
     public static class UmbConfigProducer {
         @Inject
