@@ -55,12 +55,11 @@ class StageGenerationRequestIT extends E2EStageBase {
 
         log.info("Maven build finished, waiting for UMB message");
 
-        lastCompleteUmbMessageResponse(generationRequestId, resp -> {
-            resp.then()
-                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
-                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(MAVEN_BUILD_ID))
-                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(MAVEN_BUILD_ID))
-                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+        publishedUmbMessage(generationRequestId, message -> {
+            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
+                    .body("headers.pnc_build_id", CoreMatchers.is(MAVEN_BUILD_ID))
+                    .body("msg.build.id", CoreMatchers.is(MAVEN_BUILD_ID))
+                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
         });
 
         log.info("Maven build passed");
@@ -77,12 +76,11 @@ class StageGenerationRequestIT extends E2EStageBase {
 
         log.info("Gradle 5 build finished, waiting for UMB message");
 
-        lastCompleteUmbMessageResponse(generationRequestId, resp -> {
-            resp.then()
-                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
-                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(GRADLE_5_BUILD_ID))
-                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(GRADLE_5_BUILD_ID))
-                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+        publishedUmbMessage(generationRequestId, message -> {
+            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
+                    .body("headers.pnc_build_id", CoreMatchers.is(GRADLE_5_BUILD_ID))
+                    .body("msg.build.id", CoreMatchers.is(GRADLE_5_BUILD_ID))
+                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
         });
 
         log.info("Gradle 5 build passed");
@@ -123,12 +121,11 @@ class StageGenerationRequestIT extends E2EStageBase {
 
         log.info("NodeJs NPM build finished, waiting for UMB message");
 
-        lastCompleteUmbMessageResponse(generationRequestId, resp -> {
-            resp.then()
-                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
-                    .body("raw_messages[0].headers.pnc_build_id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
-                    .body("raw_messages[0].msg.build.id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
-                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+        publishedUmbMessage(generationRequestId, message -> {
+            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
+                    .body("headers.pnc_build_id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
+                    .body("msg.build.id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
+                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
         });
 
         log.info("NodeJs NPM build passed");

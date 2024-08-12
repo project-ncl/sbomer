@@ -52,13 +52,12 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
 
         log.info("JWS container image finished, waiting for UMB message");
 
-        lastCompleteUmbMessageResponse(generationRequestId, resp -> {
-            resp.then()
-                    .body("raw_messages[0].headers.generation_request_id", CoreMatchers.is(generationRequestId))
-                    .body("raw_messages[0].headers.container_image", CoreMatchers.is(JWS_IMAGE))
-                    .body("raw_messages[0].msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId))
-                    .body("raw_messages[0].msg.sbom.generationRequest.type", CoreMatchers.is("CONTAINERIMAGE"))
-                    .body("raw_messages[0].msg.sbom.generationRequest.containerimage.name", CoreMatchers.is(JWS_IMAGE));
+        publishedUmbMessage(generationRequestId, message -> {
+            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
+                    .body("headers.container_image", CoreMatchers.is(JWS_IMAGE))
+                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId))
+                    .body("msg.sbom.generationRequest.type", CoreMatchers.is("CONTAINERIMAGE"))
+                    .body("msg.sbom.generationRequest.containerimage.name", CoreMatchers.is(JWS_IMAGE));
         });
 
         log.info("JWS container image passed");
