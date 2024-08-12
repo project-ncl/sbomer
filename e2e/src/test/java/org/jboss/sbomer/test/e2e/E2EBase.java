@@ -20,10 +20,13 @@ package org.jboss.sbomer.test.e2e;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
+import java.util.OptionalInt;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 import org.awaitility.Awaitility;
 import org.hamcrest.CoreMatchers;
@@ -33,15 +36,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class E2EBase {
+
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GenerationRequest {
         String id;
+        String type;
     }
 
     @Data
@@ -59,6 +65,7 @@ public abstract class E2EBase {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RawMessage {
+        Map<String, String> headers;
         Message msg;
     }
 
@@ -115,8 +122,8 @@ public abstract class E2EBase {
         log.info("GenerationRequest '{}' successfully finished", generationRequestId);
     }
 
-    public void lastCompleteUmbMessageResponse(String generationRequestId, Consumer<Response> consumer) {
-        AtomicReference<Response> atomicResponse = new AtomicReference<>();
+    public void publishedUmbMessage(String generationRequestId, Consumer<ValidatableResponse> consumer) {
+        AtomicReference<ValidatableResponse> atomicResponse = new AtomicReference<>();
 
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
 
@@ -134,19 +141,19 @@ public abstract class E2EBase {
                 return false;
             }
 
-            Optional<RawMessage> rawMessageOpt = response.body()
-                    .jsonPath()
-                    .getList("raw_messages", RawMessage.class)
-                    .stream()
+            List<RawMessage> rawMessages = response.body().jsonPath().getList("raw_messages", RawMessage.class);
+
+            OptionalInt indexOpt = IntStream.range(0, rawMessages.size())
                     .filter(
-                            message -> message.getMsg()
+                            index -> rawMessages.get(index)
+                                    .getMsg()
                                     .getSbom()
                                     .getGenerationRequest()
                                     .getId()
                                     .equals(generationRequestId))
-                    .findAny();
+                    .findFirst();
 
-            if (rawMessageOpt.isEmpty()) {
+            if (indexOpt.isEmpty()) {
                 log.debug("No UMB messages found for GenerationRquest '{}'", generationRequestId);
                 return false;
             }
@@ -156,7 +163,9 @@ public abstract class E2EBase {
                     response.body().jsonPath().getString("msg_id"),
                     generationRequestId);
 
-            atomicResponse.set(response);
+            ;
+
+            atomicResponse.set(response.then().rootPath("raw_messages[" + indexOpt.getAsInt() + "]"));
 
             return true;
         });
