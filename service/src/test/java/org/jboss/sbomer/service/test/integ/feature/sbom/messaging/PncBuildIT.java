@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 

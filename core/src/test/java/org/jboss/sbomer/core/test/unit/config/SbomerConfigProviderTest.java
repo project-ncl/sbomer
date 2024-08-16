@@ -1,6 +1,7 @@
 package org.jboss.sbomer.core.test.unit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -107,8 +108,8 @@ class SbomerConfigProviderTest {
             ProductConfig product = config.getProducts().get(0);
 
             assertEquals(2, product.getProcessors().size());
-            assertTrue(product.getProcessors().get(0) instanceof DefaultProcessorConfig);
-            assertTrue(product.getProcessors().get(1) instanceof RedHatProductProcessorConfig);
+            assertInstanceOf(DefaultProcessorConfig.class, product.getProcessors().get(0));
+            assertInstanceOf(RedHatProductProcessorConfig.class, product.getProcessors().get(1));
             assertEquals(GeneratorType.MAVEN_CYCLONEDX, product.getGenerator().getType());
             assertEquals("--batch-mode", product.getGenerator().getArgs());
             assertEquals("2.7.9", product.getGenerator().getVersion());
@@ -124,8 +125,8 @@ class SbomerConfigProviderTest {
             ProductConfig product = config.getProducts().get(0);
 
             assertEquals(2, product.getProcessors().size());
-            assertTrue(product.getProcessors().get(0) instanceof DefaultProcessorConfig);
-            assertTrue(product.getProcessors().get(1) instanceof RedHatProductProcessorConfig);
+            assertInstanceOf(DefaultProcessorConfig.class, product.getProcessors().get(0));
+            assertInstanceOf(RedHatProductProcessorConfig.class, product.getProcessors().get(1));
             assertEquals(GeneratorType.MAVEN_CYCLONEDX, product.getGenerator().getType());
             assertEquals("--batch-mode", product.getGenerator().getArgs());
             assertEquals("1.1.1", product.getGenerator().getVersion());
@@ -141,8 +142,8 @@ class SbomerConfigProviderTest {
             ProductConfig product = config.getProducts().get(0);
 
             assertEquals(2, product.getProcessors().size());
-            assertTrue(product.getProcessors().get(0) instanceof DefaultProcessorConfig);
-            assertTrue(product.getProcessors().get(1) instanceof RedHatProductProcessorConfig);
+            assertInstanceOf(DefaultProcessorConfig.class, product.getProcessors().get(0));
+            assertInstanceOf(RedHatProductProcessorConfig.class, product.getProcessors().get(1));
             assertEquals(GeneratorType.MAVEN_CYCLONEDX, product.getGenerator().getType());
             assertEquals("--custom-args", product.getGenerator().getArgs());
             assertEquals("2.7.9", product.getGenerator().getVersion());
@@ -158,8 +159,8 @@ class SbomerConfigProviderTest {
             ProductConfig product = config.getProducts().get(0);
 
             assertEquals(2, product.getProcessors().size());
-            assertTrue(product.getProcessors().get(0) instanceof DefaultProcessorConfig);
-            assertTrue(product.getProcessors().get(1) instanceof RedHatProductProcessorConfig);
+            assertInstanceOf(DefaultProcessorConfig.class, product.getProcessors().get(0));
+            assertInstanceOf(RedHatProductProcessorConfig.class, product.getProcessors().get(1));
         }
 
         @Test
