@@ -104,7 +104,7 @@ public class SyftImageAdjuster implements Adjuster {
             // Handle RPMs
             if (purl.getType().equals("rpm")) {
                 // Remove all components that are RPMs if the includeRpms is not set to true
-                log.debug("Component is of type RPM, to be removed: {}", purl, !includeRpms);
+                log.debug("Component is of type RPM, to be removed: {} (includeRpms: {})", purl, !includeRpms);
                 return !includeRpms;
             } else {
                 // Handle everything else

@@ -340,7 +340,7 @@ public class PncService {
             GroupConfiguration groupConfig = getGroupConfig(groupConfigRef.getId());
 
             if (groupConfig == null) {
-                log.warn("GroupConfiguration '{}' could not be found, this is unexpected, but ignoring");
+                log.warn("GroupConfiguration '{}' could not be found, this is unexpected, but ignoring", groupConfigRef.getId());
                 return;
             }
 

@@ -310,7 +310,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
             log.error("Could not create the '{}' directory", path, e);
         }
 
-        log.info("Cloning the repository...", path);
+        log.info("Cloning the repository to {}...", path);
         try {
             Git.cloneRepository().setDirectory(path.toFile()).setURI(url).setBranch(tag).setDepth(1).call();
         } catch (InvalidRemoteException e) {
