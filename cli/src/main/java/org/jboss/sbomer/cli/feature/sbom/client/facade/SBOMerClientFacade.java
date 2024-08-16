@@ -51,7 +51,7 @@ public class SBOMerClientFacade {
 
     @Inject
     @RestClient
-    private SBOMerClient sbomerClient;
+    SBOMerClient sbomerClient;
 
     public List<SbomGenerationRequest> searchSuccessfulGenerations(String identifier) {
         PaginationParameters pagParams = new PaginationParameters();
