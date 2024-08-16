@@ -96,7 +96,7 @@ public class KojiService {
         try {
             return awaitResults(finderTask);
         } catch (InterruptedException | ExecutionException e) { // NOSONAR We are rethrowing it.
-            log.debug("Analysis failed due to {}", e);
+            log.debug("Analysis failed due to {}", e.getMessage(), e);
             throw e.getCause();
         }
     }
