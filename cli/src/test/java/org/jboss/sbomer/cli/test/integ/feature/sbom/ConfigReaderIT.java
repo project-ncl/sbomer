@@ -18,6 +18,7 @@
 package org.jboss.sbomer.cli.test.integ.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -168,7 +169,7 @@ class ConfigReaderIT {
             assertNotNull(config);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
 
-            assertTrue(config instanceof PncBuildConfig);
+            assertInstanceOf(PncBuildConfig.class, config);
 
             ProductConfig productConfig = ((PncBuildConfig) config).getProducts().get(0);
             assertEquals(0, productConfig.getProcessors().size());
@@ -279,7 +280,7 @@ class ConfigReaderIT {
             Config config = configReader.getConfig(build);
 
             assertNotNull(config);
-            assertTrue(config instanceof PncBuildConfig);
+            assertInstanceOf(PncBuildConfig.class, config);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
 
             ProductConfig productConfig = ((PncBuildConfig) config).getProducts().get(0);
@@ -345,7 +346,7 @@ class ConfigReaderIT {
             Config config = configReader.getConfig(build);
 
             assertNotNull(config);
-            assertTrue(config instanceof PncBuildConfig);
+            assertInstanceOf(PncBuildConfig.class, config);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
 
             ProductConfig productConfig = ((PncBuildConfig) config).getProducts().get(0);

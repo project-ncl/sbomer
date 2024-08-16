@@ -39,7 +39,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.test.integ.feature.s3.S3FeatureIT.S3ClientConfig;
 import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -59,7 +59,7 @@ import io.restassured.http.ContentType;
 @QuarkusTest
 @TestProfile(S3ClientConfig.class)
 @WithTestResource(AmqpTestResourceLifecycleManager.class)
-public class S3FeatureIT {
+class S3FeatureIT {
 
     @InjectSpy
     S3StorageHandler storageHandler;
@@ -88,8 +88,8 @@ public class S3FeatureIT {
         }
     }
 
-    @BeforeClass
-    static void init() {
+    @BeforeAll
+    public static void init() {
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
     }
