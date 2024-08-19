@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 import org.cyclonedx.model.Bom;
@@ -37,7 +38,7 @@ class DefaultProcessorIT {
     PncService pncService;
 
     @BeforeEach
-    void init() {
+    void init() throws MalformedURLException {
         this.defaultProcessor = new DefaultProcessor(pncService, Mockito.mock(KojiService.class));
     }
 
@@ -50,6 +51,7 @@ class DefaultProcessorIT {
         component.setPurl("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar");
         component.setVersion("9.1.0.redhat-00002");
         component.setHashes(List.of(new Hash(Algorithm.SHA1, "2cdf6b457191ed82ef3a9d2e579f6d0aa495a533")));
+        component.setType(Component.Type.LIBRARY);
 
         Metadata metadata = new Metadata();
         metadata.setComponent(component);

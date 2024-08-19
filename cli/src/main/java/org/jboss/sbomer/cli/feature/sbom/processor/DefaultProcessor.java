@@ -32,19 +32,26 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setSupplier;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.updatePurl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
+import org.cyclonedx.model.Property;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.pnc.PncService;
+
+import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -214,7 +221,14 @@ public class DefaultProcessor implements Processor {
     @Override
     public Bom process(Bom bom) {
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-            processComponent(bom, bom.getMetadata().getComponent());
+            Component component = bom.getMetadata().getComponent();
+
+            processComponent(bom, component);
+
+            // We are handling a container image, let's do more!
+            if (component.getType().equals(Component.Type.CONTAINER)) {
+                processContainerImageComponent(component);
+            }
         }
         if (bom.getComponents() != null) {
             for (Component c : bom.getComponents()) {
@@ -226,6 +240,53 @@ public class DefaultProcessor implements Processor {
         purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
         return bom;
+    }
+
+    private void processContainerImageComponent(Component component) {
+        // Try to find required properties
+        Optional<Property> componentOpt = SbomUtils
+                .findPropertyWithNameInComponent("sbomer:image:labels:com.redhat.component", component);
+        Optional<Property> versionOpt = SbomUtils
+                .findPropertyWithNameInComponent("sbomer:image:labels:version", component);
+        Optional<Property> releaseOpt = SbomUtils
+                .findPropertyWithNameInComponent("sbomer:image:labels:release", component);
+
+        if (componentOpt.isEmpty() || versionOpt.isEmpty() || releaseOpt.isEmpty()) {
+            log.warn(
+                    "One or more required properties was not found in the component, skipping adding RH-specific metadata for this container image");
+            return;
+        }
+
+        String nvr = List.of(componentOpt.get().getValue(), versionOpt.get().getValue(), releaseOpt.get().getValue())
+                .stream()
+                .collect(Collectors.joining("-"));
+
+        log.debug("Looking up container information in Brew for NVR '{}'", nvr);
+
+        KojiBuildInfo buildInfo = null;
+
+        try {
+            buildInfo = kojiService.findBuild(nvr);
+        } catch (KojiClientException e) {
+            log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
+            return;
+        }
+
+        if (buildInfo == null) {
+            log.warn("No Brew build information was retrieved, will not add any information");
+            return;
+        }
+
+        // It is a RH image, set publisher and supplier
+        setPublisher(component);
+        setSupplier(component);
+
+        // Add aditional metadata
+        setBrewBuildMetadata(
+                component,
+                String.valueOf(buildInfo.getId()),
+                Optional.of(buildInfo.getSource()),
+                kojiService.getConfig().getKojiWebURL().toString());
     }
 
     @Override
