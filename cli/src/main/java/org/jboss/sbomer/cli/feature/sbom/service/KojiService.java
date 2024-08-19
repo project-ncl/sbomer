@@ -28,9 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.commons.collections4.MultiValuedMap;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.build.finder.core.BuildConfig;
@@ -48,7 +45,11 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.cli.feature.sbom.utils.buildfinder.FinderStatus;
 
 import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
+import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -198,6 +199,30 @@ public class KojiService {
         } catch (Throwable e) {
             log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
         }
+        return null;
+    }
+
+    public KojiBuildInfo findBuild(String nvr) throws KojiClientException {
+        if (nvr == null) {
+            return null;
+        }
+
+        log.debug("Finding Brew build for NVR '{}'...", nvr);
+
+        List<KojiBuildInfo> builds = kojiSession.getBuild(List.of(KojiIdOrName.getFor(nvr)));
+
+        if (builds.size() == 0) {
+            log.debug("No results found");
+            return null;
+        }
+
+        if (builds.size() == 1) {
+            log.debug("Found a build for NVR '{}'...", nvr);
+            return builds.get(0);
+        }
+
+        log.warn("Found more than one build for NVR '{}', this is unexpected, returning nothing!", nvr);
+
         return null;
     }
 }
