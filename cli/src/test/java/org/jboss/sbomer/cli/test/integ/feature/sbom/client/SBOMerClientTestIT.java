@@ -78,21 +78,20 @@ class SBOMerClientTestIT {
         pagParams.setPageIndex(0);
         pagParams.setPageSize(1);
         String rsqlQuery = "id==123";
-        Response response = client.searchSboms("123", pagParams, rsqlQuery, null);
-        String json = response.readEntity(String.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        TypeReference<Page<SbomRecord>> typeReference = new TypeReference<Page<SbomRecord>>() {
-        };
-        try {
-            Page<SbomRecord> sboms = objectMapper.readValue(json, typeReference);
-            assertNotNull(sboms);
-            assertEquals("123", sboms.getContent().iterator().next().id());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().identifier());
-        } catch (JsonMappingException e) {
-            fail(e.getMessage());
-        } catch (JsonProcessingException e) {
-            fail(e.getMessage());
+        try (Response response = client.searchSboms("123", pagParams, rsqlQuery, null)) {
+            String json = response.readEntity(String.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            TypeReference<Page<SbomRecord>> typeReference = new TypeReference<>() {
+            };
+            try {
+                Page<SbomRecord> sboms = objectMapper.readValue(json, typeReference);
+                assertNotNull(sboms);
+                assertEquals("123", sboms.getContent().iterator().next().id());
+                assertEquals("QUARKUS", sboms.getContent().iterator().next().identifier());
+            } catch (JsonProcessingException e) {
+                fail(e.getMessage());
+            }
         }
     }
 
@@ -104,23 +103,22 @@ class SBOMerClientTestIT {
 
         String rsqlQuery = "identifier=eq=QUARKUS;generationRequest.identifier=eq=QUARKUS;generationRequest.status=eq=FINISHED;generationRequest.result=eq=SUCCESS;generationRequest.type=eq=BUILD";
         String sortQuery = "creationTime=desc=";
-        Response response = client.searchSboms("QUARKUS", pagParams, rsqlQuery, sortQuery);
-        String json = response.readEntity(String.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        TypeReference<Page<SbomRecord>> typeReference = new TypeReference<Page<SbomRecord>>() {
-        };
-        try {
-            Page<SbomRecord> sboms = objectMapper.readValue(json, typeReference);
-            assertNotNull(sboms);
-            assertEquals("123", sboms.getContent().iterator().next().id());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().identifier());
-            assertEquals("QUARKUS", sboms.getContent().iterator().next().generationRequest().identifier());
+        try (Response response = client.searchSboms("QUARKUS", pagParams, rsqlQuery, sortQuery)) {
+            String json = response.readEntity(String.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            TypeReference<Page<SbomRecord>> typeReference = new TypeReference<Page<SbomRecord>>() {
+            };
+            try {
+                Page<SbomRecord> sboms = objectMapper.readValue(json, typeReference);
+                assertNotNull(sboms);
+                assertEquals("123", sboms.getContent().iterator().next().id());
+                assertEquals("QUARKUS", sboms.getContent().iterator().next().identifier());
+                assertEquals("QUARKUS", sboms.getContent().iterator().next().generationRequest().identifier());
 
-        } catch (JsonMappingException e) {
-            fail(e.getMessage());
-        } catch (JsonProcessingException e) {
-            fail(e.getMessage());
+            } catch (JsonProcessingException e) {
+                fail(e.getMessage());
+            }
         }
     }
 
@@ -131,21 +129,20 @@ class SBOMerClientTestIT {
         pagParams.setPageSize(1);
         String rsqlQuery = "id==AABBCC";
         String sortQuery = "creationTime=desc=";
-        Response response = client.searchGenerationRequests("AABBCC", pagParams, rsqlQuery, sortQuery);
-        String json = response.readEntity(String.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        TypeReference<Page<SbomGenerationRequestRecord>> typeReference = new TypeReference<Page<SbomGenerationRequestRecord>>() {
-        };
-        try {
-            Page<SbomGenerationRequestRecord> sbomRequests = objectMapper.readValue(json, typeReference);
-            assertNotNull(sbomRequests);
-            assertEquals("AABBCC", sbomRequests.getContent().iterator().next().id());
-            assertEquals("QUARKUS", sbomRequests.getContent().iterator().next().identifier());
-        } catch (JsonMappingException e) {
-            fail(e.getMessage());
-        } catch (JsonProcessingException e) {
-            fail(e.getMessage());
+        try (Response response = client.searchGenerationRequests("AABBCC", pagParams, rsqlQuery, sortQuery)) {
+            String json = response.readEntity(String.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            TypeReference<Page<SbomGenerationRequestRecord>> typeReference = new TypeReference<Page<SbomGenerationRequestRecord>>() {
+            };
+            try {
+                Page<SbomGenerationRequestRecord> sbomRequests = objectMapper.readValue(json, typeReference);
+                assertNotNull(sbomRequests);
+                assertEquals("AABBCC", sbomRequests.getContent().iterator().next().id());
+                assertEquals("QUARKUS", sbomRequests.getContent().iterator().next().identifier());
+            } catch (JsonProcessingException e) {
+                fail(e.getMessage());
+            }
         }
     }
 }

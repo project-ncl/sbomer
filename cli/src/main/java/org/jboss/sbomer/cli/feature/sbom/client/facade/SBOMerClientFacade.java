@@ -66,18 +66,21 @@ public class SBOMerClientFacade {
                 rsqlQuery,
                 sortQuery);
 
-        Response response = sbomerClient.searchGenerationRequests(identifier, pagParams, rsqlQuery, sortQuery);
-
-        String json = response.readEntity(String.class);
-        TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<Page<SbomGenerationRequest>>() {
-        };
-        try {
-            Page<SbomGenerationRequest> sbomRequests = ObjectMapperProvider.json().readValue(json, typeReference);
-            if (sbomRequests.getTotalHits() > 0) {
-                return new ArrayList<>(sbomRequests.getContent());
+        try (Response response = sbomerClient.searchGenerationRequests(identifier, pagParams, rsqlQuery, sortQuery)) {
+            String json = response.readEntity(String.class);
+            TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<Page<SbomGenerationRequest>>() {
+            };
+            try {
+                Page<SbomGenerationRequest> sbomRequests = ObjectMapperProvider.json().readValue(json, typeReference);
+                if (sbomRequests.getTotalHits() > 0) {
+                    return new ArrayList<>(sbomRequests.getContent());
+                }
+            } catch (JsonProcessingException e) {
+                log.warn(
+                        "Could not find existing successful SBOM Generation Requests for PNC build '{}'",
+                        identifier,
+                        e);
             }
-        } catch (JsonProcessingException e) {
-            log.warn("Could not find existing successful SBOM Generation Requests for PNC build '{}'", identifier, e);
         }
         return Collections.emptyList();
     }
@@ -101,18 +104,19 @@ public class SBOMerClientFacade {
 
         log.info("Searching existing successful SBOM Generation Requests with rsqlQuery: {}", rsqlQuery);
 
-        Response response = sbomerClient.searchSboms(requestId, pagParams, rsqlQuery, rsqlSort);
+        try (Response response = sbomerClient.searchSboms(requestId, pagParams, rsqlQuery, rsqlSort)) {
+            String json = response.readEntity(String.class);
+            TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
+            };
 
-        String json = response.readEntity(String.class);
-        TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
-        };
-        try {
-            Page<Sbom> sboms = ObjectMapperProvider.json().readValue(json, typeReference);
-            if (sboms.getTotalHits() > 0) {
-                return new ArrayList<>(sboms.getContent());
+            try {
+                Page<Sbom> sboms = ObjectMapperProvider.json().readValue(json, typeReference);
+                if (sboms.getTotalHits() > 0) {
+                    return new ArrayList<>(sboms.getContent());
+                }
+            } catch (JsonProcessingException e) {
+                log.warn("Could not find SBOMs for Generation Request '{}'", requestId, e);
             }
-        } catch (JsonProcessingException e) {
-            log.warn("Could not find SBOMs for Generation Request '{}'", requestId, e);
         }
         return Collections.emptyList();
     }
