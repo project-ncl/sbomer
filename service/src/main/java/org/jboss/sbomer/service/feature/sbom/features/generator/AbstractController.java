@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -388,8 +389,8 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         // It should, but...
         if (Files.exists(workdirPath)) {
-            try {
-                Files.walk(workdirPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+            try (Stream<Path> stream = Files.walk(workdirPath)) {
+                stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             } catch (IOException e) {
                 log.error(
                         "An error occurred while removing the '{}' directory",

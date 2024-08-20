@@ -43,8 +43,7 @@ public class GenerationFinishedMessageBodyValidator implements Validator<Generat
 
         String schema;
 
-        try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream("schemas/message-success-schema.json");
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("schemas/message-success-schema.json")) {
             schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);

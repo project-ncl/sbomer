@@ -49,8 +49,7 @@ public class ConfigSchemaValidator implements Validator<Config> {
         String schemaFile = GenerationRequestType.schemaFile(config.getClass());
         String schema;
 
-        try {
-            InputStream is = SchemaValidator.class.getClassLoader().getResourceAsStream("schemas/" + schemaFile);
+        try (InputStream is = SchemaValidator.class.getClassLoader().getResourceAsStream("schemas/" + schemaFile)) {
             schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);

@@ -311,8 +311,12 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         }
 
         log.info("Cloning the repository to {}...", path);
-        try {
-            Git.cloneRepository().setDirectory(path.toFile()).setURI(url).setBranch(tag).setDepth(1).call();
+        try (Git git = Git.cloneRepository()
+                .setDirectory(path.toFile())
+                .setURI(url)
+                .setBranch(tag)
+                .setDepth(1)
+                .call()) {
         } catch (InvalidRemoteException e) {
             throw new ApplicationException(
                     "Unknown error occurred while preparing to clone the '{}'  repository",
