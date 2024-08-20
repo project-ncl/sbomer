@@ -217,11 +217,20 @@ public class KojiService {
         }
 
         if (builds.size() == 1) {
-            log.debug("Found a build for NVR '{}'...", nvr);
-            return builds.get(0);
+            KojiBuildInfo buildInfo = builds.get(0);
+
+            // It could happen that the returned build infor is null.
+            if (buildInfo == null) {
+                log.debug("No results found");
+                return null;
+            }
+
+            log.debug("Found a single build: '{}'...", buildInfo.getId());
+            return buildInfo;
         }
 
         log.warn("Found more than one build for NVR '{}', this is unexpected, returning nothing!", nvr);
+        log.debug(builds.toString());
 
         return null;
     }
