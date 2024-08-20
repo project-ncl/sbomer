@@ -159,7 +159,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         String fileName = extractFilenameFromURL(deliverableUrl);
         Optional<String> distributionSha256 = artifactsToManifest.stream()
                 .filter(
-                        a -> a.getDistribution() != null
+                        a -> a.getDistribution() != null && a.getDistribution().getSha256() != null
                                 && deliverableUrl.equals(a.getDistribution().getDistributionUrl()))
                 .map(a -> a.getDistribution().getSha256())
                 .findFirst();
