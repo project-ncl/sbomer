@@ -370,7 +370,6 @@ public class OperationController extends AbstractController {
         if (failedTaskRuns.isEmpty()) {
 
             List<Sbom> sboms = storeOperationSboms(generationRequest);
-            notificationService.notifyCompleted(sboms);
 
             return updateRequest(
                     generationRequest,
@@ -572,8 +571,6 @@ public class OperationController extends AbstractController {
             // And store it in the database
             sboms.add(sbomRepository.saveSbom(sbom));
         }
-
-        s3LogHandler.storeFiles(generationRequest);
 
         return sboms;
     }
