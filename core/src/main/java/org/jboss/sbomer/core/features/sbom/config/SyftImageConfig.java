@@ -25,6 +25,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import lombok.AllArgsConstructor;
@@ -55,7 +56,8 @@ public class SyftImageConfig extends Config {
      * Flag to indicate whether RPMs should be added to manifest.
      */
     @Builder.Default
-    boolean rpms = false;
+    @JsonProperty("rpms")
+    boolean includeRpms = false;
 
     /**
      * Processors configuration.

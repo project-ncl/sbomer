@@ -18,7 +18,8 @@ import io.fabric8.tekton.pipeline.v1beta1.Param;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 
-public class TaskRunSyftImageGenerateDependentResourceTest {
+@SuppressWarnings("unchecked")
+class TaskRunSyftImageGenerateDependentResourceTest {
     static class TaskRunSyftImageGenerateDependentResourceAlt extends TaskRunSyftImageGenerateDependentResource {
 
         TaskRunSyftImageGenerateDependentResourceAlt() {
@@ -38,8 +39,7 @@ public class TaskRunSyftImageGenerateDependentResourceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void test() throws ParseException {
+    void testDefaultConfig() throws ParseException {
         TaskRunSyftImageGenerateDependentResourceAlt res = new TaskRunSyftImageGenerateDependentResourceAlt();
 
         GenerationRequest generationRequest = new GenerationRequestBuilder(GenerationRequestType.CONTAINERIMAGE)
@@ -55,7 +55,7 @@ public class TaskRunSyftImageGenerateDependentResourceTest {
         assertEquals("sbom-request-oneone-1-generate", desired.getMetadata().getName());
         assertEquals("sbomer-sa", desired.getSpec().getServiceAccountName());
         assertEquals(Duration.parse("6h"), desired.getSpec().getTimeout());
-        assertEquals(3, desired.getSpec().getParams().size());
+        assertEquals(4, desired.getSpec().getParams().size());
 
         Param param = null;
 
@@ -71,9 +71,35 @@ public class TaskRunSyftImageGenerateDependentResourceTest {
         assertEquals("paths", param.getName());
         assertEquals(Collections.emptyList(), param.getValue().getArrayVal());
 
+        param = desired.getSpec().getParams().get(3);
+        assertEquals("rpms", param.getName());
+        assertEquals("false", param.getValue().getStringVal());
+
         assertEquals("sbomer-generate-image-syft", desired.getSpec().getTaskRef().getName());
 
         assertEquals(1, desired.getSpec().getWorkspaces().size());
         assertEquals("data", desired.getSpec().getWorkspaces().get(0).getName());
+    }
+
+    @Test
+    void allowToEnableRpms() {
+        TaskRunSyftImageGenerateDependentResourceAlt res = new TaskRunSyftImageGenerateDependentResourceAlt();
+
+        SyftImageConfig config = new SyftImageConfig();
+        config.setIncludeRpms(true);
+
+        GenerationRequest generationRequest = new GenerationRequestBuilder(GenerationRequestType.CONTAINERIMAGE)
+                .withId("oneone")
+                .withIdentifier("image-name")
+                .withConfig(config)
+                .build();
+
+        Context<GenerationRequest> mockedContext = Mockito.mock(Context.class);
+
+        TaskRun desired = res.desired(generationRequest, mockedContext);
+
+        Param param = desired.getSpec().getParams().get(3);
+        assertEquals("rpms", param.getName());
+        assertEquals("true", param.getValue().getStringVal());
     }
 }
