@@ -25,6 +25,7 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -32,6 +33,7 @@ import picocli.CommandLine.Option;
         mixinStandardHelpOptions = true,
         name = "syft-image",
         description = "Adjust the Syft manifest output for a container image")
+@Slf4j
 public class SyftImageAdjustCommand extends AbstractAdjustCommand {
 
     @Option(names = "--path-filter")
@@ -47,6 +49,9 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
 
     @Override
     protected Bom doAdjust(Bom bom, Path workDir) {
+        log.debug("Paths: {}", paths);
+        log.debug("RPMs: {}", rpms);
+
         SyftImageAdjuster adjuster = new SyftImageAdjuster(paths, rpms);
 
         return adjuster.adjust(bom, workDir);

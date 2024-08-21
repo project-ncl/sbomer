@@ -54,6 +54,7 @@ public class TaskRunSyftImageGenerateDependentResource
 
     public static final String PARAM_COMMAND_CONTAINER_IMAGE = "image";
     public static final String PARAM_PATHS = "paths";
+    public static final String PARAM_RPMS = "rpms";
     public static final String PARAM_PROCESSORS = "processors";
     public static final String TASK_SUFFIX = "-generate-image-syft";
     public static final String SA_SUFFIX = "-sa";
@@ -92,6 +93,10 @@ public class TaskRunSyftImageGenerateDependentResource
             throw new ApplicationException("Cannot set timeout", e);
         }
 
+        String rpmsParam = Objects
+                .requireNonNullElse(generationRequest.getConfig(SyftImageConfig.class).isIncludeRpms(), false) ? "true"
+                        : "false";
+
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
                 .withLabels(labels)
@@ -119,7 +124,8 @@ public class TaskRunSyftImageGenerateDependentResource
                                                 Objects.requireNonNullElse(
                                                         generationRequest.getConfig(SyftImageConfig.class).getPaths(),
                                                         Collections.emptyList())))
-                                .build())
+                                .build(),
+                        new ParamBuilder().withName(PARAM_RPMS).withValue(new ParamValue(rpmsParam)).build())
                 .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
 
                 .withWorkspaces(
