@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
@@ -27,28 +26,20 @@ import java.util.TreeMap;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class UrlUtils {
 
     private UrlUtils() {
         // This is a utility class
     }
 
-    public static final String UTF_8 = "utf-8";
-
     public static String urlencode(String value) {
-        try {
-            return URLEncoder.encode(value, UTF_8);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to urlencode", e);
-        }
+        return URLEncoder.encode(value, UTF_8);
     }
 
     public static String urldecode(String value) {
-        try {
-            return URLDecoder.decode(value, UTF_8);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to urldecode", e);
-        }
+        return URLDecoder.decode(value, UTF_8);
     }
 
     /**
@@ -69,21 +60,21 @@ public class UrlUtils {
                 return purl;
             }
 
-            if (!allowList.stream().anyMatch(qualifiers::containsKey)) {
+            if (allowList.stream().noneMatch(qualifiers::containsKey)) {
                 // The qualifiers do not include any allowedQualifier
                 return purl;
             }
 
-            // Qualifiers are not modifable, we need to recreate the purl with new map of qualifiers
-            TreeMap<String, String> modifableQualifiers = new TreeMap<>(qualifiers);
-            modifableQualifiers.keySet().removeAll(allowList);
+            // Qualifiers are not modifiable, we need to recreate the purl with new map of qualifiers
+            TreeMap<String, String> modifiableQualifiers = new TreeMap<>(qualifiers);
+            allowList.forEach(modifiableQualifiers.keySet()::remove);
 
             return new PackageURL(
                     packageURL.getType(),
                     packageURL.getNamespace(),
                     packageURL.getName(),
                     packageURL.getVersion(),
-                    modifableQualifiers,
+                    modifiableQualifiers,
                     packageURL.getSubpath()).toString();
         } catch (MalformedPackageURLException e) {
             // Just return the originally provided purl
