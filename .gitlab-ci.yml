@@ -66,6 +66,7 @@ build:
       -Denforcer.skipRules=bannedRepositories
       --no-transfer-progress
   before_script:
+    - dnf -y --noplugins --setopt=install_weak_deps=0 --setopt=tsflags=nodocs upgrade
     - dnf install -y --setopt=tsflags=nodocs unzip zip
     - mkdir certs
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
