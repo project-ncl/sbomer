@@ -173,7 +173,7 @@ public class MavenCommandLineParser {
         if (profiles.isEmpty()) {
             return "";
         }
-        return " -" + PROFILES_OPTION + profiles.stream().collect(Collectors.joining(","));
+        return " -" + PROFILES_OPTION + String.join(",", profiles);
     }
 
     private String rebuildProjectsCmd() {
@@ -181,7 +181,7 @@ public class MavenCommandLineParser {
             return " ";
         }
 
-        String projectList = projects.stream().collect(Collectors.joining(","));
+        String projectList = String.join(",", projects);
         // Remove single and double quotes if the string starts and ends with them
         projectList = projectList.replaceAll("(^['\"])|(['\"]$)", "").trim();
         // Finally remove all spaces inside the string
@@ -194,7 +194,7 @@ public class MavenCommandLineParser {
         if (noArgsOptions.isEmpty()) {
             return "";
         }
-        return " -" + noArgsOptions.stream().collect(Collectors.joining(" -"));
+        return " -" + String.join(" -", noArgsOptions);
     }
 
     private String rebuildSystemPropertiesCmd() {
@@ -203,7 +203,8 @@ public class MavenCommandLineParser {
         }
 
         StringBuilder sb = new StringBuilder();
-        properties.forEach((key, value) -> sb.append(" -" + SYSTEM_PROPERTIES_OPTION + key + "=" + value));
+        properties.forEach(
+                (key, value) -> sb.append(" -").append(SYSTEM_PROPERTIES_OPTION).append(key).append("=").append(value));
         return sb.toString();
     }
 
