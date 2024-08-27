@@ -109,7 +109,7 @@ public class CLI implements QuarkusApplication {
          * @return {@code true} if one of previous cmmands failed, {@code false} otherwise.
          */
         private boolean isFailed(List<Object> result) {
-            return result.stream().filter(r -> r instanceof Integer res && res != 0).count() > 0;
+            return result.stream().anyMatch(r -> r instanceof Integer res && res != 0);
         }
 
         private List<Object> recursivelyExecuteUserObject(ParseResult parseResult, List<Object> result)
