@@ -473,7 +473,7 @@ public class SbomUtils {
 
     public static boolean hasProperty(Component component, String property) {
         return component.getProperties() != null
-                && component.getProperties().stream().filter(c -> c.getName().equalsIgnoreCase(property)).count() > 0;
+                && component.getProperties().stream().anyMatch(c -> c.getName().equalsIgnoreCase(property));
     }
 
     public static boolean hasHash(Component component, Algorithm algorithm) {
