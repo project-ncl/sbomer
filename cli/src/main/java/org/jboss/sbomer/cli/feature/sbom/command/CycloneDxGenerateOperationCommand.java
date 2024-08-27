@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
-import org.cyclonedx.model.Tool;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
 import org.jboss.pnc.enums.BuildType;
