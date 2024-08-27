@@ -19,7 +19,6 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.nio.file.Path;
 
-import io.quarkus.logging.Log;
 import picocli.CommandLine.ITypeConverter;
 
 public class PathConverter implements ITypeConverter<Path> {
