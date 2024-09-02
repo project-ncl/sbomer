@@ -34,7 +34,7 @@ default:
 
 build:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:1ee4d8c50d14d9c9e9229d9a039d793fcbc9aa803806d194c957a397cf1d2b17
+    name: registry.access.redhat.com/ubi9@sha256:9e6a89ab2a9224712391c77fab2ab01009e387aff42854826427aaf18b98b1ff
     entrypoint: [""]
   stage: build
   cache:
@@ -163,7 +163,7 @@ build-image-ui:
 
 pages:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:1ee4d8c50d14d9c9e9229d9a039d793fcbc9aa803806d194c957a397cf1d2b17
+    name: registry.access.redhat.com/ubi9@sha256:9e6a89ab2a9224712391c77fab2ab01009e387aff42854826427aaf18b98b1ff
     entrypoint: [""]
   variables:
     KUBERNETES_CPU_REQUEST: "100m"
