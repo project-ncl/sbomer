@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
@@ -32,7 +33,6 @@ import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUI
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -773,7 +773,7 @@ public class SbomUtils {
 
     public static Bom fromString(String bomStr) {
         try {
-            return new JsonParser().parse(bomStr.getBytes(Charset.defaultCharset()));
+            return new JsonParser().parse(bomStr.getBytes(UTF_8));
         } catch (ParseException e) {
             log.error(e.getMessage(), e);
             return null;
