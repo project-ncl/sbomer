@@ -29,7 +29,7 @@ default:
         echo "Skipping pushing image ${OCI_IMAGE_NAME}:${OCI_IMAGE_TAG:-latest}"
       fi
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 build:
@@ -42,7 +42,7 @@ build:
     paths:
       - .m2/repository
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   variables:
     KUBERNETES_CPU_REQUEST: "1500m"
@@ -102,7 +102,7 @@ build-ui:
     paths:
       - ui/node_modules
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    #- if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   variables:
     KUBERNETES_CPU_REQUEST: "1000m"
