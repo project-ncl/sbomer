@@ -15,9 +15,6 @@
 	],
 	"rebaseWhen": "behind-base-branch",
 	"timezone": "Europe/Warsaw",
-	"schedule": [
-		"before 5am"
-	],
 	"labels": [
 		"dependencies"
 	],

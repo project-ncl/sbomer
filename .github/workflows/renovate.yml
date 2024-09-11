@@ -1,7 +1,7 @@
 name: Renovate
 on:
   schedule:
-    - cron: "0/15 * * * *"
+    - cron: "3 */6 * * *"
 jobs:
   renovate:
     runs-on: ubuntu-latest
@@ -9,7 +9,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Renovate
-        uses: renovatebot/github-action@v40.1.9
+        uses: renovatebot/github-action@v40.2.8
         with:
           configurationFile: .github/renovate.json
           token: ${{ secrets.RENOVATE_TOKEN }}
