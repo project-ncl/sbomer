@@ -19,6 +19,9 @@ package org.jboss.sbomer.service.feature.sbom.k8s.resources;
 
 import java.util.Map;
 
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -110,6 +113,11 @@ public class TaskRunOperationInitDependentResource
                                 .withPersistentVolumeClaim(
                                         new PersistentVolumeClaimVolumeSourceBuilder().withClaimName(release + "-sboms")
                                                 .build())
+                                .build())
+                .withComputeResources(
+                        new ResourceRequirementsBuilder()
+                                .withRequests(Map.of("cpu", Quantity.parse("250m"), "memory", Quantity.parse("512Mi")))
+                                .withLimits(Map.of("cpu", Quantity.parse("500m"), "memory", Quantity.parse("1Gi")))
                                 .build())
                 .endSpec()
                 .build();

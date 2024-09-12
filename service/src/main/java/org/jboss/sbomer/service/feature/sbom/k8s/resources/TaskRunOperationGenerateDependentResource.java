@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
@@ -164,6 +166,11 @@ public class TaskRunOperationGenerateDependentResource extends KubernetesDepende
                                 .withPersistentVolumeClaim(
                                         new PersistentVolumeClaimVolumeSourceBuilder().withClaimName(release + "-sboms")
                                                 .build())
+                                .build())
+                .withComputeResources(
+                        new ResourceRequirementsBuilder()
+                                .withRequests(Map.of("cpu", Quantity.parse("250m"), "memory", Quantity.parse("512Mi")))
+                                .withLimits(Map.of("cpu", Quantity.parse("500m"), "memory", Quantity.parse("1Gi")))
                                 .build())
                 .endSpec()
                 .build();
