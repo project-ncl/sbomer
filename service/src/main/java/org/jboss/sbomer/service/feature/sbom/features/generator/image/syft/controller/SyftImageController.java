@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -48,7 +49,6 @@ import io.javaoperatorsdk.operator.api.reconciler.Constants;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
-import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -138,7 +138,7 @@ public class SyftImageController extends AbstractController {
 
         // In case the Task Run is not successfull, fail thge generation
         if (!isSuccessful(generateTaskRun)) {
-            log.error("Generation failed, the TaskRun returnd failure");
+            log.error("Generation failed, the TaskRun returned failure");
 
             return updateRequest(
                     generationRequest,
@@ -152,45 +152,45 @@ public class SyftImageController extends AbstractController {
 
         log.debug("Reading manifests from '{}'...", generationDir.toAbsolutePath());
 
-        List<Sbom> sboms = new ArrayList<>();
-
-        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/bom.json");
+        List<Path> manifestPaths = null;
 
         try {
-            Files.walkFileTree(generationDir, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-
-                    if (matcher.matches(path)) {
-                        log.info("Found manifest at path '{}'", path.toAbsolutePath());
-
-                        // Read the generated SBOM JSON file
-                        Bom bom = SbomUtils.fromPath(path);
-                        // Store the manifest in database
-                        sboms.add(storeSbom(generationRequest, bom));
-
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+            manifestPaths = findManifests(generationDir);
         } catch (IOException e) {
-            log.error("Unexpected error ocurred", e);
+            log.error("Unexpected IO exception ocurred while trying to find generated manifests", e);
 
             return updateRequest(
                     generationRequest,
                     SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_GENERATION,
-                    "Generation failed. One or more generated SBOMs failed due IO exception. See logs for more information.");
-        } catch (ValidationException e) {
-            // There was an error when validating the entity, most probably the SBOM is not valid
-            log.error("Unable to validate generated SBOM", e);
-
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_GENERATION,
-                    "Generation failed. One or more generated SBOMs failed validation. See logs for more information.");
+                    GenerationResult.ERR_SYSTEM,
+                    "Generation succeded, but reading generated SBOMs failed due IO exception. See logs for more information.");
         }
+
+        if (manifestPaths.isEmpty()) {
+            log.error("No manifests found, this is unexpected");
+
+            return updateRequest(
+                    generationRequest,
+                    SbomGenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.");
+        }
+
+        List<Bom> boms = null;
+
+        try {
+            boms = readManifests(manifestPaths);
+        } catch (Exception e) {
+            log.error("Unable to read one or more manifests", e);
+
+            return updateRequest(
+                    generationRequest,
+                    SbomGenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Generation succeded, but reading generated manifests failed was not successful. See logs for more information.");
+        }
+
+        List<Sbom> sboms = storeBoms(generationRequest, boms);
 
         return updateRequest(
                 generationRequest,
@@ -199,5 +199,65 @@ public class SyftImageController extends AbstractController {
                 String.format(
                         "Generation finished successfully. Generated SBOMs: %s",
                         sboms.stream().map(sbom -> sbom.getId()).collect(Collectors.joining(", "))));
+    }
+
+    /**
+     * Traverses through the directory tree and finds manifest (files that have {@code bom.json}) and returns all found
+     * files as a {@link List} of {@link Path}s.
+     *
+     * @param directory The top-level directory where search for manifests should be started.
+     * @return List of {@link Path}s to found manifests.
+     */
+    protected List<Path> findManifests(Path directory) throws IOException {
+        List<Path> manifestPaths = new ArrayList<>();
+
+        log.info("Finding manifests under the '{}' directory...", directory.toAbsolutePath());
+
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/bom.json");
+
+        Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+                if (matcher.matches(path)) {
+                    log.info("Found manifest at path '{}'", path.toAbsolutePath());
+
+                    manifestPaths.add(path);
+
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+
+        log.info("Found {} generated manifests", manifestPaths.size());
+
+        return manifestPaths;
+    }
+
+    /**
+     * Reads manifests for given {@code manifestPaths} and converts them into {@link Bom}s.
+     *
+     * @param manifestPaths List of {@link Path}s to manifests in JSON format.
+     * @return List of {@link Bom}s.
+     */
+    protected List<Bom> readManifests(List<Path> manifestPaths) {
+        List<Bom> boms = new ArrayList<>();
+
+        log.info("Reading {} manifests...", manifestPaths.size());
+
+        for (Path manifestPath : manifestPaths) {
+            log.debug("Reading manifest at path '{}'...", manifestPath);
+
+            // Read the generated SBOM JSON file
+            Bom bom = SbomUtils.fromPath(manifestPath);
+
+            // If we couldn't read it, this is a fatal failure for us
+            if (bom == null) {
+                throw new ApplicationException("Could not read the manifest at '{}'", manifestPath.toAbsolutePath());
+            }
+
+            boms.add(bom);
+        }
+
+        return boms;
     }
 }

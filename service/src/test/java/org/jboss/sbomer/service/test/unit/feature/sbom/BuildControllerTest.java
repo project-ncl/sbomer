@@ -43,7 +43,7 @@ import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 
-public class BuildControllerTest {
+class BuildControllerTest {
 
     private GenerationRequest generationRequest() {
         return new GenerationRequestBuilder(GenerationRequestType.BUILD).withId("CUSTOMID")
