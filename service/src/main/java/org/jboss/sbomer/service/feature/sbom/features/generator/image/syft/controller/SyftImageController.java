@@ -19,8 +19,18 @@ package org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.cont
 
 import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
 
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -137,35 +147,40 @@ public class SyftImageController extends AbstractController {
                     "Generation failed. TaskRun responsible for generation failed. See logs for more information.");
         }
 
-        // Construct the path to the manifest
-        Path sbomPath = Path.of(
-                controllerConfig.sbomDir(),
-                generationRequest.getMetadata().getName(),
+        // Construct the path to the working directory of the generator
+        Path generationDir = Path.of(controllerConfig.sbomDir(), generationRequest.getMetadata().getName());
 
-                generationRequest.getMetadata().getName() + "-" + SbomGenerationPhase.GENERATE.ordinal() + "-"
-                        + SbomGenerationPhase.GENERATE.name().toLowerCase(),
-                "bom.json");
+        log.debug("Reading manifests from '{}'...", generationDir.toAbsolutePath());
 
-        log.debug("Reading manifest from '{}'...", sbomPath.toAbsolutePath());
+        List<Sbom> sboms = new ArrayList<>();
 
-        // Read the generated SBOM JSON file
-        Bom bom = SbomUtils.fromPath(sbomPath);
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/bom.json");
 
-        // If the manifest could not be read
-        if (bom == null) {
-            log.error("Could not read generated manifest");
+        try {
+            Files.walkFileTree(generationDir, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+
+                    if (matcher.matches(path)) {
+                        log.info("Found manifest at path '{}'", path.toAbsolutePath());
+
+                        // Read the generated SBOM JSON file
+                        Bom bom = SbomUtils.fromPath(path);
+                        // Store the manifest in database
+                        sboms.add(storeSbom(generationRequest, bom));
+
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            log.error("Unexpected error ocurred", e);
 
             return updateRequest(
                     generationRequest,
                     SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. Generated manifest could not be read. See logs for more information.");
-        }
-
-        Sbom sbom = null;
-
-        try {
-            sbom = storeSbom(generationRequest, bom);
+                    GenerationResult.ERR_GENERATION,
+                    "Generation failed. One or more generated SBOMs failed due IO exception. See logs for more information.");
         } catch (ValidationException e) {
             // There was an error when validating the entity, most probably the SBOM is not valid
             log.error("Unable to validate generated SBOM", e);
@@ -181,6 +196,8 @@ public class SyftImageController extends AbstractController {
                 generationRequest,
                 SbomGenerationStatus.FINISHED,
                 GenerationResult.SUCCESS,
-                String.format("Generation finished successfully. Generated manifest: %s", sbom.getId()));
+                String.format(
+                        "Generation finished successfully. Generated SBOMs: %s",
+                        sboms.stream().map(sbom -> sbom.getId()).collect(Collectors.joining(", "))));
     }
 }
