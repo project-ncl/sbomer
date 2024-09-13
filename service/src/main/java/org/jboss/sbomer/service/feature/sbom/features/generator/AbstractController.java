@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -64,6 +65,7 @@ import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEven
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -73,9 +75,11 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     public static final String EVENT_SOURCE_NAME = "GenerationRequestEventSource";
 
     @Inject
+    @Setter
     protected SbomRepository sbomRepository;
 
     @Inject
+    @Setter
     protected GenerationRequestControllerConfig controllerConfig;
 
     @Inject
@@ -128,7 +132,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
     /**
      * <p>
-     * Stores the generated manifest in the database which results in creation of a new {@link Sbom} entity.
+     * Stores the generated manifests in the database which results in creation of new {@link Sbom}s entities.
      * </p>
      *
      * <p>
@@ -140,24 +144,31 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return
      */
     @Transactional
-    protected Sbom storeSbom(GenerationRequest generationRequest, Bom bom) {
+    protected List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
         // First, update the status of the GenerationRequest entity.
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
 
+        log.info("There are {} manifests to be stored for the {} request...", boms.size(), generationRequest.getId());
+
+        List<Sbom> sboms = new ArrayList<>();
+
+        // Create Sboms entities for all manifests
+        boms.forEach(
+                bom -> sboms.add(
+                        Sbom.builder()
+                                .withId(RandomStringIdGenerator.generate())
+                                .withIdentifier(generationRequest.getIdentifier())
+                                .withSbom(SbomUtils.toJsonNode(bom))
+                                .withGenerationRequest(sbomGenerationRequest)
+                                .build()));
+
         log.info(
-                "Storing generated manifest for the GenerationRequest '{}'",
+                "Storing {} manifests for the GenerationRequest '{}'",
+                boms.size(),
                 generationRequest.getMetadata().getName());
 
-        // Create the Sbom entity
-        Sbom sbom = Sbom.builder()
-                .withId(RandomStringIdGenerator.generate())
-                .withIdentifier(generationRequest.getIdentifier())
-                .withSbom(SbomUtils.toJsonNode(bom))
-                .withGenerationRequest(sbomGenerationRequest)
-                .build();
-
         // And store it in the database
-        return sbomRepository.saveSbom(sbom);
+        return sbomRepository.saveSboms(sboms);
     }
 
     /**

@@ -78,4 +78,16 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
         return sbom;
     }
 
+    /**
+     * Stores in database all provided {@link Sbom}s.
+     *
+     * @param sboms Manifests to store
+     * @return Stored manifests
+     */
+    @Transactional
+    public List<Sbom> saveSboms(List<Sbom> sboms) {
+        persist(sboms);
+        flush();
+        return sboms;
+    }
 }
