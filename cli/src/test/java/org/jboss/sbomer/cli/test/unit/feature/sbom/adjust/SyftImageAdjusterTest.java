@@ -23,14 +23,10 @@ public class SyftImageAdjusterTest {
 
     Bom bom = null;
 
-    SyftImageAdjusterTest() throws IOException {
-        this.bom = SbomUtils.fromString(TestResources.asString("boms/image.json"));
-
-    }
-
     @BeforeEach
     void init() throws IOException {
         Files.writeString(Path.of(tmpDir.getAbsolutePath(), "skopeo.json"), TestResources.asString("skopeo.json"));
+        this.bom = SbomUtils.fromString(TestResources.asString("boms/image.json"));
     }
 
     @Test
@@ -70,6 +66,26 @@ public class SyftImageAdjusterTest {
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
         assertEquals(182, adjusted.getComponents().size());
+    }
+
+    @Test
+    void shouldLeaveOnlyArchAndEpochQualifiers() throws IOException {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(null, true);
+
+        assertEquals(
+                "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64&upstream=bzip2-1.0.8-8.el9.src.rpm&distro=rhel-9.2",
+                bom.getComponents().get(10).getPurl());
+
+        assertEquals(
+                "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1&upstream=dbus-1.12.20-7.el9_2.1.src.rpm&distro=rhel-9.2",
+                bom.getComponents().get(21).getPurl());
+
+        Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
+
+        assertEquals("pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64", adjusted.getComponents().get(10).getPurl());
+        assertEquals(
+                "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
+                adjusted.getComponents().get(21).getPurl());
     }
 
 }
