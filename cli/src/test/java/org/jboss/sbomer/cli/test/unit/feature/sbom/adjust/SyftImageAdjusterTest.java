@@ -36,7 +36,7 @@ public class SyftImageAdjusterTest {
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
         assertEquals(
-                "pkg:oci/amq-streams-console-ui-rhel9@sha256%3Af63b27a29c032843941b15567ebd1f37f540160e8066ac74c05367134c2ff3aa?repository_url=registry.com&os=linux&arch=amd64&tag=2.7.0-8.1718294415",
+                "pkg:oci/amq-streams-console-ui-rhel9@sha256%3Af63b27a29c032843941b15567ebd1f37f540160e8066ac74c05367134c2ff3aa?os=linux&arch=amd64&tag=2.7.0-8.1718294415",
                 adjusted.getMetadata().getComponent().getPurl());
         assertEquals(32, adjusted.getComponents().size());
     }

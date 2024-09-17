@@ -186,9 +186,6 @@ public class SyftImageAdjuster implements Adjuster {
                 .append("@")
                 .append(UrlUtils.urlencode(inspectData.getDigest()))
                 .append("?")
-                .append("repository_url=")
-                .append(componentNameParts[0]) // This should be the registry the image was pulled from
-                .append("&")
                 .append("os=")
                 .append(inspectData.getOs())
                 .append("&")
@@ -293,8 +290,6 @@ public class SyftImageAdjuster implements Adjuster {
                             // If we removed any qualifiers, we need to rebuild the purl
                             if (qualifiers.entrySet()
                                     .removeIf(q -> !q.getKey().equals("arch") && !q.getKey().equals("epoch"))) {
-                                System.out.println(qualifiers);
-
                                 String updatedPurl = new PackageURL(
                                         packageURL.getType(),
                                         packageURL.getNamespace(),
