@@ -1,15 +1,15 @@
 package org.jboss.sbomer.service.test.unit.feature.sbom.syftimage;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +33,6 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -109,13 +108,13 @@ class SyftImageControllerTest {
     @Test
     void findSomeManifests(@TempDir Path tmpDir) throws Exception {
         Path oneDir = tmpDir.resolve("one");
-        oneDir.toFile().mkdirs();
+        Files.createDirectory(oneDir);
 
         Path twoDir = tmpDir.resolve("two");
-        twoDir.toFile().mkdirs();
+        Files.createDirectory(twoDir);
 
         Path threeDir = twoDir.resolve("three");
-        threeDir.toFile().mkdirs();
+        Files.createDirectory(threeDir);
 
         Path twoManifest = twoDir.resolve("bom.json");
         Path threeManifest = threeDir.resolve("bom.json");
@@ -124,10 +123,11 @@ class SyftImageControllerTest {
         Files.write(threeManifest, "{}".getBytes());
 
         List<Path> manifests = controller.findManifests(tmpDir);
+        Collections.sort(manifests);
 
         assertEquals(2, manifests.size());
-        assertTrue(manifests.get(0).toString().endsWith("/two/three/bom.json"));
-        assertTrue(manifests.get(1).toString().endsWith("/two/bom.json"));
+        assertTrue(manifests.get(0).endsWith("two/bom.json"));
+        assertTrue(manifests.get(1).endsWith("two/three/bom.json"));
     }
 
     @Test
@@ -185,7 +185,7 @@ class SyftImageControllerTest {
     }
 
     @Test
-    void shouldReconcileOneManifest(@TempDir Path tmpDir) throws IOException {
+    void shouldReconcileOneManifest(@TempDir Path tmpDir) {
         withController(tmpDir, (requestDir, ctrl) -> {
             Path manifest1 = requestDir.resolve("bom.json");
 
