@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
@@ -270,11 +271,50 @@ public class SyftImageAdjuster implements Adjuster {
             Property propType = SbomUtils.findPropertyWithNameInComponent("sbomer:package:type", component)
                     .orElse(null);
 
-            if (component.getPurl() != null && propType != null && propType.getValue().equals("java-archive")) {
-                log.debug(
-                        "Adjusting purl for the '{}' Java component by adding '?type=jar' suffix...",
-                        component.getPurl());
-                component.setPurl(component.getPurl() + "?type=jar");
+            if (component.getPurl() != null && propType != null) {
+                switch (propType.getValue()) {
+                    case "java-archive":
+                        log.debug(
+                                "Adjusting purl for the '{}' Java component by adding '?type=jar' suffix...",
+                                component.getPurl());
+                        component.setPurl(component.getPurl() + "?type=jar");
+                        break;
+
+                    case "rpm":
+                        log.debug(
+                                "Adjusting purl for the '{}' RPM component by removing all qualifiers besides 'arch' and 'epoch'...",
+                                component.getPurl());
+
+                        try {
+                            PackageURL packageURL = new PackageURL(component.getPurl());
+
+                            TreeMap<String, String> qualifiers = new TreeMap<>(packageURL.getQualifiers());
+
+                            // If we removed any qualifiers, we need to rebuild the purl
+                            if (qualifiers.entrySet()
+                                    .removeIf(q -> !q.getKey().equals("arch") && !q.getKey().equals("epoch"))) {
+                                System.out.println(qualifiers);
+
+                                String updatedPurl = new PackageURL(
+                                        packageURL.getType(),
+                                        packageURL.getNamespace(),
+                                        packageURL.getName(),
+                                        packageURL.getVersion(),
+                                        qualifiers,
+                                        packageURL.getSubpath()).canonicalize();
+
+                                log.debug("Updating purl to: '{}'", updatedPurl);
+
+                                component.setPurl(updatedPurl);
+                            }
+                        } catch (MalformedPackageURLException e) {
+                            log.warn("Could not clean up purl '{}'", component.getPurl(), e);
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
             }
         }
 
