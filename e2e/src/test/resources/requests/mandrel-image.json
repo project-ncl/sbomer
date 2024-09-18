@@ -1,0 +1,17 @@
+{
+    "apiVersion": "sbomer.jboss.org/v1alpha1",
+    "type": "syft-image",
+    "rpms": true,
+    "paths": ["/usr/share/java/quarkus-mandrel-java", "/usr/lib/jvm/java-21-openjdk"],
+    "processors": [
+        { "type": "default" },
+        {
+            "type": "redhat-product",
+            "errata": {
+                "productName": "pName",
+                "productVersion": "pVersion",
+                "productVariant": "pVariant"
+            }
+        }
+    ]
+}
