@@ -1,51 +1,41 @@
 {
-	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": [
-		"config:recommended"
-	],
-	"username": "renovate-release",
-	"gitAuthor": "Renovate Bot <bot@renovateapp.com>",
-	"onboarding": false,
-	"platform": "github",
-	"forkProcessing": "disabled",
-	"requireConfig": "ignored",
-	"branchPrefix": "renovate-bot/",
-	"repositories": [
-		"project-ncl/sbomer"
-	],
-	"rebaseWhen": "behind-base-branch",
-	"timezone": "Europe/Warsaw",
-	"labels": [
-		"dependencies"
-	],
-	"vulnerabilityAlerts": {
-		"labels": [
-			"security"
-		]
-	},
-	"packageRules": [
-		{
-			"description": "lockFileMaintenance",
-			"matchUpdateTypes": [
-				"pin",
-				"digest",
-				"patch",
-				"minor",
-				"major",
-				"lockFileMaintenance"
-			],
-			"dependencyDashboardApproval": false,
-			"minimumReleaseAge": null
-		},
-		{
-			"matchPackageNames": [
-				"io.quarkus.platform:quarkus-qpid-jms-bom",
-				"io.quarkus:quarkus-maven-plugin"
-			],
-			"matchManagers": [
-				"maven"
-			],
-			"enabled": false
-		}
-	]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:recommended"],
+    "username": "renovate-release",
+    "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+    "onboarding": false,
+    "platform": "github",
+    "forkProcessing": "disabled",
+    "requireConfig": "ignored",
+    "branchPrefix": "renovate-bot/",
+    "repositories": ["project-ncl/sbomer"],
+    "rebaseWhen": "behind-base-branch",
+    "timezone": "Europe/Warsaw",
+    "labels": ["dependencies"],
+    "vulnerabilityAlerts": {
+        "labels": ["security"]
+    },
+    "packageRules": [
+        {
+            "description": "lockFileMaintenance",
+            "matchUpdateTypes": ["pin", "digest", "patch", "minor", "major", "lockFileMaintenance"],
+            "dependencyDashboardApproval": false,
+            "minimumReleaseAge": null
+        },
+        {
+            "matchPackageNames": ["io.quarkus:quarkus-maven-plugin"],
+            "matchManagers": ["maven"],
+            "enabled": false
+        },
+        {
+            "matchUpdateTypes": ["patch"],
+            "matchPackageNames": ["postcss"],
+            "automerge": true
+        },
+        {
+            "extends": ["monorepo:aws-java-sdk-v2", "monorepo:typescript-eslint", "monorepo:mapstruct", "monorepo:commitlint"],
+            "matchUpdateTypes": ["patch"],
+            "automerge": true
+        }
+    ]
 }
