@@ -163,8 +163,6 @@ public abstract class E2EBase {
                     response.body().jsonPath().getString("msg_id"),
                     generationRequestId);
 
-            ;
-
             atomicResponse.set(response.then().rootPath("raw_messages[" + indexOpt.getAsInt() + "]"));
 
             return true;
@@ -179,6 +177,14 @@ public abstract class E2EBase {
                 .contentType(ContentType.JSON)
                 .when()
                 .get(String.format("/api/v1alpha3/sboms/requests/%s", generationId));
+    }
+
+    public Response getSboms(String generationId) {
+        return RestAssured.given()
+                .baseUri(getSbomerBaseUri())
+                .contentType(ContentType.JSON)
+                .when()
+                .get(String.format("/api/v1alpha3/sboms?query=generationRequest.id==%s", generationId));
     }
 
     public String requestGeneration(String buildId) {
