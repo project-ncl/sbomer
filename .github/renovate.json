@@ -1,6 +1,6 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:recommended"],
+    "extends": ["config:recommended", ":automergeDigest"],
     "username": "renovate-release",
     "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
     "onboarding": false,
@@ -12,6 +12,7 @@
     "rebaseWhen": "behind-base-branch",
     "timezone": "Europe/Warsaw",
     "labels": ["dependencies"],
+    "configMigration": true,
     "vulnerabilityAlerts": {
         "labels": ["security"]
     },
@@ -28,12 +29,7 @@
             "enabled": false
         },
         {
-            "matchUpdateTypes": ["patch"],
-            "matchPackageNames": ["postcss"],
-            "automerge": true
-        },
-        {
-            "extends": ["monorepo:aws-java-sdk-v2", "monorepo:typescript-eslint", "monorepo:mapstruct", "monorepo:commitlint"],
+            "extends": ["monorepo:aws-java-sdk-v2", "monorepo:typescript-eslint", "monorepo:mapstruct", "monorepo:commitlint", "group:postcss"],
             "matchUpdateTypes": ["patch"],
             "automerge": true
         }
