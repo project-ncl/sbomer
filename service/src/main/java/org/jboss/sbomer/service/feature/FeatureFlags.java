@@ -54,6 +54,9 @@ public class FeatureFlags implements UnleashSubscriber {
     public static final String TOGGLE_NOTIFY_OPERATION = "notify-operation";
     public static final String TOGGLE_NOTIFY_ANALYSIS = "notify-analysis";
 
+    // Atlas
+    public static final String TOGGLE_ATLAS_PUBLISH = "atlas-publish";
+
     /**
      * A map holding all toggle values we are interested in. This is used for logging purposes. We are retrieving the
      * state of the toggle via {@link Unleash} object instead.
@@ -72,6 +75,9 @@ public class FeatureFlags implements UnleashSubscriber {
     @ConfigProperty(name = "SBOMER_FEATURE_NOTIFY_CONTAINERIMAGE_ENABLED", defaultValue = "false")
     boolean notifyContainerImage;
 
+    @ConfigProperty(name = "SBOMER_FEATURE_ATLAS_PUBLISH_ENABLED", defaultValue = "false")
+    boolean publishToAtlas;
+
     /**
      * Returns {@code true} in case the dry-run mode is enabled.
      *
@@ -88,6 +94,15 @@ public class FeatureFlags implements UnleashSubscriber {
      */
     public boolean s3Storage() {
         return unleash.isEnabled(TOGGLE_S3_STORAGE, s3StorageEnabled);
+    }
+
+    /**
+     * Returns {@code true} if storing logs in S3 bucket is enabled.
+     *
+     * @return {@code true} if s3 support for logs is enabled, {@code false} otherwise
+     */
+    public boolean atlasPublish() {
+        return unleash.isEnabled(TOGGLE_ATLAS_PUBLISH, publishToAtlas);
     }
 
     /**
@@ -118,7 +133,8 @@ public class FeatureFlags implements UnleashSubscriber {
                 TOGGLE_NOTIFY_CONTAINERIMAGE,
                 TOGGLE_NOTIFY_BUILD,
                 TOGGLE_NOTIFY_OPERATION,
-                TOGGLE_NOTIFY_ANALYSIS)) {
+                TOGGLE_NOTIFY_ANALYSIS,
+                TOGGLE_ATLAS_PUBLISH)) {
             FeatureToggle toggle = toggleResponse.getToggleCollection().getToggle(toggleName);
 
             if (toggle != null) {

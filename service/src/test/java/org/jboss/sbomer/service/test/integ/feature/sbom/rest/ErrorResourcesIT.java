@@ -21,7 +21,6 @@ import static org.mockito.Mockito.doThrow;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.jboss.resteasy.spi.Failure;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.junit.jupiter.api.Test;
@@ -35,7 +34,6 @@ import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotAcceptableException;
 import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.NotAuthorizedException;
-import jakarta.ws.rs.core.Response;
 
 /**
  * Ensures that we can handle errors properly.
@@ -45,167 +43,152 @@ import jakarta.ws.rs.core.Response;
 @WithTestResource(AmqpTestResourceLifecycleManager.class)
 class ErrorResourcesIT {
 
-    @InjectSpy
-    SbomService sbomService;
+        @InjectSpy
+        SbomService sbomService;
 
-    @Test
-    void testHandlingNotFoundResource() {
-        RestAssured.given()
-                .when()
-                .get("/api/alph/sms/doesnotexist")
-                .then()
-                .statusCode(404)
-                .body("resource", CoreMatchers.is("/api/alph/sms/doesnotexist"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Not Found"))
-                .body("message", CoreMatchers.is("Requested resource '/api/alph/sms/doesnotexist' was not found"))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
+        @Test
+        void testHandlingNotFoundResource() {
+                RestAssured.given()
+                                .when()
+                                .get("/api/alph/sms/doesnotexist")
+                                .then()
+                                .statusCode(404)
+                                .body("resource", CoreMatchers.is("/api/alph/sms/doesnotexist"))
+                                .body("errorId", CoreMatchers.isA(String.class))
+                                .body("error", CoreMatchers.is("Not Found"))
+                                .body(
+                                                "message",
+                                                CoreMatchers.is(
+                                                                "Requested resource '/api/alph/sms/doesnotexist' was not found"))
+                                .body("$", Matchers.not(Matchers.hasKey("errors")));
+        }
 
-    @Test
-    void testHandlingNotFoundSbom() {
-        RestAssured.given()
-                .when()
-                .get("/api/v1alpha2/sboms/doesnotexist")
-                .then()
-                .statusCode(404)
-                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/doesnotexist"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Not Found"))
-                .body("message", CoreMatchers.is("SBOM with id 'doesnotexist' not found"))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
+        @Test
+        void testHandlingNotFoundSbom() {
+                RestAssured.given()
+                                .when()
+                                .get("/api/v1alpha2/sboms/doesnotexist")
+                                .then()
+                                .statusCode(404)
+                                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/doesnotexist"))
+                                .body("errorId", CoreMatchers.isA(String.class))
+                                .body("error", CoreMatchers.is("Not Found"))
+                                .body("message", CoreMatchers.is("SBOM with id 'doesnotexist' not found"))
+                                .body("$", Matchers.not(Matchers.hasKey("errors")));
+        }
 
-    @Test
-    void testHandlingUnauthorized() {
-        // This doesn't make sense, but what we want to test is handling of any NotAuthorizedException
-        doThrow(NotAuthorizedException.class).when(sbomService).get("unauthorized");
+        @Test
+        void testHandlingUnauthorized() {
+                // This doesn't make sense, but what we want to test is handling of any NotAuthorizedException
+                doThrow(NotAuthorizedException.class).when(sbomService).get("unauthorized");
 
-        RestAssured.given()
-                .when()
-                .get("/api/v1alpha2/sboms/unauthorized")
-                .then()
-                .statusCode(401)
-                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/unauthorized"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Unauthorized"))
-                .body(
-                        "message",
-                        CoreMatchers.is("Access to '/api/v1alpha2/sboms/unauthorized' resource is not authorized!"))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
+                RestAssured.given()
+                                .when()
+                                .get("/api/v1alpha2/sboms/unauthorized")
+                                .then()
+                                .statusCode(401)
+                                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/unauthorized"))
+                                .body("errorId", CoreMatchers.isA(String.class))
+                                .body("error", CoreMatchers.is("Unauthorized"))
+                                .body(
+                                                "message",
+                                                CoreMatchers.is(
+                                                                "Access to '/api/v1alpha2/sboms/unauthorized' resource is not authorized!"))
+                                .body("$", Matchers.not(Matchers.hasKey("errors")));
+        }
 
-    @Test
-    void testHandlingForbidden() {
-        // This doesn't make sense, but what we want to test is handling of any ForbiddenException
-        doThrow(ForbiddenException.class).when(sbomService).get("forbidden");
+        @Test
+        void testHandlingForbidden() {
+                // This doesn't make sense, but what we want to test is handling of any ForbiddenException
+                doThrow(ForbiddenException.class).when(sbomService).get("forbidden");
 
-        RestAssured.given()
-                .when()
-                .get("/api/v1alpha2/sboms/forbidden")
-                .then()
-                .statusCode(403)
-                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/forbidden"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Forbidden"))
-                .body("message", CoreMatchers.is("Access to '/api/v1alpha2/sboms/forbidden' resource is forbidden!"))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
+                RestAssured.given()
+                                .when()
+                                .get("/api/v1alpha2/sboms/forbidden")
+                                .then()
+                                .statusCode(403)
+                                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/forbidden"))
+                                .body("errorId", CoreMatchers.isA(String.class))
+                                .body("error", CoreMatchers.is("Forbidden"))
+                                .body(
+                                                "message",
+                                                CoreMatchers.is(
+                                                                "Access to '/api/v1alpha2/sboms/forbidden' resource is forbidden!"))
+                                .body("$", Matchers.not(Matchers.hasKey("errors")));
+        }
 
-    @Test
-    void testHandlingNotAllowed() {
-        // This doesn't make sense, but what we want to test is handling of any NotAllowedException
-        doThrow(NotAllowedException.class).when(sbomService).get("notallowed");
+        @Test
+        void testHandlingNotAllowed() {
+                // This doesn't make sense, but what we want to test is handling of any NotAllowedException
+                doThrow(NotAllowedException.class).when(sbomService).get("notallowed");
 
-        RestAssured.given()
-                .when()
-                .get("/api/v1alpha2/sboms/notallowed")
-                .then()
-                .statusCode(405)
-                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/notallowed"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Method Not Allowed"))
-                .body(
-                        "message",
-                        CoreMatchers.is(
-                                "Requesting resource '/api/v1alpha2/sboms/notallowed' using 'GET' method is not allowed. Please consult API documentation."))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
+                RestAssured.given()
+                                .when()
+                                .get("/api/v1alpha2/sboms/notallowed")
+                                .then()
+                                .statusCode(405)
+                                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/notallowed"))
+                                .body("errorId", CoreMatchers.isA(String.class))
+                                .body("error", CoreMatchers.is("Method Not Allowed"))
+                                .body(
+                                                "message",
+                                                CoreMatchers.is(
+                                                                "Requesting resource '/api/v1alpha2/sboms/notallowed' using 'GET' method is not allowed. Please consult API documentation."))
+                                .body("$", Matchers.not(Matchers.hasKey("errors")));
+        }
 
-    @Test
-    void testIllegalParameters() {
-        RestAssured.given()
-                .when()
-                .get("/api/v1alpha2/sboms?sort=123")
-                .then()
-                .statusCode(400)
-                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Bad Request"))
-                .body(
-                        "message",
-                        CoreMatchers.is(
-                                "An error occurred while parsing the RSQL query, please make sure you use correct syntax"))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
+        @Test
+        void testIllegalParameters() {
+                RestAssured.given()
+                                .when()
+                                .get("/api/v1alpha2/sboms?sort=123")
+                                .then()
+                                .statusCode(400)
+                                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms"))
+                                .body("errorId", CoreMatchers.isA(String.class))
+                                .body("error", CoreMatchers.is("Bad Request"))
+                                .body(
+                                                "message",
+                                                CoreMatchers.is(
+                                                                "An error occurred while parsing the RSQL query, please make sure you use correct syntax"))
+                                .body("$", Matchers.not(Matchers.hasKey("errors")));
+        }
 
-    @Test
-    void testResteasyInternalFailure() {
-        // This doesn't make sense, but what we want to test is handling of any Failure
-        Failure failure = new Failure("This is a message", Response.status(500).build());
+        @Test
+        void testDefaultExceptionMapper() {
+                // This doesn't make sense, but what we want to test handling of an exception that we don't handle
+                // explicitly
+                doThrow(NotAcceptableException.class).when(sbomService).get("NotAcceptable");
 
-        doThrow(failure).when(sbomService).get("internalfailure");
+                RestAssured.given()
+                                .when()
+                                .get("/api/v1alpha2/sboms/NotAcceptable")
+                                .then()
+                                .statusCode(500)
+                                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/NotAcceptable"))
+                                .body("errorId", CoreMatchers.isA(String.class))
+                                .body("error", CoreMatchers.is("Internal Server Error"))
+                                .body(
+                                                "message",
+                                                CoreMatchers.is(
+                                                                "An error occurred while processing your request, please contact administrator providing the 'errorId'"))
+                                .body("$", Matchers.not(Matchers.hasKey("errors")));
+        }
 
-        RestAssured.given()
-                .when()
-                .get("/api/v1alpha2/sboms/internalfailure")
-                .then()
-                .statusCode(500)
-                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/internalfailure"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Internal Server Error"))
-                .body(
-                        "message",
-                        CoreMatchers.is(
-                                "An error occurred while processing your request, please contact administrator providing the 'errorId'"))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
-
-    @Test
-    void testDefaultExceptionMapper() {
-        // This doesn't make sense, but what we want to test handling of an exception that we don't handle
-        // explicitly
-        doThrow(NotAcceptableException.class).when(sbomService).get("NotAcceptable");
-
-        RestAssured.given()
-                .when()
-                .get("/api/v1alpha2/sboms/NotAcceptable")
-                .then()
-                .statusCode(500)
-                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms/NotAcceptable"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Internal Server Error"))
-                .body(
-                        "message",
-                        CoreMatchers.is(
-                                "An error occurred while processing your request, please contact administrator providing the 'errorId'"))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
-
-    @Test
-    void testInvalidRSQL() {
-        RestAssured.given()
-                .when()
-                .get("/api/v1alpha2/sboms?query=asd")
-                .then()
-                .statusCode(400)
-                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms"))
-                .body("errorId", CoreMatchers.isA(String.class))
-                .body("error", CoreMatchers.is("Bad Request"))
-                .body(
-                        "message",
-                        CoreMatchers.is(
-                                "An error occurred while parsing the RSQL query, please make sure you use correct syntax"))
-                .body("$", Matchers.not(Matchers.hasKey("errors")));
-    }
+        @Test
+        void testInvalidRSQL() {
+                RestAssured.given()
+                                .when()
+                                .get("/api/v1alpha2/sboms?query=asd")
+                                .then()
+                                .statusCode(400)
+                                .body("resource", CoreMatchers.is("/api/v1alpha2/sboms"))
+                                .body("errorId", CoreMatchers.isA(String.class))
+                                .body("error", CoreMatchers.is("Bad Request"))
+                                .body(
+                                                "message",
+                                                CoreMatchers.is(
+                                                                "An error occurred while parsing the RSQL query, please make sure you use correct syntax"))
+                                .body("$", Matchers.not(Matchers.hasKey("errors")));
+        }
 }

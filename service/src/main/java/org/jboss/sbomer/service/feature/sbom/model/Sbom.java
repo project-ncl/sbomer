@@ -113,37 +113,11 @@ public class Sbom extends PanacheEntityBase {
     private String statusMessage;
 
     /**
-     * Returns the generated SBOM as the CycloneDX {@link Bom} object.
-     *
-     * In case the SBOM is not available yet, returns <code>null</code>.
-     *
-     * @return The {@link Bom} object representing the SBOM.
-     */
-    @JsonIgnore
-    public Bom getCycloneDxBom() {
-        if (sbom == null) {
-            return null;
-        }
-
-        Bom bom = SbomUtils.fromJsonNode(sbom);
-
-        if (bom == null) {
-            try {
-                BomJsonGenerator generator = BomGeneratorFactory.createJson(schemaVersion(), new Bom());
-                bom = new JsonParser().parse(generator.toJsonNode().textValue().getBytes());
-            } catch (ParseException e) {
-            }
-        }
-
-        return bom;
-    }
-
-    /**
      * Updates the purl for the object based on the SBOM content, if provided.
      *
      */
     private void setupRootPurl() {
-        Bom bom = getCycloneDxBom();
+        Bom bom = SbomUtils.fromJsonNode(getSbom());
 
         rootPurl = null;
 

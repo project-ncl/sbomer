@@ -37,6 +37,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
@@ -80,7 +81,7 @@ class SbomRepositoryIT {
     void testValidBom() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
-        Bom bom = sbom.getCycloneDxBom();
+        Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
 
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);
@@ -170,7 +171,7 @@ class SbomRepositoryIT {
     void testValidOperationBom() throws JsonProcessingException, JsonMappingException {
         String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
-        Bom bom = sbom.getCycloneDxBom();
+        Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
 
         assertEquals("CycloneDX", bom.getBomFormat());
         Component firstComponent = bom.getComponents().get(0);

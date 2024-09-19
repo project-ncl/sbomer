@@ -53,6 +53,10 @@ quarkus:
       group-id: com.fasterxml.jackson.jakarta.rs
       artifact-id: jackson-jakarta-rs-yaml-provider
 
+  rest-client:
+    "atlas":
+      url: "https://${sbomer.atlas.host}"
+
   # Support for feature-flags
   unleash:
     # Disable extension by default

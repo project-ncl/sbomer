@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.jboss.resteasy.spi.Failure;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -110,10 +109,6 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
 
     void copyHeaders(T ex, ResponseBuilder builder) {
         Response response = null;
-
-        if (ex instanceof Failure fex) {
-            response = fex.getResponse();
-        }
 
         if (ex instanceof WebApplicationException waex) {
             response = waex.getResponse();
