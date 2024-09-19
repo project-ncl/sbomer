@@ -193,8 +193,8 @@ public class NotificationService {
         Optional<ExternalReference> pncBuildSystemRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
-                        .findFirst();
+                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
+                .findFirst();
 
         Build buildPayload = null;
         Operation operationPayload = null;
@@ -226,8 +226,8 @@ public class NotificationService {
                 Optional<ExternalReference> pncOperationRef = getExternalReferences(
                         component,
                         ExternalReference.Type.BUILD_SYSTEM).stream()
-                                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_OPERATION_ID))
-                                .findFirst();
+                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_OPERATION_ID))
+                        .findFirst();
 
                 operationPayload = Operation.builder()
                         .id(sbom.getIdentifier())

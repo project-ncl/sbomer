@@ -56,6 +56,8 @@ quarkus:
   rest-client:
     "atlas":
       url: "https://${sbomer.atlas.host}"
+    "pnc":
+      url: "https://${sbomer.pnc.host}"
 
   # Support for feature-flags
   unleash:

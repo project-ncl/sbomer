@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 import java.util.List;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.OperationResult;
@@ -36,7 +37,6 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.core.pnc.PncService;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncDelAnalysisNotificationMessageBody;
@@ -45,6 +45,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
+import org.jboss.sbomer.service.pnc.PncClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -74,7 +75,8 @@ public class PncNotificationHandler {
     SbomGenerationRequestRepository sbomGenerationRequestRepository;
 
     @Inject
-    PncService pncService;
+    @RestClient
+    PncClient pncClient;
 
     public void handle(Message<String> message, GenerationRequestType type) throws JsonProcessingException {
         switch (type) {
@@ -299,7 +301,7 @@ public class PncNotificationHandler {
     }
 
     private boolean isSuccessfullAnalysis(PncDelAnalysisNotificationMessageBody msgBody) {
-        DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(msgBody.getOperationId());
+        DeliverableAnalyzerOperation operation = pncClient.getDeliverableAnalyzerOperation(msgBody.getOperationId());
 
         return OperationResult.SUCCESSFUL.equals(operation.getResult());
     }

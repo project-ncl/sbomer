@@ -20,7 +20,9 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
+import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
@@ -41,7 +43,6 @@ import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
-import org.jboss.sbomer.core.pnc.PncService;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -52,6 +53,7 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.rest.RestUtils;
+import org.jboss.sbomer.service.pnc.PncClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -94,7 +96,8 @@ public class SbomService {
     protected ConfigSchemaValidator configSchemaValidator;
 
     @Inject
-    protected PncService pncService;
+    @RestClient
+    PncClient pncClient;
 
     @WithSpan
     public long countSboms() {
@@ -341,7 +344,9 @@ public class SbomService {
 
             DeliverableAnalyzerOperation operation = null;
             try {
-                operation = pncService.analyzeDeliverables(config.getMilestoneId(), config.getDeliverableUrls());
+                operation = pncClient.analyzeDeliverables(
+                        config.getMilestoneId(),
+                        DeliverablesAnalysisRequest.builder().deliverablesUrls(config.getDeliverableUrls()).build());
             } catch (ClientException ex) {
                 throw new ApplicationException(
                         "Operation could not be retrieved because PNC responded with an error",
