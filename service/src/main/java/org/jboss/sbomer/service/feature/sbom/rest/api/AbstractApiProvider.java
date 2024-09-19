@@ -30,7 +30,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
@@ -108,12 +107,12 @@ public abstract class AbstractApiProvider {
 
     protected JsonNode doGetBomById(String sbomId) {
         Sbom sbom = doGetSbomById(sbomId);
-        return SbomUtils.toJsonNode(sbom.getCycloneDxBom());
+        return sbom.getSbom();
     }
 
     protected JsonNode doGetBomByPurl(String purl) {
         Sbom sbom = doGetSbomByPurl(purl);
-        return SbomUtils.toJsonNode(sbom.getCycloneDxBom());
+        return sbom.getSbom();
     }
 
     protected SbomGenerationRequest doGetSbomGenerationRequestById(String generationRequestId) {

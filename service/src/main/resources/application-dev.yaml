@@ -39,6 +39,24 @@ quarkus:
       ~: true
       origins: "/.*/"
 
+  log:
+    level: INFO
+    category:
+      "io.quarkus.oidc.client":
+        level: TRACE
+        min-level: TRACE
+      "org.jboss.resteasy.reactive.client.logging":
+        level: TRACE
+        min-level: TRACE
+
+  rest-client:
+    logging:
+      scope: request-response
+      body-limit: 1024
+
+  oidc-client:
+    client-enabled: true
+
 sbomer:
   api-url: "http://localhost:8080/api/v1alpha3/"
   pnc:
