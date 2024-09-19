@@ -30,6 +30,8 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.FeatureFlags;
+import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
+import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -62,11 +64,9 @@ public class AtlasHandler {
         }
 
         if (!featureFlags.atlasPublish()) {
-            log.warn(
+            throw new FeatureDisabledException(
                     "Atlas integration is disabled, following manifests will not be published to Atlas: {}",
                     sboms.stream().map(sbom -> sbom.getId()).collect(Collectors.joining(", ")));
-
-            return;
         }
 
         log.info("Uploading {} manifests...", sboms.size());
@@ -75,7 +75,7 @@ public class AtlasHandler {
             uploadManifest(sbom);
         }
 
-        log.info("All manifests uploaded!");
+        log.info("Upload complete!");
     }
 
     protected void uploadManifest(Sbom sbom) {
@@ -91,6 +91,14 @@ public class AtlasHandler {
                         "Unable to read manifest from SBOM '{}' (purl: '{}')",
                         sbom.getId(),
                         sbom.getRootPurl());
+            }
+
+            if (ProductConfig.ErrataProductConfig.fromBom(bom) == null) {
+                log.warn(
+                        "Could not retrieve product configuration from the main component (purl = '{}') in the '{}' SBOM, skipping uploading to Atlas",
+                        sbom.getRootPurl(),
+                        sbom.getId());
+                return;
             }
 
             // Convert into JSON

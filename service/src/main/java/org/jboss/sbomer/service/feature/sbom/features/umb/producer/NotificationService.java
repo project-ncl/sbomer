@@ -36,7 +36,7 @@ import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.errors.FeatureConfigurationException;
-import org.jboss.sbomer.service.feature.errors.FeatureNotAvailableException;
+import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
@@ -87,17 +87,17 @@ public class NotificationService {
 
     public void notifyCompleted(List<org.jboss.sbomer.service.feature.sbom.model.Sbom> sboms) {
         if (featureFlags.isDryRun()) {
-            throw new FeatureNotAvailableException(
+            throw new FeatureDisabledException(
                     "SBOMer running in dry-run mode, notification service won't send the notification");
         }
 
         if (!umbConfig.isEnabled()) {
-            throw new FeatureNotAvailableException(
+            throw new FeatureDisabledException(
                     "UMB feature disabled, notification service won't send the notification");
         }
 
         if (!umbConfig.producer().isEnabled()) {
-            throw new FeatureNotAvailableException("UMB feature to produce notification messages disabled");
+            throw new FeatureDisabledException("UMB feature to produce notification messages disabled");
         }
 
         if (!umbConfig.producer().topic().isPresent()) {
@@ -131,7 +131,7 @@ public class NotificationService {
              *
              * Skips sending UMB messages for manifests not related to a product build.
              */
-            if (getProductConfiguration(bom) == null) {
+            if (ProductConfig.ErrataProductConfig.fromBom(bom) == null) {
                 throw new NotificationException(
                         "Could not retrieve product configuration from the main component (purl = '{}') in the '{}' SBOM, skipping sending UMB notification",
                         component.getPurl(),
@@ -140,7 +140,7 @@ public class NotificationService {
 
             // Check whether we should send UMB notification for a given type.
             if (!featureFlags.shouldNotify(sbom.getGenerationRequest().getType())) {
-                throw new FeatureNotAvailableException(
+                throw new FeatureDisabledException(
                         "Notifications for '{}' type are disabled, notification service won't send it",
                         sbom.getGenerationRequest().getType());
             }
@@ -193,8 +193,8 @@ public class NotificationService {
         Optional<ExternalReference> pncBuildSystemRef = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM).stream()
-                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
-                .findFirst();
+                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_BUILD_ID))
+                        .findFirst();
 
         Build buildPayload = null;
         Operation operationPayload = null;
@@ -226,8 +226,8 @@ public class NotificationService {
                 Optional<ExternalReference> pncOperationRef = getExternalReferences(
                         component,
                         ExternalReference.Type.BUILD_SYSTEM).stream()
-                        .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_OPERATION_ID))
-                        .findFirst();
+                                .filter(r -> r.getComment().equals(SBOM_RED_HAT_PNC_OPERATION_ID))
+                                .findFirst();
 
                 operationPayload = Operation.builder()
                         .id(sbom.getIdentifier())
@@ -251,7 +251,7 @@ public class NotificationService {
 
         sbomPayload.setGenerationRequest(generationRequest);
 
-        ProductConfig.ErrataProductConfig errataProductConfigPayload = getProductConfiguration(bom);
+        ProductConfig.ErrataProductConfig errataProductConfigPayload = ProductConfig.ErrataProductConfig.fromBom(bom);
         ProductConfig productConfigPayload = ProductConfig.builder().errataTool(errataProductConfigPayload).build();
 
         return GenerationFinishedMessageBody.builder()
@@ -262,36 +262,6 @@ public class NotificationService {
                 // Backwards compatibility, will be removed!
                 .operation(operationPayload)
                 .productConfig(productConfigPayload)
-                .build();
-    }
-
-    /**
-     * <p>
-     * Generates the {@link ProductConfig.ErrataProductConfig} object based on the data available in the the CycloneDX
-     * {@link org.cyclonedx.model.Bom} for the main component.
-     * </p>
-     *
-     * <p>
-     * In case required properties cannot be found, {@code null} is returned.
-     * </p>
-     *
-     * @param bom The {@link org.cyclonedx.model.Bom} BOM to be used for retrieving the Product config
-     * @return The {@link ProductConfig.ErrataProductConfig} object or {@code null} if data cannot be found.
-     */
-    private ProductConfig.ErrataProductConfig getProductConfiguration(org.cyclonedx.model.Bom bom) {
-        Component component = bom.getMetadata().getComponent();
-        Optional<Property> productName = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, component);
-        Optional<Property> productVersion = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_VERSION, component);
-        Optional<Property> productVariant = findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_VARIANT, component);
-
-        if (productName.isEmpty() || productVersion.isEmpty() || productVariant.isEmpty()) {
-            return null;
-        }
-
-        return ProductConfig.ErrataProductConfig.builder()
-                .productName(productName.get().getValue())
-                .productVersion(productVersion.get().getValue())
-                .productVariant(productVariant.get().getValue())
                 .build();
     }
 }

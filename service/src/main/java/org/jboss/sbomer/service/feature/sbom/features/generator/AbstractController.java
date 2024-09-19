@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,10 +37,10 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.service.feature.errors.FeatureNotAvailableException;
+import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
+import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
-import org.jboss.sbomer.service.feature.sbom.features.umb.NotificationException;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -90,6 +91,9 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
     @Inject
     S3StorageHandler s3LogHandler;
+
+    @Inject
+    AtlasHandler atlasHandler;
 
     protected abstract UpdateControl<GenerationRequest> updateRequest(
             GenerationRequest generationRequest,
@@ -349,14 +353,26 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         log.debug("Reconcile FINISHED for '{}'...", generationRequest.getName());
 
-        s3LogHandler.storeFiles(generationRequest);
+        // Store files in S3
+        CompletableFuture.runAsync(() -> s3LogHandler.storeFiles(generationRequest));
 
-        try {
-            List<Sbom> sboms = sbomRepository.findSbomsByGenerationRequest(generationRequest.getId());
-            notificationService.notifyCompleted(sboms);
-        } catch (FeatureNotAvailableException | NotificationException e) {
-            log.warn(e.getMessage(), e);
-        }
+        List<Sbom> sboms = sbomRepository.findSbomsByGenerationRequest(generationRequest.getId());
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                notificationService.notifyCompleted(sboms);
+            } catch (FeatureDisabledException e) {
+                log.warn(e.getMessage(), e);
+            }
+        });
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                atlasHandler.upload(sboms);
+            } catch (FeatureDisabledException e) {
+                log.warn(e.getMessage(), e);
+            }
+        });
 
         // At this point al the work is finished and we can clean up the GenerationRequest Kubernetes resource.
         cleanupFinishedGenerationRequest(generationRequest);
