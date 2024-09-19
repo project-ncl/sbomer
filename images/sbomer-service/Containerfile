@@ -77,7 +77,7 @@
 ###
 
 # https://catalog.redhat.com/software/containers/ubi9/openjdk-17/61ee7c26ed74b2ffb22b07f6
-FROM registry.access.redhat.com/ubi9/openjdk-17@sha256:ad3f7f55663953adaa9d7917b292ba813a3063a7c4ad30560cb7544a571b90e0
+FROM registry.access.redhat.com/ubi9/openjdk-17@sha256:746fa1bf5c29aa3de0cf4af65e8f51bdde6e6f75753cb0e7eededca3883940a9
 
 ENV LANGUAGE='en_US:en'
 
