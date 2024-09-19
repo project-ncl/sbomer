@@ -17,13 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
-import org.jboss.sbomer.service.feature.errors.FeatureNotAvailableException;
+import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
-public class FeatureNotAvailableExceptionMapper extends AbstractExceptionMapper<FeatureNotAvailableException> {
+public class FeatureDisabledExceptionMapper extends AbstractExceptionMapper<FeatureDisabledException> {
 
     @Override
     Status getStatus() {
@@ -31,7 +31,7 @@ public class FeatureNotAvailableExceptionMapper extends AbstractExceptionMapper<
     }
 
     @Override
-    String errorMessage(FeatureNotAvailableException ex) {
+    String errorMessage(FeatureDisabledException ex) {
         return ex.getMessage();
     }
 }

@@ -19,8 +19,8 @@ package org.jboss.sbomer.service.feature.errors;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 
-public class FeatureNotAvailableException extends ApplicationException {
-    public FeatureNotAvailableException(String message, Object... params) {
+public class FeatureDisabledException extends ApplicationException {
+    public FeatureDisabledException(String message, Object... params) {
         super(message, params);
     }
 }

@@ -42,11 +42,15 @@ class AtlasHandlerTest {
     AtlasClient atlasClient = mock(AtlasClient.class);
 
     private Sbom generateSbom(String id, String purl) throws IOException {
+        return generateSbom(id, purl, "sboms/complete_operation_sbom.json");
+    }
+
+    private Sbom generateSbom(String id, String purl, String path) throws IOException {
         Sbom sbom = new Sbom();
         sbom.setId(id);
         sbom.setRootPurl(purl);
 
-        String bomJson = TestResources.asString("sboms/complete_sbom.json");
+        String bomJson = TestResources.asString(path);
         sbom.setSbom(new ObjectMapper().readTree(bomJson));
 
         return sbom;
@@ -78,13 +82,24 @@ class AtlasHandlerTest {
     @Test
     void testUploadBoms() throws Exception {
         Sbom sbomA = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
-
         Sbom sbomB = generateSbom("BBB", "pkg:maven/compB@1.1.0?type=pom");
 
         atlasHandler.upload(List.of(sbomA, sbomB));
 
         verify(atlasClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(InputStream.class));
         verify(atlasClient, times(1)).upload(eq("pkg:maven/compB@1.1.0?type=pom"), any(InputStream.class));
+    }
+
+    @Test
+    void testUploadOnlyProductBoms() throws Exception {
+        Sbom sbomA = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
+        Sbom sbomB = generateSbom("BBB", "pkg:maven/compB@1.1.0?type=pom", "sboms/complete_sbom.json");
+
+        atlasHandler.upload(List.of(sbomA, sbomB));
+
+        // Only one of manifests was udpdated, because the second doesn't have product properties
+        verify(atlasClient, times(1)).upload(anyString(), any(InputStream.class));
+        verify(atlasClient).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(InputStream.class));
     }
 
     @Test
