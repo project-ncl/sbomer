@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -354,25 +355,38 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         log.debug("Reconcile FINISHED for '{}'...", generationRequest.getName());
 
         // Store files in S3
-        CompletableFuture.runAsync(() -> s3LogHandler.storeFiles(generationRequest));
+        CompletableFuture<Void> storeFilesInS3 = CompletableFuture
+                .runAsync(() -> s3LogHandler.storeFiles(generationRequest))
+                .exceptionally((e) -> {
+                    // This is not fatal
+                    log.warn("Storing files in S3 failed", e);
+                    return null;
+                });
 
         List<Sbom> sboms = sbomRepository.findSbomsByGenerationRequest(generationRequest.getId());
 
-        CompletableFuture.runAsync(() -> {
+        CompletableFuture<Void> publishToUmb = CompletableFuture.runAsync(() -> {
             try {
                 notificationService.notifyCompleted(sboms);
             } catch (FeatureDisabledException e) {
                 log.warn(e.getMessage(), e);
             }
+        }).exceptionally((e) -> {
+            throw new ApplicationException("UMB notification failed", e);
         });
 
-        CompletableFuture.runAsync(() -> {
+        CompletableFuture<Void> uploadToAtlas = CompletableFuture.runAsync(() -> {
             try {
                 atlasHandler.upload(sboms);
             } catch (FeatureDisabledException e) {
                 log.warn(e.getMessage(), e);
             }
+        }).exceptionally((e) -> {
+            throw new ApplicationException("Uploading manifests to Atlas failed", e);
         });
+
+        // Wait for all tasks to be done
+        CompletableFuture.allOf(storeFilesInS3, publishToUmb, uploadToAtlas).join();
 
         // At this point al the work is finished and we can clean up the GenerationRequest Kubernetes resource.
         cleanupFinishedGenerationRequest(generationRequest);
