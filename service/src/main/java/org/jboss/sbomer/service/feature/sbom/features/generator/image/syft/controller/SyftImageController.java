@@ -194,6 +194,16 @@ public class SyftImageController extends AbstractController {
 
         List<Sbom> sboms = storeBoms(generationRequest, boms);
 
+        try {
+            performPost(sboms, generationRequest);
+        } catch (ApplicationException e) {
+            return updateRequest(
+                    generationRequest,
+                    SbomGenerationStatus.FAILED,
+                    GenerationResult.ERR_POST,
+                    e.getMessage());
+        }
+
         return updateRequest(
                 generationRequest,
                 SbomGenerationStatus.FINISHED,

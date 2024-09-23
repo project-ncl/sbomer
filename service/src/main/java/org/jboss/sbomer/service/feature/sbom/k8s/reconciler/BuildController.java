@@ -346,6 +346,16 @@ public class BuildController extends AbstractController {
                         "Generation failed. One or more generated SBOMs failed validation. See logs for more information.");
             }
 
+            try {
+                performPost(sboms, generationRequest);
+            } catch (ApplicationException e) {
+                return updateRequest(
+                        generationRequest,
+                        SbomGenerationStatus.FAILED,
+                        GenerationResult.ERR_POST,
+                        e.getMessage());
+            }
+
             return updateRequest(
                     generationRequest,
                     SbomGenerationStatus.FINISHED,
