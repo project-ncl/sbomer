@@ -35,6 +35,7 @@ public class SyftImageAdjusterTest {
         SyftImageAdjuster adjuster = new SyftImageAdjuster(null, false);
 
         assertEquals(192, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
@@ -45,6 +46,8 @@ public class SyftImageAdjusterTest {
         assertEquals(1, adjusted.getComponents().size());
         assertEquals(32, adjusted.getComponents().get(0).getComponents().size());
         assertEquals(33, adjusted.getDependencies().size());
+
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
@@ -52,12 +55,14 @@ public class SyftImageAdjusterTest {
         SyftImageAdjuster adjuster = new SyftImageAdjuster(List.of("/app"), false);
 
         assertEquals(192, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
         assertEquals(1, adjusted.getComponents().size());
         assertEquals(23, adjusted.getComponents().get(0).getComponents().size());
         assertEquals(24, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
@@ -65,12 +70,14 @@ public class SyftImageAdjusterTest {
         SyftImageAdjuster adjuster = new SyftImageAdjuster(null, true);
 
         assertEquals(192, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
         assertEquals(1, adjusted.getComponents().size());
         assertEquals(191, adjusted.getComponents().get(0).getComponents().size());
         assertEquals(192, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
@@ -78,12 +85,14 @@ public class SyftImageAdjusterTest {
         SyftImageAdjuster adjuster = new SyftImageAdjuster(List.of("/app"), true);
 
         assertEquals(192, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
         assertEquals(1, adjusted.getComponents().size());
         assertEquals(182, adjusted.getComponents().get(0).getComponents().size());
         assertEquals(183, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
@@ -98,6 +107,8 @@ public class SyftImageAdjusterTest {
                 "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1&upstream=dbus-1.12.20-7.el9_2.1.src.rpm&distro=rhel-9.2",
                 bom.getComponents().get(21).getPurl());
 
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
+
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
         // 11th component before adjustment becomes 11th element nested under a root component.
@@ -107,14 +118,16 @@ public class SyftImageAdjusterTest {
         assertEquals(
                 "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
                 adjusted.getComponents().get(0).getComponents().get(21).getPurl());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
-    void shouldAdjustNameAndPurl() {
+    void shouldAdjustNameAndPurl() throws IOException {
         SyftImageAdjuster adjuster = new SyftImageAdjuster();
 
         assertEquals("registry.com/rh-osbs/amq-streams-console-ui-rhel9", bom.getMetadata().getComponent().getName());
         assertNull(bom.getMetadata().getComponent().getPurl());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
@@ -122,6 +135,7 @@ public class SyftImageAdjusterTest {
         assertEquals(
                 "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
                 adjusted.getMetadata().getComponent().getPurl());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
@@ -129,7 +143,7 @@ public class SyftImageAdjusterTest {
         SyftImageAdjuster adjuster = new SyftImageAdjuster();
 
         assertEquals(192, bom.getComponents().size());
-        // assertEquals("", bom.getMetadata().getComponent().getPurl());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom, tmpDir.toPath());
 
@@ -140,5 +154,6 @@ public class SyftImageAdjusterTest {
         assertEquals(192, adjusted.getDependencies().size());
         // Main component dependencies
         assertEquals(191, adjusted.getDependencies().get(0).getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 }
