@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -21,8 +22,10 @@ import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.controller.SyftImageController;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -158,6 +161,8 @@ class SyftImageControllerTest {
         when(controllerConfig.sbomDir()).thenReturn(tmpDir.toString());
 
         SyftImageControllerAlt ctrl = new SyftImageControllerAlt();
+        ctrl.setNotificationService(mock(NotificationService.class));
+        ctrl.setAtlasHandler(mock(AtlasHandler.class));
         ctrl.setControllerConfig(controllerConfig);
         ctrl.setSbomRepository(new MockSbomRepository());
 
