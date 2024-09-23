@@ -16,19 +16,6 @@
 # limitations under the License.
 #
 
-mp:
-  messaging:
-    incoming:
-      builds:
-        port: ${UMB_BROKER_PORT}
-        address: ${sbomer.features.umb.consumer.topic}
-        host: "${UMB_BROKER_HOST}"
-    outgoing:
-      finished:
-        port: ${UMB_BROKER_PORT}
-        address: "topic://${sbomer.features.umb.producer.topic}"
-        host: "${UMB_BROKER_HOST}"
-
 sbomer:
   api-url: "https://${SBOMER_ROUTE_HOST}/api/v1alpha3/"
   pnc:
@@ -49,12 +36,8 @@ sbomer:
   features:
     umb:
       enabled: true
-      consumer:
-        enabled: true
-        topic: "${CONSUMER_TOPIC}"
       producer:
         enabled: true
-        topic: "${PRODUCER_TOPIC}"
 
 quarkus:
   oidc:

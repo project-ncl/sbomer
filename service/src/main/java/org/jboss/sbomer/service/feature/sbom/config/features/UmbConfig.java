@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.config.features;
 
-import java.util.Optional;
-
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
@@ -31,22 +29,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ConfigMapping(prefix = "sbomer.features.umb")
 public interface UmbConfig {
 
-    public interface UmbConsumerConfig {
-        /**
-         * Enables the UMB consumer feature
-         *
-         * @return {@code true} if enabled, {@code false} otherwise
-         */
-        @WithDefault("false")
-        @WithName("enabled")
-        boolean isEnabled();
-
-        /**
-         * The topic that should be listened on.
-         */
-        Optional<String> topic();
-    }
-
     public interface UmbProducerConfig {
         /**
          * Enables the UMB producer feature
@@ -56,19 +38,11 @@ public interface UmbConfig {
         @WithDefault("false")
         @WithName("enabled")
         boolean isEnabled();
-
-        /**
-         * The topic that should be used to send messages to.
-         */
-        Optional<String> topic();
-
     }
 
     @WithDefault("false")
     @WithName("enabled")
     boolean isEnabled();
-
-    UmbConsumerConfig consumer();
 
     UmbProducerConfig producer();
 }

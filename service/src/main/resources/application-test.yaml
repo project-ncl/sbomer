@@ -16,6 +16,12 @@
 # limitations under the License.
 #
 
+mp:
+  messaging:
+    incoming:
+      builds:
+        address: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.builds"
+
 quarkus:
   datasource:
     db-kind: h2
@@ -53,9 +59,6 @@ sbomer:
 
   features:
     umb:
-      enabled: true
-      consumer:
-        enabled: true
-        topic: "Consumer.pncsbomer.testing.VirtualTopic.eng.pnc.builds"
+      enabled: false
       producer:
         enabled: false

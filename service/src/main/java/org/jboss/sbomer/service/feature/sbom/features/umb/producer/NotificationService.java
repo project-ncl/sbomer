@@ -100,10 +100,6 @@ public class NotificationService {
             throw new FeatureDisabledException("UMB feature to produce notification messages disabled");
         }
 
-        if (!umbConfig.producer().topic().isPresent()) {
-            throw new FeatureConfigurationException("UMB producer topic not specified");
-        }
-
         if (sboms == null || sboms.isEmpty()) {
             log.warn("No SBOMs provided to send notifications for");
             return;
