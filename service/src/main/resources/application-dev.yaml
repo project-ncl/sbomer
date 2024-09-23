@@ -76,7 +76,5 @@ sbomer:
   features:
     umb:
       enabled: false
-      consumer:
-        enabled: false
       producer:
         enabled: false

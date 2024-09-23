@@ -21,7 +21,6 @@ import static io.restassured.RestAssured.given;
 import static org.mockito.ArgumentMatchers.eq;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.config.Config;
@@ -45,8 +44,8 @@ import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -74,7 +73,6 @@ class SBOMResourceIT {
 
             UmbProducerConfig producerConfig = Mockito.mock(UmbProducerConfig.class);
             Mockito.when(producerConfig.isEnabled()).thenReturn(true);
-            Mockito.when(producerConfig.topic()).thenReturn(Optional.of("/Vitualtopic/dummy"));
 
             Mockito.when(umbConfigSpy.isEnabled()).thenReturn(true);
             Mockito.when(umbConfigSpy.producer()).thenReturn(producerConfig);

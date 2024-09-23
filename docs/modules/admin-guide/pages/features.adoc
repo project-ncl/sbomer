@@ -18,7 +18,6 @@ Global::
 
 Consumer::
 
-- `consumer.enabled`: `<true|false>` -- Controls the enablement of the consumer feature.
 - `consumer.topic`: `<STRING>` -- Name of the topic on which the consumer should be listening. It can be overridden with the `CONSUMER_TOPIC` environment variable.
 - `consumer.trigger`: `<all|product|none` -- Filter that controls which messages received on the UMB will trigger SBOM generation. Default: `product`.
 

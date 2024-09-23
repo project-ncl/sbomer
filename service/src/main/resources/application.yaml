@@ -21,17 +21,33 @@ smallrye:
     worker:
       "build-processor-pool":
         max-concurrency: 10
+      "errata-processor-pool":
+        max-concurrency: 10
 
 mp:
   messaging:
     incoming:
+      errata:
+        port: ${UMB_BROKER_PORT}
+        address: ${SBOMER_CONSUMER_ERRATA_TOPIC}
+        host: "${UMB_BROKER_HOST}"
+        connector: smallrye-amqp
+        enabled: ${sbomer.features.umb.enabled}
+        client-options-name: umb
+        failure-strategy: reject
       builds:
+        port: ${UMB_BROKER_PORT}
+        address: ${SBOMER_CONSUMER_PNC_TOPIC}
+        host: "${UMB_BROKER_HOST}"
         connector: smallrye-amqp
         enabled: ${sbomer.features.umb.enabled}
         client-options-name: umb
         failure-strategy: reject
     outgoing:
       finished:
+        port: ${UMB_BROKER_PORT}
+        address: "topic://${PRODUCER_TOPIC}"
+        host: "${UMB_BROKER_HOST}"
         connector: smallrye-amqp
         enabled: ${sbomer.features.umb.enabled}
         client-options-name: umb

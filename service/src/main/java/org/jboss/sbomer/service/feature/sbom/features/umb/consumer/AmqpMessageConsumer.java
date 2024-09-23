@@ -66,18 +66,15 @@ public class AmqpMessageConsumer {
         }
 
         log.info("Will use the reactive AMQP message consumer");
+    }
 
-        if (!umbConfig.isEnabled()) {
-            log.warn(
-                    "UMB feature is disabled, but this setting will be ignored because the 'sbomer.features.umb.reactive' is set to true");
-            return;
-        }
+    @Incoming("errata")
+    @Blocking(ordered = false, value = "errata-processor-pool")
+    public CompletionStage<Void> processErrata(Message<String> message) {
+        log.debug("Received new Errata tool status change notification via the AMQP consumer");
+        log.debug("Message content: {}", message.getPayload());
 
-        if (!umbConfig.consumer().isEnabled()) {
-            log.info(
-                    "UMB feature to consume messages is disabled, but this setting will be ignored because the 'sbomer.features.umb.reactive' is set to true");
-            return;
-        }
+        return message.ack();
     }
 
     @Incoming("builds")
@@ -85,7 +82,7 @@ public class AmqpMessageConsumer {
     public CompletionStage<Void> process(Message<String> message) {
         receivedMessages.incrementAndGet();
 
-        log.debug("Received new message via the AMQP consumer");
+        log.debug("Received new PNC build status notification via the AMQP consumer");
         log.debug("Message content: {}", message.getPayload());
 
         // Checking whether there is some additional metadata attached to the message
