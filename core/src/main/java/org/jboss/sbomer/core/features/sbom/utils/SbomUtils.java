@@ -351,6 +351,12 @@ public class SbomUtils {
         return metadata;
     }
 
+    public static List<ParseException> validate(JsonNode jsonNode) throws IOException {
+        return new JsonParser().validate(
+                jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes(),
+                schemaVersion());
+    }
+
     public static Tool createTool(String version) {
         Tool tool = new Tool();
         tool.setName(SBOMER_NAME);

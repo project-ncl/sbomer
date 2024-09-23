@@ -118,7 +118,9 @@ public class SyftImageAdjuster implements Adjuster {
         cleanupComponent(bom.getMetadata().getComponent());
 
         // ...and all other components
-        bom.getComponents().forEach(this::cleanupComponent);
+        for (int i = 0; i < bom.getComponents().size(); i++) {
+            cleanupComponent(bom.getComponents().get(i));
+        }
 
         createComponentTree(bom);
 
@@ -381,6 +383,13 @@ public class SyftImageAdjuster implements Adjuster {
         // as a product dependency
         if (dependencies.size() > 1) {
             for (Dependency dependency : dependencies.subList(1, dependencies.size())) {
+
+                boolean found = dependencies.stream().anyMatch(d -> d.getRef().equals(dependency.getRef()));
+
+                if (!found) {
+                    dependencies.add(dependency);
+                }
+
                 productDependency.addDependency(SbomUtils.createDependency(dependency.getRef()));
             }
         }
