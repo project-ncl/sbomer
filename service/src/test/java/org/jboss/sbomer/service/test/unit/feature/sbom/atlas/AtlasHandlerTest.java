@@ -27,6 +27,7 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 class AtlasHandlerTest {
@@ -86,8 +87,8 @@ class AtlasHandlerTest {
 
         atlasHandler.upload(List.of(sbomA, sbomB));
 
-        verify(atlasClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(InputStream.class));
-        verify(atlasClient, times(1)).upload(eq("pkg:maven/compB@1.1.0?type=pom"), any(InputStream.class));
+        verify(atlasClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
+        verify(atlasClient, times(1)).upload(eq("pkg:maven/compB@1.1.0?type=pom"), any(JsonNode.class));
     }
 
     @Test
@@ -98,21 +99,21 @@ class AtlasHandlerTest {
         atlasHandler.upload(List.of(sbomA, sbomB));
 
         // Only one of manifests was udpdated, because the second doesn't have product properties
-        verify(atlasClient, times(1)).upload(anyString(), any(InputStream.class));
-        verify(atlasClient).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(InputStream.class));
+        verify(atlasClient, times(1)).upload(anyString(), any(JsonNode.class));
+        verify(atlasClient).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
     }
 
     @Test
     void testHandlingOfApiErrors() throws Exception {
         Sbom sbom = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
 
-        doThrow(ClientException.class).when(atlasClient).upload(anyString(), any(InputStream.class));
+        doThrow(ClientException.class).when(atlasClient).upload(anyString(), any(JsonNode.class));
 
         ApplicationException ex = assertThrows(ApplicationException.class, () -> {
             atlasHandler.upload(List.of(sbom));
         });
 
-        verify(atlasClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(InputStream.class));
+        verify(atlasClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
 
         assertEquals("Unable to store AAA manifest in Atlas, purl: pkg:maven/compA@1.1.0?type=pom", ex.getMessage());
     }

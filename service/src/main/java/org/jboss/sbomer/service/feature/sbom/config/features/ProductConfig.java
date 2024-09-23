@@ -67,6 +67,7 @@ public class ProductConfig {
          */
         public static ErrataProductConfig fromBom(Bom bom) {
             Component component = bom.getMetadata().getComponent();
+
             Optional<Property> productName = SbomUtils
                     .findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, component);
             Optional<Property> productVersion = SbomUtils
