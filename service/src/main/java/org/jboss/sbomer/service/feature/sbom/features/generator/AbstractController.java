@@ -89,12 +89,14 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     KubernetesClient kubernetesClient;
 
     @Inject
+    @Setter
     NotificationService notificationService;
 
     @Inject
     S3StorageHandler s3LogHandler;
 
     @Inject
+    @Setter
     AtlasHandler atlasHandler;
 
     // TODO: Refactor this to have it's implementation shared

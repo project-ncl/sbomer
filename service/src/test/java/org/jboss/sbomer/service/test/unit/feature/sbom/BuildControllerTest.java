@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -18,7 +19,9 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
+import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -120,6 +123,9 @@ class BuildControllerTest {
     @Test
     void testSetReasonForMultipleManifestsFinished() throws Exception {
         BuildController bc = new BuildController();
+
+        bc.setNotificationService(mock(NotificationService.class));
+        bc.setAtlasHandler(mock(AtlasHandler.class));
 
         GenerationRequestControllerConfig controllerConfig = Mockito.mock(GenerationRequestControllerConfig.class);
         when(controllerConfig.sbomDir()).thenReturn("/a/dir");
