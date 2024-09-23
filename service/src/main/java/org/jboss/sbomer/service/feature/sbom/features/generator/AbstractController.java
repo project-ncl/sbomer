@@ -366,8 +366,12 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                     return null;
                 });
 
-        List<Sbom> sboms = sbomRepository.findSbomsByGenerationRequest(generationRequest.getId());
+        storeFilesInS3.join();
 
+        return UpdateControl.noUpdate();
+    }
+
+    protected void performPost(List<Sbom> sboms, GenerationRequest generationRequest) {
         CompletableFuture<Void> publishToUmb = CompletableFuture.runAsync(() -> {
             try {
                 notificationService.notifyCompleted(sboms);
@@ -390,17 +394,13 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         try {
             // Wait for all tasks to be done
-            CompletableFuture.allOf(storeFilesInS3, publishToUmb, uploadToAtlas).join();
+            CompletableFuture.allOf(publishToUmb, uploadToAtlas).join();
         } catch (CompletionException e) {
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_POST,
-                    "MAnifest was generated properly, but at leas one of post-generation tasks did not finish successfully: {}",
-                    e.getMessage());
+            throw new ApplicationException(
+                    "Manifest was generated successfully, but at least one of the post-generation tasks did not finish successfully: {}",
+                    e.getMessage(),
+                    e);
         }
-
-        return UpdateControl.noUpdate();
     }
 
     /**
