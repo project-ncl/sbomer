@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -115,7 +114,7 @@ class AtlasHandlerTest {
 
         verify(atlasClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
 
-        assertEquals("Unable to store AAA manifest in Atlas, purl: pkg:maven/compA@1.1.0?type=pom", ex.getMessage());
+        assertEquals("Unable to store 'AAA' manifest in Atlas, purl: 'pkg:maven/compA@1.1.0?type=pom'", ex.getMessage());
     }
 
     @Test
