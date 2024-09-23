@@ -29,25 +29,68 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
+import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.core.features.sbom.utils.UrlUtils;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of the {@link Adjuster} for the {@link GeneratorType#IMAGE_SYFT} type.
+ *
+ * @author Marek Goldmann
+ * @see SyftImageConfig
+ */
 @Slf4j
 public class SyftImageAdjuster implements Adjuster {
+    /**
+     * <p>
+     * For non-RPM content, a list of paths within the container image for which when a component is found it will be
+     * retained in the generated manifest. In case the found component is not on a path in this list it will be removed
+     * from the manifest.
+     * </p>
+     *
+     * <p>
+     * If this is {@code null} or an empty list is provided -- all components will be retained in the manifest.
+     * </p>
+     */
     List<String> paths;
+    /**
+     * A flag to determine whether RPM packages should be retained in the generated manifests (value set to
+     * {@code true}) or removed (value set to {@code false}).
+     */
     boolean includeRpms;
+
+    /**
+     * <p>
+     * List of supported property name prefixes.
+     * </p>
+     *
+     * @see SyftImageAdjuster#adjustProperties(List)
+     */
+    final static private List<String> ALLOWED_PROPERTY_PREFIXES = List
+            .of("sbomer:package:language", "sbomer:package:type", "sbomer:location:0:path", "sbomer:image:labels");
+
+    public SyftImageAdjuster() {
+        this.paths = new ArrayList<>();
+        this.includeRpms = true;
+    }
 
     public SyftImageAdjuster(List<String> paths, boolean includeRpms) {
         this.paths = paths;
         this.includeRpms = includeRpms;
     }
 
+    /**
+     * Checks whether given path is on or under paths specified by the {@link SyftImageAdjuster#paths} list.
+     *
+     * @param path
+     * @return
+     */
     private boolean isOnPath(String path) {
         // In case we haven't provided paths to filter, add all found artifacts.
         if (paths == null || paths.isEmpty()) {
@@ -59,31 +102,46 @@ public class SyftImageAdjuster implements Adjuster {
 
     @Override
     public Bom adjust(Bom bom, Path workDir) {
-        log.debug("Starting adjustment of the manifest, configuration paths: {}, includeRpms: {}", paths, includeRpms);
-
-        Component productComponent = bom.getMetadata().getComponent();
-
-        // Initialize properties for main component, if not done so yet
-        if (productComponent.getProperties() == null) {
-            productComponent.setProperties(new ArrayList<>());
-        }
-
-        // If there are properties in the metadata field of the manifest, move these into the main component's
-        // properties.
-        if (bom.getMetadata().getProperties() != null) {
-            log.debug(
-                    "Moving '{}' properties from metadata to main component",
-                    bom.getMetadata().getProperties().size());
-
-            productComponent.getProperties().addAll(bom.getMetadata().getProperties());
-            bom.getMetadata().setProperties(null);
-        }
-
-        log.debug("There are {} components to be adjusted", bom.getComponents().size());
+        log.debug(
+                "Starting adjustment of the manifest, parameters: configuration paths: [{}], includeRpms: [{}]",
+                paths,
+                includeRpms);
 
         // Remove components from manifest according to 'paths' and 'includeRpms' parameters
-        bom.getComponents().removeIf(c -> {
+        log.debug("Filtering out all components that do not meet requirements...");
 
+        filterComponents(bom.getComponents());
+        adjustProperties(bom);
+        adjustNameAndPurl(bom, workDir);
+
+        // Cleanup main component
+        cleanupComponent(bom.getMetadata().getComponent());
+
+        // ...and all other components
+        bom.getComponents().forEach(this::cleanupComponent);
+
+        createComponentTree(bom);
+
+        // Populate dependencies section with components
+        adjustDependencies(bom);
+
+        return bom;
+    }
+
+    /**
+     * Removes all components from the component tree that do not meet requirements: as defined by
+     * {@link SyftImageAdjuster#includeRpms} and {@link SyftImageAdjuster#paths}.
+     *
+     * @param bom
+     * @see SyftImageAdjuster#includeRpms
+     * @see SyftImageAdjuster#paths
+     */
+    private void filterComponents(List<Component> components) {
+        if (components == null) {
+            return;
+        }
+
+        components.removeIf(c -> {
             if (c.getPurl() == null) {
                 log.debug(
                         "Component (of type '{}', cpe: '{}') does not have purl assigned, marked for removal",
@@ -129,24 +187,104 @@ public class SyftImageAdjuster implements Adjuster {
             }
         });
 
-        // Cleanup main component
-        cleanupComponent(productComponent);
-
-        // ...and all other components
-        bom.getComponents().forEach(this::cleanupComponent);
-
-        // Set the purl for the main component
-        productComponent.setPurl(generateImagePurl(productComponent, workDir));
-
-        // Populate dependencies section with components
-        populateDependencies(bom);
-
-        return bom;
+        // Go deep
+        components.forEach(c -> filterComponents(c.getComponents()));
     }
 
-    private String generateImagePurl(Component component, Path workDir) {
+    /**
+     * <p>
+     * Creates a component tree in the main {@link Bom#getComponents()} list.
+     * </p>
+     *
+     * <p>
+     * The result of this adjustment is that there will be onlys asingle {@link Component} in the component list with
+     * all other components listed in this particular component's {@link Component#getComponents()} list. This
+     * effectiveky creates a tree with a single root being the container image component itself.
+     * </p>
+     *
+     * @param bom
+     */
+    private void createComponentTree(Bom bom) {
+        Component mainComponent = bom.getMetadata().getComponent();
+
+        // Create a new component out of the current main component which will replace it.
+        Component matadataComponent = new Component();
+        matadataComponent.setType(mainComponent.getType());
+        matadataComponent.setName(mainComponent.getName());
+        matadataComponent.setPurl(mainComponent.getPurl());
+        matadataComponent.setProperties(mainComponent.getProperties());
+
+        // Set main component
+        bom.getMetadata().setComponent(matadataComponent);
+
+        // Clear any properties from the root component. These are now in the metadata component.
+        mainComponent.setProperties(null);
+        // Create component tree
+        mainComponent.setComponents(new ArrayList<>());
+        mainComponent.getComponents().addAll(bom.getComponents());
+
+        // Remove any components and add our root component
+        bom.setComponents(new ArrayList<>());
+        bom.getComponents().add(mainComponent);
+    }
+
+    /**
+     * <p>
+     * Adjust properties in the manifest. This includes a few steps.
+     * </p>
+     *
+     * <p>
+     * If there are any properties in the metadata section, move these to the main component's properties.
+     * </p>
+     *
+     * <p>
+     * Adjusts any properties in the main component as well as for each component found in the component list
+     * (recursively). See {@link SyftImageAdjuster#adjustProperties(List)}.
+     * </p>
+     *
+     * @param bom The manifest to adjust the properties of.
+     * @see SyftImageAdjuster#adjustProperties(List)
+     */
+    private void adjustProperties(Bom bom) {
+        log.info("Adjusting manifest properties...");
+
+        Component mainComponent = bom.getMetadata().getComponent();
+
+        // Initialize properties for main component, if not done so yet
+        if (mainComponent.getProperties() == null) {
+            mainComponent.setProperties(new ArrayList<>());
+        }
+
+        // If there are properties in the metadata field of the manifest, move these into the main component's
+        // properties.
+        if (bom.getMetadata().getProperties() != null) {
+            log.debug(
+                    "Moving '{}' properties from metadata to main component",
+                    bom.getMetadata().getProperties().size());
+
+            mainComponent.getProperties().addAll(bom.getMetadata().getProperties());
+            bom.getMetadata().setProperties(null);
+        }
+
+        // Adjust main component's properties...
+        adjustProperties(bom.getMetadata().getComponent().getProperties());
+        // ...and any other properties found in the component tree.
+        bom.getComponents().forEach(c -> adjustProperties(c.getProperties()));
+
+        log.info("Properties adjusted!");
+    }
+
+    /**
+     * Based on the metadata we got the output of Skopeo ({@code skopeo.json} file), adjust main component's purl and
+     * name.
+     *
+     * @param component
+     * @param workDir
+     */
+    private void adjustNameAndPurl(Bom bom, Path workDir) {
         String tag = null;
         ContainerImageInspectOutput inspectData = null;
+        final Component mainComponent = bom.getMetadata().getComponent();
 
         try {
             inspectData = ObjectMapperProvider.json()
@@ -160,7 +298,7 @@ public class SyftImageAdjuster implements Adjuster {
 
         // 7.4.17
         Optional<Property> versionOpt = SbomUtils
-                .findPropertyWithNameInComponent("sbomer:image:labels:version", component);
+                .findPropertyWithNameInComponent("sbomer:image:labels:version", mainComponent);
 
         if (versionOpt.isEmpty()) {
             throw new ApplicationException(
@@ -169,7 +307,7 @@ public class SyftImageAdjuster implements Adjuster {
 
         // 5.1717585311
         Optional<Property> releaseOpt = SbomUtils
-                .findPropertyWithNameInComponent("sbomer:image:labels:release", component);
+                .findPropertyWithNameInComponent("sbomer:image:labels:release", mainComponent);
 
         if (releaseOpt.isEmpty()) {
             throw new ApplicationException(
@@ -178,92 +316,155 @@ public class SyftImageAdjuster implements Adjuster {
 
         tag = versionOpt.get().getValue() + "-" + releaseOpt.get().getValue();
 
-        // Split the name, if required
-        String[] componentNameParts = component.getName().split("/");
+        String name = inspectData.labels.get("name");
+        String[] componentNameParts = mainComponent.getName().split("/");
 
-        StringBuilder builder = new StringBuilder("pkg:oci/") //
-                .append(componentNameParts[componentNameParts.length - 1])
-                .append("@")
-                .append(UrlUtils.urlencode(inspectData.getDigest()))
-                .append("?")
-                .append("os=")
-                .append(inspectData.getOs())
-                .append("&")
-                .append("arch=")
-                .append(inspectData.getArchitecture())
-                .append("&")
-                .append("tag=")
-                .append(tag);
+        if (name == null) {
+            if (componentNameParts.length > 1) {
+                name = mainComponent.getName()
+                        .substring(mainComponent.getName().indexOf("/"), mainComponent.getName().length());
+            }
+        }
 
-        String purl = builder.toString();
+        String[] nameParts = name.split(("/"));
+
+        TreeMap<String, String> qualifiers = new TreeMap<String, String>();
+        qualifiers.put("os", inspectData.getOs());
+        qualifiers.put("arch", inspectData.getArchitecture());
+        qualifiers.put("tag", tag);
+
+        PackageURL purl;
+
+        try {
+            purl = new PackageURL(
+                    "oci",
+                    null,
+                    nameParts[nameParts.length - 1],
+                    inspectData.getDigest(),
+                    qualifiers,
+                    null);
+        } catch (MalformedPackageURLException e) {
+            throw new ApplicationException("Cannot generate purl for container image", e);
+        }
 
         log.debug("Generated purl: '{}'", purl);
 
-        return purl;
+        mainComponent.setPurl(purl);
+        mainComponent.setName(name);
     }
 
-    private void populateDependencies(Bom bom) {
+    /**
+     * <p>
+     * Populates the {@link Bom#getDependencies()} with the information we about components have.
+     * </p>
+     *
+     * <p>
+     * A main element will be added representing the container image itself with a {@code dependsOn} array populated
+     * with the list of all components found in the image.
+     * </p>
+     *
+     * <p>
+     * Each component is added to the dependencies section as well with {@code dependsOn} being an emoty array.
+     * </p>
+     *
+     * @param bom
+     */
+    private void adjustDependencies(Bom bom) {
         List<Dependency> dependencies = new ArrayList<>();
 
-        Dependency product = SbomUtils.createDependency(bom.getMetadata().getComponent().getPurl());
+        populateDependencies(dependencies, bom.getComponents());
 
-        dependencies.add(product);
+        // The image itself is the first element
+        Dependency productDependency = dependencies.get(0);
 
-        // For each component, if it's not already in the dependencies, add it to both: dependency list as well as a
-        // dependency to the main product dependency
-        bom.getComponents().forEach(c -> {
-            if (dependencies.stream().anyMatch(d -> d.getRef().equals(c.getPurl()))) {
-                return;
+        // If there are more dependencies (besides the main image), add all of them
+        // as a product dependency
+        if (dependencies.size() > 1) {
+            for (Dependency dependency : dependencies.subList(1, dependencies.size())) {
+                productDependency.addDependency(SbomUtils.createDependency(dependency.getRef()));
             }
-
-            Dependency dependency = SbomUtils.createDependency(c.getPurl());
-            dependencies.add(dependency);
-            product.addDependency(dependency);
-
-        });
+        }
 
         bom.setDependencies(dependencies);
     }
 
+    /**
+     * <p>
+     * Adds a new {@link Dependency} to a list for each {@link Component} in the list.
+     * </p>
+     *
+     * <p>
+     * CAse where a component has nested components is handled as well.
+     * </p>
+     */
+    private void populateDependencies(List<Dependency> dependencies, List<Component> components) {
+        if (components == null) {
+            return;
+        }
+
+        components.forEach(component -> {
+            dependencies.add(SbomUtils.createDependency(component.getBomRef()));
+            populateDependencies(dependencies, component.getComponents());
+        });
+
+    }
+
+    /**
+     * <p>
+     * Updates property names to our rules.
+     * </p>
+     *
+     * <p>
+     * Removes any properties which names do not start with allowed prefixes,
+     * {@link SyftImageAdjuster#ALLOWED_PROPERTY_PREFIXES}.
+     * </p>
+     *
+     * @param properties
+     * @see SyftImageAdjuster#ALLOWED_PROPERTY_PREFIXES
+     */
+    private void adjustProperties(List<Property> properties) {
+        if (properties == null) {
+            return;
+        }
+
+        // Adjust property names
+        properties.forEach(p -> {
+            String newName = p.getName().replace("syft:", "sbomer:");
+
+            log.debug("Adjusting property name from '{}' to '{}'", p.getName(), newName);
+
+            p.setName(newName);
+        });
+
+        // Remove properties we don't care about
+        properties.removeIf(prop -> {
+            boolean supportedProp = ALLOWED_PROPERTY_PREFIXES.stream()
+                    .anyMatch(prefix -> prop.getName().startsWith(prefix));
+
+            if (!supportedProp) {
+                log.debug(
+                        "Property '{}' with value '{}' is not on the supported properties list, removing...",
+                        prop.getName(),
+                        prop.getValue());
+            }
+
+            return !supportedProp;
+        });
+
+    }
+
+    /**
+     * Adjusts the provided {@link Component} according to our standards.
+     *
+     * @param component
+     */
     private void cleanupComponent(Component component) {
         log.debug("Cleaning up component '{}'", component.getPurl());
 
         // Remove CPE, we don't use it now
         component.setCpe(null);
-        // Remove BOM ref, we don't use it now
-        component.setBomRef(null);
 
         if (component.getProperties() != null) {
-            List<String> supportedPropsPrefixes = List.of(
-                    "sbomer:package:language",
-                    "sbomer:package:type",
-                    "sbomer:location:0:path",
-                    "sbomer:image:labels");
-
-            // Adjust property names
-            component.getProperties().forEach(p -> {
-                String newName = p.getName().replace("syft:", "sbomer:");
-
-                log.debug("Adjusting property name from '{}' to '{}'", p.getName(), newName);
-
-                p.setName(newName);
-            });
-
-            // Remove properties we don't care about
-            component.getProperties().removeIf(prop -> {
-                boolean supportedProp = supportedPropsPrefixes.stream()
-                        .anyMatch(prefix -> prop.getName().startsWith(prefix));
-
-                if (!supportedProp) {
-                    log.debug(
-                            "Property '{}' with value '{}' is not on the supported properties list, removing...",
-                            prop.getName(),
-                            prop.getValue());
-                }
-
-                return !supportedProp;
-            });
-
             // Adjust purl for Java components
             Property propType = SbomUtils.findPropertyWithNameInComponent("sbomer:package:type", component)
                     .orElse(null);
@@ -311,6 +512,12 @@ public class SyftImageAdjuster implements Adjuster {
                         break;
                 }
             }
+        }
+
+        component.setBomRef(component.getPurl());
+
+        if (component.getComponents() != null && !component.getComponents().isEmpty()) {
+            component.getComponents().forEach(c -> cleanupComponent(c));
         }
 
         log.debug("Component '{}' adjusted", component.getPurl());

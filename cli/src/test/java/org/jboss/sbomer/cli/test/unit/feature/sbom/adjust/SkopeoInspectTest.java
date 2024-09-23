@@ -17,9 +17,9 @@ class SkopeoInspectTest {
         ContainerImageInspectOutput data = ObjectMapperProvider.json()
                 .readValue(rawData, ContainerImageInspectOutput.class);
 
-        assertEquals("sha256:f63b27a29c032843941b15567ebd1f37f540160e8066ac74c05367134c2ff3aa", data.getDigest());
-        assertEquals("registry.redhat.io/jboss-webserver-5/jws58-openjdk17-openshift-rhel8", data.getName());
+        assertEquals("sha256:ee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3", data.getDigest());
+        assertEquals("registry.com/rh-osbs/amq-streams-console-ui-rhel9", data.getName());
         assertEquals("amd64", data.getArchitecture());
-        assertEquals(34, data.getLabels().size());
+        assertEquals(21, data.getLabels().size());
     }
 }

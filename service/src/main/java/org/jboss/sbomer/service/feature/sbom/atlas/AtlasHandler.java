@@ -17,13 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -101,22 +97,8 @@ public class AtlasHandler {
                 return;
             }
 
-            // Convert into JSON
-            // TODO: Make this not pretty-printed, will save some data
-            String jsonBom = SbomUtils.toJson(bom);
-
-            // Convert into InputStream
-            // https://issues.redhat.com/browse/SBOMER-153
-            InputStream is = new ByteArrayInputStream(jsonBom.getBytes(StandardCharsets.UTF_8));
-
             // Store it!
-            atlasClient.upload(sbom.getRootPurl(), is);
-        } catch (GeneratorException e) {
-            throw new ApplicationException(
-                    "Unable to serialize {} manifest, purl: {}",
-                    sbom.getId(),
-                    sbom.getRootPurl(),
-                    e);
+            atlasClient.upload(sbom.getRootPurl(), sbom.getSbom());
         } catch (ClientException e) {
             throw new ApplicationException(
                     "Unable to store {} manifest in Atlas, purl: {}",

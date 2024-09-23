@@ -746,8 +746,8 @@ public class SbomUtils {
         }
 
         try {
-            return new JsonParser()
-                    .parse(jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes());
+            final String content = jsonNode.isTextual() ? jsonNode.textValue() : jsonNode.toString();
+            return new JsonParser().parse(content.getBytes(UTF_8));
         } catch (ParseException e) {
             log.error(e.getMessage(), e);
             return null;

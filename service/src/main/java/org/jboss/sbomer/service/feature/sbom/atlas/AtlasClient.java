@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
-import java.io.InputStream;
+import java.util.List;
 
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
@@ -26,6 +26,8 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.UnauthorizedException;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.oidc.client.filter.OidcClientFilter;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
@@ -55,12 +57,8 @@ public interface AtlasClient {
     @GET
     public Bom get(@QueryParam("id") String purl);
 
-    // TODO: check why automatic serialization
     @PUT
-    public void upload(@QueryParam("id") String purl, Bom bom);
-
-    @PUT
-    public void upload(@QueryParam("id") String purl, InputStream bom);
+    public void upload(@QueryParam("id") String purl, JsonNode bom);
 
     @ClientExceptionMapper
     @Blocking
@@ -69,13 +67,16 @@ public interface AtlasClient {
 
         switch (response.getStatus()) {
             case 400:
-                return new ClientException("Bad request, {}", message);
+                return new ClientException("Bad request", List.of(message));
             case 401:
-                return new UnauthorizedException("Caller is unauthorized to access resource; {}", message);
+                return new UnauthorizedException(
+                        "Caller is unauthorized to access resource; {}",
+                        message,
+                        List.of(message));
             case 403:
-                return new ForbiddenException("Caller is forbidden to access resource; {}", message);
+                return new ForbiddenException("Caller is forbidden to access resource; {}", message, List.of(message));
             case 404:
-                return new NotFoundException("Requested resource was not found; {}", message);
+                return new NotFoundException("Requested resource was not found; {}", message, List.of(message));
             default:
                 break;
         }
