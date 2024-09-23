@@ -50,6 +50,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunOperationInitD
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.slf4j.helpers.MessageFormatter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -110,7 +111,8 @@ public class OperationController extends AbstractController {
             GenerationRequest generationRequest,
             SbomGenerationStatus status,
             GenerationResult result,
-            String reason) {
+            String reason,
+            Object... params) {
 
         if (generationRequest.getStatus() != null) {
             String label = switch (generationRequest.getStatus()) {
@@ -126,7 +128,7 @@ public class OperationController extends AbstractController {
 
         generationRequest.setStatus(status);
         generationRequest.setResult(result);
-        generationRequest.setReason(reason);
+        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
         return UpdateControl.updateResource(generationRequest);
     }
 

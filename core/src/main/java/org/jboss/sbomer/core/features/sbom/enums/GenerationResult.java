@@ -29,6 +29,7 @@ public enum GenerationResult {
     ERR_CONFIG_MISSING(3),
     ERR_INDEX_INVALID(4),
     ERR_GENERATION(5),
+    ERR_POST(6),
     ERR_SYSTEM(99),
     ERR_MULTI(100);
 

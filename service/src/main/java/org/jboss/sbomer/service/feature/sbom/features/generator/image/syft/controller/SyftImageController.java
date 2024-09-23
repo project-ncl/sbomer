@@ -43,6 +43,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.slf4j.helpers.MessageFormatter;
 
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.reconciler.Constants;
@@ -84,7 +85,8 @@ public class SyftImageController extends AbstractController {
             GenerationRequest generationRequest,
             SbomGenerationStatus status,
             GenerationResult result,
-            String reason) {
+            String reason,
+            Object... params) {
 
         if (generationRequest.getStatus() != null) {
             String label = switch (generationRequest.getStatus()) {
@@ -99,7 +101,7 @@ public class SyftImageController extends AbstractController {
 
         generationRequest.setStatus(status);
         generationRequest.setResult(result);
-        generationRequest.setReason(reason);
+        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
         return UpdateControl.updateResource(generationRequest);
     }
 

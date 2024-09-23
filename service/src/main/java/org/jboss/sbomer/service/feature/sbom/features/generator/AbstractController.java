@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -96,11 +97,13 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     @Inject
     AtlasHandler atlasHandler;
 
+    // TODO: Refactor this to have it's implementation shared
     protected abstract UpdateControl<GenerationRequest> updateRequest(
             GenerationRequest generationRequest,
             SbomGenerationStatus status,
             GenerationResult result,
-            String reason);
+            String reason,
+            Object... params);
 
     /**
      * Returns the {@link TaskRun} having the specified {@link SbomGenerationPhase} from the given {@link TaskRun}
@@ -372,7 +375,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 log.warn(e.getMessage(), e);
             }
         }).exceptionally((e) -> {
-            throw new ApplicationException("UMB notification failed", e);
+            throw new ApplicationException("UMB notification failed: {}", e.getMessage(), e);
         });
 
         CompletableFuture<Void> uploadToAtlas = CompletableFuture.runAsync(() -> {
@@ -382,14 +385,20 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 log.warn(e.getMessage(), e);
             }
         }).exceptionally((e) -> {
-            throw new ApplicationException("Uploading manifests to Atlas failed", e);
+            throw new ApplicationException("Atlas upload failed: {}", e.getMessage(), e);
         });
 
-        // Wait for all tasks to be done
-        CompletableFuture.allOf(storeFilesInS3, publishToUmb, uploadToAtlas).join();
-
-        // At this point al the work is finished and we can clean up the GenerationRequest Kubernetes resource.
-        cleanupFinishedGenerationRequest(generationRequest);
+        try {
+            // Wait for all tasks to be done
+            CompletableFuture.allOf(storeFilesInS3, publishToUmb, uploadToAtlas).join();
+        } catch (CompletionException e) {
+            return updateRequest(
+                    generationRequest,
+                    SbomGenerationStatus.FAILED,
+                    GenerationResult.ERR_POST,
+                    "MAnifest was generated properly, but at leas one of post-generation tasks did not finish successfully: {}",
+                    e.getMessage());
+        }
 
         return UpdateControl.noUpdate();
     }

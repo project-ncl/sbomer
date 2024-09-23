@@ -101,7 +101,7 @@ public class AtlasHandler {
             atlasClient.upload(sbom.getRootPurl(), sbom.getSbom());
         } catch (ClientException e) {
             throw new ApplicationException(
-                    "Unable to store {} manifest in Atlas, purl: {}",
+                    "Unable to store '{}' manifest in Atlas, purl: '{}'",
                     sbom.getId(),
                     sbom.getRootPurl(),
                     e);
