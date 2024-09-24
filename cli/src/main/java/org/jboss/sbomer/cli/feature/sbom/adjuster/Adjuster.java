@@ -17,12 +17,10 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import java.nio.file.Path;
-
 import org.cyclonedx.model.Bom;
 
 public interface Adjuster {
-    public default Bom adjust(Bom bom, Path workDir) {
+    public default Bom adjust(Bom bom) {
         return bom;
     }
 }

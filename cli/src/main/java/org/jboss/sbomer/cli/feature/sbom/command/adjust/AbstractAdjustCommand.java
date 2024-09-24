@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import org.cyclonedx.model.Bom;
-import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
@@ -46,11 +45,11 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
 
             Bom bom = SbomUtils.fromPath(parent.getPath());
 
-            log.info("Starting {} adjuster", getGeneratorType());
+            log.info("Starting {} adjuster", getAdjusterType());
 
             Bom adjustedBom = doAdjust(bom, parent.getPath().getParent());
 
-            log.debug("{} adjuster finished", getGeneratorType());
+            log.debug("{} adjuster finished", getAdjusterType());
 
             SbomUtils.toPath(adjustedBom, parent.getOutputPath());
 
@@ -67,7 +66,7 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
 
     }
 
-    protected abstract GeneratorType getGeneratorType();
+    protected abstract String getAdjusterType();
 
     protected abstract Bom doAdjust(Bom bom, Path workDir);
 

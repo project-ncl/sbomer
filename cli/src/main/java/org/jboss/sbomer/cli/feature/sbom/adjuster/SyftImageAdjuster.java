@@ -58,12 +58,14 @@ public class SyftImageAdjuster implements Adjuster {
      * If this is {@code null} or an empty list is provided -- all components will be retained in the manifest.
      * </p>
      */
-    List<String> paths;
+    List<String> paths = new ArrayList<>();
     /**
      * A flag to determine whether RPM packages should be retained in the generated manifests (value set to
      * {@code true}) or removed (value set to {@code false}).
      */
-    boolean includeRpms;
+    boolean includeRpms = true;
+
+    Path workDir;
 
     /**
      * <p>
@@ -75,12 +77,12 @@ public class SyftImageAdjuster implements Adjuster {
     final static private List<String> ALLOWED_PROPERTY_PREFIXES = List
             .of("sbomer:package:language", "sbomer:package:type", "sbomer:location:0:path", "sbomer:image:labels");
 
-    public SyftImageAdjuster() {
-        this.paths = new ArrayList<>();
-        this.includeRpms = true;
+    public SyftImageAdjuster(Path workDir) {
+        this.workDir = workDir;
     }
 
-    public SyftImageAdjuster(List<String> paths, boolean includeRpms) {
+    public SyftImageAdjuster(Path workDir, List<String> paths, boolean includeRpms) {
+        this.workDir = workDir;
         this.paths = paths;
         this.includeRpms = includeRpms;
     }
@@ -101,7 +103,7 @@ public class SyftImageAdjuster implements Adjuster {
     }
 
     @Override
-    public Bom adjust(Bom bom, Path workDir) {
+    public Bom adjust(Bom bom) {
         log.debug(
                 "Starting adjustment of the manifest, parameters: configuration paths: [{}], includeRpms: [{}]",
                 paths,
