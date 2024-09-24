@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
+package org.jboss.sbomer.service.test.utils.umb;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +31,14 @@ public class AmqpTestResourceLifecycleManager implements QuarkusTestResourceLife
         Map<String, String> finishedProps = InMemoryConnector.switchOutgoingChannelsToInMemory("finished");
         env.putAll(buildsProps);
         env.putAll(finishedProps);
+        env.putAll(
+                Map.of(
+                        "sbomer.features.umb.enabled",
+                        "true",
+                        "mp.messaging.outgoing.finished.address",
+                        "topic://a-test-topic",
+                        "sbomer.features.umb.producer.enabled",
+                        "true"));
         return env;
     }
 

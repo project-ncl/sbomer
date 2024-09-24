@@ -18,10 +18,10 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import java.util.Set;
@@ -41,15 +41,15 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
-import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.quarkus.logging.Log;
-import io.quarkus.test.common.WithTestResource;
+import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolation;
@@ -57,7 +57,7 @@ import jakarta.validation.Validator;
 
 @QuarkusTransactionalTest
 @WithKubernetesTestServer
-@WithTestResource(AmqpTestResourceLifecycleManager.class)
+@TestProfile(TestUmbProfile.class)
 class SbomRepositoryIT {
 
     @Inject

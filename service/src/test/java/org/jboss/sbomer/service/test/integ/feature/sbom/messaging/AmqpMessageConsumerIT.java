@@ -23,15 +23,16 @@ import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
-import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-@WithTestResource(AmqpTestResourceLifecycleManager.class)
+@TestProfile(TestUmbProfile.class)
 class AmqpMessageConsumerIT {
     @Inject
     AmqpMessageConsumer consumer;

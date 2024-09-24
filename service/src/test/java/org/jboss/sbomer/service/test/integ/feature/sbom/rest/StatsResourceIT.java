@@ -21,15 +21,13 @@ import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
-import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
 import org.jboss.sbomer.service.test.integ.feature.sbom.rest.StatsResourceIT.CustomConfig;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
-import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -37,10 +35,9 @@ import io.restassured.RestAssured;
 
 @QuarkusTest
 @TestProfile(CustomConfig.class)
-@WithTestResource(AmqpTestResourceLifecycleManager.class)
 @WithKubernetesTestServer
 class StatsResourceIT {
-    public static class CustomConfig implements QuarkusTestProfile {
+    public static class CustomConfig extends TestUmbProfile {
         @Override
         public Map<String, String> getConfigOverrides() {
             return Map.of(
@@ -55,7 +52,9 @@ class StatsResourceIT {
                     "sbomer.deployment.type",
                     "preprod",
                     "sbomer.deployment.zone",
-                    "us-east-1");
+                    "us-east-1",
+                    "sbomer.features.umb.enabled",
+                    "false");
         }
 
     }
