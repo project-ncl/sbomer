@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
-import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -43,8 +42,8 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
     private boolean rpms;
 
     @Override
-    protected GeneratorType getGeneratorType() {
-        return GeneratorType.IMAGE_SYFT;
+    protected String getAdjusterType() {
+        return "syft-image";
     }
 
     @Override
@@ -52,8 +51,8 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
         log.debug("Paths: {}", paths);
         log.debug("RPMs: {}", rpms);
 
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(paths, rpms);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(workDir, paths, rpms);
 
-        return adjuster.adjust(bom, workDir);
+        return adjuster.adjust(bom);
     }
 }

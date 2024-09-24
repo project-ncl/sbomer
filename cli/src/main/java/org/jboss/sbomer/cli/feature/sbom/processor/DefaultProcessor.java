@@ -44,6 +44,7 @@ import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Property;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.sbomer.cli.feature.sbom.adjuster.PncBuildAdjuster;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
@@ -220,6 +221,9 @@ public class DefaultProcessor implements Processor {
 
     @Override
     public Bom process(Bom bom) {
+        // TODO: this should be moved to its own workflow
+        new PncBuildAdjuster().adjust(bom);
+
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             Component component = bom.getMetadata().getComponent();
 
