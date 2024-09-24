@@ -44,6 +44,7 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.test.PncWireMock;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -51,6 +52,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.smallrye.reactive.messaging.memory.InMemoryConnector;
@@ -60,7 +62,7 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
-@WithTestResource(AmqpTestResourceLifecycleManager.class)
+@TestProfile(TestUmbProfile.class)
 @WithTestResource(PncWireMock.class)
 @Slf4j
 @WithKubernetesTestServer

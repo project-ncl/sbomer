@@ -27,17 +27,17 @@ import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
-import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.InjectMock;
-import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-@WithTestResource(AmqpTestResourceLifecycleManager.class)
+@TestProfile(TestUmbProfile.class)
 public class S3StorageHandlerTestIT {
 
     @Inject

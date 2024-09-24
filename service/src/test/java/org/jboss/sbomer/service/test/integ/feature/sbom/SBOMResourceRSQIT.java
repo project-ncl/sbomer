@@ -33,15 +33,15 @@ import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
-import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.http.ContentType;
@@ -49,7 +49,7 @@ import io.restassured.path.json.JsonPath;
 
 @QuarkusTest
 @WithKubernetesTestServer
-@WithTestResource(AmqpTestResourceLifecycleManager.class)
+@TestProfile(TestUmbProfile.class)
 class SBOMResourceRSQIT {
 
     @InjectSpy

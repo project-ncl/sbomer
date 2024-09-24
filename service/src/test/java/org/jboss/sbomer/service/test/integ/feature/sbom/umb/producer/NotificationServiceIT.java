@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -43,8 +42,7 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Generat
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.test.integ.feature.sbom.messaging.AmqpTestResourceLifecycleManager;
-import org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer.NotificationServiceIT.UmbProducerEnabled;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -52,16 +50,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import io.quarkus.test.InjectMock;
-import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-@TestProfile(UmbProducerEnabled.class)
-@WithTestResource(AmqpTestResourceLifecycleManager.class)
+@TestProfile(TestUmbProfile.class)
 class NotificationServiceIT {
 
     @InjectMock
@@ -69,18 +64,6 @@ class NotificationServiceIT {
 
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "sboms", fileName);
-    }
-
-    public static class UmbProducerEnabled implements QuarkusTestProfile {
-
-        @Override
-        public Map<String, String> getConfigOverrides() {
-            return Map.of(
-                    "sbomer.features.umb.producer.enabled",
-                    "true",
-                    "sbomer.features.umb.producer.topic",
-                    "a-test-topic");
-        }
     }
 
     private Sbom createOperationSBOM() throws IOException {
