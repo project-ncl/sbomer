@@ -50,6 +50,7 @@ import io.javaoperatorsdk.operator.api.reconciler.Constants;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -192,7 +193,20 @@ public class SyftImageController extends AbstractController {
                     "Generation succeded, but reading generated manifests failed was not successful. See logs for more information.");
         }
 
-        List<Sbom> sboms = storeBoms(generationRequest, boms);
+        List<Sbom> sboms = null;
+
+        try {
+            sboms = storeBoms(generationRequest, boms);
+        } catch (ValidationException e) {
+            // There was an error when validating the entity, most probably the SBOM is not valid
+            log.error("Unable to validate generated SBOMs: {}", e.getMessage(), e);
+
+            return updateRequest(
+                    generationRequest,
+                    SbomGenerationStatus.FAILED,
+                    GenerationResult.ERR_GENERATION,
+                    "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.", e.getMessage());
+        }
 
         try {
             performPost(sboms, generationRequest);
