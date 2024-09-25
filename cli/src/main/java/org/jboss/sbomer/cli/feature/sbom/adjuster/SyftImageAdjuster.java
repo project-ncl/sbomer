@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
@@ -124,7 +125,7 @@ public class SyftImageAdjuster implements Adjuster {
             cleanupComponent(bom.getComponents().get(i));
         }
 
-        createComponentTree(bom);
+        adjustComponents(bom);
 
         // Populate dependencies section with components
         adjustDependencies(bom);
@@ -197,39 +198,33 @@ public class SyftImageAdjuster implements Adjuster {
 
     /**
      * <p>
-     * Creates a component tree in the main {@link Bom#getComponents()} list.
+     * Ensures that the main component is present in the {@link Bom#getComponents()} list.
      * </p>
-     *
+     * 
      * <p>
-     * The result of this adjustment is that there will be onlys asingle {@link Component} in the component list with
-     * all other components listed in this particular component's {@link Component#getComponents()} list. This
-     * effectiveky creates a tree with a single root being the container image component itself.
+     * At the same time it cleans up the main compontn available in the {@link Metadata#getComponent()}.
      * </p>
      *
      * @param bom
      */
-    private void createComponentTree(Bom bom) {
+    private void adjustComponents(Bom bom) {
         Component mainComponent = bom.getMetadata().getComponent();
 
         // Create a new component out of the current main component which will replace it.
-        Component matadataComponent = new Component();
-        matadataComponent.setType(mainComponent.getType());
-        matadataComponent.setName(mainComponent.getName());
-        matadataComponent.setPurl(mainComponent.getPurl());
-        matadataComponent.setProperties(mainComponent.getProperties());
+        Component metadataComponent = new Component();
+        metadataComponent.setType(mainComponent.getType());
+        metadataComponent.setName(mainComponent.getName());
+        metadataComponent.setPurl(mainComponent.getPurl());
+        metadataComponent.setProperties(mainComponent.getProperties());
 
         // Set main component
-        bom.getMetadata().setComponent(matadataComponent);
+        bom.getMetadata().setComponent(metadataComponent);
 
         // Clear any properties from the root component. These are now in the metadata component.
         mainComponent.setProperties(null);
-        // Create component tree
-        mainComponent.setComponents(new ArrayList<>());
-        mainComponent.getComponents().addAll(bom.getComponents());
 
-        // Remove any components and add our root component
-        bom.setComponents(new ArrayList<>());
-        bom.getComponents().add(mainComponent);
+        // Set the main component
+        bom.getComponents().add(0, mainComponent);
     }
 
     /**
@@ -385,13 +380,6 @@ public class SyftImageAdjuster implements Adjuster {
         // as a product dependency
         if (dependencies.size() > 1) {
             for (Dependency dependency : dependencies.subList(1, dependencies.size())) {
-
-                boolean found = dependencies.stream().anyMatch(d -> d.getRef().equals(dependency.getRef()));
-
-                if (!found) {
-                    dependencies.add(dependency);
-                }
-
                 productDependency.addDependency(SbomUtils.createDependency(dependency.getRef()));
             }
         }
@@ -414,7 +402,12 @@ public class SyftImageAdjuster implements Adjuster {
         }
 
         components.forEach(component -> {
-            dependencies.add(SbomUtils.createDependency(component.getBomRef()));
+            boolean found = dependencies.stream().anyMatch(d -> d.getRef().equals(component.getBomRef()));
+
+            if (!found) {
+                dependencies.add(SbomUtils.createDependency(component.getBomRef()));
+            }
+
             populateDependencies(dependencies, component.getComponents());
         });
 
