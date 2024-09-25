@@ -43,10 +43,8 @@ public class SyftImageAdjusterTest {
                 "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
                 adjusted.getMetadata().getComponent().getPurl());
         assertEquals("amq-streams/console-ui-rhel9", adjusted.getMetadata().getComponent().getName());
-        assertEquals(1, adjusted.getComponents().size());
-        assertEquals(32, adjusted.getComponents().get(0).getComponents().size());
+        assertEquals(33, adjusted.getComponents().size());
         assertEquals(33, adjusted.getDependencies().size());
-
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
@@ -59,8 +57,7 @@ public class SyftImageAdjusterTest {
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(1, adjusted.getComponents().size());
-        assertEquals(23, adjusted.getComponents().get(0).getComponents().size());
+        assertEquals(24, adjusted.getComponents().size());
         assertEquals(24, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
@@ -74,8 +71,7 @@ public class SyftImageAdjusterTest {
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(1, adjusted.getComponents().size());
-        assertEquals(191, adjusted.getComponents().get(0).getComponents().size());
+        assertEquals(192, adjusted.getComponents().size());
         assertEquals(192, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
@@ -89,8 +85,7 @@ public class SyftImageAdjusterTest {
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(1, adjusted.getComponents().size());
-        assertEquals(182, adjusted.getComponents().get(0).getComponents().size());
+        assertEquals(183, adjusted.getComponents().size());
         assertEquals(183, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
@@ -111,13 +106,11 @@ public class SyftImageAdjusterTest {
 
         Bom adjusted = adjuster.adjust(bom);
 
-        // 11th component before adjustment becomes 11th element nested under a root component.
-        assertEquals(
-                "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64",
-                adjusted.getComponents().get(0).getComponents().get(10).getPurl());
+        // 11th component before adjustment becomes 12th after adding main component
+        assertEquals("pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64", adjusted.getComponents().get(11).getPurl());
         assertEquals(
                 "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
-                adjusted.getComponents().get(0).getComponents().get(21).getPurl());
+                adjusted.getComponents().get(22).getPurl());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
@@ -147,9 +140,7 @@ public class SyftImageAdjusterTest {
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(1, bom.getComponents().size());
-        // It is one less after filtering, because the "operating system" component does not have a purl.
-        assertEquals(191, bom.getComponents().get(0).getComponents().size());
+        assertEquals(192, bom.getComponents().size());
         // Main component + all of it's components
         assertEquals(192, adjusted.getDependencies().size());
         // Main component dependencies
