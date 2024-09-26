@@ -392,31 +392,37 @@ class SbomUtilsTest {
                 "pkg:maven/main-product/asm@9.1.0.redhat-00002?type=jar",
                 "pkg:maven/main-product-updated/asm@9.1.0.redhat-00002?type=jar");
 
-        // We have 2 components after all, not 3, one was duplicate
-        assertEquals(2, bom.getComponents().size());
+        assertEquals(3, bom.getComponents().size());
         assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", bom.getComponents().get(0).getPurl());
-        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", bom.getComponents().get(1).getPurl());
+        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", bom.getComponents().get(1).getPurl());
+        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", bom.getComponents().get(2).getPurl());
 
         // Main component's purl should be updated
         assertEquals(
                 "pkg:maven/main-product-updated/asm@9.1.0.redhat-00002?type=jar",
                 bom.getMetadata().getComponent().getPurl());
 
-        assertEquals(3, bom.getDependencies().size());
+        assertEquals(4, bom.getDependencies().size());
 
         // Dependencies after update
+        assertEquals("pkg:maven/main-product/asm@9.1.0.redhat-00002?type=jar", bom.getDependencies().get(0).getRef());
+
         assertEquals(
-                "pkg:maven/main-product-updated/asm@9.1.0.redhat-00002?type=jar",
-                bom.getDependencies().get(0).getRef());
-        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", bom.getDependencies().get(1).getRef());
-        assertEquals(0, bom.getDependencies().get(1).getDependencies().size());
-        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", bom.getDependencies().get(2).getRef());
-        assertEquals(0, bom.getDependencies().get(2).getDependencies().size());
+                "pkg:maven/org.objectweb.asm/asm@9.1.0.redhat-00002?type=jar",
+                bom.getDependencies().get(1).getRef());
+        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", bom.getDependencies().get(2).getRef());
+        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", bom.getDependencies().get(3).getRef());
+        assertNull(bom.getDependencies().get(1).getDependencies());
+        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", bom.getDependencies().get(2).getRef());
+        assertNull(bom.getDependencies().get(2).getDependencies());
+        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", bom.getDependencies().get(3).getRef());
+        assertNull(bom.getDependencies().get(3).getDependencies());
 
         List<Dependency> productDeps = bom.getDependencies().get(0).getDependencies();
 
-        assertEquals(2, productDeps.size());
-        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(0).getRef());
-        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", productDeps.get(1).getRef());
+        assertEquals(3, productDeps.size());
+        assertEquals("pkg:maven/org.objectweb.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(0).getRef());
+        assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(1).getRef());
+        assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", productDeps.get(2).getRef());
     }
 }

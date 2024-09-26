@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Dependency;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -146,5 +147,30 @@ public class SyftImageAdjusterTest {
         // Main component dependencies
         assertEquals(191, adjusted.getDependencies().get(0).getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+    }
+
+    @Test
+    void depdsShouldPointToComponents() throws Exception {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath());
+
+        this.bom = SbomUtils.fromString(TestResources.asString("boms/shaded.json"));
+
+        assertEquals(459, bom.getComponents().size());
+        assertEquals(294, bom.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        // One component added (image) at position 0, one component removed (operating system), size is the same as
+        // before
+        assertEquals(459, adjusted.getComponents().size());
+        assertEquals(459, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+
+        for (Dependency d : bom.getDependencies()) {
+            if (bom.getComponents().stream().filter(c -> c.getBomRef().equals(d.getRef())).findAny().isEmpty()) {
+                throw new Exception("The dependency " + d.getRef() + " does not have a related component!");
+            }
+        }
     }
 }

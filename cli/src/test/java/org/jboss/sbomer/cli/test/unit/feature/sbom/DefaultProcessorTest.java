@@ -80,4 +80,22 @@ public class DefaultProcessorTest {
         assertEquals("https://git.com/repo#hash", commit.getUrl());
 
     }
+
+    @Test
+    void baseTest() throws IOException {
+        Bom bom = SbomUtils.fromString(TestResources.asString("boms/adjusted.json"));
+
+        PncService pncServiceMock = Mockito.mock(PncService.class);
+        KojiService kojiServiceMock = Mockito.mock(KojiService.class);
+
+        DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
+
+        assertEquals(459, bom.getComponents().size());
+        assertEquals(459, bom.getDependencies().size());
+
+        defaultProcessor.process(bom);
+
+        assertEquals(459, bom.getComponents().size());
+        assertEquals(459, bom.getDependencies().size());
+    }
 }

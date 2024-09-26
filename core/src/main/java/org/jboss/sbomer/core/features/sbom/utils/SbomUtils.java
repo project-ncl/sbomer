@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -395,52 +394,7 @@ public class SbomUtils {
         if (bom.getComponents() != null) {
             // Update all components' purls (if needed)
             bom.getComponents().forEach(c -> updatePurl(c, oldPurl, newPurl));
-
-            // Remove all duplicates from the components
-            bom.setComponents(new ArrayList<>(new LinkedHashSet<>(bom.getComponents())));
         }
-
-        if (bom.getDependencies() != null) {
-            // Start handling dependencies
-            List<Dependency> dependencies = new ArrayList<>();
-
-            // Update all dependencies
-            bom.getDependencies().forEach(d -> dependencies.add(updatePurl(d, oldPurl, newPurl)));
-
-            // Remove all duplicates from dependencies
-            bom.setDependencies(new ArrayList<>(new LinkedHashSet<>(dependencies)));
-        }
-    }
-
-    /**
-     * Updates the ref in the depenency and all of it's children, if needed.
-     *
-     * @param dependency
-     * @param oldPurl
-     * @param newPurl
-     * @return
-     */
-    public static Dependency updatePurl(Dependency dependency, String oldPurl, String newPurl) {
-        List<Dependency> dependencies = new ArrayList<>();
-
-        Dependency updatedDependency = dependency;
-
-        // We cannot just update the ref, we need to create entire new Dependency...
-        if (dependency.getRef().equals(oldPurl)) {
-            updatedDependency = SbomUtils.createDependency(newPurl);
-        }
-
-        // Update refs in dependencie as well
-        if (dependency.getDependencies() != null) {
-            dependency.getDependencies().forEach(d -> {
-                dependencies.add(updatePurl(d, oldPurl, newPurl));
-            });
-        }
-
-        // Set updated dependencies back
-        updatedDependency.setDependencies(new ArrayList<>(new LinkedHashSet<>(dependencies)));
-
-        return updatedDependency;
     }
 
     /**
@@ -454,6 +408,7 @@ public class SbomUtils {
     public static boolean updatePurl(Component component, String oldPurl, String newPurl) {
         if (component.getPurl().equals(oldPurl)) {
             component.setPurl(newPurl);
+
             return true;
         }
 
