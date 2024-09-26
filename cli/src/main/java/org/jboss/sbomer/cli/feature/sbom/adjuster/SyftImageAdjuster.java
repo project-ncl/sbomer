@@ -75,8 +75,12 @@ public class SyftImageAdjuster implements Adjuster {
      *
      * @see SyftImageAdjuster#adjustProperties(List)
      */
-    final static private List<String> ALLOWED_PROPERTY_PREFIXES = List
-            .of("sbomer:package:language", "sbomer:package:type", "sbomer:location:0:path", "sbomer:image:labels");
+    final static private List<String> ALLOWED_PROPERTY_PREFIXES = List.of(
+            "sbomer:package:language",
+            "sbomer:package:type",
+            "sbomer:location:0:path",
+            "sbomer:metadata:virtualPath",
+            "sbomer:image:labels");
 
     public SyftImageAdjuster(Path workDir) {
         this.workDir = workDir;
@@ -200,7 +204,7 @@ public class SyftImageAdjuster implements Adjuster {
      * <p>
      * Ensures that the main component is present in the {@link Bom#getComponents()} list.
      * </p>
-     * 
+     *
      * <p>
      * At the same time it cleans up the main compontn available in the {@link Metadata#getComponent()}.
      * </p>
@@ -216,6 +220,7 @@ public class SyftImageAdjuster implements Adjuster {
         metadataComponent.setName(mainComponent.getName());
         metadataComponent.setPurl(mainComponent.getPurl());
         metadataComponent.setProperties(mainComponent.getProperties());
+        metadataComponent.setType(Component.Type.CONTAINER);
 
         // Set main component
         bom.getMetadata().setComponent(metadataComponent);
@@ -379,8 +384,8 @@ public class SyftImageAdjuster implements Adjuster {
         // If there are more dependencies (besides the main image), add all of them
         // as a product dependency
         if (dependencies.size() > 1) {
-            for (Dependency dependency : dependencies.subList(1, dependencies.size())) {
-                productDependency.addDependency(SbomUtils.createDependency(dependency.getRef()));
+            for (Component component : bom.getComponents().subList(1, dependencies.size())) {
+                productDependency.addDependency(SbomUtils.createDependency(component.getBomRef()));
             }
         }
 
@@ -402,12 +407,7 @@ public class SyftImageAdjuster implements Adjuster {
         }
 
         components.forEach(component -> {
-            boolean found = dependencies.stream().anyMatch(d -> d.getRef().equals(component.getBomRef()));
-
-            if (!found) {
-                dependencies.add(SbomUtils.createDependency(component.getBomRef()));
-            }
-
+            dependencies.add(SbomUtils.createDependency(component.getBomRef()));
             populateDependencies(dependencies, component.getComponents());
         });
 
@@ -517,8 +517,6 @@ public class SyftImageAdjuster implements Adjuster {
                 }
             }
         }
-
-        component.setBomRef(component.getPurl());
 
         if (component.getComponents() != null && !component.getComponents().isEmpty()) {
             component.getComponents().forEach(c -> cleanupComponent(c));
