@@ -112,7 +112,7 @@ you may want to adjust this command.
 
 === Firewall Adjustments
 
-We will be mounting directories from the minikube instance into the host. Most likely the firewall will
+We will be mounting directories from the minikube instance into the host. If you have `firewalld` installed, then most likely the firewall will
 prevent us from doing it. But we really, really need to do it. Let's allow it:
 
 [source,console]

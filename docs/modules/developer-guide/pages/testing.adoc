@@ -19,7 +19,7 @@ $ ./hack/run-test-integ.sh
 == End to End Tests
 
 In order to run e2e test we need to target some environment. Currently we only use the
-xref:admin-guide:deployment-environments#staging[staging environment] for this purpose.
+xref:admin-guide:deployment-environments.adoc#staging[staging environment] for this purpose.
 
 Two environment variables should be provided:
 
