@@ -322,13 +322,7 @@ class NotificationServiceIT {
         // Remove all product properties
         sbom.setSbom(SbomUtils.removeErrataProperties(sbom.getSbom()));
 
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            notificationService.notifyCompleted(List.of(sbom));
-        });
-
-        assertEquals(
-                "Could not retrieve product configuration from the main component (purl = 'pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar') in the '416640206274228333' SBOM, skipping sending UMB notification",
-                ex.getMessage());
+        notificationService.notifyCompleted(List.of(sbom));
 
         verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));
     }

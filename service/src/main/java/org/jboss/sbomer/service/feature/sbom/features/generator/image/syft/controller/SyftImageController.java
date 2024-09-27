@@ -205,7 +205,8 @@ public class SyftImageController extends AbstractController {
                     generationRequest,
                     SbomGenerationStatus.FAILED,
                     GenerationResult.ERR_GENERATION,
-                    "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.", e.getMessage());
+                    "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.",
+                    e.getMessage());
         }
 
         try {

@@ -128,10 +128,11 @@ public class NotificationService {
              * Skips sending UMB messages for manifests not related to a product build.
              */
             if (ProductConfig.ErrataProductConfig.fromBom(bom) == null) {
-                throw new NotificationException(
+                log.warn(
                         "Could not retrieve product configuration from the main component (purl = '{}') in the '{}' SBOM, skipping sending UMB notification",
-                        component.getPurl(),
+                        sbom.getRootPurl(),
                         sbom.getId());
+                return;
             }
 
             // Check whether we should send UMB notification for a given type.
