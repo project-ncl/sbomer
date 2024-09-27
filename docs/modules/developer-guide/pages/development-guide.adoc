@@ -56,9 +56,13 @@ Please follow link:https://helm.sh/docs/intro/install/[upstream documentation] t
 You need to clone the link:https://gitlab.cee.redhat.com/appsvcs-platform/security/sbomer-helm[sbomer-helm] repository
 to continue.
 
+From the `sbomer-helm` directory, you will need to run `./hack/vault/login.sh` followed by `./hack/vault/fetch-dev.sh` to fetch the
+secrets. These scripts require that you have link:https://jqlang.github.io/jq/[jq] and
+link:https://developer.hashicorp.com/vault/docs/install[vault] installed.
+
 [WARNING]
 ====
-Always please make syre you use the correct Kubernetes context to prevent damages to environments you didn't want to touch!
+Always please make sure that you use the correct Kubernetes context to prevent damages to environments you didn't want to touch!
 
 This can be done by specifying `--kube-context` option in Helm and `--context` in `kubectl`.
 
@@ -86,12 +90,12 @@ Deployment type: dev.
 Deployment target: minikube.
 ----
 
-After some time you should see the `cache` link:https://kubernetes.io/docs/concepts/workloads/controllers/deployment/[Deployment]
+After some time you should see the `cache` link:https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/[StatefulSet]
 ready:
 
 [source,console]
 ----
-$ kubectl get deployments sbomer-cache
+$ kubectl get statefulsets sbomer-cache
 NAME           READY   UP-TO-DATE   AVAILABLE   AGE
 sbomer-cache   1/1     1            1           12m
 ----
@@ -101,8 +105,8 @@ As well as the `db` link:https://kubernetes.io/docs/concepts/workloads/controlle
 [source,console]
 ----
 $ kubectl get statefulsets sbomer-db
-NAME        READY   AGE
-sbomer-db   1/1     13m
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+sbomer-db      1/1     1            1           13m
 ----
 
 Good job!
@@ -182,7 +186,7 @@ The service is now available at: http://localhost:8080.
 
 == Congratulations!
 
-You have a running service in development mode! You can go straight to the code and make changes. These will be immediately refected
+You have a running service in development mode! You can go straight to the code and make changes. These will be immediately reflected
 in the running service thanks to link:https://quarkus.io/guides/dev-mode-differences[Quarkus dev mode].
 
 Once you make changes, don't forget to xref:testing.adoc[run tests].
