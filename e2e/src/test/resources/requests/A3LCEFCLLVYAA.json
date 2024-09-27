@@ -1,21 +1,11 @@
 {
-  "apiVersion": "sbomer.jboss.org/v1alpha1",
-  "buildId": "A3LCEFCLLVYAA",
-  "products": [
-    {
-      "processors": [
+    "apiVersion": "sbomer.jboss.org/v1alpha1",
+    "buildId": "A3LCEFCLLVYAA",
+    "products": [
         {
-          "type": "redhat-product",
-          "errata": {
-            "productName": "RHTESTPRODUCT",
-            "productVersion": "RHEL-8-RHTESTPRODUCT-1.1",
-            "productVariant": "8Base-RHTESTPRODUCT-1.1"
-          }
+            "generator": {
+                "type": "gradle-cyclonedx"
+            }
         }
-      ],
-      "generator": {
-        "type": "gradle-cyclonedx"
-      }
-    }
-  ]
+    ]
 }
