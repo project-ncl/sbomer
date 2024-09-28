@@ -38,6 +38,7 @@ import io.vertx.core.json.JsonObject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -79,6 +80,7 @@ public class AmqpMessageConsumer {
 
     @Incoming("builds")
     @Blocking(ordered = false, value = "build-processor-pool")
+    @Transactional
     public CompletionStage<Void> process(Message<String> message) {
         receivedMessages.incrementAndGet();
 

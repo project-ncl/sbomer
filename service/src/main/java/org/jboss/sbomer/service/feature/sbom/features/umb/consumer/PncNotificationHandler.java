@@ -45,6 +45,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
+import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.pnc.PncClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -73,6 +74,9 @@ public class PncNotificationHandler {
 
     @Inject
     SbomGenerationRequestRepository sbomGenerationRequestRepository;
+
+    @Inject
+    SbomService sbomService;
 
     @Inject
     @RestClient
@@ -114,20 +118,34 @@ public class PncNotificationHandler {
             return;
         }
 
-        if (isSuccessfulPersistentBuild(messageBody)) {
-            log.info("Triggering automated SBOM generation for PNC build '{}'' ...", messageBody.getBuild().getId());
-
-            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
-                    .withIdentifier(messageBody.getBuild().getId())
-                    .withStatus(SbomGenerationStatus.NEW)
-                    .build();
-
-            log.debug("ConfigMap to create: '{}'", req);
-
-            ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
-
-            log.info("Request created: {}", cm.getMetadata().getName());
+        if (!isSuccessfulPersistentBuild(messageBody)) {
+            log.info("Received message is not a scuccessful pesistent build, skipping...");
+            return;
         }
+
+        SbomGenerationRequest existingRequest = sbomService
+                .findRequestByIdentifier(GenerationRequestType.BUILD, messageBody.getBuild().getId());
+
+        if (existingRequest != null) {
+            log.warn(
+                    "Received notification for PNC build '{}', but we already handled it in request '{}', skipping",
+                    messageBody.getBuild().getId(),
+                    existingRequest.getId());
+            return;
+        }
+
+        log.info("Triggering automated SBOM generation for PNC build '{}' ...", messageBody.getBuild().getId());
+
+        GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
+                .withIdentifier(messageBody.getBuild().getId())
+                .withStatus(SbomGenerationStatus.NEW)
+                .build();
+
+        log.debug("ConfigMap to create: '{}'", req);
+
+        ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
+
+        log.info("Request created: {}", cm.getMetadata().getName());
     }
 
     /**
