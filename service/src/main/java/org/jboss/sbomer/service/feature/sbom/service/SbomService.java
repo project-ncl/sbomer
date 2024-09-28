@@ -496,6 +496,25 @@ public class SbomService {
 
     }
 
+    public SbomGenerationRequest findRequestByIdentifier(GenerationRequestType type, String identifier) {
+        QueryParameters parameters = QueryParameters.builder()
+                .rsqlQuery("identifier=eq='" + identifier + "' and type=eq=" + type)
+                .sort("creationTime=desc=")
+                .pageSize(10)
+                .pageIndex(0)
+                .build();
+
+        List<SbomGenerationRequest> sboms = sbomRequestRepository.search(parameters);
+
+        log.debug("Found {} results for the '{}' identifier nad '{}' type", sboms.size(), identifier, type);
+
+        if (sboms.isEmpty()) {
+            return null;
+        }
+
+        return sboms.get(0);
+    }
+
     /**
      * Notify the creation of an existing SBOM via UMB.
      *
