@@ -37,7 +37,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Data
 @SuperBuilder(setterPrefix = "with")
 @AllArgsConstructor
@@ -113,6 +115,15 @@ public abstract class Config {
 
             return param;
         }).collect(Collectors.joining(" "));
+    }
+
+    public static <T extends Config> T newInstance(Class<T> clazz) {
+        try {
+            return clazz.getConstructor().newInstance();
+        } catch (Exception e) {
+            log.warn("Unable to create a new default config of class '{}'", clazz, e);
+            return null;
+        }
     }
 
     public String toJson() {

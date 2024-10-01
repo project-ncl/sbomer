@@ -1,7 +1,9 @@
 package org.jboss.sbomer.core.test.unit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
@@ -54,7 +56,59 @@ public class ConfigTest {
     }
 
     @Nested
+    class DeliverableAnalysisConfigTest {
+
+        @Test
+        void shouldReturnDefault() {
+            DeliverableAnalysisConfig config = Config.newInstance(DeliverableAnalysisConfig.class);
+
+            assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
+            assertNull(config.getDeliverableUrls());
+            assertNull(config.getErrata());
+            assertNull(config.getMilestoneId());
+        }
+    }
+
+    @Nested
+    class OperationConfigTest {
+
+        @Test
+        void shouldReturnDefault() {
+            OperationConfig config = Config.newInstance(OperationConfig.class);
+
+            assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
+            assertNull(config.getDeliverableUrls());
+            assertNull(config.getOperationId());
+            assertNull(config.getProduct());
+        }
+    }
+
+    @Nested
+    class PncBuildConfigTest {
+
+        @Test
+        void shouldReturnDefault() {
+            PncBuildConfig config = Config.newInstance(PncBuildConfig.class);
+
+            assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
+            assertNull(config.getBuildId());
+            assertNull(config.getEnvironment());
+            assertTrue(config.getProducts().isEmpty());
+        }
+    }
+
+    @Nested
     class SyftImageConfigTest {
+
+        @Test
+        void shouldReturnNewInstance() {
+            SyftImageConfig config = Config.newInstance(SyftImageConfig.class);
+
+            assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
+            assertTrue(config.getPaths().isEmpty());
+            assertFalse(config.isIncludeRpms());
+
+        }
 
         @Test
         void shouldAddDefaultProcessor() {

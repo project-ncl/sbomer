@@ -88,6 +88,11 @@ public class SbomerConfigProvider {
     public void adjust(OperationConfig config) {
         log.debug("Adjusting operation configuration...");
 
+        // If we have not specified any products (for example when provided an empty config)
+        if (config.getProduct() == null) {
+            config.setProduct(ProductConfig.builder().build());
+        }
+
         GeneratorConfig generatorConfig = config.getProduct().getGenerator();
 
         // Generator configuration was not provided, will use defaults
