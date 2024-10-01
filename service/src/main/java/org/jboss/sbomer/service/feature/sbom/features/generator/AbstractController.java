@@ -370,6 +370,9 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         storeFilesInS3.join();
 
+        // We're good, remove all files now!
+        cleanupFinishedGenerationRequest(generationRequest);
+
         return UpdateControl.noUpdate();
     }
 
