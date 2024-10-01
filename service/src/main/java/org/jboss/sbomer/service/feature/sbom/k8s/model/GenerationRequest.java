@@ -136,9 +136,20 @@ public class GenerationRequest extends ConfigMap {
     }
 
     @JsonIgnore
+    @Deprecated
     public <T extends Config> T getConfig(Class<T> clazz) {
+        return getConfig(clazz, false);
+    }
+
+    @JsonIgnore
+    public <T extends Config> T getConfig(Class<T> clazz, boolean def) {
         String configData = getData().get(KEY_CONFIG);
-        return Config.fromString(configData, clazz);
+        T config = Config.fromString(configData, clazz);
+
+        if (config == null && def) {
+            return Config.newInstance(clazz);
+        }
+        return config;
     }
 
     @JsonIgnore

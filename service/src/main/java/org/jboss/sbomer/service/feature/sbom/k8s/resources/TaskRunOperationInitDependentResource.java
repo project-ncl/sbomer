@@ -83,7 +83,7 @@ public class TaskRunOperationInitDependentResource
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.OPERATIONINIT.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
-        OperationConfig config = generationRequest.getConfig(OperationConfig.class);
+        OperationConfig config = generationRequest.getConfig(OperationConfig.class, true);
 
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
