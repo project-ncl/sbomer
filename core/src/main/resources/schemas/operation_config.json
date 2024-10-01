@@ -5,6 +5,15 @@
   "description": "User-provided configuration file to instruct SBOM generation",
   "type": "object",
   "$defs": {
+    "processor-default": {
+      "$id": "/schemas/processors/default",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "default"
+        }
+      }
+    },
     "processor-redhat-product": {
       "$id": "/schemas/processors/redhat-product",
       "type": "object",
@@ -82,8 +91,11 @@
           "type": "array",
           "uniqueItems": true,
           "minItems": 0,
-          "maxItems": 1,
+          "maxItems": 2,
           "prefixItems": [
+            {
+              "$ref": "#/$defs/processor-default"
+            },
             {
               "$ref": "#/$defs/processor-redhat-product"
             }
