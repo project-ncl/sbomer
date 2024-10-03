@@ -120,6 +120,34 @@ class ConfigSchemaValidatorTest {
     @Nested
     class OperationConfigTests {
 
+        @Test
+        void validateConfig() throws IOException {
+            String content = TestResources.asString("configs/operation.json");
+
+            OperationConfig config = Config.fromString(content, OperationConfig.class);
+
+            assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
+            assertEquals(
+                    List.of(
+                            "https://host.com/staging/rhaf/camel-4.8.0.ER1/rhaf-camel-4.8.0.ER1-maven-repository.zip",
+                            "https://host.com/rcm-guest/staging/rhaf/camel-spring-boot-4.8.0.CS1/rhaf-camel-spring-boot-4.8.0.CS1-maven-repository.zip"),
+                    config.getDeliverableUrls());
+
+            RedHatProductProcessorConfig redHatProductProcessorConfig = (RedHatProductProcessorConfig) config
+                    .getProduct()
+                    .getProcessors()
+                    .get(0);
+
+            assertEquals("RHBOAC", redHatProductProcessorConfig.getErrata().getProductName());
+            assertEquals("RHBOAC CSB 4.8 Text-only", redHatProductProcessorConfig.getErrata().getProductVersion());
+            assertEquals("6Server-RHBOAC-CSB-4.8", redHatProductProcessorConfig.getErrata().getProductVariant());
+
+            ValidationResult result = validator.validate(config);
+            assertTrue(result.isValid());
+            assertTrue(result.getErrors().isEmpty());
+
+        }
+
         private OperationConfig minimalRuntimeOperationConfig() {
             List<ProcessorConfig> processors = new ArrayList<>();
 
@@ -161,7 +189,29 @@ class ConfigSchemaValidatorTest {
     }
 
     @Nested
-    class DelAnConfigTests {
+    class DeliverableAnalysisConfigTests {
+
+        @Test
+        void validateConfig() throws IOException {
+            String content = TestResources.asString("configs/analysis.json");
+
+            DeliverableAnalysisConfig config = Config.fromString(content, DeliverableAnalysisConfig.class);
+
+            assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
+            assertEquals(
+                    List.of(
+                            "https://host.com/rcm-guest/staging/rhaf/camel-4.8.0.ER1/rhaf-camel-4.8.0.ER1-maven-repository.zip ",
+                            "https://host.com/rcm-guest/staging/rhaf/camel-spring-boot-4.8.0.CS1/rhaf-camel-spring-boot-4.8.0.CS1-maven-repository.zip"),
+                    config.getDeliverableUrls());
+            assertEquals("RHBOAC", config.getErrata().getProductName());
+            assertEquals("RHBOAC CSB 4.8 Text-only", config.getErrata().getProductVersion());
+            assertEquals("6Server-RHBOAC-CSB-4.8", config.getErrata().getProductVariant());
+            assertEquals("3101", config.getMilestoneId());
+
+            ValidationResult result = validator.validate(config);
+            assertTrue(result.isValid());
+            assertTrue(result.getErrors().isEmpty());
+        }
 
         private DeliverableAnalysisConfig minimalDeliverableAnalysisConfig() {
             String milestoneId = "13";
@@ -283,4 +333,5 @@ class ConfigSchemaValidatorTest {
             assertTrue(result.getErrors().isEmpty());
         }
     }
+
 }

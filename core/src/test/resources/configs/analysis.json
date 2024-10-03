@@ -1,0 +1,11 @@
+{
+    "apiVersion": "sbomer.jboss.org/v1alpha1",
+    "type": "analysis",
+    "milestoneId": "3101",
+    "errata": {
+        "productName": "RHBOAC",
+        "productVersion": "RHBOAC CSB 4.8 Text-only",
+        "productVariant": "6Server-RHBOAC-CSB-4.8"
+    },
+    "deliverableUrls": ["https://host.com/rcm-guest/staging/rhaf/camel-4.8.0.ER1/rhaf-camel-4.8.0.ER1-maven-repository.zip ", "https://host.com/rcm-guest/staging/rhaf/camel-spring-boot-4.8.0.CS1/rhaf-camel-spring-boot-4.8.0.CS1-maven-repository.zip"]
+}

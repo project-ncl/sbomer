@@ -1,0 +1,21 @@
+{
+    "type": "operation",
+    "apiVersion": "sbomer.jboss.org/v1alpha1",
+    "operationId": "BC6LAPCXN5AAA",
+    "product": {
+        "processors": [
+            {
+                "type": "redhat-product",
+                "errata": {
+                    "productName": "RHBOAC",
+                    "productVersion": "RHBOAC CSB 4.8 Text-only",
+                    "productVariant": "6Server-RHBOAC-CSB-4.8"
+                }
+            }
+        ],
+        "generator": {
+            "type": "cyclonedx-operation"
+        }
+    },
+    "deliverableUrls": ["https://host.com/staging/rhaf/camel-4.8.0.ER1/rhaf-camel-4.8.0.ER1-maven-repository.zip", "https://host.com/rcm-guest/staging/rhaf/camel-spring-boot-4.8.0.CS1/rhaf-camel-spring-boot-4.8.0.CS1-maven-repository.zip"]
+}
