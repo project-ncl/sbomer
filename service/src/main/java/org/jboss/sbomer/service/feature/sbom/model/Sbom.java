@@ -17,16 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.model;
 
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
-
 import java.time.Instant;
 import java.util.Map;
 
-import org.cyclonedx.exception.ParseException;
-import org.cyclonedx.generators.BomGeneratorFactory;
-import org.cyclonedx.generators.json.BomJsonGenerator;
 import org.cyclonedx.model.Bom;
-import org.cyclonedx.parsers.JsonParser;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
