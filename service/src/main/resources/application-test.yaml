@@ -43,6 +43,10 @@ quarkus:
     cors:
       ~: true
       origins: "/.*/"
+
+kerberos-client:
+  user-principal-name: principal
+
 sbomer:
   controller:
     generation-request:
@@ -61,4 +65,6 @@ sbomer:
     umb:
       enabled: false
       producer:
+        enabled: false
+    kerberos:
         enabled: false

@@ -1,0 +1,103 @@
+{
+    "data": {
+      "id": 153,
+      "type": "products",
+      "attributes": {
+        "name": "Red Hat build of Quarkus",
+        "description": "Quarkus is a Kubernetes-native Java framework tailored for JVM and native compilation, crafted from best-of-breed Java libraries and standards.",
+        "short_name": "RHBQ",
+        "bugzilla_product_name": "",
+        "valid_bug_states": [
+          "VERIFIED",
+          "MODIFIED"
+        ],
+        "ftp_path": "",
+        "ftp_subdir": "rhbq",
+        "is_internal": false,
+        "suppress_push_request_jira": false,
+        "isactive": true,
+        "move_bugs_on_qe": false,
+        "show_bug_package_mismatch_warning": true
+      },
+      "relationships": {
+        "default_docs_reviewer": {
+          "id": 3004848,
+          "login_name": "aaa@bbb.com"
+        },
+        "default_solution": {
+          "id": 2,
+          "title": "enterprise"
+        },
+        "product_versions": [
+          {
+            "id": 1229,
+            "name": "RHBQ Text-Only"
+          },
+          {
+            "id": 1720,
+            "name": "RHEL-8-RHBQ-2.7"
+          },
+          {
+            "id": 1838,
+            "name": "RHEL-8-RHBQ-2.13"
+          },
+          {
+            "id": 1997,
+            "name": "Middleware-RHBQ-2.13"
+          },
+          {
+            "id": 2040,
+            "name": "RHEL-8-RHBQ-3.2"
+          },
+          {
+            "id": 2080,
+            "name": "Middleware-RHBQ-3.2"
+          },
+          {
+            "id": 2166,
+            "name": "RHEL-8-RHBQ-3.8"
+          },
+          {
+            "id": 2175,
+            "name": "Middleware-RHBQ-3.8"
+          }
+        ],
+        "push_targets": [
+          {
+            "id": 3,
+            "name": "ftp"
+          },
+          {
+            "id": 7,
+            "name": "cdn_stage"
+          },
+          {
+            "id": 10,
+            "name": "cdn_docker_stage"
+          },
+          {
+            "id": 9,
+            "name": "cdn_docker"
+          },
+          {
+            "id": 4,
+            "name": "cdn"
+          }
+        ],
+        "state_machine_rule_set": {
+          "id": 1,
+          "name": "Default"
+        },
+        "exd_org_group": {
+          "id": 123,
+          "name": "M&M",
+          "short_name": "M&M",
+          "jira_key": "SPMM",
+          "jira_ticket_project_keys": {
+            "push_request": "SPMM",
+            "listings_change": "SPMM"
+          }
+        }
+      }
+    }
+  }

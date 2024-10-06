@@ -74,6 +74,8 @@ quarkus:
       url: "https://${sbomer.atlas.host}"
     "pnc":
       url: "https://${sbomer.pnc.host}"
+    "errata":
+      url: "https://${sbomer.errata.host}"
 
   # Support for feature-flags
   unleash:
@@ -100,6 +102,9 @@ quarkus:
         level: WARN
       "io.quarkus.kubernetes.client":
         level: INFO
+      "io.quarkiverse.kerberos.runtime.KerberosIdentityProvider":
+        level: TRACE
+
     console:
       # Enable console logging
       enable: true
@@ -164,11 +169,16 @@ quarkus:
       ~: true
       origins: "/.*/"
 
+  kerberos:
+    enabled:  ${sbomer.features.kerberos.enabled}
+
 sbomer:
   features:
     umb:
       # Disable UMB feature entirely by default
       enabled: false
+    kerberos:
+        enabled: false
 
   controller:
     generation-request:

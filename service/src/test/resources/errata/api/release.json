@@ -1,0 +1,53 @@
+{
+  "data": {
+    "id": 2227,
+    "type": "releases",
+    "attributes": {
+      "name": "RHEL-8-RHBQ-3.8",
+      "description": "Red Hat build of Quarkus 3.8 on RHEL 8",
+      "type": "Async",
+      "allow_pkg_dupes": false,
+      "ship_date": null,
+      "pelc_product_version_name": "",
+      "is_active": true,
+      "enabled": true,
+      "enable_batching": false,
+      "is_async": true,
+      "is_deferred": false,
+      "allow_shadow": false,
+      "allow_blocker": false,
+      "allow_exception": false,
+      "limit_bugs_by_product": false,
+      "supports_component_acl": false,
+      "blocker_flags": [
+        
+      ],
+      "internal_target_release": null,
+      "zstream_target_release": null,
+      "notify_bugzilla_about_release_status": false,
+      "is_silent": false,
+      "pp_start_date": null,
+      "pp_end_date": null
+    },
+    "relationships": {
+      "brew_tags": [
+        
+      ],
+      "product": {
+        "id": 153,
+        "short_name": "RHBQ"
+      },
+      "product_versions": [
+        {
+          "id": 2166,
+          "name": "RHEL-8-RHBQ-3.8"
+        }
+      ],
+      "state_machine_rule_set": null,
+      "program_manager": {
+        "id": 3000677,
+        "login_name": "aa@bb.com"
+      }
+    }
+  }
+}
