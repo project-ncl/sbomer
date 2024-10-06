@@ -29,11 +29,21 @@ import lombok.Data;
 public class Stats {
 
     /**
-     * Statistics related to message consumer. All stats since application boot time.
+     * Statistics related to message PNC consumer. All stats since application boot time.
      */
     @Data
     @Builder(setterPrefix = "with")
-    public static class Consumer {
+    public static class PncConsumer {
+        int received;
+        int processed;
+    }
+
+    /**
+     * Statistics related to message Errata consumer. All stats since application boot time.
+     */
+    @Data
+    @Builder(setterPrefix = "with")
+    public static class ErrataConsumer {
         int received;
         int processed;
     }
@@ -51,7 +61,8 @@ public class Stats {
     @Data
     @Builder(setterPrefix = "with")
     public static class Messaging {
-        Consumer consumer;
+        PncConsumer pncConsumer;
+        ErrataConsumer errataConsumer;
         Producer producer;
     }
 

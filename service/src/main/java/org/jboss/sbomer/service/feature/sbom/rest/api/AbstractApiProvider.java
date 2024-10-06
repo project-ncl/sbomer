@@ -37,11 +37,12 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessagePr
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.Consumer;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Deployment;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.ErrataConsumer;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.Producer;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.GenerationRequestStats;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Messaging;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.Producer;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.PncConsumer;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Resources;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.SbomStats;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -136,11 +137,17 @@ public abstract class AbstractApiProvider {
 
         if (umbConfig.isEnabled()) {
             messaging = Messaging.builder()
-                    .withConsumer(
-                            Consumer.builder()
-                                    .withProcessed(messageConsumer.getProcessedMessages())
-                                    .withReceived(messageConsumer.getReceivedMessages())
+                    .withPncConsumer(
+                            PncConsumer.builder()
+                                    .withProcessed(messageConsumer.getPncProcessedMessages())
+                                    .withReceived(messageConsumer.getPncReceivedMessages())
                                     .build())
+                    .withErrataConsumer(
+                            ErrataConsumer.builder()
+                                    .withProcessed(messageConsumer.getErrataProcessedMessages())
+                                    .withReceived(messageConsumer.getErrataReceivedMessages())
+                                    .build())
+
                     .withProducer(
                             Producer.builder()
                                     .withAcked(messageProducer.getAckedMessages())
