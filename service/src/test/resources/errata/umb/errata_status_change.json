@@ -1,0 +1,17 @@
+{
+    "content_types": [
+      "rpm"
+    ],
+    "errata_id": 139230,
+    "errata_status": "SHIPPED_LIVE",
+    "from": "IN_PUSH",
+    "fulladvisory": "RHSA-2041:XXXX-YY",
+    "product": "MYPRODUCT",
+    "release": "MYRELEASE",
+    "skip_customer_notifications": false,
+    "synopsis": "Important: security update",
+    "to": "SHIPPED_LIVE",
+    "type": "RHSA",
+    "when": "2041-10-01 08:03:25 UTC",
+    "who": "john@doyle.com"
+}

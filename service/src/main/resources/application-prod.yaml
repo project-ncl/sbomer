@@ -38,6 +38,8 @@ sbomer:
       enabled: true
       producer:
         enabled: true
+    kerberos:
+        enabled: true
 
 quarkus:
   oidc:

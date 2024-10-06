@@ -1,0 +1,52 @@
+{
+    "data": {
+      "id": 4603,
+      "type": "variants",
+      "attributes": {
+        "name": "8Base-RHBQ-3.8",
+        "description": "Red Hat build of Quarkus 3.8",
+        "cpe": "cpe:/a:rh:qk:3.8::el8",
+        "override_ftp_base_folder": null,
+        "enabled": true,
+        "buildroot": false,
+        "tps_stream": "",
+        "relationships": {
+          "product": {
+            "id": 153,
+            "name": "Red Hat build of Quarkus",
+            "short_name": "RHBQ"
+          },
+          "product_version": {
+            "id": 2166,
+            "name": "RHEL-8-RHBQ-3.8"
+          },
+          "rhel_release": {
+            "id": 87,
+            "name": "RHEL-8"
+          },
+          "rhel_variant": {
+            "id": 2235,
+            "name": "8Base"
+          },
+          "push_targets": [
+            {
+              "id": 7,
+              "name": "cdn_stage"
+            },
+            {
+              "id": 10,
+              "name": "cdn_docker_stage"
+            },
+            {
+              "id": 9,
+              "name": "cdn_docker"
+            },
+            {
+              "id": 4,
+              "name": "cdn"
+            }
+          ]
+        }
+      }
+    }
+  }
