@@ -1,3 +1,4 @@
+import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
 import { SbomerStats } from '@app/types';
 import { timestampToHumanReadable } from '@app/utils/Utils';
 import {
@@ -10,12 +11,13 @@ import {
   DescriptionListTerm,
   HelperText,
   HelperTextItem,
-  Skeleton
+  Skeleton,
 } from '@patternfly/react-core';
 import { InfoIcon } from '@patternfly/react-icons';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ErrorSection } from '../ErrorSection/ErrorSection';
+import { useAsyncRetry } from 'react-use';
 
 const StatisticsContent = (props: { stats: SbomerStats }) => {
   return (
@@ -52,14 +54,16 @@ const StatisticsContent = (props: { stats: SbomerStats }) => {
           <DescriptionListTerm>PNC Processed messages</DescriptionListTerm>
           <DescriptionListDescription>
             {props.stats.messaging.pncConsumer.processed} out of {props.stats.messaging.pncConsumer.received} (
-            {props.stats.messaging.pncConsumer.received - props.stats.messaging.pncConsumer.processed} failed to process)
+            {props.stats.messaging.pncConsumer.received - props.stats.messaging.pncConsumer.processed} failed to
+            process)
           </DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
           <DescriptionListTerm>Errata Processed messages</DescriptionListTerm>
           <DescriptionListDescription>
             {props.stats.messaging.errataConsumer.processed} out of {props.stats.messaging.errataConsumer.received} (
-            {props.stats.messaging.errataConsumer.received - props.stats.messaging.errataConsumer.processed} failed to process)
+            {props.stats.messaging.errataConsumer.received - props.stats.messaging.errataConsumer.processed} failed to
+            process)
           </DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
@@ -74,28 +78,29 @@ const StatisticsContent = (props: { stats: SbomerStats }) => {
 };
 
 export const StatsSection = () => {
-  const [stats, setStats] = useState<SbomerStats>();
-  const [error, setError] = useState(false);
+  const sbomerApi = DefaultSbomerApi.getInstance();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('https://sbomer.pnc.engineering.redhat.com/api/v1alpha3/stats');
-        setStats(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError(true);
-      }
-    };
-
-    fetchData();
+  const getStats = useCallback(async () => {
+    try {
+      return await sbomerApi.stats();
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }, []);
+
+  const { loading, value, error } = useAsyncRetry(
+    () =>
+      getStats().then((data) => {
+        return data;
+      }),
+    [],
+  );
 
   if (error) {
     return <ErrorSection />;
   }
 
-  return stats ? (
+  return value ? (
     <Card isLarge>
       <CardTitle>Statistics</CardTitle>
       <CardBody>
@@ -107,7 +112,7 @@ export const StatsSection = () => {
           </HelperTextItem>
         </HelperText>
         <br />
-        <StatisticsContent stats={stats!} />
+        <StatisticsContent stats={value!} />
       </CardBody>
     </Card>
   ) : (
