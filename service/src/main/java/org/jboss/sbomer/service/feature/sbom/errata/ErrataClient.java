@@ -39,7 +39,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -58,34 +58,34 @@ public interface ErrataClient {
     // Retrieve the advisory data, the id could be advisory id or advisory name.
     @GET
     @Path("/erratum/{id}")
-    public Errata getErratum(@QueryParam("id") String errataId);
+    public Errata getErratum(@PathParam("id") String errataId);
 
     // Get the details of a product by its id or short name
     @GET
     @Path("/products/{id}")
-    public ErrataProduct getProduct(@QueryParam("id") String productId);
+    public ErrataProduct getProduct(@PathParam("id") String productId);
 
     // Get the details of a release by its id or name
     @GET
     @Path("/releases/{id}")
-    public ErrataRelease getReleases(@QueryParam("id") String releaseId);
+    public ErrataRelease getReleases(@PathParam("id") String releaseId);
 
     // Get the details of a variant by its name or id
     @GET
     @Path("/variants/{id}")
-    public ErrataVariant getVariants(@QueryParam("id") String variantId);
+    public ErrataVariant getVariants(@PathParam("id") String variantId);
 
     // Get Brew build details.
     @GET
     @Path("/build/{id_or_nvr}")
     // TODO DTOs
-    public String getBrewBuildDetails(@QueryParam("id_or_nvr") String brewIdOrNvr);
+    public String getBrewBuildDetails(@PathParam("id_or_nvr") String brewIdOrNvr);
 
     // Fetch the Brew builds associated with an advisory.
     @GET
     @Path("/erratum/{id}/builds")
     // TODO DTOs
-    public String getBuilds(@QueryParam("id") String errataId);
+    public String getBuilds(@PathParam("id") String errataId);
 
     @ClientExceptionMapper
     @Blocking
