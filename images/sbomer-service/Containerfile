@@ -87,6 +87,9 @@ COPY certs/2015-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.
 COPY certs/2022-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
 RUN update-ca-trust
 
+# Copy the custom Kerberos configuration file
+COPY images/sbomer-service/krb5.conf /etc/krb5.conf
+
 USER default
 
 COPY --chown=185:0 images/sbomer-service/run.sh /deployments/
