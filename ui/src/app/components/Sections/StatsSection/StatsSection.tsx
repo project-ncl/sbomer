@@ -49,10 +49,17 @@ const StatisticsContent = (props: { stats: SbomerStats }) => {
           <DescriptionListDescription>{timestampToHumanReadable(props.stats.uptimeMillis)}</DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
-          <DescriptionListTerm>Processed messages</DescriptionListTerm>
+          <DescriptionListTerm>PNC Processed messages</DescriptionListTerm>
           <DescriptionListDescription>
-            {props.stats.messaging.consumer.processed} out of {props.stats.messaging.consumer.received} (
-            {props.stats.messaging.consumer.received - props.stats.messaging.consumer.processed} failed to process)
+            {props.stats.messaging.pncConsumer.processed} out of {props.stats.messaging.pncConsumer.received} (
+            {props.stats.messaging.pncConsumer.received - props.stats.messaging.pncConsumer.processed} failed to process)
+          </DescriptionListDescription>
+        </DescriptionListGroup>
+        <DescriptionListGroup>
+          <DescriptionListTerm>Errata Processed messages</DescriptionListTerm>
+          <DescriptionListDescription>
+            {props.stats.messaging.errataConsumer.processed} out of {props.stats.messaging.errataConsumer.received} (
+            {props.stats.messaging.errataConsumer.received - props.stats.messaging.errataConsumer.processed} failed to process)
           </DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
