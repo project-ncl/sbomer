@@ -21,24 +21,34 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import org.jboss.sbomer.core.features.sbom.utils.CustomInstantDeserializer;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.ErrataStatusChangeMessageBody;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ErrataMessageHelper {
 
-    static ObjectMapper customJsonObjectMapper = ObjectMapperProvider.json()
-            .registerModule(new SimpleModule().addDeserializer(Instant.class, new CustomInstantDeserializer()));
+    static ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+            .registerModule(new SimpleModule().addDeserializer(Instant.class, new CustomInstantDeserializer()))
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
+            .setSerializationInclusion(Include.NON_NULL)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS);
 
     public static String decode(byte[] encodedJson) {
         return new String(encodedJson, StandardCharsets.US_ASCII);
     }
 
     public static ErrataStatusChangeMessageBody fromStatusChangeMessage(String json) throws JsonProcessingException {
-        return customJsonObjectMapper.readValue(json, ErrataStatusChangeMessageBody.class);
+        return jsonObjectMapper.readValue(json, ErrataStatusChangeMessageBody.class);
     }
 
 }

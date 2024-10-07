@@ -83,7 +83,6 @@ public class AmqpMessageConsumer {
         errataReceivedMessages.incrementAndGet();
 
         log.debug("Received new Errata tool status change notification via the AMQP consumer");
-        log.debug("Raw Message content: {}", message.getPayload());
 
         // Decode the message bytes to a String
         String decodedMessage = ErrataMessageHelper.decode(message.getPayload());

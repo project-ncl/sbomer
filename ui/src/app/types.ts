@@ -30,7 +30,11 @@ export type SbomerStats = {
   uptime: string;
   uptimeMillis: number;
   messaging: {
-    consumer: {
+    pncConsumer: {
+      received: number;
+      processed: number;
+    };
+    errataConsumer: {
       received: number;
       processed: number;
     };
