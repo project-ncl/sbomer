@@ -65,9 +65,12 @@ public class ErrataNotificationHandler {
                 erratumRelease.getData().getAttributes().getName());
 
         Optional<JsonNode> notes = erratum.getNotesMapping();
+
         if (notes.isEmpty()) {
             log.info("The erratum does not contain any JSON content inside the notes...");
+            return;
         }
+
         log.info("The erratum contains a notes content with following JSON: \n{}", notes.get().toPrettyString());
 
     }
