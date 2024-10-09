@@ -76,6 +76,9 @@ quarkus:
       url: "https://${sbomer.pnc.host}"
     "errata":
       url: "https://${sbomer.errata.host}"
+      connect-timeout: 30000
+      read-timeout: 45000
+      connection-ttl: 120000
 
   # Support for feature-flags
   unleash:
@@ -103,7 +106,7 @@ quarkus:
       "io.quarkus.kubernetes.client":
         level: INFO
       "io.quarkiverse.kerberos.runtime.KerberosIdentityProvider":
-        level: TRACE
+        level: DEBUG
 
     console:
       # Enable console logging
