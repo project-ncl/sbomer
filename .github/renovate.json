@@ -24,6 +24,18 @@
             "minimumReleaseAge": null
         },
         {
+            "groupName": "Surefire",
+            "groupSlug": "maven-surefire",
+            "matchDatasources": ["maven"],
+            "matchPackageNames": ["org.apache.maven.plugins:maven-surefire-plugin"]
+        },
+        {
+            "groupName": "Surefire",
+            "groupSlug": "maven-failsafe",
+            "matchDatasources": ["maven"],
+            "matchPackageNames": ["org.apache.maven.plugins:maven-failsafe-plugin"]
+        },
+        {
             "matchPackageNames": ["io.quarkus:quarkus-maven-plugin"],
             "matchManagers": ["maven"],
             "enabled": false
@@ -33,5 +45,6 @@
             "matchUpdateTypes": ["patch"],
             "automerge": true
         }
-    ]
+    ],
+    "platformAutomerge": true
 }
