@@ -17,7 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
@@ -27,6 +33,8 @@ import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.UnauthorizedException;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataPage;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
@@ -35,6 +43,8 @@ import io.quarkiverse.kerberos.client.KerberosClientRequestFilter;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -58,7 +68,7 @@ public interface ErrataClient {
     // Retrieve the advisory data, the id could be advisory id or advisory name.
     @GET
     @Path("/erratum/{id}")
-    public Errata getErratum(@PathParam("id") String errataId);
+    public Errata getErratum(@PathParam("id") String erratumId);
 
     // Get the details of a product by its id or short name
     @GET
@@ -68,24 +78,27 @@ public interface ErrataClient {
     // Get the details of a release by its id or name
     @GET
     @Path("/releases/{id}")
-    public ErrataRelease getReleases(@PathParam("id") String releaseId);
+    public ErrataRelease getRelease(@PathParam("id") String releaseId);
 
     // Get the details of a variant by its name or id
     @GET
     @Path("/variants/{id}")
-    public ErrataVariant getVariants(@PathParam("id") String variantId);
+    public ErrataVariant getVariant(@PathParam("id") String variantId);
 
-    // Get Brew build details.
+    // Get the details of a variant by its name or id
     @GET
-    @Path("/build/{id_or_nvr}")
-    // TODO DTOs
-    public String getBrewBuildDetails(@PathParam("id_or_nvr") String brewIdOrNvr);
+    @Path("/variants")
+    public ErrataPage<ErrataVariant.VariantData> getAllVariants(@Valid @BeanParam ErrataQueryParameters pageParameters);
+
+    // Get Brew build details. - NOT NEEDED? LEAVING HERE FOR NOW
+    // @GET
+    // @Path("/build/{id_or_nvr}")
+    // public String getBrewBuildDetails(@PathParam("id_or_nvr") String brewIdOrNvr);
 
     // Fetch the Brew builds associated with an advisory.
     @GET
-    @Path("/erratum/{id}/builds")
-    // TODO DTOs
-    public String getBuilds(@PathParam("id") String errataId);
+    @Path("/erratum/{id}/builds_list")
+    public ErrataBuildList getBuildsList(@PathParam("id") String erratumId);
 
     @ClientExceptionMapper
     @Blocking
@@ -109,6 +122,50 @@ public interface ErrataClient {
         }
 
         return null;
+    }
+
+    default Collection<ErrataVariant.VariantData> getVariantOfProductAndProductVersion(
+            String productShortName,
+            Long productVersionId) {
+
+        Collection<ErrataVariant.VariantData> allVariants = getAllEntities(
+                Map.of("filter[product_short_name]", productShortName),
+                this::getAllVariants);
+
+        return allVariants.stream()
+                .filter(variant -> variant.getAttributes() != null)
+                .filter(variant -> variant.getAttributes().getRelationships() != null)
+                .filter(variant -> variant.getAttributes().getRelationships().getProductVersion() != null)
+                .filter(
+                        variant -> productVersionId
+                                .equals(variant.getAttributes().getRelationships().getProductVersion().getId()))
+                .collect(Collectors.toList());
+    }
+
+    // Default method for handling pagination logic with a generic type `T` and a function `getPageFunction`
+    default <T> Collection<T> getAllEntities(
+            Map<String, String> filters,
+            Function<ErrataQueryParameters, ErrataPage<T>> getPageFunction) {
+
+        ErrataQueryParameters parameters = ErrataQueryParameters.builder().withFilters(filters).build();
+
+        Collection<T> entities = new ArrayList<>();
+        int currentPage = 1;
+        int totalPages = 1;
+
+        do {
+            ErrataPage<T> response = getPageFunction.apply(parameters);
+
+            if (response.getData() != null && !response.getData().isEmpty()) {
+                entities.addAll(response.getData());
+            }
+
+            currentPage = response.getPage().getPageNumber() + 1;
+            totalPages = response.getPage().getTotalPages();
+            parameters.setPageNumber(currentPage);
+        } while (currentPage <= totalPages);
+
+        return entities;
     }
 
 }

@@ -17,67 +17,49 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder(setterPrefix = "with")
-@AllArgsConstructor
-@NoArgsConstructor
 public class ErrataRelease {
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ErrataProduct {
-        Long id;
+        private Long id;
         @JsonProperty("short_name")
-        String shortName;
+        private String shortName;
     }
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ErrataProductVersion {
-        Long id;
-        String name;
+        private Long id;
+        private String name;
     }
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class Relationships {
-        ErrataProduct product;
+        private ErrataProduct product;
         @JsonProperty("product_versions")
-        ErrataProductVersion[] productVersions;
+        private List<ErrataProductVersion> productVersions = new ArrayList<ErrataProductVersion>();
     }
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ErrataAttributes {
-        String name;
-        String description;
+        private String name;
+        private String description;
     }
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ReleaseData {
-        Long id;
-        String type;
-        ErrataAttributes attributes;
-        Relationships relationships;
+        private Long id;
+        private String type;
+        private ErrataAttributes attributes;
+        private Relationships relationships;
     }
 
-    ReleaseData data;
+    private ReleaseData data;
 }

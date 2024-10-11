@@ -18,6 +18,8 @@
 package org.jboss.sbomer.service.feature.sbom.errata.dto;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -28,35 +30,24 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Slf4j
-@Builder(setterPrefix = "with")
-@NoArgsConstructor
-@AllArgsConstructor
 public class Errata {
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class WrappedErrata {
-        Rhba rhba;
-        Rhea rhea;
-        Rhsa rhsa;
+        private Rhba rhba;
+        private Rhea rhea;
+        private Rhsa rhsa;
     }
 
     @Data
     @EqualsAndHashCode(callSuper = true)
-    @SuperBuilder(setterPrefix = "with")
     public static class Rhba extends Details {
         public Rhba() {
         }
@@ -64,7 +55,6 @@ public class Errata {
 
     @Data
     @EqualsAndHashCode(callSuper = true)
-    @SuperBuilder(setterPrefix = "with")
     public static class Rhea extends Details {
         public Rhea() {
         }
@@ -72,86 +62,73 @@ public class Errata {
 
     @Data
     @EqualsAndHashCode(callSuper = true)
-    @SuperBuilder(setterPrefix = "with")
     public static class Rhsa extends Details {
         public Rhsa() {
         }
     }
 
     @Data
-    @SuperBuilder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class Details {
-        Long id;
-        String fulladvisory;
-        String synopsis;
-        ErrataStatus status;
-        ErrataProduct product;
+        private Long id;
+        private String fulladvisory;
+        private String synopsis;
+        private ErrataStatus status;
+        private ErrataProduct product;
         @JsonProperty("is_brew")
-        Boolean brew;
+        private Boolean brew;
         @JsonProperty("group_id")
-        Long groupId;
+        private Long groupId;
         @JsonProperty("old_advisory")
-        String oldAdvisory;
+        private String oldAdvisory;
         @JsonProperty("text_only")
-        Boolean textonly;
+        private Boolean textonly;
         @JsonProperty("content_types")
-        String[] contentTypes;
+        private List<String> contentTypes = new ArrayList<String>();
         @JsonProperty("created_at")
-        Instant createdAt;
+        private Instant createdAt;
         @JsonProperty("actual_ship_date")
-        Instant actualShipDate;
+        private Instant actualShipDate;
     }
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ErrataProduct {
-        Long id;
-        String name;
+        private Long id;
+        private String name;
         @JsonProperty("short_name")
-        String shortName;
+        private String shortName;
     }
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class WrappedContent {
-        Content content;
+        private Content content;
     }
 
     @Data
-    @Builder(setterPrefix = "with")
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class Content {
         @JsonProperty("id")
-        Long id;
+        private Long id;
         @JsonProperty("errata_id")
-        Long errataId;
-        String topic;
-        String description;
-        String solution;
-        String cve;
+        private Long errataId;
+        private String topic;
+        private String description;
+        private String solution;
+        private String cve;
         @JsonProperty("how_to_test")
-        String notes;
+        private String notes;
         @JsonProperty("updated_at")
-        Instant updatedAt;
+        private Instant updatedAt;
         @JsonProperty("text_only_cpe")
-        String textOnlyCpe;
+        private String textOnlyCpe;
         @JsonProperty("product_version_text")
-        String productVersionText;
+        private String productVersionText;
     }
 
-    WrappedErrata errata;
+    private WrappedErrata errata;
 
     @JsonProperty("original_type")
-    ErrataType originalType;
+    private ErrataType originalType;
 
-    WrappedContent content;
+    private WrappedContent content;
 
     public Optional<Details> getDetails() {
         switch (originalType) {
