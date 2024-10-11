@@ -10,11 +10,14 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map.Entry;
 
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataPage;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
@@ -23,6 +26,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataType;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.ErrataStatusChangeMessageBody;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class ErrataMessageHelperTestCase {
@@ -57,13 +61,13 @@ public class ErrataMessageHelperTestCase {
         assertEquals("Red Hat build of Quarkus 3.8 on RHEL 8", release.getData().getAttributes().getDescription());
         assertEquals(153L, release.getData().getRelationships().getProduct().getId());
         assertEquals("RHBQ", release.getData().getRelationships().getProduct().getShortName());
-        assertEquals(1, release.getData().getRelationships().getProductVersions().length);
+        assertEquals(1, release.getData().getRelationships().getProductVersions().size());
         ErrataRelease.ErrataProductVersion productVersion = release.getData()
                 .getRelationships()
-                .getProductVersions()[0];
+                .getProductVersions()
+                .get(0);
         assertEquals(2166L, productVersion.getId());
         assertEquals("RHEL-8-RHBQ-3.8", productVersion.getName());
-
     }
 
     @Test
@@ -77,10 +81,11 @@ public class ErrataMessageHelperTestCase {
         assertEquals(
                 "Quarkus is a Kubernetes-native Java framework tailored for JVM and native compilation, crafted from best-of-breed Java libraries and standards.",
                 product.getData().getAttributes().getDescription());
-        assertEquals(8, product.getData().getRelationships().getProductVersions().length);
+        assertEquals(8, product.getData().getRelationships().getProductVersions().size());
         ErrataProduct.ErrataProductVersion productVersion = product.getData()
                 .getRelationships()
-                .getProductVersions()[0];
+                .getProductVersions()
+                .get(0);
         assertEquals(1229L, productVersion.getId());
         assertEquals("RHBQ Text-Only", productVersion.getName());
     }
@@ -125,7 +130,7 @@ public class ErrataMessageHelperTestCase {
         assertEquals(ZonedDateTime.of(2041, 9, 24, 7, 4, 48, 0, ZoneOffset.UTC).toInstant(), details.getCreatedAt());
         assertEquals("RHBA-2041:139230-01", details.getOldAdvisory());
         assertFalse(details.getTextonly());
-        assertTrue(List.of(details.getContentTypes()).contains("docker"));
+        assertTrue(details.getContentTypes().contains("docker"));
         assertEquals(153L, details.getProduct().getId());
         assertEquals("Red Hat build of Quarkus", details.getProduct().getName());
         assertEquals("RHBQ", details.getProduct().getShortName());
@@ -156,6 +161,50 @@ public class ErrataMessageHelperTestCase {
         JsonNode firstRef = refs.get(0);
         assertEquals("purl", firstRef.get("type").asText());
         assertEquals("pkg:oci/q-m@sha256%3A?os=linux&arch=arm64&tag=13.12345", firstRef.get("uri").asText());
+    }
+
+    @Test
+    void testPagedErrataReleaseDTO() throws IOException {
+        String pagedVariantsJson = TestResources.asString("errata/api/paged_variants.json");
+        ErrataPage<ErrataVariant.VariantData> pagedVariants = ObjectMapperProvider.json()
+                .readValue(pagedVariantsJson, new TypeReference<ErrataPage<ErrataVariant.VariantData>>() {
+                });
+
+        assertEquals(1L, pagedVariants.getPage().getPageNumber());
+        assertEquals(1L, pagedVariants.getPage().getTotalPages());
+        assertEquals(11L, pagedVariants.getPage().getTotalHits());
+        assertEquals(11L, pagedVariants.getData().size());
+        assertEquals(2990L, pagedVariants.getData().get(0).getId());
+        assertEquals("6Server-RHBQ-TextOnly", pagedVariants.getData().get(0).getAttributes().getName());
+        assertEquals("cpe:/a:redhat:quarkus:::el6", pagedVariants.getData().get(0).getAttributes().getCpe());
+        assertEquals(
+                "RHBQ Text-Only",
+                pagedVariants.getData().get(0).getAttributes().getRelationships().getProductVersion().getName());
+    }
+
+    @Test
+    void testErrataBuildListDTO() throws IOException {
+        String errataBuildListJson = TestResources.asString("errata/api/build_list.json");
+        ErrataBuildList buildList = ObjectMapperProvider.json().readValue(errataBuildListJson, ErrataBuildList.class);
+
+        assertEquals(1, buildList.getProductVersions().size());
+        Entry<String, ErrataBuildList.ProductVersionEntry> firstItem = buildList.getProductVersions()
+                .entrySet()
+                .iterator()
+                .next();
+        assertEquals("release-e2e-test-1.0-updates-rhel-9", firstItem.getKey());
+        assertEquals("release-e2e-test-1.0-updates-rhel-9", firstItem.getValue().getName());
+        assertEquals(1, firstItem.getValue().getBuilds().size());
+        Entry<String, ErrataBuildList.BuildItem> firstBuild = firstItem.getValue()
+                .getBuilds()
+                .get(0)
+                .getBuildItems()
+                .entrySet()
+                .iterator()
+                .next();
+        assertEquals("release-e2e-test-1.0.4928-1.el9", firstBuild.getKey());
+        assertEquals(2405700, firstBuild.getValue().getId());
+        assertEquals("release-e2e-test-1.0.4928-1.el9", firstBuild.getValue().getNvr());
 
     }
 }

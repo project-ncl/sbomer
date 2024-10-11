@@ -1,0 +1,48 @@
+{
+  "release-e2e-test-1.0-updates-rhel-9": {
+    "name": "release-e2e-test-1.0-updates-rhel-9",
+    "description": "Vitals-RPM test package for RHEL9",
+    "builds": [
+      {
+        "release-e2e-test-1.0.4928-1.el9": {
+          "nvr": "release-e2e-test-1.0.4928-1.el9",
+          "nevr": "release-e2e-test-0:1.0.4928-1.el9",
+          "id": 2405700,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-ReleaseE2ETest-1.0": {
+              "SRPMS": [
+                {
+                  "filename": "release-e2e-test-1.0.4928-1.el9.src.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "release-e2e-test-1.0.4928-1.el9.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "release-e2e-test-1.0.4928-1.el9.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ]
+            }
+          },
+          "added_by": "autobot-vitals-stage",
+          "is_signed": true
+        }
+      }
+    ],
+    "sig_key": {
+      "name": "redhate2etesting",
+      "keyid": "37036783"
+    },
+    "container_sig_key": {
+      "name": "redhate2etesting",
+      "keyid": "37036783"
+    }
+  }
+}

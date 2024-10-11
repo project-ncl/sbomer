@@ -25,35 +25,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class ErrataProduct {
+public class ErrataPage<T> {
 
     @Data
-    public static class ErrataProductVersion {
-        private Long id;
-        private String name;
+    public static class Page {
+        /**
+         * Page number.
+         */
+        @JsonProperty("current_page")
+        private int pageNumber;
+
+        /**
+         * Total pages provided.
+         */
+        @JsonProperty("total_pages")
+        private int totalPages;
+
+        /**
+         * Number of all hits (not only this page).
+         */
+        @JsonProperty("result_count")
+        private int totalHits;
     }
 
-    @Data
-    public static class Attributes {
-        private String name;
-        private String description;
-        @JsonProperty("short_name")
-        private String shortName;
-    }
+    private Page page;
+    private List<T> data = new ArrayList<T>();
 
-    @Data
-    public static class Relationships {
-        @JsonProperty("product_versions")
-        private List<ErrataProductVersion> productVersions = new ArrayList<ErrataProductVersion>();
-    }
-
-    @Data
-    public static class ProductData {
-        private Long id;
-        private String type;
-        private Attributes attributes;
-        private Relationships relationships;
-    }
-
-    private ProductData data;
 }
