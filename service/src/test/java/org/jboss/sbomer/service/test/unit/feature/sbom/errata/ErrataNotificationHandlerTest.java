@@ -53,7 +53,7 @@ class ErrataNotificationHandlerTest {
         errataNotificationHandler = new ErrataNotificationHandlerAlt();
 
         FeatureFlags featureFlags = mock(FeatureFlags.class);
-        when(featureFlags.errataApiRead()).thenReturn(true);
+        when(featureFlags.errataIntegrationEnabled()).thenReturn(true);
         errataNotificationHandler.setFeatureFlags(featureFlags);
         errataNotificationHandler.setErrataClient(errataClient);
     }

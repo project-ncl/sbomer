@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
@@ -41,30 +42,27 @@ public class Errata {
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class WrappedErrata {
-        private Rhba rhba;
-        private Rhea rhea;
-        private Rhsa rhsa;
+        private RHBA rhba;
+        private RHEA rhea;
+        private RHSA rhsa;
     }
 
     @Data
     @EqualsAndHashCode(callSuper = true)
-    public static class Rhba extends Details {
-        public Rhba() {
-        }
+    @NoArgsConstructor
+    public static class RHBA extends Details {
     }
 
     @Data
     @EqualsAndHashCode(callSuper = true)
-    public static class Rhea extends Details {
-        public Rhea() {
-        }
+    @NoArgsConstructor
+    public static class RHEA extends Details {
     }
 
     @Data
     @EqualsAndHashCode(callSuper = true)
-    public static class Rhsa extends Details {
-        public Rhsa() {
-        }
+    @NoArgsConstructor
+    public static class RHSA extends Details {
     }
 
     @Data
