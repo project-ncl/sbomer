@@ -60,7 +60,7 @@ public class ErrataNotificationHandler {
         ErrataStatusChangeMessageBody errataStatusChange = ErrataMessageHelper.fromStatusChangeMessage(message);
         log.info("Fetching Errata information for erratum with id {}...", errataStatusChange.getErrataId());
 
-        if (!featureFlags.errataApiRead()) {
+        if (!featureFlags.errataIntegrationEnabled()) {
             log.warn("Errata API integration is disabled, the UMB message won't be used!!");
             return;
         }
@@ -80,7 +80,6 @@ public class ErrataNotificationHandler {
         } else {
             log.info("The erratum contains a notes content with following JSON: \n{}", notes.get().toPrettyString());
         }
-
 
         if (erratum.getDetails().isEmpty()) {
             log.warn("Mmmmm I don't know how to get the release information...");

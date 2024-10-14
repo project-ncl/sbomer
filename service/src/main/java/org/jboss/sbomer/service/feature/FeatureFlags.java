@@ -58,7 +58,7 @@ public class FeatureFlags implements UnleashSubscriber {
     public static final String TOGGLE_ATLAS_PUBLISH = "atlas-publish";
 
     // Errata
-    public static final String TOGGLE_ERRATA_API_READ = "errata-api-read";
+    public static final String TOGGLE_ERRATA_INTEGRATION = "errata-integration";
 
     /**
      * A map holding all toggle values we are interested in. This is used for logging purposes. We are retrieving the
@@ -81,8 +81,8 @@ public class FeatureFlags implements UnleashSubscriber {
     @ConfigProperty(name = "SBOMER_FEATURE_ATLAS_PUBLISH_ENABLED", defaultValue = "false")
     boolean publishToAtlas;
 
-    @ConfigProperty(name = "SBOMER_FEATURE_ERRATA_API_READ_ENABLED", defaultValue = "false")
-    boolean readFromErrataApi;
+    @ConfigProperty(name = "SBOMER_FEATURE_ERRATA_INTEGRATION_ENABLED", defaultValue = "false")
+    boolean errataIntegration;
 
     /**
      * Returns {@code true} in case the dry-run mode is enabled.
@@ -114,10 +114,10 @@ public class FeatureFlags implements UnleashSubscriber {
     /**
      * Returns {@code true} if reading from Errata API is enabled.
      *
-     * @return {@code true} if reading from Errata API is enabled, {@code false} otherwise
+     * @return {@code true} if the integration with Errata API is enabled, {@code false} otherwise
      */
-    public boolean errataApiRead() {
-        return unleash.isEnabled(TOGGLE_ERRATA_API_READ, readFromErrataApi);
+    public boolean errataIntegrationEnabled() {
+        return unleash.isEnabled(TOGGLE_ERRATA_INTEGRATION, errataIntegration);
     }
 
     /**
