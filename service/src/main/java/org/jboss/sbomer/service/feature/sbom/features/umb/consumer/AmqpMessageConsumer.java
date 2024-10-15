@@ -34,6 +34,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageType;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
 import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
@@ -82,19 +83,25 @@ public class AmqpMessageConsumer {
     @Incoming("errata")
     @Blocking(ordered = false, value = "errata-processor-pool")
     public CompletionStage<Void> processErrata(Message<byte[]> message) {
+        log.debug("Received new Errata tool status change notification via the AMQP consumer");
+
+        // Decode the message bytes to a String
+        String decodedMessage = ErrataMessageHelper.decode(message.getPayload());
+        log.debug("Decoded Message content: {}", decodedMessage);
 
         UMBMessage umbMessage = UMBMessage.builder()
                 .withConsumer(UMBConsumer.ERRATA)
                 .withReceivalTime(Instant.now())
                 .withStatus(UMBMessageStatus.NONE)
                 .build();
+
+        try {
+            umbMessage.setContent(ObjectMapperProvider.json().readTree(decodedMessage));
+        } catch (JsonProcessingException e) {
+            log.warn("Could not parse into json the message payload, will not be persisted in the UMBMessage table");
+        }
+
         umbMessage.persistAndFlush();
-
-        log.debug("Received new Errata tool status change notification via the AMQP consumer");
-
-        // Decode the message bytes to a String
-        String decodedMessage = ErrataMessageHelper.decode(message.getPayload());
-        log.debug("Decoded Message content: {}", decodedMessage);
 
         // Checking whether there is some additional metadata attached to the message
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
@@ -141,16 +148,22 @@ public class AmqpMessageConsumer {
     @Blocking(ordered = false, value = "build-processor-pool")
     @Transactional
     public CompletionStage<Void> process(Message<String> message) {
+        log.debug("Received new PNC build status notification via the AMQP consumer");
+        log.debug("Message content: {}", message.getPayload());
 
         UMBMessage umbMessage = UMBMessage.builder()
                 .withConsumer(UMBConsumer.PNC)
                 .withReceivalTime(Instant.now())
                 .withStatus(UMBMessageStatus.NONE)
                 .build();
-        umbMessage.persistAndFlush();
 
-        log.debug("Received new PNC build status notification via the AMQP consumer");
-        log.debug("Message content: {}", message.getPayload());
+        try {
+            umbMessage.setContent(ObjectMapperProvider.json().readTree(message.getPayload()));
+        } catch (JsonProcessingException e) {
+            log.warn("Could not parse into json the message payload, will not be persisted in the UMBMessage table");
+        }
+
+        umbMessage.persistAndFlush();
 
         // Checking whether there is some additional metadata attached to the message
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
