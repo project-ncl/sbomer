@@ -18,10 +18,16 @@
 package org.jboss.sbomer.service.feature.sbom.model;
 
 import java.time.Instant;
+import java.util.Map;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageType;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -80,6 +86,11 @@ public class UMBMessage extends PanacheEntity {
 
     @Column(nullable = true, updatable = true)
     private String topic;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @ToString.Exclude
+    @Schema(implementation = Map.class) // Workaround for swagger limitation of not being able to digest through a very
+    private JsonNode content;
 
     public static long countPncProcessedMessages() {
         return find(

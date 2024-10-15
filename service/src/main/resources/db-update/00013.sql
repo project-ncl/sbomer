@@ -30,6 +30,7 @@ BEGIN transaction;
       msg_id  character varying(255),
       creation_time timestamp without time zone,
       topic character varying(255),
+      content jsonb,
       CONSTRAINT umb_message_pkey_ PRIMARY KEY (id)
     );
 
