@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
@@ -21,6 +22,8 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataPage;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataType;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.ErrataStatusChangeMessageBody;
@@ -205,6 +208,64 @@ public class ErrataMessageHelperTestCase {
         assertEquals("release-e2e-test-1.0.4928-1.el9", firstBuild.getKey());
         assertEquals(2405700, firstBuild.getValue().getId());
         assertEquals("release-e2e-test-1.0.4928-1.el9", firstBuild.getValue().getNvr());
-
     }
+
+    @Test
+    void testErrataMultipleBuildListDTO() throws IOException {
+        String multipleErrataBuildListJson = TestResources.asString("errata/api/multiple_build_list.json");
+        ErrataBuildList buildList = ObjectMapperProvider.json()
+                .readValue(multipleErrataBuildListJson, ErrataBuildList.class);
+
+        assertEquals(6, buildList.getProductVersions().size());
+        assertTrue(
+                buildList.getProductVersions()
+                        .values()
+                        .stream()
+                        .map(ProductVersionEntry::getName)
+                        .collect(Collectors.toList())
+                        .containsAll(
+                                List.of(
+                                        "RHEL-8.6.0.Z.EUS",
+                                        "RHEL-8.8.0.Z.EUS",
+                                        "RHEL-9.0.0.Z.EUS",
+                                        "RHEL-9.2.0.Z.EUS",
+                                        "RHEL-9.3.0.Z.MAIN",
+                                        "RHEL-8.9.0.Z.MAIN")));
+        Optional<Entry<String, ProductVersionEntry>> firstValue = buildList.getProductVersions()
+                .entrySet()
+                .stream()
+                .filter(pv -> pv.getValue().getName().equals("RHEL-8.6.0.Z.EUS"))
+                .findAny();
+        assertTrue(firstValue.isPresent());
+        Optional<Entry<String, BuildItem>> firstBuildItem = firstValue.get()
+                .getValue()
+                .getBuilds()
+                .stream()
+                .flatMap(build -> build.getBuildItems().entrySet().stream())
+                .filter(bi -> bi.getKey().equals("sudo-1.9.5p2-1.el8_6"))
+                .findAny();
+        assertTrue(firstBuildItem.isPresent());
+        assertEquals("sudo-1.9.5p2-1.el8_6", firstBuildItem.get().getKey());
+        assertEquals(2871088, firstBuildItem.get().getValue().getId());
+        assertEquals("sudo-1.9.5p2-1.el8_6", firstBuildItem.get().getValue().getNvr());
+
+        Optional<Entry<String, ProductVersionEntry>> secondValue = buildList.getProductVersions()
+                .entrySet()
+                .stream()
+                .filter(pv -> pv.getValue().getName().equals("RHEL-8.8.0.Z.EUS"))
+                .findAny();
+        assertTrue(secondValue.isPresent());
+        Optional<Entry<String, BuildItem>> secondBuildItem = secondValue.get()
+                .getValue()
+                .getBuilds()
+                .stream()
+                .flatMap(build -> build.getBuildItems().entrySet().stream())
+                .filter(bi -> bi.getKey().equals("sudo-1.9.5p2-1.el8_8"))
+                .findAny();
+        assertTrue(secondBuildItem.isPresent());
+        assertEquals("sudo-1.9.5p2-1.el8_8", secondBuildItem.get().getKey());
+        assertEquals(2870637, secondBuildItem.get().getValue().getId());
+        assertEquals("sudo-1.9.5p2-1.el8_8", secondBuildItem.get().getValue().getNvr());
+    }
+
 }
