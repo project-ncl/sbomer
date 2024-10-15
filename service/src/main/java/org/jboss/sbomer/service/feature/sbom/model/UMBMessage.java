@@ -29,12 +29,13 @@ import org.jboss.sbomer.core.features.sbom.enums.UMBMessageType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Index;
 import lombok.AllArgsConstructor;
@@ -61,7 +62,11 @@ import lombok.extern.slf4j.Slf4j;
 @Builder(setterPrefix = "with")
 @RegisterForReflection
 @Slf4j
-public class UMBMessage extends PanacheEntity {
+public class UMBMessage extends PanacheEntityBase {
+
+    @Id
+    @Column(nullable = false, updatable = false)
+    private String id;
 
     @Column(name = "consumer", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
