@@ -34,8 +34,8 @@ public class Stats {
     @Data
     @Builder(setterPrefix = "with")
     public static class PncConsumer {
-        int received;
-        int processed;
+        long received;
+        long processed;
     }
 
     /**
@@ -44,8 +44,8 @@ public class Stats {
     @Data
     @Builder(setterPrefix = "with")
     public static class ErrataConsumer {
-        int received;
-        int processed;
+        long received;
+        long processed;
     }
 
     /**
@@ -54,8 +54,8 @@ public class Stats {
     @Data
     @Builder(setterPrefix = "with")
     public static class Producer {
-        int nacked;
-        int acked;
+        long nacked;
+        long acked;
     }
 
     @Data

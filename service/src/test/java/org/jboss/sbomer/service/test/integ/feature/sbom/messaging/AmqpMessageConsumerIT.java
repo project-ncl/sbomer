@@ -39,9 +39,13 @@ class AmqpMessageConsumerIT {
 
     @Test
     void testParsingOfUnexpectedData() throws IOException {
-        Message<String> message = AmqpMessageHelper.toMessage(
-                TestResources.asString("umb/unexpected.json"),
-                new JsonObject().put("type", "DeliverableAnalysisStateChange"));
+        JsonObject headers = new JsonObject();
+        headers.put("type", "DeliverableAnalysisStateChange");
+        headers.put("timestamp", 1698076061381L);
+        headers.put("message-id", "ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1");
+        headers.put("destination", "/topic/VirtualTopic.eng.pnc.builds");
+
+        Message<String> message = AmqpMessageHelper.toMessage(TestResources.asString("umb/unexpected.json"), headers);
 
         consumer.process(message);
     }

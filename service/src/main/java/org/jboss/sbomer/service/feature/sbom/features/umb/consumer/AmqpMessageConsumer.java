@@ -17,19 +17,26 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
-import java.nio.charset.StandardCharsets;
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataProcessedMessages;
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataReceivedMessages;
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncProcessedMessages;
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncReceivedMessages;
+
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
+import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
+import org.jboss.sbomer.core.features.sbom.enums.UMBMessageType;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
-import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.ErrataStatusChangeMessageBody;
+import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -63,11 +70,6 @@ public class AmqpMessageConsumer {
     @Inject
     ErrataNotificationHandler errataNotificationHandler;
 
-    private AtomicInteger pncReceivedMessages = new AtomicInteger(0);
-    private AtomicInteger pncProcessedMessages = new AtomicInteger(0);
-    private AtomicInteger errataReceivedMessages = new AtomicInteger(0);
-    private AtomicInteger errataProcessedMessages = new AtomicInteger(0);
-
     public void init(@Observes StartupEvent ev) {
         if (!umbConfig.isEnabled()) {
             log.info("UMB support is disabled");
@@ -80,7 +82,13 @@ public class AmqpMessageConsumer {
     @Incoming("errata")
     @Blocking(ordered = false, value = "errata-processor-pool")
     public CompletionStage<Void> processErrata(Message<byte[]> message) {
-        errataReceivedMessages.incrementAndGet();
+
+        UMBMessage umbMessage = UMBMessage.builder()
+                .withConsumer(UMBConsumer.ERRATA)
+                .withReceivalTime(Instant.now())
+                .withStatus(UMBMessageStatus.NONE)
+                .build();
+        umbMessage.persistAndFlush();
 
         log.debug("Received new Errata tool status change notification via the AMQP consumer");
 
@@ -92,32 +100,40 @@ public class AmqpMessageConsumer {
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
         metadata.ifPresent(meta -> {
             JsonObject properties = meta.getProperties();
-
             log.debug("Message properties: {}", properties.toString());
+
+            umbMessage.setCreationTime(Instant.ofEpochMilli(properties.getLong("timestamp")));
+            umbMessage.setMsgId(properties.getString("message-id"));
+            umbMessage.setTopic(properties.getString("destination"));
 
             if (!Objects.equals(properties.getString("subject"), "errata.activity.status")) {
                 // This should not happen because we listen to the "errata.activity.status" topic, but just in case
                 log.warn("Received a message that is not errata.activity.status, ignoring it");
+
+                if (metadata.isPresent()) {
+                    umbMessage.setType(UMBMessageType.UNKNOWN);
+                    umbMessage.setStatus(UMBMessageStatus.ACK);
+                    umbMessage.persistAndFlush();
+                }
+
                 message.ack();
                 return;
             }
 
-            // // commented for now to get more messages while we integrate with Errata
-            // if (!Objects.equals(properties.getString("errata_status"), "SHIPPED_LIVE")) {
-            // log.warn("Received a status change that is not SHIPPED_LIVE, ignoring it");
-            // message.ack();
-            // return;
-            // }
+            umbMessage.setType(UMBMessageType.ERRATA);
         });
 
         try {
             errataNotificationHandler.handle(decodedMessage);
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize Errata message, this is unexpected", e);
+            umbMessage.setStatus(UMBMessageStatus.NACK);
+            umbMessage.persistAndFlush();
             return message.nack(e);
         }
 
-        errataProcessedMessages.getAndIncrement();
+        umbMessage.setStatus(UMBMessageStatus.ACK);
+        umbMessage.persistAndFlush();
         return message.ack();
     }
 
@@ -125,7 +141,13 @@ public class AmqpMessageConsumer {
     @Blocking(ordered = false, value = "build-processor-pool")
     @Transactional
     public CompletionStage<Void> process(Message<String> message) {
-        pncReceivedMessages.incrementAndGet();
+
+        UMBMessage umbMessage = UMBMessage.builder()
+                .withConsumer(UMBConsumer.PNC)
+                .withReceivalTime(Instant.now())
+                .withStatus(UMBMessageStatus.NONE)
+                .build();
+        umbMessage.persistAndFlush();
 
         log.debug("Received new PNC build status notification via the AMQP consumer");
         log.debug("Message content: {}", message.getPayload());
@@ -136,19 +158,31 @@ public class AmqpMessageConsumer {
 
         metadata.ifPresent(meta -> {
             JsonObject properties = meta.getProperties();
-
             log.debug("Message properties: {}", properties.toString());
+
+            umbMessage.setCreationTime(Instant.ofEpochMilli(properties.getLong("timestamp")));
+            umbMessage.setMsgId(properties.getString("message-id"));
+            umbMessage.setTopic(properties.getString("destination"));
 
             if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
                 type.set(GenerationRequestType.BUILD);
+                umbMessage.setType(UMBMessageType.BUILD);
             } else if (Objects.equals(properties.getString("type"), "DeliverableAnalysisStateChange")) {
                 type.set(GenerationRequestType.OPERATION);
+                umbMessage.setType(UMBMessageType.DELIVERABLE_ANALYSIS);
+            } else {
+                umbMessage.setType(UMBMessageType.UNKNOWN);
             }
         });
 
         // This shouldn't happen anymore because we use a selector to filter messages
         if (type.get() == null) {
             log.warn("Received a message that is not BuildStateChange nor DeliverableAnalysisStateChange, ignoring it");
+            // I still want to persist the additional metadata if present
+            if (metadata.isPresent()) {
+                umbMessage.setStatus(UMBMessageStatus.ACK);
+                umbMessage.persistAndFlush();
+            }
             return message.ack();
         }
 
@@ -156,26 +190,29 @@ public class AmqpMessageConsumer {
             pncNotificationHandler.handle(message, type.get());
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize PNC message, this is unexpected", e);
+            umbMessage.setStatus(UMBMessageStatus.NACK);
+            umbMessage.persistAndFlush();
             return message.nack(e);
         }
 
-        pncProcessedMessages.getAndIncrement();
+        umbMessage.setStatus(UMBMessageStatus.ACK);
+        umbMessage.persistAndFlush();
         return message.ack();
     }
 
-    public int getPncProcessedMessages() {
-        return pncProcessedMessages.get();
+    public long getPncProcessedMessages() {
+        return countPncProcessedMessages();
     }
 
-    public int getPncReceivedMessages() {
-        return pncReceivedMessages.get();
+    public long getPncReceivedMessages() {
+        return countPncReceivedMessages();
     }
 
-    public int getErrataProcessedMessages() {
-        return errataProcessedMessages.get();
+    public long getErrataProcessedMessages() {
+        return countErrataProcessedMessages();
     }
 
-    public int getErrataReceivedMessages() {
-        return errataReceivedMessages.get();
+    public long getErrataReceivedMessages() {
+        return countErrataReceivedMessages();
     }
 }
