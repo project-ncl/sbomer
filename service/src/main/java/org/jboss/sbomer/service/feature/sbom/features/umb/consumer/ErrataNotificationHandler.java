@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.QE;
+import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.SHIPPED_LIVE;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -65,6 +68,11 @@ public class ErrataNotificationHandler {
             return;
         }
 
+        if (errataStatusChange.getStatus() != QE && errataStatusChange.getStatus() != SHIPPED_LIVE) {
+            log.warn("Received a status change that is not QE nor SHIPPED_LIVE, ignoring it");
+            return;
+        }
+
         String summary = retrieveAllErratumData(errataStatusChange.getErrataId());
         System.out.println(summary);
     }
@@ -110,6 +118,7 @@ public class ErrataNotificationHandler {
             Collection<ErrataVariant.VariantData> errataVariants = errataClient.getVariantOfProductAndProductVersion(
                     erratum.getDetails().get().getProduct().getShortName(),
                     productVersion.getId());
+
             for (ErrataVariant.VariantData variant : errataVariants) {
                 summary += "\n\tVariant: " + variant.getAttributes().getName() + " (CPE: "
                         + variant.getAttributes().getCpe() + ")";

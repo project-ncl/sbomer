@@ -228,6 +228,7 @@ class PncBuildIT {
         headers.put("messageId", "ID:orch-70-z4tx6-43917-1678809685060-25:1:8557:1:1");
         headers.put("persistent", "true");
         headers.put("producer", "PNC");
+        headers.put("timestamp", 1698076061381L);
 
         return AmqpMessageHelper.toMessage(TestResources.asString("payloads/umb-pnc-build-body.json"), headers);
     }
@@ -247,6 +248,7 @@ class PncBuildIT {
         headers.put("messageId", "ID:orch-70-z4tx6-43917-1678809685060-25:1:8557:1:1");
         headers.put("persistent", "true");
         headers.put("producer", "PNC");
+        headers.put("timestamp", 1698076061381L);
 
         return AmqpMessageHelper.toMessage(TestResources.asString("payloads/umb-pnc-del-analysis-body.json"), headers);
     }
@@ -266,6 +268,7 @@ class PncBuildIT {
         headers.put("messageId", "ID:orch-70-z4tx6-43917-1678809685060-25:1:8557:1:1");
         headers.put("persistent", "true");
         headers.put("producer", "PNC");
+        headers.put("timestamp", 1698076061381L);
 
         return AmqpMessageHelper
                 .toMessage(TestResources.asString("payloads/umb-pnc-failed-del-analysis-body.json"), headers);
