@@ -37,6 +37,7 @@ import org.jboss.sbomer.core.features.sbom.enums.UMBMessageType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
+import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -90,6 +91,7 @@ public class AmqpMessageConsumer {
         log.debug("Decoded Message content: {}", decodedMessage);
 
         UMBMessage umbMessage = UMBMessage.builder()
+                .withId(RandomStringIdGenerator.generate())
                 .withConsumer(UMBConsumer.ERRATA)
                 .withReceivalTime(Instant.now())
                 .withStatus(UMBMessageStatus.NONE)
@@ -116,12 +118,9 @@ public class AmqpMessageConsumer {
             if (!Objects.equals(properties.getString("subject"), "errata.activity.status")) {
                 // This should not happen because we listen to the "errata.activity.status" topic, but just in case
                 log.warn("Received a message that is not errata.activity.status, ignoring it");
-
-                if (metadata.isPresent()) {
-                    umbMessage.setType(UMBMessageType.UNKNOWN);
-                    umbMessage.setStatus(UMBMessageStatus.ACK);
-                    umbMessage.persistAndFlush();
-                }
+                umbMessage.setType(UMBMessageType.UNKNOWN);
+                umbMessage.setStatus(UMBMessageStatus.ACK);
+                umbMessage.persistAndFlush();
 
                 message.ack();
                 return;
@@ -152,6 +151,7 @@ public class AmqpMessageConsumer {
         log.debug("Message content: {}", message.getPayload());
 
         UMBMessage umbMessage = UMBMessage.builder()
+                .withId(RandomStringIdGenerator.generate())
                 .withConsumer(UMBConsumer.PNC)
                 .withReceivalTime(Instant.now())
                 .withStatus(UMBMessageStatus.NONE)

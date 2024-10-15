@@ -22,7 +22,7 @@
 BEGIN transaction;
 
     CREATE TABLE umb_message (
-      id bigint NOT NULL,
+      id character varying(50) NOT NULL,
       consumer character varying(10) NOT NULL,
       receival_time timestamp without time zone NOT NULL,
       status  character varying(10) NOT NULL,
