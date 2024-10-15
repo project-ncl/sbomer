@@ -1,0 +1,824 @@
+{
+  "RHEL-8.6.0.Z.EUS": {
+    "name": "RHEL-8.6.0.Z.EUS",
+    "description": "Red Hat Enterprise Linux 8.6 Extended Update Support",
+    "builds": [
+      {
+        "sudo-1.9.5p2-1.el8_6": {
+          "nvr": "sudo-1.9.5p2-1.el8_6",
+          "nevr": "sudo-0:1.9.5p2-1.el8_6",
+          "id": 2871088,
+          "is_module": false,
+          "variant_arch": {
+            "BaseOS-8.6.0.Z.EUS": {
+              "SRPMS": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_6.src.rpm",
+                  "is_signed": true
+                }
+              ],
+              "aarch64": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_6.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_6.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_6.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_6.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_6.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_6.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_6.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_6.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_6.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_6.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_6.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_6.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            }
+          },
+          "added_by": "rsroka",
+          "is_signed": true
+        }
+      }
+    ],
+    "sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "container_sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    }
+  },
+  "RHEL-8.8.0.Z.EUS": {
+    "name": "RHEL-8.8.0.Z.EUS",
+    "description": "Red Hat Enterprise Linux 8.8 Extended Update Support",
+    "builds": [
+      {
+        "sudo-1.9.5p2-1.el8_8": {
+          "nvr": "sudo-1.9.5p2-1.el8_8",
+          "nevr": "sudo-0:1.9.5p2-1.el8_8",
+          "id": 2870637,
+          "is_module": false,
+          "variant_arch": {
+            "BaseOS-8.8.0.Z.EUS": {
+              "SRPMS": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_8.src.rpm",
+                  "is_signed": true
+                }
+              ],
+              "aarch64": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_8.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_8.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_8.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_8.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_8.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_8.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_8.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_8.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_8.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_8.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_8.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_8.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            }
+          },
+          "added_by": "rsroka",
+          "is_signed": true
+        }
+      }
+    ],
+    "sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "container_sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    }
+  },
+  "RHEL-9.0.0.Z.EUS": {
+    "name": "RHEL-9.0.0.Z.EUS",
+    "description": "Red Hat Enterprise Linux 9.0 Extended Update Support",
+    "builds": [
+      {
+        "sudo-1.9.5p2-7.el9_0.4": {
+          "nvr": "sudo-1.9.5p2-7.el9_0.4",
+          "nevr": "sudo-0:1.9.5p2-7.el9_0.4",
+          "id": 2871096,
+          "is_module": false,
+          "variant_arch": {
+            "AppStream-9.0.0.Z.EUS": {
+              "aarch64": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-7.el9_0.4.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-7.el9_0.4.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-7.el9_0.4.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-7.el9_0.4.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-7.el9_0.4.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-7.el9_0.4.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-7.el9_0.4.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-7.el9_0.4.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-7.el9_0.4.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-7.el9_0.4.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-7.el9_0.4.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-7.el9_0.4.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-7.el9_0.4.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-7.el9_0.4.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-7.el9_0.4.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-7.el9_0.4.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            },
+            "BaseOS-9.0.0.Z.EUS": {
+              "SRPMS": [
+                {
+                  "filename": "sudo-1.9.5p2-7.el9_0.4.src.rpm",
+                  "is_signed": true
+                }
+              ],
+              "aarch64": [
+                {
+                  "filename": "sudo-1.9.5p2-7.el9_0.4.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-7.el9_0.4.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-7.el9_0.4.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-7.el9_0.4.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-1.9.5p2-7.el9_0.4.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-7.el9_0.4.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-7.el9_0.4.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-7.el9_0.4.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-1.9.5p2-7.el9_0.4.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-7.el9_0.4.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-7.el9_0.4.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-7.el9_0.4.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-1.9.5p2-7.el9_0.4.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-7.el9_0.4.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-7.el9_0.4.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-7.el9_0.4.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            }
+          },
+          "added_by": "rsroka",
+          "is_signed": true
+        }
+      }
+    ],
+    "sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "container_sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "ima_sig_key": {
+      "name": "redhatimarelease",
+      "keyid": "0D332449"
+    }
+  },
+  "RHEL-9.2.0.Z.EUS": {
+    "name": "RHEL-9.2.0.Z.EUS",
+    "description": "Red Hat Enterprise Linux 9.2 Extended Update Support",
+    "builds": [
+      {
+        "sudo-1.9.5p2-9.el9_2.2": {
+          "nvr": "sudo-1.9.5p2-9.el9_2.2",
+          "nevr": "sudo-0:1.9.5p2-9.el9_2.2",
+          "id": 2871097,
+          "is_module": false,
+          "variant_arch": {
+            "AppStream-9.2.0.Z.EUS": {
+              "aarch64": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-9.el9_2.2.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-9.el9_2.2.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-9.el9_2.2.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-9.el9_2.2.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-9.el9_2.2.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-9.el9_2.2.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-9.el9_2.2.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-9.el9_2.2.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-9.el9_2.2.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-9.el9_2.2.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-9.el9_2.2.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-9.el9_2.2.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-9.el9_2.2.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-9.el9_2.2.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-9.el9_2.2.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-9.el9_2.2.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            },
+            "BaseOS-9.2.0.Z.EUS": {
+              "SRPMS": [
+                {
+                  "filename": "sudo-1.9.5p2-9.el9_2.2.src.rpm",
+                  "is_signed": true
+                }
+              ],
+              "aarch64": [
+                {
+                  "filename": "sudo-1.9.5p2-9.el9_2.2.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-9.el9_2.2.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-9.el9_2.2.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-9.el9_2.2.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-1.9.5p2-9.el9_2.2.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-9.el9_2.2.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-9.el9_2.2.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-9.el9_2.2.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-1.9.5p2-9.el9_2.2.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-9.el9_2.2.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-9.el9_2.2.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-9.el9_2.2.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-1.9.5p2-9.el9_2.2.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-9.el9_2.2.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-9.el9_2.2.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-9.el9_2.2.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            }
+          },
+          "added_by": "rsroka",
+          "is_signed": true
+        }
+      }
+    ],
+    "sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "container_sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "ima_sig_key": {
+      "name": "redhatimarelease",
+      "keyid": "0D332449"
+    }
+  },
+  "RHEL-9.3.0.Z.MAIN": {
+    "name": "RHEL-9.3.0.Z.MAIN",
+    "description": "Red Hat Enterprise Linux 9",
+    "builds": [
+      {
+        "sudo-1.9.5p2-10.el9_3": {
+          "nvr": "sudo-1.9.5p2-10.el9_3",
+          "nevr": "sudo-0:1.9.5p2-10.el9_3",
+          "id": 2868024,
+          "is_module": false,
+          "variant_arch": {
+            "AppStream-9.3.0.Z.MAIN": {
+              "aarch64": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-10.el9_3.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-10.el9_3.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-10.el9_3.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-10.el9_3.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-10.el9_3.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-10.el9_3.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-10.el9_3.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-10.el9_3.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-10.el9_3.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-10.el9_3.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-10.el9_3.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-10.el9_3.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-python-plugin-1.9.5p2-10.el9_3.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-10.el9_3.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-10.el9_3.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-10.el9_3.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            },
+            "BaseOS-9.3.0.Z.MAIN": {
+              "SRPMS": [
+                {
+                  "filename": "sudo-1.9.5p2-10.el9_3.src.rpm",
+                  "is_signed": true
+                }
+              ],
+              "aarch64": [
+                {
+                  "filename": "sudo-1.9.5p2-10.el9_3.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-10.el9_3.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-10.el9_3.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-10.el9_3.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-1.9.5p2-10.el9_3.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-10.el9_3.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-10.el9_3.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-10.el9_3.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-1.9.5p2-10.el9_3.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-10.el9_3.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-10.el9_3.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-10.el9_3.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-1.9.5p2-10.el9_3.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-10.el9_3.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-10.el9_3.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-python-plugin-debuginfo-1.9.5p2-10.el9_3.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            }
+          },
+          "added_by": "rsroka",
+          "is_signed": true
+        }
+      }
+    ],
+    "sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "container_sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "ima_sig_key": {
+      "name": "redhatimarelease",
+      "keyid": "0D332449"
+    }
+  },
+  "RHEL-8.9.0.Z.MAIN": {
+    "name": "RHEL-8.9.0.Z.MAIN",
+    "description": "Red Hat Enterprise Linux 8",
+    "builds": [
+      {
+        "sudo-1.9.5p2-1.el8_9": {
+          "nvr": "sudo-1.9.5p2-1.el8_9",
+          "nevr": "sudo-0:1.9.5p2-1.el8_9",
+          "id": 2871093,
+          "is_module": false,
+          "variant_arch": {
+            "BaseOS-8.9.0.Z.MAIN": {
+              "SRPMS": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_9.src.rpm",
+                  "is_signed": true
+                }
+              ],
+              "aarch64": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_9.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_9.aarch64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_9.aarch64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "ppc64le": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_9.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_9.ppc64le.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_9.ppc64le.rpm",
+                  "is_signed": true
+                }
+              ],
+              "x86_64": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_9.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_9.x86_64.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_9.x86_64.rpm",
+                  "is_signed": true
+                }
+              ],
+              "s390x": [
+                {
+                  "filename": "sudo-1.9.5p2-1.el8_9.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debugsource-1.9.5p2-1.el8_9.s390x.rpm",
+                  "is_signed": true
+                },
+                {
+                  "filename": "sudo-debuginfo-1.9.5p2-1.el8_9.s390x.rpm",
+                  "is_signed": true
+                }
+              ]
+            }
+          },
+          "added_by": "dapospis",
+          "is_signed": true
+        }
+      }
+    ],
+    "sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    },
+    "container_sig_key": {
+      "name": "redhatrelease2",
+      "keyid": "fd431d51"
+    }
+  }
+}
