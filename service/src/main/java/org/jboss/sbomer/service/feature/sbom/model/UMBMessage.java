@@ -37,6 +37,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.transaction.Transactional;
 import jakarta.persistence.Index;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -130,16 +131,18 @@ public class UMBMessage extends PanacheEntityBase {
                 .build();
     }
 
-    public static UMBMessage ackAndSave(UMBMessage message) {
-        message.setStatus(UMBMessageStatus.ACK);
-        message.persistAndFlush();
-        return message;
+    @Transactional
+    public UMBMessage ackAndSave() {
+        setStatus(UMBMessageStatus.ACK);
+        persistAndFlush();
+        return this;
     }
 
-    public static UMBMessage nackAndSave(UMBMessage message) {
-        message.setStatus(UMBMessageStatus.NACK);
-        message.persistAndFlush();
-        return message;
+    @Transactional
+    public UMBMessage nackAndSave() {
+        setStatus(UMBMessageStatus.NACK);
+        persistAndFlush();
+        return this;
     }
 
 }

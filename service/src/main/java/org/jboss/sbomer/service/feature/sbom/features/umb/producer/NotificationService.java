@@ -17,12 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.producer;
 
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.findPropertyWithNameInComponent;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.fromJsonNode;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
 
@@ -31,11 +27,9 @@ import java.util.Optional;
 
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
-import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.feature.FeatureFlags;
-import org.jboss.sbomer.service.feature.errors.FeatureConfigurationException;
 import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;

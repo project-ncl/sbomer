@@ -18,13 +18,18 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -32,9 +37,11 @@ import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 @QuarkusTransactionalTest
 @WithKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UMBMessageRepositoryIT {
 
     @Test
+    @Order(1)
     void testFindByMsgIdUMBMessage() {
         UMBMessage msg = UMBMessage.find("msgId = ?1", "ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1").singleResult();
 
@@ -45,11 +52,26 @@ class UMBMessageRepositoryIT {
     }
 
     @Test
+    @Order(2)
     void testCountMessages() {
         assertEquals(2, UMBMessage.countPncReceivedMessages());
         assertEquals(1, UMBMessage.countPncProcessedMessages());
         assertEquals(1, UMBMessage.countErrataReceivedMessages());
         assertEquals(1, UMBMessage.countErrataProcessedMessages());
+    }
+
+    @Test
+    @Order(3)
+    void testAckMessages() {
+        UMBMessage message = UMBMessage.createNew(UMBConsumer.PNC);
+        assertNull(UMBMessage.findById(message.getId()));
+
+        message.ackAndSave();
+
+        UMBMessage persistedMsg = UMBMessage.findById(message.getId());
+
+        assertNotNull(persistedMsg);
+        assertEquals(UMBMessageStatus.ACK, persistedMsg.getStatus());
     }
 
 }
