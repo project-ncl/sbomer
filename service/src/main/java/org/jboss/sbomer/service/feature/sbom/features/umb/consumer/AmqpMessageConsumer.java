@@ -106,9 +106,9 @@ public class AmqpMessageConsumer {
             JsonObject properties = meta.getProperties();
             log.debug("Message properties: {}", properties.toString());
 
-            umbMessage.setCreationTime(Instant.ofEpochMilli(properties.getLong("timestamp")));
-            umbMessage.setMsgId(properties.getString("message-id"));
-            umbMessage.setTopic(properties.getString("destination"));
+            umbMessage.setCreationTime(Instant.ofEpochMilli(meta.getCreationTime()));
+            umbMessage.setMsgId(meta.getId());
+            umbMessage.setTopic(meta.getAddress());
 
             if (!Objects.equals(properties.getString("subject"), "errata.activity.status")) {
                 // This should not happen because we listen to the "errata.activity.status" topic, but just in case
@@ -160,9 +160,9 @@ public class AmqpMessageConsumer {
             JsonObject properties = meta.getProperties();
             log.debug("Message properties: {}", properties.toString());
 
-            umbMessage.setCreationTime(Instant.ofEpochMilli(properties.getLong("timestamp")));
-            umbMessage.setMsgId(properties.getString("message-id"));
-            umbMessage.setTopic(properties.getString("destination"));
+            umbMessage.setCreationTime(Instant.ofEpochMilli(meta.getCreationTime()));
+            umbMessage.setMsgId(meta.getId());
+            umbMessage.setTopic(meta.getAddress());
 
             if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
                 type.set(GenerationRequestType.BUILD);
