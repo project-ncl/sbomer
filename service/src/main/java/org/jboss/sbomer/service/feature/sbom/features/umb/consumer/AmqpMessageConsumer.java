@@ -17,10 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.ackAndSave;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataProcessedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataReceivedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncProcessedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncReceivedMessages;
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.createNew;
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.nackAndSave;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -32,12 +35,10 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
-import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
-import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -90,12 +91,7 @@ public class AmqpMessageConsumer {
         String decodedMessage = ErrataMessageHelper.decode(message.getPayload());
         log.debug("Decoded Message content: {}", decodedMessage);
 
-        UMBMessage umbMessage = UMBMessage.builder()
-                .withId(RandomStringIdGenerator.generate())
-                .withConsumer(UMBConsumer.ERRATA)
-                .withReceivalTime(Instant.now())
-                .withStatus(UMBMessageStatus.NONE)
-                .build();
+        UMBMessage umbMessage = createNew(UMBConsumer.ERRATA);
 
         try {
             umbMessage.setContent(ObjectMapperProvider.json().readTree(decodedMessage));
@@ -119,8 +115,7 @@ public class AmqpMessageConsumer {
                 // This should not happen because we listen to the "errata.activity.status" topic, but just in case
                 log.warn("Received a message that is not errata.activity.status, ignoring it");
                 umbMessage.setType(UMBMessageType.UNKNOWN);
-                umbMessage.setStatus(UMBMessageStatus.ACK);
-                umbMessage.persistAndFlush();
+                ackAndSave(umbMessage);
 
                 message.ack();
                 return;
@@ -133,13 +128,11 @@ public class AmqpMessageConsumer {
             errataNotificationHandler.handle(decodedMessage);
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize Errata message, this is unexpected", e);
-            umbMessage.setStatus(UMBMessageStatus.NACK);
-            umbMessage.persistAndFlush();
+            nackAndSave(umbMessage);
             return message.nack(e);
         }
 
-        umbMessage.setStatus(UMBMessageStatus.ACK);
-        umbMessage.persistAndFlush();
+        ackAndSave(umbMessage);
         return message.ack();
     }
 
@@ -150,12 +143,7 @@ public class AmqpMessageConsumer {
         log.debug("Received new PNC build status notification via the AMQP consumer");
         log.debug("Message content: {}", message.getPayload());
 
-        UMBMessage umbMessage = UMBMessage.builder()
-                .withId(RandomStringIdGenerator.generate())
-                .withConsumer(UMBConsumer.PNC)
-                .withReceivalTime(Instant.now())
-                .withStatus(UMBMessageStatus.NONE)
-                .build();
+        UMBMessage umbMessage = createNew(UMBConsumer.PNC);
 
         try {
             umbMessage.setContent(ObjectMapperProvider.json().readTree(message.getPayload()));
@@ -193,8 +181,7 @@ public class AmqpMessageConsumer {
             log.warn("Received a message that is not BuildStateChange nor DeliverableAnalysisStateChange, ignoring it");
             // I still want to persist the additional metadata if present
             if (metadata.isPresent()) {
-                umbMessage.setStatus(UMBMessageStatus.ACK);
-                umbMessage.persistAndFlush();
+                ackAndSave(umbMessage);
             }
             return message.ack();
         }
@@ -203,13 +190,11 @@ public class AmqpMessageConsumer {
             pncNotificationHandler.handle(message, type.get());
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize PNC message, this is unexpected", e);
-            umbMessage.setStatus(UMBMessageStatus.NACK);
-            umbMessage.persistAndFlush();
+            nackAndSave(umbMessage);
             return message.nack(e);
         }
 
-        umbMessage.setStatus(UMBMessageStatus.ACK);
-        umbMessage.persistAndFlush();
+        ackAndSave(umbMessage);
         return message.ack();
     }
 
