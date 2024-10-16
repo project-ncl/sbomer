@@ -120,4 +120,26 @@ public class UMBMessage extends PanacheEntityBase {
     public static long countErrataReceivedMessages() {
         return UMBMessage.find("consumer = ?1", UMBConsumer.ERRATA).count();
     }
+
+    public static UMBMessage createNew(UMBConsumer consumer) {
+        return UMBMessage.builder()
+                .withId(RandomStringIdGenerator.generate())
+                .withConsumer(consumer)
+                .withReceivalTime(Instant.now())
+                .withStatus(UMBMessageStatus.NONE)
+                .build();
+    }
+
+    public static UMBMessage ackAndSave(UMBMessage message) {
+        message.setStatus(UMBMessageStatus.ACK);
+        message.persistAndFlush();
+        return message;
+    }
+
+    public static UMBMessage nackAndSave(UMBMessage message) {
+        message.setStatus(UMBMessageStatus.NACK);
+        message.persistAndFlush();
+        return message;
+    }
+
 }

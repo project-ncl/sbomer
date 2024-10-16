@@ -34,9 +34,32 @@
  * limitations under the License.
  */
 
-INSERT INTO umb_message(id, consumer, receival_time, status, type, msg_id, creation_time, topic) VALUES ("10001", 'PNC', '2024-10-14 14:18:45.148407', 'ACK', 'DELIVERABLE_ANALYSIS', 'ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1', '2024-10-14 12:18:45.148407', '/topic/VirtualTopic.eng.pnc.builds');
-INSERT INTO umb_message(id, consumer, receival_time, status, type, msg_id, creation_time, topic) VALUES ("10002", 'ERRATA', '2024-10-14 14:18:45.148407', 'ACK', 'ERRATA', 'ID:umb-prod-2.umb-001.prod.us-east-1.aws.redhat.com-44939-1728675652022-7:105726:-1:1:1', '2024-10-14 12:18:45.148407', '/topic/VirtualTopic.eng.errata.activity.status');
-INSERT INTO umb_message(id, consumer, receival_time, status) VALUES ("10003", 'PNC', '2024-10-14 14:18:45.148407', 'NONE');
+INSERT INTO umb_message(id, consumer, receival_time, status, type, msg_id, creation_time, topic) 
+   VALUES (
+    'AAABBBCCC',
+    'PNC',
+    '2024-10-14 14:18:45.148407',
+    'ACK',
+    'DELIVERABLE_ANALYSIS',
+    'ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1',
+    '2024-10-14 12:18:45.148407',
+    '/topic/VirtualTopic.eng.pnc.builds');
+INSERT INTO umb_message(id, consumer, receival_time, status, type, msg_id, creation_time, topic) 
+   VALUES (
+    'DDDEEEFFF',
+    'ERRATA',
+    '2024-10-14 14:18:45.148407',
+    'ACK',
+    'ERRATA',
+    'ID:umb-prod-2.umb-001.prod.us-east-1.aws.redhat.com-44939-1728675652022-7:105726:-1:1:1',
+    '2024-10-14 12:18:45.148407',
+    '/topic/VirtualTopic.eng.errata.activity.status');
+INSERT INTO umb_message(id, consumer, receival_time, status) 
+   VALUES (
+    'GGGHHHIII',
+    'PNC',
+    '2024-10-14 14:18:45.148407',
+    'NONE');
 
 
 INSERT INTO sbom_generation_request(
