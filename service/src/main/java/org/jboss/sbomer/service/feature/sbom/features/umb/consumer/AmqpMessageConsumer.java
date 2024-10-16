@@ -17,13 +17,11 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.ackAndSave;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataProcessedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataReceivedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncProcessedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncReceivedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.createNew;
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.nackAndSave;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -84,6 +82,7 @@ public class AmqpMessageConsumer {
 
     @Incoming("errata")
     @Blocking(ordered = false, value = "errata-processor-pool")
+    @Transactional
     public CompletionStage<Void> processErrata(Message<byte[]> message) {
         log.debug("Received new Errata tool status change notification via the AMQP consumer");
 
@@ -115,7 +114,7 @@ public class AmqpMessageConsumer {
                 // This should not happen because we listen to the "errata.activity.status" topic, but just in case
                 log.warn("Received a message that is not errata.activity.status, ignoring it");
                 umbMessage.setType(UMBMessageType.UNKNOWN);
-                ackAndSave(umbMessage);
+                umbMessage.ackAndSave();
 
                 message.ack();
                 return;
@@ -128,11 +127,11 @@ public class AmqpMessageConsumer {
             errataNotificationHandler.handle(decodedMessage);
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize Errata message, this is unexpected", e);
-            nackAndSave(umbMessage);
+            umbMessage.nackAndSave();
             return message.nack(e);
         }
 
-        ackAndSave(umbMessage);
+        umbMessage.ackAndSave();
         return message.ack();
     }
 
@@ -181,7 +180,7 @@ public class AmqpMessageConsumer {
             log.warn("Received a message that is not BuildStateChange nor DeliverableAnalysisStateChange, ignoring it");
             // I still want to persist the additional metadata if present
             if (metadata.isPresent()) {
-                ackAndSave(umbMessage);
+                umbMessage.ackAndSave();
             }
             return message.ack();
         }
@@ -190,11 +189,11 @@ public class AmqpMessageConsumer {
             pncNotificationHandler.handle(message, type.get());
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize PNC message, this is unexpected", e);
-            nackAndSave(umbMessage);
+            umbMessage.nackAndSave();
             return message.nack(e);
         }
 
-        ackAndSave(umbMessage);
+        umbMessage.ackAndSave();
         return message.ack();
     }
 
