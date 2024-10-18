@@ -1,0 +1,40 @@
+{
+  "RHEL-9.4.0.Z.MAIN+EUS": {
+    "name": "RHEL-9.4.0.Z.MAIN+EUS",
+    "description": "Red Hat Enterprise Linux 9",
+    "builds": [
+      {
+        "podman-container-9.4-14.1728871566": {
+          "nvr": "podman-container-9.4-14.1728871566",
+          "nevr": "podman-container-0:9.4-14.1728871566",
+          "id": 3338841,
+          "is_module": false,
+          "variant_arch": {
+            "AppStream-9.4.0.Z.MAIN.EUS": {
+              "multi": [
+                {
+                  "filename": "docker-image-sha256:73260288ff2491d7e36d918e223223b8b9ea1ee65ba6a39730b49d4350fe3401.aarch64.tar.gz",
+                  "is_signed": false
+                },
+                {
+                  "filename": "docker-image-sha256:fc8d1317752d0c01e57233c92d2a34f823348d27b2cfb9e83e29965cdfcafb10.x86_64.tar.gz",
+                  "is_signed": false
+                },
+                {
+                  "filename": "docker-image-sha256:617d9114143e4c57aca3f1d2c0d48c9dccd7eaef53a3dd5c7f800519654a4a27.ppc64le.tar.gz",
+                  "is_signed": false
+                },
+                {
+                  "filename": "docker-image-sha256:44655a449479d71c542352d3361e7b25ce31ab4b122abb6de15415fe2c302b28.s390x.tar.gz",
+                  "is_signed": false
+                }
+              ]
+            }
+          },
+          "added_by": "botas/pnt-devops-rad-jenkins.rhev-ci-vms.eng.rdu2.redhat.com",
+          "is_signed": false
+        }
+      }
+    ]
+  }
+}

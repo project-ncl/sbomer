@@ -23,6 +23,7 @@ import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncPro
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncReceivedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.createNew;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
@@ -124,8 +125,12 @@ public class AmqpMessageConsumer {
         });
 
         try {
-            errataNotificationHandler.handle(decodedMessage);
+            errataNotificationHandler.handle(umbMessage);
         } catch (JsonProcessingException e) {
+            log.error("Unable to deserialize Errata message, this is unexpected", e);
+            umbMessage.nackAndSave();
+            return message.nack(e);
+        } catch (IOException e) {
             log.error("Unable to deserialize Errata message, this is unexpected", e);
             umbMessage.nackAndSave();
             return message.nack(e);

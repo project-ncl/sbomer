@@ -1,0 +1,17 @@
+{
+    "content_types": [
+      "docker"
+    ],
+    "errata_id": 139856,
+    "errata_status": "QE",
+    "from": "NEW_FILES",
+    "fulladvisory": "RHSA-2041:XXXX-YY",
+    "product": "MYPRODUCT",
+    "release": "MYRELEASE",
+    "skip_customer_notifications": false,
+    "synopsis": "Important: security update",
+    "to": "QE",
+    "type": "RHSA",
+    "when": "2041-10-01 08:03:25 UTC",
+    "who": "john@doyle.com"
+}

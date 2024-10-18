@@ -22,6 +22,11 @@ sbomer:
     ## (required)
     ## Hostname of the PNC service
     # host:
+  koji:
+    ## (required)
+    ## Hostname of the Brew service
+    # hub-url:
+    # web-url:
 
   purl-qualifiers-allow-list:
     - repository_url

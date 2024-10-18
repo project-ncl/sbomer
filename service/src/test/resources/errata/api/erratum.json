@@ -34,7 +34,7 @@
         "published": 1,
         "deleted": 0,
         "qa_complete": 1,
-        "status": "SHIPPED_LIVE",
+        "status": "NEW_FILES",
         "resolution": "",
         "reporter_id": 3003383,
         "assigned_to_id": 3000749,
