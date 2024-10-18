@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 public class ErrataBuildList {
@@ -58,5 +59,23 @@ public class ErrataBuildList {
         private String nvr;
         private String nevr;
         private Long id;
+        @JsonProperty("is_module")
+        private boolean isModule;
+        @JsonProperty("added_by")
+        private String addedBy;
+        @JsonProperty("is_signed")
+        private boolean isSigned;
+        @JsonProperty("variant_arch")
+        private Map<String, VariantArch> variantArch = new HashMap<String, VariantArch>();
+
+        @JsonAnySetter
+        public void addVariantArch(String variantName, VariantArch variantArchItem) {
+            this.variantArch.put(variantName, variantArchItem);
+        }
+    }
+
+    @Data
+    public static class VariantArch {
+        // Empty class for now since we are not interested in any item inside
     }
 }

@@ -1,0 +1,52 @@
+{
+  "data": {
+    "id": 2096,
+    "type": "releases",
+    "attributes": {
+      "name": "RHEL-9.4.0.Z.MAIN+EUS",
+      "description": "RHEL-9.4.0.Z.MAIN+EUS",
+      "type": "Zstream",
+      "allow_pkg_dupes": false,
+      "ship_date": null,
+      "pelc_product_version_name": null,
+      "is_active": true,
+      "enabled": true,
+      "enable_batching": true,
+      "is_async": true,
+      "is_deferred": false,
+      "allow_shadow": false,
+      "allow_blocker": false,
+      "allow_exception": false,
+      "limit_bugs_by_product": false,
+      "supports_component_acl": false,
+      "blocker_flags": [
+        "release",
+        "zstream"
+      ],
+      "internal_target_release": "",
+      "zstream_target_release": "9.4.0",
+      "notify_bugzilla_about_release_status": true,
+      "is_silent": false,
+      "pp_start_date": null,
+      "pp_end_date": null,
+      "forbid_container_advisories": false
+    },
+    "relationships": {
+      "brew_tags": [],
+      "product": {
+        "id": 16,
+        "short_name": "RHEL"
+      },
+      "product_versions": [
+        {
+          "id": 2064,
+          "name": "RHEL-9.4.0.Z.MAIN+EUS"
+        }
+      ],
+      "state_machine_rule_set": {
+        "id": 20,
+        "name": "Default sans RPMDiff"
+      }
+    }
+  }
+}

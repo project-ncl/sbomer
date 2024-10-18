@@ -17,11 +17,20 @@
  */
 package org.jboss.sbomer.service.test.unit.feature.sbom.errata;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
+import org.jboss.pnc.build.finder.koji.ClientSession;
+import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
+import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.FeatureFlags;
@@ -30,16 +39,20 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.ErrataNotificationHandler;
+import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
+import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
 class ErrataNotificationHandlerTest {
 
     static class ErrataNotificationHandlerAlt extends ErrataNotificationHandler {
         @Override
-        public void handle(String message) throws JsonProcessingException {
+        public void handle(UMBMessage message) throws JsonProcessingException, IOException {
             super.handle(message);
         }
     }
@@ -47,6 +60,8 @@ class ErrataNotificationHandlerTest {
     ErrataNotificationHandlerAlt errataNotificationHandler;
 
     ErrataClient errataClient = mock(ErrataClient.class);
+    ClientSession clientSession = mock(ClientSession.class);
+    SbomService sbomService = mock(SbomService.class);
 
     @BeforeEach
     void beforeEach() {
@@ -56,10 +71,12 @@ class ErrataNotificationHandlerTest {
         when(featureFlags.errataIntegrationEnabled()).thenReturn(true);
         errataNotificationHandler.setFeatureFlags(featureFlags);
         errataNotificationHandler.setErrataClient(errataClient);
+        errataNotificationHandler.setKojiSession(clientSession);
+        errataNotificationHandler.setSbomService(sbomService);
     }
 
     @Test
-    void testGetErrata() throws IOException {
+    void testHandleRealErrataWithNewFilesStatus() throws IOException, JsonProcessingException {
         String errataJsonString = TestResources.asString("errata/api/erratum.json");
         String releaseJsonString = TestResources.asString("errata/api/release.json");
         String errataBuildsJsonString = TestResources.asString("errata/api/build_list.json");
@@ -69,12 +86,63 @@ class ErrataNotificationHandlerTest {
                 .readValue(errataBuildsJsonString, ErrataBuildList.class);
 
         String umbErrataStatusChangeMsg = TestResources.asString("errata/umb/errata_status_change.json");
+        UMBMessage umbMessage = UMBMessage.createNew(UMBConsumer.ERRATA);
+        umbMessage.setContent(ObjectMapperProvider.json().readTree(umbErrataStatusChangeMsg));
 
         when(errataClient.getErratum("139230")).thenReturn(errata);
         when(errataClient.getBuildsList("139230")).thenReturn(buildList);
         when(errataClient.getRelease("2227")).thenReturn(release);
 
-        errataNotificationHandler.handle(umbErrataStatusChangeMsg);
+        errataNotificationHandler.handle(umbMessage);
+    }
+
+    @Test
+    void testHandleRealErrataDockerWithQEStatus() throws KojiClientException, IOException, JsonProcessingException {
+        String errataJsonString = TestResources.asString("errata/api/erratum_QE.json");
+        String releaseJsonString = TestResources.asString("errata/api/erratum_QE_release.json");
+        String errataBuildsJsonString = TestResources.asString("errata/api/erratum_QE_build_list.json");
+        Errata errata = ObjectMapperProvider.json().readValue(errataJsonString, Errata.class);
+        ErrataRelease release = ObjectMapperProvider.json().readValue(releaseJsonString, ErrataRelease.class);
+        ErrataBuildList buildList = ObjectMapperProvider.json()
+                .readValue(errataBuildsJsonString, ErrataBuildList.class);
+
+        String umbErrataStatusChangeMsg = TestResources.asString("errata/umb/errata_status_change_QE.json");
+        KojiBuildInfo kojiBuildInfo = createKojiBuildInfo();
+
+        UMBMessage umbMessage = UMBMessage.createNew(UMBConsumer.ERRATA);
+        umbMessage.setContent(ObjectMapperProvider.json().readTree(umbErrataStatusChangeMsg));
+
+        when(errataClient.getErratum("139856")).thenReturn(errata);
+        when(errataClient.getBuildsList("139856")).thenReturn(buildList);
+        when(errataClient.getRelease("2096")).thenReturn(release);
+        when(clientSession.getBuild(3338841)).thenReturn(kojiBuildInfo);
+
+        errataNotificationHandler.handle(umbMessage);
+
+        verify(sbomService, times(1)).generateSyftImage(
+                eq(
+                        "registry-proxy.com/rh-osbs/rhel9-podman@sha256:a9a84a89352ab1cbe3f5b094b4abbc7c5800edf65f5d52751932bd6488433d63"),
+                any(SyftImageConfig.class));
+
+    }
+
+    private KojiBuildInfo createKojiBuildInfo() {
+        KojiBuildInfo kojiBuildInfo = new KojiBuildInfo();
+        kojiBuildInfo.setName("podman-container");
+        kojiBuildInfo.setVersion("9.4");
+        kojiBuildInfo.setRelease("14.1728871566");
+        Map<String, Object> extras = Map.of(
+                "image",
+                Map.of(
+                        "index",
+                        Map.of(
+                                "pull",
+                                List.of(
+                                        "registry-proxy.com/rh-osbs/rhel9-podman@sha256:a9a84a89352ab1cbe3f5b094b4abbc7c5800edf65f5d52751932bd6488433d63",
+                                        "registry-proxy.com/rh-osbs/rhel9-podman:9.4-14.1728871566"))));
+
+        kojiBuildInfo.setExtra(extras);
+        return kojiBuildInfo;
     }
 
 }
