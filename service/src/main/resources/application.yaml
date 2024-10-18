@@ -190,3 +190,4 @@ sbomer:
       # # This includes removing the generation request kubernetes resource as well as any leftovers on the filesystem
       # # located in the sbomer.sbom-dir directory.
       cleanup: false
+
