@@ -87,6 +87,29 @@
       <artifactId>vertx-json-schema</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.jboss.pnc.build.finder</groupId>
+      <artifactId>core</artifactId>
+      <version>${version.build-finder}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jboss.pnc</groupId>
+          <artifactId>rest-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.pnc</groupId>
+          <artifactId>pnc-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
       <version>3.0</version>
