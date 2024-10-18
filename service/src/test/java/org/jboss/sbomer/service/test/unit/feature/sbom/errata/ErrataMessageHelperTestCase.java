@@ -127,7 +127,7 @@ public class ErrataMessageHelperTestCase {
         assertEquals(139230L, details.getId());
         assertEquals("RHBA-2041:7158-01", details.getFulladvisory());
         assertEquals("updated q/m container image", details.getSynopsis());
-        assertEquals(ErrataStatus.SHIPPED_LIVE, details.getStatus());
+        assertEquals(ErrataStatus.NEW_FILES, details.getStatus());
         assertTrue(details.getBrew());
         assertEquals(2227L, details.getGroupId());
         assertEquals(ZonedDateTime.of(2041, 9, 24, 7, 4, 48, 0, ZoneOffset.UTC).toInstant(), details.getCreatedAt());
@@ -248,6 +248,8 @@ public class ErrataMessageHelperTestCase {
         assertEquals("sudo-1.9.5p2-1.el8_6", firstBuildItem.get().getKey());
         assertEquals(2871088, firstBuildItem.get().getValue().getId());
         assertEquals("sudo-1.9.5p2-1.el8_6", firstBuildItem.get().getValue().getNvr());
+        assertEquals(1, firstBuildItem.get().getValue().getVariantArch().keySet().size());
+        assertTrue(firstBuildItem.get().getValue().getVariantArch().keySet().contains("BaseOS-8.6.0.Z.EUS"));
 
         Optional<Entry<String, ProductVersionEntry>> secondValue = buildList.getProductVersions()
                 .entrySet()
@@ -266,6 +268,8 @@ public class ErrataMessageHelperTestCase {
         assertEquals("sudo-1.9.5p2-1.el8_8", secondBuildItem.get().getKey());
         assertEquals(2870637, secondBuildItem.get().getValue().getId());
         assertEquals("sudo-1.9.5p2-1.el8_8", secondBuildItem.get().getValue().getNvr());
+        assertEquals(1, secondBuildItem.get().getValue().getVariantArch().keySet().size());
+        assertTrue(secondBuildItem.get().getValue().getVariantArch().containsKey("BaseOS-8.8.0.Z.EUS"));
     }
 
 }

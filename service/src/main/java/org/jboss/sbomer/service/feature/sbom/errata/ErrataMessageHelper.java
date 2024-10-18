@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
@@ -26,6 +27,7 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.ErrataS
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -49,6 +51,12 @@ public class ErrataMessageHelper {
 
     public static ErrataStatusChangeMessageBody fromStatusChangeMessage(String json) throws JsonProcessingException {
         return jsonObjectMapper.readValue(json, ErrataStatusChangeMessageBody.class);
+    }
+
+    public static ErrataStatusChangeMessageBody fromStatusChangeMessage(JsonNode jsonNode) throws IOException {
+        return jsonObjectMapper.readValue(
+                jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes(),
+                ErrataStatusChangeMessageBody.class);
     }
 
 }

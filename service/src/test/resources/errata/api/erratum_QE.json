@@ -1,0 +1,147 @@
+{
+  "errata": {
+    "rhba": {
+      "id": 139856,
+      "revision": 1,
+      "fulladvisory": "RHBA-2024:8225-01",
+      "issue_date": "2024-10-17T00:46:55Z",
+      "update_date": "2024-10-17T00:46:55Z",
+      "release_date": null,
+      "synopsis": "updated rhel9/podman container image",
+      "pushed": 0,
+      "published": 1,
+      "deleted": 0,
+      "qa_complete": 1,
+      "status": "QE",
+      "resolution": "",
+      "reporter_id": 3003383,
+      "assigned_to_id": 3002824,
+      "old_delete_product": null,
+      "severity": "normal",
+      "priority": "normal",
+      "rhn_complete": 0,
+      "request": 0,
+      "doc_complete": 1,
+      "rhnqa": 1,
+      "closed": 0,
+      "contract": null,
+      "pushcount": 1,
+      "text_ready": 0,
+      "package_owner_id": 165199,
+      "manager_id": 3002528,
+      "rhnqa_shadow": 0,
+      "published_shadow": 0,
+      "current_tps_run": null,
+      "filelist_locked": 0,
+      "filelist_changed": 0,
+      "sign_requested": 0,
+      "security_impact": "None",
+      "product_id": 16,
+      "is_brew": 1,
+      "status_updated_at": "2024-10-17T00:54:52Z",
+      "group_id": 2096,
+      "created_at": "2024-10-14T02:44:56Z",
+      "updated_at": "2024-10-17T00:55:05Z",
+      "respin_count": 0,
+      "old_advisory": "RHBA-2024:139856-01",
+      "rating": 0,
+      "docs_responsibility_id": 1,
+      "quality_responsibility_id": 155,
+      "devel_responsibility_id": 3,
+      "is_valid": 1,
+      "current_state_index_id": 838854,
+      "text_only": false,
+      "publish_date_override": "2024-10-17T00:00:00Z",
+      "state_machine_rule_set_id": null,
+      "actual_ship_date": "2024-10-17T00:54:52Z",
+      "supports_multiple_product_destinations": false,
+      "security_approved": null,
+      "batch_id": null,
+      "is_batch_blocker": false,
+      "request_rcm_push_comment_id": null,
+      "content_types": [
+        "docker"
+      ],
+      "embargo_undated": false,
+      "security_sla": null,
+      "cloned_from_id": null,
+      "is_followup": false,
+      "expected_publish_date": "2024-10-17",
+      "builds_updated_at": "2024-10-14T02:44:58Z",
+      "cve_mapping_validation_complete": null,
+      "prevent_auto_push_ready": false,
+      "suppress_push_request_jira": false,
+      "lower_grade_approved": false,
+      "blocking_advisories": [],
+      "dependent_advisories": [],
+      "embargo_date": null,
+      "errata_id": 8225,
+      "fulltype": "Red Hat Bug Fix Advisory",
+      "is_operator_hotfix": false,
+      "is_operator_prerelease": false,
+      "publish_date": "2024-10-17T00:00:00Z",
+      "reboot_suggested": 0,
+      "skip_customer_notifications": false,
+      "labels": [],
+      "product": {
+        "id": 16,
+        "name": "Red Hat Enterprise Linux",
+        "short_name": "RHEL"
+      }
+    }
+  },
+  "original_type": "RHBA",
+  "content": {
+    "content": {
+      "id": 137436,
+      "errata_id": 139856,
+      "topic": "Updated rhel9/podman container image is now available for Red Hat Enterprise Linux 9.",
+      "description": "The rhel9/podman container image has been updated for Red Hat Enterprise Linux 9 to address the following security advisory: RHSA-2024:8039 (see References)\n\nUsers of rhel9/podman container images are advised to upgrade to these updated images, which contain backported patches to correct these security issues, fix these bugs and add these enhancements. Users of these images are also encouraged to rebuild all container images that depend on these images.\n\nYou can find images updated by this advisory in Red Hat Container Catalog (see References).",
+      "solution": "The Red Hat Enterprise Linux 9 container image provided by this update can be downloaded from the Red Hat Container Registry at registry.access.redhat.com. Installation instructions for your platform are available at Red Hat Container Catalog (see References).\n\nDockerfiles and scripts should be amended either to refer to this new image specifically, or to the latest image generally.",
+      "keywords": "",
+      "cve": "",
+      "crossref": "",
+      "reference": "https://access.redhat.com/errata/RHSA-2024:8039\nhttps://catalog.redhat.com/software/containers/registry/registry.access.redhat.com/repository/rhel9/podman",
+      "how_to_test": null,
+      "doc_reviewer_id": 1,
+      "updated_at": "2024-10-14T02:44:57Z",
+      "revision_count": 1,
+      "doc_review_due_at": null,
+      "text_only_cpe": null,
+      "product_version_text": null,
+      "product_security_reviewer_id": null
+    }
+  },
+  "diffs": {},
+  "bugs": {
+    "errata": {
+      "rhba": {
+        "id": 139856
+      }
+    },
+    "idsfixed": [
+      "2310527",
+      "2310528",
+      "2310529",
+      "2315691"
+    ],
+    "to_fetch": [],
+    "id_field": "id",
+    "id_prefix": "bz:",
+    "type": "bugs",
+    "bugs": []
+  },
+  "jira_issues": {
+    "errata": {
+      "rhba": {
+        "id": 139856
+      }
+    },
+    "idsfixed": [],
+    "to_fetch": [],
+    "id_field": "key",
+    "id_prefix": "jira:",
+    "type": "jira_issues",
+    "jira_issues": []
+  }
+}
