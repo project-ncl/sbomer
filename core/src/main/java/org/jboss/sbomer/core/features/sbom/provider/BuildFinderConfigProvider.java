@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.build.finder.core.BuildConfig;
 import org.jboss.pnc.build.finder.core.BuildSystem;
 import org.jboss.pnc.build.finder.core.ChecksumType;
@@ -129,7 +130,7 @@ public class BuildFinderConfigProvider {
     }
 
     /**
-     * Override koji hub url in the config if 'sbomer.koji.hub-url' defined in a system property, env variable, or in
+     * Override koji hub url in the config if 'sbomer.koji.hub.url' defined in a system property, env variable, or in
      * application.properties.
      *
      * @param config config file to potentially override its kojiHubUrl
@@ -137,31 +138,30 @@ public class BuildFinderConfigProvider {
      * @throws IOException if we can't parse the value as an URL
      */
     private void setKojiHubURL(BuildConfig config) throws IOException {
-        Optional<String> optionalKojiHubURL = org.eclipse.microprofile.config.ConfigProvider.getConfig()
-                .getOptionalValue("sbomer.koji.hub-url", String.class);
+        // Fetch the KojiHubURL from the configuration
+        String kojiHubURLString = ConfigProvider.getConfig()
+                .getOptionalValue("sbomer.koji.hub.url", String.class)
+                .orElse(null);
 
-        String kojiHubURLString;
-        if (optionalKojiHubURL.isPresent()) {
-            kojiHubURLString = optionalKojiHubURL.get();
-        } else if (System.getenv("SBOMER_KOJI_HUB_HOST") != null) {
-            kojiHubURLString = "https://" + System.getenv("SBOMER_KOJI_HUB_HOST") + "/brewhub";
-        } else {
-            log.warn("Empty KojiHubURL!! Querying Brew will not work!!");
+        // Return early if no valid URL was found
+        if (kojiHubURLString == null) {
+            log.warn("KojiHubURL is missing! Querying Brew will not work.");
             return;
         }
 
         log.debug("Using KojiHubURL: {}", kojiHubURLString);
 
+        // Validate and set the KojiHubURL
         try {
             URL kojiHubURL = new URL(kojiHubURLString);
             config.setKojiHubURL(kojiHubURL);
         } catch (MalformedURLException e) {
-            throw new IOException("Bad Koji hub URL: " + kojiHubURLString, e);
+            throw new IOException("Invalid Koji hub URL: " + kojiHubURLString, e);
         }
     }
 
     /**
-     * Override koji web url in the config if 'sbomer.koji.web-url' defined in a system property, env variable, or in
+     * Override koji web url in the config if 'sbomer.koji.web.url' defined in a system property, env variable, or in
      * application.properties. Otherwise, use kojiHubUrl to generate the kojiWebUrl.
      *
      * @param config config file to potentially override its kojiWebUrl
@@ -169,29 +169,38 @@ public class BuildFinderConfigProvider {
      * @throws IOException if we can't parse the value as an URL
      */
     private void setKojiWebURL(BuildConfig config) throws IOException {
-        Optional<String> optionalKojiWebURL = org.eclipse.microprofile.config.ConfigProvider.getConfig()
-                .getOptionalValue("sbomer.koji.web-url", String.class);
+        // Retrieve the KojiWebURL from the configuration or construct it based on KojiHubURL if necessary
+        String kojiWebURLString = ConfigProvider.getConfig()
+                .getOptionalValue("sbomer.koji.web.url", String.class)
+                .orElseGet(() -> {
+                    if (config.getKojiWebURL() == null && config.getKojiHubURL() != null) {
+                        // Hack for missing koji.web-url
+                        String fallbackURL = config.getKojiHubURL()
+                                .toExternalForm()
+                                .replace("hub.", "web.")
+                                .replace("hub", "");
+                        log.warn("KojiWebURL is missing, using derived URL: {}", fallbackURL);
+                        return fallbackURL;
+                    } else {
+                        return null;
+                    }
+                });
 
-        String kojiWebURLString;
-        if (optionalKojiWebURL.isPresent()) {
-            kojiWebURLString = optionalKojiWebURL.get();
-        } else if (System.getenv("SBOMER_KOJI_WEB_HOST") != null) {
-            kojiWebURLString = "https://" + System.getenv("SBOMER_KOJI_WEB_HOST") + "/brew";
-        } else if (config.getKojiWebURL() == null && config.getKojiHubURL() != null) {
-            // Hack for missing koji.web-url
-            kojiWebURLString = config.getKojiHubURL().toExternalForm().replace("hub.", "web.").replace("hub", "");
-        } else {
-            log.warn("Empty KojiWebURL!! Querying Brew will not work!!");
+        // Return early if no valid URL was found
+        if (kojiWebURLString == null) {
+            log.warn("KojiWebURL and fallback KojiHubURL are both unavailable! Querying Brew will not work.");
             return;
         }
 
         log.debug("Using KojiWebURL: {}", kojiWebURLString);
 
+        // Validate and set the KojiWebURL
         try {
             URL kojiWebURL = new URL(kojiWebURLString);
             config.setKojiWebURL(kojiWebURL);
         } catch (MalformedURLException e) {
-            throw new IOException("Bad Koji web URL: " + kojiWebURLString, e);
+            throw new IOException("Invalid Koji web URL: " + kojiWebURLString, e);
         }
     }
+
 }
