@@ -140,19 +140,23 @@ public class BuildFinderConfigProvider {
         Optional<String> optionalKojiHubURL = org.eclipse.microprofile.config.ConfigProvider.getConfig()
                 .getOptionalValue("sbomer.koji.hub-url", String.class);
 
+        String kojiHubURLString;
         if (optionalKojiHubURL.isPresent()) {
-            String s = optionalKojiHubURL.get();
-            log.debug("Using KojiHubURL: {}", s);
-
-            try {
-                URL kojiHubURL = new URL(s);
-                config.setKojiHubURL(kojiHubURL);
-            } catch (MalformedURLException e) {
-                throw new IOException("Bad Koji hub URL: " + s, e);
-            }
+            kojiHubURLString = optionalKojiHubURL.get();
+        } else if (System.getenv("SBOMER_KOJI_HUB_HOST") != null) {
+            kojiHubURLString = "https://" + System.getenv("SBOMER_KOJI_HUB_HOST") + "/brewhub";
         } else {
             log.warn("Empty KojiHubURL!! Querying Brew will not work!!");
+            return;
+        }
 
+        log.debug("Using KojiHubURL: {}", kojiHubURLString);
+
+        try {
+            URL kojiHubURL = new URL(kojiHubURLString);
+            config.setKojiHubURL(kojiHubURL);
+        } catch (MalformedURLException e) {
+            throw new IOException("Bad Koji hub URL: " + kojiHubURLString, e);
         }
     }
 
@@ -168,29 +172,26 @@ public class BuildFinderConfigProvider {
         Optional<String> optionalKojiWebURL = org.eclipse.microprofile.config.ConfigProvider.getConfig()
                 .getOptionalValue("sbomer.koji.web-url", String.class);
 
+        String kojiWebURLString;
         if (optionalKojiWebURL.isPresent()) {
-            String s = optionalKojiWebURL.get();
-            log.debug("Using KojiWebURL: {}", s);
-
-            try {
-                URL kojiWebURL = new URL(s);
-                config.setKojiWebURL(kojiWebURL);
-            } catch (MalformedURLException e) {
-                throw new IOException("Bad Koji web URL: " + s, e);
-            }
+            kojiWebURLString = optionalKojiWebURL.get();
+        } else if (System.getenv("SBOMER_KOJI_WEB_HOST") != null) {
+            kojiWebURLString = "https://" + System.getenv("SBOMER_KOJI_WEB_HOST") + "/brew";
         } else if (config.getKojiWebURL() == null && config.getKojiHubURL() != null) {
             // Hack for missing koji.web-url
-            String s = config.getKojiHubURL().toExternalForm().replace("hub.", "web.").replace("hub", "");
-
-            try {
-                URL kojiWebURL = new URL(s);
-                config.setKojiWebURL(kojiWebURL);
-            } catch (MalformedURLException e) {
-                throw new IOException("Bad Koji web URL: " + s, e);
-            }
+            kojiWebURLString = config.getKojiHubURL().toExternalForm().replace("hub.", "web.").replace("hub", "");
         } else {
             log.warn("Empty KojiWebURL!! Querying Brew will not work!!");
+            return;
+        }
+
+        log.debug("Using KojiWebURL: {}", kojiWebURLString);
+
+        try {
+            URL kojiWebURL = new URL(kojiWebURLString);
+            config.setKojiWebURL(kojiWebURL);
+        } catch (MalformedURLException e) {
+            throw new IOException("Bad Koji web URL: " + kojiWebURLString, e);
         }
     }
-
 }
