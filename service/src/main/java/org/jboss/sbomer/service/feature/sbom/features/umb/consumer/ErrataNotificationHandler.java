@@ -102,7 +102,7 @@ public class ErrataNotificationHandler {
         System.out.println(summary);
 
         if (!erratum.getDetails().get().getTextonly()) {
-            handleRealAdvisory(erratum);
+            handleStandardAdvisory(erratum);
         } else {
             handleTextOnlyAdvisory(erratum);
         }
@@ -117,7 +117,7 @@ public class ErrataNotificationHandler {
         log.warn("** TODO ** Handle the Text-only advisories");
     }
 
-    private void handleRealAdvisory(Errata erratum) {
+    private void handleStandardAdvisory(Errata erratum) {
         log.info(
                 "Advisory {} ({}) is standard (non Text-Only), with status {}",
                 erratum.getDetails().get().getFulladvisory(),
@@ -132,13 +132,14 @@ public class ErrataNotificationHandler {
         }
 
         if (ErrataStatus.QE.equals(details.getStatus())) {
-            handleQERealAdvisory(details);
+            handleStandardQEAdvisory(details);
         } else {
 
         }
     }
 
-    private void handleQERealAdvisory(Details details) {
+    private void handleStandardQEAdvisory(Details details) {
+        log.debug("Handle standard QE Advisory {}", details);
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(String.valueOf(details.getId()));
         Map<ProductVersionEntry, List<BuildItem>> buildDetails = erratumBuildList.getProductVersions()
                 .values()
@@ -161,11 +162,12 @@ public class ErrataNotificationHandler {
     }
 
     private void processDockerBuilds(Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
+        log.debug("Processing docker builds: {}", buildDetails);
         SyftImageConfig config = SyftImageConfig.builder().withIncludeRpms(true).build();
         buildDetails.forEach((pVersion, items) -> {
-            log.info("Processing container builds of Errata Product Version: '{}'", pVersion);
+            log.debug("Processing container builds of Errata Product Version: '{}'", pVersion);
             items.forEach(item -> {
-                log.info("Getting image information from Brew for build '{}' ({})", item.getNvr(), item.getId());
+                log.debug("Getting image information from Brew for build '{}' ({})", item.getNvr(), item.getId());
                 String imageName = getImageNameFromBuild(item.getId());
                 if (imageName != null) {
                     sbomService.generateSyftImage(imageName, config);
