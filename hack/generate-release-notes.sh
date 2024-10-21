@@ -53,10 +53,10 @@ git log "${release_from}..${release_to}" --oneline --no-merges --pretty="format:
 
 echo
 echo "---- Release Notes Entry ----"
-echo "## :date: ${DEPLOYMENT_DATE}"
-echo "### Changes"
+echo "### :date: ${DEPLOYMENT_DATE}"
+echo "#### Changes"
 echo "- TBD"
-echo "### Details"
+echo "#### Details"
 echo "- Release \`${release_to}\`"
 echo "- Revision ${revision}"
 echo "- [Code](https://github.com/project-ncl/sbomer/tree/${release_to})"
