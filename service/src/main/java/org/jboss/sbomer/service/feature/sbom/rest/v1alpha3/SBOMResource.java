@@ -327,20 +327,21 @@ public class SBOMResource extends AbstractApiProvider {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
     @Operation(
-            summary = "Triggers a PNC Deliverable Analysis using the provided information",
-            description = "Triggers a PNC Deliverable Analysis using the provided information.")
-    @Path("/sboms/generate/analysis")
+            summary = "Generates SBOMs from an Errata Advisory",
+            description = "SBOMs base generation for a particular Errata Advisory")
+    @Parameter(name = "advisoryId", description = "Errata Advisory identifier", example = "123456")
+    @Path("/sboms/generate/advisory/{advisoryId}")
     @APIResponse(
             responseCode = "202",
-            description = "Schedules a new PNC operation of type deliverable analysis. This is an asynchronous call. PNC will start the deliverable analysis from the provided configuration and will notify the end of the analysis asynchronously.",
+            description = "Schedules generation of SBOMs for a particular Errata advisoryId. This is an asynchronous call. It does execute the generation behind the scenes.",
             content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
     @APIResponse(
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response generateNewOperation(DeliverableAnalysisConfig config) throws Exception {
+    public Response generateFromAdvisory(@PathParam("advisoryId") String advisoryId) throws Exception {
 
-        return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateNewOperation(config))).build();
+        return Response.accepted(mapper.toSbomRequestRecords(advisoryService.generateFromAdvisory(advisoryId))).build();
 
     }
 }
