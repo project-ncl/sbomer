@@ -43,7 +43,7 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     private static final String ERRATA_QE_CONTAINER_IMAGE = "registry-proxy-stage.engineering.redhat.com/rh-osbs-stage/e2e-container-e2e-container-test-product@sha256:a7c041ff17c41f3f7b706159cc7e576f25b7012eae41898ee36074a0ff49e768";
 
     @Test
-    void testMultiArchImage() throws IOException, URISyntaxException {
+    void testContainerGenerationOfQEAdvisory() throws IOException, URISyntaxException {
         String generationRequestId = requestGenerationFromAdvisory(ERRATA_QE_CONTAINER, ERRATA_QE_CONTAINER_IMAGE);
 
         log.info("Advisory in QE status with Container - Generation Request created: {}", generationRequestId);
@@ -55,7 +55,7 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
         response.then()
                 .log()
                 .all()
-                .statusCode(202)
+                .statusCode(200)
                 .body("content[0].identifier", CoreMatchers.is(ERRATA_QE_CONTAINER_IMAGE));
 
         log.info("Advisory in QE status with Container generated!");
