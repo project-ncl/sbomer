@@ -251,4 +251,27 @@ public abstract class E2EBase {
 
         return response.body().path("id").toString();
     }
+
+    public String requestGenerationFromAdvisory(String advisoryId, String image) {
+        log.info("Requesting SBOM for advisory ID: {}", advisoryId);
+
+        Response response = RestAssured.given()
+                .urlEncodingEnabled(false)
+                .baseUri(getSbomerBaseUri())
+                .log()
+                .all()
+                .when()
+                .contentType(ContentType.JSON)
+                .post(String.format("/api/v1alpha3/sboms/generate/advisory/%s", advisoryId));
+
+        response.then()
+                .log()
+                .all()
+                .statusCode(202)
+                .body("[0].identifier", CoreMatchers.is(image))
+                .and()
+                .body("[0].status", CoreMatchers.is("NEW"));
+
+        return response.body().path("[0].id").toString();
+    }
 }

@@ -45,6 +45,7 @@ import org.jboss.sbomer.service.feature.sbom.model.Stats.Messaging;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.PncConsumer;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Resources;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.SbomStats;
+import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -70,6 +71,9 @@ public abstract class AbstractApiProvider {
 
     @Inject
     protected SbomService sbomService;
+
+    @Inject
+    protected AdvisoryService advisoryService;
 
     @Inject
     protected ConfigSchemaValidator configSchemaValidator;

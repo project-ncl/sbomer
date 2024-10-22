@@ -17,12 +17,12 @@
  */
 package org.jboss.sbomer.service.test.unit.feature.sbom.errata;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,7 +40,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.ErrataNotificationHandler;
 import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
-import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -61,7 +61,7 @@ class ErrataNotificationHandlerTest {
 
     ErrataClient errataClient = mock(ErrataClient.class);
     ClientSession clientSession = mock(ClientSession.class);
-    SbomService sbomService = mock(SbomService.class);
+    AdvisoryService advisoryService = mock(AdvisoryService.class);
 
     @BeforeEach
     void beforeEach() {
@@ -70,9 +70,8 @@ class ErrataNotificationHandlerTest {
         FeatureFlags featureFlags = mock(FeatureFlags.class);
         when(featureFlags.errataIntegrationEnabled()).thenReturn(true);
         errataNotificationHandler.setFeatureFlags(featureFlags);
-        errataNotificationHandler.setErrataClient(errataClient);
-        errataNotificationHandler.setKojiSession(clientSession);
-        errataNotificationHandler.setSbomService(sbomService);
+        errataNotificationHandler.setAdvisoryService(advisoryService);
+        advisoryService.setErrataClient(errataClient);
     }
 
     @Test
@@ -119,11 +118,7 @@ class ErrataNotificationHandlerTest {
 
         errataNotificationHandler.handle(umbMessage);
 
-        verify(sbomService, times(1)).generateSyftImage(
-                eq(
-                        "registry-proxy.com/rh-osbs/rhel9-podman@sha256:a9a84a89352ab1cbe3f5b094b4abbc7c5800edf65f5d52751932bd6488433d63"),
-                any(SyftImageConfig.class));
-
+        verify(advisoryService, times(1)).generateFromAdvisory(eq("139856"));
     }
 
     private KojiBuildInfo createKojiBuildInfo() {
