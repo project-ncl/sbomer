@@ -203,7 +203,9 @@ public class AdvisoryService {
                     .collect(Collectors.toList());
             BrewRPMConfig config = BrewRPMConfig.builder()
                     .withAdvisoryId(String.valueOf(details.getId()))
+                    .withAdvisory(details.getFulladvisory())
                     .withProductVersionId(pVersionId != null ? String.valueOf(pVersionId) : pVersion.getName())
+                    .withProductVersion(pVersion.getName())
                     .withBrewBuildIds(brewBuildIds)
                     .build();
 

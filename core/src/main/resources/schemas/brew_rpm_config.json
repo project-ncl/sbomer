@@ -14,18 +14,26 @@
         "enum": ["brew-rpm"]
       },
       "advisoryId": {
-        "description": "Errata advisory identifier",
+        "description": "Errata advisory id",
+        "type": "string"
+      },
+      "advisory": {
+        "description": "Errata advisory full name",
         "type": "string"
       },
       "productVersionId": {
-        "description": "Product Version identifier",
+        "description": "Product Version id",
+        "type": "string"
+      },
+      "productVersion": {
+        "description": "Product Version name",
         "type": "string"
       },
       "brewBuildIds": {
         "description": "List of Brew build identifiers",
         "type": "array",
         "items": {
-          "type": "integer",
+          "type": "string",
           "description": "The Brew build identifier",
           "additionalProperties": false
         }

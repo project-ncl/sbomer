@@ -52,6 +52,8 @@ import lombok.extern.slf4j.Slf4j;
 public class TaskRunBrewRPMGenerateDependentResource
         extends CRUDNoGCKubernetesDependentResource<TaskRun, GenerationRequest> {
 
+    public static final String ANNOTATION_ADVISORY = "advisory";
+    public static final String ANNOTATION_PRODUCT_VERSION = "product-version";
     public static final String ANNOTATION_ADVISORY_ID = "advisory-id";
     public static final String ANNOTATION_PRODUCT_VERSION_ID = "product-version-id";
 
@@ -98,8 +100,12 @@ public class TaskRunBrewRPMGenerateDependentResource
         Map<String, String> annotations = Map.of(
                 ANNOTATION_ADVISORY_ID,
                 config.getAdvisoryId(),
+                ANNOTATION_ADVISORY,
+                config.getAdvisory(),
                 ANNOTATION_PRODUCT_VERSION_ID,
-                config.getProductVersionId());
+                config.getProductVersionId(),
+                ANNOTATION_PRODUCT_VERSION,
+                config.getProductVersion());
 
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
