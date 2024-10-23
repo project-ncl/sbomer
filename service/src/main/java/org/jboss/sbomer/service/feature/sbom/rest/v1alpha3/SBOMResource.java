@@ -30,7 +30,6 @@ import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
-import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -324,24 +323,4 @@ public class SBOMResource extends AbstractApiProvider {
 
     }
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
-    @Operation(
-            summary = "Generates SBOMs from an Errata Advisory",
-            description = "SBOMs base generation for a particular Errata Advisory")
-    @Parameter(name = "advisoryId", description = "Errata Advisory identifier", example = "123456")
-    @Path("/sboms/generate/advisory/{advisoryId}")
-    @APIResponse(
-            responseCode = "202",
-            description = "Schedules generation of SBOMs for a particular Errata advisoryId. This is an asynchronous call. It does execute the generation behind the scenes.",
-            content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response generateFromAdvisory(@PathParam("advisoryId") String advisoryId) throws Exception {
-
-        return Response.accepted(mapper.toSbomRequestRecords(advisoryService.generateFromAdvisory(advisoryId))).build();
-
-    }
 }
