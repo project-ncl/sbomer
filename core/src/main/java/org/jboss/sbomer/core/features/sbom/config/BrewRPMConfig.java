@@ -41,14 +41,24 @@ import lombok.extern.jackson.Jacksonized;
 public class BrewRPMConfig extends Config {
 
     /**
-     * Advisory identifier in Errata.
+     * Advisory id in Errata.
      */
     String advisoryId;
 
     /**
-     * Product version identifier in Errata.
+     * Advisory full-name in Errata.
+     */
+    String advisory;
+
+    /**
+     * Product version id in Errata.
      */
     String productVersionId;
+
+    /**
+     * Product version name in Errata.
+     */
+    String productVersion;
 
     /**
      * Brew build identifiers that are attached to the advisory.

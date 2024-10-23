@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.test.e2e.rw;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -39,12 +41,12 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
         return Paths.get("src", "test", "resources", "requests", fileName);
     }
 
-    private static final String ERRATA_QE_CONTAINER = "88484";
+    private static final String ERRATA_ID_QE_CONTAINER = "88484"; //RHBA-2023:88484-01
     private static final String ERRATA_QE_CONTAINER_IMAGE = "registry-proxy-stage.engineering.redhat.com/rh-osbs-stage/e2e-container-e2e-container-test-product@sha256:a7c041ff17c41f3f7b706159cc7e576f25b7012eae41898ee36074a0ff49e768";
 
     @Test
     void testContainerGenerationOfQEAdvisory() throws IOException, URISyntaxException {
-        String generationRequestId = requestGenerationFromAdvisory(ERRATA_QE_CONTAINER, ERRATA_QE_CONTAINER_IMAGE);
+        String generationRequestId = requestGenerationFromAdvisory(ERRATA_ID_QE_CONTAINER, ERRATA_QE_CONTAINER_IMAGE);
 
         log.info("Advisory in QE status with Container - Generation Request created: {}", generationRequestId);
 
@@ -60,4 +62,25 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
 
         log.info("Advisory in QE status with Container generated!");
     }
+
+    private static final String ERRATA_ID_QE_RPM = "89769"; // RHBA-2024:89769-01
+    private static final String ERRATA_QE_PRODUCT_VERSION_ID = "467"; // RHEL-7.2.Z
+
+    @Test
+    void testRPMGenerationOfQEAdvisory() throws IOException, URISyntaxException {
+        String generationRequestId = requestGenerationFromAdvisory(
+                ERRATA_ID_QE_RPM,
+                ERRATA_ID_QE_RPM + "-" + ERRATA_QE_PRODUCT_VERSION_ID);
+
+        log.info("Advisory in QE status with RPMs - Generation Request created: {}", generationRequestId);
+
+        waitForGeneration(generationRequestId);
+
+        final Response response = getSboms(generationRequestId);
+        // There is not real SBOMs generation yet!
+        assertEquals(0, response.body().jsonPath().getInt("totalHits"));
+
+        log.info("Advisory in QE status with Container generated!");
+    }
+
 }
