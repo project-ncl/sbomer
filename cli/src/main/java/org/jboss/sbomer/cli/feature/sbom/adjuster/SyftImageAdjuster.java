@@ -219,14 +219,9 @@ public class SyftImageAdjuster implements Adjuster {
         metadataComponent.setType(mainComponent.getType());
         metadataComponent.setName(mainComponent.getName());
         metadataComponent.setPurl(mainComponent.getPurl());
-        metadataComponent.setProperties(mainComponent.getProperties());
-        metadataComponent.setType(Component.Type.CONTAINER);
 
         // Set main component
         bom.getMetadata().setComponent(metadataComponent);
-
-        // Clear any properties from the root component. These are now in the metadata component.
-        mainComponent.setProperties(null);
 
         // Set the main component
         bom.getComponents().add(0, mainComponent);
