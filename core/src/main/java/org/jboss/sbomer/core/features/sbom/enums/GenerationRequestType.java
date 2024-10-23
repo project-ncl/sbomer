@@ -19,6 +19,7 @@ package org.jboss.sbomer.core.features.sbom.enums;
 
 import java.util.List;
 
+import org.jboss.sbomer.core.features.sbom.config.BrewRPMConfig;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
@@ -31,7 +32,8 @@ public enum GenerationRequestType {
     BUILD(PncBuildConfig.class, "config.json"),
     OPERATION(OperationConfig.class, "operation_config.json"),
     CONTAINERIMAGE(SyftImageConfig.class, "syft-image-config.json"),
-    ANALYSIS(DeliverableAnalysisConfig.class, "deliverable_analysis_config.json");
+    ANALYSIS(DeliverableAnalysisConfig.class, "deliverable_analysis_config.json"),
+    BREW_RPM(BrewRPMConfig.class, "brew_rpm_config.json");
 
     @Getter
     Class<? extends Config> implementation;
@@ -45,7 +47,7 @@ public enum GenerationRequestType {
     }
 
     public static GenerationRequestType fromName(String type) {
-        return GenerationRequestType.valueOf(type.toUpperCase());
+        return GenerationRequestType.valueOf(type.toUpperCase().replace("-", "_"));
     }
 
     public static String schemaFile(Class<? extends Config> clazz) {
@@ -63,7 +65,7 @@ public enum GenerationRequestType {
     }
 
     public String toName() {
-        return this.name().toLowerCase();
+        return this.name().toLowerCase().replace("_", "-");
     }
 
 }
