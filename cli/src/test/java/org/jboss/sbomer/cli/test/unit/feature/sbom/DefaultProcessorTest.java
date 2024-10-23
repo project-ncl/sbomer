@@ -36,7 +36,7 @@ public class DefaultProcessorTest {
         Bom bom = SbomUtils.fromString(TestResources.asString("boms/image-after-adjustments.json"));
         Bom processed = defaultProcessor.process(bom);
 
-        assertEquals(143, processed.getComponents().size());
+        assertEquals(192, processed.getComponents().size());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class DefaultProcessorTest {
         buildConfig.setKojiWebURL(new URL("https://koji.web"));
 
         when(kojiServiceMock.getConfig()).thenReturn(buildConfig);
-        when(kojiServiceMock.findBuild(eq("jboss-webserver-58-openjdk17-rhel8-openshift-container-5.8.0-5")))
+        when(kojiServiceMock.findBuild(eq("amqstreams-console-ui-container-2.7.0-8.1718294415")))
                 .thenReturn(kojiBuildInfo);
 
         DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
@@ -60,21 +60,23 @@ public class DefaultProcessorTest {
         Bom bom = SbomUtils.fromString(TestResources.asString("boms/image-after-adjustments.json"));
         Bom processed = defaultProcessor.process(bom);
 
-        assertEquals(143, processed.getComponents().size());
+        assertEquals(192, processed.getComponents().size());
 
-        Component component = processed.getMetadata().getComponent();
+        Component mainComponent = processed.getComponents().get(0);
 
-        assertEquals("Red Hat", component.getSupplier().getName());
-        assertEquals("Red Hat", component.getPublisher());
+        assertEquals("Red Hat", mainComponent.getSupplier().getName());
+        assertEquals("Red Hat", mainComponent.getPublisher());
 
-        ExternalReference buildSystem = SbomUtils.getExternalReferences(component, Type.BUILD_SYSTEM).get(0);
+        ExternalReference buildSystem = SbomUtils.getExternalReferences(mainComponent, Type.BUILD_SYSTEM).get(0);
 
         assertEquals("https://koji.web/buildinfo?buildID=12345", buildSystem.getUrl());
         assertEquals("brew-build-id", buildSystem.getComment());
 
-        assertEquals("https://git.com/repo#hash", SbomUtils.getExternalReferences(component, Type.VCS).get(0).getUrl());
+        assertEquals(
+                "https://git.com/repo#hash",
+                SbomUtils.getExternalReferences(mainComponent, Type.VCS).get(0).getUrl());
 
-        Commit commit = component.getPedigree().getCommits().get(0);
+        Commit commit = mainComponent.getPedigree().getCommits().get(0);
 
         assertEquals("hash", commit.getUid());
         assertEquals("https://git.com/repo#hash", commit.getUrl());
