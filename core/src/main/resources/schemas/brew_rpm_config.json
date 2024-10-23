@@ -1,0 +1,39 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://jboss.org/sbomer/brew-rpm-config.json",
+    "title": "SBOMer Brew RPM configuration file",
+    "description": "Configuration file to trigger the Brew RPM generator",
+    "type": "object",
+    "properties": {
+      "apiVersion": {
+        "description": "Version of the configuration file",
+        "enum": ["sbomer.jboss.org/v1alpha1"]
+      },
+      "type": {
+        "description": "Configuration type",
+        "enum": ["brew-rpm"]
+      },
+      "advisoryId": {
+        "description": "Errata advisory identifier",
+        "type": "string"
+      },
+      "productVersionId": {
+        "description": "Product Version identifier",
+        "type": "string"
+      },
+      "brewBuildIds": {
+        "description": "List of Brew build identifiers",
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "description": "The Brew build identifier",
+          "additionalProperties": false
+        }
+      }
+    }, 
+    "required": [
+      "advisoryId", "productVersionId", "brewBuildIds"
+    ],
+    "additionalProperties": false
+  }
+  

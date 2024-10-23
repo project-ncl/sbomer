@@ -27,16 +27,22 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.koji.ClientSession;
+import org.jboss.sbomer.core.features.sbom.config.BrewRPMConfig;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata.Details;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.Build;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -78,8 +84,7 @@ public class AdvisoryService {
         }
 
         // Will be removed, leave now for debugging
-        String summary = retrieveAllErratumData(erratum);
-        System.out.println(summary);
+        printAllErratumData(erratum);
 
         if (!erratum.getDetails().get().getTextonly()) {
             return handleStandardAdvisory(erratum);
@@ -112,13 +117,18 @@ public class AdvisoryService {
         if (ErrataStatus.QE.equals(details.getStatus())) {
             return handleStandardQEAdvisory(details);
         } else {
-            // TODO Handle SHIPPED_LIVE
+            log.warn("** TODO ** Handle the SHIPPED-LIVE advisories");
             return Collections.emptyList();
         }
     }
 
     private Collection<SbomGenerationRequest> handleStandardQEAdvisory(Details details) {
         log.debug("Handle standard QE Advisory {}", details);
+
+        if (details.getContentTypes().stream().noneMatch(type -> type.equals("docker") || type.equals("rpm"))) {
+            log.warn("** TODO ** Unknown content-type :{}", details.getContentTypes());
+            return Collections.emptyList();
+        }
 
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(String.valueOf(details.getId()));
         Map<ProductVersionEntry, List<BuildItem>> buildDetails = erratumBuildList.getProductVersions()
@@ -134,11 +144,9 @@ public class AdvisoryService {
 
         if (details.getContentTypes().contains("docker")) {
             return processDockerBuilds(buildDetails);
-        } else if (details.getContentTypes().contains("rpm")) {
-            return processRPMBuilds(buildDetails);
         } else {
-            log.warn("** TODO ** Unknown content-type :{}", details.getContentTypes());
-            return Collections.emptyList();
+            ErrataProduct product = errataClient.getProduct(details.getProduct().getShortName());
+            return processRPMBuilds(details, product, buildDetails);
         }
     }
 
@@ -165,11 +173,71 @@ public class AdvisoryService {
         return sbomRequests;
     }
 
-    private Collection<SbomGenerationRequest> processRPMBuilds(Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
+    private Collection<SbomGenerationRequest> processRPMBuilds(
+            Details details,
+            ErrataProduct product,
+            Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
         log.debug("Processing RPM builds: {}", buildDetails);
+
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
-        // TODO HANDLE RPMs
+
+        buildDetails.forEach((pVersion, items) -> {
+            log.debug(
+                    "Processing RPM builds of Errata Product '{}' with Product Version: '{}'",
+                    product.getData().getAttributes().getName(),
+                    pVersion);
+
+            if (items == null || items.isEmpty()) {
+                log.warn(
+                        "There are no RPM builds associated with Errata {} and Product Version: '{}'",
+                        details.getId(),
+                        pVersion);
+                return;
+            }
+
+            // Find the Product Version id from the ErrataProduct metadata
+            Long pVersionId = findErrataProductVersionIdByName(product, pVersion.getName());
+
+            List<String> brewBuildIds = items.stream()
+                    .map(item -> item.getId().toString())
+                    .collect(Collectors.toList());
+            BrewRPMConfig config = BrewRPMConfig.builder()
+                    .withAdvisoryId(String.valueOf(details.getId()))
+                    .withProductVersionId(pVersionId != null ? String.valueOf(pVersionId) : pVersion.getName())
+                    .withBrewBuildIds(brewBuildIds)
+                    .build();
+
+            log.debug("Creating GenerationRequest Kubernetes resource...");
+
+            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BREW_RPM)
+                    .withIdentifier(config.getAdvisoryId() + "-" + config.getProductVersionId())
+                    .withStatus(SbomGenerationStatus.NEW)
+                    .withConfig(config)
+                    .build();
+
+            log.debug("ConfigMap to create: '{}'", req);
+
+            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+            kubernetesClient.configMaps().resource(req).create();
+
+            sbomRequests.add(sbomGenerationRequest);
+        });
+
         return sbomRequests;
+    }
+
+    public Long findErrataProductVersionIdByName(ErrataProduct product, String pVersionName) {
+        if (product != null && product.getData() != null && product.getData().getRelationships() != null) {
+            return product.getData()
+                    .getRelationships()
+                    .getProductVersions()
+                    .stream()
+                    .filter(version -> version.getName().equals(pVersionName))
+                    .map(ErrataProduct.ErrataProductVersion::getId)
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
     }
 
     private String getImageNameFromBuild(Long buildId) {
@@ -204,7 +272,7 @@ public class AdvisoryService {
         }
     }
 
-    private String retrieveAllErratumData(Errata erratum) {
+    private void printAllErratumData(Errata erratum) {
 
         Optional<JsonNode> notes = erratum.getNotesMapping();
 
@@ -216,7 +284,7 @@ public class AdvisoryService {
 
         if (erratum.getDetails().isEmpty()) {
             log.warn("Mmmmm I don't know how to get the release information...");
-            return "";
+            return;
         }
 
         log.info("Fetching Erratum release ...");
@@ -264,7 +332,7 @@ public class AdvisoryService {
         }
 
         summary.append("\n**********************************\n");
-        return summary.toString();
+        System.out.println(summary.toString());
     }
 
 }
