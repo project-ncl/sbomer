@@ -1,6 +1,7 @@
 package org.jboss.sbomer.cli.test.unit.feature.sbom.adjust;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -172,5 +174,46 @@ public class SyftImageAdjusterTest {
                 throw new Exception("The dependency " + d.getRef() + " does not have a related component!");
             }
         }
+    }
+
+    // https://issues.redhat.com/browse/SBOMER-197
+    @Test
+    void metadataComponentShouldBeBareRepresentationOfMainComponent() throws IOException {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), null, true);
+
+        assertFalse(bom.getMetadata().getProperties().isEmpty());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        Component metadataComponent = adjusted.getMetadata().getComponent();
+
+        // Has purl
+        assertEquals(
+                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
+                metadataComponent.getPurl());
+        // Has type
+        assertEquals(Component.Type.CONTAINER, metadataComponent.getType());
+        // Has name
+        assertEquals("amq-streams/console-ui-rhel9", metadataComponent.getName());
+        // No properties
+        assertNull(metadataComponent.getProperties());
+
+        // Main component is the first one
+        Component mainComponent = adjusted.getComponents().get(0);
+
+        assertFalse(mainComponent.getProperties().isEmpty());
+        // Has purl
+        assertEquals(
+                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
+                mainComponent.getPurl());
+        // Has type
+        assertEquals(Component.Type.CONTAINER, mainComponent.getType());
+        // Has name
+        assertEquals("amq-streams/console-ui-rhel9", mainComponent.getName());
+        // Other things, for example bom-ref
+        assertEquals("3893910a10b83660", mainComponent.getBomRef());
+
+        // Is valid
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 }

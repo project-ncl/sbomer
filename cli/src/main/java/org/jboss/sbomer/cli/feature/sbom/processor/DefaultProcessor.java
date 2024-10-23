@@ -227,16 +227,31 @@ public class DefaultProcessor implements Processor {
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             Component component = bom.getMetadata().getComponent();
 
-            processComponent(bom, component);
+            switch (component.getType()) {
+                case CONTAINER:
+                    // no-op
+                    // For container images there is nothing to do for the metadata component,
+                    // all modifications are done in the main component.
+                    break;
 
-            // We are handling a container image, let's do more!
-            if (component.getType().equals(Component.Type.CONTAINER)) {
-                processContainerImageComponent(component);
+                default:
+                    processComponent(bom, component);
+                    break;
             }
         }
+
         if (bom.getComponents() != null) {
             for (Component c : bom.getComponents()) {
-                processComponent(bom, c);
+
+                switch (c.getType()) {
+                    case CONTAINER:
+                        processContainerImageComponent(c);
+                        break;
+
+                    default:
+                        processComponent(bom, c);
+                        break;
+                }
             }
         }
 
