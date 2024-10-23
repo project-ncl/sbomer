@@ -20,6 +20,7 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.FeatureFlags;
+import org.jboss.sbomer.service.feature.sbom.atlas.AtlasBuildClient;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasClient;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
@@ -32,14 +33,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class AtlasHandlerTest {
     static class AtlasHandlerAlt extends AtlasHandler {
         @Override
-        public void uploadManifest(Sbom sbom) {
-            super.uploadManifest(sbom);
+        public void uploadBuildManifest(Sbom sbom) {
+            super.uploadBuildManifest(sbom);
         }
     }
 
     AtlasHandlerAlt atlasHandler;
 
-    AtlasClient atlasClient = mock(AtlasClient.class);
+    AtlasBuildClient atlasBuildClient = mock(AtlasBuildClient.class);
 
     private Sbom generateSbom(String id, String purl) throws IOException {
         return generateSbom(id, purl, "sboms/complete_operation_sbom.json");
@@ -64,19 +65,19 @@ class AtlasHandlerTest {
         when(featureFlags.atlasPublish()).thenReturn(true);
         atlasHandler.setFeatureFlags(featureFlags);
 
-        atlasHandler.setAtlasClient(atlasClient);
+        atlasHandler.setAtlasBuildClient(atlasBuildClient);
     }
 
     @Test
     void testUploadNothing() {
         // Should not fail, just a warning should be added
-        atlasHandler.upload(null);
+        atlasHandler.publishBuildManifests(null);
     }
 
     @Test
     void testUploadEmpty() {
         // Should not fail, just a warning should be added
-        atlasHandler.upload(Collections.emptyList());
+        atlasHandler.publishBuildManifests(Collections.emptyList());
     }
 
     @Test
@@ -84,10 +85,10 @@ class AtlasHandlerTest {
         Sbom sbomA = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
         Sbom sbomB = generateSbom("BBB", "pkg:maven/compB@1.1.0?type=pom");
 
-        atlasHandler.upload(List.of(sbomA, sbomB));
+        atlasHandler.publishBuildManifests(List.of(sbomA, sbomB));
 
-        verify(atlasClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
-        verify(atlasClient, times(1)).upload(eq("pkg:maven/compB@1.1.0?type=pom"), any(JsonNode.class));
+        verify(atlasBuildClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
+        verify(atlasBuildClient, times(1)).upload(eq("pkg:maven/compB@1.1.0?type=pom"), any(JsonNode.class));
     }
 
     @Test
@@ -95,24 +96,24 @@ class AtlasHandlerTest {
         Sbom sbomA = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
         Sbom sbomB = generateSbom("BBB", "pkg:maven/compB@1.1.0?type=pom", "sboms/complete_sbom.json");
 
-        atlasHandler.upload(List.of(sbomA, sbomB));
+        atlasHandler.publishBuildManifests(List.of(sbomA, sbomB));
 
         // Only one of manifests was udpdated, because the second doesn't have product properties
-        verify(atlasClient, times(1)).upload(anyString(), any(JsonNode.class));
-        verify(atlasClient).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
+        verify(atlasBuildClient, times(1)).upload(anyString(), any(JsonNode.class));
+        verify(atlasBuildClient).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
     }
 
     @Test
     void testHandlingOfApiErrors() throws Exception {
         Sbom sbom = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
 
-        doThrow(new ClientException("A reason")).when(atlasClient).upload(anyString(), any(JsonNode.class));
+        doThrow(new ClientException("A reason")).when(atlasBuildClient).upload(anyString(), any(JsonNode.class));
 
         ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            atlasHandler.upload(List.of(sbom));
+            atlasHandler.publishBuildManifests(List.of(sbom));
         });
 
-        verify(atlasClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
+        verify(atlasBuildClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
 
         assertEquals(
                 "Unable to store 'AAA' manifest in Atlas, purl: 'pkg:maven/compA@1.1.0?type=pom': A reason",
@@ -125,7 +126,7 @@ class AtlasHandlerTest {
         sbom.setSbom(ObjectMapperProvider.json().readTree(""));
 
         ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            atlasHandler.upload(List.of(sbom));
+            atlasHandler.publishBuildManifests(List.of(sbom));
         });
 
         assertEquals(
