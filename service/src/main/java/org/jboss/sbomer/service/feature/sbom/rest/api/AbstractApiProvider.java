@@ -73,9 +73,6 @@ public abstract class AbstractApiProvider {
     protected SbomService sbomService;
 
     @Inject
-    protected AdvisoryService advisoryService;
-
-    @Inject
     protected ConfigSchemaValidator configSchemaValidator;
 
     @Inject
