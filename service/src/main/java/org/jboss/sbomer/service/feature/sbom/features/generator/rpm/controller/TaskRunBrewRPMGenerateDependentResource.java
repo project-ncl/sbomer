@@ -18,9 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.features.generator.rpm.controller;
 
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -52,12 +50,14 @@ import lombok.extern.slf4j.Slf4j;
 public class TaskRunBrewRPMGenerateDependentResource
         extends CRUDNoGCKubernetesDependentResource<TaskRun, GenerationRequest> {
 
-    public static final String ANNOTATION_ADVISORY = "advisory";
-    public static final String ANNOTATION_PRODUCT_VERSION = "product-version";
-    public static final String ANNOTATION_ADVISORY_ID = "advisory-id";
-    public static final String ANNOTATION_PRODUCT_VERSION_ID = "product-version-id";
+    public static final String ANNOTATION_ADVISORY = "sbomer.jboss.org/errata-advisory";
+    public static final String ANNOTATION_PRODUCT_VERSION = "sbomer.jboss.org/errata-product-version";
+    public static final String ANNOTATION_ADVISORY_ID = "sbomer.jboss.org/errata-advisory-id";
+    public static final String ANNOTATION_PRODUCT_VERSION_ID = "sbomer.jboss.org/errata-product-version-id";
+    public static final String ANNOTATION_BUILD_ID = "sbomer.jboss.org/brew-build-id";
+    public static final String ANNOTATION_BUILD_NVR = "sbomer.jboss.org/brew-build-nvr";
 
-    public static final String PARAM_BREW_BUILD_IDS = "builds";
+    public static final String PARAM_BREW_BUILD_ID = "build-id";
 
     public static final String TASK_SUFFIX = "-generator-brew-rpm";
     public static final String SA_SUFFIX = "-sa";
@@ -99,13 +99,17 @@ public class TaskRunBrewRPMGenerateDependentResource
         BrewRPMConfig config = generationRequest.getConfig(BrewRPMConfig.class);
         Map<String, String> annotations = Map.of(
                 ANNOTATION_ADVISORY_ID,
-                config.getAdvisoryId(),
+                String.valueOf(config.getAdvisoryId()),
                 ANNOTATION_ADVISORY,
                 config.getAdvisory(),
                 ANNOTATION_PRODUCT_VERSION_ID,
-                config.getProductVersionId(),
+                String.valueOf(config.getProductVersionId()),
                 ANNOTATION_PRODUCT_VERSION,
-                config.getProductVersion());
+                config.getProductVersion(),
+                ANNOTATION_BUILD_ID,
+                String.valueOf(config.getBrewBuildId()),
+                ANNOTATION_BUILD_NVR,
+                config.getBrewBuildNVR());
 
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
@@ -123,12 +127,8 @@ public class TaskRunBrewRPMGenerateDependentResource
                 .withServiceAccountName(release + SA_SUFFIX)
                 .withTimeout(timeout)
                 .withParams(
-                        new ParamBuilder().withName(PARAM_BREW_BUILD_IDS)
-                                .withValue(
-                                        new ParamValue(
-                                                Objects.requireNonNullElse(
-                                                        config.getBrewBuildIds(),
-                                                        Collections.emptyList())))
+                        new ParamBuilder().withName(PARAM_BREW_BUILD_ID)
+                                .withValue(new ParamValue(String.valueOf(config.getBrewBuildId())))
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
 

@@ -182,47 +182,44 @@ public class AdvisoryService {
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
 
         buildDetails.forEach((pVersion, items) -> {
-            log.debug(
-                    "Processing RPM builds of Errata Product '{}' with Product Version: '{}'",
-                    product.getData().getAttributes().getName(),
-                    pVersion);
+            String productName = product.getData().getAttributes().getName();
+            log.debug("Processing RPM builds of Errata Product '{}' with Product Version: '{}'", productName, pVersion);
 
             if (items == null || items.isEmpty()) {
                 log.warn(
-                        "There are no RPM builds associated with Errata {} and Product Version: '{}'",
+                        "No RPM builds associated with Errata {} and Product Version: '{}'",
                         details.getId(),
                         pVersion);
                 return;
             }
 
-            // Find the Product Version id from the ErrataProduct metadata
             Long pVersionId = findErrataProductVersionIdByName(product, pVersion.getName());
 
-            List<String> brewBuildIds = items.stream()
-                    .map(item -> item.getId().toString())
-                    .collect(Collectors.toList());
-            BrewRPMConfig config = BrewRPMConfig.builder()
-                    .withAdvisoryId(String.valueOf(details.getId()))
-                    .withAdvisory(details.getFulladvisory())
-                    .withProductVersionId(pVersionId != null ? String.valueOf(pVersionId) : pVersion.getName())
-                    .withProductVersion(pVersion.getName())
-                    .withBrewBuildIds(brewBuildIds)
-                    .build();
+            items.forEach(item -> {
+                BrewRPMConfig config = BrewRPMConfig.builder()
+                        .withAdvisoryId(details.getId())
+                        .withAdvisory(details.getFulladvisory())
+                        .withProductVersionId(pVersionId)
+                        .withProductVersion(pVersion.getName())
+                        .withBrewBuildId(item.getId())
+                        .withBrewBuildNVR(item.getNvr())
+                        .build();
 
-            log.debug("Creating GenerationRequest Kubernetes resource...");
+                log.debug("Creating GenerationRequest Kubernetes resource...");
 
-            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BREW_RPM)
-                    .withIdentifier(config.getAdvisoryId() + "-" + config.getProductVersionId())
-                    .withStatus(SbomGenerationStatus.NEW)
-                    .withConfig(config)
-                    .build();
+                GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BREW_RPM)
+                        .withIdentifier(config.getBrewBuildNVR())
+                        .withStatus(SbomGenerationStatus.NEW)
+                        .withConfig(config)
+                        .build();
 
-            log.debug("ConfigMap to create: '{}'", req);
+                log.debug("ConfigMap to create: '{}'", req);
 
-            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
-            kubernetesClient.configMaps().resource(req).create();
+                SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+                kubernetesClient.configMaps().resource(req).create();
 
-            sbomRequests.add(sbomGenerationRequest);
+                sbomRequests.add(sbomGenerationRequest);
+            });
         });
 
         return sbomRequests;
