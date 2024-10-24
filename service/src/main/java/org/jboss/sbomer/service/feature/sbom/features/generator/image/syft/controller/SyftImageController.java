@@ -20,14 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.cont
 import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,7 +29,6 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -228,63 +220,4 @@ public class SyftImageController extends AbstractController {
                         sboms.stream().map(sbom -> sbom.getId()).collect(Collectors.joining(", "))));
     }
 
-    /**
-     * Traverses through the directory tree and finds manifest (files that have {@code bom.json}) and returns all found
-     * files as a {@link List} of {@link Path}s.
-     *
-     * @param directory The top-level directory where search for manifests should be started.
-     * @return List of {@link Path}s to found manifests.
-     */
-    protected List<Path> findManifests(Path directory) throws IOException {
-        List<Path> manifestPaths = new ArrayList<>();
-
-        log.info("Finding manifests under the '{}' directory...", directory.toAbsolutePath());
-
-        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/bom.json");
-
-        Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-                if (matcher.matches(path)) {
-                    log.info("Found manifest at path '{}'", path.toAbsolutePath());
-
-                    manifestPaths.add(path);
-
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-
-        log.info("Found {} generated manifests", manifestPaths.size());
-
-        return manifestPaths;
-    }
-
-    /**
-     * Reads manifests for given {@code manifestPaths} and converts them into {@link Bom}s.
-     *
-     * @param manifestPaths List of {@link Path}s to manifests in JSON format.
-     * @return List of {@link Bom}s.
-     */
-    protected List<Bom> readManifests(List<Path> manifestPaths) {
-        List<Bom> boms = new ArrayList<>();
-
-        log.info("Reading {} manifests...", manifestPaths.size());
-
-        for (Path manifestPath : manifestPaths) {
-            log.debug("Reading manifest at path '{}'...", manifestPath);
-
-            // Read the generated SBOM JSON file
-            Bom bom = SbomUtils.fromPath(manifestPath);
-
-            // If we couldn't read it, this is a fatal failure for us
-            if (bom == null) {
-                throw new ApplicationException("Could not read the manifest at '{}'", manifestPath.toAbsolutePath());
-            }
-
-            boms.add(bom);
-        }
-
-        return boms;
-    }
 }
