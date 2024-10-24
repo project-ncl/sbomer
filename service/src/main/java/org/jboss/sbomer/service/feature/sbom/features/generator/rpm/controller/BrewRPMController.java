@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.controller;
+package org.jboss.sbomer.service.feature.sbom.features.generator.rpm.controller;
 
 import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
 
@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- * Reconciler working on the {@link GenerationRequest} entity and the {@link GenerationRequestType#CONTAINERIMAGE} type.
+ * Reconciler working on the {@link GenerationRequest} entity and the {@link GenerationRequestType#RPM} type.
  * </p>
  *
  * <p>
@@ -63,16 +63,14 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @ControllerConfiguration(
-        labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=containerimage",
+        labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=brew-rpm",
         namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
-
         dependents = { @Dependent(
-                type = TaskRunSyftImageGenerateDependentResource.class,
-                useEventSourceWithName = EVENT_SOURCE_NAME)
-
-        })
+                type = TaskRunBrewRPMGenerateDependentResource.class,
+                useEventSourceWithName = EVENT_SOURCE_NAME) })
 @Slf4j
-public class SyftImageController extends AbstractController {
+public class BrewRPMController extends AbstractController {
+
     @Override
     protected UpdateControl<GenerationRequest> updateRequest(
             GenerationRequest generationRequest,
