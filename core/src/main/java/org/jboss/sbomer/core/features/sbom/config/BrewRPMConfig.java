@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.core.features.sbom.config;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -43,7 +41,7 @@ public class BrewRPMConfig extends Config {
     /**
      * Advisory id in Errata.
      */
-    String advisoryId;
+    Long advisoryId;
 
     /**
      * Advisory full-name in Errata.
@@ -53,7 +51,7 @@ public class BrewRPMConfig extends Config {
     /**
      * Product version id in Errata.
      */
-    String productVersionId;
+    Long productVersionId;
 
     /**
      * Product version name in Errata.
@@ -61,9 +59,14 @@ public class BrewRPMConfig extends Config {
     String productVersion;
 
     /**
-     * Brew build identifiers that are attached to the advisory.
+     * Brew build id attached to the advisory.
      */
-    List<String> brewBuildIds;
+    Long brewBuildId;
+
+    /**
+     * Brew build NVR attached to the advisory.
+     */
+    String brewBuildNVR;
 
     @JsonIgnore
     @Override

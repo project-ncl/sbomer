@@ -15,7 +15,7 @@
       },
       "advisoryId": {
         "description": "Errata advisory id",
-        "type": "string"
+        "type": "integer"
       },
       "advisory": {
         "description": "Errata advisory full name",
@@ -23,20 +23,19 @@
       },
       "productVersionId": {
         "description": "Product Version id",
-        "type": "string"
+        "type": "integer"
       },
       "productVersion": {
         "description": "Product Version name",
         "type": "string"
       },
-      "brewBuildIds": {
-        "description": "List of Brew build identifiers",
-        "type": "array",
-        "items": {
-          "type": "string",
-          "description": "The Brew build identifier",
-          "additionalProperties": false
-        }
+      "brewBuildId": {
+        "description": "Brew build id attached to the advisory",
+        "type": "integer"
+      },
+      "brewBuildNVR": {
+        "description": "Brew build NVR attached to the advisory",
+        "type": "string"
       }
     }, 
     "required": [
