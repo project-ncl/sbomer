@@ -389,7 +389,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         CompletableFuture<Void> uploadToAtlas = CompletableFuture.runAsync(() -> {
             try {
-                atlasHandler.upload(sboms);
+                atlasHandler.publishBuildManifests(sboms);
             } catch (FeatureDisabledException e) {
                 log.warn(e.getMessage(), e);
             }

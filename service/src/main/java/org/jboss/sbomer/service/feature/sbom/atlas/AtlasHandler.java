@@ -41,13 +41,17 @@ public class AtlasHandler {
     @Inject
     @RestClient
     @Setter
-    AtlasClient atlasClient;
+    AtlasBuildClient atlasBuildClient;
 
     @Inject
     @Setter
     FeatureFlags featureFlags;
 
-    public void upload(List<Sbom> sboms) {
+    public Bom retrieveBuildManifest(String purl) {
+        return atlasBuildClient.get(purl);
+    }
+
+    public void publishBuildManifests(List<Sbom> sboms) {
         if (sboms == null) {
             log.warn(
                     "Manifest list is not provided, this is unexpected, Atlas will not be populated with manifest, but continuing");
@@ -68,13 +72,13 @@ public class AtlasHandler {
         log.info("Uploading {} manifests...", sboms.size());
 
         for (Sbom sbom : sboms) {
-            uploadManifest(sbom);
+            uploadBuildManifest(sbom);
         }
 
         log.info("Upload complete!");
     }
 
-    protected void uploadManifest(Sbom sbom) {
+    protected void uploadBuildManifest(Sbom sbom) {
         log.info("Uploading manifest '{}' (purl: '{}')...", sbom.getId(), sbom.getRootPurl());
 
         try {
@@ -98,7 +102,7 @@ public class AtlasHandler {
             }
 
             // Store it!
-            atlasClient.upload(sbom.getRootPurl(), sbom.getSbom());
+            atlasBuildClient.upload(sbom.getRootPurl(), sbom.getSbom());
         } catch (ClientException e) {
             throw new ApplicationException(
                     "Unable to store '{}' manifest in Atlas, purl: '{}': {}",

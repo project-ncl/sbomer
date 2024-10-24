@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
@@ -47,7 +46,6 @@ import jakarta.ws.rs.core.Response;
  */
 @ApplicationScoped
 @ClientHeaderParam(name = "User-Agent", value = "SBOMer")
-@RegisterRestClient(configKey = "atlas")
 @Path("/api/v1/sbom")
 @OidcClientFilter
 @Produces(MediaType.APPLICATION_JSON)

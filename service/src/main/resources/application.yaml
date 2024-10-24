@@ -70,8 +70,10 @@ quarkus:
       artifact-id: jackson-jakarta-rs-yaml-provider
 
   rest-client:
-    "atlas":
-      url: "https://${sbomer.atlas.host}"
+    "atlas-build":
+      url: "https://${sbomer.atlas.build.host}"
+    "atlas-release":
+      url: "https://${sbomer.atlas.release.host}"
     "pnc":
       url: "https://${sbomer.pnc.host}"
     "errata":
@@ -170,7 +172,7 @@ quarkus:
       origins: "/.*/"
 
   kerberos:
-    enabled:  ${sbomer.features.kerberos.enabled}
+    enabled: ${sbomer.features.kerberos.enabled}
 
 sbomer:
   features:
@@ -178,7 +180,7 @@ sbomer:
       # Disable UMB feature entirely by default
       enabled: false
     kerberos:
-        enabled: false
+      enabled: false
 
   controller:
     generation-request:
@@ -190,4 +192,3 @@ sbomer:
       # # This includes removing the generation request kubernetes resource as well as any leftovers on the filesystem
       # # located in the sbomer.sbom-dir directory.
       cleanup: false
-
