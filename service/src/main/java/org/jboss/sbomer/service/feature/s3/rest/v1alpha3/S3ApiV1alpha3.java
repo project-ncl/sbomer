@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.s3.rest;
+package org.jboss.sbomer.service.feature.s3.rest.v1alpha3;
 
 import java.util.List;
 
@@ -43,6 +43,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Use {@code /api/v1beta1}.
+ */
 @Path("/api/v1alpha3")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -50,7 +53,8 @@ import lombok.extern.slf4j.Slf4j;
 @PermitAll
 @Slf4j
 @Tag(name = "v1alpha3")
-public class SBOMResource {
+@Deprecated
+public class S3ApiV1alpha3 {
     @Inject
     FeatureFlags featureFlags;
 
