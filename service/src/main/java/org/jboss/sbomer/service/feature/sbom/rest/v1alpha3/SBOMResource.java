@@ -65,9 +65,10 @@ import lombok.extern.slf4j.Slf4j;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Tag(name = "v1alpha3", description = "v1alpha3 API endpoints")
+@Tag(name = "v1alpha3", description = "v1alpha3 API endpoints (deprecated)")
 @PermitAll
 @Slf4j
+@Deprecated
 public class SBOMResource extends AbstractApiProvider {
     @Inject
     V1Alpha3Mapper mapper;

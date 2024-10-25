@@ -47,6 +47,7 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 @PermitAll
 @Tag(name = "v1alpha3")
+@Deprecated
 public class SBOMResource {
     @Inject
     V1Alpha3Mapper mapper;
