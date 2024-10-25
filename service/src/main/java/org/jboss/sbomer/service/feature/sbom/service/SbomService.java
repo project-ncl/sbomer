@@ -139,26 +139,6 @@ public class SbomService {
     }
 
     @WithSpan
-    public Page<Sbom> searchSbomsByQueryPaginated(
-            @SpanAttribute(value = "pageIndex") int pageIndex,
-            @SpanAttribute(value = "pageSize") int pageSize,
-            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
-            @SpanAttribute(value = "sort") String sort) {
-
-        QueryParameters parameters = QueryParameters.builder()
-                .rsqlQuery(rsqlQuery)
-                .sort(sort)
-                .pageSize(pageSize)
-                .pageIndex(pageIndex)
-                .build();
-
-        List<Sbom> content = sbomRepository.search(parameters);
-        Long count = sbomRepository.countByRsqlQuery(parameters.getRsqlQuery());
-
-        return toPage(content, parameters, count);
-    }
-
-    @WithSpan
     public Page<SbomGenerationRequest> searchSbomRequestsByQueryPaginated(
             @SpanAttribute(value = "pageIndex") int pageIndex,
             @SpanAttribute(value = "pageSize") int pageSize,
