@@ -74,7 +74,7 @@
   "dependencies": {
     "@melloware/react-logviewer": "^5.1.1",
     "@patternfly/react-core": "5.4.2",
-    "@patternfly/react-icons": "5.4.0",
+    "@patternfly/react-icons": "5.4.2",
     "@patternfly/react-log-viewer": "^5.2.0",
     "@patternfly/react-styles": "5.4.1",
     "@patternfly/react-table": "^5.3.3",
