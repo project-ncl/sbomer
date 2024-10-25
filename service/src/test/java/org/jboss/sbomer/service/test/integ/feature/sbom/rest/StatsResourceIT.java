@@ -67,7 +67,7 @@ class StatsResourceIT {
     void testEmptyStatsEndpoint(String apiVersion) {
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha1/stats")
+                .get("/api/v1alpha3/stats")
                 .then()
                 .statusCode(200)
                 .body("resources.sboms.total", CoreMatchers.is(2))
@@ -85,7 +85,7 @@ class StatsResourceIT {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
+    @ValueSource(strings = { "v1alpha3" })
     void testStatsEndpoint(String apiVersion) {
         Mockito.when(sbomService.countSboms()).thenReturn(12l);
         Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);

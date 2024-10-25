@@ -89,9 +89,9 @@ class SBOMResourceIT {
 
     @Test
     void testExistenceOfSbomsEndpoint() {
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
+        Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
         given().when()
-                .get("/api/v1alpha2/sboms")
+                .get("/api/v1alpha3/sboms")
                 .then()
                 .statusCode(200)
                 .body("totalHits", CoreMatchers.is(2))
@@ -101,15 +101,15 @@ class SBOMResourceIT {
 
     @Test
     void testListSbomsPageParams() {
-        Mockito.when(sbomService.searchSbomsByQueryPaginated(1, 20, null, null)).thenReturn(new Page<>());
-        given().when().get("/api/v1alpha2/sboms?pageIndex=1&pageSize=20").then().statusCode(200);
+        Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(1, 20, null, null)).thenReturn(new Page<>());
+        given().when().get("/api/v1alpha3/sboms?pageIndex=1&pageSize=20").then().statusCode(200);
     }
 
     @Test
     void testGetSbomByIdShouldNotFailForMissing() throws IOException {
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha2/sboms/5644785")
+                .request("GET", "/api/v1alpha3/sboms/5644785")
                 .then()
                 .statusCode(404)
                 .body("message", CoreMatchers.is("SBOM with id '5644785' not found"))
@@ -127,12 +127,12 @@ class SBOMResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha2/sboms/12345")
+                .request("GET", "/api/v1alpha3/sboms/12345")
                 .then()
                 .statusCode(200)
                 .body("id", CoreMatchers.equalTo("12345"))
                 .and()
-                .body("buildId", CoreMatchers.equalTo("AAAABBBB"));
+                .body("identifier", CoreMatchers.equalTo("AAAABBBB"));
     }
 
     @Test
@@ -166,7 +166,7 @@ class SBOMResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha2/sboms/12345/bom")
+                .request("GET", "/api/v1alpha3/sboms/12345/bom")
                 .then()
                 .statusCode(200)
                 .body(
@@ -181,7 +181,7 @@ class SBOMResourceIT {
     void testGetSbomByIdShouldHandleIncorrecInput() throws IOException {
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha2/sboms/fgETHHG4785")
+                .request("GET", "/api/v1alpha3/sboms/fgETHHG4785")
                 .then()
                 .statusCode(404)
                 .body("message", CoreMatchers.is("SBOM with id 'fgETHHG4785' not found"))
@@ -203,7 +203,7 @@ class SBOMResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", "/api/v1alpha2/sboms/12345/bom")
+                .request("GET", "/api/v1alpha3/sboms/12345/bom")
                 .then()
                 .statusCode(200)
                 .body("metadata.component.name", CoreMatchers.equalTo("microprofile-graphql-parent"))
@@ -301,7 +301,7 @@ class SBOMResourceIT {
      * @throws IOException
      */
     @ParameterizedTest
-    @ValueSource(strings = { "v1alpha1", "v1alpha2", "v1alpha3" })
+    @ValueSource(strings = { "v1alpha3" })
     void testUmbNotificationResend(String apiVersion) throws IOException {
         Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.BUILD))).thenReturn(true);
 

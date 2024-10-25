@@ -77,12 +77,12 @@ class GenerationFinishedMessageBodyIT {
                 .sbom(
                         Sbom.builder()
                                 .id("429305915731435500")
-                                .link("https://sbomer/api/v1alpha2/sboms/429305915731435500")
+                                .link("https://sbomer/api/v1alpha3/sboms/429305915731435500")
                                 .bom(
                                         Bom.builder()
                                                 .format(BomFormat.CYCLONEDX)
                                                 .version("1.4")
-                                                .link("https://sbomer/api/v1alpha2/sboms/429305915731435500/bom")
+                                                .link("https://sbomer/api/v1alpha3/sboms/429305915731435500/bom")
                                                 .build())
                                 .generationRequest(
                                         OperationGenerationRequest.builder()
@@ -116,12 +116,12 @@ class GenerationFinishedMessageBodyIT {
                 .sbom(
                         Sbom.builder()
                                 .id("429305915731435500")
-                                .link("https://sbomer/api/v1alpha2/sboms/429305915731435500")
+                                .link("https://sbomer/api/v1alpha3/sboms/429305915731435500")
                                 .bom(
                                         Bom.builder()
                                                 .format(BomFormat.CYCLONEDX)
                                                 .version("1.4")
-                                                .link("https://sbomer/api/v1alpha2/sboms/429305915731435500/bom")
+                                                .link("https://sbomer/api/v1alpha3/sboms/429305915731435500/bom")
                                                 .build())
                                 .generationRequest(
                                         PncBuildGenerationRequest.builder()
