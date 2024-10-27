@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.controller;
+package org.jboss.sbomer.service.generator.image.controller;
 
 import java.text.ParseException;
 import java.util.Collections;

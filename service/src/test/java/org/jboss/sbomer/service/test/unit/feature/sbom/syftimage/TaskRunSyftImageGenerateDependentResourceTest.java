@@ -7,9 +7,9 @@ import java.util.Collections;
 
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
-import org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.controller.TaskRunSyftImageGenerateDependentResource;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
+import org.jboss.sbomer.service.generator.image.controller.TaskRunSyftImageGenerateDependentResource;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
