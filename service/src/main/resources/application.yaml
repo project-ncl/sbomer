@@ -127,9 +127,14 @@ quarkus:
   # Configuration for API viewer under the api/ /endpoint.
   smallrye-openapi:
     info-title: SBOMer service
+
   swagger-ui:
+    doc-expansion: none
     always-include: true
     path: /api
+    # Sort tags, print latest API versions first
+    tags-sorter: |
+      function (a, b) { return b.localeCompare(a); }
 
   # Database configuration
   datasource:
