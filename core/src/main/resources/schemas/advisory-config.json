@@ -1,0 +1,24 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://jboss.org/sbomer/advisory-config.json",
+    "title": "SBOMer Errata Tool advisory configuration file",
+    "description": "Configuration file used to generate manifests of attached content to an Errata Tool advisory",
+    "type": "object",
+
+    "properties": {
+        "apiVersion": {
+            "description": "Version of the configuration file",
+            "enum": ["sbomer.jboss.org/v1alpha1"]
+        },
+        "type": {
+            "description": "Configuration type",
+            "enum": ["advisory"]
+        },
+        "advisoryId": {
+            "description": "The advisory identifier (number or name)",
+            "type": "string"
+        }
+    },
+    "required": ["type", "advisoryId"],
+    "additionalProperties": false
+}
