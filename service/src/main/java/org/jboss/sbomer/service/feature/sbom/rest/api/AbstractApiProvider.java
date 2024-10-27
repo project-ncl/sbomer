@@ -19,42 +19,22 @@ package org.jboss.sbomer.service.feature.sbom.rest.api;
 
 import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
 
-import java.lang.management.ManagementFactory;
-import java.time.Duration;
-
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.FeatureFlags;
-import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
-import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.model.Stats;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.Deployment;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.ErrataConsumer;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.Producer;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.GenerationRequestStats;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.Messaging;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.PncConsumer;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.Resources;
-import org.jboss.sbomer.service.feature.sbom.model.Stats.SbomStats;
-import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -67,25 +47,10 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractApiProvider {
 
     @Inject
-    protected KubernetesClient kubernetesClient;
-
-    @Inject
     protected SbomService sbomService;
 
     @Inject
-    protected ConfigSchemaValidator configSchemaValidator;
-
-    @Inject
-    AmqpMessageConsumer messageConsumer;
-
-    @Inject
-    AmqpMessageProducer messageProducer;
-
-    @Inject
     FeatureFlags featureFlags;
-
-    @Inject
-    UmbConfig umbConfig;
 
     protected Sbom doGetSbomByPurl(String purl) {
         Sbom sbom = sbomService.findByPurl(purl);
@@ -125,95 +90,6 @@ public abstract class AbstractApiProvider {
         }
 
         return generationRequest;
-    }
-
-    @Path("/stats")
-    @GET
-    @Operation(summary = "Get service runtime information", description = "Service information and statistics.")
-    @APIResponse(responseCode = "200", description = "Available runtime information.")
-    public Stats getStats() {
-        long uptimeMillis = getUptimeMillis();
-
-        Messaging messaging = null;
-
-        if (umbConfig.isEnabled()) {
-            messaging = Messaging.builder()
-                    .withPncConsumer(
-                            PncConsumer.builder()
-                                    .withProcessed(messageConsumer.getPncProcessedMessages())
-                                    .withReceived(messageConsumer.getPncReceivedMessages())
-                                    .build())
-                    .withErrataConsumer(
-                            ErrataConsumer.builder()
-                                    .withProcessed(messageConsumer.getErrataProcessedMessages())
-                                    .withReceived(messageConsumer.getErrataReceivedMessages())
-                                    .build())
-
-                    .withProducer(
-                            Producer.builder()
-                                    .withAcked(messageProducer.getAckedMessages())
-                                    .withNacked(messageProducer.getNackedMessages())
-                                    .build())
-                    .build();
-        }
-
-        Stats stats = Stats.builder()
-                .withVersion(
-                        ConfigProvider.getConfig()
-                                .getOptionalValue("quarkus.application.version", String.class)
-                                .orElse("dev"))
-                .withUptime(toUptime(uptimeMillis))
-                .withUptimeMillis(uptimeMillis)
-                .withResources(resources())
-                .withMessaging(messaging)
-                .withRelease(ConfigProvider.getConfig().getOptionalValue("sbomer.release", String.class).orElse("dev"))
-                .withAppEnv(ConfigProvider.getConfig().getOptionalValue("app.env", String.class).orElse("dev"))
-                .withHostname(ConfigProvider.getConfig().getOptionalValue("hostname", String.class).orElse(null))
-                .withDeployment(
-                        Deployment.builder()
-                                .withTarget(
-                                        ConfigProvider.getConfig()
-                                                .getOptionalValue("sbomer.deployment.target", String.class)
-                                                .orElse("dev"))
-                                .withType(
-                                        ConfigProvider.getConfig()
-                                                .getOptionalValue("sbomer.deployment.type", String.class)
-                                                .orElse("dev"))
-                                .withZone(
-                                        ConfigProvider.getConfig()
-                                                .getOptionalValue("sbomer.deployment.zone", String.class)
-                                                .orElse("dev"))
-                                .build())
-                .build();
-
-        return stats;
-    }
-
-    private long getUptimeMillis() {
-        return ManagementFactory.getRuntimeMXBean().getUptime();
-    }
-
-    private Resources resources() {
-        return Resources.builder().withSboms(sbomStats()).withGenerationRequests(generationRequestStats()).build();
-    }
-
-    private SbomStats sbomStats() {
-        return SbomStats.builder().withTotal(sbomService.countSboms()).build();
-    }
-
-    private GenerationRequestStats generationRequestStats() {
-        return GenerationRequestStats.builder()
-                .withTotal(sbomService.countSbomGenerationRequests())
-                .withInProgress(sbomService.countInProgressSbomGenerationRequests())
-                .build();
-    }
-
-    private String toUptime(long milliseconds) {
-        return Duration.ofMillis(milliseconds)
-                .toString()
-                .substring(2)
-                .replaceAll("(\\d[HMS])(?!$)", "$1 ")
-                .toLowerCase();
     }
 
     @DELETE

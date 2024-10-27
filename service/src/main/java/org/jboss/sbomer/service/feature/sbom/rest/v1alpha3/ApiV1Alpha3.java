@@ -38,7 +38,9 @@ import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha3Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.feature.sbom.rest.api.AbstractApiProvider;
+import org.jboss.sbomer.service.stats.StatsService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
@@ -75,6 +77,9 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
 
     @Inject
     FeatureFlags featureFlags;
+
+    @Inject
+    StatsService statsService;
 
     @GET
     @Path("/sboms/requests")
@@ -344,4 +349,10 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
 
     }
 
+    @GET
+    @Operation(summary = "Retrieve service runtime information", description = "Service information and statistics.")
+    @APIResponse(responseCode = "200", description = "Available runtime information")
+    public Stats getStats() {
+        return statsService.getStats();
+    }
 }
