@@ -53,6 +53,11 @@ public class SyftImageConfig extends Config {
     List<String> paths = new ArrayList<>();
 
     /**
+     * Container image name to manifest.
+     */
+    String name;
+
+    /**
      * Flag to indicate whether RPMs should be added to manifest.
      */
     @Builder.Default
