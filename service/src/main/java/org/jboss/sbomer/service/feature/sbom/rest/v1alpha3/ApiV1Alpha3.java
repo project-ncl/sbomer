@@ -350,6 +350,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
     }
 
     @GET
+    @Path("/stats")
     @Operation(summary = "Retrieve service runtime information", description = "Service information and statistics.")
     @APIResponse(responseCode = "200", description = "Available runtime information")
     public Stats getStats() {
