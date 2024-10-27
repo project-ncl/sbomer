@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.features.generator.image.syft.rest;
+package org.jboss.sbomer.service.generator.image.rest.v1alpha3;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -48,7 +48,7 @@ import jakarta.ws.rs.core.Response;
 @PermitAll
 @Tag(name = "v1alpha3")
 @Deprecated
-public class SBOMResource {
+public class SyftImageApiV1alpha3 {
     @Inject
     V1Alpha3Mapper mapper;
 
