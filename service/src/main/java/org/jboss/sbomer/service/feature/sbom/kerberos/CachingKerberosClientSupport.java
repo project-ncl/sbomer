@@ -51,7 +51,6 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
-import org.jboss.logging.Logger;
 
 import io.quarkiverse.kerberos.client.KerberosCallbackHandler;
 import io.quarkiverse.kerberos.client.KerberosClientConfig;
@@ -61,7 +60,6 @@ import io.quarkus.runtime.configuration.ConfigurationException;
 @ApplicationScoped
 @Slf4j
 public class CachingKerberosClientSupport {
-    private static final Logger LOG = Logger.getLogger(CachingKerberosClientSupport.class);
 
     private static final String KRB5_LOGIN_MODULE = "com.sun.security.auth.module.Krb5LoginModule";
 
@@ -128,13 +126,13 @@ public class CachingKerberosClientSupport {
         try {
             Subject userPrincipalSubject = getUserPrincipalSubject(completeUserPrincipalName);
             if (userPrincipalSubject == null) {
-                LOG.debug("User Principal Subject is null");
+                log.debug("User Principal Subject is null");
                 throw new RuntimeException();
             }
 
             return getServiceTicket(userPrincipalSubject, completeUserPrincipalName);
         } catch (LoginException ex) {
-            LOG.debugf("Login exception: %s", ex.getMessage());
+            log.debug("Login exception: %s", ex.getMessage());
             throw new RuntimeException(ex);
         }
     }
@@ -159,11 +157,11 @@ public class CachingKerberosClientSupport {
             });
         } catch (PrivilegedActionException ex) {
             Throwable ex2 = ex.getCause() != null ? ex.getCause() : ex;
-            LOG.debugf("PrivilegedAction failure: %s", ex2.getMessage());
+            log.debug("PrivilegedAction failure: %s", ex2.getMessage());
             throw new RuntimeException(ex);
         } catch (Throwable ex) {
             Throwable ex2 = ex.getCause() != null ? ex.getCause() : ex;
-            LOG.debugf("Authentication failure: %s", ex2.getMessage());
+            log.debug("Authentication failure: %s", ex2.getMessage());
             throw new RuntimeException(ex2);
         }
     }
