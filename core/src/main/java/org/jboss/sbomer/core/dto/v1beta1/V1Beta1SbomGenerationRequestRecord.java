@@ -15,13 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.mapper;
+package org.jboss.sbomer.core.dto.v1beta1;
 
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomRecord;
-import org.mapstruct.Mapper;
+import java.time.Instant;
+import java.util.Map;
 
-@Mapper(config = MapperConfig.class)
-public interface V1Beta1Mapper extends EntityMapper<V1Beta1SbomRecord, V1Beta1SbomGenerationRequestRecord> {
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 
+public record V1Beta1SbomGenerationRequestRecord(
+        String id,
+        String identifier,
+        @Schema(implementation = Map.class) Config config,
+        String type,
+        Instant creationTime,
+        String status,
+        String result,
+        String reason) {
 }

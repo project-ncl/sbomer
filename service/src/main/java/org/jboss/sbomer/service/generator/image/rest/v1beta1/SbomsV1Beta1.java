@@ -27,7 +27,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
-import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -97,13 +97,14 @@ public class SbomsV1Beta1 {
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
+        // TODO: Pagination should be done here, not in the service
         Page<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
                 paginationParams.getPageIndex(),
                 paginationParams.getPageSize(),
                 rsqlQuery,
                 sort);
 
-        return mapper.toSbomSearchRecordPage(sboms);
+        return sboms;
     }
 
     @GET
@@ -121,7 +122,7 @@ public class SbomsV1Beta1 {
     @APIResponse(
             responseCode = "200",
             description = "The SBOM",
-            content = @Content(schema = @Schema(implementation = SbomRecord.class)))
+            content = @Content(schema = @Schema(implementation = V1Beta1SbomRecord.class)))
     @APIResponse(
             responseCode = "400",
             description = "Could not parse provided arguments",
@@ -134,7 +135,7 @@ public class SbomsV1Beta1 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    public SbomRecord getSbomById(@PathParam("id") String identifier) {
+    public V1Beta1SbomRecord getSbomById(@PathParam("id") String identifier) {
         Sbom sbom = sbomService.get(identifier);
 
         if (sbom == null) {
@@ -146,7 +147,7 @@ public class SbomsV1Beta1 {
                     "Manifest with could not be found for provided identifier: '" + identifier + "'");
         }
 
-        return mapper.toSbomRecord(sbom);
+        return mapper.toRecord(sbom);
     }
 
     @GET
