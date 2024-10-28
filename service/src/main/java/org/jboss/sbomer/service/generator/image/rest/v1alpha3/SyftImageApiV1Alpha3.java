@@ -25,8 +25,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.service.feature.FeatureFlags;
-import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha3Mapper;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.mapper.V1Alpha3Mapper;
 
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
@@ -48,7 +48,7 @@ import jakarta.ws.rs.core.Response;
 @PermitAll
 @Tag(name = "v1alpha3")
 @Deprecated
-public class SyftImageApiV1alpha3 {
+public class SyftImageApiV1Alpha3 {
     @Inject
     V1Alpha3Mapper mapper;
 

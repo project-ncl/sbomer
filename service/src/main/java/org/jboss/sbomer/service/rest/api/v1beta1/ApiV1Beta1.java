@@ -15,13 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.mapper;
+package org.jboss.sbomer.service.rest.api.v1beta1;
 
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomRecord;
-import org.mapstruct.Mapper;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.service.rest.api.AbstractApiProvider;
 
-@Mapper(config = MapperConfig.class)
-public interface V1Beta1Mapper extends EntityMapper<V1Beta1SbomRecord, V1Beta1SbomGenerationRequestRecord> {
+import jakarta.annotation.security.PermitAll;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import lombok.extern.slf4j.Slf4j;
+
+@Path("/api/v1beta1")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@ApplicationScoped
+@Tag(name = "v1beta1", description = "latest version")
+@PermitAll
+@Slf4j
+public class ApiV1Beta1 extends AbstractApiProvider {
 
 }

@@ -15,20 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest;
+package org.jboss.sbomer.service.rest.mapper;
 
-import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
-import org.eclipse.microprofile.openapi.annotations.info.Contact;
-import org.eclipse.microprofile.openapi.annotations.info.Info;
-import org.eclipse.microprofile.openapi.annotations.info.License;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-import jakarta.ws.rs.core.Application;
+@org.mapstruct.MapperConfig(
+        componentModel = "cdi",
+        unmappedSourcePolicy = ReportingPolicy.WARN,
+        unmappedTargetPolicy = ReportingPolicy.ERROR,
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
+public interface MapperConfig {
 
-@OpenAPIDefinition(
-        info = @Info(
-                title = "SBOMer service",
-                version = "0.0.1",
-                contact = @Contact(name = "SBOMer Team"),
-                license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0.html")))
-public class SBOMerApplication extends Application {
 }

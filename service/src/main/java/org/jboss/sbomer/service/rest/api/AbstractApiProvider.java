@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.api;
+package org.jboss.sbomer.service.rest.api;
 
 import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
 

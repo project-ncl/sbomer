@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
+package org.jboss.sbomer.service.rest.criteria.predicate;
 
 import java.util.Collection;
 

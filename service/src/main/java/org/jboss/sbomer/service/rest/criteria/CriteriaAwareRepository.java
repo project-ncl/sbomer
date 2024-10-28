@@ -15,12 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.criteria;
+package org.jboss.sbomer.service.rest.criteria;
 
 import java.util.List;
 
 import org.jboss.sbomer.core.TriFunction;
-import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
+import org.jboss.sbomer.service.rest.QueryParameters;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.TypedQuery;

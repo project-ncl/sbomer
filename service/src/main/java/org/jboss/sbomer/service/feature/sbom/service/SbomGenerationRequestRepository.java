@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
+import org.jboss.sbomer.service.rest.criteria.CriteriaAwareRepository;
 
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;

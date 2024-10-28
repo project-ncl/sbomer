@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.generator.image.rest.v1beta1;
+package org.jboss.sbomer.service.rest.api.v1beta1;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.service.feature.sbom.mapper.V1Beta1Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
+import org.jboss.sbomer.service.rest.mapper.V1Beta1Mapper;
 import org.jboss.sbomer.service.stats.StatsService;
 
 import jakarta.annotation.security.PermitAll;

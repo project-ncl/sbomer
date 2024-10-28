@@ -26,8 +26,8 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.CriteriaAwareRepository;
+import org.jboss.sbomer.service.rest.QueryParameters;
+import org.jboss.sbomer.service.rest.criteria.CriteriaAwareRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.criteria.Join;

@@ -15,26 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.v1beta1;
+package org.jboss.sbomer.service.rest;
 
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.service.feature.sbom.rest.api.AbstractApiProvider;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import jakarta.annotation.security.PermitAll;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import lombok.extern.slf4j.Slf4j;
+@Builder
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+public class QueryParameters {
 
-@Path("/api/v1beta1")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-@ApplicationScoped
-@Tag(name = "v1beta1", description = "latest version")
-@PermitAll
-@Slf4j
-public class ApiV1Beta1 extends AbstractApiProvider {
+    String rsqlQuery;
+    String sort;
+    @Builder.Default
+    int pageIndex = 0;
 
+    @Builder.Default
+    int pageSize = 50;
+
+    public int firstResult() {
+        return pageIndex * pageSize;
+    }
+
+    public int maxResults() {
+        return pageSize;
+    }
 }
