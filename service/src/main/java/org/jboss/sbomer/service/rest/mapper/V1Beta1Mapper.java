@@ -15,16 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.mapper;
+package org.jboss.sbomer.service.rest.mapper;
 
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomRecord;
+import org.mapstruct.Mapper;
 
-@org.mapstruct.MapperConfig(
-        componentModel = "cdi",
-        unmappedSourcePolicy = ReportingPolicy.WARN,
-        unmappedTargetPolicy = ReportingPolicy.ERROR,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
-public interface MapperConfig {
+@Mapper(config = MapperConfig.class)
+public interface V1Beta1Mapper extends EntityMapper<V1Beta1SbomRecord, V1Beta1SbomGenerationRequestRecord> {
 
 }

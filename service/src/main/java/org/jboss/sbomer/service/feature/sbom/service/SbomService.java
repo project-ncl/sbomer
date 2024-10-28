@@ -51,9 +51,9 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.rest.QueryParameters;
-import org.jboss.sbomer.service.feature.sbom.rest.RestUtils;
 import org.jboss.sbomer.service.pnc.PncClient;
+import org.jboss.sbomer.service.rest.QueryParameters;
+import org.jboss.sbomer.service.rest.RestUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

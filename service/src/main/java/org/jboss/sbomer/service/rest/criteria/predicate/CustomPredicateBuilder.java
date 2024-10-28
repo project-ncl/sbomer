@@ -15,14 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate;
+package org.jboss.sbomer.service.rest.criteria.predicate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.AbstractCriteriaAwareRepository;
+import org.jboss.sbomer.service.rest.criteria.AbstractCriteriaAwareRepository;
 
 import com.github.tennaito.rsql.builder.BuilderTools;
 import com.github.tennaito.rsql.jpa.PredicateBuilder;

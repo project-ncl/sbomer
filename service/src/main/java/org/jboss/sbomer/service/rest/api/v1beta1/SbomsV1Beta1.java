@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.generator.image.rest.v1beta1;
+package org.jboss.sbomer.service.rest.api.v1beta1;
 
 import java.util.Map;
 
@@ -32,9 +32,9 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
-import org.jboss.sbomer.service.feature.sbom.mapper.V1Beta1Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.mapper.V1Beta1Mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

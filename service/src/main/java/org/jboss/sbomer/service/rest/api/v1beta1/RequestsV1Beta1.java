@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.generator.image.rest.v1beta1;
+package org.jboss.sbomer.service.rest.api.v1beta1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +44,10 @@ import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.utils.PaginationParameters;
-import org.jboss.sbomer.service.feature.sbom.mapper.V1Beta1Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.mapper.V1Beta1Mapper;
 import org.jboss.util.NotImplementedException;
 
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;

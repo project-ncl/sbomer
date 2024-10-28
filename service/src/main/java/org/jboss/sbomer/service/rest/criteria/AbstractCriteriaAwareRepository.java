@@ -15,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest.criteria;
+package org.jboss.sbomer.service.rest.criteria;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jboss.pnc.common.Strings;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate.CustomPredicateSortBuilder;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate.CustomizedJpaPredicateSortVisitor;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate.CustomizedJpaPredicateVisitor;
-import org.jboss.sbomer.service.feature.sbom.rest.criteria.predicate.CustomizedPredicateBuilderStrategy;
+import org.jboss.sbomer.service.rest.criteria.predicate.CustomPredicateSortBuilder;
+import org.jboss.sbomer.service.rest.criteria.predicate.CustomizedJpaPredicateSortVisitor;
+import org.jboss.sbomer.service.rest.criteria.predicate.CustomizedJpaPredicateVisitor;
+import org.jboss.sbomer.service.rest.criteria.predicate.CustomizedPredicateBuilderStrategy;
 
 import com.github.tennaito.rsql.misc.EntityManagerAdapter;
 

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.mapper;
+package org.jboss.sbomer.service.rest.mapper;
 
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;

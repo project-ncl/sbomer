@@ -15,34 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.rest;
+package org.jboss.sbomer.service.rest;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.info.Contact;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
+import org.eclipse.microprofile.openapi.annotations.info.License;
 
-@Builder
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-public class QueryParameters {
+import jakarta.ws.rs.core.Application;
 
-    String rsqlQuery;
-    String sort;
-    @Builder.Default
-    int pageIndex = 0;
-
-    @Builder.Default
-    int pageSize = 50;
-
-    public int firstResult() {
-        return pageIndex * pageSize;
-    }
-
-    public int maxResults() {
-        return pageSize;
-    }
+@OpenAPIDefinition(
+        info = @Info(
+                title = "SBOMer service",
+                version = "0.0.1",
+                contact = @Contact(name = "SBOMer Team"),
+                license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0.html")))
+public class SBOMerApplication extends Application {
 }
