@@ -17,15 +17,27 @@
  */
 package org.jboss.sbomer.service.feature.sbom.mapper;
 
-import java.util.List;
+import java.util.Collection;
 
+import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.mapstruct.BeanMapping;
 
-public interface EntityMapper<E, R> {
-    R toSbomRecord(E entity);
+public interface EntityMapper<S extends Record, R extends Record> {
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    S toRecord(Sbom sboms);
 
-    Page<R> toRecordPage(Page<E> entities);
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    R toRecord(SbomGenerationRequest request);
 
-    List<R> toRecordList(List<E> entities);
+    Page<BaseSbomRecord> sbomsToBaseRecordPage(Page<Sbom> sboms);
 
+    Collection<R> requestsToRecords(Collection<SbomGenerationRequest> requests);
+
+    Collection<BaseSbomGenerationRequestRecord> requestsToBaseRecords(Collection<SbomGenerationRequest> requests);
+
+    Page<BaseSbomGenerationRequestRecord> requestsToBaseRecordPage(Page<SbomGenerationRequest> requests);
 }

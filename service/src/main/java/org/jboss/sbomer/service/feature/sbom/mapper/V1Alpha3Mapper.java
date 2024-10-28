@@ -17,31 +17,11 @@
  */
 package org.jboss.sbomer.service.feature.sbom.mapper;
 
-import java.util.Collection;
-
-import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
-import org.jboss.sbomer.core.features.sbom.rest.Page;
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MapperConfig.class)
-public interface V1Alpha3Mapper {
-
-    SbomRecord toSbomRecord(Sbom entity);
-
-    BaseSbomRecord toSearchRecord(Sbom entity);
-
-    SbomGenerationRequestRecord toSbomRequestRecord(SbomGenerationRequest entity);
-
-    Collection<SbomGenerationRequestRecord> toSbomRequestRecords(Collection<SbomGenerationRequest> entities);
-
-    Page<BaseSbomRecord> toSbomSearchRecordPage(Page<BaseSbomRecord> sboms);
-
-    Page<SbomRecord> toSbomRecordPage(Page<Sbom> sboms);
-
-    Page<SbomGenerationRequestRecord> toSbomRequestRecordPage(Page<SbomGenerationRequest> sbomRequests);
+public interface V1Alpha3Mapper extends EntityMapper<SbomRecord, SbomGenerationRequestRecord> {
 
 }

@@ -26,6 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
@@ -111,7 +112,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Page<SbomGenerationRequestRecord> searchGenerationRequests(
+    public Page<BaseSbomGenerationRequestRecord> searchGenerationRequests(
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
@@ -120,7 +121,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
                 paginationParams.getPageSize(),
                 rsqlQuery,
                 sort);
-        return mapper.toSbomRequestRecordPage(requests);
+        return mapper.requestsToBaseRecordPage(requests);
     }
 
     @GET
@@ -146,7 +147,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public SbomGenerationRequestRecord getGenerationRequestById(@PathParam("id") String generationRequestId) {
-        return mapper.toSbomRequestRecord(doGetSbomGenerationRequestById(generationRequestId));
+        return mapper.toRecord(doGetSbomGenerationRequestById(generationRequestId));
     }
 
     @GET
@@ -187,7 +188,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
                 rsqlQuery,
                 sort);
 
-        return mapper.toSbomSearchRecordPage(sboms);
+        return sboms;
     }
 
     @POST
@@ -217,7 +218,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
             return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
 
-        return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateFromBuild(buildId, config))).build();
+        return Response.accepted(mapper.toRecord(sbomService.generateFromBuild(buildId, config))).build();
     }
 
     @GET
@@ -241,7 +242,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
             description = "Internal server error",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public SbomRecord getSbomById(@PathParam("id") String sbomId) {
-        return mapper.toSbomRecord(doGetSbomById(sbomId));
+        return mapper.toRecord(doGetSbomById(sbomId));
     }
 
     @GET
@@ -282,7 +283,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
     @APIResponse(responseCode = "404", description = "Requested SBOM could not be found")
     @APIResponse(responseCode = "500", description = "Internal server error")
     public SbomRecord getSbomByPurl(@PathParam("purl") String purl) {
-        return mapper.toSbomRecord(doGetSbomByPurl(purl));
+        return mapper.toRecord(doGetSbomByPurl(purl));
     }
 
     @GET
@@ -325,7 +326,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateFromOperation(@PathParam("operationId") String operationId, OperationConfig config)
             throws Exception {
-        return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateFromOperation(operationId, config)))
+        return Response.accepted(mapper.toRecord(sbomService.generateFromOperation(operationId, config)))
                 .build();
     }
 
@@ -345,8 +346,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateNewOperation(DeliverableAnalysisConfig config) throws Exception {
 
-        return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateNewOperation(config))).build();
-
+        return Response.accepted(mapper.toRecord(sbomService.generateNewOperation(config))).build();
     }
 
     @GET

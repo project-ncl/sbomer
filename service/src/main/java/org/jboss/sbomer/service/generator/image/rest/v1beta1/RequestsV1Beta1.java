@@ -30,7 +30,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
-import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
@@ -125,7 +126,7 @@ public class RequestsV1Beta1 {
     @APIResponse(
             responseCode = "202",
             description = "Manifest generation successfully requested",
-            content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
+            content = @Content(schema = @Schema(implementation = V1Beta1SbomGenerationRequestRecord.class)))
     @APIResponse(
             responseCode = "500",
             description = "Internal server error",
@@ -165,7 +166,7 @@ public class RequestsV1Beta1 {
             throw new NotImplementedException("Operation is not implemented yet");
         }
 
-        return Response.accepted(mapper.toSbomRequestRecords(requests)).build();
+        return Response.accepted(mapper.requestsToRecords(requests)).build();
     }
 
     @GET
@@ -182,7 +183,7 @@ public class RequestsV1Beta1 {
             description = "The generation request",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
+                    schema = @Schema(implementation = V1Beta1SbomGenerationRequestRecord.class)))
     @APIResponse(
             responseCode = "400",
             description = "Malformed request",
@@ -201,14 +202,14 @@ public class RequestsV1Beta1 {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = ErrorResponse.class)))
-    public SbomGenerationRequestRecord getGenerationRequestById(@PathParam("id") String generationRequestId) {
+    public V1Beta1SbomGenerationRequestRecord getGenerationRequestById(@PathParam("id") String generationRequestId) {
         SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId); // NOSONAR
 
         if (generationRequest == null) {
             throw new NotFoundException("Generation request with id '{}' could not be found", generationRequestId);
         }
 
-        return mapper.toSbomRequestRecord(generationRequest);
+        return mapper.toRecord(generationRequest);
     }
 
     @GET
@@ -240,7 +241,7 @@ public class RequestsV1Beta1 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Page<SbomGenerationRequestRecord> searchGenerationRequests(
+    public Page<BaseSbomGenerationRequestRecord> searchGenerationRequests(
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
@@ -249,6 +250,7 @@ public class RequestsV1Beta1 {
                 paginationParams.getPageSize(),
                 rsqlQuery,
                 sort);
-        return mapper.toSbomRequestRecordPage(requests);
+
+        return mapper.requestsToBaseRecordPage(requests);
     }
 }

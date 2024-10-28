@@ -72,6 +72,6 @@ public class SyftImageApiV1alpha3 {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateFromContainerImage(@PathParam("name") String imageName, SyftImageConfig config)
             throws Exception {
-        return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateSyftImage(imageName, config))).build();
+        return Response.accepted(mapper.toRecord(sbomService.generateSyftImage(imageName, config))).build();
     }
 }
