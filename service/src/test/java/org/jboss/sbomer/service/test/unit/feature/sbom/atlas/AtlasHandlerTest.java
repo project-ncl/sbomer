@@ -17,11 +17,9 @@ import java.util.List;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasBuildClient;
-import org.jboss.sbomer.service.feature.sbom.atlas.AtlasClient;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,18 +90,6 @@ class AtlasHandlerTest {
     }
 
     @Test
-    void testUploadOnlyProductBoms() throws Exception {
-        Sbom sbomA = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
-        Sbom sbomB = generateSbom("BBB", "pkg:maven/compB@1.1.0?type=pom", "sboms/complete_sbom.json");
-
-        atlasHandler.publishBuildManifests(List.of(sbomA, sbomB));
-
-        // Only one of manifests was udpdated, because the second doesn't have product properties
-        verify(atlasBuildClient, times(1)).upload(anyString(), any(JsonNode.class));
-        verify(atlasBuildClient).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
-    }
-
-    @Test
     void testHandlingOfApiErrors() throws Exception {
         Sbom sbom = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
 
@@ -119,19 +105,4 @@ class AtlasHandlerTest {
                 "Unable to store 'AAA' manifest in Atlas, purl: 'pkg:maven/compA@1.1.0?type=pom': A reason",
                 ex.getMessage());
     }
-
-    @Test
-    void testHandlingOfSerialziationFailures() throws Exception {
-        Sbom sbom = generateSbom("AAA", "pkg:maven/compA@1.1.0?type=pom");
-        sbom.setSbom(ObjectMapperProvider.json().readTree(""));
-
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            atlasHandler.publishBuildManifests(List.of(sbom));
-        });
-
-        assertEquals(
-                "Unable to read manifest from SBOM 'AAA' (purl: 'pkg:maven/compA@1.1.0?type=pom')",
-                ex.getMessage());
-    }
-
 }

@@ -24,10 +24,8 @@ import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
-import org.jboss.sbomer.service.feature.sbom.config.features.ProductConfig;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -82,25 +80,6 @@ public class AtlasHandler {
         log.info("Uploading manifest '{}' (purl: '{}')...", sbom.getId(), sbom.getRootPurl());
 
         try {
-            // Read the content as CycloneDX BOM
-            Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
-
-            // Really unexpected...
-            if (bom == null) {
-                throw new ApplicationException(
-                        "Unable to read manifest from SBOM '{}' (purl: '{}')",
-                        sbom.getId(),
-                        sbom.getRootPurl());
-            }
-
-            if (ProductConfig.ErrataProductConfig.fromBom(bom) == null) {
-                log.warn(
-                        "Could not retrieve product configuration from the main component (purl = '{}') in the '{}' SBOM, skipping uploading to Atlas",
-                        sbom.getRootPurl(),
-                        sbom.getId());
-                return;
-            }
-
             // Store it!
             atlasBuildClient.upload(sbom.getRootPurl(), sbom.getSbom());
         } catch (ClientException e) {
