@@ -125,9 +125,7 @@ public class SyftImageAdjuster implements Adjuster {
         cleanupComponent(bom.getMetadata().getComponent());
 
         // ...and all other components
-        for (int i = 0; i < bom.getComponents().size(); i++) {
-            cleanupComponent(bom.getComponents().get(i));
-        }
+        cleanupComponents(bom.getComponents());
 
         adjustComponents(bom);
 
@@ -450,6 +448,21 @@ public class SyftImageAdjuster implements Adjuster {
             return !supportedProp;
         });
 
+    }
+
+    /**
+     * Adjusts all provided {@link Component}s according to our standards.
+     *
+     * @param components the components
+     */
+    private void cleanupComponents(List<Component> components) {
+        if (components == null) {
+            return;
+        }
+
+        for (Component component : components) {
+            cleanupComponent(component);
+        }
     }
 
     /**
