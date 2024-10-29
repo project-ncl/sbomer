@@ -50,7 +50,8 @@ import lombok.extern.slf4j.Slf4j;
         property = "type",
         defaultImpl = PncBuildConfig.class)
 @JsonSubTypes({ @JsonSubTypes.Type(SyftImageConfig.class), @JsonSubTypes.Type(PncBuildConfig.class),
-        @JsonSubTypes.Type(OperationConfig.class), @JsonSubTypes.Type(DeliverableAnalysisConfig.class) })
+        @JsonSubTypes.Type(OperationConfig.class), @JsonSubTypes.Type(DeliverableAnalysisConfig.class),
+        @JsonSubTypes.Type(BrewRPMConfig.class) })
 public abstract class Config {
 
     /**
