@@ -20,7 +20,6 @@ package org.jboss.sbomer.service.feature.sbom.atlas;
 import java.util.List;
 
 import org.cyclonedx.model.Bom;
-import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
@@ -28,10 +27,8 @@ import org.jboss.sbomer.core.errors.UnauthorizedException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.quarkus.oidc.client.filter.OidcClientFilter;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.reactive.messaging.annotations.Blocking;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -44,10 +41,8 @@ import jakarta.ws.rs.core.Response;
 /**
  * A client for the Atlas (instance of the Trusted Profile Analyzer).
  */
-@ApplicationScoped
-@ClientHeaderParam(name = "User-Agent", value = "SBOMer")
+
 @Path("/api/v1/sbom")
-@OidcClientFilter
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public interface AtlasClient {

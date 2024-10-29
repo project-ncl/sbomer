@@ -17,12 +17,19 @@
  */
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
+import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
+import io.quarkus.oidc.client.filter.OidcClientFilter;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Client for the Atlas instance storing build manifests.
  */
 @RegisterRestClient(configKey = "atlas-build")
+@OidcClientFilter
+@ApplicationScoped
+@ClientHeaderParam(name = "User-Agent", value = "SBOMer")
 public interface AtlasBuildClient extends AtlasClient {
 
 }
