@@ -39,7 +39,7 @@
       }
     }, 
     "required": [
-      "advisoryId", "productVersionId", "brewBuildIds"
+      "advisoryId", "productVersionId", "brewBuildId"
     ],
     "additionalProperties": false
   }
