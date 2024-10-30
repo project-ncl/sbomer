@@ -17,6 +17,14 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.generator.rpm.rest;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
+
 import org.jboss.sbomer.service.feature.sbom.mapper.V1Alpha3Mapper;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 
@@ -38,6 +46,7 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 @PermitAll
+@Tag(name = "v1alpha3")
 public class SBOMResource {
 
     @Inject
@@ -48,7 +57,20 @@ public class SBOMResource {
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
+    @Operation(
+            hidden = true,
+            summary = "Generates SBOMs from an Errata Advisory",
+            description = "SBOMs base generation for a particular Errata Advisory")
+    @Parameter(name = "advisoryId", description = "Errata Advisory identifier", example = "123456")
     @Path("/{advisoryId}")
+    @APIResponse(
+            responseCode = "202",
+            description = "Schedules generation of SBOMs for a particular Errata advisoryId. This is an asynchronous call. It does execute the generation behind the scenes.",
+            content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateFromAdvisory(@PathParam("advisoryId") String advisoryId) throws Exception {
 
         return Response.accepted(mapper.toSbomRequestRecords(advisoryService.generateFromAdvisory(advisoryId))).build();
