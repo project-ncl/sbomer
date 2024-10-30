@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.rest.api.v1alpha3;
 
+import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
+
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -31,15 +33,18 @@ import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
+import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.FeatureFlags;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
-import org.jboss.sbomer.service.rest.api.AbstractApiProvider;
+import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.rest.mapper.V1Alpha3Mapper;
 import org.jboss.sbomer.service.stats.StatsService;
 
@@ -47,11 +52,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -72,15 +79,58 @@ import lombok.extern.slf4j.Slf4j;
 @PermitAll
 @Slf4j
 @Deprecated
-public class ApiV1Alpha3 extends AbstractApiProvider {
+public class ApiV1Alpha3 {
     @Inject
     V1Alpha3Mapper mapper;
+
+    @Inject
+    SbomService sbomService;
 
     @Inject
     FeatureFlags featureFlags;
 
     @Inject
     StatsService statsService;
+
+    private SbomGenerationRequest doGetSbomGenerationRequestById(String generationRequestId) {
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId); // NOSONAR
+
+        if (generationRequest == null) {
+            throw new NotFoundException("Generation request with id '{}' could not be found", generationRequestId);
+        }
+
+        return generationRequest;
+    }
+
+    private Sbom doGetSbomByPurl(String purl) {
+        Sbom sbom = sbomService.findByPurl(purl);
+
+        if (sbom == null) {
+            throw new NotFoundException("Manifest with provided identifier: '" + purl + "' couldn't be found");
+        }
+
+        return sbom;
+    }
+
+    private Sbom doGetSbomById(String sbomId) {
+        Sbom sbom = sbomService.get(sbomId);
+
+        if (sbom == null) {
+            throw new NotFoundException("Manifest with provided identifier: '{}' couldn't be found", sbomId);
+        }
+
+        return sbom;
+    }
+
+    private JsonNode doGetBomById(String sbomId) {
+        Sbom sbom = doGetSbomById(sbomId);
+        return sbom.getSbom();
+    }
+
+    private JsonNode doGetBomByPurl(String purl) {
+        Sbom sbom = doGetSbomByPurl(purl);
+        return sbom.getSbom();
+    }
 
     @GET
     @Path("/sboms/requests")
@@ -326,8 +376,7 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateFromOperation(@PathParam("operationId") String operationId, OperationConfig config)
             throws Exception {
-        return Response.accepted(mapper.toRecord(sbomService.generateFromOperation(operationId, config)))
-                .build();
+        return Response.accepted(mapper.toRecord(sbomService.generateFromOperation(operationId, config))).build();
     }
 
     @POST
@@ -355,5 +404,55 @@ public class ApiV1Alpha3 extends AbstractApiProvider {
     @APIResponse(responseCode = "200", description = "Available runtime information")
     public Stats getStats() {
         return statsService.getStats();
+    }
+
+    @DELETE
+    @Consumes(MediaType.WILDCARD)
+    @Path("/sboms/requests/{id}")
+    @RolesAllowed(USER_DELETE_ROLE)
+    @Operation(
+            summary = "Delete SBOM generation request specified by id",
+            description = "Delete the specified SBOM generation request from the database")
+    @Parameter(name = "id", description = "The SBOM request identifier")
+    @APIResponse(responseCode = "200", description = "SBOM generation request was successfully deleted")
+    @APIResponse(responseCode = "404", description = "Specified SBOM generation request could not be found")
+    @APIResponse(responseCode = "500", description = "Internal server error")
+    public Response deleteGenerationRequest(@PathParam("id") final String id) {
+
+        try {
+            MDCUtils.addProcessContext(id);
+            sbomService.deleteSbomRequest(id);
+
+            return Response.ok().build();
+        } finally {
+            MDCUtils.removeProcessContext();
+        }
+    }
+
+    @POST
+    @Consumes(MediaType.WILDCARD)
+    @Operation(
+            summary = "Resend UMB notification message for a completed SBOM",
+            description = "Force the resending of the UMB notification message for an already generated SBOM.")
+    @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
+    @Path("/sboms/{id}/notify")
+    @APIResponse(responseCode = "200")
+    @APIResponse(
+            responseCode = "404",
+            description = "Requested SBOM could not be found",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    public Response notify(@PathParam("id") String sbomId) throws Exception {
+        if (featureFlags.isDryRun()) {
+            log.warn("Skipping notification for SBOM '{}' because of SBOMer running in dry-run mode", sbomId);
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
+        }
+
+        Sbom sbom = doGetSbomById(sbomId);
+        sbomService.notifyCompleted(sbom);
+        return Response.ok().build();
     }
 }

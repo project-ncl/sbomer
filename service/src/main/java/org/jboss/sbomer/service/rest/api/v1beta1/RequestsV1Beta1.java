@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.rest.api.v1beta1;
 
+import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +44,7 @@ import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -53,11 +56,13 @@ import org.jboss.util.NotImplementedException;
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -252,5 +257,28 @@ public class RequestsV1Beta1 {
                 sort);
 
         return mapper.requestsToBaseRecordPage(requests);
+    }
+
+    @DELETE
+    @Consumes(MediaType.WILDCARD)
+    @Path("/{id}")
+    @RolesAllowed(USER_DELETE_ROLE)
+    @Operation(
+            summary = "Delete SBOM generation request specified by id",
+            description = "Delete the specified SBOM generation request from the database")
+    @Parameter(name = "id", description = "The SBOM request identifier")
+    @APIResponse(responseCode = "200", description = "SBOM generation request was successfully deleted")
+    @APIResponse(responseCode = "404", description = "Specified SBOM generation request could not be found")
+    @APIResponse(responseCode = "500", description = "Internal server error")
+    public Response deleteGenerationRequest(@PathParam("id") final String id) {
+
+        try {
+            MDCUtils.addProcessContext(id);
+            sbomService.deleteSbomRequest(id);
+
+            return Response.ok().build();
+        } finally {
+            MDCUtils.removeProcessContext();
+        }
     }
 }

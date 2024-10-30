@@ -21,7 +21,10 @@ import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
 import org.mapstruct.Mapper;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 @Mapper(config = MapperConfig.class)
+@ApplicationScoped
 public interface V1Alpha3Mapper extends EntityMapper<SbomRecord, SbomGenerationRequestRecord> {
 
 }

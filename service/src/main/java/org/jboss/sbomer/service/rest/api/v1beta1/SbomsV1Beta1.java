@@ -32,6 +32,7 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
+import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.rest.mapper.V1Beta1Mapper;
@@ -46,17 +47,22 @@ import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1beta1/sboms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 @PermitAll
+@Slf4j
 @Tag(name = "v1beta1")
 public class SbomsV1Beta1 {
     @Inject
@@ -65,8 +71,10 @@ public class SbomsV1Beta1 {
     @Inject
     SbomService sbomService;
 
-    @GET
+    @Inject
+    FeatureFlags featureFlags;
 
+    @GET
     @Operation(summary = "Search SBOMs", description = "List paginated SBOMs using RSQL advanced search.")
     @Parameter(
             name = "query",
@@ -143,8 +151,7 @@ public class SbomsV1Beta1 {
         }
 
         if (sbom == null) {
-            throw new NotFoundException(
-                    "Manifest with could not be found for provided identifier: '" + identifier + "'");
+            throw new NotFoundException("Manifest with provided identifier: '" + identifier + "' couldn't be found");
         }
 
         return mapper.toRecord(sbom);
@@ -192,5 +199,37 @@ public class SbomsV1Beta1 {
 
         // TODO: We probably should ensure proper foormatting (ordering of keys)
         return sbom.getSbom();
+    }
+
+    @POST
+    @Consumes(MediaType.WILDCARD)
+    @Operation(
+            summary = "Resend UMB notification message for a completed SBOM",
+            description = "Force the resending of the UMB notification message for an already generated SBOM.")
+    @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
+    @Path("/{id}/notify")
+    @APIResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "404",
+            description = "Requested SBOM could not be found",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    public Response notify(@PathParam("id") String sbomId) throws Exception {
+        if (featureFlags.isDryRun()) {
+            log.warn("Skipping notification for SBOM '{}' because of SBOMer running in dry-run mode", sbomId);
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
+        }
+
+        Sbom sbom = sbomService.get(sbomId);
+
+        if (sbom == null) {
+            throw new NotFoundException("Manifest with provided identifier: '{}' couldn't be found", sbomId);
+        }
+
+        sbomService.notifyCompleted(sbom);
+        return Response.ok().build();
     }
 }
