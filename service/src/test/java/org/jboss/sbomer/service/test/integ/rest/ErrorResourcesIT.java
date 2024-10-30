@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.test.integ.feature.sbom.rest;
+package org.jboss.sbomer.service.test.integ.rest;
 
 import static org.mockito.Mockito.doThrow;
 
@@ -24,6 +24,7 @@ import org.hamcrest.Matchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -61,6 +62,7 @@ class ErrorResourcesIT {
     }
 
     @Test
+    @ValueSource(strings = { "v1alpha3", "v1beta1" })
     void testHandlingNotFoundSbom() {
         RestAssured.given()
                 .when()
