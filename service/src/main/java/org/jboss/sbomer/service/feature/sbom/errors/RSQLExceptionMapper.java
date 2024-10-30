@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RSQLExceptionMapper extends AbstractExceptionMapper<RSQLParserException> {
 
     @Override
-    Status getStatus() {
+    Status getStatus(RSQLParserException ex) {
         return Status.BAD_REQUEST;
     }
 
@@ -39,7 +39,7 @@ public class RSQLExceptionMapper extends AbstractExceptionMapper<RSQLParserExcep
     }
 
     @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+    Response hook(ResponseBuilder responseBuilder, RSQLParserException ex) {
         log.error("Could not parse RSQL", ex);
 
         return responseBuilder.build();

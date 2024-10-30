@@ -25,7 +25,7 @@ import jakarta.ws.rs.ext.Provider;
 public class NotFoundExceptionMapper extends AbstractExceptionMapper<NotFoundException> {
 
     @Override
-    Status getStatus() {
+    Status getStatus(NotFoundException ex) {
         return Status.NOT_FOUND;
     }
 

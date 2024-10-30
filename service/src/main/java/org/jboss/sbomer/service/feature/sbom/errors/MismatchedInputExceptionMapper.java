@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,13 +33,18 @@ import lombok.extern.slf4j.Slf4j;
 public class MismatchedInputExceptionMapper extends AbstractExceptionMapper<MismatchedInputException> {
 
     @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+    Status getStatus(MismatchedInputException ex) {
+        return Status.BAD_REQUEST;
+    }
+
+    @Override
+    Response hook(ResponseBuilder responseBuilder, MismatchedInputException ex) {
         log.error("Received content that cannot be deserialized", ex);
         return responseBuilder.build();
     }
 
     @Override
     String errorMessage(MismatchedInputException ex) {
-        return formattedString("An error occurred while deserializing provided content: {}", ex.getOriginalMessage());
+        return formattedString("An error occurred while deserializing provided content, please check your body 🤼");
     }
 }

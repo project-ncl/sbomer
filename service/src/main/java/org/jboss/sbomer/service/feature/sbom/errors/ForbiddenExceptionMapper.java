@@ -30,12 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 public class ForbiddenExceptionMapper extends AbstractExceptionMapper<ForbiddenException> {
 
     @Override
-    Status getStatus() {
+    Status getStatus(ForbiddenException ex) {
         return Status.FORBIDDEN;
     }
 
     @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+    Response hook(ResponseBuilder responseBuilder, ForbiddenException ex) {
         log.warn("Access to '{}' resource requested by a client has been forbidden.", uriInfo.getPath(), ex);
         return responseBuilder.build();
     }

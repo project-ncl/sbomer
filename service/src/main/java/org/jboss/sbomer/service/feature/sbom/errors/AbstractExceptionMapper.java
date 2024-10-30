@@ -56,7 +56,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
         return UUID.randomUUID().toString();
     }
 
-    Status getStatus() {
+    Status getStatus(T ex) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 
@@ -93,7 +93,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
      * @param responseBuilder The prepared default {@link Response} object.
      * @param ex The {@link Throwable} containing the cause
      */
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+    Response hook(ResponseBuilder responseBuilder, T ex) {
         return responseBuilder.build();
     }
 
@@ -101,7 +101,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
         return ErrorResponse.builder()
                 .resource(uriInfo.getPath())
                 .errorId(generateErrorId())
-                .error(getStatus().getReasonPhrase())
+                .error(getStatus(ex).getReasonPhrase())
                 .errors(customErrors())
                 .message(errorMessage(ex))
                 .build();
@@ -133,7 +133,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
         ErrorResponse errorResponse = errorResponse(ex);
 
         // Prepare initial response builder with default 500 error and JSON content type
-        ResponseBuilder responseBuilder = Response.status(getStatus())
+        ResponseBuilder responseBuilder = Response.status(getStatus(ex))
                 .entity(errorResponse)
                 .type(MediaType.APPLICATION_JSON);
 
