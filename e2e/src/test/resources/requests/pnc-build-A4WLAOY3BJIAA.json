@@ -1,10 +1,9 @@
 {
   "apiVersion": "sbomer.jboss.org/v1alpha1",
-  "buildId": "A3YCIKLQTVYAA",
+  "type": "pnc-build",
+  "buildId": "A4WLAOY3BJIAA",
   "environment": {
-    "gradle": "5.6.2",
-    "java": "8",
-    "maven": "3.6.0"
+    "node": "12"
   },
   "products": [
     {
@@ -19,8 +18,7 @@
         }
       ],
       "generator": {
-        "type": "gradle-cyclonedx",
-        "version": "1.7.3"
+        "type": "nodejs-cyclonedx"
       }
     }
   ]
