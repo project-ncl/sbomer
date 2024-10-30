@@ -51,7 +51,7 @@ class BuildControllerTest {
     private GenerationRequest generationRequest() {
         return new GenerationRequestBuilder(GenerationRequestType.BUILD).withId("CUSTOMID")
                 .withStatus(SbomGenerationStatus.GENERATING)
-                .withConfig(Config.fromString("{}", PncBuildConfig.class))
+                .withConfig(Config.fromString("{\"type\": \"pnc-build\"}", PncBuildConfig.class))
                 .build();
     }
 

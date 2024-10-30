@@ -1,13 +1,13 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha3/sboms?pageIndex=0&pageSize=1&query=id%3D%3D123"
+    "url": "/api/v1beta1/sboms?pageIndex=0&pageSize=20&query=identifier%3Deq%3DQUARKUS%3BgenerationRequest.identifier%3Deq%3DQUARKUS%3BgenerationRequest.status%3Deq%3DFINISHED%3BgenerationRequest.result%3Deq%3DSUCCESS%3BgenerationRequest.type%3Deq%3DBUILD&sort=creationTime%3Ddesc%3D"
   },
   "response": {
     "status": 200,
     "jsonBody": {
       "pageIndex": 0,
-      "pageSize": 1,
+      "pageSize": 20,
       "totalPages": 1,
       "totalHits": 1,
       "content": [

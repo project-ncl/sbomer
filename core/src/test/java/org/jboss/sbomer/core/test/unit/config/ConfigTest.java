@@ -3,10 +3,12 @@ package org.jboss.sbomer.core.test.unit.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
@@ -31,8 +33,12 @@ public class ConfigTest {
      * By default we assume that it is a PncBuildConfig object for backwards-compatibility.
      */
     @Test
-    void shouldConvertFromStringEmptyObject() {
-        assertEquals(new PncBuildConfig(), Config.fromString("{}"));
+    void shouldNotConvertFromStringEmptyObject() {
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
+            Config.fromString("{}");
+        });
+
+        assertEquals("Provided configuration has invalid or missing 'type' identifier: '{}'", ex.getMessage());
     }
 
     @Test
