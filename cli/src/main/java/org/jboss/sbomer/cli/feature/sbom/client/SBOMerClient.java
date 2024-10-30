@@ -40,7 +40,7 @@ import jakarta.ws.rs.core.Response;
  */
 @ApplicationScoped
 @RegisterRestClient(configKey = "sbomer")
-@Path("/api/v1alpha3")
+@Path("/api/v1beta1")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public interface SBOMerClient {
@@ -62,7 +62,7 @@ public interface SBOMerClient {
      * @return {@link SbomGenerationRequest}
      */
     @GET
-    @Path("/sboms/requests/{id}")
+    @Path("/requests/{id}")
     Response getGenerationRequestById(
             @HeaderParam("log-process-context") String processContext,
             @PathParam("id") String id);
@@ -90,7 +90,7 @@ public interface SBOMerClient {
      * @return {@link Response}
      */
     @GET
-    @Path("/sboms/requests")
+    @Path("/requests")
     Response searchGenerationRequests(
             @HeaderParam("log-process-context") String processContext,
             @Valid @BeanParam PaginationParameters paginationParams,

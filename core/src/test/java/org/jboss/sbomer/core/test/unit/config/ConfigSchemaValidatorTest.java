@@ -267,7 +267,7 @@ class ConfigSchemaValidatorTest {
     @Nested
     class SyftConfigTests {
         private SyftImageConfig minimalConfig() {
-            return SyftImageConfig.builder().build();
+            return SyftImageConfig.builder().withName("registry.com/image:tag").build();
         }
 
         @Test

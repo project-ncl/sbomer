@@ -1,3 +1,4 @@
 {
-  "type": "syft-image"
+  "type": "syft-image",
+  "name": "registry.com/image:tag"
 }

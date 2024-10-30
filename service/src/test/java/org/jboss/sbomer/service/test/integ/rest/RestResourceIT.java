@@ -221,40 +221,39 @@ class RestResourceIT {
         }
 
         @Test
-        void shouldStartGenerationForAGivenPncBuildWithEmptyJsonConfig() {
+        void shouldNotStartGenerationForAGivenPncBuildWithEmptyJsonConfig() {
             given().body("{}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", "/api/v1alpha3/sboms/generate/build/AABBCC")
                     .then()
-                    .statusCode(202)
-                    .body("id", CoreMatchers.any(String.class))
+                    .statusCode(400)
+                    .body(
+                            "message",
+                            CoreMatchers.is(
+                                    "An error occurred while deserializing provided content, please check your body 🤼"))
                     .and()
-                    .body("identifier", CoreMatchers.equalTo("AABBCC"))
+                    .body("errorId", CoreMatchers.isA(String.class))
                     .and()
-                    .body("type", CoreMatchers.equalTo("BUILD"))
-                    .and()
-                    .body("status", CoreMatchers.is("NEW"));
+                    .body("error", CoreMatchers.equalTo("Bad Request"));
         }
 
-        /**
-         * Invalid properties are ignored.
-         */
         @Test
-        void shouldStartGenerationForAGivenPncBuildWithInvalidJsonConfig() {
+        void shouldNotStartGenerationForAGivenPncBuildWithInvalidJsonConfig() {
             given().body("{\"df\": \"123\"}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", "/api/v1alpha3/sboms/generate/build/AABBCC")
                     .then()
-                    .statusCode(202)
-                    .body("id", CoreMatchers.any(String.class))
+                    .statusCode(400)
+                    .body(
+                            "message",
+                            CoreMatchers.is(
+                                    "An error occurred while deserializing provided content, please check your body 🤼"))
                     .and()
-                    .body("identifier", CoreMatchers.equalTo("AABBCC"))
+                    .body("errorId", CoreMatchers.isA(String.class))
                     .and()
-                    .body("type", CoreMatchers.equalTo("BUILD"))
-                    .and()
-                    .body("status", CoreMatchers.is("NEW"));
+                    .body("error", CoreMatchers.equalTo("Bad Request"));
         }
 
         /**
@@ -269,15 +268,15 @@ class RestResourceIT {
                     .contentType(ContentType.JSON)
                     .request("POST", "/api/v1alpha3/sboms/generate/build/AABBCC")
                     .then()
-                    .statusCode(500)
+                    .statusCode(400)
                     .body(
                             "message",
                             CoreMatchers.is(
-                                    "An error occurred while deserializing provided content: Could not resolve type id 'operation' as a subtype of `org.jboss.sbomer.core.features.sbom.config.PncBuildConfig`: Class `org.jboss.sbomer.core.features.sbom.config.OperationConfig` not subtype of `org.jboss.sbomer.core.features.sbom.config.PncBuildConfig`"))
+                                    "An error occurred while deserializing provided content, please check your body 🤼"))
                     .and()
                     .body("errorId", CoreMatchers.isA(String.class))
                     .and()
-                    .body("error", CoreMatchers.equalTo("Internal Server Error"));
+                    .body("error", CoreMatchers.equalTo("Bad Request"));
         }
     }
 

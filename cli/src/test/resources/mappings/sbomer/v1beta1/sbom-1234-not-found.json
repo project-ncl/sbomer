@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/api/v1alpha3/sboms/1234"
+    "url": "/api/v1beta1/sboms/1234"
   },
   "response": {
     "status": 404,

@@ -72,7 +72,7 @@ class ErrorResourcesIT {
                 .body("resource", CoreMatchers.is("/api/v1alpha3/sboms/doesnotexist"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Not Found"))
-                .body("message", CoreMatchers.is("SBOM with id 'doesnotexist' not found"))
+                .body("message", CoreMatchers.is("Manifest with provided identifier: 'doesnotexist' couldn't be found"))
                 .body("$", Matchers.not(Matchers.hasKey("errors")));
     }
 
