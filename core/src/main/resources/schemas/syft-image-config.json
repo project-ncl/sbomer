@@ -55,6 +55,10 @@
       "description": "Configuration type",
       "enum": ["syft-image"]
     },
+    "name": {
+      "description": "Container image name (pull spec) to be manifested",
+      "type": "string"
+    },
     "rpms": {
       "description": "Flag to indicate whether RPMs should be added to manifest",
       "type": "boolean"
@@ -80,6 +84,6 @@
       "items": false
     }
   },
-  "required": ["type"],
+  "required": ["type", "name"],
   "additionalProperties": false
 }
