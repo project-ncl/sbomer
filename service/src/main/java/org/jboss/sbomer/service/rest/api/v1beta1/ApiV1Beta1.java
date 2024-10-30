@@ -18,7 +18,6 @@
 package org.jboss.sbomer.service.rest.api.v1beta1;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.service.rest.api.AbstractApiProvider;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "v1beta1", description = "latest version")
 @PermitAll
 @Slf4j
-public class ApiV1Beta1 extends AbstractApiProvider {
+public class ApiV1Beta1 {
 
 }
