@@ -44,11 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @SuperBuilder(setterPrefix = "with")
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type",
-        defaultImpl = PncBuildConfig.class)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({ @JsonSubTypes.Type(SyftImageConfig.class), @JsonSubTypes.Type(PncBuildConfig.class),
         @JsonSubTypes.Type(OperationConfig.class), @JsonSubTypes.Type(DeliverableAnalysisConfig.class),
         @JsonSubTypes.Type(BrewRPMConfig.class), @JsonSubTypes.Type(AdvisoryConfig.class) })
