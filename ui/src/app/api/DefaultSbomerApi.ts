@@ -17,7 +17,7 @@
 ///
 
 import axios, { Axios, AxiosError } from 'axios';
-import { GenerateForPncParams, SbomerApi, SbomerGenerationRequest, SbomerSbom, SbomerStats } from '../types';
+import { GenerateParams, SbomerApi, SbomerGenerationRequest, SbomerSbom, SbomerStats } from '../types';
 
 type Options = {
   baseUrl: string;
@@ -69,7 +69,7 @@ export class DefaultSbomerApi implements SbomerApi {
 
   async getSboms(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerSbom[]; total: number }> {
     const response = await fetch(
-      `${this.baseUrl}/api/v1alpha3/sboms?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta1/sboms?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -93,7 +93,7 @@ export class DefaultSbomerApi implements SbomerApi {
 
   async getSbomsForRequest(generationRequestId: string): Promise<{ data: SbomerSbom[]; total: number }> {
     const response = await fetch(
-      `${this.baseUrl}/api/v1alpha3/sboms?query=generationRequest.id==${generationRequestId}&pageSize=20&pageIndex=0`,
+      `${this.baseUrl}/api/v1beta1/sboms?query=generationRequest.id==${generationRequestId}&pageSize=20&pageIndex=0`,
     );
 
     if (response.status != 200) {
@@ -116,7 +116,7 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async getSbom(id: string): Promise<SbomerSbom> {
-    const request = await this.client.get<SbomerSbom>(`/api/v1alpha3/sboms/${id}`).then((response) => {
+    const request = await this.client.get<SbomerSbom>(`/api/v1beta1/sboms/${id}`).then((response) => {
       return response.data as SbomerSbom;
     });
 
@@ -124,7 +124,7 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async getLogPaths(generationRequestId: string): Promise<Array<string>> {
-    const response = await this.client.get(`/api/v1alpha3/sboms/requests/${generationRequestId}/logs`);
+    const response = await this.client.get(`/api/v1beta1/requests/${generationRequestId}/logs`);
 
     if (response.status != 200) {
       throw new Error(
@@ -141,7 +141,7 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async stats(): Promise<SbomerStats> {
-    const response = await fetch(`${this.baseUrl}/api/v1alpha3/stats`);
+    const response = await fetch(`${this.baseUrl}/api/v1beta1/stats`);
 
     if (response.status != 200) {
       const body = await response.text();
@@ -157,7 +157,7 @@ export class DefaultSbomerApi implements SbomerApi {
     pageIndex: number;
   }): Promise<{ data: SbomerGenerationRequest[]; total: number }> {
     const response = await fetch(
-      `${this.baseUrl}/api/v1alpha3/sboms/requests?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta1/requests?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -183,7 +183,7 @@ export class DefaultSbomerApi implements SbomerApi {
 
   async getGenerationRequest(id: string): Promise<SbomerGenerationRequest> {
     const request = await this.client
-      .get<SbomerGenerationRequest>(`/api/v1alpha3/sboms/requests/${id}`)
+      .get<SbomerGenerationRequest>(`/api/v1beta1/requests/${id}`)
       .then((response) => {
         return response.data as SbomerGenerationRequest;
       });
@@ -191,8 +191,8 @@ export class DefaultSbomerApi implements SbomerApi {
     return request;
   }
 
-  async generateForPncBuild({ buildId, config }: GenerateForPncParams): Promise<SbomerGenerationRequest> {
-    const response = await fetch(`${this.baseUrl}/api/v1alpha3/sboms/generate/build/${buildId}`, {
+  async generate({ config }: GenerateParams): Promise<Array<SbomerGenerationRequest>> {
+    const response = await fetch(`${this.baseUrl}/api/v1beta1/generate`, {
       method: 'POST',
       body: config,
       headers: { 'Content-Type': 'application/json' },
@@ -206,6 +206,6 @@ export class DefaultSbomerApi implements SbomerApi {
       );
     }
 
-    return response.json() as Promise<SbomerGenerationRequest>;
+    return response.json() as Promise<Array<SbomerGenerationRequest>>;
   }
 }
