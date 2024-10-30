@@ -47,7 +47,8 @@ class StageGenerationRequestIT extends E2EStageBase {
 
     @Test
     void testSuccessfulGenerationMavenBuild() throws IOException {
-        String generationRequestId = requestGeneration(MAVEN_BUILD_ID);
+        String requestBody = Files.readString(sbomPath("pnc-build-" + MAVEN_BUILD_ID + ".json"));
+        String generationRequestId = requestGenerationV1Beta1(requestBody);
 
         log.info("Maven build - Generation Request created: {}", generationRequestId);
 
@@ -67,8 +68,8 @@ class StageGenerationRequestIT extends E2EStageBase {
 
     @Test
     void testSuccessfulGenerationGradle5Build() throws IOException {
-        String requestBody = Files.readString(sbomPath(GRADLE_5_BUILD_ID + ".json"));
-        String generationRequestId = requestGenerationWithConfiguration(GRADLE_5_BUILD_ID, requestBody);
+        String requestBody = Files.readString(sbomPath("pnc-build-" + GRADLE_5_BUILD_ID + ".json"));
+        String generationRequestId = requestGenerationV1Beta1(requestBody);
 
         log.info("Gradle 5 build - Generation Request created: {}", generationRequestId);
 
@@ -88,8 +89,8 @@ class StageGenerationRequestIT extends E2EStageBase {
 
     @Test
     void testSuccessfulGenerationGradle4Build() throws IOException {
-        String requestBody = Files.readString(sbomPath(GRADLE_4_BUILD_ID + ".json"));
-        String generationRequestId = requestGenerationWithConfiguration(GRADLE_4_BUILD_ID, requestBody);
+        String requestBody = Files.readString(sbomPath("pnc-build-" + GRADLE_4_BUILD_ID + ".json"));
+        String generationRequestId = requestGenerationV1Beta1(requestBody);
 
         log.info("Gradle 4 build - Generation Request created: {}", generationRequestId);
 
@@ -112,8 +113,8 @@ class StageGenerationRequestIT extends E2EStageBase {
 
     @Test
     void testSuccessfulGenerationNodeJsNpmBuild() throws IOException {
-        String requestBody = Files.readString(sbomPath(NODEJS_NPM_BUILD_ID + ".json"));
-        String generationRequestId = requestGenerationWithConfiguration(NODEJS_NPM_BUILD_ID, requestBody);
+        String requestBody = Files.readString(sbomPath("pnc-build-" + NODEJS_NPM_BUILD_ID + ".json"));
+        String generationRequestId = requestGenerationV1Beta1(requestBody);
 
         log.info("NodeJs NPM build - Generation Request created: {}", generationRequestId);
 

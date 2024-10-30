@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -41,12 +42,12 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
         return Paths.get("src", "test", "resources", "requests", fileName);
     }
 
-    private static final String ERRATA_ID_QE_CONTAINER = "88484"; // RHBA-2023:88484-01
     private static final String ERRATA_QE_CONTAINER_IMAGE = "registry-proxy-stage.engineering.redhat.com/rh-osbs-stage/e2e-container-e2e-container-test-product@sha256:a7c041ff17c41f3f7b706159cc7e576f25b7012eae41898ee36074a0ff49e768";
 
     @Test
     void testContainerGenerationOfQEAdvisory() throws IOException, URISyntaxException {
-        String generationRequestId = requestGenerationFromAdvisory(ERRATA_ID_QE_CONTAINER, ERRATA_QE_CONTAINER_IMAGE);
+        String requestBody = Files.readString(sbomPath("advisory-88484.json"));
+        String generationRequestId = requestGenerationV1Beta1(requestBody);
 
         log.info("Advisory in QE status with Container - Generation Request created: {}", generationRequestId);
 
@@ -63,12 +64,12 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
         log.info("Advisory in QE status with Container generated!");
     }
 
-    private static final String ERRATA_ID_QE_RPM = "89769"; // RHBA-2024:89769-01
-    private static final String ERRATA_RPM_NVR = "redhat-release-computenode-7.2-8.el7_2.1"; // id=561861
-
+    // private static final String ERRATA_ID_QE_RPM = "89769"; // RHBA-2024:89769-01
+    // private static final String ERRATA_RPM_NVR = "redhat-release-computenode-7.2-8.el7_2.1"; // id=561861
     @Test
     void testRPMGenerationOfQEAdvisory() throws IOException, URISyntaxException {
-        String generationRequestId = requestGenerationFromAdvisory(ERRATA_ID_QE_RPM, ERRATA_RPM_NVR);
+        String requestBody = Files.readString(sbomPath("advisory-89769.json"));
+        String generationRequestId = requestGenerationV1Beta1(requestBody);
 
         log.info("Advisory in QE status with RPMs - Generation Request created: {}", generationRequestId);
 

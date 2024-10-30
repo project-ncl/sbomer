@@ -48,7 +48,7 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
     @Test
     void testSuccessfulGenerationForContainerImage() throws IOException, URISyntaxException {
         String requestBody = Files.readString(sbomPath("jws-image.json"));
-        String generationRequestId = requestContainerImageGeneration(JWS_IMAGE, requestBody);
+        String generationRequestId = requestGenerationV1Beta1(requestBody);
 
         log.info("JWS container image - Generation Request created: {}", generationRequestId);
 
@@ -70,7 +70,7 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
     @Test
     void testMultiArchImage() throws IOException, URISyntaxException {
         String requestBody = Files.readString(sbomPath("mandrel-image.json"));
-        String generationRequestId = requestContainerImageGeneration(MANDREL_IMAGE, requestBody);
+        String generationRequestId = requestGenerationV1Beta1(requestBody);
 
         log.info("Mandrel container image - Generation Request created: {}", generationRequestId);
 

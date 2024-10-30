@@ -17,9 +17,6 @@
  */
 package org.jboss.sbomer.test.e2e;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
@@ -176,7 +173,7 @@ public abstract class E2EBase {
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1alpha3/sboms/requests/%s", generationId));
+                .get(String.format("/api/v1beta1/sboms/requests/%s", generationId));
     }
 
     public Response getSboms(String generationId) {
@@ -184,55 +181,11 @@ public abstract class E2EBase {
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1alpha3/sboms?query=generationRequest.id==%s", generationId));
+                .get(String.format("/api/v1beta1/sboms?query=generationRequest.id==%s", generationId));
     }
 
-    public String requestGeneration(String buildId) {
-        log.info("Requesting SBOM for build ID: {}", buildId);
-
-        Response response = RestAssured.given()
-                .baseUri(getSbomerBaseUri())
-                .when()
-                .contentType(ContentType.JSON)
-                .post(String.format("/api/v1alpha3/sboms/generate/build/%s", buildId));
-
-        response.then()
-                .statusCode(202)
-                .body("identifier", CoreMatchers.is(buildId))
-                .and()
-                .body("status", CoreMatchers.is("NEW"));
-
-        return response.body().path("id").toString();
-    }
-
-    public String requestContainerImageGeneration(String image, String jsonBody)
-            throws UnsupportedEncodingException, MalformedURLException, URISyntaxException {
-        log.info("Requesting SBOM for container image: '{}', with jsonBody: '{}'", image, jsonBody);
-
-        Response response = RestAssured.given()
-                .urlEncodingEnabled(false)
-                .baseUri(getSbomerBaseUri())
-                .log()
-                .all()
-                .when()
-                .contentType(ContentType.JSON)
-                .body(jsonBody)
-                .urlEncodingEnabled(true)
-                .post("/api/v1alpha3/generator/syft/image/{image}", image);
-
-        response.then()
-                .log()
-                .all()
-                .statusCode(202)
-                .body("identifier", CoreMatchers.is(image))
-                .and()
-                .body("status", CoreMatchers.is("NEW"));
-
-        return response.body().path("id").toString();
-    }
-
-    public String requestGenerationWithConfiguration(String buildId, String jsonBody) {
-        log.info("Requesting SBOM for build ID: {}, with jsonBody: {}", buildId, jsonBody);
+    public String requestGenerationV1Beta1(String jsonBody) {
+        log.info("Requesting generation of manifest with jsonBody: {}", jsonBody);
 
         Response response = RestAssured.given()
                 .baseUri(getSbomerBaseUri())
@@ -240,39 +193,10 @@ public abstract class E2EBase {
                 .body(jsonBody)
                 .when()
                 .contentType(ContentType.JSON)
-                .post(String.format("/api/v1alpha3/sboms/generate/build/%s", buildId));
+                .post("/api/v1beta1/requests");
 
-        // We are providing the configuration so the status will jump to INITIALIZING, not NEW
-        response.then()
-                .statusCode(202)
-                .body("identifier", CoreMatchers.is(buildId))
-                .and()
-                .body("status", CoreMatchers.is("INITIALIZING"));
+        response.then().statusCode(202);
 
         return response.body().path("id").toString();
     }
-
-    public String requestGenerationFromAdvisory(String advisoryId, String identifier) {
-        log.info("Requesting SBOM for advisory ID: {}", advisoryId);
-
-        Response response = RestAssured.given()
-                .urlEncodingEnabled(false)
-                .baseUri(getSbomerBaseUri())
-                .log()
-                .all()
-                .when()
-                .contentType(ContentType.JSON)
-                .post(String.format("/api/v1alpha3/generator/advisory/%s", advisoryId));
-
-        response.then()
-                .log()
-                .all()
-                .statusCode(202)
-                .body("[0].identifier", CoreMatchers.is(identifier))
-                .and()
-                .body("[0].status", CoreMatchers.is("NEW"));
-
-        return response.body().path("[0].id").toString();
-    }
-
 }
