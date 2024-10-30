@@ -96,9 +96,8 @@ export class SbomerSbom {
   }
 }
 
-export type GenerateForPncParams = {
-  buildId: string;
-  config?: string;
+export type GenerateParams = {
+  config: string;
 };
 
 export type SbomerApi = {
@@ -118,5 +117,5 @@ export type SbomerApi = {
 
   getSbom(id: string): Promise<SbomerSbom>;
 
-  generateForPncBuild({ buildId, config }: GenerateForPncParams): Promise<SbomerGenerationRequest>;
+  generate({ config }: GenerateParams): Promise<Array<SbomerGenerationRequest>>;
 };
