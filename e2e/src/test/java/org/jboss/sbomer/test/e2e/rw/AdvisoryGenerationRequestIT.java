@@ -75,8 +75,7 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
         waitForGeneration(generationRequestId);
 
         final Response response = getSboms(generationRequestId);
-        // There is not real SBOMs generation yet!
-        assertEquals(0, response.body().jsonPath().getInt("totalHits"));
+        assertEquals(1, response.body().jsonPath().getInt("totalHits"));
 
         log.info("Advisory in QE status with Container generated!");
     }
