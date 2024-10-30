@@ -30,6 +30,7 @@ import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
+import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -320,6 +321,25 @@ public class SBOMResource extends AbstractApiProvider {
             throws Exception {
         return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateFromOperation(operationId, config)))
                 .build();
+    }
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
+    @Operation(
+            summary = "Triggers a PNC Deliverable Analysis using the provided information",
+            description = "Triggers a PNC Deliverable Analysis using the provided information.")
+    @Path("/sboms/generate/analysis")
+    @APIResponse(
+            responseCode = "202",
+            description = "Schedules a new PNC operation of type deliverable analysis. This is an asynchronous call. PNC will start the deliverable analysis from the provided configuration and will notify the end of the analysis asynchronously.",
+            content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    public Response generateNewOperation(DeliverableAnalysisConfig config) throws Exception {
+
+        return Response.accepted(mapper.toSbomRequestRecord(sbomService.generateNewOperation(config))).build();
 
     }
 
