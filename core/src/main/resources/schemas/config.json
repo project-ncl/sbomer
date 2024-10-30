@@ -122,6 +122,6 @@
       }
     }
   },
-  "required": ["products", "type"],
+  "required": ["products", "type", "buildId"],
   "additionalProperties": false
 }
