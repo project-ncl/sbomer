@@ -66,10 +66,10 @@ class ErrorResourcesIT {
     void testHandlingNotFoundSbom() {
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha3/sboms/doesnotexist")
+                .get("/api/v1beta1/sboms/doesnotexist")
                 .then()
                 .statusCode(404)
-                .body("resource", CoreMatchers.is("/api/v1alpha3/sboms/doesnotexist"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/sboms/doesnotexist"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Not Found"))
                 .body("message", CoreMatchers.is("Manifest with provided identifier: 'doesnotexist' couldn't be found"))
@@ -83,15 +83,15 @@ class ErrorResourcesIT {
 
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha3/sboms/unauthorized")
+                .get("/api/v1beta1/sboms/unauthorized")
                 .then()
                 .statusCode(401)
-                .body("resource", CoreMatchers.is("/api/v1alpha3/sboms/unauthorized"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/sboms/unauthorized"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Unauthorized"))
                 .body(
                         "message",
-                        CoreMatchers.is("Access to '/api/v1alpha3/sboms/unauthorized' resource is not authorized!"))
+                        CoreMatchers.is("Access to '/api/v1beta1/sboms/unauthorized' resource is not authorized!"))
                 .body("$", Matchers.not(Matchers.hasKey("errors")));
     }
 
@@ -102,13 +102,13 @@ class ErrorResourcesIT {
 
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha3/sboms/forbidden")
+                .get("/api/v1beta1/sboms/forbidden")
                 .then()
                 .statusCode(403)
-                .body("resource", CoreMatchers.is("/api/v1alpha3/sboms/forbidden"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/sboms/forbidden"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Forbidden"))
-                .body("message", CoreMatchers.is("Access to '/api/v1alpha3/sboms/forbidden' resource is forbidden!"))
+                .body("message", CoreMatchers.is("Access to '/api/v1beta1/sboms/forbidden' resource is forbidden!"))
                 .body("$", Matchers.not(Matchers.hasKey("errors")));
     }
 
@@ -119,16 +119,16 @@ class ErrorResourcesIT {
 
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha3/sboms/notallowed")
+                .get("/api/v1beta1/sboms/notallowed")
                 .then()
                 .statusCode(405)
-                .body("resource", CoreMatchers.is("/api/v1alpha3/sboms/notallowed"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/sboms/notallowed"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Method Not Allowed"))
                 .body(
                         "message",
                         CoreMatchers.is(
-                                "Requesting resource '/api/v1alpha3/sboms/notallowed' using 'GET' method is not allowed. Please consult API documentation."))
+                                "Requesting resource '/api/v1beta1/sboms/notallowed' using 'GET' method is not allowed. Please consult API documentation."))
                 .body("$", Matchers.not(Matchers.hasKey("errors")));
     }
 
@@ -136,10 +136,10 @@ class ErrorResourcesIT {
     void testIllegalParameters() {
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha3/sboms?sort=123")
+                .get("/api/v1beta1/sboms?sort=123")
                 .then()
                 .statusCode(400)
-                .body("resource", CoreMatchers.is("/api/v1alpha3/sboms"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/sboms"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Bad Request"))
                 .body(
@@ -153,14 +153,16 @@ class ErrorResourcesIT {
     void testDefaultExceptionMapper() {
         // This doesn't make sense, but what we want to test handling of an exception that we don't handle
         // explicitly
-        doThrow(NotAcceptableException.class).when(sbomService).get("NotAcceptable");
+        doThrow(new RuntimeException("Opps, bad things happened")).when(sbomService).get("Runtime");
 
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha3/sboms/NotAcceptable")
+                .get("/api/v1beta1/sboms/Runtime")
                 .then()
+                .log()
+                .all()
                 .statusCode(500)
-                .body("resource", CoreMatchers.is("/api/v1alpha3/sboms/NotAcceptable"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/sboms/Runtime"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Internal Server Error"))
                 .body(
@@ -174,10 +176,10 @@ class ErrorResourcesIT {
     void testInvalidRSQL() {
         RestAssured.given()
                 .when()
-                .get("/api/v1alpha3/sboms?query=asd")
+                .get("/api/v1beta1/sboms?query=asd")
                 .then()
                 .statusCode(400)
-                .body("resource", CoreMatchers.is("/api/v1alpha3/sboms"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/sboms"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("error", CoreMatchers.is("Bad Request"))
                 .body(

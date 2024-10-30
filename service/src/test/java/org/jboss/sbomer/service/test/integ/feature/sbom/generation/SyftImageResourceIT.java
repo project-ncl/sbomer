@@ -47,15 +47,15 @@ class SyftImageResourceIT {
                     .contentType(ContentType.JSON)
                     .request("POST", "/api/v1alpha3/generator/syft/image/image-name")
                     .then()
-                    .statusCode(500)
+                    .statusCode(400)
                     .body(
                             "message",
                             CoreMatchers.is(
-                                    "An error occurred while deserializing provided content: Could not resolve subtype of [simple type, class org.jboss.sbomer.core.features.sbom.config.SyftImageConfig]: missing type id property 'type'"))
+                                    "An error occurred while deserializing provided content, please check your body 🤼"))
                     .and()
                     .body("errorId", CoreMatchers.isA(String.class))
                     .and()
-                    .body("error", CoreMatchers.equalTo("Internal Server Error"));
+                    .body("error", CoreMatchers.equalTo("Bad Request"));
         }
 
         @Test
@@ -75,7 +75,7 @@ class SyftImageResourceIT {
 
         @Test
         void shouldAllowCustomConfig() {
-            given().body("{\"type\": \"syft-image\", \"paths\": [ \"/opt\", \"/etc\"]}")
+            given().body("{\"type\": \"syft-image\", \"name\": \"image-name\", \"paths\": [ \"/opt\", \"/etc\"]}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", "/api/v1alpha3/generator/syft/image/image-name")

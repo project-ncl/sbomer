@@ -37,6 +37,7 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.errors.ServiceUnavailableException;
 import org.jboss.sbomer.core.features.sbom.config.AdvisoryConfig;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
@@ -47,6 +48,8 @@ import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.utils.PaginationParameters;
+import org.jboss.sbomer.service.feature.FeatureFlags;
+import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -93,6 +96,12 @@ public class RequestsV1Beta1 {
 
     @Inject
     ConfigSchemaValidator configSchemaValidator;
+
+    @Inject
+    FeatureFlags featureFlags;
+
+    @Inject
+    S3StorageHandler s3StorageHandler;
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
@@ -280,5 +289,63 @@ public class RequestsV1Beta1 {
         } finally {
             MDCUtils.removeProcessContext();
         }
+    }
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
+    @Operation(summary = "List all log file paths for a given GenerationRequest", description = "")
+    @Path("/{id}/logs")
+    @APIResponse(
+            responseCode = "200",
+            description = "List of paths to log files available for a given GenerationRequest")
+
+    @APIResponse(
+            responseCode = "404",
+            description = "Given GenerationRequest could not be found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "503",
+            description = "Content cannot be returned at this time",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    public Response getLog(@PathParam("id") String generationRequestId) throws Exception {
+        if (!featureFlags.s3Storage()) {
+            throw new ServiceUnavailableException("S3 feature is disabled currently, try again later");
+        }
+
+        log.info("Fetching list of paths to log files for GenerationRequest '{}'", generationRequestId);
+
+        List<String> paths = s3StorageHandler.listLogFilesInBucket(generationRequestId);
+
+        return Response.ok(paths).build();
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
+    @Operation(summary = "Fetch generation log on a specified path", description = "")
+    @Path("/{id}/logs/{path}")
+    @APIResponse(
+            responseCode = "200",
+            description = "Requests manifest generation for a given container image.",
+            content = @Content(mediaType = MediaType.TEXT_PLAIN))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    public Response getLog(@PathParam("id") String generationRequestId, @PathParam("path") String path)
+            throws Exception {
+        if (!featureFlags.s3Storage()) {
+            throw new ServiceUnavailableException("S3 feature is disabled currently, try again later");
+        }
+
+        log.info("Fetching log for GenerationRequest '{}' on path '{}'", generationRequestId, path);
+
+        String log = s3StorageHandler.getLog(generationRequestId, path);
+
+        return Response.ok(log).build();
     }
 }

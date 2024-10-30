@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.s3.rest.v1alpha3;
+package org.jboss.sbomer.service.rest.api.v1alpha3;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Tag(name = "v1alpha3")
 @Deprecated
-public class S3ApiV1alpha3 {
+public class S3ApiV1Alpha3 {
     @Inject
     FeatureFlags featureFlags;
 

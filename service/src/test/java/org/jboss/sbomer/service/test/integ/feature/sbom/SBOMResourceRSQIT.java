@@ -141,7 +141,7 @@ class SBOMResourceRSQIT {
                         .body(
                                 "message",
                                 CoreMatchers.is(
-                                        "SBOM with purl = 'pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom' couldn't be found"))
+                                        "Manifest with provided identifier: 'pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom' couldn't be found"))
                         .body("$", Matchers.not(Matchers.hasKey("errors")));
             }
 

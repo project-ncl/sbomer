@@ -177,7 +177,7 @@ class NotificationServiceIT {
                         "id",
                         "416640206274228333",
                         "link",
-                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
+                        "http://localhost:8080/api/v1beta1/sboms/416640206274228333",
                         "bom",
                         JsonObject.of(
                                 "format",
@@ -185,7 +185,7 @@ class NotificationServiceIT {
                                 "version",
                                 "1.4",
                                 "link",
-                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
+                                "http://localhost:8080/api/v1beta1/sboms/416640206274228333/bom"),
                         "generationRequest",
                         JsonObject.of(
                                 "id",
@@ -235,7 +235,7 @@ class NotificationServiceIT {
                         "id",
                         "416640206274228333",
                         "link",
-                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
+                        "http://localhost:8080/api/v1beta1/sboms/416640206274228333",
                         "bom",
                         JsonObject.of(
                                 "format",
@@ -243,7 +243,7 @@ class NotificationServiceIT {
                                 "version",
                                 "1.4",
                                 "link",
-                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
+                                "http://localhost:8080/api/v1beta1/sboms/416640206274228333/bom"),
                         "generationRequest",
                         JsonObject.of(
                                 "id",
@@ -302,7 +302,7 @@ class NotificationServiceIT {
                         "id",
                         "416640206274228333",
                         "link",
-                        "http://localhost:8080/api/v1alpha3/sboms/416640206274228333",
+                        "http://localhost:8080/api/v1beta1/sboms/416640206274228333",
                         "bom",
                         JsonObject.of(
                                 "format",
@@ -310,7 +310,7 @@ class NotificationServiceIT {
                                 "version",
                                 "1.4",
                                 "link",
-                                "http://localhost:8080/api/v1alpha3/sboms/416640206274228333/bom"),
+                                "http://localhost:8080/api/v1beta1/sboms/416640206274228333/bom"),
                         "generationRequest",
                         JsonObject.of(
                                 "id",
