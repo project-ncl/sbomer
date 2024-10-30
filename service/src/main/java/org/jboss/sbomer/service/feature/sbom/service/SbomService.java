@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -332,15 +333,23 @@ public class SbomService {
                         "Operation could not be retrieved because PNC responded with an error",
                         ex);
             }
+
             log.debug("Creating GenerationRequest Kubernetes resource...");
 
             // Create a ProductConfig
-            RedHatProductProcessorConfig redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
-                    .withErrata(config.getErrata())
-                    .build();
+
+            RedHatProductProcessorConfig redHatProductProcessorConfig = null;
+
+            if (config.getErrata() != null) {
+                redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
+                        .withErrata(config.getErrata())
+                        .build();
+            }
             GeneratorConfig generatorConfig = GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build();
             ProductConfig productConfig = ProductConfig.builder()
-                    .withProcessors(List.of(redHatProductProcessorConfig))
+                    .withProcessors(
+                            redHatProductProcessorConfig != null ? List.of(redHatProductProcessorConfig)
+                                    : Collections.emptyList())
                     .withGenerator(generatorConfig)
                     .build();
 

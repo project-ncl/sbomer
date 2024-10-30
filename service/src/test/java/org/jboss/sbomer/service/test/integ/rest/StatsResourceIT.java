@@ -15,16 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.test.integ.feature.sbom.rest;
+package org.jboss.sbomer.service.test.integ.rest;
 
 import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
-import org.jboss.sbomer.service.test.integ.feature.sbom.rest.StatsResourceIT.CustomConfig;
+import org.jboss.sbomer.service.test.integ.rest.StatsResourceIT.CustomConfig;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -63,8 +63,8 @@ class StatsResourceIT {
     SbomService sbomService;
 
     @ParameterizedTest
-    @ValueSource(strings = { "v1alpha3", "v1beta1" })
-    void testEmptyStatsEndpoint(String apiVersion) {
+    @EnumSource(TestableApiVersion.class)
+    void testEmptyStatsEndpoint(TestableApiVersion apiVersion) {
         RestAssured.given()
                 .when()
                 .get(String.format("/api/%s/stats", apiVersion))
@@ -85,8 +85,8 @@ class StatsResourceIT {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "v1alpha3", "v1beta1" })
-    void testStatsEndpoint(String apiVersion) {
+    @EnumSource(TestableApiVersion.class)
+    void testStatsEndpoint(TestableApiVersion apiVersion) {
         Mockito.when(sbomService.countSboms()).thenReturn(12l);
         Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
 
