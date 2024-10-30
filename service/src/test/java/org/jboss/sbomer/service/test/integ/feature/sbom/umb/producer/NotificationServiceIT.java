@@ -104,6 +104,25 @@ class NotificationServiceIT {
         return sbom;
     }
 
+    private Sbom createMinimalRpmManifest() throws IOException {
+        Bom bom = SbomUtils.fromPath(NotificationServiceIT.sbomPath("minimal-rpm.json"));
+
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
+                .withId("AABB")
+                .withType(GenerationRequestType.BREW_RPM)
+                .withIdentifier("1234")
+                .withStatus(SbomGenerationStatus.FINISHED)
+                .build();
+
+        Sbom sbom = new Sbom();
+        sbom.setIdentifier("SBOMIDRPM");
+        sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
+        sbom.setId("416640206274228333");
+        sbom.setSbom(SbomUtils.toJsonNode(bom));
+        sbom.setGenerationRequest(generationRequest);
+        return sbom;
+    }
+
     @Inject
     UmbConfig umbConfig;
 
@@ -177,6 +196,13 @@ class NotificationServiceIT {
                                 JsonObject.of("name", "registry/a-container-image"))));
 
         assertEquals(expected, JsonObject.mapFrom(messages.get(0)));
+    }
+
+    @Test
+    void shouldGracefullySkipNotifyForMinimalBrewRpm() throws IOException {
+        Sbom sbom = createMinimalRpmManifest();
+        notificationService.notifyCompleted(List.of(sbom));
+        verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));
     }
 
     @Test

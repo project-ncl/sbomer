@@ -1,0 +1,24 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "serialNumber": "urn:uuid:8a58b616-8c14-4ee5-855f-a481ea80de01",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2024-10-29T17:09:35Z",
+        "component": {
+            "type": "library",
+            "name": "openssl-mgoldman",
+            "bom-ref": "openssl-mgoldman",
+            "purl": "pkg:rpm/redhat/openssl-mgoldman@3.0.7-18.el9_2?arch=src"
+        }
+    },
+    "components": [
+        {
+            "type": "library",
+            "name": "openssl-mgoldman",
+            "bom-ref": "pkg:rpm/redhat/openssl-mgoldman@3.0.7-18.el9_2?arch=src",
+            "purl": "pkg:rpm/redhat/openssl-mgoldman@3.0.7-18.el9_2?arch=src"
+        }
+    ],
+    "dependencies": [{ "ref": "pkg:rpm/redhat/openssl-mgoldman@3.0.7-18.el9_2?arch=src", "dependsOn": [] }]
+}
