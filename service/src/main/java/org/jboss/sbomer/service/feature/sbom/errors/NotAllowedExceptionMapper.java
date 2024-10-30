@@ -29,12 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 public class NotAllowedExceptionMapper extends AbstractExceptionMapper<NotAllowedException> {
 
     @Override
-    Status getStatus() {
+    Status getStatus(NotAllowedException ex) {
         return Status.METHOD_NOT_ALLOWED;
     }
 
     @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+    Response hook(ResponseBuilder responseBuilder, NotAllowedException ex) {
         log.warn(
                 "Client requested '{}' resource with not allowed method: '{}'",
                 uriInfo.getPath(),

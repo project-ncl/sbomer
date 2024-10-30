@@ -24,7 +24,7 @@ import jakarta.ws.rs.ext.Provider;
 public class IllegalArgumentExceptionMapper extends AbstractExceptionMapper<IllegalArgumentException> {
 
     @Override
-    Status getStatus() {
+    Status getStatus(IllegalArgumentException ex) {
         return Status.BAD_REQUEST;
     }
 

@@ -29,12 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 public class NotAuthorizedExceptionMapper extends AbstractExceptionMapper<NotAuthorizedException> {
 
     @Override
-    Status getStatus() {
+    Status getStatus(NotAuthorizedException ex) {
         return Status.UNAUTHORIZED;
     }
 
     @Override
-    Response hook(ResponseBuilder responseBuilder, Throwable ex) {
+    Response hook(ResponseBuilder responseBuilder, NotAuthorizedException ex) {
         log.warn("Access to '{}' resource requested by an unauthorized client.", uriInfo.getPath(), ex);
         return responseBuilder.build();
     }

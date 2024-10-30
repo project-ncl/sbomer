@@ -26,7 +26,7 @@ import jakarta.ws.rs.ext.Provider;
 public class FeatureDisabledExceptionMapper extends AbstractExceptionMapper<FeatureDisabledException> {
 
     @Override
-    Status getStatus() {
+    Status getStatus(FeatureDisabledException ex) {
         return Status.SERVICE_UNAVAILABLE;
     }
 
