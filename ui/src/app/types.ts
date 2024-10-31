@@ -116,6 +116,4 @@ export type SbomerApi = {
   getGenerationRequest(id: string): Promise<SbomerGenerationRequest>;
 
   getSbom(id: string): Promise<SbomerSbom>;
-
-  generate({ config }: GenerateParams): Promise<Array<SbomerGenerationRequest>>;
 };

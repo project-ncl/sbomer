@@ -73,7 +73,7 @@ class TaskRunSyftImageGenerateDependentResourceTest {
 
         param = desired.getSpec().getParams().get(3);
         assertEquals("rpms", param.getName());
-        assertEquals("false", param.getValue().getStringVal());
+        assertEquals("true", param.getValue().getStringVal());
 
         assertEquals("sbomer-generate-image-syft", desired.getSpec().getTaskRef().getName());
 

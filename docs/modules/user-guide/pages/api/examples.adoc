@@ -69,7 +69,7 @@ Once the SBOM is generated it becomes available at:
 
 [source,console,subs="attributes+"]
 ----
-$ curl {sbomer-url}/api/{sbomer-latest-api-version}/sboms/[SBOM_ID]
+$ curl {sbomer-url}/api/{sbomer-latest-api-version}/manifests/[MANIFEST_ID]
 ----
 
 == Generation Requests
@@ -82,7 +82,7 @@ Please note that the return is a list of generation requests in a paginated way.
 
 [source,console,subs="attributes+"]
 ----
-$ curl {sbomer-url}/api/{sbomer-latest-api-version}/sboms/requests
+$ curl {sbomer-url}/api/{sbomer-latest-api-version}/generations
 ----
 
 === Fetching a Specific Generation Request
@@ -91,5 +91,5 @@ Get a specific generation request:
 
 [source,console,subs="attributes+"]
 ----
-$ curl {sbomer-url}/api/{sbomer-latest-api-version}/sboms/requests/[REQUEST_ID]
+$ curl {sbomer-url}/api/{sbomer-latest-api-version}/generations/[REQUEST_ID]
 ----

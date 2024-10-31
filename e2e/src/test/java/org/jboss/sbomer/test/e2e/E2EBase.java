@@ -173,7 +173,7 @@ public abstract class E2EBase {
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1beta1/sboms/requests/%s", generationId));
+                .get(String.format("/api/v1beta1/generations/%s", generationId));
     }
 
     public Response getSboms(String generationId) {
@@ -181,7 +181,7 @@ public abstract class E2EBase {
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1beta1/sboms?query=generationRequest.id==%s", generationId));
+                .get(String.format("/api/v1beta1/manifests?query=generationRequest.id==%s", generationId));
     }
 
     public String requestGenerationV1Beta1(String jsonBody) {
@@ -193,7 +193,7 @@ public abstract class E2EBase {
                 .body(jsonBody)
                 .when()
                 .contentType(ContentType.JSON)
-                .post("/api/v1beta1/requests");
+                .post("/api/v1beta1/generations");
 
         response.then().statusCode(202);
 

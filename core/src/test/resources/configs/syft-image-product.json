@@ -1,7 +1,7 @@
 {
     "apiVersion": "sbomer.jboss.org/v1alpha1",
     "type": "syft-image",
-    "name": "registry.com/image:tag",
+    "image": "registry.com/image:tag",
     "processors": [
         { "type": "default" },
         {

@@ -52,7 +52,7 @@ public interface SBOMerClient {
      * @return {@link Sbom}
      */
     @GET
-    @Path("/sboms/{id}")
+    @Path("/manifests/{id}")
     Response getById(@HeaderParam("log-process-context") String processContext, @PathParam("id") String id);
 
     /**
@@ -62,7 +62,7 @@ public interface SBOMerClient {
      * @return {@link SbomGenerationRequest}
      */
     @GET
-    @Path("/requests/{id}")
+    @Path("/generations/{id}")
     Response getGenerationRequestById(
             @HeaderParam("log-process-context") String processContext,
             @PathParam("id") String id);
@@ -75,7 +75,7 @@ public interface SBOMerClient {
      * @return {@link Response}
      */
     @GET
-    @Path("/sboms")
+    @Path("/manifests")
     Response searchSboms(
             @HeaderParam("log-process-context") String processContext,
             @Valid @BeanParam PaginationParameters paginationParams,
@@ -90,7 +90,7 @@ public interface SBOMerClient {
      * @return {@link Response}
      */
     @GET
-    @Path("/requests")
+    @Path("/generations")
     Response searchGenerationRequests(
             @HeaderParam("log-process-context") String processContext,
             @Valid @BeanParam PaginationParameters paginationParams,
