@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({ @JsonSubTypes.Type(SyftImageConfig.class), @JsonSubTypes.Type(PncBuildConfig.class),
         @JsonSubTypes.Type(OperationConfig.class), @JsonSubTypes.Type(DeliverableAnalysisConfig.class),
-        @JsonSubTypes.Type(BrewRPMConfig.class), @JsonSubTypes.Type(AdvisoryConfig.class) })
+        @JsonSubTypes.Type(BrewRPMConfig.class) })
 public abstract class Config {
 
     /**

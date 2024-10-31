@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://jboss.org/sbomer/request/pnc-build.json",
+    "type": "object",
+    "properties": {
+        "type": {
+            "const": "pnc-build"
+        },
+        "buildId": {
+            "description": "PNC build identifier",
+            "type": "string"
+        }
+    },
+    "required": ["buildId", "type"],
+    "additionalProperties": false
+}

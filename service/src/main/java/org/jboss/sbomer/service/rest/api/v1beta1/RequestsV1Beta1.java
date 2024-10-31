@@ -33,6 +33,13 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
+import org.jboss.sbomer.core.config.RequestConfigSchemaValidator;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
+import org.jboss.sbomer.core.config.request.ImageRequestConfig;
+import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
+import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
+import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
+import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.errors.ClientException;
@@ -40,8 +47,6 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ServiceUnavailableException;
 import org.jboss.sbomer.core.errors.ValidationException;
-import org.jboss.sbomer.core.features.sbom.config.AdvisoryConfig;
-import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -56,7 +61,6 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.rest.mapper.V1Beta1Mapper;
-import org.jboss.util.NotImplementedException;
 
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
@@ -97,7 +101,7 @@ public class RequestsV1Beta1 {
     AdvisoryService advisoryService;
 
     @Inject
-    ConfigSchemaValidator configSchemaValidator;
+    RequestConfigSchemaValidator requestConfigSchemaValidator;
 
     @Inject
     FeatureFlags featureFlags;
@@ -147,14 +151,14 @@ public class RequestsV1Beta1 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response createFromConfig(Config config) throws Exception {
+    public Response createFromConfig(RequestConfig config) throws Exception {
         if (config == null) {
             throw new ClientException("No config provided");
         }
 
         log.info("Validating config: {}", ObjectMapperProvider.json().writeValueAsString(config));
 
-        ValidationResult validationResult = configSchemaValidator.validate(config);
+        ValidationResult validationResult = requestConfigSchemaValidator.validate(config);
 
         if (!validationResult.isValid()) {
             throw new ClientException("Invalid config", validationResult.getErrors());
@@ -164,38 +168,55 @@ public class RequestsV1Beta1 {
 
         List<SbomGenerationRequest> requests = new ArrayList<>();
 
-        if (config instanceof AdvisoryConfig advisoryConfig) {
+        if (config instanceof ErrataAdvisoryRequestConfig advisoryConfig) {
             log.info("New Errata advisory request received");
             requests.addAll(advisoryService.generateFromAdvisory(advisoryConfig.getAdvisoryId()));
-        } else if (config instanceof PncBuildConfig pncBuildConfig) {
+        } else if (config instanceof PncBuildRequestConfig pncBuildConfig) {
             log.info("New PNC build request received");
 
-            // Additional check due to backwards compatiblity for the SyftImageConfig between v1alpha1 and v1beta1
+            // Additional check due to backwards compatiblity for the SyftImageConfig between v1alpha1 and
+            // v1beta1
             if (pncBuildConfig.getBuildId() == null) {
                 throw new ValidationException(
                         "Invalid content",
                         Collections.singletonList("Missing required 'buildId' property"));
             }
 
-            requests.add(sbomService.generateFromBuild(pncBuildConfig.getBuildId(), pncBuildConfig));
-        } else if (config instanceof DeliverableAnalysisConfig analysisConfig) {
+            requests.add(
+                    sbomService.generateFromBuild(
+                            pncBuildConfig.getBuildId(),
+                            PncBuildConfig.builder().withBuildId(pncBuildConfig.getBuildId()).build()));
+        } else if (config instanceof PncAnalysisRequestConfig analysisConfig) {
             log.info("New PNC analysis request received");
-            requests.add(sbomService.generateNewOperation(analysisConfig));
-        } else if (config instanceof SyftImageConfig syftImageConfig) {
+
+            requests.add(
+                    sbomService.generateNewOperation(
+                            DeliverableAnalysisConfig.builder()
+                                    .withDeliverableUrls(analysisConfig.getUrls())
+                                    .withMilestoneId(analysisConfig.getMilestoneId())
+                                    .build()));
+        } else if (config instanceof ImageRequestConfig imageConfig) {
             log.info("New container image request received");
 
-            // Additional check due to backwards compatiblity for the SyftImageConfig between v1alpha1 and v1beta1
-            if (syftImageConfig.getImage() == null) {
+            // Additional check due to backwards compatiblity for the SyftImageConfig between v1alpha1 and
+            // v1beta1
+            if (imageConfig.getImage() == null) {
                 throw new ValidationException(
                         "Invalid content",
                         Collections.singletonList("Missing required 'image' property"));
             }
 
-            requests.add(sbomService.generateSyftImage(syftImageConfig.getImage(), syftImageConfig));
-        } else if (config instanceof OperationConfig operationConfig) {
+            requests.add(
+                    sbomService.generateSyftImage(
+                            imageConfig.getImage(),
+                            SyftImageConfig.builder().withImage(imageConfig.getImage()).build()));
+        } else if (config instanceof PncOperationRequestConfig operationConfig) {
             log.info("New PNC operation request received");
 
-            requests.add(sbomService.generateFromOperation(operationConfig.getOperationId(), operationConfig));
+            requests.add(
+                    sbomService.generateFromOperation(
+                            operationConfig.getOperationId(),
+                            OperationConfig.builder().withOperationId(operationConfig.getOperationId()).build()));
         }
 
         return Response.accepted(mapper.requestsToRecords(requests)).build();
