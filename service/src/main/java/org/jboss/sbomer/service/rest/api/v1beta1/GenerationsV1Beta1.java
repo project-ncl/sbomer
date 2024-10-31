@@ -32,7 +32,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.RequestConfigSchemaValidator;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.ImageRequestConfig;
@@ -83,14 +82,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
-@Path("/api/v1beta1/requests")
+@Path("/api/v1beta1/generations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 @PermitAll
 @Tag(name = "v1beta1")
 @Slf4j
-public class RequestsV1Beta1 {
+public class GenerationsV1Beta1 {
     @Inject
     V1Beta1Mapper mapper;
 
@@ -267,13 +266,13 @@ public class RequestsV1Beta1 {
 
     @GET
     @Operation(
-            summary = "Search for manifest generation requests",
-            description = "Paginated list of SBOM generation requests using RSQL advanced search.")
+            summary = "Search manifest generation requests",
+            description = "Paginated list of generation requests using RSQL advanced search.")
     @Parameter(
             name = "query",
             description = "A RSQL query to search the generation requests",
             examples = { @ExampleObject(
-                    name = "Find all SBOM generation requests with provided identifier",
+                    name = "Find all generation requests with provided identifier",
                     value = "identifier=eq=ABCDEFGHIJKLM") })
     @Parameter(
             name = "sort",
@@ -284,7 +283,7 @@ public class RequestsV1Beta1 {
                             value = "creationTime=desc=") })
     @APIResponse(
             responseCode = "200",
-            description = "List of SBOM generation requests in the system for a specified RSQL query.",
+            description = "Paginated list of generation requests in the system for a specified RSQL query.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     @APIResponse(
             responseCode = "400",
@@ -312,10 +311,10 @@ public class RequestsV1Beta1 {
     @Path("/{id}")
     @RolesAllowed(USER_DELETE_ROLE)
     @Operation(
-            summary = "Delete SBOM generation request specified by id",
-            description = "Delete the specified SBOM generation request from the database")
-    @Parameter(name = "id", description = "The SBOM request identifier")
-    @APIResponse(responseCode = "200", description = "SBOM generation request was successfully deleted")
+            summary = "Delete generation request specified by id",
+            description = "Delete the specified generation request from the database")
+    @Parameter(name = "id", description = "The generation request identifier")
+    @APIResponse(responseCode = "200", description = "Generation request was successfully deleted")
     @APIResponse(responseCode = "404", description = "Specified SBOM generation request could not be found")
     @APIResponse(responseCode = "500", description = "Internal server error")
     public Response deleteGenerationRequest(@PathParam("id") final String id) {
@@ -332,15 +331,12 @@ public class RequestsV1Beta1 {
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
-    @Operation(summary = "List all log file paths for a given GenerationRequest", description = "")
+    @Operation(summary = "List all log files available fot generation request", description = "")
     @Path("/{id}/logs")
-    @APIResponse(
-            responseCode = "200",
-            description = "List of paths to log files available for a given GenerationRequest")
-
+    @APIResponse(responseCode = "200", description = "List all log files available fot generation request")
     @APIResponse(
             responseCode = "404",
-            description = "Given GenerationRequest could not be found",
+            description = "Given generation request could not be found",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @APIResponse(
             responseCode = "500",
@@ -365,11 +361,11 @@ public class RequestsV1Beta1 {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
-    @Operation(summary = "Fetch generation log on a specified path", description = "")
+    @Operation(summary = "Fetch generation log file content on a specified path", description = "")
     @Path("/{id}/logs/{path}")
     @APIResponse(
             responseCode = "200",
-            description = "Requests manifest generation for a given container image.",
+            description = "Log file content",
             content = @Content(mediaType = MediaType.TEXT_PLAIN))
     @APIResponse(
             responseCode = "500",

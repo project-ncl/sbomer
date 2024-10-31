@@ -57,14 +57,14 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import lombok.extern.slf4j.Slf4j;
 
-@Path("/api/v1beta1/sboms")
+@Path("/api/v1beta1/manifests")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 @PermitAll
 @Slf4j
 @Tag(name = "v1beta1")
-public class SbomsV1Beta1 {
+public class ManifestsV1Beta1 {
     @Inject
     V1Beta1Mapper mapper;
 
@@ -75,23 +75,23 @@ public class SbomsV1Beta1 {
     FeatureFlags featureFlags;
 
     @GET
-    @Operation(summary = "Search SBOMs", description = "List paginated SBOMs using RSQL advanced search.")
+    @Operation(summary = "Search manifests", description = "List paginated manifests using RSQL advanced search.")
     @Parameter(
             name = "query",
-            description = "A RSQL query to search the SBOMs",
-            examples = {
-                    @ExampleObject(name = "Find all SBOMs with provided buildId", value = "buildId=eq=ABCDEFGHIJKLM"),
-                    @ExampleObject(
-                            name = "Find all SBOMs with provided purl",
-                            value = "rootPurl=eq='pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00270?type=jar'") })
+            description = "A RSQL query to search manifests",
+            examples = { @ExampleObject(
+                    name = "Find all manifests with provided purl",
+                    value = "rootPurl=eq='pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00270?type=jar'") })
     @Parameter(
             name = "sort",
             description = "Optional RSQL sort",
-            examples = { @ExampleObject(name = "Order SBOMs by id in ascending order", value = "id=asc="),
+            examples = { @ExampleObject(name = "Order manifests by id in ascending order", value = "id=asc="),
                     @ExampleObject(
-                            name = "Order SBOMs by creation time in descending order",
+                            name = "Order manifests by creation time in descending order",
                             value = "creationTime=desc=") })
-    @APIResponse(responseCode = "200", description = "List of SBOMs in the system for a specified RSQL query.")
+    @APIResponse(
+            responseCode = "200",
+            description = "Paginated list of manifests in the system for a specified RSQL query.")
     @APIResponse(
             responseCode = "400",
             description = "Failed while parsing the provided RSQL string, please verify the correct syntax.",
@@ -118,7 +118,7 @@ public class SbomsV1Beta1 {
     @Path("/{id}")
     @Operation(
             summary = "Get specific manifest",
-            description = "Get specific manifest for the provided identifier. Both, manifest identifer and purl's are supported.")
+            description = "Get specific manifest for the provided identifier. Both; manifest identifer and purl's are supported.")
     @Parameter(
             name = "id",
             description = "Manifest generation request identifier or purl",
@@ -128,7 +128,7 @@ public class SbomsV1Beta1 {
                             name = "Package URL") })
     @APIResponse(
             responseCode = "200",
-            description = "The SBOM",
+            description = "The manifest",
             content = @Content(schema = @Schema(implementation = V1Beta1SbomRecord.class)))
     @APIResponse(
             responseCode = "400",
@@ -159,12 +159,12 @@ public class SbomsV1Beta1 {
     @GET
     @Path("/{id}/bom")
     @Operation(
-            summary = "Get the BOM content of particular SBOM",
-            description = "Get the BOM content of particular SBOM")
+            summary = "Get the BOM content in CycloneDX format of particular manifest",
+            description = "Get the BOM content of particular manifest")
     @Parameter(
             name = "id",
             description = "Manifest generation request identifier or purl",
-            examples = { @ExampleObject(value = "88CA2291D4014C6", name = "Generation request identifier"),
+            examples = { @ExampleObject(value = "88CA2291D4014C6", name = "Manifest identifier"),
                     @ExampleObject(
                             value = "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00270?type=jar",
                             name = "Package URL") })
@@ -178,7 +178,7 @@ public class SbomsV1Beta1 {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @APIResponse(
             responseCode = "404",
-            description = "Requested SBOM could not be found",
+            description = "Requested manifest could not be found",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @APIResponse(
             responseCode = "500",
@@ -203,14 +203,14 @@ public class SbomsV1Beta1 {
     @POST
     @Consumes(MediaType.WILDCARD)
     @Operation(
-            summary = "Resend UMB notification message for a completed SBOM",
+            summary = "Resend UMB notification message for a generated manifest",
             description = "Force the resending of the UMB notification message for an already generated SBOM.")
-    @Parameter(name = "id", description = "SBOM identifier", example = "429305915731435500")
+    @Parameter(name = "id", description = "Manifest identifier", example = "429305915731435500")
     @Path("/{id}/notify")
     @APIResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     @APIResponse(
             responseCode = "404",
-            description = "Requested SBOM could not be found",
+            description = "Requested manifest could not be found",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     @APIResponse(
             responseCode = "500",
@@ -218,7 +218,7 @@ public class SbomsV1Beta1 {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response notify(@PathParam("id") String sbomId) throws Exception {
         if (featureFlags.isDryRun()) {
-            log.warn("Skipping notification for SBOM '{}' because of SBOMer running in dry-run mode", sbomId);
+            log.warn("Skipping notification for manifest '{}' because of SBOMer running in dry-run mode", sbomId);
             return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
 
