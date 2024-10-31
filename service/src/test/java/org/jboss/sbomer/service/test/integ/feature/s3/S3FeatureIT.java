@@ -134,10 +134,10 @@ class S3FeatureIT {
 
         RestAssured.given()
                 .when()
-                .get("/api/v1beta1/requests/NOPE/logs")
+                .get("/api/v1beta1/generations/NOPE/logs")
                 .then()
                 .statusCode(503)
-                .body("resource", CoreMatchers.is("/api/v1beta1/requests/NOPE/logs"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/generations/NOPE/logs"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("message", CoreMatchers.is("S3 feature is disabled currently, try again later"))
                 .body("$", Matchers.not(Matchers.hasKey("errors")));
@@ -149,10 +149,10 @@ class S3FeatureIT {
 
         RestAssured.given()
                 .when()
-                .get("/api/v1beta1/requests/NOPE/logs")
+                .get("/api/v1beta1/generations/NOPE/logs")
                 .then()
                 .statusCode(404)
-                .body("resource", CoreMatchers.is("/api/v1beta1/requests/NOPE/logs"))
+                .body("resource", CoreMatchers.is("/api/v1beta1/generations/NOPE/logs"))
                 .body("errorId", CoreMatchers.isA(String.class))
                 .body("message", CoreMatchers.is("GenerationRequest with id 'NOPE' could not be found"))
                 .body("$", Matchers.not(Matchers.hasKey("errors")));
@@ -174,7 +174,7 @@ class S3FeatureIT {
 
         RestAssured.given()
                 .when()
-                .get("/api/v1beta1/requests/REQUESTID/logs")
+                .get("/api/v1beta1/generations/REQUESTID/logs")
                 .then()
                 .assertThat()
                 .contentType(ContentType.JSON)
@@ -198,7 +198,7 @@ class S3FeatureIT {
         RestAssured.given()
                 .accept(ContentType.TEXT)
                 .when()
-                .get("/api/v1beta1/requests/REQUESTID/logs/{path}", "a/path/to/generate.log")
+                .get("/api/v1beta1/generations/REQUESTID/logs/{path}", "a/path/to/generate.log")
                 .then()
                 .assertThat()
                 .statusCode(200)

@@ -1,7 +1,6 @@
 package org.jboss.sbomer.core.test.unit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,7 +111,7 @@ public class ConfigTest {
 
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
             assertTrue(config.getPaths().isEmpty());
-            assertFalse(config.isIncludeRpms());
+            assertTrue(config.isIncludeRpms());
 
         }
 
