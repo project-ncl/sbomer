@@ -12,7 +12,13 @@ This includes things like understanding the environment configuration which was 
 SBOMer tries to be as close as it can be to the original environment in order to ensure high compatiblity
 of the generated manifest with the Build itself.
 
-== Elements
+== Properties
+
+=== `buildId`
+
+The PNC build identifier representing the build to manifest.
+
+This property is required for `v1beta1` REST API onwards.
 
 === `products`
 
