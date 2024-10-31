@@ -37,7 +37,13 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({ @JsonSubTypes.Type(ImageRequestConfig.class) })
+@JsonSubTypes({ //
+        @JsonSubTypes.Type(ImageRequestConfig.class), //
+        @JsonSubTypes.Type(ErrataAdvisoryRequestConfig.class), //
+        @JsonSubTypes.Type(PncAnalysisRequestConfig.class), //
+        @JsonSubTypes.Type(PncOperationRequestConfig.class), //
+        @JsonSubTypes.Type(PncBuildRequestConfig.class), //
+})
 public abstract class RequestConfig {
     /**
      * The API version of the configuration file. In case of breaking changes this value will be used to detect the
