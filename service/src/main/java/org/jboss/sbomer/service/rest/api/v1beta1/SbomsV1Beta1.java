@@ -105,7 +105,6 @@ public class SbomsV1Beta1 {
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
-        // TODO: Pagination should be done here, not in the service
         Page<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
                 paginationParams.getPageIndex(),
                 paginationParams.getPageSize(),
