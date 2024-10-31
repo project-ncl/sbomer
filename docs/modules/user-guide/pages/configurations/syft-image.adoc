@@ -3,11 +3,13 @@
 
 In case the `syft-image` configuration is provided, the xref:generators/syft.adoc[] generator will be used.
 
-== Elements
+== Properties
 
-=== `image` (required)
+=== `image`
 
 The name (pullspec) of the image to manifest.
+
+This property is required for `v1beta1` REST API onwards.
 
 === `paths`
 
