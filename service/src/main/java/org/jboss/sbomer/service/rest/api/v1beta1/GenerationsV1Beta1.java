@@ -331,9 +331,9 @@ public class GenerationsV1Beta1 {
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
-    @Operation(summary = "List all log files available fot generation request", description = "")
+    @Operation(summary = "List all log files available for generation request", description = "")
     @Path("/{id}/logs")
-    @APIResponse(responseCode = "200", description = "List all log files available fot generation request")
+    @APIResponse(responseCode = "200", description = "List all log files available for generation request")
     @APIResponse(
             responseCode = "404",
             description = "Given generation request could not be found",
