@@ -41,9 +41,9 @@ class StageStatsIT extends E2EStageBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "v1alpha3" })
+    @ValueSource(strings = { "v1alpha3", "v1beta1" })
     void testStats(String version) throws IOException {
-        Response stats = getStats("v1alpha1");
+        Response stats = getStats(version);
 
         stats.then()
                 .statusCode(200)
