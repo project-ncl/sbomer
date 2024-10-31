@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.rest.api.v1beta1;
 import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -38,6 +39,7 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ServiceUnavailableException;
+import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.AdvisoryConfig;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
@@ -167,17 +169,33 @@ public class RequestsV1Beta1 {
             requests.addAll(advisoryService.generateFromAdvisory(advisoryConfig.getAdvisoryId()));
         } else if (config instanceof PncBuildConfig pncBuildConfig) {
             log.info("New PNC build request received");
+
+            // Additional check due to backwards compatiblity for the SyftImageConfig between v1alpha1 and v1beta1
+            if (pncBuildConfig.getBuildId() == null) {
+                throw new ValidationException(
+                        "Invalid content",
+                        Collections.singletonList("Missing required 'buildId' property"));
+            }
+
             requests.add(sbomService.generateFromBuild(pncBuildConfig.getBuildId(), pncBuildConfig));
         } else if (config instanceof DeliverableAnalysisConfig analysisConfig) {
             log.info("New PNC analysis request received");
             requests.add(sbomService.generateNewOperation(analysisConfig));
         } else if (config instanceof SyftImageConfig syftImageConfig) {
             log.info("New container image request received");
-            requests.add(sbomService.generateSyftImage(syftImageConfig.getName(), syftImageConfig));
-        } else if (config instanceof OperationConfig) {
+
+            // Additional check due to backwards compatiblity for the SyftImageConfig between v1alpha1 and v1beta1
+            if (syftImageConfig.getImage() == null) {
+                throw new ValidationException(
+                        "Invalid content",
+                        Collections.singletonList("Missing required 'image' property"));
+            }
+
+            requests.add(sbomService.generateSyftImage(syftImageConfig.getImage(), syftImageConfig));
+        } else if (config instanceof OperationConfig operationConfig) {
             log.info("New PNC operation request received");
 
-            throw new NotImplementedException("Operation is not implemented yet");
+            requests.add(sbomService.generateFromOperation(operationConfig.getOperationId(), operationConfig));
         }
 
         return Response.accepted(mapper.requestsToRecords(requests)).build();

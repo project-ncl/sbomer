@@ -5,6 +5,10 @@ In case the `syft-image` configuration is provided, the xref:generators/syft.ado
 
 == Elements
 
+=== `image` (required)
+
+The name (pullspec) of the image to manifest.
+
 === `paths`
 
 List of paths within the container image that should be used to filter components found by Syft.
@@ -13,7 +17,7 @@ it will be retained. Every component located outsude of given paths will be remo
 
 === `rpms`
 
-A flag whether RPM packages should be added to generated manifest. By default this flag is set to `false` which means
+A flag whether RPM packages should be added to generated manifest. By default this flag is set to `true` which means
 that no RPM packagaes will be added to manifest.
 
 === `processors`

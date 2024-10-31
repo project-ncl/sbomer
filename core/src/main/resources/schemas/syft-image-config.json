@@ -55,7 +55,7 @@
       "description": "Configuration type",
       "enum": ["syft-image"]
     },
-    "name": {
+    "image": {
       "description": "Container image name (pull spec) to be manifested",
       "type": "string"
     },
@@ -84,6 +84,6 @@
       "items": false
     }
   },
-  "required": ["type", "name"],
+  "required": ["type"],
   "additionalProperties": false
 }
