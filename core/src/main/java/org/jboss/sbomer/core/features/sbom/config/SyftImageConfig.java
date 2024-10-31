@@ -53,16 +53,16 @@ public class SyftImageConfig extends Config {
     List<String> paths = new ArrayList<>();
 
     /**
-     * Container image name to manifest.
+     * Container image name (pullspec) to manifest.
      */
-    String name;
+    String image;
 
     /**
      * Flag to indicate whether RPMs should be added to manifest.
      */
     @Builder.Default
     @JsonProperty("rpms")
-    boolean includeRpms = false;
+    boolean includeRpms = true;
 
     /**
      * Processors configuration.
