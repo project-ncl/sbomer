@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.test.integ.rest;
 
 import static io.restassured.RestAssured.given;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig.UmbProduc
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.pnc.PncClient;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
@@ -66,6 +68,7 @@ import jakarta.inject.Inject;
 @WithKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 class RestResourceIT {
+
     public static class UmbConfigProducer {
         @Inject
         Config config;
@@ -90,6 +93,9 @@ class RestResourceIT {
     @InjectMock
     @RestClient
     PncClient pncClient;
+
+    @InjectMock
+    AdvisoryService advisoryService;
 
     @InjectSpy
     SbomService sbomService;
@@ -397,6 +403,57 @@ class RestResourceIT {
                     .body("[0].type", CoreMatchers.equalTo("OPERATION"))
                     .and()
                     .body("[0].status", CoreMatchers.is("NO_OP"));
+        }
+
+        @Test
+        void shouldRequestOperation() {
+            given().body("{\"type\": \"pnc-operation\", \"operationId\": \"ABCDEF\"}")
+                    .when()
+                    .contentType(ContentType.JSON)
+                    .request("POST", requestApiPath)
+                    .then()
+                    .log()
+                    .all(true)
+                    .statusCode(202)
+                    .body("size()", CoreMatchers.is(1))
+                    .and()
+                    .body("[0].id", CoreMatchers.any(String.class))
+                    .and()
+                    .body("[0].identifier", CoreMatchers.equalTo("ABCDEF"))
+                    .and()
+                    .body("[0].type", CoreMatchers.equalTo("OPERATION"))
+                    .and()
+                    .body("[0].status", CoreMatchers.is("NEW"));
+        }
+
+        @Test
+        void shouldRequestAdvisory() {
+            when(advisoryService.generateFromAdvisory(eq("12345"))).thenReturn(
+                    List.of(
+                            SbomGenerationRequest.builder()
+                                    .withId("SOMEID")
+                                    .withIdentifier("AAABBB")
+                                    .withType(GenerationRequestType.BREW_RPM)
+                                    .withStatus(SbomGenerationStatus.NEW)
+                                    .build()));
+
+            given().body("{\"type\": \"errata-advisory\", \"advisoryId\": \"12345\"}")
+                    .when()
+                    .contentType(ContentType.JSON)
+                    .request("POST", requestApiPath)
+                    .then()
+                    .log()
+                    .all(true)
+                    .statusCode(202)
+                    .body("size()", CoreMatchers.is(1))
+                    .and()
+                    .body("[0].id", CoreMatchers.any(String.class))
+                    .and()
+                    .body("[0].identifier", CoreMatchers.equalTo("AAABBB"))
+                    .and()
+                    .body("[0].type", CoreMatchers.equalTo("BREW_RPM"))
+                    .and()
+                    .body("[0].status", CoreMatchers.is("NEW"));
         }
     }
 
