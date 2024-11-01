@@ -20,7 +20,6 @@ package org.jboss.sbomer.service.rest.api.v1beta1;
 import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -45,7 +44,6 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ServiceUnavailableException;
-import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -173,14 +171,6 @@ public class GenerationsV1Beta1 {
         } else if (config instanceof PncBuildRequestConfig pncBuildConfig) {
             log.info("New PNC build request received");
 
-            // Additional check due to backwards compatiblity for the SyftImageConfig between v1alpha1 and
-            // v1beta1
-            if (pncBuildConfig.getBuildId() == null) {
-                throw new ValidationException(
-                        "Invalid content",
-                        Collections.singletonList("Missing required 'buildId' property"));
-            }
-
             requests.add(
                     sbomService.generateFromBuild(
                             pncBuildConfig.getBuildId(),
@@ -196,14 +186,6 @@ public class GenerationsV1Beta1 {
                                     .build()));
         } else if (config instanceof ImageRequestConfig imageConfig) {
             log.info("New container image request received");
-
-            // Additional check due to backwards compatiblity for the SyftImageConfig between v1alpha1 and
-            // v1beta1
-            if (imageConfig.getImage() == null) {
-                throw new ValidationException(
-                        "Invalid content",
-                        Collections.singletonList("Missing required 'image' property"));
-            }
 
             requests.add(
                     sbomService.generateSyftImage(

@@ -23,7 +23,7 @@ To request SBOM generation we need to pass the PNC build id:
 
 [source,console,subs="attributes+"]
 ----
-$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/build/[PNC_BUILD_ID]
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations/generate/build/[PNC_BUILD_ID]
 ----
 
 === Requesting ZIP SBOM Generation Manually

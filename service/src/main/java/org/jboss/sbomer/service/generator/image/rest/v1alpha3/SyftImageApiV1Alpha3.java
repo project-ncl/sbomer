@@ -22,7 +22,10 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
+import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
@@ -58,6 +61,9 @@ public class SyftImageApiV1Alpha3 {
     @Inject
     FeatureFlags featureFlags;
 
+    @Inject
+    ConfigSchemaValidator configSchemaValidator;
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
     @Operation(summary = "", description = "")
@@ -72,6 +78,17 @@ public class SyftImageApiV1Alpha3 {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateFromContainerImage(@PathParam("name") String imageName, SyftImageConfig config)
             throws Exception {
+
+        if (config == null) {
+            config = SyftImageConfig.builder().withImage(imageName).build();
+        }
+
+        ValidationResult validationResult = configSchemaValidator.validate(config);
+
+        if (!validationResult.isValid()) {
+            throw new ClientException("Invalid config", validationResult.getErrors());
+        }
+
         return Response.accepted(mapper.toRecord(sbomService.generateSyftImage(imageName, config))).build();
     }
 }

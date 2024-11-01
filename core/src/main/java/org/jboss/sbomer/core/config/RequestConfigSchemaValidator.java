@@ -20,13 +20,11 @@ package org.jboss.sbomer.core.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -59,7 +57,14 @@ public class RequestConfigSchemaValidator implements Validator<RequestConfig> {
         String schema;
 
         try (InputStream is = SchemaValidator.class.getClassLoader()
-                .getResourceAsStream("schemas/request/" + typeName.value())) {
+                .getResourceAsStream("schemas/request/" + typeName.value() + ".json")) {
+
+            if (is == null) {
+                throw new ApplicationException(
+                        "Could not find schema for type: '{}', please contact administrator",
+                        typeName.value());
+            }
+
             schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);

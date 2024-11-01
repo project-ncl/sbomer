@@ -1,19 +1,19 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://jboss.org/sbomer/request/pnc-build.json",
+    "$id": "https://jboss.org/sbomer/request/image.json",
     "type": "object",
     "properties": {
         "apiVersion": {
             "enum": ["sbomer.jboss.org/v1alpha1"]
         },
         "type": {
-            "const": "pnc-build"
+            "const": "image"
         },
-        "buildId": {
-            "description": "PNC build identifier",
+        "image": {
+            "description": "Image pull spec",
             "type": "string"
         }
     },
-    "required": ["buildId", "type"],
+    "required": ["image", "type"],
     "additionalProperties": false
 }

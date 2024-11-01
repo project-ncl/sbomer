@@ -27,7 +27,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @SuperBuilder(setterPrefix = "with")
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
 @JsonSubTypes({ //
         @JsonSubTypes.Type(ImageRequestConfig.class), //
         @JsonSubTypes.Type(ErrataAdvisoryRequestConfig.class), //
@@ -53,7 +52,6 @@ public abstract class RequestConfig {
     @Builder.Default
     String apiVersion = "sbomer.jboss.org/v1alpha1";
 
-    @Getter
     String type;
 
     public String toJson() {

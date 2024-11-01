@@ -171,13 +171,13 @@ public class NotificationService {
         Sbom.Bom bomPayload = Sbom.Bom.builder()
                 .format(bomFormat)
                 .version(bom.getSpecVersion())
-                .link(sbomerConfig.apiUrl() + "sboms/" + sbom.getId() + "/bom")
+                .link(sbomerConfig.apiUrl() + "manifests/" + sbom.getId() + "/bom")
                 .build();
 
         // generationRequest field will be populated later
         Sbom sbomPayload = Sbom.builder()
                 .id(String.valueOf(sbom.getId()))
-                .link(sbomerConfig.apiUrl() + "sboms/" + sbom.getId())
+                .link(sbomerConfig.apiUrl() + "manifests/" + sbom.getId())
                 .bom(bomPayload)
                 .build();
 
