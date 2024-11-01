@@ -102,7 +102,7 @@ class RestResourceIT {
     void testExistenceOfSbomsEndpoint(TestableApiVersion apiVersion) {
         Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
         given().when()
-                .get(String.format("/api/%s/sboms", apiVersion))
+                .get(apiVersion.manifestsPath())
                 .then()
                 .statusCode(200)
                 .body("totalHits", CoreMatchers.is(2))
@@ -114,7 +114,10 @@ class RestResourceIT {
     @EnumSource(TestableApiVersion.class)
     void testListSbomsPageParams(TestableApiVersion apiVersion) {
         Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(1, 20, null, null)).thenReturn(new Page<>());
-        given().when().get(String.format("/api/%s/sboms?pageIndex=1&pageSize=20", apiVersion)).then().statusCode(200);
+        given().when()
+                .get(String.format("?pageIndex=1&pageSize=20", apiVersion.manifestsPath()))
+                .then()
+                .statusCode(200);
     }
 
     @ParameterizedTest
@@ -122,7 +125,7 @@ class RestResourceIT {
     void testGetSbomByIdShouldNotFailForMissing(TestableApiVersion apiVersion) throws IOException {
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", String.format("/api/%s/sboms/5644785", apiVersion))
+                .request("GET", String.format("%s/5644785", apiVersion.manifestsPath()))
                 .then()
                 .statusCode(404)
                 .body("message", CoreMatchers.is("Manifest with provided identifier: '5644785' couldn't be found"))
@@ -141,7 +144,7 @@ class RestResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", String.format("/api/%s/sboms/12345", apiVersion))
+                .request("GET", String.format("%s/12345", apiVersion.manifestsPath()))
                 .then()
                 .statusCode(200)
                 .body("id", CoreMatchers.equalTo("12345"))
@@ -163,7 +166,7 @@ class RestResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", String.format("/api/%s/sboms/12345/bom", apiVersion))
+                .request("GET", String.format("%s/12345/bom", apiVersion.manifestsPath()))
                 .then()
                 .statusCode(200)
                 .body(
@@ -189,7 +192,7 @@ class RestResourceIT {
 
         given().when()
                 .contentType(ContentType.JSON)
-                .request("GET", String.format("/api/%s/sboms/12345/bom", apiVersion))
+                .request("GET", String.format("%s/12345/bom", apiVersion.manifestsPath()))
                 .then()
                 .statusCode(200)
                 .body("metadata.component.name", CoreMatchers.equalTo("microprofile-graphql-parent"))
@@ -284,7 +287,7 @@ class RestResourceIT {
     class V1Beta1 {
         private static final String API_VERSION = "v1beta1";
 
-        private final String requestApiPath = String.format("/api/%s/requests", API_VERSION);
+        private final String requestApiPath = String.format("/api/%s/generations", API_VERSION);
 
         @Test
         void shouldHandleInvalidConfig() {
@@ -329,7 +332,7 @@ class RestResourceIT {
 
         @Test
         void shouldRequestContainerImage() {
-            given().body("{\"type\": \"syft-image\", \"name\": \"registry.com/image:tag\"}")
+            given().body("{\"type\": \"image\", \"image\": \"registry.com/image:tag\"}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", requestApiPath)
@@ -351,7 +354,7 @@ class RestResourceIT {
         @Test
         void shouldHandleMalformedContent() {
             given().body(
-                    "{\"type\": \"analysis\", \"milestoneId\": \"ABCDEF\", \"deliverableUrls\": \\\"http://host.com/a.zip\\\", \"http://host.com/b.zip\"]}")
+                    "{\"type\": \"pnc-analysis\", \"milestoneId\": \"ABCDEF\", \"urls\": \\\"http://host.com/a.zip\\\", \"http://host.com/b.zip\"]}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", requestApiPath)
@@ -377,7 +380,7 @@ class RestResourceIT {
                     .thenReturn(DeliverableAnalyzerOperation.delAnalyzerBuilder().id("RETID").build());
 
             given().body(
-                    "{\"type\": \"analysis\", \"milestoneId\": \"ABCDEF\", \"deliverableUrls\": [\"http://host.com/a.zip\", \"http://host.com/b.zip\"]}")
+                    "{\"type\": \"pnc-analysis\", \"milestoneId\": \"ABCDEF\", \"urls\": [\"http://host.com/a.zip\", \"http://host.com/b.zip\"]}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", requestApiPath)
@@ -430,7 +433,7 @@ class RestResourceIT {
 
         RestAssured.given()
                 .when()
-                .post(String.format("/api/%s/sboms/BIDBID/notify", apiVersion))
+                .post(String.format("%s/BIDBID/notify", apiVersion.manifestsPath()))
                 .then()
                 .statusCode(200);
     }

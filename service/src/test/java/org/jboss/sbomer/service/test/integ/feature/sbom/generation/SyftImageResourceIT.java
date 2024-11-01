@@ -66,7 +66,10 @@ class SyftImageResourceIT {
                     .request("POST", "/api/v1alpha3/generator/syft/image/image-name")
                     .then()
                     .statusCode(400)
-                    .body("message", CoreMatchers.is("Provided 'syft-image' configuration is not valid"))
+                    .body(
+                            "message",
+                            CoreMatchers.is(
+                                    "An error occurred while deserializing provided content, please check your body 🤼"))
                     .and()
                     .body("errorId", CoreMatchers.isA(String.class))
                     .and()
@@ -75,7 +78,7 @@ class SyftImageResourceIT {
 
         @Test
         void shouldAllowCustomConfig() {
-            given().body("{\"type\": \"syft-image\", \"name\": \"image-name\", \"paths\": [ \"/opt\", \"/etc\"]}")
+            given().body("{\"type\": \"syft-image\", \"paths\": [ \"/opt\", \"/etc\"]}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", "/api/v1alpha3/generator/syft/image/image-name")
@@ -119,7 +122,10 @@ class SyftImageResourceIT {
                     .request("POST", "/api/v1beta1/generations")
                     .then()
                     .statusCode(400)
-                    .body("message", CoreMatchers.is("Invalid config"))
+                    .body(
+                            "message",
+                            CoreMatchers.is(
+                                    "An error occurred while deserializing provided content, please check your body 🤼"))
                     .and()
                     .body("errorId", CoreMatchers.isA(String.class))
                     .and()
@@ -128,8 +134,7 @@ class SyftImageResourceIT {
 
         @Test
         void shouldAllowCustomConfig() {
-            given().body(
-                    "{\"type\": \"syft-image\", \"name\": \"registry.com/image:tag\", \"paths\": [ \"/opt\", \"/etc\"]}")
+            given().body("{\"type\": \"image\", \"image\": \"registry.com/image:tag\"}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", "/api/v1beta1/generations")
@@ -145,5 +150,4 @@ class SyftImageResourceIT {
                     .body("[0].status", CoreMatchers.is("NEW"));
         }
     }
-
 }
