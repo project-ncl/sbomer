@@ -33,6 +33,10 @@ quarkus:
     log:
       sql: true
 
+  rest-client:
+    "errata":
+      url: "https://dummy"
+
   operator-sdk:
     start-operator: false
 

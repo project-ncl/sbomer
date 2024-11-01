@@ -1,0 +1,20 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://jboss.org/sbomer/request/errata-advisory.json",
+    "type": "object",
+    "properties": {
+        "apiVersion": {
+            "enum": ["sbomer.jboss.org/v1alpha1"]
+        },
+        "type": {
+            "const": "errata-advisory"
+        },
+
+        "advisoryId": {
+            "description": "Errata Tool advisory identifier",
+            "type": "string"
+        }
+    },
+    "required": ["advisoryId", "type"],
+    "additionalProperties": false
+}
