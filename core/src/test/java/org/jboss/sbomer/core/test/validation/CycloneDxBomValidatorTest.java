@@ -25,14 +25,31 @@ import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 
 import org.cyclonedx.model.Bom;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBomValidator;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class CycloneDxBomValidatorTest {
+
+    private static Locale originalLocale;
+
+    @BeforeAll
+    static void setLocale() {
+        originalLocale = Locale.getDefault();
+        Locale.setDefault(Locale.US);
+    }
+
+    @AfterAll
+    static void resetLocale() {
+        Locale.setDefault(originalLocale);
+    }
+
     @Test
     void testBomValidation() {
         HibernateConstraintValidatorContext context = mock(HibernateConstraintValidatorContext.class);
