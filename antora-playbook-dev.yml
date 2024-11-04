@@ -34,4 +34,4 @@ ui:
 asciidoc:
   attributes:
     sbomer-url: http://localhost:8080
-    sbomer-latest-api-version: v1alpha3
+    sbomer-latest-api-version: v1beta1

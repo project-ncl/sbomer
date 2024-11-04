@@ -1,9 +1,0 @@
-= Syft
-:generator-slug: syft
-
-include::ROOT:partial$wip.adoc[]
-
-SBOMer generator using the link:https://github.com/anchore/syft[Syft tool].
-
-Currently this generator is used to generate manifests for container images. Its main purpose is
-to manifest Application Services products released as container images.

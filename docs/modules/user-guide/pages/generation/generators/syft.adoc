@@ -1,0 +1,10 @@
+= Syft
+:generator-slug: syft
+
+SBOMer generator using the link:https://github.com/anchore/syft[Syft tool].
+
+This generator manifests the content of the provided container image. It will specifically
+manifest components that are:
+
+- RPMs
+- Any additional files stored on the filesystem known to Syft

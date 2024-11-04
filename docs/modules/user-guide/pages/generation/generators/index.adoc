@@ -1,0 +1,11 @@
+= Generators
+
+include::ROOT:partial$wip.adoc[]
+
+We do have currently following generators:
+
+* xref:generation/generators/maven-domino.adoc[]
+* xref:generation/generators/maven-cyclonedx.adoc[]
+* xref:generation/generators/gradle-cyclonedx.adoc[]
+* xref:generation/generators/syft.adoc[]
+

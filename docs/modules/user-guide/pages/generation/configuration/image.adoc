@@ -1,0 +1,74 @@
+= Container Image
+:config-slug: image
+
+Type:: `{config-slug}`
+
+In case the `{config-slug}` configuration is provided, the xref:generators/syft.adoc[Syft generator] will be used.
+
+== Properties
+
+=== `image` (required)
+
+The name (pullspec) of the image to manifest.
+
+== Examples
+
+[source,yaml]
+----
+type: image
+image: registry.redhat.io/jboss-webserver-5/jws58-openjdk17-openshift-rhel8@sha256:3e28c6353bb1fdfe2a70dec5d840f2ef03a47bf2c9c92507982dca566fac0898
+----
+
+// === `paths`
+
+// List of paths within the container image that should be used to filter components found by Syft.
+// If the path to component (for example a JAR file) is located on one of the paths provided in the configuration file
+// it will be retained. Every component located outsude of given paths will be removed from the manifest.
+
+// === `rpms`
+
+// A flag whether RPM packages should be added to generated manifest. By default this flag is set to `true` which means
+// that no RPM packagaes will be added to manifest.
+
+// === `processors`
+
+// An array of xref:processors/index.adoc[processors]. The xref:processors/default.adoc[Default] processor is run always. Others are optional.
+
+// == Example
+
+// [source,yaml]
+// ----
+// apiVersion: sbomer.jboss.org/v1alpha1
+// type: syft-image
+// paths:
+//     - "/opt"
+// ----
+
+// If we have two components: `/opt/product/content/first.jar` and `/var/lib/product/content/second.jar` detected in the image
+// we will only add `/opt/product/content/first.jar` to the manifest and the `/var/lib/product/content/second.jar` will be skipped.
+
+// [source,yaml]
+// ----
+// apiVersion: sbomer.jboss.org/v1alpha1
+// type: syft-image
+// rpms: true
+// paths:
+//     - "/opt"
+// ----
+
+// This example is similar to the above one with one difference: all RPM packages will be added to the manifest.
+
+// [source,yaml]
+// ----
+// apiVersion: sbomer.jboss.org/v1alpha1
+// type: syft-image
+// processors:
+//     - type: default
+//     - type: redhat-product
+//       errata:
+//           productName: pName
+//           productVersion: pVersion
+//           productVariant: pVariant
+// ----
+
+// This example specifies the xref:processors/index.adoc[processors] that should be run once the manifest is created.

@@ -5,7 +5,7 @@ its features.
 
 == Main Concepts
 
-Within SBOMer we can define a few concepts. It may be beneficioal to becoma familiar with them.
+Within SBOMer we can define a few concepts. It may be beneficioal to become familiar with them.
 
 xref:generators/index.adoc[Generators]::
 Generators are responsible for base manifest generations. These are mostly external tools that
@@ -20,15 +20,10 @@ SBOMer side. Not every generator needs an adjuster. In many cases the output of 
 +
 Adjusters are not exposed to end users directly.
 
-xref:processors/index.adoc[Processors]::
+Processors::
 Processors take the generated manifest (optionally adjusted) and enrich the metadata. This means that the manifest
-is populated with information about components that we can find by various tools and services. Depending
-on the component type, different tools and services will be queried. For a single manifest, multiple
-processors can be run.
-
-xref:configurations/index.adoc[Configurations]::
-Configurations bind generators and processors with the information about the content that should be
-used as the source for the manifest generation.
+is populated with information about components that we can find by querying various tools and services.
+For a single manifest, multiple processors can be run.
 
 == Interaction With SBOMer
 
@@ -46,3 +41,6 @@ UI can be accessed at link:{sbomer-url}[].
 === REST API
 
 We have dedicated a separate place for REST API, xref:api/index.adoc[take a look here]!
+
+== Where to start?
+
