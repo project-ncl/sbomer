@@ -1,0 +1,19 @@
+= PNC Deliverable Analysis Operation
+:config-slug: pnc-operation
+
+Type:: `{config-slug}`
+
+This configuration can be used to manifest content that was *already analysed* by the PNC
+Deliverables Analysis.
+
+== Properties
+
+=== `operationId` (required)
+
+The PNC operation identifier.
+
+[source,yaml,subs="attributes+"]
+----
+type: {config-slug}
+operationId: 12356
+----

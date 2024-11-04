@@ -1,91 +1,123 @@
 = Examples
 
-== Basic SBOM Operations
+This page provides examples of common use cases of the SBOMer API.
 
-=== Fetching all SBOMs
+== Manifests
+
+=== Fetching all manifests
 
 Please note that the return is a list of SBOMs in a paginated way.
 
 [source,console,subs="attributes+"]
 ----
-$ curl {sbomer-url}/api/{sbomer-latest-api-version}/sboms
+$ curl {sbomer-url}/api/{sbomer-latest-api-version}/manifests
 ----
 
-=== Requesting SBOM Generation Manually
+=== Requesting manifest generation
 
-[NOTE]
-====
-This should not be required in general. SBOMer generates SBOMs automatically for successful PNC builds. It can
-still be handy if you want to retry a generation.
-====
+To request manifest generation we need to use the `/api/{sbomer-latest-api-version}/generations` and provide
+a xref:api/configurations/index.adoc[generation request configuration] as the body.
 
-To request SBOM generation we need to pass the PNC build id:
+Below you can see examples grouped by the type of the deliverable to manifest.
+
+NOTE: The `/api/{sbomer-latest-api-version}/generations` accepts JSON (`application/json`) as well as YAML (`application/yaml`) content.
+
+==== Container image
+
+TIP: See xref:api/configurations/image.adoc[image configuration].
+
+Request manifest generation for the `registry.redhat.io/jboss-webserver-5/jws58-openjdk17-openshift-rhel8@sha256:3e28c6353bb1fdfe2a70dec5d840f2ef03a47bf2c9c92507982dca566fac0898` container image.
 
 [source,console,subs="attributes+"]
 ----
-$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations/generate/build/[PNC_BUILD_ID]
-----
-
-=== Requesting ZIP SBOM Generation Manually
-
-[NOTE]
-====
-This is typically to be used when ZIPs are created outside of PNC builds, e.g. in Jenkins. A new deliverable analysis can be triggered for the specified ZIPs and for a particular milestone. SBOMer will generate the ZIP SBOMs upon receival of the corresponding successful deliverable analysis operation notification.
-====
-
-To request ZIP SBOM generation we need to pass the PNC deliverable analysis operation id:
-
-[source,console,subs="attributes+"]
-----
-$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/operation/[PNC_DELIVERABLE_ANALYSIS_OPERATION_ID]
-----
-
-=== Requesting ZIP Analysis Manually
-
-To request a ZIP deliverable analysis in PNC, which will eventually notify SBOMer of its completion and subsequently trigger a ZIP SBOM generation, we need to pass some required information:
-
-[source,console,subs="attributes+"]
-----
-$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/generate/analysis \ 
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \ 
   -H 'accept: application/json' -H 'Content-Type: application/json' \
   -d '{
-  "apiVersion": "sbomer.jboss.org/v1alpha1",
-  "type": "analysis",
-  "milestoneId": "$milestoneId",
-  "errata": {
-     "productName": "$productName",
-     "productVersion": "$productVersion",
-     "productVariant": "$productVariant"
-  },
-  "deliverableUrls": [
-    "$deliverableUrl1", "$deliverableUrl2"
+  "type": "image",
+  "image": "registry.redhat.io/jboss-webserver-5/jws58-openjdk17-openshift-rhel8@sha256:3e28c6353bb1fdfe2a70dec5d840f2ef03a47bf2c9c92507982dca566fac0898"
+}'
+----
+
+==== PNC build
+
+TIP: See xref:api/configurations/pnc-build.adoc[PNC build configuration].
+
+Request manifest generation for the `A7IGVJ7N2DYAA` PNC build.
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \ 
+  -H 'accept: application/json' -H 'Content-Type: application/json' \
+  -d '{
+  "type": "pnc-build",
+  "buildId": "A7IGVJ7N2DYAA"
+}'
+----
+
+==== PNC Analysis
+
+TIP: See xref:api/configurations/pnc-analysis.adoc[PNC analysis configuration].
+
+Request manifest generation for following zips:
+
+- https://download.host.com/staging/product-a/release-b/first.zip
+- https://download.host.com/staging/product-a/release-b/second.zip
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \ 
+  -H 'accept: application/json' -H 'Content-Type: application/json' \
+  -d '{
+  "type": "pnc-analysis",
+  "urls": [
+    "https://download.host.com/staging/product-a/release-b/first.zip",
+    "https://download.host.com/staging/product-a/release-b/second.zip"
   ]
 }'
 ----
 
-=== Fetching a Specific SBOM
+==== PNC Deliverable Analyser operation
 
-Once the SBOM is generated it becomes available at:
+TIP: See xref:api/configurations/pnc-operation.adoc[PNC operation configuration].
+
+Request manifest generation for the `BBNOWAGR3EYAA` PNC Deliverables Analyser operation:
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \ 
+  -H 'accept: application/json' -H 'Content-Type: application/json' \
+  -d '{
+  "type": "pnc-operation",
+  "operationId": "BBNOWAGR3EYAA"
+}'
+----
+
+=== Fetching a specific manifest
+
+After the manifest is generated it will become available at:
 
 [source,console,subs="attributes+"]
 ----
 $ curl {sbomer-url}/api/{sbomer-latest-api-version}/manifests/[MANIFEST_ID]
 ----
 
-== Generation Requests
+TIP: As the identifier you can use the manifest ID or the main component's link:https://github.com/package-url/purl-spec[purl].
 
-Generation requests provide information on the progress of the generation.
 
-=== Fetching All Generation Requests
+== Generations
 
-Please note that the return is a list of generation requests in a paginated way.
+Generations provide information on the progress of the generation.
+
+=== Fetching all generations
+
+Please note that the return is a list of generations in a paginated way.
 
 [source,console,subs="attributes+"]
 ----
 $ curl {sbomer-url}/api/{sbomer-latest-api-version}/generations
 ----
 
-=== Fetching a Specific Generation Request
+=== Fetching specific generation
 
 Get a specific generation request:
 

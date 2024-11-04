@@ -1,0 +1,26 @@
+= Errata Tool Advisory
+:config-slug: errata-advisory
+
+Type:: `{config-slug}`
+
+The {config-slug} configuration can be used to manifest content attached to a particular Errata
+Tool advisory.
+
+Currently supported content:
+
+- Container image
+- RPM
+
+== Properties
+
+=== `advisoryId` (required)
+
+The advisory identifier.
+
+== Examples
+
+[source,yaml,subs="attributes+"]
+----
+type: {config-slug}
+advisoryId: 12345
+----

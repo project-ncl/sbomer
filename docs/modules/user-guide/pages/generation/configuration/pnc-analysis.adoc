@@ -1,0 +1,34 @@
+= PNC Analysis
+:config-slug: pnc-analysis
+
+Type:: `{config-slug}`
+
+This configuration is typically to be used when ZIPs are created outside of PNC builds, e.g. in Jenkins. A new deliverable analysis can be triggered for the specified ZIPs and for a particular milestone. SBOMer will generate the ZIP SBOMs upon receival of the corresponding successful deliverable analysis operation notification.
+
+NOTE: The `{config-slug}` configuration can be used for PNC-built ZIPs as well!
+
+This config requests a new PNC analysis for given deliverables, waits for it finish and generates
+a manifest afterwards.
+
+Each deliverable will have a dedicated manifest generated.
+
+== Properties
+
+=== `milestoneId` (required)
+
+The PNC milestone identifier (number) to which the opertion should attach its results.
+
+=== `urls` (required)
+
+List of URLs to ZIP deliverables that should be manifested. Multiple URLs can be provided.
+
+== Examples
+
+[source,yaml,subs="attributes+"]
+----
+type: {config-slug}
+milestoneId: 12345
+urls:
+    - https://download.host.com/staging/product-a/release-b/first.zip
+    - https://download.host.com/staging/product-a/release-b/second.zip
+----

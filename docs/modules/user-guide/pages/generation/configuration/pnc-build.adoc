@@ -1,0 +1,156 @@
+= PNC Build
+:config-slug: pnc-build
+
+Type:: `{config-slug}`
+
+This is a special tyle of configuration which covers a Build finished in the PNC build system.
+
+SBOMer is configured to automatically generate manifests for all successfully finished PNC builds.
+For such cases, the xref:generators/maven-cyclonedx.adoc[CycloneDX Maven Plugin] generator is used.
+SBOMer has the ability to automatically generate the configuration according to the Build metadata.
+This includes things like understanding the environment configuration which was used at the build time.
+SBOMer tries to be as close as it can be to the original environment in order to ensure high compatiblity
+of the generated manifest with the Build itself.
+
+== Properties
+
+=== `buildId` (required)
+
+The PNC build identifier representing the build to manifest.
+
+== Examples
+
+[source,yaml,subs="attributes+"]
+----
+type: {config-slug}
+buildId: A7IGVJ7N2DYAA
+----
+
+// === `products`
+
+// [source,yaml]
+// ----
+// apiVersion: sbomer.jboss.org/v1alpha1
+// type: pnc-build
+// products:
+//   ...
+// ----
+
+// It is possible that a single build can generate artifacts that will be released as different
+// products. For this purpose we have the `products` element which defines a list of products.
+
+// In case there is only one product, just add a single product entry to the list.
+
+// === `generator`
+
+// [source,yaml]
+// ----
+// apiVersion: sbomer.jboss.org/v1alpha1
+// type: pnc-build
+// products:
+//   - generator:
+//     ...
+// ----
+
+// Generator determines which xref:generators/index.adoc[generator] should be used to generate
+// the base manifest. In case a generator is not provided, the default xref:generators/maven-cyclonedx.adoc[CycloneDX Maven Plugin] will be used.
+
+// WARNING: If you provide this field it is your responsiblity to ensure that the
+// defined generator can be used for given build.
+
+// ==== Supported generators
+
+// * xref:generators/maven-domino.adoc[]
+// * xref:generators/maven-cyclonedx.adoc[]
+// * xref:generators/gradle-cyclonedx.adoc[]
+
+
+// === `processors`
+
+// A list of xref:processors/index.adoc[processors] that should be run after the manifest is generated.
+
+// NOTE: The xref:processors/default.adoc[default processor] is always added, you don't need to specify it in the list.
+
+// You can add a Red Hat processor that binds given PNC build to a Red Hat product release:
+
+// [source,yaml]
+// ----
+// apiVersion: sbomer.jboss.org/v1alpha1
+// type: pnc-build
+// products:
+//   - processors:
+//       - type: redhat-product
+//         errata:
+//           productName: "RHBQ"
+//           productVersion: "RHEL-8-RHBQ-2.13"
+//           productVariant: "8Base-RHBQ-2.13"
+// ----
+
+// You need to make sure you enter correct information. You can find details in the Errata tool
+// configuration of your product release.
+
+// TIP: For available options, please refer to the particular xref:processors/index.adoc[processor] documentation.
+
+// == Examples
+
+// === Multi-product configuration
+
+// Example of support for multi-product source code repository where a single build (configuration)
+// in PNC can build more than one product. In the example below have two products defined.
+
+// [source,yaml]
+// ----
+// apiVersion: sbomer.jboss.org/v1alpha1
+// type: pnc-build
+// products:
+//   - processors:
+//       - type: redhat-product
+//         errata:
+//           productName: "CCCDDD"
+//           productVersion: "CCDD"
+//           productVariant: "CD"
+//     generator:
+//       type: maven-domino
+//       args: "--config-file .domino/cccddd.json --warn-on-missing-scm"
+//       version: "0.0.107"
+
+//   - processors:
+//       - type: redhat-product
+//         errata:
+//           productName: "AAABBB"
+//           productVersion: "AABB"
+//           productVariant: "AB"
+//     generator:
+//       type: maven-domino
+//       customArgs: "--config-file .domino/aaabbb.json --warn-on-missing-scm"
+// ----
+
+// === Single product configuration
+
+// A single product (most common use case) where only the required configuration for the
+// `redhat-product` processor is provided. For everything else default values are used.
+
+// [source,yaml]
+// ----
+// apiVersion: sbomer.jboss.org/v1alpha1
+// type: pnc-build
+// products:
+//   - processors:
+//       - type: redhat-product
+//         errata:
+//           productName: "RHBQ"
+//           productVersion: "RHEL-8-RHBQ-2.13"
+//           productVariant: "8Base-RHBQ-2.13"
+// ----
+
+== Storing Configuration in a Repository
+
+It is possible to store configuration in a reposiotory so that SBOMer uses it for the manifest generation purpose
+instead of a default one (which could be potentially wrong).
+
+In order to make your configuration available to SBOMer you need to commit it into the Git repository
+representing the source code used to build the project in PNC. Configuration file should be stored under the `.sbomer/config.yaml`
+path.
+
+Once a build is done in PNC, SBOMer will investigate the Git repository (using the tag added by the PNC build system)
+to find the configuration file. If it will be available, it will be used.

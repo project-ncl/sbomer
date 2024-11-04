@@ -1,0 +1,30 @@
+= Generation Request Configuration
+
+Configurations are responsible for providing required information to SBOMer about content
+which should be manifested. There are many supported sources for manifest generations:s
+
+* PNC build (a successful build in PNC),
+* Container image (a container image available in a registry),
+* PNC deliverable analysis (generation based on finished deliverable analysis),
+* PNC operation (requesting a deliverable analysis and generating a manigest based on the outcome)
+
+Each source requires different parameters to be provided. Currently available configuration types
+can be found below.
+
+* xref:generation/configuration/pnc-build.adoc[]
+* xref:generation/configuration/image.adoc[]
+* xref:generation/configuration/pnc-analysis.adoc[]
+* xref:generation/configuration/pnc-operation.adoc[]
+* xref:generation/configuration/errata-advisory.adoc[]
+
+== Schema
+
+Each configuration type is validated according to a schema.
+
+[source,yaml]
+----
+apiVersion: sbomer.jboss.org/v1alpha1
+type: [CONFIGURATION_TYPE]
+# Content below is dependent on the type above.
+# Please refer to the specific configuration types.
+----

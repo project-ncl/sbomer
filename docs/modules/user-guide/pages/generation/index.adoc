@@ -1,0 +1,10 @@
+= Generation
+
+Manifest generation is the most important feature of SBOMer.
+
+SBOMer supports manifest generation for multiple different sources for which we have xref:generation/configuration/index.adoc[dedicated configuration].
+
+Generations can be requested manually using the xref:api/index.adoc[REST API] or can be
+run automatically as a response to an event from supported services (for example PNC or Errata Tool).
+
+TIP: See examples how you can xref:api/examples.adoc[manually request a generation].
