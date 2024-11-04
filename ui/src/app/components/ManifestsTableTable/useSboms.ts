@@ -26,10 +26,10 @@ export function useManifests(initialPage: number, intialPageSize: number) {
   const [pageIndex, setPageIndex] = useState(initialPage || 0);
   const [pageSize, setPageSize] = useState(intialPageSize || 10);
 
-  const getSboms = useCallback(
+  const getManifests = useCallback(
     async ({ pageSize, pageIndex }: { pageSize: number; pageIndex: number }) => {
       try {
-        return await sbomerApi.getSboms({ pageSize, pageIndex });
+        return await sbomerApi.getManifests({ pageSize, pageIndex });
       } catch (e) {
         return Promise.reject(e);
       }
@@ -39,7 +39,7 @@ export function useManifests(initialPage: number, intialPageSize: number) {
 
   const { loading, value, error, retry } = useAsyncRetry(
     () =>
-      getSboms({
+      getManifests({
         pageSize: pageSize,
         pageIndex: pageIndex,
       }).then((data) => {

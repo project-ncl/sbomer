@@ -17,7 +17,7 @@
 ///
 
 import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
-import { SbomerGenerationRequest } from '@app/types';
+import { SbomerGeneration } from '@app/types';
 import { useCallback } from 'react';
 import { useAsync, useAsyncRetry } from 'react-use';
 
@@ -26,7 +26,7 @@ export function useGenerationRequestManifests(id: string) {
   const getManifests = useCallback(
     async (id: string) => {
       try {
-        return await sbomerApi.getSbomsForRequest(id);
+        return await sbomerApi.getManifestsForGeneration(id);
       } catch (e) {
         return Promise.reject(e);
       }

@@ -22,10 +22,10 @@ import { useAsyncRetry } from 'react-use';
 
 export function useGenerationRequest(id: string) {
   const sbomerApi = DefaultSbomerApi.getInstance();
-  const getGenerationRequest = useCallback(
+  const getGeneration = useCallback(
     async (id: string) => {
       try {
-        return await sbomerApi.getGenerationRequest(id);
+        return await sbomerApi.getGeneration(id);
       } catch (e) {
         return Promise.reject(e);
       }
@@ -39,10 +39,10 @@ export function useGenerationRequest(id: string) {
     error,
   } = useAsyncRetry(
     () =>
-      getGenerationRequest(id).then((data) => {
+      getGeneration(id).then((data) => {
         return data;
       }),
-    [getGenerationRequest, id],
+    [getGeneration, id],
   );
 
   return [

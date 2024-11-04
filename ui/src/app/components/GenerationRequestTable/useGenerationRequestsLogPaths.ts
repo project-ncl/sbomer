@@ -17,15 +17,15 @@
 ///
 
 import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
-import { SbomerGenerationRequest } from '@app/types';
+import { SbomerGeneration } from '@app/types';
 import { useCallback } from 'react';
 import { useAsync } from 'react-use';
 
-export function useGenerationRequestsLogPaths(request: SbomerGenerationRequest) {
+export function useGenerationRequestsLogPaths(request: SbomerGeneration) {
   const sbomerApi = DefaultSbomerApi.getInstance();
 
   const getLogPaths = useCallback(
-    async (request: SbomerGenerationRequest) => {
+    async (request: SbomerGeneration) => {
       try {
         return await sbomerApi.getLogPaths(request.id);
       } catch (e) {

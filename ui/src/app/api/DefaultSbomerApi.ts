@@ -17,7 +17,7 @@
 ///
 
 import axios, { Axios, AxiosError } from 'axios';
-import { GenerateParams, SbomerApi, SbomerGenerationRequest, SbomerSbom, SbomerStats } from '../types';
+import { SbomerApi, SbomerGeneration, SbomerManifest, SbomerStats } from '../types';
 
 type Options = {
   baseUrl: string;
@@ -67,7 +67,7 @@ export class DefaultSbomerApi implements SbomerApi {
     );
   }
 
-  async getSboms(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerSbom[]; total: number }> {
+  async getManifests(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerManifest[]; total: number }> {
     const response = await fetch(
       `${this.baseUrl}/api/v1beta1/manifests?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
@@ -80,20 +80,20 @@ export class DefaultSbomerApi implements SbomerApi {
 
     const data = await response.json();
 
-    const sboms: SbomerSbom[] = [];
+    const sboms: SbomerManifest[] = [];
 
     if (data.content) {
       data.content.forEach((sbom: any) => {
-        sboms.push(new SbomerSbom(sbom));
+        sboms.push(new SbomerManifest(sbom));
       });
     }
 
     return { data: sboms, total: data.totalHits };
   }
 
-  async getSbomsForRequest(generationRequestId: string): Promise<{ data: SbomerSbom[]; total: number }> {
+  async getManifestsForGeneration(generationId: string): Promise<{ data: SbomerManifest[]; total: number }> {
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/manifests?query=generationRequest.id==${generationRequestId}&pageSize=20&pageIndex=0`,
+      `${this.baseUrl}/api/v1beta1/manifests?query=generation.id==${generationId}&pageSize=20&pageIndex=0`,
     );
 
     if (response.status != 200) {
@@ -104,32 +104,32 @@ export class DefaultSbomerApi implements SbomerApi {
 
     const data = await response.json();
 
-    const sboms: SbomerSbom[] = [];
+    const sboms: SbomerManifest[] = [];
 
     if (data.content) {
       data.content.forEach((sbom: any) => {
-        sboms.push(new SbomerSbom(sbom));
+        sboms.push(new SbomerManifest(sbom));
       });
     }
 
     return { data: sboms, total: data.totalHits };
   }
 
-  async getSbom(id: string): Promise<SbomerSbom> {
-    const request = await this.client.get<SbomerSbom>(`/api/v1beta1/manifests/${id}`).then((response) => {
-      return response.data as SbomerSbom;
+  async getManifest(id: string): Promise<SbomerManifest> {
+    const request = await this.client.get<SbomerManifest>(`/api/v1beta1/manifests/${id}`).then((response) => {
+      return response.data as SbomerManifest;
     });
 
     return request;
   }
 
-  async getLogPaths(generationRequestId: string): Promise<Array<string>> {
-    const response = await this.client.get(`/api/v1beta1/generations/${generationRequestId}/logs`);
+  async getLogPaths(generationId: string): Promise<Array<string>> {
+    const response = await this.client.get(`/api/v1beta1/generations/${generationId}/logs`);
 
     if (response.status != 200) {
       throw new Error(
         'Failed to retrieve log paths for GenerationRequest ' +
-          generationRequestId +
+          generationId +
           ', got ' +
           response.status +
           " response: '" +
@@ -152,10 +152,10 @@ export class DefaultSbomerApi implements SbomerApi {
     return (await response.json()) as SbomerStats;
   }
 
-  async getGenerationRequests(pagination: {
+  async getGenerations(pagination: {
     pageSize: number;
     pageIndex: number;
-  }): Promise<{ data: SbomerGenerationRequest[]; total: number }> {
+  }): Promise<{ data: SbomerGeneration[]; total: number }> {
     const response = await fetch(
       `${this.baseUrl}/api/v1beta1/generations?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
@@ -170,22 +170,22 @@ export class DefaultSbomerApi implements SbomerApi {
 
     const data = await response.json();
 
-    const requests: SbomerGenerationRequest[] = [];
+    const requests: SbomerGeneration[] = [];
 
     if (data.content) {
       data.content.forEach((request: any) => {
-        requests.push(new SbomerGenerationRequest(request));
+        requests.push(new SbomerGeneration(request));
       });
     }
 
     return { data: requests, total: data.totalHits };
   }
 
-  async getGenerationRequest(id: string): Promise<SbomerGenerationRequest> {
+  async getGeneration(id: string): Promise<SbomerGeneration> {
     const request = await this.client
-      .get<SbomerGenerationRequest>(`/api/v1beta1/generations/${id}`)
+      .get<SbomerGeneration>(`/api/v1beta1/generations/${id}`)
       .then((response) => {
-        return response.data as SbomerGenerationRequest;
+        return response.data as SbomerGeneration;
       });
 
     return request;

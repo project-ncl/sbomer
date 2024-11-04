@@ -44,17 +44,17 @@ export type SbomerStats = {
     };
   };
   resources: {
-    generationRequests: {
+    generations: {
       total: number;
       inProgress: number;
     };
-    sboms: {
+    manifests: {
       total: number;
     };
   };
 };
 
-export class SbomerGenerationRequest {
+export class SbomerGeneration {
   public id: string;
   public status: string;
   public result: string;
@@ -78,12 +78,12 @@ export class SbomerGenerationRequest {
   }
 }
 
-export class SbomerSbom {
+export class SbomerManifest {
   public id: string;
   public identifier: string;
   public rootPurl: string;
   public creationTime: Date;
-  public generationRequest: SbomerGenerationRequest;
+  public generation: SbomerGeneration;
   public sbom: string;
 
   constructor(payload: any) {
@@ -91,7 +91,7 @@ export class SbomerSbom {
     this.identifier = payload.identifier;
     this.rootPurl = payload.rootPurl;
     this.creationTime = new Date(payload.creationTime);
-    this.generationRequest = new SbomerGenerationRequest(payload.generationRequest);
+    this.generation = new SbomerGeneration(payload.generation);
     this.sbom = payload.sbom;
   }
 }
@@ -103,17 +103,17 @@ export type GenerateParams = {
 export type SbomerApi = {
   getBaseUrl(): string;
   stats(): Promise<SbomerStats>;
-  getLogPaths(generationRequestId: string): Promise<Array<string>>;
+  getLogPaths(generationId: string): Promise<Array<string>>;
 
-  getGenerationRequests(pagination: {
+  getGenerations(pagination: {
     pageSize: number;
     pageIndex: number;
-  }): Promise<{ data: SbomerGenerationRequest[]; total: number }>;
+  }): Promise<{ data: SbomerGeneration[]; total: number }>;
 
-  getSboms(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerSbom[]; total: number }>;
-  getSbomsForRequest(generationRequestId: string): Promise<{ data: SbomerSbom[]; total: number }>;
+  getManifests(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerManifest[]; total: number }>;
+  getManifestsForGeneration(generationId: string): Promise<{ data: SbomerManifest[]; total: number }>;
 
-  getGenerationRequest(id: string): Promise<SbomerGenerationRequest>;
+  getGeneration(id: string): Promise<SbomerGeneration>;
 
-  getSbom(id: string): Promise<SbomerSbom>;
+  getManifest(id: string): Promise<SbomerManifest>;
 };

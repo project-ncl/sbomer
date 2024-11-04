@@ -74,7 +74,7 @@ export const ManifestsTable = () => {
                 <pre>{manifest.id}</pre>
               </Td>
               <Td dataLabel={columnNames.type}>
-                <pre>{manifest.generationRequest.type}</pre>
+                <pre>{manifest.generation.type}</pre>
               </Td>
               <Td dataLabel={columnNames.identifier}>
                 <Tooltip

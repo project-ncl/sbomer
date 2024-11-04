@@ -18,18 +18,14 @@
 package org.jboss.sbomer.core.dto.v1beta1;
 
 import java.time.Instant;
-import java.util.Map;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.jboss.sbomer.core.features.sbom.config.Config;
-
-public record V1Beta1SbomGenerationRequestRecord(
+public record V1Beta1BaseManifestRecord(
         String id,
         String identifier,
-        @Schema(implementation = Map.class) Config config,
-        String type,
+        String rootPurl,
         Instant creationTime,
-        String status,
-        String result,
-        String reason) {
+        Integer configIndex,
+        String statusMessage,
+        V1Beta1BaseGenerationRecord generation) {
+
 }

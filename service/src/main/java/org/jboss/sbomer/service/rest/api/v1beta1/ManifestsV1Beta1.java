@@ -27,7 +27,8 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseManifestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1ManifestRecord;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -100,7 +101,7 @@ public class ManifestsV1Beta1 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    public Page<BaseSbomRecord> searchSboms(
+    public Page<V1Beta1BaseManifestRecord> searchSboms(
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
@@ -111,7 +112,7 @@ public class ManifestsV1Beta1 {
                 rsqlQuery,
                 sort);
 
-        return sboms;
+        return mapper.toRecord(sboms);
     }
 
     @GET
@@ -129,7 +130,7 @@ public class ManifestsV1Beta1 {
     @APIResponse(
             responseCode = "200",
             description = "The manifest",
-            content = @Content(schema = @Schema(implementation = V1Beta1SbomRecord.class)))
+            content = @Content(schema = @Schema(implementation = V1Beta1ManifestRecord.class)))
     @APIResponse(
             responseCode = "400",
             description = "Could not parse provided arguments",
@@ -142,7 +143,7 @@ public class ManifestsV1Beta1 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    public V1Beta1SbomRecord getSbomById(@PathParam("id") String identifier) {
+    public V1Beta1ManifestRecord getSbomById(@PathParam("id") String identifier) {
         Sbom sbom = sbomService.get(identifier);
 
         if (sbom == null) {

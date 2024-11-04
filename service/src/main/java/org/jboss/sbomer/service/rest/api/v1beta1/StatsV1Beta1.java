@@ -21,7 +21,6 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord;
-import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.rest.mapper.V1Beta1Mapper;
 import org.jboss.sbomer.service.stats.StatsService;
 

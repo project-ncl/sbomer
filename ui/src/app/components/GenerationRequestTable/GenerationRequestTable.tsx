@@ -59,7 +59,7 @@ export const GenerationRequestTable = () => {
   return (
     <>
       <Table aria-label="Generation request table" variant="compact">
-        <Caption>Latest manifest generation requests</Caption>
+        <Caption>Latest manifest generations</Caption>
         <Thead>
           <Tr>
             <Th>{columnNames.status}</Th>
@@ -69,38 +69,38 @@ export const GenerationRequestTable = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {value.map((request) => (
-            <Tr key={request.id} isClickable onRowClick={() => history.push('/requests/' + request.id)}>
+          {value.map((generation) => (
+            <Tr key={generation.id} isClickable onRowClick={() => history.push('/requests/' + generation.id)}>
               <Td dataLabel={columnNames.status}>
                 <Tooltip
                   isContentLeftAligned={true}
                   content={
                     <div>
                       <div>
-                        <strong>{request.result}</strong>
+                        <strong>{generation.result}</strong>
                       </div>
-                      <div>{request.reason}</div>
+                      <div>{generation.reason}</div>
                     </div>
                   }
                 >
-                  <Label style={{ cursor: 'pointer' }} color={statusToColor(request)}>
-                    {statusToDescription(request)}
+                  <Label style={{ cursor: 'pointer' }} color={statusToColor(generation)}>
+                    {statusToDescription(generation)}
                   </Label>
 
                   {/* <span className="pf-v5-c-timestamp pf-m-help-text">{request.status}</span> */}
                 </Tooltip>
               </Td>
               <Td dataLabel={columnNames.type}>
-                <Tooltip isContentLeftAligned={true} content={<code>{request.identifier}</code>}>
-                  <span className="pf-v5-c-timestamp pf-m-help-text">{request.type}</span>
+                <Tooltip isContentLeftAligned={true} content={<code>{generation.identifier}</code>}>
+                  <span className="pf-v5-c-timestamp pf-m-help-text">{generation.type}</span>
                 </Tooltip>
               </Td>
               <Td dataLabel={columnNames.id}>
-                <pre>{request.id}</pre>
+                <pre>{generation.id}</pre>
               </Td>
               <Td dataLabel={columnNames.creationTime}>
-                <Timestamp date={request.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - request.creationTime.getTime(), false, 'ago')}
+                <Timestamp date={generation.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                  {timestampToHumanReadable(Date.now() - generation.creationTime.getTime(), false, 'ago')}
                 </Timestamp>
               </Td>
             </Tr>

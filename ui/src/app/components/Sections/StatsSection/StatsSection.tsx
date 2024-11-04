@@ -29,13 +29,12 @@ const StatisticsContent = (props: { stats: SbomerStats }) => {
       >
         <DescriptionListGroup>
           <DescriptionListTerm>Manifests</DescriptionListTerm>
-          <DescriptionListDescription>{props.stats.resources.sboms.total}</DescriptionListDescription>
+          <DescriptionListDescription>{props.stats.resources.manifests.total}</DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
-          <DescriptionListTerm>Generation requests</DescriptionListTerm>
+          <DescriptionListTerm>Generations</DescriptionListTerm>
           <DescriptionListDescription>
-            {props.stats.resources.generationRequests.total} ({props.stats.resources.generationRequests.inProgress} in
-            progress)
+            {props.stats.resources.generations.total} ({props.stats.resources.generations.inProgress} in progress)
           </DescriptionListDescription>
         </DescriptionListGroup>
 
@@ -50,28 +49,33 @@ const StatisticsContent = (props: { stats: SbomerStats }) => {
           <DescriptionListTerm>Uptime</DescriptionListTerm>
           <DescriptionListDescription>{timestampToHumanReadable(props.stats.uptimeMillis)}</DescriptionListDescription>
         </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>PNC Processed messages</DescriptionListTerm>
-          <DescriptionListDescription>
-            {props.stats.messaging.pncConsumer.processed} out of {props.stats.messaging.pncConsumer.received} (
-            {props.stats.messaging.pncConsumer.received - props.stats.messaging.pncConsumer.processed} failed to
-            process)
-          </DescriptionListDescription>
-        </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>Errata Processed messages</DescriptionListTerm>
-          <DescriptionListDescription>
-            {props.stats.messaging.errataConsumer.processed} out of {props.stats.messaging.errataConsumer.received} (
-            {props.stats.messaging.errataConsumer.received - props.stats.messaging.errataConsumer.processed} failed to
-            process)
-          </DescriptionListDescription>
-        </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>Produced messages</DescriptionListTerm>
-          <DescriptionListDescription>
-            {props.stats.messaging.producer.acked} ({props.stats.messaging.producer.nacked} failed to send)
-          </DescriptionListDescription>
-        </DescriptionListGroup>
+
+        {props.stats.messaging && (
+          <>
+            <DescriptionListGroup>
+              <DescriptionListTerm>PNC Processed messages</DescriptionListTerm>
+              <DescriptionListDescription>
+                {props.stats.messaging.pncConsumer.processed} out of {props.stats.messaging.pncConsumer.received} (
+                {props.stats.messaging.pncConsumer.received - props.stats.messaging.pncConsumer.processed} failed to
+                process)
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+            <DescriptionListGroup>
+              <DescriptionListTerm>Errata Processed messages</DescriptionListTerm>
+              <DescriptionListDescription>
+                {props.stats.messaging.errataConsumer.processed} out of {props.stats.messaging.errataConsumer.received}{' '}
+                ({props.stats.messaging.errataConsumer.received - props.stats.messaging.errataConsumer.processed} failed
+                to process)
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+            <DescriptionListGroup>
+              <DescriptionListTerm>Produced messages</DescriptionListTerm>
+              <DescriptionListDescription>
+                {props.stats.messaging.producer.acked} ({props.stats.messaging.producer.nacked} failed to send)
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+          </>
+        )}
       </DescriptionList>
     </>
   );
