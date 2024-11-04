@@ -19,9 +19,35 @@ package org.jboss.sbomer.service.rest.mapper;
 
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsDeploymentRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsMessagingRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResourceGenerationsRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResourceManifestsRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResourceRecord;
+import org.jboss.sbomer.service.feature.sbom.model.Stats;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.Deployment;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.GenerationRequestStats;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.Messaging;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.Resources;
+import org.jboss.sbomer.service.feature.sbom.model.Stats.SbomStats;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(config = MapperConfig.class)
 public interface V1Beta1Mapper extends EntityMapper<V1Beta1SbomRecord, V1Beta1SbomGenerationRequestRecord> {
 
+    V1Beta1StatsDeploymentRecord toRecord(Deployment deployment);
+
+    V1Beta1StatsResourceGenerationsRecord toRecord(GenerationRequestStats stats);
+
+    V1Beta1StatsResourceManifestsRecord toRecord(SbomStats stats);
+
+    V1Beta1StatsMessagingRecord toRecord(Messaging messaging);
+
+    @Mapping(target = "manifests", source = "resources.sboms")
+    @Mapping(target = "generations", source = "resources.generationRequests")
+    V1Beta1StatsResourceRecord toRecord(Resources resources);
+
+    V1Beta1StatsRecord toRecord(Stats stats);
 }
