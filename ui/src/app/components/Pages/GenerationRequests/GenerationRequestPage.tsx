@@ -1,6 +1,6 @@
 import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
 import { useGenerationRequestsLogPaths } from '@app/components/GenerationRequestTable/useGenerationRequestsLogPaths';
-import { SbomerGenerationRequest } from '@app/types';
+import { SbomerGeneration } from '@app/types';
 import { resultToDescription, statusToColor, statusToDescription, typeToDescription } from '@app/utils/Utils';
 import { LazyLog } from '@melloware/react-logviewer';
 import {
@@ -42,7 +42,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useGenerationRequest } from './useGenerationRequest';
 import { useGenerationRequestManifests } from './useGenerationRequestManifests';
 
-const Logs = ({ request }: { request: SbomerGenerationRequest }) => {
+const Logs = ({ request }: { request: SbomerGeneration }) => {
   const [{ logPaths, loading, error }] = useGenerationRequestsLogPaths(request);
 
   if (error) {
@@ -88,7 +88,7 @@ const Logs = ({ request }: { request: SbomerGenerationRequest }) => {
   );
 };
 
-const GeneratedManifests = ({ request }: { request: SbomerGenerationRequest }) => {
+const GeneratedManifests = ({ request }: { request: SbomerGeneration }) => {
   const [{ manifests, total, loading, error }] = useGenerationRequestManifests(request.id);
 
   if (error) {

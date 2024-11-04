@@ -17,8 +17,15 @@
  */
 package org.jboss.sbomer.service.rest.mapper;
 
+import java.util.Collection;
+
+import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.mapstruct.Mapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,5 +33,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 @Mapper(config = MapperConfig.class)
 @ApplicationScoped
 public interface V1Alpha3Mapper extends EntityMapper<SbomRecord, SbomGenerationRequestRecord> {
+    Page<BaseSbomRecord> sbomsToBaseRecordPage(Page<Sbom> sboms);
 
+    Collection<BaseSbomGenerationRequestRecord> requestsToBaseRecords(Collection<SbomGenerationRequest> requests);
+
+    Page<BaseSbomGenerationRequestRecord> requestsToBaseRecordPage(Page<SbomGenerationRequest> requests);
 }

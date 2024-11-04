@@ -17,29 +17,54 @@
  */
 package org.jboss.sbomer.service.rest.mapper;
 
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomRecord;
+import java.util.Collection;
+
+import org.jboss.sbomer.core.dto.BaseSbomRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseGenerationRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseManifestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1ManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsDeploymentRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsMessagingRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResourceGenerationsRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResourceManifestsRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResourceRecord;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Deployment;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.GenerationRequestStats;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Messaging;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.Resources;
 import org.jboss.sbomer.service.feature.sbom.model.Stats.SbomStats;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(config = MapperConfig.class)
-public interface V1Beta1Mapper extends EntityMapper<V1Beta1SbomRecord, V1Beta1SbomGenerationRequestRecord> {
+public interface V1Beta1Mapper extends EntityMapper<V1Beta1ManifestRecord, V1Beta1GenerationRecord> {
+
+    @Override
+    @Mapping(target = "generation", source = "sbom.generationRequest")
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    V1Beta1ManifestRecord toRecord(Sbom sbom);
+
+    Page<V1Beta1ManifestRecord> sbomsToBaseRecordPage(Page<Sbom> sboms);
+
+    Collection<V1Beta1BaseGenerationRecord> requestsToBaseRecords(Collection<SbomGenerationRequest> requests);
+
+    Page<V1Beta1GenerationRecord> generationsToRecordPage(Page<SbomGenerationRequest> requests);
 
     V1Beta1StatsDeploymentRecord toRecord(Deployment deployment);
 
     V1Beta1StatsResourceGenerationsRecord toRecord(GenerationRequestStats stats);
+
+    @Mapping(target = "generation", source = "generationRequest")
+    V1Beta1BaseManifestRecord toRecord(BaseSbomRecord baseSbom);
+
+    Page<V1Beta1BaseManifestRecord> toRecord(Page<BaseSbomRecord> sboms);
 
     V1Beta1StatsResourceManifestsRecord toRecord(SbomStats stats);
 

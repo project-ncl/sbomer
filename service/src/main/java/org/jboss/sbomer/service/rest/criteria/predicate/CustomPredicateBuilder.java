@@ -127,6 +127,11 @@ public class CustomPredicateBuilder<T> {
             comparison = comparison.withSelector("identifier");
         }
 
+        if ((startRoot.getJavaType().equals(Sbom.class)) && comparison.getSelector().startsWith("generation.")) {
+            log.debug("Ensuring new 'generation' selector works with 'generationRequest'");
+            comparison = comparison.withSelector(comparison.getSelector().replace("generation.", "generationRequest."));
+        }
+
         Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, ema, misc);
 
         if ((AbstractCriteriaAwareRepository.IS_NULL.equals(comparison.getOperator())

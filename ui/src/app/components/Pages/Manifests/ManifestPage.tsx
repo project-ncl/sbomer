@@ -107,9 +107,9 @@ const ManifestPage: React.FunctionComponent = () => {
             <DescriptionListGroup>
               <DescriptionListTerm>Type</DescriptionListTerm>
               <DescriptionListDescription>
-                <Tooltip content={manifest.generationRequest.type}>
+                <Tooltip content={manifest.generation.type}>
                   <Label style={{ cursor: 'pointer' }} color="purple">
-                    {typeToDescription(manifest.generationRequest)}
+                    {typeToDescription(manifest.generation)}
                   </Label>
                 </Tooltip>
               </DescriptionListDescription>
@@ -129,9 +129,9 @@ const ManifestPage: React.FunctionComponent = () => {
                   variant="link"
                   icon={<ExternalLinkSquareAltIcon />}
                   iconPosition="end"
-                  component={(props: any) => <Link {...props} to={`/requests/${manifest.generationRequest.id}`} />}
+                  component={(props: any) => <Link {...props} to={`/requests/${manifest.generation.id}`} />}
                 >
-                  {manifest.generationRequest.id}
+                  {manifest.generation.id}
                 </Button>
               </DescriptionListDescription>
             </DescriptionListGroup>

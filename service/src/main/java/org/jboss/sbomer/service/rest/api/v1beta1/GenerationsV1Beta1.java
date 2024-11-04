@@ -38,8 +38,8 @@ import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
-import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1SbomGenerationRequestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseGenerationRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
@@ -143,7 +143,7 @@ public class GenerationsV1Beta1 {
     @APIResponse(
             responseCode = "202",
             description = "Manifest generation successfully requested",
-            content = @Content(schema = @Schema(implementation = V1Beta1SbomGenerationRequestRecord.class)))
+            content = @Content(schema = @Schema(implementation = V1Beta1GenerationRecord.class)))
     @APIResponse(
             responseCode = "500",
             description = "Internal server error",
@@ -217,7 +217,7 @@ public class GenerationsV1Beta1 {
             description = "The generation request",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = V1Beta1SbomGenerationRequestRecord.class)))
+                    schema = @Schema(implementation = V1Beta1GenerationRecord.class)))
     @APIResponse(
             responseCode = "400",
             description = "Malformed request",
@@ -236,7 +236,7 @@ public class GenerationsV1Beta1 {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = ErrorResponse.class)))
-    public V1Beta1SbomGenerationRequestRecord getGenerationRequestById(@PathParam("id") String generationRequestId) {
+    public V1Beta1GenerationRecord getGenerationRequestById(@PathParam("id") String generationRequestId) {
         SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId); // NOSONAR
 
         if (generationRequest == null) {
@@ -275,7 +275,7 @@ public class GenerationsV1Beta1 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Page<BaseSbomGenerationRequestRecord> searchGenerationRequests(
+    public Page<V1Beta1GenerationRecord> searchGenerationRequests(
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
@@ -285,7 +285,7 @@ public class GenerationsV1Beta1 {
                 rsqlQuery,
                 sort);
 
-        return mapper.requestsToBaseRecordPage(requests);
+        return mapper.generationsToRecordPage(requests);
     }
 
     @DELETE

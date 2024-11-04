@@ -16,7 +16,7 @@
 /// limitations under the License.
 ///
 
-import { SbomerGenerationRequest } from '@app/types';
+import { SbomerGeneration } from '@app/types';
 import { Label } from '@patternfly/react-core';
 
 const GenerationRequestTypes = new Map<string, { description?: string }>([
@@ -82,19 +82,19 @@ export function timestampToHumanReadable(millis: number, seconds?: false, suffix
   return hrd;
 }
 
-export function typeToDescription(request: SbomerGenerationRequest): string {
+export function typeToDescription(request: SbomerGeneration): string {
   var resolved = GenerationRequestTypes.get(request.type);
 
   return resolved?.description ?? request.type;
 }
 
-export function statusToDescription(request: SbomerGenerationRequest): string {
+export function statusToDescription(request: SbomerGeneration): string {
   var resolved = GenerationRequestStatuses.get(request.status);
 
   return resolved?.description ?? request.status;
 }
 
-export function resultToDescription(request: SbomerGenerationRequest): string {
+export function resultToDescription(request: SbomerGeneration): string {
   if (request.result == null) {
     return 'In progress';
   }
@@ -104,7 +104,7 @@ export function resultToDescription(request: SbomerGenerationRequest): string {
   return resolved?.description ?? request.result;
 }
 
-export function statusToColor(request: SbomerGenerationRequest): React.ComponentProps<typeof Label>['color'] {
+export function statusToColor(request: SbomerGeneration): React.ComponentProps<typeof Label>['color'] {
   if (!isInProgress(request)) {
     return isSuccess(request) ? 'green' : 'red';
   }
@@ -112,13 +112,13 @@ export function statusToColor(request: SbomerGenerationRequest): React.Component
   return 'grey';
 }
 
-export function resultToColor(request: SbomerGenerationRequest): React.ComponentProps<typeof Label>['color'] {
+export function resultToColor(request: SbomerGeneration): React.ComponentProps<typeof Label>['color'] {
   var resolved = GenerationRequestResults.get(request.result);
 
   return resolved?.color ?? 'blue';
 }
 
-export function isInProgress(request: SbomerGenerationRequest): boolean {
+export function isInProgress(request: SbomerGeneration): boolean {
   if (request.status == 'FINISHED' || request.status == 'FAILED') {
     return false;
   }
@@ -126,6 +126,6 @@ export function isInProgress(request: SbomerGenerationRequest): boolean {
   return true;
 }
 
-export function isSuccess(request: SbomerGenerationRequest): boolean {
+export function isSuccess(request: SbomerGeneration): boolean {
   return request.result == 'SUCCESS' ? true : false;
 }

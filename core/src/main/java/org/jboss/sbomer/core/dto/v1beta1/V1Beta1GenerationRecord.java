@@ -15,20 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.rest.mapper;
+package org.jboss.sbomer.core.dto.v1beta1;
 
-import java.util.Collection;
+import java.time.Instant;
+import java.util.Map;
 
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.mapstruct.BeanMapping;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 
-public interface EntityMapper<S extends Record, R extends Record> {
-    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
-    S toRecord(Sbom sboms);
-
-    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
-    R toRecord(SbomGenerationRequest request);
-
-    Collection<R> requestsToRecords(Collection<SbomGenerationRequest> requests);
+public record V1Beta1GenerationRecord(
+        String id,
+        String identifier,
+        @Schema(implementation = Map.class) Config config,
+        String type,
+        Instant creationTime,
+        String status,
+        String result,
+        String reason) {
 }
