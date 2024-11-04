@@ -23,8 +23,8 @@ import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.test.integ.rest.StatsResourceIT.CustomConfig;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -62,41 +62,86 @@ class StatsResourceIT {
     @InjectSpy
     SbomService sbomService;
 
-    @ParameterizedTest
-    @EnumSource(TestableApiVersion.class)
-    void testEmptyStatsEndpoint(TestableApiVersion apiVersion) {
-        RestAssured.given()
-                .when()
-                .get(String.format("/api/%s/stats", apiVersion))
-                .then()
-                .statusCode(200)
-                .body("resources.sboms.total", CoreMatchers.is(2))
-                .body("resources.generationRequests.total", CoreMatchers.is(2))
-                .body("resources.generationRequests.inProgress", CoreMatchers.is(0))
-                .body("uptime", CoreMatchers.isA(String.class))
-                .body("uptimeMillis", CoreMatchers.isA(Integer.class))
-                .body("version", CoreMatchers.isA(String.class))
-                .body("appEnv", CoreMatchers.is("prod"))
-                .body("hostname", CoreMatchers.is("localhost"))
-                .body("deployment.target", CoreMatchers.is("aws"))
-                .body("deployment.type", CoreMatchers.is("preprod"))
-                .body("deployment.zone", CoreMatchers.is("us-east-1"))
-                .body("release", CoreMatchers.is("sbomer-abc"));
+    @Nested
+    class V1Alpha3 {
+
+        final String apiVersion = "v1alpha3";
+
+        @Test
+        void testEmptyStatsEndpoint() {
+            RestAssured.given()
+                    .when()
+                    .get(String.format("/api/%s/stats", apiVersion))
+                    .then()
+                    .statusCode(200)
+                    .body("resources.sboms.total", CoreMatchers.is(2))
+                    .body("resources.generationRequests.total", CoreMatchers.is(2))
+                    .body("resources.generationRequests.inProgress", CoreMatchers.is(0))
+                    .body("uptime", CoreMatchers.isA(String.class))
+                    .body("uptimeMillis", CoreMatchers.isA(Integer.class))
+                    .body("version", CoreMatchers.isA(String.class))
+                    .body("appEnv", CoreMatchers.is("prod"))
+                    .body("hostname", CoreMatchers.is("localhost"))
+                    .body("deployment.target", CoreMatchers.is("aws"))
+                    .body("deployment.type", CoreMatchers.is("preprod"))
+                    .body("deployment.zone", CoreMatchers.is("us-east-1"))
+                    .body("release", CoreMatchers.is("sbomer-abc"));
+        }
+
+        @Test
+        void testStatsEndpoint() {
+            Mockito.when(sbomService.countSboms()).thenReturn(12l);
+            Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
+
+            RestAssured.given()
+                    .when()
+                    .get(String.format("/api/%s/stats", apiVersion))
+                    .then()
+                    .statusCode(200)
+                    .body("resources.sboms.total", CoreMatchers.is(12))
+                    .body("resources.generationRequests.total", CoreMatchers.is(500));
+        }
     }
 
-    @ParameterizedTest
-    @EnumSource(TestableApiVersion.class)
-    void testStatsEndpoint(TestableApiVersion apiVersion) {
-        Mockito.when(sbomService.countSboms()).thenReturn(12l);
-        Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
+    @Nested
+    class V1Beta1 {
 
-        RestAssured.given()
-                .when()
-                .get(String.format("/api/%s/stats", apiVersion))
-                .then()
-                .statusCode(200)
-                .body("resources.sboms.total", CoreMatchers.is(12))
-                .body("resources.generationRequests.total", CoreMatchers.is(500));
+        final String apiVersion = "v1beta1";
+
+        @Test
+        void testEmptyStatsEndpoint() {
+            RestAssured.given()
+                    .when()
+                    .get(String.format("/api/%s/stats", apiVersion))
+                    .then()
+                    .statusCode(200)
+                    .body("resources.manifests.total", CoreMatchers.is(2))
+                    .body("resources.generations.total", CoreMatchers.is(2))
+                    .body("resources.generations.inProgress", CoreMatchers.is(0))
+                    .body("uptime", CoreMatchers.isA(String.class))
+                    .body("uptimeMillis", CoreMatchers.isA(Integer.class))
+                    .body("version", CoreMatchers.isA(String.class))
+                    .body("appEnv", CoreMatchers.is("prod"))
+                    .body("hostname", CoreMatchers.is("localhost"))
+                    .body("deployment.target", CoreMatchers.is("aws"))
+                    .body("deployment.type", CoreMatchers.is("preprod"))
+                    .body("deployment.zone", CoreMatchers.is("us-east-1"))
+                    .body("release", CoreMatchers.is("sbomer-abc"));
+        }
+
+        @Test
+        void testStatsEndpoint() {
+            Mockito.when(sbomService.countSboms()).thenReturn(12l);
+            Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
+
+            RestAssured.given()
+                    .when()
+                    .get(String.format("/api/%s/stats", apiVersion))
+                    .then()
+                    .statusCode(200)
+                    .body("resources.manifests.total", CoreMatchers.is(12))
+                    .body("resources.generations.total", CoreMatchers.is(500));
+        }
     }
 
 }

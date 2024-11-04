@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.rest.api.v1beta1;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.rest.mapper.V1Beta1Mapper;
 import org.jboss.sbomer.service.stats.StatsService;
@@ -49,8 +50,8 @@ public class StatsV1Beta1 {
     @GET
     @Operation(summary = "Retrieve service runtime information", description = "Service information and statistics.")
     @APIResponse(responseCode = "200", description = "Available runtime information")
-    public Stats getStats() {
-        return statsService.getStats();
+    public V1Beta1StatsRecord getStats() {
+        return mapper.toRecord(statsService.getStats());
     }
 
 }
