@@ -105,19 +105,6 @@ class RestResourceIT {
 
     @ParameterizedTest
     @EnumSource(TestableApiVersion.class)
-    void testExistenceOfSbomsEndpoint(TestableApiVersion apiVersion) {
-        Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
-        given().when()
-                .get(apiVersion.manifestsPath())
-                .then()
-                .statusCode(200)
-                .body("totalHits", CoreMatchers.is(2))
-                .and()
-                .body("content[0].generationRequest.id", CoreMatchers.is("AASSBB"));
-    }
-
-    @ParameterizedTest
-    @EnumSource(TestableApiVersion.class)
     void testListSbomsPageParams(TestableApiVersion apiVersion) {
         Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(1, 20, null, null)).thenReturn(new Page<>());
         given().when()
@@ -230,6 +217,18 @@ class RestResourceIT {
         }
 
         @Test
+        void testExistenceOfSbomsEndpoint() {
+            Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
+            given().when()
+                    .get("/api/v1alpha3/sboms")
+                    .then()
+                    .statusCode(200)
+                    .body("totalHits", CoreMatchers.is(2))
+                    .and()
+                    .body("content[0].generationRequest.id", CoreMatchers.is("AASSBB"));
+        }
+
+        @Test
         void shouldNotStartGenerationForAGivenPncBuildWithEmptyJsonConfig() {
             given().body("{}")
                     .when()
@@ -313,6 +312,18 @@ class RestResourceIT {
                     .body("errorId", CoreMatchers.isA(String.class))
                     .and()
                     .body("error", CoreMatchers.equalTo("Bad Request"));
+        }
+
+        @Test
+        void testExistenceOfSbomsEndpoint() {
+            Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
+            given().when()
+                    .get("/api/v1beta1/manifests")
+                    .then()
+                    .statusCode(200)
+                    .body("totalHits", CoreMatchers.is(2))
+                    .and()
+                    .body("content[0].generation.id", CoreMatchers.is("AASSBB"));
         }
 
         @Test
