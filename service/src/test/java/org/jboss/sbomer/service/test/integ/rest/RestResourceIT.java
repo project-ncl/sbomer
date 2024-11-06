@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.test.integ.rest;
 
 import static io.restassured.RestAssured.given;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -30,6 +31,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hamcrest.CoreMatchers;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
+import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -38,6 +41,7 @@ import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig.UmbProducerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
@@ -48,6 +52,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -213,7 +218,7 @@ class RestResourceIT {
                     .and()
                     .body("type", CoreMatchers.equalTo("BUILD"))
                     .and()
-                    .body("status", CoreMatchers.is("NEW"));
+                    .body("status", CoreMatchers.is("INITIALIZING"));
         }
 
         @Test
@@ -439,7 +444,11 @@ class RestResourceIT {
 
         @Test
         void shouldRequestAdvisory() {
-            when(advisoryService.generateFromAdvisory(eq("12345"))).thenReturn(
+
+            ArgumentMatcher<RequestEvent> hasAdvisoryId = cfg -> cfg != null
+                    && "12345".equals(((ErrataAdvisoryRequestConfig) cfg.getRequestConfig()).getAdvisoryId());
+
+            when(advisoryService.generateFromAdvisory(argThat(hasAdvisoryId))).thenReturn(
                     List.of(
                             SbomGenerationRequest.builder()
                                     .withId("SOMEID")

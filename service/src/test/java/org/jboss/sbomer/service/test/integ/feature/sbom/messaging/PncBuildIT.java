@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -29,6 +30,9 @@ import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.eclipse.microprofile.reactive.messaging.spi.Connector;
+import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
+import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
+import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -40,6 +44,8 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncDelA
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.test.PncWireMock;
@@ -47,6 +53,8 @@ import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -96,9 +104,7 @@ class PncBuildIT {
 
         builds.send(txgMsg);
 
-        ArgumentCaptor<Message<String>> msgArgumentCaptor = ArgumentCaptor.forClass(Message.class);
-        ArgumentCaptor<GenerationRequestType> msgTypeArgumentCaptor = ArgumentCaptor
-                .forClass(GenerationRequestType.class);
+        ArgumentCaptor<RequestEvent> requestEventArgumentCaptor = ArgumentCaptor.forClass(RequestEvent.class);
 
         Awaitility.await().atMost(30, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
             List<ConfigMap> configMaps = kubernetesClient.configMaps().list().getItems();
@@ -115,16 +121,29 @@ class PncBuildIT {
             return false;
         });
 
-        verify(handler, times(1)).handle(msgArgumentCaptor.capture(), msgTypeArgumentCaptor.capture());
-        List<Message<String>> messages = msgArgumentCaptor.getAllValues();
-        List<GenerationRequestType> messageTypes = msgTypeArgumentCaptor.getAllValues();
+        verify(handler, times(1)).handle(requestEventArgumentCaptor.capture());
 
-        assertEquals(1, messages.size());
-        assertEquals(1, messageTypes.size());
-        assertEquals(GenerationRequestType.BUILD, messageTypes.get(0));
+        // Verify request event type
+        List<RequestEvent> requestEvents = requestEventArgumentCaptor.getAllValues();
+        assertEquals(1, requestEvents.size());
+        RequestEvent requestEvent = requestEvents.get(0);
+        assertEquals(RequestEventType.UMB, requestEvent.getEventType());
 
+        // Verify request config
+        RequestConfig requestConfig = requestEvent.getRequestConfig();
+        assertTrue(requestConfig instanceof PncBuildRequestConfig);
+        PncBuildRequestConfig pncBuildRequestConfig = (PncBuildRequestConfig) requestConfig;
+        assertEquals("AX5TJMYHQAIAE", pncBuildRequestConfig.getBuildId());
+
+        // Verify event
+        JsonNode event = requestEvent.getEvent();
+        assertEquals(PncBuildRequestConfig.TYPE_NAME, event.get(RequestEvent.EVENT_KEY_UMB_MSG_TYPE).asText());
+        JsonNode msgNode = event.get(RequestEvent.EVENT_KEY_UMB_MSG);
+
+        // Verify msg
+        String msg = msgNode.isTextual() ? msgNode.textValue() : msgNode.toString();
         PncBuildNotificationMessageBody buildMsgBody = ObjectMapperProvider.json()
-                .readValue(String.valueOf(messages.get(0).getPayload()), PncBuildNotificationMessageBody.class);
+                .readValue(msg, PncBuildNotificationMessageBody.class);
 
         // See "payloads/umb-pnc-build-body.json" file
         assertEquals(buildMsgBody.getBuild().getId(), "AX5TJMYHQAIAE");
@@ -139,9 +158,7 @@ class PncBuildIT {
 
         builds.send(txgMsg);
 
-        ArgumentCaptor<Message<String>> msgArgumentCaptor = ArgumentCaptor.forClass(Message.class);
-        ArgumentCaptor<GenerationRequestType> msgTypeArgumentCaptor = ArgumentCaptor
-                .forClass(GenerationRequestType.class);
+        ArgumentCaptor<RequestEvent> requestEventArgumentCaptor = ArgumentCaptor.forClass(RequestEvent.class);
 
         Awaitility.await().atMost(30, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
             List<ConfigMap> configMaps = kubernetesClient.configMaps().list().getItems();
@@ -158,20 +175,33 @@ class PncBuildIT {
             return false;
         });
 
-        verify(handler, times(1)).handle(msgArgumentCaptor.capture(), msgTypeArgumentCaptor.capture());
-        List<Message<String>> messages = msgArgumentCaptor.getAllValues();
-        List<GenerationRequestType> messageTypes = msgTypeArgumentCaptor.getAllValues();
+        verify(handler, times(1)).handle(requestEventArgumentCaptor.capture());
 
-        assertEquals(1, messages.size());
-        assertEquals(1, messageTypes.size());
-        assertEquals(GenerationRequestType.OPERATION, messageTypes.get(0));
+        // Verify request event type
+        List<RequestEvent> requestEvents = requestEventArgumentCaptor.getAllValues();
+        assertEquals(1, requestEvents.size());
+        RequestEvent requestEvent = requestEvents.get(0);
+        assertEquals(RequestEventType.UMB, requestEvent.getEventType());
 
-        PncDelAnalysisNotificationMessageBody buildMsgBody = ObjectMapperProvider.json()
-                .readValue(String.valueOf(messages.get(0).getPayload()), PncDelAnalysisNotificationMessageBody.class);
+        // Verify request config
+        RequestConfig requestConfig = requestEvent.getRequestConfig();
+        assertTrue(requestConfig instanceof PncOperationRequestConfig);
+        PncOperationRequestConfig pncOperationRequestConfig = (PncOperationRequestConfig) requestConfig;
+        assertEquals("A6DFVW2SACIAA", pncOperationRequestConfig.getOperationId());
 
-        // See "payloads/umb-pnc-build-body.json" file
-        assertEquals(buildMsgBody.getOperationId(), "A6DFVW2SACIAA");
-        assertEquals(buildMsgBody.getMilestoneId(), "2712");
+        // Verify event
+        JsonNode event = requestEvent.getEvent();
+        assertEquals(PncOperationRequestConfig.TYPE_NAME, event.get(RequestEvent.EVENT_KEY_UMB_MSG_TYPE).asText());
+        JsonNode msgNode = event.get(RequestEvent.EVENT_KEY_UMB_MSG);
+
+        // Verify msg
+        String msg = msgNode.isTextual() ? msgNode.textValue() : msgNode.toString();
+        PncDelAnalysisNotificationMessageBody operationMsgBody = ObjectMapperProvider.json()
+                .readValue(msg, PncDelAnalysisNotificationMessageBody.class);
+
+        // See "payloads/umb-pnc-del-analysis-body.json" file
+        assertEquals(operationMsgBody.getOperationId(), "A6DFVW2SACIAA");
+        assertEquals(operationMsgBody.getMilestoneId(), "2712");
     }
 
     @Test

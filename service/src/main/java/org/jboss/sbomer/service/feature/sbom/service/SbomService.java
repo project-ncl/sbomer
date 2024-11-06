@@ -276,27 +276,25 @@ public class SbomService {
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
-            if (config.getProducts().size() > 0) {
-                log.debug("Adjusting product configuration ...");
+            log.debug("Adjusting product configuration ...");
 
-                SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
-                sbomerConfigProvider.adjust(config);
+            SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+            sbomerConfigProvider.adjust(config);
 
-                ValidationResult validationResult = configSchemaValidator.validate(config);
+            ValidationResult validationResult = configSchemaValidator.validate(config);
 
-                if (!validationResult.isValid()) {
-                    throw new ValidationException("Provided config is not valid", validationResult.getErrors());
-                }
+            if (!validationResult.isValid()) {
+                throw new ValidationException("Provided config is not valid", validationResult.getErrors());
+            }
 
-                // We still need to ensure whether the provided config is valid and if we need to set some defaults.
-                // This is why we set it to INITIALIZING and not INITIALIZED
-                req.setStatus(SbomGenerationStatus.INITIALIZING);
+            // We still need to ensure whether the provided config is valid and if we need to set some defaults.
+            // This is why we set it to INITIALIZING and not INITIALIZED
+            req.setStatus(SbomGenerationStatus.INITIALIZING);
 
-                try {
-                    req.setConfig(ObjectMapperProvider.json().writeValueAsString(config));
-                } catch (JsonProcessingException e) {
-                    throw new ApplicationException("Unable to serialize provided configuration into JSON", e);
-                }
+            try {
+                req.setConfig(ObjectMapperProvider.json().writeValueAsString(config));
+            } catch (JsonProcessingException e) {
+                throw new ApplicationException("Unable to serialize provided configuration into JSON", e);
             }
 
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
