@@ -36,7 +36,15 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeName("image")
+@JsonTypeName(ImageRequestConfig.TYPE_NAME)
 public class ImageRequestConfig extends RequestConfig {
+
+    public static final String TYPE_NAME = "image";
+
+    {
+        this.type = TYPE_NAME;
+    }
+
     String image;
+
 }

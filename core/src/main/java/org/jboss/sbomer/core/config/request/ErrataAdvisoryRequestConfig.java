@@ -34,8 +34,15 @@ import lombok.extern.jackson.Jacksonized;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeName("errata-advisory")
+@JsonTypeName(ErrataAdvisoryRequestConfig.TYPE_NAME)
 public class ErrataAdvisoryRequestConfig extends RequestConfig {
+
+    public static final String TYPE_NAME = "errata-advisory";
+
+    {
+        this.type = TYPE_NAME;
+    }
+
     /**
      * Advisory identifier (number or name).
      */

@@ -36,7 +36,14 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeName("pnc-build")
+@JsonTypeName(PncBuildRequestConfig.TYPE_NAME)
 public class PncBuildRequestConfig extends RequestConfig {
+
+    public static final String TYPE_NAME = "pnc-build";
+
+    {
+        this.type = TYPE_NAME;
+    }
+
     String buildId;
 }
