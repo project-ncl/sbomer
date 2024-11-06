@@ -17,3 +17,5 @@
 --
 
 CREATE domain IF NOT EXISTS "JSONB" AS json;
+
+CREATE ALIAS IF NOT EXISTS JSON_EXTRACT FOR "org.jboss.sbomer.core.utils.h2.JsonUtils.jsonExtract";
