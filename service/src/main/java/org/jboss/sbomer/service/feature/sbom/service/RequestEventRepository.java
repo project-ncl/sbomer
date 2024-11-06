@@ -49,7 +49,8 @@ public class RequestEventRepository implements PanacheRepository<RequestEvent> {
     }
 
     public long countAllUMBEventsFrom(UMBConsumer consumer) {
-        String q = "SELECT * FROM request WHERE event_type = :event_type " + " AND event ->> 'consumer' = :consumer";
+        String q = "SELECT COUNT(*) FROM request WHERE event_type = :event_type "
+                + " AND event ->> 'consumer' = :consumer";
 
         return ((Number) getEntityManager().createNativeQuery(q)
                 .setParameter(RequestEvent.REQUEST_EVENT_TYPE, RequestEventType.UMB.name())
