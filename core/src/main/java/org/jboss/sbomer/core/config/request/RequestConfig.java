@@ -61,4 +61,5 @@ public abstract class RequestConfig {
             throw new ApplicationException("Cannot serialize configuration into a JSON string", e);
         }
     }
+
 }

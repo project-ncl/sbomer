@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PncBuildRequestConfig extends RequestConfig {
 
     public static final String TYPE_NAME = "pnc-build";
+    public static final String IDENTIFIER_KEY = "buildId";
 
     {
         this.type = TYPE_NAME;

@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageRequestConfig extends RequestConfig {
 
     public static final String TYPE_NAME = "image";
+    public static final String IDENTIFIER_KEY = "image";
 
     {
         this.type = TYPE_NAME;
