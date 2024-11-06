@@ -339,13 +339,15 @@ public class GenerateConfigCommand implements Callable<Integer> {
         if (this.configPath != null) {
             log.debug("Trying to deserialize provided config at '{}'", this.configPath);
 
-            config = ObjectMapperProvider.yaml().readValue(this.configPath.toFile(), PncBuildConfig.class);
+            config = Config.fromFile(configPath, PncBuildConfig.class);
 
-            if (config.isEmpty()) {
-                log.debug("Deserialized configuration is empty, will generate one.");
-                config = null;
-            } else {
-                log.debug("Successfully deserialized provided configuration: '{}'", config);
+            if (config != null) {
+                if (config.isEmpty()) {
+                    log.debug("Deserialized configuration is empty, will generate one.");
+                    config = null;
+                } else {
+                    log.debug("Successfully deserialized provided configuration: '{}'", config);
+                }
             }
         }
 

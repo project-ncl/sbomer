@@ -18,6 +18,8 @@
 package org.jboss.sbomer.core.features.sbom.config;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -131,25 +133,79 @@ public abstract class Config {
         }
     }
 
-    public static Config fromString(String value) {
-        return Config.fromString(value, Config.class);
+    public static Config fromFile(Path path) {
+        return Config.fromFile(path, Config.class);
     }
 
-    public static <T extends Config> T fromString(String data, Class<T> clazz) {
-        if (data == null || Strings.isEmpty(data)) {
+    public static <T extends Config> T fromFile(Path path, Class<T> clazz) {
+        if (path == null) {
             return null;
         }
 
         try {
-            return ObjectMapperProvider.yaml().readValue(data.getBytes(), clazz);
-        } catch (InvalidTypeIdException itide) {
-            throw new ApplicationException(
-                    "Provided configuration has invalid or missing 'type' identifier: '{}'",
-                    data,
-                    itide);
+            return fromString(Files.readString(path), clazz);
         } catch (IOException e) {
-            throw new ApplicationException("Cannot deserialize Config: '{}'", data, e);
+            throw new ApplicationException("Cannot read configuration from file '{}'", path, e);
+        }
+    }
+
+    public static Config fromString(String value) {
+        return Config.fromString(value, Config.class);
+    }
+
+    public static <T extends Config> T fromString(String value, Class<T> clazz) {
+        if (value == null || Strings.isEmpty(value)) {
+            return null;
         }
 
+        return Config.fromBytes(value.getBytes(), clazz);
+    }
+
+    public static Config fromBytes(byte[] data) {
+        return Config.fromBytes(data, Config.class);
+    }
+
+    public static <T extends Config> T fromBytes(byte[] data, Class<T> clazz) {
+        if (data == null || data.length == 0) {
+            return null;
+        }
+
+        try {
+            return ObjectMapperProvider.yaml().readValue(data, clazz);
+        } catch (InvalidTypeIdException itide) {
+
+            // root "type" identifier failures
+            if (itide.getPath().isEmpty()) {
+                // The root "type" identifier is missing
+                if (itide.getTypeId() == null) {
+                    throw new ApplicationException("No configuration type provided", itide);
+                } else {
+                    // The root "type" identifier is wrong
+                    throw new ApplicationException("Invalid configuration type provided: {}", itide.getTypeId(), itide);
+                }
+            }
+
+            String path = String.format(
+                    "$.%s",
+                    String.join(
+                            ".",
+                            itide.getPath()
+                                    .stream()
+                                    .map(
+                                            r -> r.getIndex() < 0 ? String.format("%s", r.getFieldName())
+                                                    : String.format("[%s]", r.getIndex()))
+                                    .collect(Collectors.toList())));
+
+            // Nested "type" identifier is missing
+            if (itide.getTypeId() == null) {
+                throw new ApplicationException("Missing type at path {}", path, itide);
+            } else {
+                // Nested "type" identifier is wtong
+                throw new ApplicationException("Invalid type '{}' found at path {}", itide.getTypeId(), path, itide);
+            }
+
+        } catch (IOException e) {
+            throw new ApplicationException("Cannot deserialize provided config", e);
+        }
     }
 }

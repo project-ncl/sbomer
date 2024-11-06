@@ -24,8 +24,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
-import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -42,52 +42,35 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
         return Paths.get("src", "test", "resources", "requests", fileName);
     }
 
-    private final static String JWS_IMAGE = "registry.redhat.io/jboss-webserver-5/jws58-openjdk17-openshift-rhel8@sha256:f63b27a29c032843941b15567ebd1f37f540160e8066ac74c05367134c2ff3aa";
     private final static String MANDREL_IMAGE = "registry.redhat.io/quarkus/mandrel-for-jdk-21-rhel8@sha256:a406de0fd344785fb39eba81cbef01cf7fb3e2be43d0e671a8587d1abe1418b4";
-
-    @Test
-    void testSuccessfulGenerationForContainerImage() throws IOException, URISyntaxException {
-        String requestBody = Files.readString(sbomPath("jws-image.json"));
-        String generationRequestId = requestGenerationV1Beta1(requestBody);
-
-        log.info("JWS container image - Generation Request created: {}", generationRequestId);
-
-        waitForGeneration(generationRequestId);
-
-        log.info("JWS container image finished, waiting for UMB message");
-
-        publishedUmbMessage(generationRequestId, message -> {
-            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
-                    .body("headers.container_image", CoreMatchers.is(JWS_IMAGE))
-                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId))
-                    .body("msg.sbom.generationRequest.type", CoreMatchers.is("CONTAINERIMAGE"))
-                    .body("msg.sbom.generationRequest.containerimage.name", CoreMatchers.is(JWS_IMAGE));
-        });
-
-        log.info("JWS container image passed");
-    }
 
     @Test
     void testMultiArchImage() throws IOException, URISyntaxException {
         String requestBody = Files.readString(sbomPath("mandrel-image.json"));
-        String generationRequestId = requestGenerationV1Beta1(requestBody);
+        List<String> generationIds = requestGeneration(requestBody);
 
-        log.info("Mandrel container image - Generation Request created: {}", generationRequestId);
+        assertEquals(1, generationIds.size());
 
-        waitForGeneration(generationRequestId);
+        String generationId = generationIds.get(0);
 
-        log.info("Mandrel container image finished, waiting for UMB message");
+        log.info("Mandrel container image - Generation Request created: {}", generationId);
 
-        // TODO: Expect 4 messages
-        publishedUmbMessage(generationRequestId, message -> {
-            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
-                    .body("headers.container_image", CoreMatchers.is(MANDREL_IMAGE))
-                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId))
-                    .body("msg.sbom.generationRequest.type", CoreMatchers.is("CONTAINERIMAGE"))
-                    .body("msg.sbom.generationRequest.containerimage.name", CoreMatchers.is(MANDREL_IMAGE));
-        });
+        waitForGeneration(generationId);
 
-        final Response response = getSboms(generationRequestId);
+        // TODO: UMB check disabled, because we do not add product coordinates anymore which control if we should send
+        // UMB message
+        // log.info("Mandrel container image finished, waiting for UMB message");
+
+        // // TODO: Expect 4 messages
+        // publishedUmbMessage(generationId, message -> {
+        // message.body("headers.generation_request_id", CoreMatchers.is(generationId))
+        // .body("headers.container_image", CoreMatchers.is(MANDREL_IMAGE))
+        // .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId))
+        // .body("msg.sbom.generationRequest.type", CoreMatchers.is("CONTAINERIMAGE"))
+        // .body("msg.sbom.generationRequest.containerimage.name", CoreMatchers.is(MANDREL_IMAGE));
+        // });
+
+        final Response response = getManifestsForGeneration(generationId);
 
         assertEquals(2, response.body().jsonPath().getInt("totalHits"));
 

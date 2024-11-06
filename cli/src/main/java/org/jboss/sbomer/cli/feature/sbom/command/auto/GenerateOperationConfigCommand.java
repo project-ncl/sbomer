@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command.auto;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -31,14 +30,12 @@ import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.pnc.PncService;
-
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
 
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -170,26 +167,11 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
         if (partialConfigPath != null) {
             log.info("Reading partial configuration file from '{}'", partialConfigPath.toAbsolutePath());
 
-            // The partialConfigPath might be empty, let's verify if there is some content to validate
-            if (Files.exists(partialConfigPath) && Files.isRegularFile(partialConfigPath)) {
-
-                String content = Files.readString(partialConfigPath).trim();
-                if (content.length() > 0) {
-                    try {
-                        operationConfig = ObjectMapperProvider.json().readValue(content, OperationConfig.class);
-                    } catch (StreamReadException e) {
-                        log.error("Unable to parse the configuration file", e);
-                        return GenerationResult.ERR_CONFIG_INVALID.getCode();
-                    } catch (DatabindException e) {
-                        log.error("Unable to deserialize the configuration file", e);
-                        return GenerationResult.ERR_CONFIG_INVALID.getCode();
-                    } catch (IOException e) {
-                        log.error("Unable to read configuration file", e);
-                        return GenerationResult.ERR_CONFIG_INVALID.getCode();
-                    }
-
-                    log.debug("Configuration read successfully: {}", operationConfig);
-                }
+            try {
+                operationConfig = Config.fromFile(partialConfigPath, OperationConfig.class);
+            } catch (ApplicationException e) {
+                log.error("Unable to read configuration file", e);
+                return GenerationResult.ERR_CONFIG_INVALID.getCode();
             }
         }
 

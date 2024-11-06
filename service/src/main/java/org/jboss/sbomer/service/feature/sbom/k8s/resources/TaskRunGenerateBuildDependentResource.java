@@ -94,7 +94,7 @@ public class TaskRunGenerateBuildDependentResource extends KubernetesDependentRe
 
     @Override
     public Map<String, TaskRun> desiredResources(GenerationRequest primary, Context<GenerationRequest> context) {
-        PncBuildConfig config = primary.getConfig(PncBuildConfig.class);
+        PncBuildConfig config = primary.getConfig(PncBuildConfig.class, true);
 
         Map<String, TaskRun> taskRuns = new HashMap<>(config.getProducts().size());
 
