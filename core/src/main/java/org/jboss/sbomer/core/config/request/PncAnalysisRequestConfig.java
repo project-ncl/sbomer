@@ -38,8 +38,16 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeName("pnc-analysis")
+@JsonTypeName(PncAnalysisRequestConfig.TYPE_NAME)
 public class PncAnalysisRequestConfig extends RequestConfig {
+
+    public static final String TYPE_NAME = "pnc-analysis";
+
+    {
+        this.type = TYPE_NAME;
+    }
+
     String milestoneId;
     List<String> urls;
+
 }
