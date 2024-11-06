@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PncOperationRequestConfig extends RequestConfig {
 
     public static final String TYPE_NAME = "pnc-operation";
+    public static final String IDENTIFIER_KEY = "operationId";
 
     {
         this.type = TYPE_NAME;

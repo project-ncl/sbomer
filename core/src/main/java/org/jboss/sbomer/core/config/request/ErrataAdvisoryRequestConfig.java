@@ -38,6 +38,7 @@ import lombok.extern.jackson.Jacksonized;
 public class ErrataAdvisoryRequestConfig extends RequestConfig {
 
     public static final String TYPE_NAME = "errata-advisory";
+    public static final String IDENTIFIER_KEY = "advisoryId";
 
     {
         this.type = TYPE_NAME;
