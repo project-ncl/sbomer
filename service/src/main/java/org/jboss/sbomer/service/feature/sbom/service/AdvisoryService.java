@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.koji.ClientSession;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.features.sbom.config.BrewRPMConfig;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -44,6 +45,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -79,12 +81,15 @@ public class AdvisoryService {
     @Setter
     FeatureFlags featureFlags;
 
-    public Collection<SbomGenerationRequest> generateFromAdvisory(String advisoryId) {
+    public Collection<SbomGenerationRequest> generateFromAdvisory(RequestEvent requestEvent) {
+
+        ErrataAdvisoryRequestConfig advisoryRequestConfig = (ErrataAdvisoryRequestConfig) requestEvent
+                .getRequestConfig();
 
         // Fetching Erratum
-        Errata erratum = errataClient.getErratum(advisoryId);
+        Errata erratum = errataClient.getErratum(advisoryRequestConfig.getAdvisoryId());
         if (erratum == null || erratum.getDetails().isEmpty()) {
-            log.warn("Could not retrieve the erratum details for id : '{}'", advisoryId);
+            log.warn("Could not retrieve the erratum details for id : '{}'", advisoryRequestConfig.getAdvisoryId());
             return Collections.emptyList();
         }
 
@@ -92,14 +97,14 @@ public class AdvisoryService {
         printAllErratumData(erratum);
 
         if (!erratum.getDetails().get().getTextonly()) {
-            return handleStandardAdvisory(erratum);
+            return handleStandardAdvisory(requestEvent, erratum);
         } else {
-            return handleTextOnlyAdvisory(erratum);
+            return handleTextOnlyAdvisory(requestEvent, erratum);
         }
     }
 
-    private Collection<SbomGenerationRequest> handleTextOnlyAdvisory(Errata erratum) {
-        // Handle the text-only advisories
+    private Collection<SbomGenerationRequest> handleTextOnlyAdvisory(RequestEvent requestEvent, Errata erratum) {
+
         if (!featureFlags.textOnlyErrataManifestGenerationEnabled()) {
             log.warn(
                     "Text-Only Errata manifest generation is disabled, the deliverables attached to the advisory won't be manifested!!");
@@ -110,7 +115,7 @@ public class AdvisoryService {
         return Collections.emptyList();
     }
 
-    private Collection<SbomGenerationRequest> handleStandardAdvisory(Errata erratum) {
+    private Collection<SbomGenerationRequest> handleStandardAdvisory(RequestEvent requestEvent, Errata erratum) {
         log.info(
                 "Advisory {} ({}) is standard (non Text-Only), with status {}",
                 erratum.getDetails().get().getFulladvisory(),
@@ -126,14 +131,14 @@ public class AdvisoryService {
         }
 
         if (ErrataStatus.QE.equals(details.getStatus())) {
-            return handleStandardQEAdvisory(details);
+            return handleStandardQEAdvisory(requestEvent, details);
         } else {
             log.warn("** TODO ** Handle the SHIPPED-LIVE advisories");
             return Collections.emptyList();
         }
     }
 
-    private Collection<SbomGenerationRequest> handleStandardQEAdvisory(Details details) {
+    private Collection<SbomGenerationRequest> handleStandardQEAdvisory(RequestEvent requestEvent, Details details) {
         log.debug("Handle standard QE Advisory {}", details);
 
         if (details.getContentTypes().stream().noneMatch(type -> type.equals("docker") || type.equals("rpm"))) {
@@ -154,20 +159,23 @@ public class AdvisoryService {
                                         .collect(Collectors.toList())));
 
         if (details.getContentTypes().contains("docker")) {
-            return processDockerBuilds(buildDetails);
+            return processDockerBuilds(requestEvent, buildDetails);
         } else {
             ErrataProduct product = errataClient.getProduct(details.getProduct().getShortName());
-            return processRPMBuilds(details, product, buildDetails);
+            return processRPMBuilds(requestEvent, details, product, buildDetails);
         }
     }
 
     private Collection<SbomGenerationRequest> processDockerBuilds(
+            RequestEvent requestEvent,
             Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
+
         if (!featureFlags.standardErrataImageManifestGenerationEnabled()) {
             log.warn(
                     "Standard Errata container images manifest generation is disabled, the container images attached to the advisory won't be manifested!!");
             return Collections.emptyList();
         }
+
         log.debug("Processing docker builds: {}", buildDetails);
 
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
@@ -181,8 +189,9 @@ public class AdvisoryService {
 
                 String imageName = getImageNameFromBuild(item.getId());
                 if (imageName != null) {
+                    config.setImage(imageName);
                     log.debug("Creating GenerationRequest Kubernetes resource...");
-                    sbomRequests.add(sbomService.generateSyftImage(imageName, config));
+                    sbomRequests.add(sbomService.generateSyftImage(requestEvent, config));
                 }
             });
         });
@@ -190,6 +199,7 @@ public class AdvisoryService {
     }
 
     private Collection<SbomGenerationRequest> processRPMBuilds(
+            RequestEvent requestEvent,
             Details details,
             ErrataProduct product,
             Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
@@ -199,6 +209,7 @@ public class AdvisoryService {
                     "Standard Errata RPM manifest generation is disabled, the RPM builds attached to the advisory won't be manifested!!");
             return Collections.emptyList();
         }
+
         log.debug("Processing RPM builds: {}", buildDetails);
 
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
@@ -237,7 +248,7 @@ public class AdvisoryService {
 
                 log.debug("ConfigMap to create: '{}'", req);
 
-                SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+                SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
                 kubernetesClient.configMaps().resource(req).create();
 
                 sbomRequests.add(sbomGenerationRequest);

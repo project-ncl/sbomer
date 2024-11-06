@@ -50,6 +50,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.pnc.PncClient;
@@ -180,34 +181,27 @@ public class SbomService {
     }
 
     @WithSpan
-    public SbomGenerationRequest generateSyftImage(
-            @SpanAttribute(value = "image") String imageName,
-            SyftImageConfig config) {
+    public SbomGenerationRequest generateSyftImage(RequestEvent requestEvent, SyftImageConfig config) {
 
-        log.info("New generation request for container image '{}'", imageName);
+        log.debug("Validating provided configuration...");
+        ValidationResult result = configSchemaValidator.validate(config);
 
-        if (config != null) {
-            log.debug("Validating provided configuration...");
-            ValidationResult result = configSchemaValidator.validate(config);
-
-            if (!result.isValid()) {
-                throw new ClientException("Provided 'syft-image' configuration is not valid", result.getErrors());
-            }
-        } else {
-            config = new SyftImageConfig();
+        if (!result.isValid()) {
+            throw new ValidationException("Provided 'syft-image' configuration is not valid", result.getErrors());
         }
 
+        log.info("New generation request for container image '{}'", config.getImage());
         log.debug("Creating GenerationRequest Kubernetes resource...");
 
         GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.CONTAINERIMAGE)
-                .withIdentifier(imageName)
+                .withIdentifier(config.getImage())
                 .withStatus(SbomGenerationStatus.NEW)
                 .withConfig(config)
                 .build();
 
         log.debug("ConfigMap to create: '{}'", req);
 
-        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
         kubernetesClient.configMaps().resource(req).create();
 
@@ -215,69 +209,78 @@ public class SbomService {
     }
 
     @WithSpan
-    public SbomGenerationRequest generateFromOperation(
-            @SpanAttribute(value = "operationId") String operationId,
-            OperationConfig config) {
-        log.info("New generation request for operation id '{}'", operationId);
+    public SbomGenerationRequest generateFromOperation(RequestEvent requestEvent, OperationConfig config) {
+
+        ValidationResult result = configSchemaValidator.validate(config);
+
+        if (!result.isValid()) {
+            throw new ValidationException("Provided 'operation' configuration is not valid", result.getErrors());
+        }
+        log.info("New generation request for operationId '{}' ...", config.getOperationId());
         log.debug("Creating GenerationRequest Kubernetes resource...");
 
         GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
-                .withIdentifier(operationId)
+                .withIdentifier(config.getOperationId())
                 .withStatus(SbomGenerationStatus.NEW)
                 .build();
 
-        if (config != null) {
-            log.debug("Received product configuration...");
-            SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
-            sbomerConfigProvider.adjust(config);
-            config.setOperationId(operationId);
+        log.debug("Received product configuration...");
+        SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+        sbomerConfigProvider.adjust(config);
 
-            ValidationResult validationResult = configSchemaValidator.validate(config);
+        ValidationResult validationResult = configSchemaValidator.validate(config);
 
-            if (!validationResult.isValid()) {
-                throw new ValidationException("Provided operation config is not valid", validationResult.getErrors());
-            }
+        if (!validationResult.isValid()) {
+            throw new ValidationException("Provided operation config is not valid", validationResult.getErrors());
+        }
 
-            // Because the config is valid, use it and set the status to initialized
-            req.setStatus(SbomGenerationStatus.NEW);
-            try {
-                req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(config));
-            } catch (JsonProcessingException e) {
-                throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
-            }
+        // Because the config is valid, use it and set the status to initialized
+        req.setStatus(SbomGenerationStatus.NEW);
+        try {
+            req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(config));
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
         }
 
         log.debug("ConfigMap to create: '{}'", req);
 
-        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
         kubernetesClient.configMaps().resource(req).create();
 
-        log.debug("ZipGenerationRequest Kubernetes resource '{}' created for operation '{}'", req.getId(), operationId);
+        log.debug(
+                "ZipGenerationRequest Kubernetes resource '{}' created for operation '{}'",
+                req.getId(),
+                config.getOperationId());
 
         return sbomGenerationRequest;
     }
 
     @WithSpan
-    public SbomGenerationRequest generateFromBuild(
-            @SpanAttribute(value = "buildId") String buildId,
-            PncBuildConfig config) {
+    public SbomGenerationRequest generateFromBuild(RequestEvent requestEvent, PncBuildConfig config) {
         try {
-            MDCUtils.addBuildContext(buildId);
+            MDCUtils.addBuildContext(config.getBuildId());
 
-            log.info("New generation request for build id '{}'", buildId);
+            log.debug("Validating provided configuration...");
+            ValidationResult result = configSchemaValidator.validate(config);
+
+            if (!result.isValid()) {
+                throw new ValidationException("Provided 'pnc-build' configuration is not valid", result.getErrors());
+            }
+
+            log.info("New generation request for build id '{}'", config.getBuildId());
             log.debug("Creating GenerationRequest Kubernetes resource...");
 
-            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD).withIdentifier(buildId)
+            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
+                    .withIdentifier(config.getBuildId())
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
-            if (config != null && !config.isEmpty()) {
-                log.debug("Received product configuration...");
+            if (config.getProducts().size() > 0) {
+                log.debug("Adjusting product configuration ...");
 
                 SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
                 sbomerConfigProvider.adjust(config);
-                config.setBuildId(buildId);
 
                 ValidationResult validationResult = configSchemaValidator.validate(config);
 
@@ -296,11 +299,14 @@ public class SbomService {
                 }
             }
 
-            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(req);
+            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
             kubernetesClient.configMaps().resource(req).create();
 
-            log.debug("GenerationRequest Kubernetes resource '{}' created for build '{}'", req.getId(), buildId);
+            log.debug(
+                    "GenerationRequest Kubernetes resource '{}' created for build '{}'",
+                    req.getId(),
+                    config.getBuildId());
 
             return sbomGenerationRequest;
         } finally {
@@ -309,84 +315,78 @@ public class SbomService {
     }
 
     @WithSpan
-    public SbomGenerationRequest generateNewOperation(DeliverableAnalysisConfig config) {
-        log.info("New deliverable analysis operation request ...");
+    public SbomGenerationRequest generateNewOperation(RequestEvent requestEvent, DeliverableAnalysisConfig config) {
+        log.debug("Validating provided configuration...");
 
-        if (config != null) {
-            log.debug("Received deliverable analysis configuration...");
+        ValidationResult result = configSchemaValidator.validate(config);
 
-            ValidationResult delAnalysisConfigValidationRes = configSchemaValidator.validate(config);
+        if (!result.isValid()) {
+            throw new ValidationException("Provided 'analysis' configuration is not valid", result.getErrors());
+        }
+        log.info(
+                "New deliverable analysis operation request for milestone '{}' and urls '{}' ...",
+                config.getMilestoneId(),
+                config.getDeliverableUrls());
 
-            if (!delAnalysisConfigValidationRes.isValid()) {
-                throw new ValidationException(
-                        "Provided deliverable analysis config is not valid",
-                        delAnalysisConfigValidationRes.getErrors());
-            }
-
-            DeliverableAnalyzerOperation operation = null;
-            try {
-                operation = pncClient.analyzeDeliverables(
-                        config.getMilestoneId(),
-                        DeliverablesAnalysisRequest.builder().deliverablesUrls(config.getDeliverableUrls()).build());
-            } catch (ClientException ex) {
-                throw new ApplicationException(
-                        "Operation could not be retrieved because PNC responded with an error",
-                        ex);
-            }
-
-            log.debug("Creating GenerationRequest Kubernetes resource...");
-
-            // Create a ProductConfig
-
-            RedHatProductProcessorConfig redHatProductProcessorConfig = null;
-
-            if (config.getErrata() != null) {
-                redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
-                        .withErrata(config.getErrata())
-                        .build();
-            }
-            GeneratorConfig generatorConfig = GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build();
-            ProductConfig productConfig = ProductConfig.builder()
-                    .withProcessors(
-                            redHatProductProcessorConfig != null ? List.of(redHatProductProcessorConfig)
-                                    : Collections.emptyList())
-                    .withGenerator(generatorConfig)
-                    .build();
-
-            // Creating a standard OperationConfig from the DeliverableAnalysisConfig and the new operation received
-            OperationConfig operationConfig = OperationConfig.builder()
-                    .withApiVersion(config.getApiVersion())
-                    .withDeliverableUrls(config.getDeliverableUrls())
-                    .withOperationId(operation.getId())
-                    .withProduct(productConfig)
-                    .build();
-            SbomerConfigProvider.getInstance().adjust(operationConfig);
-
-            ValidationResult operationConfigValidationRes = configSchemaValidator.validate(operationConfig);
-
-            if (!operationConfigValidationRes.isValid()) {
-                throw new ValidationException(
-                        "Provided operation config is not valid",
-                        operationConfigValidationRes.getErrors());
-            }
-
-            GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
-                    .withIdentifier(operation.getId())
-                    .withStatus(SbomGenerationStatus.NO_OP)
-                    .build();
-            try {
-                req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(operationConfig));
-            } catch (JsonProcessingException e) {
-                throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
-            }
-
-            // We actually do not need to create the ConfigMap because it would be a no-operation anyway. We can only
-            // create the placeholder inside the DB with the metadata and wait for the UMB message once the deliverable
-            // analysis from PNC finishes.
-            return SbomGenerationRequest.sync(req);
+        DeliverableAnalyzerOperation operation = null;
+        try {
+            operation = pncClient.analyzeDeliverables(
+                    config.getMilestoneId(),
+                    DeliverablesAnalysisRequest.builder().deliverablesUrls(config.getDeliverableUrls()).build());
+        } catch (ClientException ex) {
+            throw new ApplicationException("Operation could not be retrieved because PNC responded with an error", ex);
         }
 
-        return null;
+        log.debug("Creating GenerationRequest Kubernetes resource...");
+
+        // Create a ProductConfig
+
+        RedHatProductProcessorConfig redHatProductProcessorConfig = null;
+
+        if (config.getErrata() != null) {
+            redHatProductProcessorConfig = RedHatProductProcessorConfig.builder()
+                    .withErrata(config.getErrata())
+                    .build();
+        }
+        GeneratorConfig generatorConfig = GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build();
+        ProductConfig productConfig = ProductConfig.builder()
+                .withProcessors(
+                        redHatProductProcessorConfig != null ? List.of(redHatProductProcessorConfig)
+                                : Collections.emptyList())
+                .withGenerator(generatorConfig)
+                .build();
+
+        // Creating a standard OperationConfig from the DeliverableAnalysisConfig and the new operation received
+        OperationConfig operationConfig = OperationConfig.builder()
+                .withApiVersion(config.getApiVersion())
+                .withDeliverableUrls(config.getDeliverableUrls())
+                .withOperationId(operation.getId())
+                .withProduct(productConfig)
+                .build();
+        SbomerConfigProvider.getInstance().adjust(operationConfig);
+
+        ValidationResult operationConfigValidationRes = configSchemaValidator.validate(operationConfig);
+
+        if (!operationConfigValidationRes.isValid()) {
+            throw new ValidationException(
+                    "Provided operation config is not valid",
+                    operationConfigValidationRes.getErrors());
+        }
+
+        GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
+                .withIdentifier(operation.getId())
+                .withStatus(SbomGenerationStatus.NO_OP)
+                .build();
+        try {
+            req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(operationConfig));
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
+        }
+
+        // We actually do not need to create the ConfigMap because it would be a no-operation anyway. We can only
+        // create the placeholder inside the DB with the metadata and wait for the UMB message once the deliverable
+        // analysis from PNC finishes.
+        return SbomGenerationRequest.sync(requestEvent, req);
     }
 
     /**
