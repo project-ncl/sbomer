@@ -33,10 +33,169 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+-- UMB request event for the pnc build ARYT3LBXDVYAC
+INSERT INTO request (id, receival_time, event_type, request_config, event)
+  VALUES ('build_ARYT3LBXDVYAC', '2024-10-14 14:18:45.148407', 'UMB', 
+  '{
+     "type": "pnc-build",
+     "apiVersion": "sbomer.jboss.org/v1alpha1",
+     "buildId": "ARYT3LBXDVYAC"
+   }',
+  '{
+     "creation_time": "2024-10-14 12:18:45.148407",
+     "destination": "/topic/VirtualTopic.eng.pnc.builds",
+     "consumer": "PNC",
+     "msg_status": "ACK",
+     "msg_type": "BUILD",
+     "msg_id": "ID:orch-86-qmrdq-44443-1697588407649-5:1:3:1:1",
+     "msg": {
+        "attribute": "state-change",
+        "build": {
+           "buildConfigRevision": {
+           "buildScript": "mvn clean",
+           "buildType": "MVN",
+           "creationTime": 1729490967.781,
+           "defaultAlignmentParams": "",
+           "id": "17068",
+           "name": "modelmesh-2.16.0",
+           "rev": 2728037,
+           "scmRevision": "rhoai-2.16"
+        },
+        "buildContentId": "build-ARYT3LBXDVYAC",
+        "environment": {
+           "attributes": {
+             "JDK": "17.0",
+             "MAVEN": "3.9.1",
+             "NODEJS": "18",
+             "NPM": "8",
+             "OS": "Linux"
+           },
+           "deprecated": false,
+           "description": "OpenJDK 17.0; RHEL 8; Mvn 3.9.1; Nodejs 18; npm 8 [builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.7]",
+           "hidden": false,
+           "id": "807",
+           "name": "OpenJDK 17.0; RHEL 8; Mvn 3.9.1; Nodejs 18; npm 8",
+           "systemImageId": "builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.7"
+        },
+        "id": "ARYT3LBXDVYAC",
+        "progress": "FINISHED",
+        "scmRepository": {
+           "externalUrl": "https://github.com/red-hat-data-services/modelmesh",
+           "id": "1232"
+        },
+        "startTime": 1730699417.52,
+        "status": "SUCCESS",
+        "submitTime": 1730699417.193
+       },
+       "oldStatus": "BUILDING"
+     }
+   }'
+);
+
+-- UMB request event for the pnc operation BDQXCNRZJYYAA
+INSERT INTO request (id, receival_time, event_type, request_config, event)
+  VALUES ('operation_BDQXCNRZJYYAA', '2024-10-14 14:18:45.148407', 'UMB', 
+  '{
+     "type": "pnc-operation",
+     "apiVersion": "sbomer.jboss.org/v1alpha1",
+     "operationId": "BDQXCNRZJYYAA"
+   }',
+  '{
+     "creation_time": "2024-10-14 12:18:45.148407",
+     "destination": "/topic/VirtualTopic.eng.pnc.builds",
+     "consumer": "PNC",
+     "msg_status": "ACK",
+     "msg_type": "DELIVERABLE_ANALYSIS",
+     "msg_id": "ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1",
+     "msg": {
+        "attribute": "deliverable-analysis-state-change",
+        "deliverablesUrls": [
+          "https://download.com/rhbk-22.0.5.ER1-quarkus-dist.zip"
+         ],
+        "milestoneId": "1921",
+        "operationId": "BDQXCNRZJYYAA",
+        "result": "SUCCESSFUL",
+        "status": "FINISHED"
+     }
+   }'
+);
+
+-- UMB request event for the status change of errata advisory 139787
+INSERT INTO request (id, receival_time, event_type, request_config, event)
+  VALUES ('errata_139787', '2024-10-14 14:18:45.148407', 'UMB', 
+  '{
+     "type": "errata-advisory",
+     "apiVersion": "sbomer.jboss.org/v1alpha1",
+     "advisoryId": "139787"
+   }',
+  '{
+     "creation_time": "2024-10-14 12:18:45.148407",
+     "destination": "/topic/VirtualTopic.eng.errata.activity.status",
+     "consumer": "ERRATA",
+     "msg_status": "ACK",
+     "msg_type": "ERRATA",
+     "msg_id": "ID:umb-prod-2.umb-001.prod.us-east-1.aws.redhat.com-44939-1728675652022-7:105726:-1:1:1",
+     "msg": {
+        "content_types": [
+         "rpm"
+        ],
+        "errata_id": 139787,
+        "errata_status": "REL_PREP",
+        "from": "QE",
+        "fulladvisory": "RHSA-2024:139787-04",
+        "product": "RHEL",
+        "release": "RHEL-8.8.0.Z.EUS",
+        "skip_customer_notifications": false,
+        "synopsis": "Important: thunderbird security update",
+        "to": "REL_PREP",
+        "type": "RHSA",
+        "when": "2024-10-28 15:37:17 UTC",
+        "who": "xx@redhat.com"
+      }
+   }'
+);
+
+-- Unkown UMB request event from PNC
+INSERT INTO request (id, receival_time, event_type, request_config, event)
+  VALUES ('XXXYYYY', '2023-10-14 14:18:45.148407', 'UMB', 
+    null,
+  '{
+     "creation_time": "2024-10-14 12:18:45.148407",
+     "destination": "/topic/VirtualTopic.eng.pnc.builds",
+     "consumer": "PNC",
+     "msg_status": "NACK",
+     "msg_type": "UNKNOWN",
+     "msg_id": "ID:orch-86-qmrdq-33543-16-5:1:3:1:1",
+     "msg": {
+        "attribute": "unknown-attribute"
+     }
+   }'
+);
+
+-- REST request event for the pnc build ARYT3LBXDVYAC
+INSERT INTO request (id, receival_time, event_type, request_config, event)
+  VALUES ('build_ARYT3LBXDVYAC_rest', '2023-10-14 14:18:45.148407', 'REST', 
+  '{
+     "type": "pnc-build",
+     "apiVersion": "sbomer.jboss.org/v1alpha1",
+     "buildId": "ARYT3LBXDVYAC"
+   }',
+  '{
+     "method": "POST",
+     "destination": "/api/v1beta1/generations",
+     "address": "1.2.3.4",
+     "username": "<none>",
+     "trace_id": "00000000",
+     "span_id": "00000000"
+   }'
+);
+
+-- Request associated with an UMB event
 INSERT INTO sbom_generation_request(
 		id,
 		creation_time,
 		identifier,
+                request_id,
 		status,
 		result,
 		reason,
@@ -47,6 +206,7 @@ VALUES (
 		'AASSBB',
 		now(),
 		'ARYT3LBXDVYAC',
+		'build_ARYT3LBXDVYAC',
 		'FINISHED',
 		'SUCCESS',
 		'It succeeded',
