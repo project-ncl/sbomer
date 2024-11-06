@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.cli.feature.sbom;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +26,6 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.Build;
 import org.jboss.sbomer.cli.feature.sbom.client.GitLabClient;
 import org.jboss.sbomer.cli.feature.sbom.client.GitilesClient;
-import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -172,10 +170,6 @@ public class ConfigReader {
             return null;
         }
 
-        try {
-            return yamlObjectMapper.readValue(configContent, Config.class);
-        } catch (IOException e) {
-            throw new ApplicationException("Unable to parse configuration file", e);
-        }
+        return Config.fromBytes(configContent);
     }
 }

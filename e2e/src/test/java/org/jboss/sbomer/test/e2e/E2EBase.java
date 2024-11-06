@@ -26,7 +26,6 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.awaitility.Awaitility;
-import org.hamcrest.CoreMatchers;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -95,28 +94,28 @@ public abstract class E2EBase {
         waitForGeneration(generationRequestId, 20, TimeUnit.MINUTES);
     }
 
-    protected void waitForGeneration(String generationRequestId, long time, TimeUnit unit) {
-        Awaitility.await().atMost(time, unit).pollInterval(5, TimeUnit.SECONDS).until(() -> {
-            final Response response = getGeneration(generationRequestId);
+    protected void waitForGeneration(String generationId, long time, TimeUnit unit) {
+        Awaitility.await().atMost(time, unit).pollInterval(10, TimeUnit.SECONDS).until(() -> {
+            final Response response = getGeneration(generationId);
+
             final String status = response.body().jsonPath().getString("status");
 
             log.info(
-                    "GenerationRequest '{}' (type: '{}', identifier: '{}') current status: {}",
-                    generationRequestId,
+                    "Generation '{}' (type: '{}', identifier: '{}') current status: {}",
+                    generationId,
                     response.body().jsonPath().getString("type"),
                     response.body().jsonPath().getString("identifier"),
                     status);
 
             if (status.equals("FAILED")) {
-                log.error("GenerationRequest '{}' failed: {}", generationRequestId, response.asPrettyString());
-                throw new Exception(
-                        String.format("GenerationRequest '%s' failed, see logs above", generationRequestId));
+                log.error("Generation '{}' failed: {}", generationId, response.asPrettyString());
+                throw new Exception(String.format("GenerationRequest '%s' failed, see logs above", generationId));
             }
 
             return status.equals("FINISHED");
         });
 
-        log.info("GenerationRequest '{}' successfully finished", generationRequestId);
+        log.info("Generation '{}' successfully finished", generationId);
     }
 
     public void publishedUmbMessage(String generationRequestId, Consumer<ValidatableResponse> consumer) {
@@ -169,22 +168,34 @@ public abstract class E2EBase {
     }
 
     public Response getGeneration(String generationId) {
-        return RestAssured.given()
+        log.info("Fetching generation with id '{}'", generationId);
+
+        Response response = RestAssured.given()
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
                 .get(String.format("/api/v1beta1/generations/%s", generationId));
+
+        log.info("Got: {}", response.body().asPrettyString());
+
+        return response;
     }
 
-    public Response getSboms(String generationId) {
-        return RestAssured.given()
+    public Response getManifestsForGeneration(String generationId) {
+        log.info("Fetching manifests for generation with id '{}'", generationId);
+
+        Response response = RestAssured.given()
                 .baseUri(getSbomerBaseUri())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(String.format("/api/v1beta1/manifests?query=generationRequest.id==%s", generationId));
+                .get(String.format("/api/v1beta1/manifests?query=generation.id==%s", generationId));
+
+        log.info("Got: {}", response.body().asPrettyString());
+
+        return response;
     }
 
-    public String requestGenerationV1Beta1(String jsonBody) {
+    public List<String> requestGeneration(String jsonBody) {
         log.info("Requesting generation of manifest with jsonBody: {}", jsonBody);
 
         Response response = RestAssured.given()
@@ -197,6 +208,8 @@ public abstract class E2EBase {
 
         response.then().statusCode(202);
 
-        return response.body().path("id").toString();
+        log.info("Got: {}", response.body().asPrettyString());
+
+        return response.jsonPath().getList("id");
     }
 }

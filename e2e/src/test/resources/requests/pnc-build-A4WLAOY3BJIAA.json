@@ -1,25 +1,5 @@
 {
   "apiVersion": "sbomer.jboss.org/v1alpha1",
   "type": "pnc-build",
-  "buildId": "A4WLAOY3BJIAA",
-  "environment": {
-    "node": "12"
-  },
-  "products": [
-    {
-      "processors": [
-        {
-          "type": "redhat-product",
-          "errata": {
-            "productName": "RHTESTPRODUCT",
-            "productVersion": "RHEL-8-RHTESTPRODUCT-1.1",
-            "productVariant": "8Base-RHTESTPRODUCT-1.1"
-          }
-        }
-      ],
-      "generator": {
-        "type": "nodejs-cyclonedx"
-      }
-    }
-  ]
+  "buildId": "A4WLAOY3BJIAA"
 }

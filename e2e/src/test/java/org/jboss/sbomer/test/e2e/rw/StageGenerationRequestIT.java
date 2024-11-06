@@ -17,10 +17,13 @@
  */
 package org.jboss.sbomer.test.e2e.rw;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
@@ -48,19 +51,20 @@ class StageGenerationRequestIT extends E2EStageBase {
     @Test
     void testSuccessfulGenerationMavenBuild() throws IOException {
         String requestBody = Files.readString(sbomPath("pnc-build-" + MAVEN_BUILD_ID + ".json"));
-        String generationRequestId = requestGenerationV1Beta1(requestBody);
+        List<String> generationIds = requestGeneration(requestBody);
+        assertEquals(1, generationIds.size());
+        String generationId = generationIds.get(0);
+        log.info("Maven build - Generation Request created: {}", generationId);
 
-        log.info("Maven build - Generation Request created: {}", generationRequestId);
-
-        waitForGeneration(generationRequestId);
+        waitForGeneration(generationId);
 
         log.info("Maven build finished, waiting for UMB message");
 
-        publishedUmbMessage(generationRequestId, message -> {
-            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
+        publishedUmbMessage(generationId, message -> {
+            message.body("headers.generation_request_id", CoreMatchers.is(generationId))
                     .body("headers.pnc_build_id", CoreMatchers.is(MAVEN_BUILD_ID))
                     .body("msg.build.id", CoreMatchers.is(MAVEN_BUILD_ID))
-                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId));
         });
 
         log.info("Maven build passed");
@@ -69,19 +73,21 @@ class StageGenerationRequestIT extends E2EStageBase {
     @Test
     void testSuccessfulGenerationGradle5Build() throws IOException {
         String requestBody = Files.readString(sbomPath("pnc-build-" + GRADLE_5_BUILD_ID + ".json"));
-        String generationRequestId = requestGenerationV1Beta1(requestBody);
+        List<String> generationIds = requestGeneration(requestBody);
+        assertEquals(1, generationIds.size());
+        String generationId = generationIds.get(0);
 
-        log.info("Gradle 5 build - Generation Request created: {}", generationRequestId);
+        log.info("Gradle 5 build - Generation Request created: {}", generationId);
 
-        waitForGeneration(generationRequestId);
+        waitForGeneration(generationId);
 
         log.info("Gradle 5 build finished, waiting for UMB message");
 
-        publishedUmbMessage(generationRequestId, message -> {
-            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
+        publishedUmbMessage(generationId, message -> {
+            message.body("headers.generation_request_id", CoreMatchers.is(generationId))
                     .body("headers.pnc_build_id", CoreMatchers.is(GRADLE_5_BUILD_ID))
                     .body("msg.build.id", CoreMatchers.is(GRADLE_5_BUILD_ID))
-                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId));
         });
 
         log.info("Gradle 5 build passed");
@@ -90,11 +96,13 @@ class StageGenerationRequestIT extends E2EStageBase {
     @Test
     void testSuccessfulGenerationGradle4Build() throws IOException {
         String requestBody = Files.readString(sbomPath("pnc-build-" + GRADLE_4_BUILD_ID + ".json"));
-        String generationRequestId = requestGenerationV1Beta1(requestBody);
+        List<String> generationIds = requestGeneration(requestBody);
+        assertEquals(1, generationIds.size());
+        String generationId = generationIds.get(0);
 
-        log.info("Gradle 4 build - Generation Request created: {}", generationRequestId);
+        log.info("Gradle 4 build - Generation Request created: {}", generationId);
 
-        waitForGeneration(generationRequestId);
+        waitForGeneration(generationId);
 
         // log.info("Gradle 4 build finished, waiting for UMB message");
 
@@ -114,19 +122,21 @@ class StageGenerationRequestIT extends E2EStageBase {
     @Test
     void testSuccessfulGenerationNodeJsNpmBuild() throws IOException {
         String requestBody = Files.readString(sbomPath("pnc-build-" + NODEJS_NPM_BUILD_ID + ".json"));
-        String generationRequestId = requestGenerationV1Beta1(requestBody);
+        List<String> generationIds = requestGeneration(requestBody);
+        assertEquals(1, generationIds.size());
+        String generationId = generationIds.get(0);
 
-        log.info("NodeJs NPM build - Generation Request created: {}", generationRequestId);
+        log.info("NodeJs NPM build - Generation Request created: {}", generationId);
 
-        waitForGeneration(generationRequestId);
+        waitForGeneration(generationId);
 
         log.info("NodeJs NPM build finished, waiting for UMB message");
 
-        publishedUmbMessage(generationRequestId, message -> {
-            message.body("headers.generation_request_id", CoreMatchers.is(generationRequestId))
+        publishedUmbMessage(generationId, message -> {
+            message.body("headers.generation_request_id", CoreMatchers.is(generationId))
                     .body("headers.pnc_build_id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
                     .body("msg.build.id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
-                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationRequestId));
+                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId));
         });
 
         log.info("NodeJs NPM build passed");

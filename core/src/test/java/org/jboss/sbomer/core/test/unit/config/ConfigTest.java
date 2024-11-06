@@ -19,25 +19,36 @@ import org.junit.jupiter.api.Test;
 
 public class ConfigTest {
     @Test
-    void shouldConvertFromStringNotFailOnNullValue() {
+    void shouldHandleNullValue() {
         assertNull(Config.fromString(null));
     }
 
     @Test
-    void shouldConvertFromStringNotFailOnEmptyString() {
+    void shouldHandleEmptyString() {
         assertNull(Config.fromString(""));
     }
 
-    /**
-     * By default we assume that it is a PncBuildConfig object for backwards-compatibility.
-     */
     @Test
-    void shouldNotConvertFromStringEmptyObject() {
+    void shouldHandleNull() {
+        assertNull(Config.fromString("null"));
+    }
+
+    @Test
+    void shouldHandleEmptyObject() {
         ApplicationException ex = assertThrows(ApplicationException.class, () -> {
             Config.fromString("{}");
         });
 
-        assertEquals("Provided configuration has invalid or missing 'type' identifier: '{}'", ex.getMessage());
+        assertEquals("No configuration type provided", ex.getMessage());
+    }
+
+    @Test
+    void shouldHandleInvalidType() {
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
+            Config.fromString("{\"type\": \"invalid\"}");
+        });
+
+        assertEquals("Invalid configuration type provided: invalid", ex.getMessage());
     }
 
     @Test

@@ -38,7 +38,6 @@ import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseGenerationRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
@@ -171,10 +170,7 @@ public class GenerationsV1Beta1 {
         } else if (config instanceof PncBuildRequestConfig pncBuildConfig) {
             log.info("New PNC build request received");
 
-            requests.add(
-                    sbomService.generateFromBuild(
-                            pncBuildConfig.getBuildId(),
-                            PncBuildConfig.builder().withBuildId(pncBuildConfig.getBuildId()).build()));
+            requests.add(sbomService.generateFromBuild(pncBuildConfig.getBuildId(), null));
         } else if (config instanceof PncAnalysisRequestConfig analysisConfig) {
             log.info("New PNC analysis request received");
 

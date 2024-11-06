@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
@@ -47,13 +48,15 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     @Test
     void testContainerGenerationOfQEAdvisory() throws IOException, URISyntaxException {
         String requestBody = Files.readString(sbomPath("advisory-88484.json"));
-        String generationRequestId = requestGenerationV1Beta1(requestBody);
+        List<String> generationIds = requestGeneration(requestBody);
+        assertEquals(1, generationIds.size());
+        String generationId = generationIds.get(0);
 
-        log.info("Advisory in QE status with Container - Generation Request created: {}", generationRequestId);
+        log.info("Advisory in QE status with Container - Generation Request created: {}", generationId);
 
-        waitForGeneration(generationRequestId);
+        waitForGeneration(generationId);
 
-        final Response response = getSboms(generationRequestId);
+        final Response response = getManifestsForGeneration(generationId);
 
         response.then()
                 .log()
@@ -69,13 +72,15 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     @Test
     void testRPMGenerationOfQEAdvisory() throws IOException, URISyntaxException {
         String requestBody = Files.readString(sbomPath("advisory-89769.json"));
-        String generationRequestId = requestGenerationV1Beta1(requestBody);
+        List<String> generationIds = requestGeneration(requestBody);
+        assertEquals(1, generationIds.size());
+        String generationId = generationIds.get(0);
 
-        log.info("Advisory in QE status with RPMs - Generation Request created: {}", generationRequestId);
+        log.info("Advisory in QE status with RPMs - Generation Request created: {}", generationId);
 
-        waitForGeneration(generationRequestId);
+        waitForGeneration(generationId);
 
-        final Response response = getSboms(generationRequestId);
+        final Response response = getManifestsForGeneration(generationId);
         assertEquals(1, response.body().jsonPath().getInt("totalHits"));
 
         log.info("Advisory in QE status with Container generated!");

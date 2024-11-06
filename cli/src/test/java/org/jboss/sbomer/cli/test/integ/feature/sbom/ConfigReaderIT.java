@@ -113,7 +113,7 @@ class ConfigReaderIT {
                 configReader.getConfig(build);
             });
 
-            assertEquals("Unable to parse configuration file", ex.getMessage());
+            assertEquals("Invalid type 'doesntexist' found at path $.products.[0].processors.[0]", ex.getMessage());
             assertEquals(
                     "Could not resolve type id 'doesntexist' as a subtype of `org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig`: known type ids = [default, redhat-product] (for POJO property 'processors')",
                     ((JsonMappingException) ex.getCause()).getOriginalMessage());
@@ -134,7 +134,7 @@ class ConfigReaderIT {
                 configReader.getConfig(build);
             });
 
-            assertEquals("Unable to parse configuration file", ex.getMessage());
+            assertEquals("Cannot deserialize provided config", ex.getMessage());
             assertTrue(((JsonMappingException) ex.getCause()).getMessage().startsWith("Unrecognized field \"dummy\""));
         }
 
@@ -233,7 +233,7 @@ class ConfigReaderIT {
                 configReader.getConfig(build);
             });
 
-            assertEquals("Unable to parse configuration file", ex.getMessage());
+            assertEquals("Invalid type 'doesntexist' found at path $.products.[0].processors.[0]", ex.getMessage());
             assertEquals(
                     "Could not resolve type id 'doesntexist' as a subtype of `org.jboss.sbomer.core.features.sbom.config.runtime.ProcessorConfig`: known type ids = [default, redhat-product] (for POJO property 'processors')",
                     ((JsonMappingException) ex.getCause()).getOriginalMessage());
@@ -252,7 +252,7 @@ class ConfigReaderIT {
                 configReader.getConfig(build);
             });
 
-            assertEquals("Unable to parse configuration file", ex.getMessage());
+            assertEquals("Cannot deserialize provided config", ex.getMessage());
             assertTrue(((JsonMappingException) ex.getCause()).getMessage().startsWith("Unrecognized field \"dummy\""));
         }
 
