@@ -17,15 +17,37 @@
  */
 package org.jboss.sbomer.service.rest;
 
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_METHOD;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_ADDRESS;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_USERNAME;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_TRACE_ID;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_SPAN_ID;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_DESTINATION;
+
+import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.validation.ConstraintViolation;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
+import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.validator.engine.HibernateConstraintViolation;
+import org.jboss.sbomer.core.config.request.RequestConfig;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
 import org.yaml.snakeyaml.parser.ParserException;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+
+@Slf4j
 public class RestUtils {
     private RestUtils() {
         // This is a utility class
@@ -63,5 +85,58 @@ public class RestUtils {
      */
     public static List<String> parseExceptionsToMessages(List<ParserException> violations) {
         return violations.stream().map(cv -> "bom" + cv.getMessage().substring(1)).toList();
+    }
+
+    /**
+     * Gets the user principal (if available) from the SecurityContex of a ContainerRequestContext.
+     *
+     * @param context the container request context
+     * @return user principal name
+     */
+    public static String getUserPrincipalName(ContainerRequestContext context) {
+        SecurityContext securityContext = context.getSecurityContext();
+        if (securityContext != null) {
+            Principal userPrincipal = securityContext.getUserPrincipal();
+            if (userPrincipal != null) {
+                return userPrincipal.getName();
+            }
+        }
+        return "<none>";
+    }
+
+    /**
+     * Creates a request from a REST API call event.
+     *
+     * @param requestConfig the configuration posted to the REST API call
+     * @param requestContext the container request context
+     * @return the request object
+     */
+    public static RequestEvent createRequestFromRestEvent(
+            RequestConfig requestConfig,
+            ContainerRequestContext requestContext,
+            Span currentSpan) {
+
+        UriInfo uriInfo = requestContext.getUriInfo();
+        String clientIp = Optional.ofNullable(requestContext.getHeaderString("X-Forwarded-For")).orElse("<none>");
+        String method = requestContext.getMethod().toUpperCase();
+        String userPrincipal = getUserPrincipalName(requestContext);
+        String traceId = currentSpan.getSpanContext().getTraceId();
+        String spanId = currentSpan.getSpanContext().getSpanId();
+
+        Map<String, String> event = Map.of(
+                EVENT_REST_METHOD,
+                method,
+                EVENT_DESTINATION,
+                uriInfo.getRequestUri().toString(),
+                EVENT_REST_ADDRESS,
+                clientIp,
+                EVENT_REST_USERNAME,
+                userPrincipal,
+                EVENT_REST_TRACE_ID,
+                traceId,
+                EVENT_REST_SPAN_ID,
+                spanId);
+
+        return RequestEvent.createNew(requestConfig, RequestEventType.REST, event);
     }
 }

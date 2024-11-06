@@ -28,6 +28,9 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
+import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
+import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
@@ -41,16 +44,19 @@ import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.FeatureFlags;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.RestUtils;
 import org.jboss.sbomer.service.rest.mapper.V1Alpha3Mapper;
 import org.jboss.sbomer.service.stats.StatsService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
+import io.opentelemetry.api.trace.Span;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -66,6 +72,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -260,7 +268,10 @@ public class ApiV1Alpha3 {
             responseCode = "400",
             description = "Could not parse provided arguments",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    public Response generate(@PathParam("buildId") String buildId, PncBuildConfig config) throws Exception {
+    public Response generate(
+            @PathParam("buildId") String buildId,
+            PncBuildConfig config,
+            @Context ContainerRequestContext requestContext) throws Exception {
         if (featureFlags.isDryRun()) {
             log.warn(
                     "Skipping creating new Generation Request for buildId '{}' because of SBOMer running in dry-run mode",
@@ -268,7 +279,19 @@ public class ApiV1Alpha3 {
             return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
 
-        return Response.accepted(mapper.toRecord(sbomService.generateFromBuild(buildId, config))).build();
+        if (config == null) {
+            config = new PncBuildConfig();
+        }
+
+        config.setBuildId(buildId);
+
+        // Create the Request to be associated with this REST API call event
+        RequestEvent request = RestUtils.createRequestFromRestEvent(
+                PncBuildRequestConfig.builder().withBuildId(buildId).build(),
+                requestContext,
+                Span.current());
+
+        return Response.accepted(mapper.toRecord(sbomService.generateFromBuild(request, config))).build();
     }
 
     @GET
@@ -374,9 +397,23 @@ public class ApiV1Alpha3 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response generateFromOperation(@PathParam("operationId") String operationId, OperationConfig config)
-            throws Exception {
-        return Response.accepted(mapper.toRecord(sbomService.generateFromOperation(operationId, config))).build();
+    public Response generateFromOperation(
+            @PathParam("operationId") String operationId,
+            OperationConfig config,
+            @Context ContainerRequestContext requestContext) throws Exception {
+
+        if (config == null) {
+            config = new OperationConfig();
+        }
+
+        config.setOperationId(operationId);
+
+        // Create the Request to be associated with this REST API call event
+        RequestEvent request = RestUtils.createRequestFromRestEvent(
+                PncOperationRequestConfig.builder().withOperationId(operationId).build(),
+                requestContext,
+                Span.current());
+        return Response.accepted(mapper.toRecord(sbomService.generateFromOperation(request, config))).build();
     }
 
     @POST
@@ -393,9 +430,24 @@ public class ApiV1Alpha3 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response generateNewOperation(DeliverableAnalysisConfig config) throws Exception {
+    public Response generateNewOperation(
+            DeliverableAnalysisConfig config,
+            @Context ContainerRequestContext requestContext) throws Exception {
 
-        return Response.accepted(mapper.toRecord(sbomService.generateNewOperation(config))).build();
+        if (config == null) {
+            config = new DeliverableAnalysisConfig();
+        }
+
+        // Create the Request to be associated with this REST API call event
+        RequestEvent request = RestUtils.createRequestFromRestEvent(
+                PncAnalysisRequestConfig.builder()
+                        .withMilestoneId(config.getMilestoneId())
+                        .withUrls(config.getDeliverableUrls())
+                        .build(),
+                requestContext,
+                Span.current());
+
+        return Response.accepted(mapper.toRecord(sbomService.generateNewOperation(request, config))).build();
     }
 
     @GET

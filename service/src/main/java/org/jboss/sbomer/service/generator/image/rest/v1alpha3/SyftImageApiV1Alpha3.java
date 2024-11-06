@@ -22,17 +22,18 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
-import org.jboss.sbomer.core.config.ConfigSchemaValidator;
+import org.jboss.sbomer.core.config.request.ImageRequestConfig;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
-import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.service.feature.FeatureFlags;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.RestUtils;
 import org.jboss.sbomer.service.rest.mapper.V1Alpha3Mapper;
 
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
+import io.opentelemetry.api.trace.Span;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -41,6 +42,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -61,9 +64,6 @@ public class SyftImageApiV1Alpha3 {
     @Inject
     FeatureFlags featureFlags;
 
-    @Inject
-    ConfigSchemaValidator configSchemaValidator;
-
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
     @Operation(summary = "", description = "")
@@ -76,19 +76,22 @@ public class SyftImageApiV1Alpha3 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response generateFromContainerImage(@PathParam("name") String imageName, SyftImageConfig config)
-            throws Exception {
+    public Response generateFromContainerImage(
+            @PathParam("name") String imageName,
+            SyftImageConfig config,
+            @Context ContainerRequestContext requestContext) throws Exception {
 
         if (config == null) {
-            config = SyftImageConfig.builder().withImage(imageName).build();
+            config = new SyftImageConfig();
         }
+        config.setImage(imageName);
 
-        ValidationResult validationResult = configSchemaValidator.validate(config);
+        // Create the Request to be associated with this REST API call event
+        RequestEvent request = RestUtils.createRequestFromRestEvent(
+                ImageRequestConfig.builder().withImage(imageName).build(),
+                requestContext,
+                Span.current());
 
-        if (!validationResult.isValid()) {
-            throw new ClientException("Invalid config", validationResult.getErrors());
-        }
-
-        return Response.accepted(mapper.toRecord(sbomService.generateSyftImage(imageName, config))).build();
+        return Response.accepted(mapper.toRecord(sbomService.generateSyftImage(request, config))).build();
     }
 }

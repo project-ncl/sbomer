@@ -53,13 +53,16 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.RestUtils;
 import org.jboss.sbomer.service.rest.mapper.V1Beta1Mapper;
 
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
+import io.opentelemetry.api.trace.Span;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -75,6 +78,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -147,7 +152,8 @@ public class GenerationsV1Beta1 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response createFromConfig(RequestConfig config) throws Exception {
+    public Response createFromConfig(RequestConfig config, @Context ContainerRequestContext requestContext)
+            throws Exception {
         if (config == null) {
             throw new ClientException("No config provided");
         }
@@ -162,20 +168,27 @@ public class GenerationsV1Beta1 {
 
         log.info("Provided config is valid!");
 
+        // Create the Request to be associated with this REST API call event
+        RequestEvent request = RestUtils.createRequestFromRestEvent(config, requestContext, Span.current());
+
         List<SbomGenerationRequest> requests = new ArrayList<>();
 
-        if (config instanceof ErrataAdvisoryRequestConfig advisoryConfig) {
+        if (config instanceof ErrataAdvisoryRequestConfig) {
             log.info("New Errata advisory request received");
-            requests.addAll(advisoryService.generateFromAdvisory(advisoryConfig.getAdvisoryId()));
+            requests.addAll(advisoryService.generateFromAdvisory(request));
         } else if (config instanceof PncBuildRequestConfig pncBuildConfig) {
             log.info("New PNC build request received");
 
-            requests.add(sbomService.generateFromBuild(pncBuildConfig.getBuildId(), null));
+            requests.add(
+                    sbomService.generateFromBuild(
+                            request,
+                            PncBuildConfig.builder().withBuildId(pncBuildConfig.getBuildId()).build()));
         } else if (config instanceof PncAnalysisRequestConfig analysisConfig) {
             log.info("New PNC analysis request received");
 
             requests.add(
                     sbomService.generateNewOperation(
+                            request,
                             DeliverableAnalysisConfig.builder()
                                     .withDeliverableUrls(analysisConfig.getUrls())
                                     .withMilestoneId(analysisConfig.getMilestoneId())
@@ -185,14 +198,14 @@ public class GenerationsV1Beta1 {
 
             requests.add(
                     sbomService.generateSyftImage(
-                            imageConfig.getImage(),
+                            request,
                             SyftImageConfig.builder().withImage(imageConfig.getImage()).build()));
         } else if (config instanceof PncOperationRequestConfig operationConfig) {
             log.info("New PNC operation request received");
 
             requests.add(
                     sbomService.generateFromOperation(
-                            operationConfig.getOperationId(),
+                            request,
                             OperationConfig.builder().withOperationId(operationConfig.getOperationId()).build()));
         }
 

@@ -23,12 +23,16 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
+import org.jboss.sbomer.service.rest.RestUtils;
 import org.jboss.sbomer.service.rest.mapper.V1Alpha3Mapper;
 
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
+import io.opentelemetry.api.trace.Span;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -37,6 +41,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -70,9 +76,17 @@ public class SBOMResource {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response generateFromAdvisory(@PathParam("advisoryId") String advisoryId) throws Exception {
+    public Response generateFromAdvisory(
+            @PathParam("advisoryId") String advisoryId,
+            @Context ContainerRequestContext requestContext) throws Exception {
 
-        return Response.accepted(mapper.requestsToRecords(advisoryService.generateFromAdvisory(advisoryId))).build();
+        // Create the Request to be associated with this REST API call event
+        RequestEvent request = RestUtils.createRequestFromRestEvent(
+                ErrataAdvisoryRequestConfig.builder().withAdvisoryId(advisoryId).build(),
+                requestContext,
+                Span.current());
+
+        return Response.accepted(mapper.requestsToRecords(advisoryService.generateFromAdvisory(request))).build();
 
     }
 }
