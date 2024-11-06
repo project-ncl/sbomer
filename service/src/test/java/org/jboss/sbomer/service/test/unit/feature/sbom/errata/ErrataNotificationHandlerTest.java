@@ -17,20 +17,26 @@
  */
 package org.jboss.sbomer.service.test.unit.feature.sbom.errata;
 
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_CONSUMER;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_STATUS;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_TYPE;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.jboss.pnc.build.finder.koji.ClientSession;
-import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
+import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
+import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.FeatureFlags;
@@ -39,21 +45,25 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.ErrataNotificationHandler;
-import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
+import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
+@QuarkusTransactionalTest
 class ErrataNotificationHandlerTest {
 
     static class ErrataNotificationHandlerAlt extends ErrataNotificationHandler {
-        @Override
-        public void handle(UMBMessage message) throws JsonProcessingException, IOException {
-            super.handle(message);
+        public void handle(RequestEvent requestEvent) throws JsonProcessingException, IOException {
+            super.handle(requestEvent);
         }
     }
 
@@ -88,14 +98,23 @@ class ErrataNotificationHandlerTest {
                 .readValue(errataBuildsJsonString, ErrataBuildList.class);
 
         String umbErrataStatusChangeMsg = TestResources.asString("errata/umb/errata_status_change.json");
-        UMBMessage umbMessage = UMBMessage.createNew(UMBConsumer.ERRATA);
-        umbMessage.setContent(ObjectMapperProvider.json().readTree(umbErrataStatusChangeMsg));
+
+        ObjectNode event = ObjectMapperProvider.json().createObjectNode();
+        event.put(EVENT_KEY_UMB_CONSUMER, UMBConsumer.ERRATA.toString());
+        event.put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NONE.toString());
+        event.put(EVENT_KEY_UMB_MSG, umbErrataStatusChangeMsg);
+        event.put(EVENT_KEY_UMB_MSG_TYPE, ErrataAdvisoryRequestConfig.TYPE_NAME);
+
+        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("139230").build();
+
+        // Create the initial requestEvent
+        RequestEvent requestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event).save();
 
         when(errataClient.getErratum("139230")).thenReturn(errata);
         when(errataClient.getBuildsList("139230")).thenReturn(buildList);
         when(errataClient.getRelease("2227")).thenReturn(release);
 
-        errataNotificationHandler.handle(umbMessage);
+        errataNotificationHandler.handle(requestEvent);
     }
 
     @Test
@@ -111,17 +130,28 @@ class ErrataNotificationHandlerTest {
         String umbErrataStatusChangeMsg = TestResources.asString("errata/umb/errata_status_change_QE.json");
         KojiBuildInfo kojiBuildInfo = createKojiBuildInfo();
 
-        UMBMessage umbMessage = UMBMessage.createNew(UMBConsumer.ERRATA);
-        umbMessage.setContent(ObjectMapperProvider.json().readTree(umbErrataStatusChangeMsg));
+        ObjectNode event = ObjectMapperProvider.json().createObjectNode();
+        event.put(EVENT_KEY_UMB_CONSUMER, UMBConsumer.ERRATA.toString());
+        event.put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NONE.toString());
+        event.put(EVENT_KEY_UMB_MSG, umbErrataStatusChangeMsg);
+        event.put(EVENT_KEY_UMB_MSG_TYPE, ErrataAdvisoryRequestConfig.TYPE_NAME);
+
+        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("139856").build();
+
+        // Create the initial requestEvent
+        RequestEvent requestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event).save();
 
         when(errataClient.getErratum("139856")).thenReturn(errata);
         when(errataClient.getBuildsList("139856")).thenReturn(buildList);
         when(errataClient.getRelease("2096")).thenReturn(release);
         when(clientSession.getBuild(3338841)).thenReturn(kojiBuildInfo);
 
-        errataNotificationHandler.handle(umbMessage);
+        errataNotificationHandler.handle(requestEvent);
 
-        verify(advisoryService, times(1)).generateFromAdvisory(eq("139856"));
+        ArgumentMatcher<RequestEvent> hasAdvisoryId = cfg -> cfg != null
+                && "139856".equals(((ErrataAdvisoryRequestConfig) cfg.getRequestConfig()).getAdvisoryId());
+
+        verify(advisoryService, times(1)).generateFromAdvisory(argThat(hasAdvisoryId));
     }
 
     private KojiBuildInfo createKojiBuildInfo() {

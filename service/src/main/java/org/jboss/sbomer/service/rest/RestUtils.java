@@ -17,12 +17,12 @@
  */
 package org.jboss.sbomer.service.rest;
 
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_METHOD;
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_ADDRESS;
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_USERNAME;
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_TRACE_ID;
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_REST_SPAN_ID;
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_DESTINATION;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_METHOD;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_ADDRESS;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_USERNAME;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_TRACE_ID;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_SPAN_ID;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_URI_PATH;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -124,17 +124,17 @@ public class RestUtils {
         String spanId = currentSpan.getSpanContext().getSpanId();
 
         Map<String, String> event = Map.of(
-                EVENT_REST_METHOD,
+                EVENT_KEY_REST_METHOD,
                 method,
-                EVENT_DESTINATION,
+                EVENT_KEY_REST_URI_PATH,
                 uriInfo.getRequestUri().toString(),
-                EVENT_REST_ADDRESS,
+                EVENT_KEY_REST_ADDRESS,
                 clientIp,
-                EVENT_REST_USERNAME,
+                EVENT_KEY_REST_USERNAME,
                 userPrincipal,
-                EVENT_REST_TRACE_ID,
+                EVENT_KEY_REST_TRACE_ID,
                 traceId,
-                EVENT_REST_SPAN_ID,
+                EVENT_KEY_REST_SPAN_ID,
                 spanId);
 
         return RequestEvent.createNew(requestConfig, RequestEventType.REST, event);
