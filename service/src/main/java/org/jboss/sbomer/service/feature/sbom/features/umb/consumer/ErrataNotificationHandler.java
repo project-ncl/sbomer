@@ -20,18 +20,24 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.QE;
 import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.SHIPPED_LIVE;
 
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
+
 import java.io.IOException;
+
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.ErrataStatusChangeMessageBody;
-import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,26 +53,36 @@ public class ErrataNotificationHandler {
     @Setter
     FeatureFlags featureFlags;
 
-    public void handle(UMBMessage message) throws JsonProcessingException, IOException {
+    public void handle(RequestEvent requestEvent) throws JsonProcessingException, IOException {
+
         if (!featureFlags.errataIntegrationEnabled()) {
             log.warn("Errata API integration is disabled, the UMB message won't be used!!");
             return;
         }
 
-        ErrataStatusChangeMessageBody errataStatusChange = ErrataMessageHelper
-                .fromStatusChangeMessage(message.getContent());
-        log.info("Fetching Errata information for erratum with id {}...", errataStatusChange.getErrataId());
+        JsonNode msgNode = requestEvent.getEvent().get(EVENT_KEY_UMB_MSG);
+        String msg = msgNode.isTextual() ? msgNode.textValue() : msgNode.toString();
+        ErrataStatusChangeMessageBody errataStatusChange = ErrataMessageHelper.fromStatusChangeMessage(msg);
 
         if (!isRelevantStatus(errataStatusChange.getStatus())) {
             log.warn("Received a status change that is not QE nor SHIPPED_LIVE, ignoring it");
             return;
         }
 
-        advisoryService.generateFromAdvisory(String.valueOf(errataStatusChange.getErrataId()));
+        // Update the requestEvent with the requestConfig
+        requestEvent = addErrataAdvisoryRequestConfig(requestEvent, String.valueOf(errataStatusChange.getErrataId()));
+
+        advisoryService.generateFromAdvisory(requestEvent);
     }
 
     private boolean isRelevantStatus(ErrataStatus status) {
         return status == QE || status == SHIPPED_LIVE;
+    }
+
+    @Transactional
+    protected RequestEvent addErrataAdvisoryRequestConfig(RequestEvent requestEvent, String errataId) {
+        requestEvent.setRequestConfig(ErrataAdvisoryRequestConfig.builder().withAdvisoryId(errataId).build());
+        return requestEvent.save();
     }
 
 }

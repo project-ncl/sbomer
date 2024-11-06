@@ -15,9 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.enums;
+package org.jboss.sbomer.service.feature.sbom.model;
 
-public enum UMBMessageType {
+public enum RequestEventType {
 
-    BUILD, DELIVERABLE_ANALYSIS, ERRATA, UNKNOWN
+    REST, UMB;
+
+    public static RequestEventType fromName(String origin) {
+        return RequestEventType.valueOf(origin.toUpperCase());
+    }
+
+    public String toName() {
+        return this.name().toLowerCase();
+    }
+
 }

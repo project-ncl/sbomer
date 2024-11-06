@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+<<<<<<< HEAD
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countAlreadyAckedWithMsgId;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataProcessedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataReceivedMessages;
@@ -25,25 +26,39 @@ import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncRec
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataSkippedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncSkippedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.createNew;
+=======
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_CONSUMER;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_STATUS;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_TYPE;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_CREATION_TIME;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_ID;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_TOPIC;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE;
+>>>>>>> d86cdaac (feat(SBOMER-219): Add model to store RequestEvents, remove UMBMessage)
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
+import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
+import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
-import org.jboss.sbomer.core.features.sbom.enums.UMBMessageType;
+import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
-import org.jboss.sbomer.service.feature.sbom.model.UMBMessage;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
+import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.StartupEvent;
@@ -76,6 +91,9 @@ public class AmqpMessageConsumer {
     @Inject
     ErrataNotificationHandler errataNotificationHandler;
 
+    @Inject
+    RequestEventRepository repository;
+
     public void init(@Observes StartupEvent ev) {
         if (!umbConfig.isEnabled()) {
             log.info("UMB support is disabled");
@@ -95,69 +113,48 @@ public class AmqpMessageConsumer {
         String decodedMessage = ErrataMessageHelper.decode(message.getPayload());
         log.debug("Decoded Message content: {}", decodedMessage);
 
-        UMBMessage umbMessage = createNew(UMBConsumer.ERRATA);
-
-        try {
-            umbMessage.setContent(ObjectMapperProvider.json().readTree(decodedMessage));
-        } catch (JsonProcessingException e) {
-            log.warn("Could not parse into json the message payload, will not be persisted in the UMBMessage table");
-        }
-
-        umbMessage.persistAndFlush();
+        ObjectNode event = createUnidentifiedEvent(decodedMessage, UMBConsumer.ERRATA);
 
         // Checking whether there is some additional metadata attached to the message
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
-        metadata.ifPresent(meta -> {
-            JsonObject properties = meta.getProperties();
-            log.debug("Message properties: {}", properties.toString());
 
-            umbMessage.setCreationTime(Instant.ofEpochMilli(meta.getCreationTime()));
-            umbMessage.setMsgId(meta.getId());
-            umbMessage.setTopic(meta.getAddress());
+        if (metadata.isPresent()) {
+            addMetadataToEvent(metadata.get(), event);
+            identifyErrataEvent(metadata.get(), event);
+        }
 
-            if (!Objects.equals(properties.getString("subject"), "errata.activity.status")) {
-                // This should not happen because we listen to the "errata.activity.status" topic, but just in case
-                log.warn("Received a message that is not errata.activity.status, ignoring it");
-                umbMessage.setType(UMBMessageType.UNKNOWN);
-                umbMessage.ackAndSave();
-
-                message.ack();
-                return;
-            }
-
-            umbMessage.setType(UMBMessageType.ERRATA);
-        });
-
-        if (umbMessage.getMsgId() != null) {
+        if (event.get(EVENT_KEY_UMB_MSG_ID) != null) {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
             // There is an issue in our queues and same messages are processed multiple times, we want to avoid
             // generating manifests for the same event
-            long alreadyGenerated = countAlreadyAckedWithMsgId(umbMessage.getMsgId());
-            if (alreadyGenerated > 0) {
-                log.warn(
-                        "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
-                        umbMessage.getMsgId(),
-                        alreadyGenerated);
+            String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
+            // long alreadyGenerated = countAlreadyAckedWithMsgId(msgId);
+            // if (alreadyGenerated > 0) {
+            //     log.warn(
+            //             "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
+            //             msgId,
+            //             alreadyGenerated);
 
-                umbMessage.skipAndSave();
-                return message.ack();
-            }
+            //     umbMessage.skipAndSave();
+            //     return message.ack();
+            // }
         }
+
+        if (!isIdentifiedEvent(event)) {
+            return ackAndSaveUnknownMessage(message, event);
+        }
+
+        // Store the requestEvent (to keep events in case of subsequent failures)
+        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
 
         try {
-            errataNotificationHandler.handle(umbMessage);
-        } catch (JsonProcessingException e) {
-            log.error("Unable to deserialize Errata message, this is unexpected", e);
-            umbMessage.nackAndSave();
-            return message.nack(e);
+            errataNotificationHandler.handle(requestEvent);
         } catch (IOException e) {
             log.error("Unable to deserialize Errata message, this is unexpected", e);
-            umbMessage.nackAndSave();
-            return message.nack(e);
+            return nackAndSave(message, requestEvent, e);
         }
 
-        umbMessage.ackAndSave();
-        return message.ack();
+        return ackAndSave(message, requestEvent);
     }
 
     @Incoming("builds")
@@ -167,91 +164,130 @@ public class AmqpMessageConsumer {
         log.debug("Received new PNC build status notification via the AMQP consumer");
         log.debug("Message content: {}", message.getPayload());
 
-        UMBMessage umbMessage = createNew(UMBConsumer.PNC);
-
-        try {
-            umbMessage.setContent(ObjectMapperProvider.json().readTree(message.getPayload()));
-        } catch (JsonProcessingException e) {
-            log.warn("Could not parse into json the message payload, will not be persisted in the UMBMessage table");
-        }
-
-        umbMessage.persistAndFlush();
+        ObjectNode event = createUnidentifiedEvent(message.getPayload(), UMBConsumer.PNC);
 
         // Checking whether there is some additional metadata attached to the message
         Optional<IncomingAmqpMetadata> metadata = message.getMetadata(IncomingAmqpMetadata.class);
-        AtomicReference<GenerationRequestType> type = new AtomicReference<>(null);
 
-        metadata.ifPresent(meta -> {
-            JsonObject properties = meta.getProperties();
-            log.debug("Message properties: {}", properties.toString());
-
-            umbMessage.setCreationTime(Instant.ofEpochMilli(meta.getCreationTime()));
-            umbMessage.setMsgId(meta.getId());
-            umbMessage.setTopic(meta.getAddress());
-
-            if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
-                type.set(GenerationRequestType.BUILD);
-                umbMessage.setType(UMBMessageType.BUILD);
-            } else if (Objects.equals(properties.getString("type"), "DeliverableAnalysisStateChange")) {
-                type.set(GenerationRequestType.OPERATION);
-                umbMessage.setType(UMBMessageType.DELIVERABLE_ANALYSIS);
-            } else {
-                umbMessage.setType(UMBMessageType.UNKNOWN);
-            }
-        });
-
-        // This shouldn't happen anymore because we use a selector to filter messages
-        if (type.get() == null) {
-            log.warn("Received a message that is not BuildStateChange nor DeliverableAnalysisStateChange, ignoring it");
-            // I still want to persist the additional metadata if present
-            if (metadata.isPresent()) {
-                umbMessage.ackAndSave();
-            }
-            return message.ack();
+        if (metadata.isPresent()) {
+            addMetadataToEvent(metadata.get(), event);
+            identifyPncEvent(metadata.get(), event);
         }
 
-        if (umbMessage.getMsgId() != null) {
+        if (event.get(EVENT_KEY_UMB_MSG_ID) != null) {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
             // There is an issue in our queues and same messages are processed multiple times, we want to avoid
             // generating manifests for the same event
-            long alreadyGenerated = countAlreadyAckedWithMsgId(umbMessage.getMsgId());
-            if (alreadyGenerated > 0) {
-                log.warn(
-                        "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
-                        umbMessage.getMsgId(),
-                        alreadyGenerated);
+            String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
+            // long alreadyGenerated = countAlreadyAckedWithMsgId(msgId);
+            // if (alreadyGenerated > 0) {
+            //     log.warn(
+            //             "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
+            //             msgId,
+            //             alreadyGenerated);
 
-                umbMessage.skipAndSave();
-                return message.ack();
-            }
+            //     umbMessage.skipAndSave();
+            //     return message.ack();
+            // }
         }
+
+        if (!isIdentifiedEvent(event)) {
+            return ackAndSaveUnknownMessage(message, event);
+        }
+
+        // Store the requestEvent (to keep events in case of subsequent failures)
+        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
 
         try {
-            pncNotificationHandler.handle(message, type.get());
+            pncNotificationHandler.handle(requestEvent);
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize PNC message, this is unexpected", e);
-            umbMessage.nackAndSave();
-            return message.nack(e);
+            return nackAndSave(message, requestEvent, e);
         }
 
-        umbMessage.ackAndSave();
+        return ackAndSave(message, requestEvent);
+    }
+
+    private void identifyErrataEvent(IncomingAmqpMetadata metadata, ObjectNode event) {
+
+        JsonObject properties = metadata.getProperties();
+        log.debug("Message properties: {}", properties.toString());
+
+        if (Objects.equals(properties.getString("subject"), "errata.activity.status")) {
+            event.put(EVENT_KEY_UMB_MSG_TYPE, ErrataAdvisoryRequestConfig.TYPE_NAME);
+        } else {
+            log.warn("Received an Errata message that is not of subject 'errata.activity.status', ignoring it");
+        }
+    }
+
+    private void identifyPncEvent(IncomingAmqpMetadata metadata, ObjectNode event) {
+
+        JsonObject properties = metadata.getProperties();
+        log.debug("Message properties: {}", properties.toString());
+
+        if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
+            event.put(EVENT_KEY_UMB_MSG_TYPE, PncBuildRequestConfig.TYPE_NAME);
+        } else if (Objects.equals(properties.getString("type"), "DeliverableAnalysisStateChange")) {
+            event.put(EVENT_KEY_UMB_MSG_TYPE, PncOperationRequestConfig.TYPE_NAME);
+        } else {
+            log.warn(
+                    "Received a PNC message that is not of type 'BuildStateChange' nor 'DeliverableAnalysisStateChange', ignoring it");
+        }
+    }
+
+    private boolean isIdentifiedEvent(ObjectNode event) {
+        return event.has(EVENT_KEY_UMB_MSG_TYPE);
+    }
+
+    private CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
+        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString());
+        requestEvent.save();
+
+        return message.nack(e);
+    }
+
+    private CompletionStage<Void> ackAndSave(Message<?> message, RequestEvent requestEvent) {
+        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
+        requestEvent.save();
+
         return message.ack();
     }
 
+    private CompletionStage<Void> ackAndSaveUnknownMessage(Message<?> message, ObjectNode event) {
+        event.put(EVENT_KEY_UMB_MSG_TYPE, EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE)
+                .put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
+        RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+        return message.ack();
+    }
+
+    private ObjectNode createUnidentifiedEvent(String content, UMBConsumer consumer) {
+        return ObjectMapperProvider.json()
+                .createObjectNode()
+                .put(EVENT_KEY_UMB_CONSUMER, consumer.toString())
+                .put(EVENT_KEY_UMB_MSG, content)
+                .put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NONE.toString());
+    }
+
+    private ObjectNode addMetadataToEvent(IncomingAmqpMetadata metadata, ObjectNode event) {
+        return event.put(EVENT_KEY_UMB_MSG_CREATION_TIME, Instant.ofEpochMilli(metadata.getCreationTime()).toString())
+                .put(EVENT_KEY_UMB_MSG_ID, metadata.getId())
+                .put(EVENT_KEY_UMB_TOPIC, metadata.getAddress());
+    }
+
     public long getPncProcessedMessages() {
-        return countPncProcessedMessages();
+        return repository.countPncProcessedMessages();
     }
 
     public long getPncReceivedMessages() {
-        return countPncReceivedMessages();
+        return repository.countPncReceivedMessages();
     }
 
     public long getErrataProcessedMessages() {
-        return countErrataProcessedMessages();
+        return repository.countErrataProcessedMessages();
     }
 
     public long getErrataReceivedMessages() {
-        return countErrataReceivedMessages();
+        return repository.countErrataReceivedMessages();
     }
 
     public long getPncSkippedMessages() {

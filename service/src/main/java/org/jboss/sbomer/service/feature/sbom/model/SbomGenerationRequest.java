@@ -36,12 +36,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
@@ -103,15 +108,20 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(foreignKey = @ForeignKey(name = "fk_generationrequest_request"))
+    private RequestEvent request;
+
     /**
      * Method to sync the {@link GenerationRequest} Kubernetes resource with the {@link SbomGenerationRequest} entity in
-     * the database.
+     * the database, with a provided request event.
      *
      * @param generationRequest
+     * @param request
      * @return Updated {@link SbomGenerationRequest} entity
      */
     @Transactional
-    public static SbomGenerationRequest sync(GenerationRequest generationRequest) {
+    public static SbomGenerationRequest sync(RequestEvent request, GenerationRequest generationRequest) {
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.findById(generationRequest.getId()); // NOSONAR
 
         // Create the entity if it's not there
@@ -136,6 +146,11 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         // And config
         sbomGenerationRequest.setConfig(generationRequest.getConfig());
 
+        // If the request is null (e.g. sync called from the controllers) do not override it
+        if (request != null) {
+            sbomGenerationRequest.setRequest(request);
+        }
+
         // Store it in the database
         sbomGenerationRequest.persistAndFlush();
 
@@ -145,6 +160,17 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                 generationRequest.getMetadata().getName());
 
         return sbomGenerationRequest;
+    }
+
+    /**
+     * Method to sync the {@link GenerationRequest} Kubernetes resource with the {@link SbomGenerationRequest} entity in
+     * the database.
+     *
+     * @param generationRequest
+     * @return Updated {@link SbomGenerationRequest} entity
+     */
+    public static SbomGenerationRequest sync(GenerationRequest generationRequest) {
+        return sync(null, generationRequest);
     }
 
     @Transactional

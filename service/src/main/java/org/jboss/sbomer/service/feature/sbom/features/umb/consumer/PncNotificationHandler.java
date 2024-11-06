@@ -17,9 +17,11 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_TYPE;
+
 import java.util.List;
 
-import org.eclipse.microprofile.reactive.messaging.Message;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
@@ -28,6 +30,8 @@ import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
+import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.DefaultProcessorConfig;
@@ -43,12 +47,14 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncDelA
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.pnc.PncClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -82,18 +88,24 @@ public class PncNotificationHandler {
     @RestClient
     PncClient pncClient;
 
-    public void handle(Message<String> message, GenerationRequestType type) throws JsonProcessingException {
-        switch (type) {
-            case BUILD:
+    public void handle(RequestEvent requestEvent) throws JsonProcessingException {
+
+        JsonNode msgNode = requestEvent.getEvent().get(EVENT_KEY_UMB_MSG);
+        String msg = msgNode.isTextual() ? msgNode.textValue() : msgNode.toString();
+
+        String msgType = requestEvent.getEvent().get(EVENT_KEY_UMB_MSG_TYPE).asText();
+
+        switch (msgType) {
+            case PncBuildRequestConfig.TYPE_NAME:
                 PncBuildNotificationMessageBody buildMsgBody = ObjectMapperProvider.json()
-                        .readValue(message.getPayload(), PncBuildNotificationMessageBody.class);
-                handle(buildMsgBody);
+                        .readValue(msg, PncBuildNotificationMessageBody.class);
+                handle(buildMsgBody, requestEvent);
                 break;
 
-            case OPERATION:
+            case PncOperationRequestConfig.TYPE_NAME:
                 PncDelAnalysisNotificationMessageBody delAnalysisMsgBody = ObjectMapperProvider.json()
-                        .readValue(message.getPayload(), PncDelAnalysisNotificationMessageBody.class);
-                handle(delAnalysisMsgBody);
+                        .readValue(msg, PncDelAnalysisNotificationMessageBody.class);
+                handle(delAnalysisMsgBody, requestEvent);
                 break;
             default:
                 break;
@@ -105,7 +117,7 @@ public class PncNotificationHandler {
      *
      * @param messageBody the body of the PNC build notification.
      */
-    private void handle(PncBuildNotificationMessageBody messageBody) {
+    private void handle(PncBuildNotificationMessageBody messageBody, RequestEvent requestEvent) {
         if (messageBody == null) {
             log.warn("Received message does not contain body, ignoring");
             return;
@@ -119,7 +131,7 @@ public class PncNotificationHandler {
         }
 
         if (!isSuccessfulPersistentBuild(messageBody)) {
-            log.info("Received message is not a scuccessful pesistent build, skipping...");
+            log.info("Received message is not a successful persistent build, skipping...");
             return;
         }
 
@@ -134,6 +146,9 @@ public class PncNotificationHandler {
             return;
         }
 
+        // Update the requestEvent with the requestConfig
+        requestEvent = addPncBuildRequestConfig(requestEvent, String.valueOf(messageBody.getBuild().getId()));
+
         log.info("Triggering automated SBOM generation for PNC build '{}' ...", messageBody.getBuild().getId());
 
         GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
@@ -142,6 +157,8 @@ public class PncNotificationHandler {
                 .build();
 
         log.debug("ConfigMap to create: '{}'", req);
+
+        SbomGenerationRequest.sync(requestEvent, req);
 
         ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
 
@@ -153,7 +170,7 @@ public class PncNotificationHandler {
      *
      * @param messageBody the body of the PNC build notification.
      */
-    private void handle(PncDelAnalysisNotificationMessageBody messageBody) {
+    private void handle(PncDelAnalysisNotificationMessageBody messageBody, RequestEvent requestEvent) {
         if (messageBody == null) {
             log.warn("Received message does not contain body, ignoring");
             return;
@@ -211,16 +228,31 @@ public class PncNotificationHandler {
             pendingRequest = pendingRequests.get(0);
         }
 
+        // Update the requestEvent with the requestConfig
+        requestEvent = addPncOperationRequestConfig(requestEvent, String.valueOf(messageBody.getOperationId()));
+
         GenerationRequest req = createDelAnalysisGenerationRequest(messageBody, pendingRequest);
 
         log.debug("ConfigMap to create: '{}'", req);
 
-        SbomGenerationRequest.sync(req);
+        SbomGenerationRequest.sync(requestEvent, req);
 
         ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
 
         log.info("Request created: {}", cm.getMetadata().getName());
 
+    }
+
+    @Transactional
+    protected RequestEvent addPncBuildRequestConfig(RequestEvent requestEvent, String buildId) {
+        requestEvent.setRequestConfig(PncBuildRequestConfig.builder().withBuildId(buildId).build());
+        return requestEvent.save();
+    }
+
+    @Transactional
+    protected RequestEvent addPncOperationRequestConfig(RequestEvent requestEvent, String operationId) {
+        requestEvent.setRequestConfig(PncOperationRequestConfig.builder().withOperationId(operationId).build());
+        return requestEvent.save();
     }
 
     @Transactional

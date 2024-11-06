@@ -47,7 +47,7 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
      "destination": "/topic/VirtualTopic.eng.pnc.builds",
      "consumer": "PNC",
      "msg_status": "ACK",
-     "msg_type": "BUILD",
+     "msg_type": "pnc-build",
      "msg_id": "ID:orch-86-qmrdq-44443-1697588407649-5:1:3:1:1",
      "msg": {
         "attribute": "state-change",
@@ -106,7 +106,7 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
      "destination": "/topic/VirtualTopic.eng.pnc.builds",
      "consumer": "PNC",
      "msg_status": "ACK",
-     "msg_type": "DELIVERABLE_ANALYSIS",
+     "msg_type": "pnc-operation",
      "msg_id": "ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1",
      "msg": {
         "attribute": "deliverable-analysis-state-change",
@@ -134,7 +134,7 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
      "destination": "/topic/VirtualTopic.eng.errata.activity.status",
      "consumer": "ERRATA",
      "msg_status": "ACK",
-     "msg_type": "ERRATA",
+     "msg_type": "errata-advisory",
      "msg_id": "ID:umb-prod-2.umb-001.prod.us-east-1.aws.redhat.com-44939-1728675652022-7:105726:-1:1:1",
      "msg": {
         "content_types": [
@@ -165,7 +165,7 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
      "destination": "/topic/VirtualTopic.eng.pnc.builds",
      "consumer": "PNC",
      "msg_status": "NACK",
-     "msg_type": "UNKNOWN",
+     "msg_type": "unknown",
      "msg_id": "ID:orch-86-qmrdq-33543-16-5:1:3:1:1",
      "msg": {
         "attribute": "unknown-attribute"
