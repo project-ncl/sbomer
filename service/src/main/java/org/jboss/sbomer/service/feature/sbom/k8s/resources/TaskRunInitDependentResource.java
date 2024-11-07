@@ -100,7 +100,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
                                 .withNewValue(generationRequest.getIdentifier())
                                 .build(),
                         new ParamBuilder().withName(PARAM_CONFIG_NAME)
-                                .withNewValue(Objects.requireNonNullElse(generationRequest.getJsonConfig(), "{}"))
+                                .withNewValue(Objects.requireNonNullElse(generationRequest.getJsonConfig(), ""))
                                 .build())
                 .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
                 .withWorkspaces(

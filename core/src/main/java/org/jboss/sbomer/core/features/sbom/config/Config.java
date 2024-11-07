@@ -160,7 +160,7 @@ public abstract class Config {
             return null;
         }
 
-        return Config.fromBytes(value.getBytes(), clazz);
+        return Config.fromBytes(value.strip().getBytes(), clazz);
     }
 
     public static Config fromBytes(byte[] data) {
