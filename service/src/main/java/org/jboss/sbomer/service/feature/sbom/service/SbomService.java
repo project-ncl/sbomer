@@ -211,11 +211,6 @@ public class SbomService {
     @WithSpan
     public SbomGenerationRequest generateFromOperation(RequestEvent requestEvent, OperationConfig config) {
 
-        ValidationResult result = configSchemaValidator.validate(config);
-
-        if (!result.isValid()) {
-            throw new ValidationException("Provided 'operation' configuration is not valid", result.getErrors());
-        }
         log.info("New generation request for operationId '{}' ...", config.getOperationId());
         log.debug("Creating GenerationRequest Kubernetes resource...");
 
@@ -224,22 +219,26 @@ public class SbomService {
                 .withStatus(SbomGenerationStatus.NEW)
                 .build();
 
-        log.debug("Received product configuration...");
-        SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
-        sbomerConfigProvider.adjust(config);
+        if (config.getProduct() != null) {
+            log.debug("Received product configuration...");
+            SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+            sbomerConfigProvider.adjust(config);
 
-        ValidationResult validationResult = configSchemaValidator.validate(config);
+            ValidationResult validationResult = configSchemaValidator.validate(config);
 
-        if (!validationResult.isValid()) {
-            throw new ValidationException("Provided operation config is not valid", validationResult.getErrors());
-        }
+            if (!validationResult.isValid()) {
+                throw new ValidationException(
+                        "Provided 'operation' configuration is not valid",
+                        validationResult.getErrors());
+            }
 
-        // Because the config is valid, use it and set the status to initialized
-        req.setStatus(SbomGenerationStatus.NEW);
-        try {
-            req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(config));
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
+            // Because the config is valid, use it and set the status to initialized
+            req.setStatus(SbomGenerationStatus.NEW);
+            try {
+                req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(config));
+            } catch (JsonProcessingException e) {
+                throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
+            }
         }
 
         log.debug("ConfigMap to create: '{}'", req);
@@ -261,13 +260,6 @@ public class SbomService {
         try {
             MDCUtils.addBuildContext(config.getBuildId());
 
-            log.debug("Validating provided configuration...");
-            ValidationResult result = configSchemaValidator.validate(config);
-
-            if (!result.isValid()) {
-                throw new ValidationException("Provided 'pnc-build' configuration is not valid", result.getErrors());
-            }
-
             log.info("New generation request for build id '{}'", config.getBuildId());
             log.debug("Creating GenerationRequest Kubernetes resource...");
 
@@ -281,10 +273,13 @@ public class SbomService {
             SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
             sbomerConfigProvider.adjust(config);
 
+            log.debug("Validating provided configuration...");
             ValidationResult validationResult = configSchemaValidator.validate(config);
 
             if (!validationResult.isValid()) {
-                throw new ValidationException("Provided config is not valid", validationResult.getErrors());
+                throw new ValidationException(
+                        "Provided 'pnc-build' configuration is not valid",
+                        validationResult.getErrors());
             }
 
             // We still need to ensure whether the provided config is valid and if we need to set some defaults.
