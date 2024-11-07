@@ -64,4 +64,74 @@ BEGIN;
 COMMIT;
 
 
+CREATE INDEX idx_umb_msg_content_all ON umb_message USING GIN (content);
+
+----------------------------------------------------------------
+-- Migration script from 'umb_message' to 'request' tables
+----------------------------------------------------------------
+BEGIN;
+
+INSERT INTO request (id, receival_time, event_type, request_config, event)
+SELECT
+    umb_message.id,
+    umb_message.receival_time,
+    'UMB' AS event_type,
+
+    -- Create JSON object for request_config based on umb_message.type
+    CASE 
+        WHEN umb_message.type = 'BUILD' THEN jsonb_build_object(
+            'type', 'pnc-build',
+            'apiVersion', 'sbomer.jboss.org/v1alpha1',
+            'buildId', umb_message.content -> 'build' ->> 'id'
+        )
+        WHEN umb_message.type = 'ERRATA' THEN jsonb_build_object(
+            'type', 'errata-advisory',
+            'apiVersion', 'sbomer.jboss.org/v1alpha1',
+            'advisoryId', (umb_message.content ->> 'errata_id')::text
+        )
+        WHEN umb_message.type = 'DELIVERABLE_ANALYSIS' THEN jsonb_build_object(
+            'type', 'pnc-operation',
+            'apiVersion', 'sbomer.jboss.org/v1alpha1',
+            'operationId', umb_message.content ->> 'operationId'
+        )
+    END AS request_config,
+
+    -- Create JSON object for event based on umb_message.type
+    CASE 
+        WHEN umb_message.type = 'BUILD' THEN jsonb_build_object(
+            'creation_time', umb_message.creation_time,
+            'destination', umb_message.topic,
+            'consumer', umb_message.consumer,
+            'msg_status', umb_message.status,
+            'msg_type', 'pnc-build',
+            'msg_id', umb_message.msg_id,
+            'msg', umb_message.content
+        )
+        WHEN umb_message.type = 'ERRATA' THEN jsonb_build_object(
+            'creation_time', umb_message.creation_time,
+            'destination', umb_message.topic,
+            'consumer', umb_message.consumer,
+            'msg_status', umb_message.status,
+            'msg_type', 'errata-advisory',
+            'msg_id', umb_message.msg_id,
+            'msg', umb_message.content
+        )
+        WHEN umb_message.type = 'DELIVERABLE_ANALYSIS' THEN jsonb_build_object(
+            'creation_time', umb_message.creation_time,
+            'destination', umb_message.topic,
+            'consumer', umb_message.consumer,
+            'msg_status', umb_message.status,
+            'msg_type', 'pnc-operation',
+            'msg_id', umb_message.msg_id,
+            'msg', umb_message.content
+        )
+    END AS event
+
+FROM
+    umb_message
+WHERE
+    umb_message.type IN ('BUILD', 'ERRATA', 'DELIVERABLE_ANALYSIS');
+
+COMMIT;
+
  

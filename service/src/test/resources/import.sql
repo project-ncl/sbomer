@@ -44,7 +44,7 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
    }' FORMAT JSON,
   '{
      "creation_time": "2024-10-14 12:18:45.148407",
-     "destination": "/topic/VirtualTopic.eng.pnc.builds",
+     "destination": "topic://VirtualTopic.eng.pnc.builds",
      "consumer": "PNC",
      "msg_status": "ACK",
      "msg_type": "pnc-build",
@@ -103,7 +103,7 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
    }' FORMAT JSON,
   '{
      "creation_time": "2024-10-14 12:18:45.148407",
-     "destination": "/topic/VirtualTopic.eng.pnc.builds",
+     "destination": "topic://VirtualTopic.eng.pnc.builds",
      "consumer": "PNC",
      "msg_status": "ACK",
      "msg_type": "pnc-operation",
@@ -131,7 +131,7 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
    }' FORMAT JSON,
   '{
      "creation_time": "2024-10-14 12:18:45.148407",
-     "destination": "/topic/VirtualTopic.eng.errata.activity.status",
+     "destination": "topic://VirtualTopic.eng.errata.activity.status",
      "consumer": "ERRATA",
      "msg_status": "ACK",
      "msg_type": "errata-advisory",
@@ -162,7 +162,7 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
     null,
   '{
      "creation_time": "2024-10-14 12:18:45.148407",
-     "destination": "/topic/VirtualTopic.eng.pnc.builds",
+     "destination": "topic://VirtualTopic.eng.pnc.builds",
      "consumer": "PNC",
      "msg_status": "NACK",
      "msg_type": "unknown",
