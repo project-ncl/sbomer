@@ -21,11 +21,15 @@ import org.jboss.pnc.api.enums.BuildStatus;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.ProgressStatus;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PncBuildNotificationMessageBody {
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Build {
         String id;
         BuildConfigRevision buildConfigRevision;
@@ -35,6 +39,7 @@ public class PncBuildNotificationMessageBody {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BuildConfigRevision {
         String id;
         BuildType buildType;

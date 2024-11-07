@@ -20,11 +20,13 @@ package org.jboss.sbomer.cli.feature.sbom.adjuster;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContainerImageInspectOutput {
     @JsonProperty("Name")
     String name;
