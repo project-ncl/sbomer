@@ -30,6 +30,7 @@ import org.jboss.pnc.build.finder.koji.ClientSession;
 import org.jboss.sbomer.core.features.sbom.config.BrewRPMConfig;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata.Details;
@@ -74,6 +75,10 @@ public class AdvisoryService {
     @Inject
     SbomService sbomService;
 
+    @Inject
+    @Setter
+    FeatureFlags featureFlags;
+
     public Collection<SbomGenerationRequest> generateFromAdvisory(String advisoryId) {
 
         // Fetching Erratum
@@ -95,6 +100,12 @@ public class AdvisoryService {
 
     private Collection<SbomGenerationRequest> handleTextOnlyAdvisory(Errata erratum) {
         // Handle the text-only advisories
+        if (!featureFlags.textOnlyErrataManifestGenerationEnabled()) {
+            log.warn(
+                    "Text-Only Errata manifest generation is disabled, the deliverables attached to the advisory won't be manifested!!");
+            return Collections.emptyList();
+        }
+
         log.warn("** TODO ** Handle the Text-only advisories");
         return Collections.emptyList();
     }
@@ -152,6 +163,11 @@ public class AdvisoryService {
 
     private Collection<SbomGenerationRequest> processDockerBuilds(
             Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
+        if (!featureFlags.standardErrataImageManifestGenerationEnabled()) {
+            log.warn(
+                    "Standard Errata container images manifest generation is disabled, the container images attached to the advisory won't be manifested!!");
+            return Collections.emptyList();
+        }
         log.debug("Processing docker builds: {}", buildDetails);
 
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
@@ -177,6 +193,12 @@ public class AdvisoryService {
             Details details,
             ErrataProduct product,
             Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
+
+        if (!featureFlags.standardErrataRPMManifestGenerationEnabled()) {
+            log.warn(
+                    "Standard Errata RPM manifest generation is disabled, the RPM builds attached to the advisory won't be manifested!!");
+            return Collections.emptyList();
+        }
         log.debug("Processing RPM builds: {}", buildDetails);
 
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();

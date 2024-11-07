@@ -59,6 +59,9 @@ public class FeatureFlags implements UnleashSubscriber {
 
     // Errata
     public static final String TOGGLE_ERRATA_INTEGRATION = "errata-integration";
+    public static final String TOGGLE_STANDARD_ERRATA_RPM_MANIFEST_GENERATION = "errata-standard-rpm-manifest-generation";
+    public static final String TOGGLE_STANDARD_ERRATA_IMAGE_MANIFEST_GENERATION = "errata-standard-image-manifest-generation";
+    public static final String TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION = "errata-textonly-manifest-generation";
 
     /**
      * A map holding all toggle values we are interested in. This is used for logging purposes. We are retrieving the
@@ -83,6 +86,15 @@ public class FeatureFlags implements UnleashSubscriber {
 
     @ConfigProperty(name = "SBOMER_FEATURE_ERRATA_INTEGRATION_ENABLED", defaultValue = "false")
     boolean errataIntegration;
+
+    @ConfigProperty(name = "SBOMER_FEATURE_STANDARD_ERRATA_RPM_MANIFEST_ENABLED", defaultValue = "false")
+    boolean standardErrataRPMManifestGeneration;
+
+    @ConfigProperty(name = "SBOMER_FEATURE_STANDARD_ERRATA_CONTAINERIMAGE_MANIFEST_ENABLED", defaultValue = "false")
+    boolean standardErrataImageManifestGeneration;
+
+    @ConfigProperty(name = "SBOMER_FEATURE_TEXTONLY_ERRATA_MANIFEST_ENABLED", defaultValue = "false")
+    boolean textonlyErrataGeneration;
 
     /**
      * Returns {@code true} in case the dry-run mode is enabled.
@@ -121,6 +133,35 @@ public class FeatureFlags implements UnleashSubscriber {
     }
 
     /**
+     * Returns {@code true} if the manifest generation of standard Errata RPM builds is enabled.
+     *
+     * @return {@code true} if the manifest generation of standard Errata RPM builds is enabled, {@code false} otherwise
+     */
+    public boolean standardErrataRPMManifestGenerationEnabled() {
+        return unleash.isEnabled(TOGGLE_STANDARD_ERRATA_RPM_MANIFEST_GENERATION, standardErrataRPMManifestGeneration);
+    }
+
+    /**
+     * Returns {@code true} if the manifest generation of standard Errata container images builds is enabled.
+     *
+     * @return {@code true} if the manifest generation of standard Errata container images builds is enabled,
+     *         {@code false} otherwise
+     */
+    public boolean standardErrataImageManifestGenerationEnabled() {
+        return unleash
+                .isEnabled(TOGGLE_STANDARD_ERRATA_IMAGE_MANIFEST_GENERATION, standardErrataImageManifestGeneration);
+    }
+
+    /**
+     * Returns {@code true} if the manifest generation of text only Errata is enabled.
+     *
+     * @return {@code true} if the manifest generation of text only Errata is enabled, {@code false} otherwise
+     */
+    public boolean textOnlyErrataManifestGenerationEnabled() {
+        return unleash.isEnabled(TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION, textonlyErrataGeneration);
+    }
+
+    /**
      * Returns {@code true} if we should send a UMB message for a successfully generated manifest where the generation
      * request source is of a given type.
      *
@@ -149,7 +190,11 @@ public class FeatureFlags implements UnleashSubscriber {
                 TOGGLE_NOTIFY_BUILD,
                 TOGGLE_NOTIFY_OPERATION,
                 TOGGLE_NOTIFY_ANALYSIS,
-                TOGGLE_ATLAS_PUBLISH)) {
+                TOGGLE_ATLAS_PUBLISH,
+                TOGGLE_ERRATA_INTEGRATION,
+                TOGGLE_STANDARD_ERRATA_RPM_MANIFEST_GENERATION,
+                TOGGLE_STANDARD_ERRATA_IMAGE_MANIFEST_GENERATION,
+                TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION)) {
             FeatureToggle toggle = toggleResponse.getToggleCollection().getToggle(toggleName);
 
             if (toggle != null) {
