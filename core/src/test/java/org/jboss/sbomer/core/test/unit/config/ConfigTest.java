@@ -43,6 +43,15 @@ public class ConfigTest {
     }
 
     @Test
+    void shouldHandleInvalidContent() {
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
+            Config.fromString("{\"type\": \"syft-image\", \"wrong\": []}");
+        });
+
+        assertEquals("Unknown property 'wrong' at path $.wrong", ex.getMessage());
+    }
+
+    @Test
     void shouldHandleInvalidType() {
         ApplicationException ex = assertThrows(ApplicationException.class, () -> {
             Config.fromString("{\"type\": \"invalid\"}");

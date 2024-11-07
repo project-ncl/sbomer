@@ -19,9 +19,12 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model;
 
 import org.jboss.pnc.api.enums.ProgressStatus;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PncDelAnalysisNotificationMessageBody {
 
     String[] deliverablesUrls;

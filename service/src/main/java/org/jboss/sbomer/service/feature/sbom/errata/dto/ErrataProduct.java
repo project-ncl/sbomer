@@ -20,20 +20,24 @@ package org.jboss.sbomer.service.feature.sbom.errata.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrataProduct {
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ErrataProductVersion {
         private Long id;
         private String name;
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Attributes {
         private String name;
         private String description;
@@ -42,12 +46,14 @@ public class ErrataProduct {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Relationships {
         @JsonProperty("product_versions")
         private List<ErrataProductVersion> productVersions = new ArrayList<ErrataProductVersion>();
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductData {
         private Long id;
         private String type;

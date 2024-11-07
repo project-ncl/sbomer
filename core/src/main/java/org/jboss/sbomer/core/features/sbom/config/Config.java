@@ -32,7 +32,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException.Reference;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -185,16 +187,7 @@ public abstract class Config {
                 }
             }
 
-            String path = String.format(
-                    "$.%s",
-                    String.join(
-                            ".",
-                            itide.getPath()
-                                    .stream()
-                                    .map(
-                                            r -> r.getIndex() < 0 ? String.format("%s", r.getFieldName())
-                                                    : String.format("[%s]", r.getIndex()))
-                                    .collect(Collectors.toList())));
+            String path = Config.readablePropertyPath(itide.getPath());
 
             // Nested "type" identifier is missing
             if (itide.getTypeId() == null) {
@@ -204,8 +197,27 @@ public abstract class Config {
                 throw new ApplicationException("Invalid type '{}' found at path {}", itide.getTypeId(), path, itide);
             }
 
+        } catch (UnrecognizedPropertyException upe) {
+            String path = Config.readablePropertyPath(upe.getPath());
+
+            throw new ApplicationException("Unknown property '{}' at path {}", upe.getPropertyName(), path, upe);
+
         } catch (IOException e) {
             throw new ApplicationException("Cannot deserialize provided config", e);
         }
     }
+
+    private static String readablePropertyPath(List<Reference> references) {
+        return String.format(
+                "$.%s",
+                String.join(
+                        ".",
+                        references.stream()
+                                .map(
+                                        r -> r.getIndex() < 0 ? String.format("%s", r.getFieldName())
+                                                : String.format("[%s]", r.getIndex()))
+                                .collect(Collectors.toList())));
+
+    }
+
 }

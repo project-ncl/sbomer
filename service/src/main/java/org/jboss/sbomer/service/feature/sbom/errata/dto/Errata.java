@@ -26,6 +26,7 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataType;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,10 +38,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Slf4j
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Errata {
 
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class WrappedErrata {
         private RHBA rhba;
         private RHEA rhea;
@@ -50,22 +53,26 @@ public class Errata {
     @Data
     @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RHBA extends Details {
     }
 
     @Data
     @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RHEA extends Details {
     }
 
     @Data
     @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RHSA extends Details {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Details {
         private Long id;
         private String fulladvisory;
@@ -89,6 +96,7 @@ public class Errata {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ErrataProduct {
         private Long id;
         private String name;
@@ -97,11 +105,13 @@ public class Errata {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class WrappedContent {
         private Content content;
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Content {
         @JsonProperty("id")
         private Long id;

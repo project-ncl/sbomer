@@ -134,7 +134,7 @@ class ConfigReaderIT {
                 configReader.getConfig(build);
             });
 
-            assertEquals("Cannot deserialize provided config", ex.getMessage());
+            assertEquals("Unknown property 'dummy' at path $.products.[0].processors.[0].dummy", ex.getMessage());
             assertTrue(((JsonMappingException) ex.getCause()).getMessage().startsWith("Unrecognized field \"dummy\""));
         }
 
@@ -252,7 +252,7 @@ class ConfigReaderIT {
                 configReader.getConfig(build);
             });
 
-            assertEquals("Cannot deserialize provided config", ex.getMessage());
+            assertEquals("Unknown property 'dummy' at path $.products.[0].processors.[0].dummy", ex.getMessage());
             assertTrue(((JsonMappingException) ex.getCause()).getMessage().startsWith("Unrecognized field \"dummy\""));
         }
 

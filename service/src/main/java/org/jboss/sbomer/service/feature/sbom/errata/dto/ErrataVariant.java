@@ -17,14 +17,17 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrataVariant {
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ErrataProduct {
         private Long id;
         private String name;
@@ -33,12 +36,14 @@ public class ErrataVariant {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ErrataProductVersion {
         private Long id;
         private String name;
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Attributes {
         private String name;
         private String description;
@@ -47,18 +52,21 @@ public class ErrataVariant {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RhelRelease {
         private Long id;
         private String name;
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RhelVariant {
         private Long id;
         private String name;
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Relationships {
         private ErrataProduct product;
         @JsonProperty("product_version")
@@ -70,6 +78,7 @@ public class ErrataVariant {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class VariantData {
         private Long id;
         private String type;

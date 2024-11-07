@@ -25,9 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrataBuildList {
 
     private Map<String, ProductVersionEntry> productVersions = new HashMap<String, ProductVersionEntry>();
@@ -38,6 +40,7 @@ public class ErrataBuildList {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductVersionEntry {
         private String name;
         private String description;
@@ -45,6 +48,7 @@ public class ErrataBuildList {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Build {
         private Map<String, BuildItem> buildItems = new HashMap<String, BuildItem>();
 
@@ -55,6 +59,7 @@ public class ErrataBuildList {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BuildItem {
         private String nvr;
         private String nevr;
@@ -75,6 +80,7 @@ public class ErrataBuildList {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class VariantArch {
         // Empty class for now since we are not interested in any item inside
     }
