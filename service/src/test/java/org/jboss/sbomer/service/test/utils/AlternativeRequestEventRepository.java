@@ -61,8 +61,8 @@ public class AlternativeRequestEventRepository extends RequestEventRepository {
     @Override
     public long countEventsForTypeAndIdentifier(String typeValue, String identifierKey, String identifierValue) {
 
-        String q = "SELECT * FROM request WHERE JSON_EXTRACT(event, '$.type') = :type " + " AND JSON_EXTRACT(event, '$."
-                + identifierKey + "') = :identifierValue";
+        String q = "SELECT * FROM request WHERE JSON_EXTRACT(request_config, '$.type') = :type "
+                + " AND JSON_EXTRACT(request_config, '$." + identifierKey + "') = :identifierValue";
 
         return getEntityManager().createNativeQuery(q, RequestEvent.class)
                 .setParameter("type", typeValue)
