@@ -18,5 +18,5 @@
 package org.jboss.sbomer.service.feature.sbom.errata.dto.enums;
 
 public enum ErrataStatus {
-    NEW_FILES, QE, REL_PREP, PUSH_READY, IN_PUSH, SHIPPED_LIVE, DROPPED_NO_SHIP, REDACTED
+    NEW_FILES, QE, REL_PREP, PUSH_READY, IN_PUSH, SHIPPED_LIVE, DROPPED_NO_SHIP, REDACTED;
 }
