@@ -69,6 +69,9 @@ class ErrataNotificationHandlerTest {
 
         FeatureFlags featureFlags = mock(FeatureFlags.class);
         when(featureFlags.errataIntegrationEnabled()).thenReturn(true);
+        when(featureFlags.standardErrataRPMManifestGenerationEnabled()).thenReturn(true);
+        when(featureFlags.standardErrataImageManifestGenerationEnabled()).thenReturn(true);
+        when(featureFlags.textOnlyErrataManifestGenerationEnabled()).thenReturn(true);
         errataNotificationHandler.setFeatureFlags(featureFlags);
         errataNotificationHandler.setAdvisoryService(advisoryService);
         advisoryService.setErrataClient(errataClient);
