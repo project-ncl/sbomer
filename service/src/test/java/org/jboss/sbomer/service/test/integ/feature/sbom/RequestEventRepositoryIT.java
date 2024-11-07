@@ -67,7 +67,7 @@ class RequestEventRepositoryIT {
 
         JsonNode event = requestEvent.getEvent();
         assertEquals(
-                "/topic/VirtualTopic.eng.errata.activity.status",
+                "topic://VirtualTopic.eng.errata.activity.status",
                 event.get(RequestEvent.EVENT_KEY_UMB_TOPIC).asText());
         assertEquals(UMBConsumer.ERRATA.name(), event.get(RequestEvent.EVENT_KEY_UMB_CONSUMER).asText());
         assertEquals(UMBMessageStatus.ACK.name(), event.get(RequestEvent.EVENT_KEY_UMB_MSG_STATUS).asText());

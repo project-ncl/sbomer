@@ -19,11 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.service;
 
 import java.lang.reflect.Field;
 
-import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
-import org.jboss.sbomer.core.config.request.ImageRequestConfig;
-import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
-import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
-import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
@@ -60,8 +55,8 @@ public class RequestEventRepository implements PanacheRepository<RequestEvent> {
 
     public long countEventsForTypeAndIdentifier(String typeValue, String identifierKey, String identifierValue) {
 
-        String q = "SELECT COUNT(*) FROM request WHERE event ->> 'type' = :type " + " AND event ->> '" + identifierKey
-                + "' = :identifierValue";
+        String q = "SELECT COUNT(*) FROM request WHERE request_config ->> 'type' = :type " + " AND request_config ->> '"
+                + identifierKey + "' = :identifierValue";
 
         return ((Number) getEntityManager().createNativeQuery(q)
                 .setParameter("type", typeValue)
@@ -98,7 +93,7 @@ public class RequestEventRepository implements PanacheRepository<RequestEvent> {
         return countAllUMBEventsFrom(UMBConsumer.ERRATA);
     }
 
-    public String getValueOfField(Class<? extends RequestConfig> configClass, String fieldName) {
+    private String getValueOfField(Class<? extends RequestConfig> configClass, String fieldName) {
         // Use reflection to get the value of the field provided
         try {
             Field typeNameField = configClass.getDeclaredField(fieldName);

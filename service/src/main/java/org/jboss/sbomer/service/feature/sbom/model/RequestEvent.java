@@ -63,7 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 @RegisterForReflection
 public class RequestEvent extends PanacheEntityBase {
 
-    // UMB event keys
+    // The event keys for UMB event type
     public final static String EVENT_KEY_UMB_CONSUMER = "consumer";
     public final static String EVENT_KEY_UMB_MSG_STATUS = "msg_status";
     public final static String EVENT_KEY_UMB_MSG = "msg";
@@ -74,7 +74,7 @@ public class RequestEvent extends PanacheEntityBase {
 
     public final static String EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE = "unknown";
 
-    // REST event keys
+    // The event keys for REST event type
     public final static String EVENT_KEY_REST_METHOD = "method";
     public final static String EVENT_KEY_REST_ADDRESS = "address";
     public final static String EVENT_KEY_REST_USERNAME = "username";
