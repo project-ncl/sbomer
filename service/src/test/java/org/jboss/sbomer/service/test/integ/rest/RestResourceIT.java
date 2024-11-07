@@ -349,7 +349,7 @@ class RestResourceIT {
                     .and()
                     .body("[0].type", CoreMatchers.equalTo("BUILD"))
                     .and()
-                    .body("[0].status", CoreMatchers.is("NEW"));
+                    .body("[0].status", CoreMatchers.is("INITIALIZING"));
         }
 
         @Test
