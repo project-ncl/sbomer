@@ -130,7 +130,9 @@ SELECT
 FROM
     umb_message
 WHERE
-    umb_message.type IN ('BUILD', 'ERRATA', 'DELIVERABLE_ANALYSIS');
+    umb_message.type IN ('BUILD', 'ERRATA', 'DELIVERABLE_ANALYSIS')
+
+ON CONFLICT (id) DO NOTHING; -- Skip insertions if there's a conflict on the `id` field
 
 COMMIT;
 
