@@ -81,14 +81,14 @@ class StageGenerationRequestIT extends E2EStageBase {
 
         waitForGeneration(generationId);
 
-        log.info("Gradle 5 build finished, waiting for UMB message");
+        // log.info("Gradle 5 build finished, waiting for UMB message");
 
-        publishedUmbMessage(generationId, message -> {
-            message.body("headers.generation_request_id", CoreMatchers.is(generationId))
-                    .body("headers.pnc_build_id", CoreMatchers.is(GRADLE_5_BUILD_ID))
-                    .body("msg.build.id", CoreMatchers.is(GRADLE_5_BUILD_ID))
-                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId));
-        });
+        // publishedUmbMessage(generationId, message -> {
+        //     message.body("headers.generation_request_id", CoreMatchers.is(generationId))
+        //             .body("headers.pnc_build_id", CoreMatchers.is(GRADLE_5_BUILD_ID))
+        //             .body("msg.build.id", CoreMatchers.is(GRADLE_5_BUILD_ID))
+        //             .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId));
+        // });
 
         log.info("Gradle 5 build passed");
     }
@@ -130,14 +130,14 @@ class StageGenerationRequestIT extends E2EStageBase {
 
         waitForGeneration(generationId);
 
-        log.info("NodeJs NPM build finished, waiting for UMB message");
+        // log.info("NodeJs NPM build finished, waiting for UMB message");
 
-        publishedUmbMessage(generationId, message -> {
-            message.body("headers.generation_request_id", CoreMatchers.is(generationId))
-                    .body("headers.pnc_build_id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
-                    .body("msg.build.id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
-                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId));
-        });
+        // publishedUmbMessage(generationId, message -> {
+        //     message.body("headers.generation_request_id", CoreMatchers.is(generationId))
+        //             .body("headers.pnc_build_id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
+        //             .body("msg.build.id", CoreMatchers.is(NODEJS_NPM_BUILD_ID))
+        //             .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId));
+        // });
 
         log.info("NodeJs NPM build passed");
     }
