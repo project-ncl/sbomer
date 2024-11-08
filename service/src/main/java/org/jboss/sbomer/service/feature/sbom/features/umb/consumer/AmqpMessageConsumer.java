@@ -62,6 +62,7 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Unremovable
 @Slf4j
+@Transactional // Quarkus should initialize the database connection pool before processing @Transactional beans
 public class AmqpMessageConsumer {
 
     @Inject
