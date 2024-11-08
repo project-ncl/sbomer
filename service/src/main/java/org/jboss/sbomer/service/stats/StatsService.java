@@ -90,11 +90,13 @@ public class StatsService {
                             PncConsumer.builder()
                                     .withProcessed(messageConsumer.getPncProcessedMessages())
                                     .withReceived(messageConsumer.getPncReceivedMessages())
+                                    .withSkipped(messageConsumer.getPncSkippedMessages())
                                     .build())
                     .withErrataConsumer(
                             ErrataConsumer.builder()
                                     .withProcessed(messageConsumer.getErrataProcessedMessages())
                                     .withReceived(messageConsumer.getErrataReceivedMessages())
+                                    .withSkipped(messageConsumer.getErrataSkippedMessages())
                                     .build())
 
                     .withProducer(
