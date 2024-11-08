@@ -28,7 +28,6 @@ public class ConfigTest {
         assertNull(Config.fromString(""));
     }
 
-
     @Test
     void shouldHandleAdditionalWhitespace() {
         assertNull(Config.fromString("  \n "));

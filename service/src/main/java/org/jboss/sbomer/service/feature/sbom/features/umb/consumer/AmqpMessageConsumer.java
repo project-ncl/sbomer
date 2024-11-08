@@ -132,10 +132,12 @@ public class AmqpMessageConsumer {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
             // There is an issue in our queues and same messages are processed multiple times, we want to avoid
             // generating manifests for the same event
-            if (countAlreadyAckedWithMsgId(umbMessage.getMsgId()) > 0) {
+            long alreadyGenerated = countAlreadyAckedWithMsgId(umbMessage.getMsgId());
+            if (alreadyGenerated > 0) {
                 log.warn(
-                        "Message with id '{}' has been already received and processed!! Will not process it again, skipping it",
-                        umbMessage.getMsgId());
+                        "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
+                        umbMessage.getMsgId(),
+                        alreadyGenerated);
 
                 umbMessage.skipAndSave();
                 return message.ack();
@@ -212,10 +214,12 @@ public class AmqpMessageConsumer {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
             // There is an issue in our queues and same messages are processed multiple times, we want to avoid
             // generating manifests for the same event
-            if (countAlreadyAckedWithMsgId(umbMessage.getMsgId()) > 0) {
+            long alreadyGenerated = countAlreadyAckedWithMsgId(umbMessage.getMsgId());
+            if (alreadyGenerated > 0) {
                 log.warn(
-                        "Message with id '{}' has been already received and processed!! Will not process it again, skipping it",
-                        umbMessage.getMsgId());
+                        "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
+                        umbMessage.getMsgId(),
+                        alreadyGenerated);
 
                 umbMessage.skipAndSave();
                 return message.ack();
