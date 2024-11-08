@@ -140,9 +140,11 @@ quarkus:
   datasource:
     db-kind: postgresql
     jdbc:
-      max-size: 20
+      max-size: 10
       min-size: 0
       initial-size: 1
+      acquisition-timeout: 10
+
   # https://quarkus.io/guides/hibernate-orm
   hibernate-orm:
     database:
