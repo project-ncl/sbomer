@@ -114,12 +114,32 @@ public class UMBMessage extends PanacheEntityBase {
                 UMBMessageStatus.ACK).count();
     }
 
+    public static long countPncSkippedMessages() {
+        return find(
+                "consumer = ?1 and type <> ?2 and status = ?3",
+                UMBConsumer.PNC,
+                UMBMessageType.UNKNOWN,
+                UMBMessageStatus.SKIPPED).count();
+    }
+
+    public static long countErrataSkippedMessages() {
+        return find(
+                "consumer = ?1 and type <> ?2 and status = ?3",
+                UMBConsumer.ERRATA,
+                UMBMessageType.UNKNOWN,
+                UMBMessageStatus.SKIPPED).count();
+    }
+
     public static long countPncReceivedMessages() {
-        return UMBMessage.find("consumer = ?1", UMBConsumer.PNC).count();
+        return find("consumer = ?1", UMBConsumer.PNC).count();
     }
 
     public static long countErrataReceivedMessages() {
-        return UMBMessage.find("consumer = ?1", UMBConsumer.ERRATA).count();
+        return find("consumer = ?1", UMBConsumer.ERRATA).count();
+    }
+
+    public static long countAlreadyAckedWithMsgId(String msgId) {
+        return find("msgId = ?1 AND status = ?2", msgId, UMBMessageStatus.ACK).count();
     }
 
     public static UMBMessage createNew(UMBConsumer consumer) {
@@ -134,6 +154,13 @@ public class UMBMessage extends PanacheEntityBase {
     @Transactional
     public UMBMessage ackAndSave() {
         setStatus(UMBMessageStatus.ACK);
+        persistAndFlush();
+        return this;
+    }
+
+    @Transactional
+    public UMBMessage skipAndSave() {
+        setStatus(UMBMessageStatus.SKIPPED);
         persistAndFlush();
         return this;
     }
