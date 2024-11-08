@@ -51,10 +51,10 @@ public record V1Beta1StatsRecord(
             V1Beta1StatsMessagingProducerRecord producer) {
     }
 
-    public record V1Beta1StatsMessagingPncConsumerRecord(long received, long processed) {
+    public record V1Beta1StatsMessagingPncConsumerRecord(long received, long processed, long skipped) {
     }
 
-    public record V1Beta1StatsMessagingErrataConsumerRecord(long received, long processed) {
+    public record V1Beta1StatsMessagingErrataConsumerRecord(long received, long processed, long skipped) {
     }
 
     public record V1Beta1StatsMessagingProducerRecord(long nacked, long acked) {
