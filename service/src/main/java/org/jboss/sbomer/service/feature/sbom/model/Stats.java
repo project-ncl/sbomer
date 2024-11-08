@@ -36,6 +36,7 @@ public class Stats {
     public static class PncConsumer {
         long received;
         long processed;
+        long skipped;
     }
 
     /**
@@ -46,6 +47,7 @@ public class Stats {
     public static class ErrataConsumer {
         long received;
         long processed;
+        long skipped;
     }
 
     /**

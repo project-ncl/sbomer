@@ -53,19 +53,31 @@ const StatisticsContent = (props: { stats: SbomerStats }) => {
         {props.stats.messaging && (
           <>
             <DescriptionListGroup>
-              <DescriptionListTerm>PNC Processed messages</DescriptionListTerm>
+              <DescriptionListTerm>PNC messages ({props.stats.messaging.pncConsumer.received} total)</DescriptionListTerm>
               <DescriptionListDescription>
-                {props.stats.messaging.pncConsumer.processed} out of {props.stats.messaging.pncConsumer.received} (
-                {props.stats.messaging.pncConsumer.received - props.stats.messaging.pncConsumer.processed} failed to
-                process)
+                <span style={{ display: 'block', marginBottom: '4px' }}>
+                  Processed: {props.stats.messaging.pncConsumer.processed}
+                </span>
+                <span style={{ display: 'block', marginBottom: '4px' }}>
+                  Skipped: {props.stats.messaging.pncConsumer.skipped}
+                </span>
+                <span style={{ display: 'block', marginBottom: '4px' }}>
+                  Failed: {props.stats.messaging.pncConsumer.received - props.stats.messaging.pncConsumer.processed - props.stats.messaging.pncConsumer.skipped}
+                </span>
               </DescriptionListDescription>
             </DescriptionListGroup>
             <DescriptionListGroup>
-              <DescriptionListTerm>Errata Processed messages</DescriptionListTerm>
+              <DescriptionListTerm>Errata messages ({props.stats.messaging.errataConsumer.received} total)</DescriptionListTerm>
               <DescriptionListDescription>
-                {props.stats.messaging.errataConsumer.processed} out of {props.stats.messaging.errataConsumer.received}{' '}
-                ({props.stats.messaging.errataConsumer.received - props.stats.messaging.errataConsumer.processed} failed
-                to process)
+                <span style={{ display: 'block', marginBottom: '4px' }}>
+                  Processed: {props.stats.messaging.errataConsumer.processed}
+                </span>
+                <span style={{ display: 'block', marginBottom: '4px' }}>
+                  Skipped: {props.stats.messaging.errataConsumer.skipped}
+                </span>
+                <span style={{ display: 'block', marginBottom: '4px' }}>
+                  Failed: {props.stats.messaging.errataConsumer.received - props.stats.messaging.errataConsumer.processed - props.stats.messaging.errataConsumer.skipped}
+                </span>
               </DescriptionListDescription>
             </DescriptionListGroup>
             <DescriptionListGroup>
@@ -110,9 +122,8 @@ export const StatsSection = () => {
       <CardBody>
         <HelperText>
           <HelperTextItem icon={<InfoIcon />}>
-            Please note that statistics other than number of manifests and generation requests are currently misleading,
-            because these do not take into account values from other nodes located across clusters. This will be
-            addressed soon.
+            Please note that Produced messages statistics are currently misleading, because these do not take into account values
+            from other nodes located across clusters. This will be addressed soon.
           </HelperTextItem>
         </HelperText>
         <br />

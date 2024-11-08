@@ -22,6 +22,8 @@ import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrata
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataReceivedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncProcessedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncReceivedMessages;
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataSkippedMessages;
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncSkippedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.createNew;
 
 import java.io.IOException;
@@ -247,4 +249,13 @@ public class AmqpMessageConsumer {
     public long getErrataReceivedMessages() {
         return countErrataReceivedMessages();
     }
+
+    public long getPncSkippedMessages() {
+        return countPncSkippedMessages();
+    }
+
+    public long getErrataSkippedMessages() {
+        return countErrataSkippedMessages();
+    }
+
 }

@@ -33,10 +33,12 @@ export type SbomerStats = {
     pncConsumer: {
       received: number;
       processed: number;
+      skipped: number;
     };
     errataConsumer: {
       received: number;
       processed: number;
+      skipped: number;
     };
     producer: {
       nacked: number;
