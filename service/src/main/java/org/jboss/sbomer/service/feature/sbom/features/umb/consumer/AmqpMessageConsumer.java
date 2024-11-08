@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
+import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countAlreadyAckedWithMsgId;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataProcessedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataReceivedMessages;
 import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncProcessedMessages;
@@ -124,6 +125,20 @@ public class AmqpMessageConsumer {
             umbMessage.setType(UMBMessageType.ERRATA);
         });
 
+        if (umbMessage.getMsgId() != null) {
+            // Verify that there aren't already ACKED UMBMessages with the same msg id
+            // There is an issue in our queues and same messages are processed multiple times, we want to avoid
+            // generating manifests for the same event
+            if (countAlreadyAckedWithMsgId(umbMessage.getMsgId()) > 0) {
+                log.warn(
+                        "Message with id '{}' has been already received and processed!! Will not process it again, skipping it",
+                        umbMessage.getMsgId());
+
+                umbMessage.skipAndSave();
+                return message.ack();
+            }
+        }
+
         try {
             errataNotificationHandler.handle(umbMessage);
         } catch (JsonProcessingException e) {
@@ -188,6 +203,20 @@ public class AmqpMessageConsumer {
                 umbMessage.ackAndSave();
             }
             return message.ack();
+        }
+
+        if (umbMessage.getMsgId() != null) {
+            // Verify that there aren't already ACKED UMBMessages with the same msg id
+            // There is an issue in our queues and same messages are processed multiple times, we want to avoid
+            // generating manifests for the same event
+            if (countAlreadyAckedWithMsgId(umbMessage.getMsgId()) > 0) {
+                log.warn(
+                        "Message with id '{}' has been already received and processed!! Will not process it again, skipping it",
+                        umbMessage.getMsgId());
+
+                umbMessage.skipAndSave();
+                return message.ack();
+            }
         }
 
         try {
