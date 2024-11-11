@@ -40,6 +40,7 @@ import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
+import org.jboss.sbomer.cli.feature.sbom.adjuster.PncOperationAdjuster;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
@@ -255,6 +256,9 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             Dependency parent = maybeParent.isPresent() ? maybeParent.get() : mainDependency;
             parent.addDependency(dependency);
         }
+
+        // Adjust the bom if needed (e.g. add the serial number)
+        new PncOperationAdjuster().adjust(bom);
 
         Path sbomDirPath = Path.of(
                 parent.getWorkdir().toAbsolutePath().toString(),
