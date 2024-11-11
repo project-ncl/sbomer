@@ -17,16 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
-<<<<<<< HEAD
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countAlreadyAckedWithMsgId;
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataProcessedMessages;
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataReceivedMessages;
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncProcessedMessages;
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncReceivedMessages;
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countErrataSkippedMessages;
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.countPncSkippedMessages;
-import static org.jboss.sbomer.service.feature.sbom.model.UMBMessage.createNew;
-=======
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_CONSUMER;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_STATUS;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
@@ -35,7 +25,6 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_ID;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_TOPIC;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE;
->>>>>>> d86cdaac (feat(SBOMER-219): Add model to store RequestEvents, remove UMBMessage)
 
 import java.io.IOException;
 import java.time.Instant;
@@ -123,29 +112,28 @@ public class AmqpMessageConsumer {
             identifyErrataEvent(metadata.get(), event);
         }
 
-        if (event.get(EVENT_KEY_UMB_MSG_ID) != null) {
-            // Verify that there aren't already ACKED UMBMessages with the same msg id
-            // There is an issue in our queues and same messages are processed multiple times, we want to avoid
-            // generating manifests for the same event
-            String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
-            // long alreadyGenerated = countAlreadyAckedWithMsgId(msgId);
-            // if (alreadyGenerated > 0) {
-            //     log.warn(
-            //             "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
-            //             msgId,
-            //             alreadyGenerated);
-
-            //     umbMessage.skipAndSave();
-            //     return message.ack();
-            // }
-        }
-
         if (!isIdentifiedEvent(event)) {
             return ackAndSaveUnknownMessage(message, event);
         }
 
         // Store the requestEvent (to keep events in case of subsequent failures)
         RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+
+        if (hasMessageId(event)) {
+            // Verify that there aren't already ACKED UMBMessages with the same msg id
+            // There is an issue in our queues and same messages are processed multiple times, we want to avoid
+            // generating manifests for the same event
+            String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
+            long alreadyGenerated = repository.countAlreadyAckedUMBEventsFor(msgId);
+            if (alreadyGenerated > 0) {
+                log.warn(
+                        "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
+                        msgId,
+                        alreadyGenerated);
+
+                return skipAndSave(message, requestEvent);
+            }
+        }
 
         try {
             errataNotificationHandler.handle(requestEvent);
@@ -174,29 +162,28 @@ public class AmqpMessageConsumer {
             identifyPncEvent(metadata.get(), event);
         }
 
-        if (event.get(EVENT_KEY_UMB_MSG_ID) != null) {
-            // Verify that there aren't already ACKED UMBMessages with the same msg id
-            // There is an issue in our queues and same messages are processed multiple times, we want to avoid
-            // generating manifests for the same event
-            String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
-            // long alreadyGenerated = countAlreadyAckedWithMsgId(msgId);
-            // if (alreadyGenerated > 0) {
-            //     log.warn(
-            //             "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
-            //             msgId,
-            //             alreadyGenerated);
-
-            //     umbMessage.skipAndSave();
-            //     return message.ack();
-            // }
-        }
-
         if (!isIdentifiedEvent(event)) {
             return ackAndSaveUnknownMessage(message, event);
         }
 
         // Store the requestEvent (to keep events in case of subsequent failures)
         RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+
+        if (hasMessageId(event)) {
+            // Verify that there aren't already ACKED UMBMessages with the same msg id
+            // There is an issue in our queues and same messages are processed multiple times, we want to avoid
+            // generating manifests for the same event
+            String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
+            long alreadyGenerated = repository.countAlreadyAckedUMBEventsFor(msgId);
+            if (alreadyGenerated > 0) {
+                log.warn(
+                        "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
+                        msgId,
+                        alreadyGenerated);
+
+                return skipAndSave(message, requestEvent);
+            }
+        }
 
         try {
             pncNotificationHandler.handle(requestEvent);
@@ -239,6 +226,10 @@ public class AmqpMessageConsumer {
         return event.has(EVENT_KEY_UMB_MSG_TYPE);
     }
 
+    private boolean hasMessageId(ObjectNode event) {
+        return event.has(EVENT_KEY_UMB_MSG_ID);
+    }
+
     private CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
         ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString());
         requestEvent.save();
@@ -248,6 +239,13 @@ public class AmqpMessageConsumer {
 
     private CompletionStage<Void> ackAndSave(Message<?> message, RequestEvent requestEvent) {
         ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
+        requestEvent.save();
+
+        return message.ack();
+    }
+
+    private CompletionStage<Void> skipAndSave(Message<?> message, RequestEvent requestEvent) {
+        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.SKIPPED.toString());
         requestEvent.save();
 
         return message.ack();
@@ -291,11 +289,11 @@ public class AmqpMessageConsumer {
     }
 
     public long getPncSkippedMessages() {
-        return countPncSkippedMessages();
+        return repository.countPncSkippedMessages();
     }
 
     public long getErrataSkippedMessages() {
-        return countErrataSkippedMessages();
+        return repository.countErrataSkippedMessages();
     }
 
 }
