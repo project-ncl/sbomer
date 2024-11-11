@@ -41,9 +41,11 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 @ApplicationScoped
@@ -156,6 +158,22 @@ public class S3ClientFacade {
         log.debug("S3 client configuration is valid");
     }
 
+    public boolean doesObjectExists(String key) {
+        try {
+            HeadObjectRequest request = HeadObjectRequest.builder().bucket(bucketName()).key(key).build();
+            client.headObject(request);
+            return true;
+        } catch (S3Exception e) {
+            if (e.statusCode() == 404) {
+                return false;
+            } else {
+                throw new ApplicationException("An error occurred when checking if object '{}' exists in S3", key, e);
+            }
+        } catch (SdkException e) {
+            throw new ApplicationException("An error occurred when checking if object '{}' exists in S3", key, e);
+        }
+    }
+
     public void upload(String path, String key) {
         log.debug("Uploading '{}' file as '{}'...", path, key);
 
@@ -163,7 +181,7 @@ public class S3ClientFacade {
             PutObjectRequest request = PutObjectRequest.builder().key(key).bucket(bucketName()).build();
             client.putObject(request, Path.of(path));
         } catch (SdkException e) {
-            throw new ApplicationException("An error ocurred when uploading '{}' file to S3", path, e);
+            throw new ApplicationException("An error occurred when uploading '{}' file to S3", path, e);
         }
     }
 

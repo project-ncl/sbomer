@@ -365,15 +365,12 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         log.debug("Reconcile FINISHED for '{}'...", generationRequest.getName());
 
         // Store files in S3
-        CompletableFuture<Void> storeFilesInS3 = CompletableFuture
-                .runAsync(() -> s3LogHandler.storeFiles(generationRequest))
-                .exceptionally((e) -> {
-                    // This is not fatal
-                    log.warn("Storing files in S3 failed", e);
-                    return null;
-                });
-
-        storeFilesInS3.join();
+        try {
+            s3LogHandler.storeFiles(generationRequest);
+        } catch (Throwable e) {
+            // This is not fatal
+            log.warn("Storing files in S3 failed", e);
+        }
 
         // We're good, remove all files now!
         cleanupFinishedGenerationRequest(generationRequest);
