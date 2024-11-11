@@ -20,6 +20,8 @@ package org.jboss.sbomer.service.test.integ.feature.s3;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.inject.Inject;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.sbomer.service.feature.FeatureFlags;
@@ -58,7 +61,7 @@ import io.restassured.http.ContentType;
 @TestProfile(S3ClientConfig.class)
 class S3FeatureIT {
 
-    @InjectSpy
+    @Inject
     S3StorageHandler storageHandler;
 
     @InjectMock
@@ -95,6 +98,7 @@ class S3FeatureIT {
 
     @Test
     void testStoreFiles(@TempDir Path tempDir) throws IOException {
+        when(featureFlags.s3Storage()).thenReturn(true);
         when(controllerConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
 
         ObjectMeta meta = mock(ObjectMeta.class);
@@ -122,10 +126,17 @@ class S3FeatureIT {
 
         // doNothing().when(clientFacade).upload(file.toFile().getAbsolutePath(),
         // "bucket-name/bucket-name/bom.json");
+        when(clientFacade.doesObjectExists(eq("AABBCC/bom.json"))).thenReturn(false);
+        when(clientFacade.doesObjectExists(eq("AABBCC/logs/init.log"))).thenReturn(true);
         doNothing().when(clientFacade).upload(eq(file.toFile().getAbsolutePath()), eq("AABBCC/bom.json"));
         doNothing().when(clientFacade).upload(eq(logFile.toFile().getAbsolutePath()), eq("AABBCC/logs/init.log"));
 
         storageHandler.storeFiles(generationRequest);
+
+        verify(clientFacade, times(1)).doesObjectExists(eq("AABBCC/bom.json"));
+        verify(clientFacade, times(1)).upload(eq(file.toFile().getAbsolutePath()), eq("AABBCC/bom.json"));
+        verify(clientFacade, times(1)).doesObjectExists(eq("AABBCC/logs/init.log"));
+        verify(clientFacade, times(0)).upload(eq(logFile.toFile().getAbsolutePath()), eq("AABBCC/logs/init.log"));
     }
 
     @Test
