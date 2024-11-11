@@ -31,6 +31,7 @@ public class MavenCommandOptions {
     public static final String PROFILES_OPTION = "P";
     public static final String SYSTEM_PROPERTIES_OPTION = "D";
     public static final String PROJECTS_OPTION = "pl";
+    public static final String ALTERNATIVE_POM = "f";
 
     public static final String[] NO_ARGS_OPTIONS = { ALSO_MAKE_OPTION, ALSO_MAKE_DEPENDENTS_OPTION,
             STRICT_CHECKSUM_OPTION, LAX_CHECKSUM_OPTION, NON_RECURSIVE_OPTION };
@@ -306,6 +307,23 @@ public class MavenCommandOptions {
                         .hasArg()
                         .desc(
                                 "Comma-delimited list of specified reactor projects to build instead of all projects. A project can be specified by [groupId]:artifactId or by its relative path")
+                        .build());
+
+        return options;
+    }
+
+    /**
+     * Add maven command options to parse pom alternative locations
+     *
+     * @param options
+     * @return
+     */
+    public static Options addAlternativePomOption(Options options) {
+        options.addOption(
+                Option.builder(ALTERNATIVE_POM)
+                        .longOpt("file")
+                        .hasArg()
+                        .desc("Force the use of an alternate POM file (or directory with pom.xml)")
                         .build());
 
         return options;

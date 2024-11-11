@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 
@@ -202,5 +203,17 @@ class MavenCommandLineParserTest {
         assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPort=${proxyPort}"));
         assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyUser=${proxyUsername}"));
         assertFalse(lineParser.getRebuiltMvnCommandScript().contains("-Dhttp.proxyPassword=${accessToken}"));
+    }
+
+    @Test
+    public void tackleAlternativePomFileTest() throws IOException, IllegalArgumentException {
+        String script = "mvn deploy -f productized/logic/pom.xml";
+
+        MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
+        assertEquals(0, lineParser.getProfiles().size());
+        assertEquals(0, lineParser.getProperties().size());
+        assertEquals(0, lineParser.getProjects().size());
+        assertNotNull(lineParser.getAlternativePomFile());
+        assertEquals("productized/logic/pom.xml", lineParser.getAlternativePomFile());
     }
 }

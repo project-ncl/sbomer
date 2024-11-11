@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils.commandline.maven;
 
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.ALTERNATIVE_POM;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.PROFILES_OPTION;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.PROJECTS_OPTION;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.SYSTEM_PROPERTIES_OPTION;
@@ -26,6 +27,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenC
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addProfilesOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addProjectsOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addSystemPropertyOptions;
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addAlternativePomOption;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,6 +71,7 @@ public class MavenCommandLineParser {
     private List<String> options;
     private List<String> projects;
     private List<String> noArgsOptions;
+    private String alternativePomFile;
     private String fullCommandScript = "";
     private String extractedMvnCommandScript = "";
     private String rebuiltMvnCommandScript = "";
@@ -92,6 +95,7 @@ public class MavenCommandLineParser {
         addSystemPropertyOptions(options);
         addProfilesOptions(options);
         addProjectsOptions(options);
+        addAlternativePomOption(options);
 
         return options;
     }
@@ -105,6 +109,7 @@ public class MavenCommandLineParser {
         options = new ArrayList<>();
         projects = new ArrayList<>();
         noArgsOptions = new ArrayList<>();
+        alternativePomFile = null;
     }
 
     public MavenCommandLineParser launder(String fullCmdScript) {
@@ -129,6 +134,10 @@ public class MavenCommandLineParser {
 
             if (cmd.hasOption(PROJECTS_OPTION)) {
                 projects = parseKeyValuePairs(cmd.getOptionValues(PROJECTS_OPTION));
+            }
+
+            if (cmd.hasOption(ALTERNATIVE_POM)) {
+                alternativePomFile = cmd.getOptionValue(ALTERNATIVE_POM);
             }
 
             for (String option : MavenCommandOptions.NO_ARGS_OPTIONS) {
@@ -166,7 +175,7 @@ public class MavenCommandLineParser {
     }
 
     private String rebuildMavenCommand() {
-        return "mvn" + rebuildNoArgsCmd() + rebuildProfilesCmd() + rebuildProjectsCmd() + rebuildSystemPropertiesCmd();
+        return "mvn" + rebuildNoArgsCmd() + rebuildProfilesCmd() + rebuildProjectsCmd() + rebuildSystemPropertiesCmd() + rebuildAlternativePomFileCmd();
     }
 
     private String rebuildProfilesCmd() {
@@ -188,6 +197,14 @@ public class MavenCommandLineParser {
         projectList = projectList.replaceAll("\\s+", "");
 
         return " -" + PROJECTS_OPTION + " " + projectList;
+    }
+
+    private String rebuildAlternativePomFileCmd() {
+        if (alternativePomFile == null) {
+            return "";
+        }
+
+        return " -" + ALTERNATIVE_POM + " " + alternativePomFile;
     }
 
     private String rebuildNoArgsCmd() {
