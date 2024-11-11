@@ -175,7 +175,8 @@ public class MavenCommandLineParser {
     }
 
     private String rebuildMavenCommand() {
-        return "mvn" + rebuildNoArgsCmd() + rebuildProfilesCmd() + rebuildProjectsCmd() + rebuildSystemPropertiesCmd() + rebuildAlternativePomFileCmd();
+        return "mvn" + rebuildNoArgsCmd() + rebuildProfilesCmd() + rebuildProjectsCmd() + rebuildSystemPropertiesCmd()
+                + rebuildAlternativePomFileCmd();
     }
 
     private String rebuildProfilesCmd() {

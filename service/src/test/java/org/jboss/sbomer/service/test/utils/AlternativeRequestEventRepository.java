@@ -17,57 +17,63 @@
  */
 package org.jboss.sbomer.service.test.utils;
 
-import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
-import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
+import java.util.Map;
+
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
-import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Singleton;
+import jakarta.persistence.Query;
 
 @Alternative
 @Singleton
 public class AlternativeRequestEventRepository extends RequestEventRepository {
 
-    @Override
-    public long countAckedUMBEventsFrom(UMBConsumer consumer) {
-        String q = "SELECT * FROM request WHERE event_type = :event_type "
-                + " AND JSON_EXTRACT(event, '$.consumer') = :consumer "
-                + " AND JSON_EXTRACT(event, '$.msg_type') <> :msg_type "
-                + " AND JSON_EXTRACT(event, '$.msg_status') = :msg_status";
+    private static final String BASE_COUNT_QUERY = "SELECT * FROM request";
 
-        return getEntityManager().createNativeQuery(q, RequestEvent.class)
-                .setParameter(RequestEvent.REQUEST_EVENT_TYPE, RequestEventType.UMB.name())
-                .setParameter(RequestEvent.EVENT_KEY_UMB_MSG_TYPE, RequestEvent.EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE)
-                .setParameter(RequestEvent.EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.name())
-                .setParameter(RequestEvent.EVENT_KEY_UMB_CONSUMER, consumer.name())
-                .getResultList()
-                .size();
+    @Override
+    protected StringBuilder initCountRequestQuery() {
+        return new StringBuilder(BASE_COUNT_QUERY);
     }
 
     @Override
-    public long countAllUMBEventsFrom(UMBConsumer consumer) {
-        String q = "SELECT * FROM request WHERE event_type = :event_type "
-                + " AND JSON_EXTRACT(event, '$.consumer') = :consumer";
-
-        return getEntityManager().createNativeQuery(q, RequestEvent.class)
-                .setParameter(RequestEvent.REQUEST_EVENT_TYPE, RequestEventType.UMB.name())
-                .setParameter(RequestEvent.EVENT_KEY_UMB_CONSUMER, consumer.name())
-                .getResultList()
-                .size();
+    protected long executeCountQuery(String query, Map<String, Object> params) {
+        Query q = getEntityManager().createNativeQuery(query, RequestEvent.class);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            q.setParameter(entry.getKey(), entry.getValue());
+        }
+        return q.getResultList().size();
     }
 
     @Override
-    public long countEventsForTypeAndIdentifier(String typeValue, String identifierKey, String identifierValue) {
-
-        String q = "SELECT * FROM request WHERE JSON_EXTRACT(request_config, '$.type') = :type "
-                + " AND JSON_EXTRACT(request_config, '$." + identifierKey + "') = :identifierValue";
-
-        return getEntityManager().createNativeQuery(q, RequestEvent.class)
-                .setParameter("type", typeValue)
-                .setParameter("identifierValue", identifierValue)
-                .getResultList()
-                .size();
+    protected StringBuilder addEventCondition(StringBuilder query, String condition, String property, String operator) {
+        query.append(" ")
+                .append(condition)
+                .append(" JSON_EXTRACT(event, '$.")
+                .append(property)
+                .append("') ")
+                .append(operator)
+                .append(" :")
+                .append(property);
+        return query;
     }
+
+    @Override
+    protected StringBuilder addConfigCondition(
+            StringBuilder query,
+            String condition,
+            String property,
+            String operator) {
+        query.append(" ")
+                .append(condition)
+                .append(" JSON_EXTRACT(request_config, '$.")
+                .append(property)
+                .append("') ")
+                .append(operator)
+                .append(" :")
+                .append(property);
+        return query;
+    }
+
 }

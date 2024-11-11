@@ -17,7 +17,21 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
+import static org.jboss.sbomer.core.features.sbom.enums.UMBConsumer.ERRATA;
+import static org.jboss.sbomer.core.features.sbom.enums.UMBConsumer.PNC;
+import static org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus.ACK;
+import static org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus.SKIPPED;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_CONSUMER;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_ID;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_STATUS;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_TYPE;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.REQUEST_CONFIG_TYPE;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.REQUEST_EVENT_TYPE;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEventType.UMB;
+
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
@@ -27,41 +41,64 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Query;
 
 @ApplicationScoped
 public class RequestEventRepository implements PanacheRepository<RequestEvent> {
 
-    public long countAckedUMBEventsFrom(UMBConsumer consumer) {
-        String q = "SELECT COUNT(*) FROM request WHERE event_type = :event_type AND event ->> 'consumer' = :consumer "
-                + " AND event ->> 'msg_type' <> :msg_type " + " AND event ->> 'msg_status' = :msg_status";
+    private static final String BASE_COUNT_QUERY = "SELECT COUNT(*) FROM request";
+    private static final String BASE_SELECT_QUERY = "SELECT * FROM request";
 
-        return ((Number) getEntityManager().createNativeQuery(q)
-                .setParameter(RequestEvent.REQUEST_EVENT_TYPE, RequestEventType.UMB.name())
-                .setParameter(RequestEvent.EVENT_KEY_UMB_CONSUMER, consumer.name())
-                .setParameter(RequestEvent.EVENT_KEY_UMB_MSG_TYPE, RequestEvent.EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE)
-                .setParameter(RequestEvent.EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.name())
-                .getSingleResult()).longValue();
+    public long countUMBEventsWithStatusFrom(UMBMessageStatus status, UMBConsumer consumer) {
+        StringBuilder query = initCountRequestQuery();
+        addCondition(query, "WHERE", REQUEST_EVENT_TYPE, "=");
+        addEventCondition(query, "AND", EVENT_KEY_UMB_CONSUMER, "=");
+        addEventCondition(query, "AND", EVENT_KEY_UMB_MSG_STATUS, "=");
+        addEventCondition(query, "AND", EVENT_KEY_UMB_MSG_TYPE, "<>");
+
+        Map<String, Object> params = Map.of(
+                REQUEST_EVENT_TYPE,
+                UMB.name(),
+                EVENT_KEY_UMB_CONSUMER,
+                consumer.name(),
+                EVENT_KEY_UMB_MSG_TYPE,
+                EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE,
+                EVENT_KEY_UMB_MSG_STATUS,
+                status.name());
+
+        return executeCountQuery(query.toString(), params);
     }
 
     public long countAllUMBEventsFrom(UMBConsumer consumer) {
-        String q = "SELECT COUNT(*) FROM request WHERE event_type = :event_type "
-                + " AND event ->> 'consumer' = :consumer";
+        StringBuilder query = initCountRequestQuery();
+        addCondition(query, "WHERE", REQUEST_EVENT_TYPE, "=");
+        addEventCondition(query, "AND", EVENT_KEY_UMB_CONSUMER, "=");
 
-        return ((Number) getEntityManager().createNativeQuery(q)
-                .setParameter(RequestEvent.REQUEST_EVENT_TYPE, RequestEventType.UMB.name())
-                .setParameter(RequestEvent.EVENT_KEY_UMB_CONSUMER, consumer.name())
-                .getSingleResult()).longValue();
+        Map<String, Object> params = Map.of(REQUEST_EVENT_TYPE, UMB.name(), EVENT_KEY_UMB_CONSUMER, consumer.name());
+
+        return executeCountQuery(query.toString(), params);
+    }
+
+    public long countAlreadyAckedUMBEventsFor(String msgId) {
+        StringBuilder query = initCountRequestQuery();
+        addCondition(query, "WHERE", REQUEST_EVENT_TYPE, "=");
+        addEventCondition(query, "AND", EVENT_KEY_UMB_MSG_STATUS, "=");
+        addEventCondition(query, "AND", EVENT_KEY_UMB_MSG_ID, "=");
+
+        Map<String, Object> params = Map
+                .of(REQUEST_EVENT_TYPE, UMB.name(), EVENT_KEY_UMB_MSG_STATUS, ACK.name(), EVENT_KEY_UMB_MSG_ID, msgId);
+
+        return executeCountQuery(query.toString(), params);
     }
 
     public long countEventsForTypeAndIdentifier(String typeValue, String identifierKey, String identifierValue) {
+        StringBuilder query = initCountRequestQuery();
+        addConfigCondition(query, "WHERE", REQUEST_CONFIG_TYPE, "=");
+        addConfigCondition(query, "AND", identifierKey, "=");
 
-        String q = "SELECT COUNT(*) FROM request WHERE request_config ->> 'type' = :type " + " AND request_config ->> '"
-                + identifierKey + "' = :identifierValue";
+        Map<String, Object> params = Map.of(REQUEST_CONFIG_TYPE, typeValue, identifierKey, identifierValue);
 
-        return ((Number) getEntityManager().createNativeQuery(q)
-                .setParameter("type", typeValue)
-                .setParameter("identifierValue", identifierValue)
-                .getSingleResult()).longValue();
+        return executeCountQuery(query.toString(), params);
     }
 
     public long countEventsForConfigWithIdentifierValue(
@@ -78,26 +115,89 @@ public class RequestEventRepository implements PanacheRepository<RequestEvent> {
     }
 
     public long countErrataProcessedMessages() {
-        return countAckedUMBEventsFrom(UMBConsumer.ERRATA);
+        return countUMBEventsWithStatusFrom(ACK, ERRATA);
+    }
+
+    public long countErrataSkippedMessages() {
+        return countUMBEventsWithStatusFrom(SKIPPED, ERRATA);
     }
 
     public long countPncProcessedMessages() {
-        return countAckedUMBEventsFrom(UMBConsumer.PNC);
+        return countUMBEventsWithStatusFrom(ACK, PNC);
+    }
+
+    public long countPncSkippedMessages() {
+        return countUMBEventsWithStatusFrom(SKIPPED, PNC);
     }
 
     public long countPncReceivedMessages() {
-        return countAllUMBEventsFrom(UMBConsumer.PNC);
+        return countAllUMBEventsFrom(PNC);
     }
 
     public long countErrataReceivedMessages() {
-        return countAllUMBEventsFrom(UMBConsumer.ERRATA);
+        return countAllUMBEventsFrom(ERRATA);
+    }
+
+    protected StringBuilder initCountRequestQuery() {
+        return new StringBuilder(BASE_COUNT_QUERY);
+    }
+
+    protected StringBuilder initSelectRequestQuery() {
+        return new StringBuilder(BASE_SELECT_QUERY);
+    }
+
+    protected StringBuilder addCondition(StringBuilder query, String condition, String property, String operator) {
+        query.append(" ")
+                .append(condition)
+                .append(" ")
+                .append(property)
+                .append(" ")
+                .append(operator)
+                .append(" :")
+                .append(property);
+        return query;
+    }
+
+    protected StringBuilder addEventCondition(StringBuilder query, String condition, String property, String operator) {
+        query.append(" ")
+                .append(condition)
+                .append(" event ->> '")
+                .append(property)
+                .append("' ")
+                .append(operator)
+                .append(" :")
+                .append(property);
+        return query;
+    }
+
+    protected StringBuilder addConfigCondition(
+            StringBuilder query,
+            String condition,
+            String property,
+            String operator) {
+        query.append(" ")
+                .append(condition)
+                .append(" request_config ->> '")
+                .append(property)
+                .append("' ")
+                .append(operator)
+                .append(" :")
+                .append(property);
+        return query;
+    }
+
+    protected long executeCountQuery(String query, Map<String, Object> params) {
+        Query q = getEntityManager().createNativeQuery(query);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            q.setParameter(entry.getKey(), entry.getValue());
+        }
+        return ((Number) q.getSingleResult()).longValue();
     }
 
     private String getValueOfField(Class<? extends RequestConfig> configClass, String fieldName) {
-        // Use reflection to get the value of the field provided
         try {
-            Field typeNameField = configClass.getDeclaredField(fieldName);
-            return (String) typeNameField.get(null);
+            Field field = configClass.getDeclaredField(fieldName);
+            return (String) field.get(null);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException(
                     "The class " + configClass.getName() + " does not have a public static final " + fieldName
