@@ -22,6 +22,7 @@ import org.eclipse.microprofile.reactive.messaging.Message;
 import io.smallrye.reactive.messaging.amqp.IncomingAmqpMetadata;
 import io.smallrye.reactive.messaging.amqp.OutgoingAmqpMetadata;
 import io.smallrye.reactive.messaging.memory.InMemoryConnector;
+import io.vertx.amqp.AmqpMessage;
 import io.vertx.amqp.AmqpMessageBuilder;
 import io.vertx.core.json.JsonObject;
 
@@ -38,8 +39,16 @@ public class AmqpMessageHelper {
      * @return {@link Message} containing {@code payload} and {@code headers}
      */
     public static Message<String> toMessage(String payload, JsonObject headers) {
-        return Message.of(payload)
-                .addMetadata(
-                        new IncomingAmqpMetadata(AmqpMessageBuilder.create().applicationProperties(headers).build()));
+        String msgId = headers.getString("messageId");
+        String address = headers.getString("destination");
+        Long timestamp = headers.getLong("timestamp");
+        AmqpMessage message = AmqpMessageBuilder.create()
+                .applicationProperties(headers)
+                .id(msgId)
+                .address(address)
+                .creationTime(timestamp)
+                .build();
+
+        return Message.of(payload).addMetadata(new IncomingAmqpMetadata(message));
     }
 }

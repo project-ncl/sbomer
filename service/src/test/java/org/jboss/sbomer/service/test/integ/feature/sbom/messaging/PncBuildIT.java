@@ -275,7 +275,7 @@ class PncBuildIT {
         headers.put("amq6100_originalDestination", "topic://VirtualTopic.eng.pnc.builds");
         headers.put("correlationId", "a420416c-d184-4ced-9277-500667305139");
         headers.put("destination", "/topic/VirtualTopic.eng.pnc.builds");
-        headers.put("messageId", "ID:orch-70-z4tx6-43917-1678809685060-25:1:8557:1:1");
+        headers.put("messageId", "ID:analysis-70-z4tx6-43917-1678809685060-25:1:8557:1:1");
         headers.put("persistent", "true");
         headers.put("producer", "PNC");
         headers.put("timestamp", 1698076061381L);
@@ -295,7 +295,7 @@ class PncBuildIT {
         headers.put("amq6100_originalDestination", "topic://VirtualTopic.eng.pnc.builds");
         headers.put("correlationId", "a420416c-d184-4ced-9277-500667305139");
         headers.put("destination", "/topic/VirtualTopic.eng.pnc.builds");
-        headers.put("messageId", "ID:orch-70-z4tx6-43917-1678809685060-25:1:8557:1:1");
+        headers.put("messageId", "ID:analysis-70-z4tx6-43917-1678809685060-25:1:8557:1:3");
         headers.put("persistent", "true");
         headers.put("producer", "PNC");
         headers.put("timestamp", 1698076061381L);
