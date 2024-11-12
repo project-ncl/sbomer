@@ -117,6 +117,7 @@ public class SyftImageAdjuster implements Adjuster {
         // Remove components from manifest according to 'paths' and 'includeRpms' parameters
         log.debug("Filtering out all components that do not meet requirements...");
 
+        adjustEmptyComponents(bom);
         filterComponents(bom.getComponents());
         adjustProperties(bom);
         adjustNameAndPurl(bom, workDir);
@@ -136,10 +137,21 @@ public class SyftImageAdjuster implements Adjuster {
     }
 
     /**
+     * If the bom components are null initialize an empty list
+     *
+     * @param bom
+     */
+    private void adjustEmptyComponents(Bom bom) {
+        if (bom.getComponents() == null) {
+            bom.setComponents(new ArrayList<Component>());
+        }
+    }
+
+    /**
      * Removes all components from the component tree that do not meet requirements: as defined by
      * {@link SyftImageAdjuster#includeRpms} and {@link SyftImageAdjuster#paths}.
      *
-     * @param bom
+     * @param components
      * @see SyftImageAdjuster#includeRpms
      * @see SyftImageAdjuster#paths
      */
