@@ -16,7 +16,7 @@ $ curl {sbomer-url}/api/{sbomer-latest-api-version}/manifests
 === Requesting manifest generation
 
 To request manifest generation we need to use the `/api/{sbomer-latest-api-version}/generations` and provide
-a xref:api/configurations/index.adoc[generation request configuration] as the body.
+a xref:generation/configuration/index.adoc[generation request configuration] as the body.
 
 Below you can see examples grouped by the type of the deliverable to manifest.
 
@@ -24,7 +24,7 @@ NOTE: The `/api/{sbomer-latest-api-version}/generations` accepts JSON (`applicat
 
 ==== Container image
 
-TIP: See xref:api/configurations/image.adoc[image configuration].
+TIP: See xref:generation/configuration/image.adoc[image configuration].
 
 Request manifest generation for the `registry.redhat.io/jboss-webserver-5/jws58-openjdk17-openshift-rhel8@sha256:3e28c6353bb1fdfe2a70dec5d840f2ef03a47bf2c9c92507982dca566fac0898` container image.
 
@@ -40,7 +40,7 @@ $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \
 
 ==== PNC build
 
-TIP: See xref:api/configurations/pnc-build.adoc[PNC build configuration].
+TIP: See xref:generation/configuration/pnc-build.adoc[PNC build configuration].
 
 Request manifest generation for the `A7IGVJ7N2DYAA` PNC build.
 
@@ -56,7 +56,7 @@ $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \
 
 ==== PNC Analysis
 
-TIP: See xref:api/configurations/pnc-analysis.adoc[PNC analysis configuration].
+TIP: See xref:generation/configuration/pnc-analysis.adoc[PNC analysis configuration].
 
 Request manifest generation for following zips:
 
@@ -76,9 +76,25 @@ $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \
 }'
 ----
 
+==== Errata Advisory
+
+TIP: See xref:generation/configuration/errata-advisory.adoc[Errata Advisory configuration].
+
+Request manifest generation for content attached to advisory `1234`:
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \ 
+  -H 'accept: application/json' -H 'Content-Type: application/json' \
+  -d '{
+  "type": "errata-advisory",
+  "advisoryId": 1234
+}'
+----
+
 ==== PNC Deliverable Analyser operation
 
-TIP: See xref:api/configurations/pnc-operation.adoc[PNC operation configuration].
+TIP: See xref:generation/configuration/pnc-operation.adoc[PNC operation configuration].
 
 Request manifest generation for the `BBNOWAGR3EYAA` PNC Deliverables Analyser operation:
 
