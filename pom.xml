@@ -76,7 +76,7 @@
     <version.commons-cli>1.9.0</version.commons-cli>
     <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
     <version.build-finder>2.3.0</version.build-finder>
-    <version.mapstruct>1.6.2</version.mapstruct>
+    <version.mapstruct>1.6.3</version.mapstruct>
     <version.jandex-maven-plugin>3.2.3</version.jandex-maven-plugin>
 
     <!-- Sonar -->
