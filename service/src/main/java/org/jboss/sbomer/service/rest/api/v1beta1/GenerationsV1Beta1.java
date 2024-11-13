@@ -176,13 +176,10 @@ public class GenerationsV1Beta1 {
         if (config instanceof ErrataAdvisoryRequestConfig) {
             log.info("New Errata advisory request received");
             requests.addAll(advisoryService.generateFromAdvisory(request));
-        } else if (config instanceof PncBuildRequestConfig pncBuildConfig) {
+        } else if (config instanceof PncBuildRequestConfig) {
             log.info("New PNC build request received");
 
-            requests.add(
-                    sbomService.generateFromBuild(
-                            request,
-                            PncBuildConfig.builder().withBuildId(pncBuildConfig.getBuildId()).build()));
+            requests.add(sbomService.generateFromBuild(request, null));
         } else if (config instanceof PncAnalysisRequestConfig analysisConfig) {
             log.info("New PNC analysis request received");
 

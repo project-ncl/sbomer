@@ -279,12 +279,6 @@ public class ApiV1Alpha3 {
             return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
 
-        if (config == null) {
-            config = new PncBuildConfig();
-        }
-
-        config.setBuildId(buildId);
-
         // Create the Request to be associated with this REST API call event
         RequestEvent request = RestUtils.createRequestFromRestEvent(
                 PncBuildRequestConfig.builder().withBuildId(buildId).build(),
