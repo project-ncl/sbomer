@@ -27,6 +27,7 @@ import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
@@ -258,38 +259,39 @@ public class SbomService {
     @WithSpan
     public SbomGenerationRequest generateFromBuild(RequestEvent requestEvent, PncBuildConfig config) {
         try {
-            MDCUtils.addBuildContext(config.getBuildId());
+            PncBuildRequestConfig requestConfig = (PncBuildRequestConfig) requestEvent.getRequestConfig();
+            MDCUtils.addBuildContext(requestConfig.getBuildId());
 
-            log.info("New generation request for build id '{}'", config.getBuildId());
+            log.info("New generation request for build id '{}'", requestConfig.getBuildId());
             log.debug("Creating GenerationRequest Kubernetes resource...");
 
             GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
-                    .withIdentifier(config.getBuildId())
+                    .withIdentifier(requestConfig.getBuildId())
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
-            log.debug("Adjusting product configuration ...");
+            if (config != null && !config.isEmpty()) {
+                log.debug("Received product configuration...");
 
-            SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
-            sbomerConfigProvider.adjust(config);
+                SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+                sbomerConfigProvider.adjust(config);
+                config.setBuildId(requestConfig.getBuildId());
 
-            log.debug("Validating provided configuration...");
-            ValidationResult validationResult = configSchemaValidator.validate(config);
+                ValidationResult validationResult = configSchemaValidator.validate(config);
 
-            if (!validationResult.isValid()) {
-                throw new ValidationException(
-                        "Provided 'pnc-build' configuration is not valid",
-                        validationResult.getErrors());
-            }
+                if (!validationResult.isValid()) {
+                    throw new ValidationException("Provided config is not valid", validationResult.getErrors());
+                }
 
-            // We still need to ensure whether the provided config is valid and if we need to set some defaults.
-            // This is why we set it to INITIALIZING and not INITIALIZED
-            req.setStatus(SbomGenerationStatus.INITIALIZING);
+                // We still need to ensure whether the provided config is valid and if we need to set some defaults.
+                // This is why we set it to INITIALIZING and not INITIALIZED
+                req.setStatus(SbomGenerationStatus.INITIALIZING);
 
-            try {
-                req.setConfig(ObjectMapperProvider.json().writeValueAsString(config));
-            } catch (JsonProcessingException e) {
-                throw new ApplicationException("Unable to serialize provided configuration into JSON", e);
+                try {
+                    req.setConfig(ObjectMapperProvider.json().writeValueAsString(config));
+                } catch (JsonProcessingException e) {
+                    throw new ApplicationException("Unable to serialize provided configuration into JSON", e);
+                }
             }
 
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
@@ -299,7 +301,7 @@ public class SbomService {
             log.debug(
                     "GenerationRequest Kubernetes resource '{}' created for build '{}'",
                     req.getId(),
-                    config.getBuildId());
+                    requestConfig.getBuildId());
 
             return sbomGenerationRequest;
         } finally {
