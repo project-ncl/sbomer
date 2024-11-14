@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public class TektonResourceUtils {
     }
 
     public static void adjustComputeResources(TaskRun taskRun) {
-        log.debug("Adjusting compute resources for TaskRun '{}'", taskRun.getFullResourceName());
+        log.debug("Adjusting compute resources for TaskRun '{}'", taskRun.getMetadata().getName());
 
         ResourceRequirements computeResources = taskRun.getSpec().getComputeResources();
 
@@ -65,28 +66,31 @@ public class TektonResourceUtils {
 
         GenerationRequestType requestType = GenerationRequestType.fromName(labelType);
 
+        Map<String, Quantity> requests = new HashMap<>();
+        Map<String, Quantity> limits = new HashMap<>();
+
         try {
             for (ResourceTarget target : ResourceTarget.values()) {
-                computeResources.setLimits(
-                        Map.of(
-                                target.toString().toLowerCase(),
-                                Quantity.parse(getResources(requestType, ResourceType.LIMITS, target))));
+                log.debug("Handling '{}' resource target...", target);
 
-                computeResources.setRequests(
-                        Map.of(
-                                target.toString().toLowerCase(),
-                                Quantity.parse(getResources(requestType, ResourceType.REQUESTS, target))));
-
+                requests.put(
+                        target.toString().toLowerCase(),
+                        Quantity.parse(getResources(requestType, ResourceType.REQUESTS, target)));
+                limits.put(
+                        target.toString().toLowerCase(),
+                        Quantity.parse(getResources(requestType, ResourceType.LIMITS, target)));
             }
-
         } catch (IllegalArgumentException e) {
-            log.warn("Unable to set resources for TaskRun '{}'", taskRun.getFullResourceName(), e);
+            log.warn("Unable to set resources for TaskRun '{}'", taskRun.getMetadata().getName(), e);
             return;
         }
 
+        computeResources.setLimits(limits);
+        computeResources.setRequests(requests);
+
         log.info(
                 "Updating compute resources of TaskRun '{}' to: {}",
-                taskRun.getFullResourceName(),
+                taskRun.getMetadata().getName(),
                 computeResources.toString());
 
         taskRun.getSpec().setComputeResources(computeResources);
