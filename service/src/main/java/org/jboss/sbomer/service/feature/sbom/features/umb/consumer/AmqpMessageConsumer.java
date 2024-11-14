@@ -115,7 +115,7 @@ public class AmqpMessageConsumer {
         }
 
         // Store the requestEvent (to keep events in case of subsequent failures)
-        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = saveNewEvent(event);
 
         if (hasMessageId(event)) {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
@@ -164,7 +164,7 @@ public class AmqpMessageConsumer {
         }
 
         // Store the requestEvent (to keep events in case of subsequent failures)
-        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = saveNewEvent(event);
 
         if (hasMessageId(event)) {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
@@ -227,32 +227,41 @@ public class AmqpMessageConsumer {
         return event.has(EVENT_KEY_UMB_MSG_ID);
     }
 
-    private CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
+    @Transactional
+    protected CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
         ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString());
         requestEvent.save();
 
         return message.nack(e);
     }
 
-    private CompletionStage<Void> ackAndSave(Message<?> message, RequestEvent requestEvent) {
+    @Transactional
+    protected CompletionStage<Void> ackAndSave(Message<?> message, RequestEvent requestEvent) {
         ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
         requestEvent.save();
 
         return message.ack();
     }
 
-    private CompletionStage<Void> skipAndSave(Message<?> message, RequestEvent requestEvent) {
+    @Transactional
+    protected CompletionStage<Void> skipAndSave(Message<?> message, RequestEvent requestEvent) {
         ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.SKIPPED.toString());
         requestEvent.save();
 
         return message.ack();
     }
 
-    private CompletionStage<Void> ackAndSaveUnknownMessage(Message<?> message, ObjectNode event) {
+    @Transactional
+    protected CompletionStage<Void> ackAndSaveUnknownMessage(Message<?> message, ObjectNode event) {
         event.put(EVENT_KEY_UMB_MSG_TYPE, EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE)
                 .put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
         RequestEvent.createNew(null, RequestEventType.UMB, event).save();
         return message.ack();
+    }
+
+    @Transactional
+    protected RequestEvent saveNewEvent(ObjectNode event) {
+        return RequestEvent.createNew(null, RequestEventType.UMB, event).save();
     }
 
     private ObjectNode createUnidentifiedEvent(String content, UMBConsumer consumer) {

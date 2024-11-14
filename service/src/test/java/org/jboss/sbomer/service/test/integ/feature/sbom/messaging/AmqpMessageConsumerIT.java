@@ -24,6 +24,7 @@ import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
+import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -32,6 +33,7 @@ import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 
 @QuarkusTest
+@QuarkusTransactionalTest
 @TestProfile(TestUmbProfile.class)
 class AmqpMessageConsumerIT {
     @Inject
