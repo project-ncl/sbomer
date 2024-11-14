@@ -68,7 +68,6 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Unremovable
 @Slf4j
-@Transactional // Quarkus should initialize the database connection pool before processing @Transactional beans
 public class AmqpMessageConsumer {
 
     @Inject
@@ -94,7 +93,6 @@ public class AmqpMessageConsumer {
 
     @Incoming("errata")
     @Blocking(ordered = false, value = "errata-processor-pool")
-    @Transactional
     public CompletionStage<Void> processErrata(Message<byte[]> message) {
         log.debug("Received new Errata tool status change notification via the AMQP consumer");
 
@@ -147,7 +145,6 @@ public class AmqpMessageConsumer {
 
     @Incoming("builds")
     @Blocking(ordered = false, value = "build-processor-pool")
-    @Transactional
     public CompletionStage<Void> process(Message<String> message) {
         log.debug("Received new PNC build status notification via the AMQP consumer");
         log.debug("Message content: {}", message.getPayload());
