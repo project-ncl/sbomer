@@ -28,6 +28,7 @@ import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonResourceUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.GenerateResourceDiscriminator;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
@@ -97,7 +98,7 @@ public class TaskRunSyftImageGenerateDependentResource
                 .requireNonNullElse(generationRequest.getConfig(SyftImageConfig.class).isIncludeRpms(), false) ? "true"
                         : "false";
 
-        return new TaskRunBuilder().withNewMetadata()
+        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
                 .withLabels(labels)
                 .withName(generationRequest.dependentResourceName(SbomGenerationPhase.GENERATE))
@@ -137,5 +138,9 @@ public class TaskRunSyftImageGenerateDependentResource
                                 .build())
                 .endSpec()
                 .build();
+
+        TektonResourceUtils.adjustComputeResources(taskRun);
+
+        return taskRun;
     }
 }
