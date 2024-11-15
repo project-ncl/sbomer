@@ -55,6 +55,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -166,7 +167,8 @@ public class AdvisoryService {
         }
     }
 
-    private Collection<SbomGenerationRequest> processDockerBuilds(
+    @Transactional
+    protected Collection<SbomGenerationRequest> processDockerBuilds(
             RequestEvent requestEvent,
             Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
 
@@ -198,7 +200,8 @@ public class AdvisoryService {
         return sbomRequests;
     }
 
-    private Collection<SbomGenerationRequest> processRPMBuilds(
+    @Transactional
+    protected Collection<SbomGenerationRequest> processRPMBuilds(
             RequestEvent requestEvent,
             Details details,
             ErrataProduct product,
@@ -258,7 +261,7 @@ public class AdvisoryService {
         return sbomRequests;
     }
 
-    public Long findErrataProductVersionIdByName(ErrataProduct product, String pVersionName) {
+    private Long findErrataProductVersionIdByName(ErrataProduct product, String pVersionName) {
         if (product != null && product.getData() != null && product.getData().getRelationships() != null) {
             return product.getData()
                     .getRelationships()

@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -79,8 +80,9 @@ public class ErrataNotificationHandler {
         return status == QE || status == SHIPPED_LIVE;
     }
 
-    @Transactional
+    @Transactional(value = TxType.REQUIRES_NEW)
     protected RequestEvent addErrataAdvisoryRequestConfig(RequestEvent requestEvent, String errataId) {
+        requestEvent = RequestEvent.findById(requestEvent.getId());
         requestEvent.setRequestConfig(ErrataAdvisoryRequestConfig.builder().withAdvisoryId(errataId).build());
         return requestEvent.save();
     }

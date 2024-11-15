@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.model;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
@@ -148,7 +149,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
         // If the request is null (e.g. sync called from the controllers) do not override it
         if (request != null) {
-            sbomGenerationRequest.setRequest(request);
+            RequestEvent dbRequestEvent = RequestEvent.findById(request.getId());
+            sbomGenerationRequest.setRequest(Optional.ofNullable(dbRequestEvent).orElse(request));
         }
 
         // Store it in the database

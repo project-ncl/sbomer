@@ -129,6 +129,8 @@ class PncBuildIT {
         RequestEvent requestEvent = requestEvents.get(0);
         assertEquals(RequestEventType.UMB, requestEvent.getEventType());
 
+        // Refresh the request event because it was updated in its own transaction
+        requestEvent = RequestEvent.findById(requestEvent.getId());
         // Verify request config
         RequestConfig requestConfig = requestEvent.getRequestConfig();
         assertTrue(requestConfig instanceof PncBuildRequestConfig);
@@ -182,6 +184,8 @@ class PncBuildIT {
         assertEquals(1, requestEvents.size());
         RequestEvent requestEvent = requestEvents.get(0);
         assertEquals(RequestEventType.UMB, requestEvent.getEventType());
+        // Refresh the request event because it was updated in its own transaction
+        requestEvent = RequestEvent.findById(requestEvent.getId());
 
         // Verify request config
         RequestConfig requestConfig = requestEvent.getRequestConfig();
