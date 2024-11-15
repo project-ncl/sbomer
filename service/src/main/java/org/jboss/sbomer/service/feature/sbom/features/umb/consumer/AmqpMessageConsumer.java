@@ -58,6 +58,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -68,7 +69,6 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Unremovable
 @Slf4j
-@Transactional // Quarkus should initialize the database connection pool before processing @Transactional beans
 public class AmqpMessageConsumer {
 
     @Inject
@@ -94,7 +94,6 @@ public class AmqpMessageConsumer {
 
     @Incoming("errata")
     @Blocking(ordered = false, value = "errata-processor-pool")
-    @Transactional
     public CompletionStage<Void> processErrata(Message<byte[]> message) {
         log.debug("Received new Errata tool status change notification via the AMQP consumer");
 
@@ -117,14 +116,14 @@ public class AmqpMessageConsumer {
         }
 
         // Store the requestEvent (to keep events in case of subsequent failures)
-        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = saveNewEvent(event);
 
         if (hasMessageId(event)) {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
             // There is an issue in our queues and same messages are processed multiple times, we want to avoid
             // generating manifests for the same event
             String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
-            long alreadyGenerated = repository.countAlreadyAckedUMBEventsFor(msgId);
+            long alreadyGenerated = getAlreadyAckedUMBEventsFor(msgId);
             if (alreadyGenerated > 0) {
                 log.warn(
                         "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
@@ -147,7 +146,6 @@ public class AmqpMessageConsumer {
 
     @Incoming("builds")
     @Blocking(ordered = false, value = "build-processor-pool")
-    @Transactional
     public CompletionStage<Void> process(Message<String> message) {
         log.debug("Received new PNC build status notification via the AMQP consumer");
         log.debug("Message content: {}", message.getPayload());
@@ -167,14 +165,14 @@ public class AmqpMessageConsumer {
         }
 
         // Store the requestEvent (to keep events in case of subsequent failures)
-        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = saveNewEvent(event);
 
         if (hasMessageId(event)) {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
             // There is an issue in our queues and same messages are processed multiple times, we want to avoid
             // generating manifests for the same event
             String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
-            long alreadyGenerated = repository.countAlreadyAckedUMBEventsFor(msgId);
+            long alreadyGenerated = getAlreadyAckedUMBEventsFor(msgId);
             if (alreadyGenerated > 0) {
                 log.warn(
                         "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
@@ -230,34 +228,6 @@ public class AmqpMessageConsumer {
         return event.has(EVENT_KEY_UMB_MSG_ID);
     }
 
-    private CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
-        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString());
-        requestEvent.save();
-
-        return message.nack(e);
-    }
-
-    private CompletionStage<Void> ackAndSave(Message<?> message, RequestEvent requestEvent) {
-        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
-        requestEvent.save();
-
-        return message.ack();
-    }
-
-    private CompletionStage<Void> skipAndSave(Message<?> message, RequestEvent requestEvent) {
-        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.SKIPPED.toString());
-        requestEvent.save();
-
-        return message.ack();
-    }
-
-    private CompletionStage<Void> ackAndSaveUnknownMessage(Message<?> message, ObjectNode event) {
-        event.put(EVENT_KEY_UMB_MSG_TYPE, EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE)
-                .put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
-        RequestEvent.createNew(null, RequestEventType.UMB, event).save();
-        return message.ack();
-    }
-
     private ObjectNode createUnidentifiedEvent(String content, UMBConsumer consumer) {
         return ObjectMapperProvider.json()
                 .createObjectNode()
@@ -272,26 +242,77 @@ public class AmqpMessageConsumer {
                 .put(EVENT_KEY_UMB_TOPIC, metadata.getAddress());
     }
 
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
+        requestEvent = RequestEvent.findById(requestEvent.getId());
+        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString());
+        requestEvent.save();
+
+        return message.nack(e);
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected CompletionStage<Void> ackAndSave(Message<?> message, RequestEvent requestEvent) {
+        requestEvent = RequestEvent.findById(requestEvent.getId());
+        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
+        requestEvent.save();
+
+        return message.ack();
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected CompletionStage<Void> skipAndSave(Message<?> message, RequestEvent requestEvent) {
+        requestEvent = RequestEvent.findById(requestEvent.getId());
+        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.SKIPPED.toString());
+        requestEvent.save();
+
+        return message.ack();
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected CompletionStage<Void> ackAndSaveUnknownMessage(Message<?> message, ObjectNode event) {
+        event.put(EVENT_KEY_UMB_MSG_TYPE, EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE)
+                .put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
+        RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+        return message.ack();
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected RequestEvent saveNewEvent(ObjectNode event) {
+        return RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+    }
+
+    @Transactional
+    public long getAlreadyAckedUMBEventsFor(String msgId) {
+        return repository.countAlreadyAckedUMBEventsFor(msgId);
+    }
+
+    @Transactional
     public long getPncProcessedMessages() {
         return repository.countPncProcessedMessages();
     }
 
+    @Transactional
     public long getPncReceivedMessages() {
         return repository.countPncReceivedMessages();
     }
 
+    @Transactional
     public long getErrataProcessedMessages() {
         return repository.countErrataProcessedMessages();
     }
 
+    @Transactional
     public long getErrataReceivedMessages() {
         return repository.countErrataReceivedMessages();
     }
 
+    @Transactional
     public long getPncSkippedMessages() {
         return repository.countPncSkippedMessages();
     }
 
+    @Transactional
     public long getErrataSkippedMessages() {
         return repository.countErrataSkippedMessages();
     }

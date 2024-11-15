@@ -61,6 +61,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -88,6 +89,7 @@ public class PncNotificationHandler {
     @RestClient
     PncClient pncClient;
 
+    @Transactional
     public void handle(RequestEvent requestEvent) throws JsonProcessingException {
 
         JsonNode msgNode = requestEvent.getEvent().get(EVENT_KEY_UMB_MSG);
@@ -243,14 +245,16 @@ public class PncNotificationHandler {
 
     }
 
-    @Transactional
+    @Transactional(value = TxType.REQUIRES_NEW)
     protected RequestEvent addPncBuildRequestConfig(RequestEvent requestEvent, String buildId) {
+        requestEvent = RequestEvent.findById(requestEvent.getId());
         requestEvent.setRequestConfig(PncBuildRequestConfig.builder().withBuildId(buildId).build());
         return requestEvent.save();
     }
 
-    @Transactional
+    @Transactional(value = TxType.REQUIRES_NEW)
     protected RequestEvent addPncOperationRequestConfig(RequestEvent requestEvent, String operationId) {
+        requestEvent = RequestEvent.findById(requestEvent.getId());
         requestEvent.setRequestConfig(PncOperationRequestConfig.builder().withOperationId(operationId).build());
         return requestEvent.save();
     }
