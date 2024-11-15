@@ -139,7 +139,8 @@ public class TaskRunSyftImageGenerateDependentResource
                 .endSpec()
                 .build();
 
-        TektonResourceUtils.adjustComputeResources(taskRun);
+        // TODO: Disabled for now
+        // TektonResourceUtils.adjustComputeResources(taskRun);
 
         return taskRun;
     }
