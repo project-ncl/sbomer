@@ -199,15 +199,3 @@ sbomer:
       # # This includes removing the generation request kubernetes resource as well as any leftovers on the filesystem
       # # located in the sbomer.sbom-dir directory.
       cleanup: false
-
-  generator:
-    # GenerationRequestType.toName()
-    containerimage:
-      tekton:
-        resources:
-          requests:
-            cpu: "800m"
-            memory: "1200Mi"
-          limits:
-            cpu: "1000m"
-            memory: "1400Mi"
