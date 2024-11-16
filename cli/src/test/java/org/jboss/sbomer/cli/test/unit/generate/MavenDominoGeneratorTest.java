@@ -97,9 +97,10 @@ class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-XX:InitialRAMPercentage=50.0",
-                        "-XX:MaxRAMPercentage=50.0",
+                        "-XX:InitialRAMPercentage=75.0",
+                        "-XX:MaxRAMPercentage=75.0",
                         "-XX:+ExitOnOutOfMemoryError",
+                        "-XX:+PrintCommandLineFlags",
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
@@ -125,9 +126,10 @@ class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-XX:InitialRAMPercentage=50.0",
-                        "-XX:MaxRAMPercentage=50.0",
+                        "-XX:InitialRAMPercentage=75.0",
+                        "-XX:MaxRAMPercentage=75.0",
                         "-XX:+ExitOnOutOfMemoryError",
+                        "-XX:+PrintCommandLineFlags",
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
@@ -150,9 +152,10 @@ class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-XX:InitialRAMPercentage=50.0",
-                        "-XX:MaxRAMPercentage=50.0",
+                        "-XX:InitialRAMPercentage=75.0",
+                        "-XX:MaxRAMPercentage=75.0",
                         "-XX:+ExitOnOutOfMemoryError",
+                        "-XX:+PrintCommandLineFlags",
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",
@@ -176,9 +179,10 @@ class MavenDominoGeneratorTest {
         assertEquals(
                 Arrays.asList(
                         "java",
-                        "-XX:InitialRAMPercentage=50.0",
-                        "-XX:MaxRAMPercentage=50.0",
+                        "-XX:InitialRAMPercentage=75.0",
+                        "-XX:MaxRAMPercentage=75.0",
                         "-XX:+ExitOnOutOfMemoryError",
+                        "-XX:+PrintCommandLineFlags",
                         "-XshowSettings:vm",
                         "-Dquarkus.args=\"\"",
                         "-jar",

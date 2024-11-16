@@ -57,9 +57,9 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
         environment.putAll(
                 Map.of(
                         "GRADLE_OPTS",
-                        "-XshowSettings:vm",
+                        "-XshowSettings:vm -XX:+PrintCommandLineFlags",
                         "JAVA_OPTS",
-                        "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError"));
+                        "-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"));
 
         ProcessRunner.run(environment, parent.getWorkdir(), command(buildCmdOptions));
 

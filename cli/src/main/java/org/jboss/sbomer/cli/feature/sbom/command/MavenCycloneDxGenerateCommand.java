@@ -47,9 +47,9 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
         ProcessRunner.run(
                 Map.of(
                         "MAVEN_OPTS",
-                        "-XshowSettings:vm",
+                        "-XshowSettings:vm -XX:+PrintCommandLineFlags",
                         "JAVA_TOOL_OPTIONS",
-                        "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError"),
+                        "-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"),
                 parent.getWorkdir(),
                 command(buildCmdOptions));
 
