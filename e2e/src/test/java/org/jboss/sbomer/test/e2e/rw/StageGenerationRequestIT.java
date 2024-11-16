@@ -44,9 +44,9 @@ class StageGenerationRequestIT extends E2EStageBase {
     }
 
     private final static String MAVEN_BUILD_ID = "AZ4HNIBW4YYAA";
-    private final static String GRADLE_5_BUILD_ID = "A3YCIKLQTVYAA";
-    private final static String GRADLE_4_BUILD_ID = "A3LCEFCLLVYAA";
-    private final static String NODEJS_NPM_BUILD_ID = "A4WLAOY3BJIAA";
+    private final static String GRADLE_5_BUILD_ID = "BD2NA27VAVIAA";
+    private final static String GRADLE_4_BUILD_ID = "BDW7L6D3DUQAA";
+    private final static String NODEJS_NPM_BUILD_ID = "BCT4ZINAVZYAA";
 
     @Test
     void testSuccessfulGenerationMavenBuild() throws IOException {
