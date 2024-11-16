@@ -113,7 +113,5 @@ source "${HOME}/env.sh"
 # See: https://issues.redhat.com/browse/SBOMER-69
 export DOMINO_JAVA_BIN="${HOME}/.sdkman/candidates/java/17/bin/java"
 
-jvm_params=( $SBOMER_JVM_PARAMS )
-
 echo "Running generation..."
-exec "${HOME}/.sdkman/candidates/java/17/bin/java" "${jvm_params}" -Duser.home=/workdir -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config "${config_path}" --index "${index}"
+exec "${HOME}/.sdkman/candidates/java/17/bin/java" -XX:InitialRAMPercentage=15.0 -XX:MaxRAMPercentage=15.0 -XX:+ExitOnOutOfMemoryError -XX:+PrintCommandLineFlags -XshowSettings:vm -Duser.home=/workdir -jar /workdir/generator/quarkus-run.jar -v sbom auto generate --workdir /tmp/sbomer-workdir --config "${config_path}" --index "${index}"
