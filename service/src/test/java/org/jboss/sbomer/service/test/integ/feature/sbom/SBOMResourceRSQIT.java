@@ -678,7 +678,7 @@ class SBOMResourceRSQIT {
                 "g12345",
                 "gAWI7P3EJ23YAA",
                 null,
-                "BUILD",
+                GenerationRequestType.BUILD,
                 Instant.now().minus(Duration.ofDays(1)));
 
         return sbom;
@@ -695,7 +695,7 @@ class SBOMResourceRSQIT {
                 "g12345",
                 "gAWI7P3EJ23YAB",
                 null,
-                "BUILD",
+                GenerationRequestType.BUILD,
                 Instant.now());
 
         return sbom;

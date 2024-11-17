@@ -57,7 +57,7 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
                             generationRequest.<String> get("id"),
                             generationRequest.<String> get("identifier").alias("gIdentifier"),
                             generationRequest.<Config> get("config"),
-                            generationRequest.<GenerationRequestType> get("type").as(String.class),
+                            generationRequest.<GenerationRequestType> get("type"),
                             generationRequest.<Instant> get("creationTime")));
         });
     }
