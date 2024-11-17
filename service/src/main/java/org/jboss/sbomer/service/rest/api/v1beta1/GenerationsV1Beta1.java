@@ -149,6 +149,12 @@ public class GenerationsV1Beta1 {
             description = "Manifest generation successfully requested",
             content = @Content(schema = @Schema(implementation = V1Beta1GenerationRecord.class)))
     @APIResponse(
+            responseCode = "400",
+            description = "Failed while processing the request, please verify the provided config.",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
@@ -179,7 +185,7 @@ public class GenerationsV1Beta1 {
         } else if (config instanceof PncBuildRequestConfig) {
             log.info("New PNC build request received");
 
-            requests.add(sbomService.generateFromBuild(request, null));
+            requests.add(sbomService.generateFromBuild(request, config, null));
         } else if (config instanceof PncAnalysisRequestConfig analysisConfig) {
             log.info("New PNC analysis request received");
 
