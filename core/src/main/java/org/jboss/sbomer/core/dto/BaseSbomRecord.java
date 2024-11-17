@@ -20,6 +20,7 @@ package org.jboss.sbomer.core.dto;
 import java.time.Instant;
 
 import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 
 public record BaseSbomRecord(
         String id,
@@ -40,7 +41,7 @@ public record BaseSbomRecord(
             String gId,
             String gIdentifier,
             Config gConfig,
-            String gType,
+            GenerationRequestType gType,
             Instant gCreationTime) {
         this(
                 id,
