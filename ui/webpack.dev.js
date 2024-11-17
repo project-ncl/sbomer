@@ -37,7 +37,15 @@ module.exports = merge(common('development'), {
       directory: path.resolve(__dirname, 'dist'),
     },
     client: {
-      overlay: true,
+      overlay: {
+        runtimeErrors: (error) => {
+          if (error.message  === 'ResizeObserver loop completed with undelivered notifications.') {
+            return false;
+          }
+
+          return true;
+        },
+      },
     },
   },
   module: {

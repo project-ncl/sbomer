@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useGenerationRequests } from './useGenerationRequests';
@@ -24,7 +24,7 @@ const columnNames = {
 };
 
 export const GenerationRequestTable = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const paramPage = useSearchParam('page') || 1;
   const paramPageSize = useSearchParam('pageSize') || 10;
 
@@ -35,13 +35,13 @@ export const GenerationRequestTable = () => {
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPageIndex(newPage - 1);
-    history.push({ search: `?page=${newPage}&pageSize=${pageSize}` });
+    navigate({ search: `?page=${newPage}&pageSize=${pageSize}` });
   };
 
   const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
     setPageSize(newPerPage);
     setPageIndex(0);
-    history.push({ search: `?page=1&pageSize=${newPerPage}` });
+    navigate({ search: `?page=1&pageSize=${newPerPage}` });
   };
 
   if (error) {
@@ -70,7 +70,7 @@ export const GenerationRequestTable = () => {
         </Thead>
         <Tbody>
           {value.map((generation) => (
-            <Tr key={generation.id} isClickable onRowClick={() => history.push('/requests/' + generation.id)}>
+            <Tr key={generation.id} isClickable onRowClick={() => navigate('/generations/' + generation.id)}>
               <Td dataLabel={columnNames.status}>
                 <Tooltip
                   isContentLeftAligned={true}
