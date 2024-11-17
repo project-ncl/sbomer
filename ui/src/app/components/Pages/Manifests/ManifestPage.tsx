@@ -77,7 +77,7 @@ const ManifestPage: React.FunctionComponent = () => {
   }
 
   return (
-    <PageSection>
+    <PageSection hasBodyWrapper={false}>
       <Grid hasGutter span={12}>
         <GridItem span={12}>
           <Title headingLevel="h1" size="4xl">
