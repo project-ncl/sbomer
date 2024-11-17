@@ -1,0 +1,15 @@
+{
+    "content_types": [],
+    "errata_id": 140268,
+    "errata_status": "QE",
+    "from": "NEW_FILES",
+    "fulladvisory": "RHEA-2041:XXXX-ZZ",
+    "product": "MYPRODUCT",
+    "release": "MYRELEASE",
+    "skip_customer_notifications": false,
+    "synopsis": "Important: textonly security update",
+    "to": "QE",
+    "type": "RHEA",
+    "when": "2041-10-01 08:03:25 UTC",
+    "who": "john@doyle.com"
+}

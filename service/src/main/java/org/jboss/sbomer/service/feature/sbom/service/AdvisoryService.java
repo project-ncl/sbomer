@@ -27,12 +27,23 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.koji.ClientSession;
+import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
+import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
+import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
+import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
+import org.jboss.sbomer.core.config.request.RequestConfig;
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.config.BrewRPMConfig;
+import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
+import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
+import org.jboss.sbomer.service.feature.sbom.errata.ErrataNotesSchemaValidator;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata.Details;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
@@ -48,6 +59,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
@@ -76,11 +88,15 @@ public class AdvisoryService {
     KubernetesClient kubernetesClient;
 
     @Inject
+    @Setter
     SbomService sbomService;
 
     @Inject
     @Setter
     FeatureFlags featureFlags;
+
+    @Inject
+    ErrataNotesSchemaValidator notesSchemaValidator;
 
     public Collection<SbomGenerationRequest> generateFromAdvisory(RequestEvent requestEvent) {
 
@@ -90,8 +106,9 @@ public class AdvisoryService {
         // Fetching Erratum
         Errata erratum = errataClient.getErratum(advisoryRequestConfig.getAdvisoryId());
         if (erratum == null || erratum.getDetails().isEmpty()) {
-            log.warn("Could not retrieve the erratum details for id : '{}'", advisoryRequestConfig.getAdvisoryId());
-            return Collections.emptyList();
+            throw new ClientException(
+                    "Could not retrieve the errata advisory with provided id {}",
+                    advisoryRequestConfig.getAdvisoryId());
         }
 
         // Will be removed, leave now for debugging
@@ -112,8 +129,67 @@ public class AdvisoryService {
             return Collections.emptyList();
         }
 
-        log.warn("** TODO ** Handle the Text-only advisories");
-        return Collections.emptyList();
+        if (ErrataStatus.QE.equals(erratum.getDetails().get().getStatus())) {
+            return handleTextOnlyQEAdvisory(requestEvent, erratum);
+        } else {
+            log.warn("** TODO ** Handle the SHIPPED-LIVE Text-Only advisories");
+            throw new ClientException("Text-Only Errata advisories with SHIPPED-LIVE are not handled yet. Stay tuned!");
+        }
+    }
+
+    private Collection<SbomGenerationRequest> handleTextOnlyQEAdvisory(RequestEvent requestEvent, Errata erratum) {
+
+        Optional<JsonNode> maybeNotes = erratum.getNotesMapping();
+        if (maybeNotes.isEmpty()) {
+            log.warn(
+                    "Text-Only Errata Advisory {} ({}) does not have a Json-formatted notes field. No manifests will be generated !!",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+            return Collections.emptyList();
+        }
+
+        ValidationResult validationResult = notesSchemaValidator.validate(erratum);
+        if (!validationResult.isValid()) {
+            throw new ApplicationException(
+                    "Text-Only Errata Advisory {} ({}) does not have a valid Json-formatted notes field. No manifests will be generated !!",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+        }
+
+        List<RequestConfig> requestConfigsWithinNotes = new ArrayList<>();
+        JsonNode notes = maybeNotes.get();
+
+        if (notes.has("deliverables")) {
+            JsonNode deliverables = notes.path("deliverables");
+
+            if (deliverables.isArray()) {
+                for (JsonNode deliverable : deliverables) {
+                    String type = deliverable.path("type").asText();
+                    log.debug("Processing deliverable of type: {}", type);
+
+                    RequestConfig requestConfig = createRequestConfig(type, deliverable);
+                    if (requestConfig != null) {
+                        requestConfigsWithinNotes.add(requestConfig);
+                    } else {
+                        log.warn(
+                                "Unsupported deliverable type '{}' in Text-Only Errata Advisory {} ({}).",
+                                type,
+                                erratum.getDetails().get().getFulladvisory(),
+                                erratum.getDetails().get().getId());
+                    }
+                }
+            }
+        } else if (notes.has("manifest")) {
+            String manifestContent = notes.get("manifest").asText();
+            log.debug(
+                    "Text-Only Errata Advisory {} ({}) has a \"manifest\" Notes field. SBOMer should do nothing. No new manifests will be generated. The content is \n{}",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId(),
+                    manifestContent);
+        }
+
+        return requestConfigsWithinNotes.isEmpty() ? Collections.emptyList()
+                : processRequestConfigsWithinNotes(requestEvent, requestConfigsWithinNotes);
     }
 
     private Collection<SbomGenerationRequest> handleStandardAdvisory(RequestEvent requestEvent, Errata erratum) {
@@ -125,17 +201,16 @@ public class AdvisoryService {
 
         Details details = erratum.getDetails().get();
         if (details.getContentTypes().isEmpty() || details.getContentTypes().size() > 1) {
-            log.warn(
-                    "** ??? ** Zero or multiple content-types ({}), will need to handle this!",
+            throw new ApplicationException(
+                    "The standard errata advisory has zero or multiple content-types ({}).",
                     details.getContentTypes());
-            return Collections.emptyList();
         }
 
         if (ErrataStatus.QE.equals(details.getStatus())) {
             return handleStandardQEAdvisory(requestEvent, details);
         } else {
-            log.warn("** TODO ** Handle the SHIPPED-LIVE advisories");
-            return Collections.emptyList();
+            log.warn("** TODO ** Handle the SHIPPED-LIVE standard advisories");
+            throw new ClientException("Standard advisories with SHIPPED-LIVE are not handled yet. Stay tuned!");
         }
     }
 
@@ -143,8 +218,9 @@ public class AdvisoryService {
         log.debug("Handle standard QE Advisory {}", details);
 
         if (details.getContentTypes().stream().noneMatch(type -> type.equals("docker") || type.equals("rpm"))) {
-            log.warn("** TODO ** Unknown content-type :{}", details.getContentTypes());
-            return Collections.emptyList();
+            throw new ApplicationException(
+                    "The standard errata advisory has unknown content-types ({}).",
+                    details.getContentTypes());
         }
 
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(String.valueOf(details.getId()));
@@ -164,6 +240,61 @@ public class AdvisoryService {
         } else {
             ErrataProduct product = errataClient.getProduct(details.getProduct().getShortName());
             return processRPMBuilds(requestEvent, details, product, buildDetails);
+        }
+    }
+
+    @Transactional
+    protected Collection<SbomGenerationRequest> processRequestConfigsWithinNotes(
+            RequestEvent requestEvent,
+            List<RequestConfig> requestConfigsWithinNotes) {
+
+        List<SbomGenerationRequest> generations = new ArrayList<SbomGenerationRequest>();
+        for (RequestConfig config : requestConfigsWithinNotes) {
+            if (config instanceof PncBuildRequestConfig) {
+                log.info("New PNC build request received");
+
+                generations.add(sbomService.generateFromBuild(requestEvent, config, null));
+            } else if (config instanceof PncAnalysisRequestConfig analysisConfig) {
+                log.info("New PNC analysis request received");
+
+                generations.add(
+                        sbomService.generateNewOperation(
+                                requestEvent,
+                                DeliverableAnalysisConfig.builder()
+                                        .withDeliverableUrls(analysisConfig.getUrls())
+                                        .withMilestoneId(analysisConfig.getMilestoneId())
+                                        .build()));
+            } else if (config instanceof PncOperationRequestConfig operationConfig) {
+                log.info("New PNC operation request received");
+
+                generations.add(
+                        sbomService.generateFromOperation(
+                                requestEvent,
+                                OperationConfig.builder().withOperationId(operationConfig.getOperationId()).build()));
+            }
+        }
+
+        return generations;
+    }
+
+    /**
+     * Helper method to create RequestConfig based on the deliverable type.
+     */
+    private RequestConfig createRequestConfig(String type, JsonNode deliverableEntry) {
+        try {
+            switch (type) {
+                case PncBuildRequestConfig.TYPE_NAME:
+                    return ObjectMapperProvider.json().treeToValue(deliverableEntry, PncBuildRequestConfig.class);
+                case PncOperationRequestConfig.TYPE_NAME:
+                    return ObjectMapperProvider.json().treeToValue(deliverableEntry, PncOperationRequestConfig.class);
+                case PncAnalysisRequestConfig.TYPE_NAME:
+                    return ObjectMapperProvider.json().treeToValue(deliverableEntry, PncAnalysisRequestConfig.class);
+                default:
+                    return null;
+            }
+        } catch (JsonProcessingException | IllegalArgumentException e) {
+            log.error("Failed to deserialize deliverable of type '{}': {}", type, e.getMessage());
+            return null;
         }
     }
 

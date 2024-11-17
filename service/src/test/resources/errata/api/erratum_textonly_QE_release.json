@@ -1,0 +1,74 @@
+{
+  "data": {
+    "id": 1245,
+    "type": "releases",
+    "attributes": {
+      "name": "Red Hat build of Quarkus Middleware",
+      "description": "Middleware advisories for Red Hat build of Quarkus",
+      "type": "Async",
+      "allow_pkg_dupes": false,
+      "ship_date": null,
+      "pelc_product_version_name": "",
+      "is_active": true,
+      "enabled": true,
+      "enable_batching": false,
+      "is_async": true,
+      "is_deferred": false,
+      "allow_shadow": false,
+      "allow_blocker": false,
+      "allow_exception": false,
+      "limit_bugs_by_product": false,
+      "supports_component_acl": false,
+      "blocker_flags": [
+        
+      ],
+      "internal_target_release": null,
+      "zstream_target_release": null,
+      "notify_bugzilla_about_release_status": false,
+      "is_silent": false,
+      "pp_start_date": null,
+      "pp_end_date": null,
+      "forbid_container_advisories": false
+    },
+    "relationships": {
+      "brew_tags": [
+        
+      ],
+      "product": {
+        "id": 153,
+        "short_name": "RHBQ"
+      },
+      "product_versions": [
+        {
+          "id": 1997,
+          "name": "Middleware-RHBQ-2.13"
+        },
+        {
+          "id": 2080,
+          "name": "Middleware-RHBQ-3.2"
+        },
+        {
+          "id": 2166,
+          "name": "RHEL-8-RHBQ-3.8"
+        },
+        {
+          "id": 2175,
+          "name": "Middleware-RHBQ-3.8"
+        },
+        {
+          "id": 2356,
+          "name": "Middleware-RHBQ-3.15"
+        },
+        {
+          "id": 2357,
+          "name": "RHEL-8-RHBQ-3.15"
+        }
+      ],
+      "state_machine_rule_set": null,
+      "program_manager": {
+        "id": 3000677,
+        "login_name": "jpallich@redhat.com"
+      }
+    }
+  }
+}

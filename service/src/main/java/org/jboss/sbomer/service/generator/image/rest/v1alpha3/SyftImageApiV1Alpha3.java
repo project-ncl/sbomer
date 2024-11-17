@@ -24,6 +24,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.config.request.ImageRequestConfig;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
+import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
@@ -72,6 +73,10 @@ public class SyftImageApiV1Alpha3 {
             responseCode = "202",
             description = "Requests manifest generation for a given container image.",
             content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
+    @APIResponse(
+            responseCode = "400",
+            description = "Could not parse provided arguments",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @APIResponse(
             responseCode = "500",
             description = "Internal server error",

@@ -280,12 +280,12 @@ public class ApiV1Alpha3 {
         }
 
         // Create the Request to be associated with this REST API call event
-        RequestEvent request = RestUtils.createRequestFromRestEvent(
-                PncBuildRequestConfig.builder().withBuildId(buildId).build(),
-                requestContext,
-                Span.current());
+        PncBuildRequestConfig pncBuildRequestConfig = PncBuildRequestConfig.builder().withBuildId(buildId).build();
+        RequestEvent request = RestUtils
+                .createRequestFromRestEvent(pncBuildRequestConfig, requestContext, Span.current());
 
-        return Response.accepted(mapper.toRecord(sbomService.generateFromBuild(request, config))).build();
+        return Response.accepted(mapper.toRecord(sbomService.generateFromBuild(request, pncBuildRequestConfig, config)))
+                .build();
     }
 
     @GET
@@ -388,6 +388,10 @@ public class ApiV1Alpha3 {
             description = "Schedules generation of a SBOM for a particular PNC operationId. This is an asynchronous call. It does execute the generation behind the scenes.",
             content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
     @APIResponse(
+            responseCode = "400",
+            description = "Could not parse provided arguments",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
@@ -420,6 +424,10 @@ public class ApiV1Alpha3 {
             responseCode = "202",
             description = "Schedules a new PNC operation of type deliverable analysis. This is an asynchronous call. PNC will start the deliverable analysis from the provided configuration and will notify the end of the analysis asynchronously.",
             content = @Content(schema = @Schema(implementation = SbomGenerationRequestRecord.class)))
+    @APIResponse(
+            responseCode = "400",
+            description = "Could not parse provided arguments",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @APIResponse(
             responseCode = "500",
             description = "Internal server error",

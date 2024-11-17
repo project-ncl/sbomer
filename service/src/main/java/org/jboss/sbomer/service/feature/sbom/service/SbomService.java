@@ -28,6 +28,7 @@ import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
+import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
@@ -257,16 +258,19 @@ public class SbomService {
     }
 
     @WithSpan
-    public SbomGenerationRequest generateFromBuild(RequestEvent requestEvent, PncBuildConfig config) {
+    public SbomGenerationRequest generateFromBuild(
+            RequestEvent requestEvent,
+            RequestConfig requestConfig,
+            PncBuildConfig config) {
         try {
-            PncBuildRequestConfig requestConfig = (PncBuildRequestConfig) requestEvent.getRequestConfig();
-            MDCUtils.addBuildContext(requestConfig.getBuildId());
+            PncBuildRequestConfig pncRequestConfig = (PncBuildRequestConfig) requestConfig;
+            MDCUtils.addBuildContext(pncRequestConfig.getBuildId());
 
-            log.info("New generation request for build id '{}'", requestConfig.getBuildId());
+            log.info("New generation request for build id '{}'", pncRequestConfig.getBuildId());
             log.debug("Creating GenerationRequest Kubernetes resource...");
 
             GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
-                    .withIdentifier(requestConfig.getBuildId())
+                    .withIdentifier(pncRequestConfig.getBuildId())
                     .withStatus(SbomGenerationStatus.NEW)
                     .build();
 
@@ -275,7 +279,7 @@ public class SbomService {
 
                 SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
                 sbomerConfigProvider.adjust(config);
-                config.setBuildId(requestConfig.getBuildId());
+                config.setBuildId(pncRequestConfig.getBuildId());
 
                 ValidationResult validationResult = configSchemaValidator.validate(config);
 
@@ -301,7 +305,7 @@ public class SbomService {
             log.debug(
                     "GenerationRequest Kubernetes resource '{}' created for build '{}'",
                     req.getId(),
-                    requestConfig.getBuildId());
+                    pncRequestConfig.getBuildId());
 
             return sbomGenerationRequest;
         } finally {
@@ -323,14 +327,8 @@ public class SbomService {
                 config.getMilestoneId(),
                 config.getDeliverableUrls());
 
-        DeliverableAnalyzerOperation operation = null;
-        try {
-            operation = pncClient.analyzeDeliverables(
-                    config.getMilestoneId(),
-                    DeliverablesAnalysisRequest.builder().deliverablesUrls(config.getDeliverableUrls()).build());
-        } catch (ClientException ex) {
-            throw new ApplicationException("Operation could not be retrieved because PNC responded with an error", ex);
-        }
+        // Trigger an analysis operation in PNC
+        DeliverableAnalyzerOperation operation = doAnalyzeDeliverables(config);
 
         log.debug("Creating GenerationRequest Kubernetes resource...");
 
@@ -508,5 +506,15 @@ public class SbomService {
     public void notifyCompleted(@SpanAttribute(value = "sbom") Sbom sbom) {
         log.info("Notifying the generation of SBOM: {}", sbom);
         notificationService.notifyCompleted(List.of(sbom));
+    }
+
+    public DeliverableAnalyzerOperation doAnalyzeDeliverables(DeliverableAnalysisConfig config) {
+        try {
+            return pncClient.analyzeDeliverables(
+                    config.getMilestoneId(),
+                    DeliverablesAnalysisRequest.builder().deliverablesUrls(config.getDeliverableUrls()).build());
+        } catch (ClientException ex) {
+            throw new ApplicationException("Operation could not be retrieved because PNC responded with an error", ex);
+        }
     }
 }
