@@ -36,7 +36,7 @@ public class TicketCache {
     public SubjectTgtPair getTgt(String userPrincipal) {
         SubjectTgtPair cached = tgtCache.get(userPrincipal);
         if (cached != null) {
-            log.debug("Got Subject-TGT from the cache: {}", cached.printDetails());
+            log.debug("Got Subject-TGT from the cache");
         }
         return cached;
     }
