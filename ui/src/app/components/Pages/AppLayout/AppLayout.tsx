@@ -1,4 +1,4 @@
-import rhlogo from '../../../../assets/Logo-Red_Hat-A-Reverse-RGB.svg';
+import rhlogo from '../../../../assets/Logo-Red_Hat-A-Standard-RGB.svg';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import {
   Brand,
