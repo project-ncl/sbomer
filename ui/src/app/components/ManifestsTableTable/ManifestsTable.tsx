@@ -9,7 +9,7 @@ import {
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useManifests } from './useSboms';
@@ -23,7 +23,7 @@ const columnNames = {
 };
 
 export const ManifestsTable = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const paramPage = useSearchParam('page') || 1;
   const paramPageSize = useSearchParam('pageSize') || 10;
 
@@ -34,13 +34,13 @@ export const ManifestsTable = () => {
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPageIndex(newPage - 1);
-    history.push({ search: `?page=${newPage}&pageSize=${pageSize}` });
+    navigate({ search: `?page=${newPage}&pageSize=${pageSize}` });
   };
 
   const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
     setPageSize(newPerPage);
     setPageIndex(0);
-    history.push({ search: `?page=1&pageSize=${newPerPage}` });
+    navigate({ search: `?page=1&pageSize=${newPerPage}` });
   };
 
   if (error) {
@@ -69,7 +69,7 @@ export const ManifestsTable = () => {
         </Thead>
         <Tbody>
           {value.map((manifest) => (
-            <Tr key={manifest.id} isClickable onRowClick={() => history.push('/manifests/' + manifest.id)}>
+            <Tr key={manifest.id} isClickable onRowClick={() => navigate('/manifests/' + manifest.id)}>
               <Td dataLabel={columnNames.id}>
                 <pre>{manifest.id}</pre>
               </Td>

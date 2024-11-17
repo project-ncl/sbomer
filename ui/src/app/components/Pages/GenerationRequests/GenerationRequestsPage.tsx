@@ -1,22 +1,26 @@
 import { GenerationRequestTable } from '@app/components/GenerationRequestTable/GenerationRequestTable';
+import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 import * as React from 'react';
+import { AppLayout } from '../AppLayout/AppLayout';
 
-const GenerationRequestsPage: React.FunctionComponent = () => {
+export function GenerationRequestsPage() {
+  useDocumentTitle('SBOMer | Generations');
+
   return (
-    <PageSection hasBodyWrapper={false}>
-      <Grid hasGutter span={12}>
-        <GridItem span={12}>
-          <Title headingLevel="h1" size="4xl">
-            Generation Requests
-          </Title>
-        </GridItem>
-        <GridItem span={12}>
-          <GenerationRequestTable />
-        </GridItem>
-      </Grid>
-    </PageSection>
+    <AppLayout>
+      <PageSection hasBodyWrapper={false}>
+        <Grid hasGutter span={12}>
+          <GridItem span={12}>
+            <Title headingLevel="h1" size="4xl">
+              Generations
+            </Title>
+          </GridItem>
+          <GridItem span={12}>
+            <GenerationRequestTable />
+          </GridItem>
+        </Grid>
+      </PageSection>
+    </AppLayout>
   );
-};
-
-export { GenerationRequestsPage };
+}

@@ -1,16 +1,21 @@
-import * as React from 'react';
-import '@patternfly/react-core/dist/styles/base.css';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { AppLayout } from '@app/components/Pages/AppLayout/AppLayout';
-import { AppRoutes } from '@app/routes';
 import '@app/app.css';
+import '@patternfly/react-core/dist/styles/base.css';
+import * as React from 'react';
+import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 
-const App: React.FunctionComponent = () => (
-  <Router>
-    <AppLayout>
-      <AppRoutes />
-    </AppLayout>
-  </Router>
-);
+
+import { IAppRoute, routes } from './routes';
+
+const App = () => {
+  return (
+    <RouterProvider
+      router={createBrowserRouter(
+        routes
+          .filter((route) => !route.routes)
+          .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
+      )}
+    />
+  );
+};
 
 export default App;
