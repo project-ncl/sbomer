@@ -28,8 +28,8 @@ import {
   Tab,
   TabTitleText,
   Tabs,
-  Text,
-  TextVariants,
+  Content,
+  ContentVariants,
   Timestamp,
   TimestampTooltipVariant,
   Title,
@@ -159,7 +159,7 @@ const GenerationRequestPage: React.FunctionComponent = () => {
   }
 
   return (
-    <PageSection>
+    <PageSection hasBodyWrapper={false}>
       <Grid hasGutter span={12}>
         <GridItem span={12}>
           <Title headingLevel="h1" size="4xl">
@@ -218,7 +218,7 @@ const GenerationRequestPage: React.FunctionComponent = () => {
               <DescriptionListTerm>Result</DescriptionListTerm>
               <DescriptionListDescription>
                 <Tooltip content={request.result} hidden={request.result == null}>
-                  <Text component={TextVariants.small}>{resultToDescription(request)}</Text>
+                  <Content component={ContentVariants.small}>{resultToDescription(request)}</Content>
                 </Tooltip>
               </DescriptionListDescription>
             </DescriptionListGroup>

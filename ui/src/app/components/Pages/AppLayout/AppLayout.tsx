@@ -4,9 +4,9 @@ import {
   Brand,
   Button,
   Masthead,
-  MastheadBrand,
+  MastheadLogo,
   MastheadMain,
-  MastheadToggle,
+  MastheadToggle, MastheadBrand,
   Nav,
   NavExpandable,
   NavItem,
@@ -28,15 +28,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const Header = (
     <Masthead>
-      <MastheadToggle>
-        <Button variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation">
-          <BarsIcon />
-        </Button>
+      
+      <MastheadMain><MastheadToggle>
+        <Button icon={<BarsIcon />} variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation" />
       </MastheadToggle>
-      <MastheadMain>
-        <MastheadBrand component="a">
+        <MastheadBrand data-codemods><MastheadLogo data-codemods component="a">
           <Link to="/"><Brand src={rhlogo} alt="Red Hat" widths={{ default: '150px' }} /></Link>
-        </MastheadBrand>
+        </MastheadLogo></MastheadBrand>
       </MastheadMain>
     </Masthead>
   );
@@ -93,7 +91,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </SkipToContent>
   );
   return (
-    <Page mainContainerId={pageId} header={Header} sidebar={sidebarOpen && Sidebar} skipToContent={PageSkipToContent}>
+    <Page mainContainerId={pageId} masthead={Header} sidebar={sidebarOpen && Sidebar} skipToContent={PageSkipToContent}>
       {children}
     </Page>
   );
