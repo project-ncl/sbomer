@@ -209,7 +209,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
                                 log.info(
                                         "Found compatible generated SBOM with id: '{}' from generation request: '{}', from previous build '{}'. Reusing it!",
                                         sbom.getId(),
-                                        sbom.getGenerationRequest().getId(),
+                                        sbomRequest.getId(),
                                         sbom.getIdentifier());
                             }
                         }
