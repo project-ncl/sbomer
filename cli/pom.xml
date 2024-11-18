@@ -94,6 +94,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.dmfs</groupId>
+      <artifactId>rfc3986-uri</artifactId>
+      <version>0.8.1</version>
+    </dependency>
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5-mockito</artifactId>
       <scope>test</scope>

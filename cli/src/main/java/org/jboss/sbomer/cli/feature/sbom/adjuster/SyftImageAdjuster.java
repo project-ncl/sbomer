@@ -29,6 +29,8 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.Property;
+import org.jboss.pnc.common.Strings;
+import org.jboss.sbomer.cli.feature.sbom.utils.UriValidator;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
@@ -536,6 +538,10 @@ public class SyftImageAdjuster implements Adjuster {
                         break;
                 }
             }
+        }
+
+        if (component.getExternalReferences() != null) {
+            component.getExternalReferences().removeIf(er -> !Strings.isEmpty(er.getUrl()) && !UriValidator.isUriValid(er.getUrl()));
         }
 
         if (component.getComponents() != null && !component.getComponents().isEmpty()) {

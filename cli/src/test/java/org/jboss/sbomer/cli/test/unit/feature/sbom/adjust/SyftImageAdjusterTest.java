@@ -3,16 +3,21 @@ package org.jboss.sbomer.cli.test.unit.feature.sbom.adjust;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.ExternalReference;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -215,5 +220,29 @@ public class SyftImageAdjusterTest {
 
         // Is valid
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+    }
+
+    @Test
+    void removeExternalReferencesWithBadURI() throws IOException {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), null, false);
+        final String badUrl = "https://github.com:facebook/regenerator/tree/master/packages/regenerator-runtime";
+
+        assertEquals(24, getExternalReferenceStream(bom).count());
+        assertTrue(getExternalReferenceStream(bom).anyMatch(r -> badUrl.endsWith(r.getUrl())));
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        assertEquals(21, getExternalReferenceStream(adjusted).count());
+        assertFalse(getExternalReferenceStream(adjusted).anyMatch(r -> badUrl.endsWith(r.getUrl())));
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+    }
+
+    private Stream<ExternalReference> getExternalReferenceStream(Bom bom) {
+        return bom.getComponents()
+            .stream()
+            .map(Component::getExternalReferences)
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream);
     }
 }
