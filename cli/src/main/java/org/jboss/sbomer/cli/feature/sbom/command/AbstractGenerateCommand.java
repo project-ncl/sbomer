@@ -281,7 +281,8 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
             throw new ApplicationException(
                     "Could not move the generated SBOM from '{}' to target location: '{}'",
                     sbomPath,
-                    parent.getOutput().toAbsolutePath());
+                    parent.getOutput().toAbsolutePath(),
+                    e);
         }
 
         log.info("Generation finished, SBOM available at: '{}'", parent.getOutput().toFile().getAbsolutePath());
