@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
@@ -46,6 +48,7 @@ import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.PncBuildAdjuster;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -249,7 +252,12 @@ public class DefaultProcessor implements Processor {
                         break;
 
                     default:
-                        processComponent(bom, c);
+                        PackageURL purl = getPackageURL(c);
+                        if ("rpm".equals(purl.getType())) {
+                            processRpmComponent(c, purl);
+                        } else {
+                            processComponent(bom, c);
+                        }
                         break;
                 }
             }
@@ -259,6 +267,40 @@ public class DefaultProcessor implements Processor {
         purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
         return bom;
+    }
+
+    private void processRpmComponent(Component component, PackageURL purl) {
+        Map<String, String> qualifiers = purl.getQualifiers();
+        if (qualifiers == null || !qualifiers.containsKey("arch")) {
+            log.debug("RPM purl is missing arch qualifier: {}", component.getPurl());
+            return;
+        }
+        String arch = qualifiers.get("arch");
+
+        KojiBuildInfo buildInfo;
+        try {
+            String nvra = purl.getName() + "-" + purl.getVersion() + "." + arch;
+            buildInfo = kojiService.findBuildByRPM(nvra);
+        } catch (KojiClientException e) {
+            log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
+            return;
+        }
+
+        if (buildInfo == null) {
+            log.warn("No Brew build information was retrieved, will not add any information");
+            return;
+        }
+
+        // It is a RH image, set publisher and supplier
+        setPublisher(component);
+        setSupplier(component);
+
+        // Add additional metadata
+        setBrewBuildMetadata(
+                component,
+                String.valueOf(buildInfo.getId()),
+                Optional.ofNullable(buildInfo.getSource()),
+                kojiService.getConfig().getKojiWebURL().toString());
     }
 
     private void processContainerImageComponent(Component component) {
@@ -300,7 +342,7 @@ public class DefaultProcessor implements Processor {
         setPublisher(component);
         setSupplier(component);
 
-        // Add aditional metadata
+        // Add additional metadata
         setBrewBuildMetadata(
                 component,
                 String.valueOf(buildInfo.getId()),
@@ -311,6 +353,14 @@ public class DefaultProcessor implements Processor {
     @Override
     public ProcessorType getType() {
         return ProcessorType.DEFAULT;
+    }
+
+    private static PackageURL getPackageURL(Component component) {
+        try {
+            return new PackageURL(component.getPurl());
+        } catch (MalformedPackageURLException e) {
+            throw new ApplicationException("Unable to parse provided purl: '{}'", component.getPurl(), e);
+        }
     }
 
 }

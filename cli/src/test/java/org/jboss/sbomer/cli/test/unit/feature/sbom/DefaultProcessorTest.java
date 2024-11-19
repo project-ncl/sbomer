@@ -1,6 +1,7 @@
 package org.jboss.sbomer.cli.test.unit.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -77,6 +78,53 @@ public class DefaultProcessorTest {
                 SbomUtils.getExternalReferences(mainComponent, Type.VCS).get(0).getUrl());
 
         Commit commit = mainComponent.getPedigree().getCommits().get(0);
+
+        assertEquals("hash", commit.getUid());
+        assertEquals("https://git.com/repo#hash", commit.getUrl());
+
+    }
+
+    @Test
+    void testAddBrewInfoForRpm() throws IOException, KojiClientException {
+        PncService pncServiceMock = Mockito.mock(PncService.class);
+        KojiService kojiServiceMock = Mockito.mock(KojiService.class);
+
+        KojiBuildInfo kojiBuildInfo = new KojiBuildInfo();
+        kojiBuildInfo.setId(12345);
+        kojiBuildInfo.setSource("https://git.com/repo#hash");
+
+        BuildConfig buildConfig = new BuildConfig();
+        buildConfig.setKojiWebURL(new URL("https://koji.web"));
+
+        when(kojiServiceMock.getConfig()).thenReturn(buildConfig);
+        when(kojiServiceMock.findBuildByRPM(eq("audit-libs-3.0.7-103.el9.x86_64")))
+                .thenReturn(kojiBuildInfo);
+
+        DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
+
+        Bom bom = SbomUtils.fromString(TestResources.asString("boms/image-after-adjustments.json"));
+        Bom processed = defaultProcessor.process(bom);
+
+        assertEquals(192, processed.getComponents().size());
+
+        Component rpmComponent = processed.getComponents().stream()
+                .filter(c -> "pkg:rpm/redhat/audit-libs@3.0.7-103.el9?arch=x86_64".equals(c.getPurl()))
+                .findFirst().orElseThrow();
+
+        assertNotNull(rpmComponent.getSupplier());
+        assertEquals("Red Hat", rpmComponent.getSupplier().getName());
+        assertEquals("Red Hat", rpmComponent.getPublisher());
+
+        ExternalReference buildSystem = SbomUtils.getExternalReferences(rpmComponent, Type.BUILD_SYSTEM).get(0);
+
+        assertEquals("https://koji.web/buildinfo?buildID=12345", buildSystem.getUrl());
+        assertEquals("brew-build-id", buildSystem.getComment());
+
+        assertEquals(
+                "https://git.com/repo#hash",
+                SbomUtils.getExternalReferences(rpmComponent, Type.VCS).get(0).getUrl());
+
+        Commit commit = rpmComponent.getPedigree().getCommits().get(0);
 
         assertEquals("hash", commit.getUid());
         assertEquals("https://git.com/repo#hash", commit.getUrl());
