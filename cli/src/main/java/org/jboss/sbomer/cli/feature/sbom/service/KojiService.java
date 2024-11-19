@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.build.finder.core.BuildConfig;
@@ -200,6 +201,36 @@ public class KojiService {
             log.error("Lookup in Brew failed due to {}", e.getMessage() == null ? e.toString() : e.getMessage(), e);
         }
         return null;
+    }
+
+    public KojiBuildInfo findBuildByRPM(String nvra) throws KojiClientException {
+        if (nvra == null) {
+            return null;
+        }
+
+        log.debug("Finding Brew build for RPM '{}'...", nvra);
+
+        List<KojiRpmInfo> rpm = kojiSession.getRPM(List.of(new KojiIdOrName(nvra)));
+
+        if (rpm.isEmpty()) {
+            log.debug("No results found");
+            return null;
+        }
+        KojiRpmInfo rpmInfo = rpm.get(0);
+        if (rpm.size() > 1) {
+            log.warn("Multiple RPMs {} found in Brew, this should not happen. Did Kojiji have a breaking change" +
+                    " update? Selected the first one {}", nvra, rpmInfo.getId());
+        }
+
+        if(rpmInfo.getBuildId() == null){
+            log.debug("RPM {} does not have assigned build", rpmInfo.getId());
+            return null;
+        }
+
+        KojiBuildInfo buildInfo = kojiSession.getBuild(rpmInfo.getBuildId());
+
+        log.debug("Found build: '{}'...", buildInfo.getId());
+        return buildInfo;
     }
 
     public KojiBuildInfo findBuild(String nvr) throws KojiClientException {
