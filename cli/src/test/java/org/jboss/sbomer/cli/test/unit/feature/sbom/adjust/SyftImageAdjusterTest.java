@@ -240,9 +240,9 @@ public class SyftImageAdjusterTest {
 
     private Stream<ExternalReference> getExternalReferenceStream(Bom bom) {
         return bom.getComponents()
-            .stream()
-            .map(Component::getExternalReferences)
-            .filter(Objects::nonNull)
-            .flatMap(Collection::stream);
+                .stream()
+                .map(Component::getExternalReferences)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream);
     }
 }

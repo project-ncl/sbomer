@@ -37,6 +37,7 @@ import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -139,6 +140,12 @@ public class AmqpMessageConsumer {
         } catch (IOException e) {
             log.error("Unable to deserialize Errata message, this is unexpected", e);
             return nackAndSave(message, requestEvent, e);
+        } catch (ApplicationException exc) {
+            log.error("Received error while handing request '{}': {}", requestEvent.getId(), exc.getMessage());
+            return nackAndSave(message, requestEvent, exc);
+        } catch (RuntimeException exc) {
+            log.error("Received error while handing request '{}'", requestEvent.getId(), exc);
+            return nackAndSave(message, requestEvent, exc);
         }
 
         return ackAndSave(message, requestEvent);
@@ -188,6 +195,12 @@ public class AmqpMessageConsumer {
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize PNC message, this is unexpected", e);
             return nackAndSave(message, requestEvent, e);
+        } catch (ApplicationException exc) {
+            log.error("Received error while handing request '{}': {}", requestEvent.getId(), exc.getMessage());
+            return nackAndSave(message, requestEvent, exc);
+        } catch (RuntimeException exc) {
+            log.error("Received error while handing request '{}'", requestEvent.getId(), exc);
+            return nackAndSave(message, requestEvent, exc);
         }
 
         return ackAndSave(message, requestEvent);

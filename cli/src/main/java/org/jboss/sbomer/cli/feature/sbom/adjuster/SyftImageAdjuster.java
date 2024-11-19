@@ -541,7 +541,8 @@ public class SyftImageAdjuster implements Adjuster {
         }
 
         if (component.getExternalReferences() != null) {
-            component.getExternalReferences().removeIf(er -> !Strings.isEmpty(er.getUrl()) && !UriValidator.isUriValid(er.getUrl()));
+            component.getExternalReferences()
+                    .removeIf(er -> !Strings.isEmpty(er.getUrl()) && !UriValidator.isUriValid(er.getUrl()));
         }
 
         if (component.getComponents() != null && !component.getComponents().isEmpty()) {
