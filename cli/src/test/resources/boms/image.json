@@ -7928,10 +7928,14 @@
       "cpe": "cpe:2.3:a:regenerator-runtime:regenerator-runtime:0.13.4:*:*:*:*:*:*:*",
       "purl": "pkg:npm/regenerator-runtime@0.13.4",
       "externalReferences": [
-        {
-          "url": "https://github.com/facebook/regenerator/tree/master/packages/regenerator-runtime",
-          "type": "distribution"
-        }
+          {
+              "url": "https://github.com/facebook/regenerator/tree/master/packages/regenerator-runtime",
+              "type": "distribution"
+          },
+          {
+              "url": "https://github.com:facebook/regenerator/tree/master/packages/regenerator-runtime",
+              "type": "vcs"
+          }
       ],
       "properties": [
         {
