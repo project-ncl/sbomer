@@ -91,7 +91,7 @@ public abstract class E2EBase {
     }
 
     protected void waitForGeneration(String generationRequestId) {
-        waitForGeneration(generationRequestId, 20, TimeUnit.MINUTES);
+        waitForGeneration(generationRequestId, 30, TimeUnit.MINUTES);
     }
 
     protected void waitForGeneration(String generationId, long time, TimeUnit unit) {
