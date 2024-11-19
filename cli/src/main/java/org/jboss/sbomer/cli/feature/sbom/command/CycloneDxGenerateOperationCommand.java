@@ -196,6 +196,9 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         Map<String, Dependency> purl256ToDependencies = new HashMap<>();
         Map<String, Dependency> pathToDependencies = new TreeMap<>();
 
+        purlToComponents.put(distributionPurl, mainComponent);
+        purl256ToDependencies.put(distributionPurl, mainDependency);
+
         for (AnalyzedArtifact artifact : artifactsToManifest) {
             // Create the component if not already created (e.g. the same pom can be a plain .pom or embedded as
             // pom.xml)
