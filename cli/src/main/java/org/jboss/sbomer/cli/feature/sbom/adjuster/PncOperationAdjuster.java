@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Dependency;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,18 @@ public class PncOperationAdjuster implements Adjuster {
             } catch (GeneratorException e) {
                 log.warn("Could not generate serialNumber out of the manifest content, setting random UUID");
                 bom.setSerialNumber(UUID.randomUUID().toString());
+            }
+        }
+
+        // Remove the dependencies which depends on the same parent bom-ref (SBOMER-245)
+        if (bom.getDependencies() != null) {
+            for (Dependency dependency : bom.getDependencies()) {
+                String parentRef = dependency.getRef();
+
+                // Get the dependsOn list and remove entries that match the parent ref
+                if (dependency.getDependencies() != null && !dependency.getDependencies().isEmpty()) {
+                    dependency.getDependencies().removeIf(dependRef -> dependRef.getRef().equals(parentRef));
+                }
             }
         }
 
