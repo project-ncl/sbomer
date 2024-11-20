@@ -98,7 +98,7 @@ public class TektonResourceUtils {
 
     /**
      * Fetches configured compute resource values for a given generator.
-     * 
+     *
      * @param generatorType
      * @param type
      * @param target

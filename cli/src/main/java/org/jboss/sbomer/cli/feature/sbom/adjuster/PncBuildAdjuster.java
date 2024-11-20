@@ -19,10 +19,13 @@ package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Dependency;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +51,28 @@ public class PncBuildAdjuster implements Adjuster {
             }
         }
 
+        cleanDependsOn(bom);
+
         return bom;
     }
+
+    private void cleanDependsOn(Bom bom) {
+        // SBOMER-236 - Dependency reference does not exist in the BOM
+        if (bom.getDependencies() == null || bom.getDependencies().isEmpty()) {
+            return;
+        }
+
+        Set<String> validRefs = new HashSet<>();
+        for (Dependency dependency : bom.getDependencies()) {
+            validRefs.add(dependency.getRef());
+        }
+
+        // Iterate through the dependencies and clean their "dependsOn" lists if it contains invalid refs
+        for (Dependency dependency : bom.getDependencies()) {
+            if (dependency.getDependencies() != null && !dependency.getDependencies().isEmpty()) {
+                dependency.getDependencies().removeIf(dependRef -> !validRefs.contains(dependRef.getRef()));
+            }
+        }
+    }
+
 }

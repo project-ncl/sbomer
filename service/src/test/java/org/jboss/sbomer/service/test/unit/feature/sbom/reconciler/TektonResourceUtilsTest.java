@@ -60,12 +60,14 @@ public class TektonResourceUtilsTest {
         when(
                 mockConfig.getOptionalValue(
                         "sbomer.generator.containerimage.tekton.resources.requests.memory",
-                        String.class)).thenReturn(Optional.of("100Mi"));
+                        String.class))
+                .thenReturn(Optional.of("100Mi"));
 
         when(
                 mockConfig.getOptionalValue(
                         "sbomer.generator.containerimage.tekton.resources.limits.memory",
-                        String.class)).thenReturn(Optional.of("200Mi"));
+                        String.class))
+                .thenReturn(Optional.of("200Mi"));
 
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withName("taskrun-name")
@@ -105,13 +107,15 @@ public class TektonResourceUtilsTest {
         when(
                 mockConfig.getOptionalValue(
                         "sbomer.generator.containerimage.tekton.resources.requests.memory",
-                        String.class)).thenReturn(Optional.of("100Mi"));
+                        String.class))
+                .thenReturn(Optional.of("100Mi"));
 
         // This is the failing one
         when(
                 mockConfig.getOptionalValue(
                         "sbomer.generator.containerimage.tekton.resources.limits.memory",
-                        String.class)).thenReturn(Optional.of("2garbage00Mi"));
+                        String.class))
+                .thenReturn(Optional.of("2garbage00Mi"));
 
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withName("taskrun-name")
