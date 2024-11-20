@@ -29,7 +29,8 @@ mp:
     incoming:
       errata:
         port: ${UMB_BROKER_PORT}
-        address: Consumer.sbomer-${APP_ENV}.sbomer-${SBOMER_DEPLOYMENT_TYPE-${SBOMER_DEPLOYMENT_TARGET}-${SBOMER_DEPLOYMENT_ZONE}.${SBOMER_CONSUMER_ERRATA_TOPIC_SUFFIX}
+        # This is useful for dev, for prod correct value is provided with MP_ env variables
+        address: ${SBOMER_CONSUMER_ERRATA_TOPIC}
         host: "${UMB_BROKER_HOST}"
         connector: smallrye-amqp
         enabled: ${sbomer.features.umb.enabled}
@@ -37,7 +38,8 @@ mp:
         failure-strategy: reject
       builds:
         port: ${UMB_BROKER_PORT}
-        address: Consumer.sbomer-${APP_ENV}.sbomer-${SBOMER_DEPLOYMENT_TYPE-${SBOMER_DEPLOYMENT_TARGET}-${SBOMER_DEPLOYMENT_ZONE}.${SBOMER_CONSUMER_PNC_TOPIC_SUFFIX}
+        # This is useful for dev, for prod correct value is provided with MP_ env variables
+        address: ${SBOMER_CONSUMER_PNC_TOPIC}
         host: "${UMB_BROKER_HOST}"
         connector: smallrye-amqp
         enabled: ${sbomer.features.umb.enabled}
