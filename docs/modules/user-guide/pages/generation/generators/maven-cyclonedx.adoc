@@ -20,7 +20,7 @@ version: "[VERSION]"
 
 [source,console]
 ----
---batch-mode
+--batch-mode -DschemaVersion=1.4
 ----
 
 *Custom arguments*
@@ -30,7 +30,7 @@ information on what other options can be passed to the tool.
 
 === `version`
 
-Default version: `2.7.9`.
+Default version: `2.9.0`.
 
 == Execution
 

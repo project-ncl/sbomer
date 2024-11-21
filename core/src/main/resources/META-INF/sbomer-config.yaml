@@ -25,13 +25,13 @@ sbomer:
         default-version: "0.0.107"
         default-args: "--warn-on-missing-scm --legacy-scm-locator"
       maven-cyclonedx:
-        default-version: "2.7.9"
-        default-args: "--batch-mode"
+        default-version: "2.9.0"
+        default-args: "--batch-mode -DschemaVersion=1.4"
       gradle-cyclonedx:
-        default-version: "1.7.4"
+        default-version: "1.10.0"
         default-args: "-info"
       nodejs-cyclonedx:
-        default-version: "1.16.1"
+        default-version: "1.19.3"
         default-args: "--package-lock-only --omit dev --short-PURLs"
       cyclonedx-operation:
         default-version: " "
