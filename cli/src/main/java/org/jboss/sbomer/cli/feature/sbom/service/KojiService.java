@@ -217,6 +217,12 @@ public class KojiService {
             return null;
         }
         KojiRpmInfo rpmInfo = rpm.get(0);
+        // It could happen that the returned RPM info is null.
+        if (rpmInfo == null) {
+            log.debug("No results found");
+            return null;
+        }
+
         if (rpm.size() > 1) {
             log.warn("Multiple RPMs {} found in Brew, this should not happen. Did Kojiji have a breaking change" +
                     " update? Selected the first one {}", nvra, rpmInfo.getId());
@@ -250,7 +256,7 @@ public class KojiService {
         if (builds.size() == 1) {
             KojiBuildInfo buildInfo = builds.get(0);
 
-            // It could happen that the returned build infor is null.
+            // It could happen that the returned build info is null.
             if (buildInfo == null) {
                 log.debug("No results found");
                 return null;
