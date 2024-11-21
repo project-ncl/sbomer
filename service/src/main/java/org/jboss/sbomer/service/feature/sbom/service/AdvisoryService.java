@@ -47,12 +47,11 @@ import org.jboss.sbomer.service.feature.sbom.errata.ErrataNotesSchemaValidator;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata.Details;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.Build;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -129,15 +128,10 @@ public class AdvisoryService {
             return Collections.emptyList();
         }
 
-        if (ErrataStatus.QE.equals(erratum.getDetails().get().getStatus())) {
-            return handleTextOnlyQEAdvisory(requestEvent, erratum);
-        } else {
-            log.warn("** TODO ** Handle the SHIPPED-LIVE Text-Only advisories");
-            throw new ClientException("Text-Only Errata advisories with SHIPPED-LIVE are not handled yet. Stay tuned!");
-        }
+        return doHandleTextOnlyAdvisory(requestEvent, erratum);
     }
 
-    private Collection<SbomGenerationRequest> handleTextOnlyQEAdvisory(RequestEvent requestEvent, Errata erratum) {
+    private Collection<SbomGenerationRequest> doHandleTextOnlyAdvisory(RequestEvent requestEvent, Errata erratum) {
 
         Optional<JsonNode> maybeNotes = erratum.getNotesMapping();
         if (maybeNotes.isEmpty()) {
@@ -206,16 +200,11 @@ public class AdvisoryService {
                     details.getContentTypes());
         }
 
-        if (ErrataStatus.QE.equals(details.getStatus())) {
-            return handleStandardQEAdvisory(requestEvent, details);
-        } else {
-            log.warn("** TODO ** Handle the SHIPPED-LIVE standard advisories");
-            throw new ClientException("Standard advisories with SHIPPED-LIVE are not handled yet. Stay tuned!");
-        }
+        return doHandleStandardAdvisory(requestEvent, details);
     }
 
-    private Collection<SbomGenerationRequest> handleStandardQEAdvisory(RequestEvent requestEvent, Details details) {
-        log.debug("Handle standard QE Advisory {}", details);
+    private Collection<SbomGenerationRequest> doHandleStandardAdvisory(RequestEvent requestEvent, Details details) {
+        log.debug("Handle standard Advisory {}", details);
 
         if (details.getContentTypes().stream().noneMatch(type -> type.equals("docker") || type.equals("rpm"))) {
             throw new ApplicationException(
