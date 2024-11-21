@@ -37,3 +37,15 @@
       generator:
         type: maven-domino
         args: "--warn-on-missing-scm --legacy-scm-locator"
+"283":
+  type: pnc-build
+  products:
+    - processors:
+        - type: redhat-product
+          errata:
+            productName: TESTPRODUCTNAME
+            productVersion: TESTPRODUCTVERSION
+            productVariant: TESTPRODUCTVARIANT
+      generator:
+        type: maven-domino
+        args: "--warn-on-missing-scm --legacy-scm-locator"
