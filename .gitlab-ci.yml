@@ -163,19 +163,23 @@ build-image-ui:
 
 pages:
   image:
-    name: registry.access.redhat.com/ubi9@sha256:2bae9062eddbbc18e76555972e7026ffe02cef560a0076e6d7f72bed2c05723f
+    name: registry.redhat.io/ubi9/nodejs-20-minimal@sha256:757c8a7add8f812afb9ca3bad63da5d38b2ddb4705c53f84301edf10eff1f831
     entrypoint: [""]
   variables:
     KUBERNETES_CPU_REQUEST: "100m"
-    KUBERNETES_CPU_LIMIT: "100m"
+    KUBERNETES_CPU_LIMIT: "300m"
     KUBERNETES_MEMORY_REQUEST: "256Mi"
-    KUBERNETES_MEMORY_LIMIT: "256Mi"
+    KUBERNETES_MEMORY_LIMIT: "512Mi"
   stage: build
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  before_script:
+    - npm ci --cache .npm --prefer-offline
   script:
-    - dnf install -y --setopt=tsflags=nodocs make gcc-c++
-    - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-    - export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" --no-use
-    - nvm install v18
     - npm install --global yarn
     - yarn install --frozen-lockfile --no-progress
     - >
@@ -185,6 +189,7 @@ pages:
     paths:
       - public
   rules:
+    # - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 deploy:
