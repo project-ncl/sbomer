@@ -12,13 +12,16 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Property;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.BeforeEach;
@@ -236,6 +239,53 @@ public class SyftImageAdjusterTest {
         assertEquals(21, getExternalReferenceStream(adjusted).count());
         assertFalse(getExternalReferenceStream(adjusted).anyMatch(r -> badUrl.endsWith(r.getUrl())));
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+    }
+
+    @Test
+    void shouldAdjustVendorAndPublisher() throws IOException {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath());
+
+        Optional<Property> bogusVendor = bom.getMetadata()
+                .getProperties()
+                .stream()
+                .filter(property -> "syft:image:labels:vendor".equals(property.getName()))
+                .findFirst();
+        assertTrue(bogusVendor.isPresent());
+        assertEquals("Red Hat, Inc.", bogusVendor.get().getValue());
+
+        Optional<Component> bogusComponent = bom.getComponents()
+                .stream()
+                .filter(
+                        component -> "pkg:rpm/redhat/alternatives@1.20-2.el9?arch=x86_64&upstream=chkconfig-1.20-2.el9.src.rpm&distro=rhel-9.2"
+                                .equals(component.getPurl()))
+                .findFirst();
+        assertTrue(bogusComponent.isPresent());
+        assertEquals("Red Hat, Inc.", bogusComponent.get().getPublisher());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        Optional<Property> oldVendor = adjusted.getComponents()
+                .get(0)
+                .getProperties()
+                .stream()
+                .filter(property -> "syft:image:labels:vendor".equals(property.getName()))
+                .findFirst();
+        assertFalse(oldVendor.isPresent());
+
+        Optional<Property> goodVendor = adjusted.getComponents()
+                .get(0)
+                .getProperties()
+                .stream()
+                .filter(property -> "sbomer:image:labels:vendor".equals(property.getName()))
+                .findFirst();
+        assertTrue(bogusVendor.isPresent());
+        assertEquals("Red Hat", goodVendor.get().getValue());
+
+        Optional<Component> goodComponent = adjusted.getComponents()
+                .stream()
+                .filter(component -> "Red Hat, Inc.".equals(component.getPublisher()))
+                .findFirst();
+        assertFalse(goodComponent.isPresent());
     }
 
     private Stream<ExternalReference> getExternalReferenceStream(Bom bom) {

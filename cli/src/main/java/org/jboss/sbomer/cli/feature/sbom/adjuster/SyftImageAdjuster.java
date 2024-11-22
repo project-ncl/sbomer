@@ -32,6 +32,7 @@ import org.cyclonedx.model.Property;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.cli.feature.sbom.utils.UriValidator;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -134,6 +135,9 @@ public class SyftImageAdjuster implements Adjuster {
 
         // Populate dependencies section with components
         adjustDependencies(bom);
+
+        // Adjust the publisher name
+        adjustPublisher(bom);
 
         return bom;
     }
@@ -283,6 +287,51 @@ public class SyftImageAdjuster implements Adjuster {
         bom.getComponents().forEach(c -> adjustProperties(c.getProperties()));
 
         log.info("Properties adjusted!");
+    }
+
+    /**
+     * <p>
+     * Adjust publisher name for Red Hat components.
+     * </p>
+     *
+     * <p>
+     * If the publisher is set to "Red Hat, Inc.", update it to "Red Hat" for consistency
+     * </p>
+     *
+     * <p>
+     * Adjusts any values in the main component as well as for each component found in the component list (recursively).
+     * See {@link SyftImageAdjuster#adjustPublisher(List)}.
+     * </p>
+     *
+     * @param bom The manifest to adjust the properties of.
+     * @see SyftImageAdjuster#adjustPublisher(List)
+     */
+    private void adjustPublisher(Bom bom) {
+        log.info("Adjusting manifest publisher...");
+
+        if (bom == null) {
+            return;
+        }
+
+        // Adjust the publisher for the main component
+        Component mainComponent = bom.getMetadata() != null ? bom.getMetadata().getComponent() : null;
+        adjustComponentPublisher(mainComponent);
+
+        // Adjust the publisher for all components in the BOM
+        if (bom.getComponents() != null) {
+            bom.getComponents().forEach(component -> adjustComponentPublisher(component));
+        }
+    }
+
+    private void adjustComponentPublisher(Component component) {
+        if (component == null) {
+            return;
+        }
+
+        String currentPublisher = component.getPublisher();
+        if (currentPublisher != null && "Red Hat, Inc.".equals(currentPublisher)) {
+            component.setPublisher(Constants.PUBLISHER);
+        }
     }
 
     /**
@@ -462,6 +511,14 @@ public class SyftImageAdjuster implements Adjuster {
             return !supportedProp;
         });
 
+        properties.stream()
+                .filter(property -> "sbomer:image:labels:vendor".equals(property.getName()))
+                .findFirst()
+                .ifPresent(property -> {
+                    if ("Red Hat, Inc.".equals(property.getValue())) {
+                        property.setValue(Constants.SUPPLIER_NAME);
+                    }
+                });
     }
 
     /**
