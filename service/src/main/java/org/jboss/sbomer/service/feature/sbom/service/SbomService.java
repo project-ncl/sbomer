@@ -33,6 +33,7 @@ import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ValidationException;
+import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -314,6 +315,7 @@ public class SbomService {
     }
 
     @WithSpan
+    @Transactional
     public SbomGenerationRequest generateNewOperation(RequestEvent requestEvent, DeliverableAnalysisConfig config) {
         log.debug("Validating provided configuration...");
 
@@ -323,17 +325,18 @@ public class SbomService {
             throw new ValidationException("Provided 'analysis' configuration is not valid", result.getErrors());
         }
         log.info(
-                "New deliverable analysis operation request for milestone '{}' and urls '{}' ...",
+                "Requesting new deliverable analysis operation for milestone '{}' and urls '{}' ...",
                 config.getMilestoneId(),
                 config.getDeliverableUrls());
 
         // Trigger an analysis operation in PNC
         DeliverableAnalyzerOperation operation = doAnalyzeDeliverables(config);
-
-        log.debug("Creating GenerationRequest Kubernetes resource...");
+        log.debug(
+                "Deliverable analysis operation '{}' successfully triggered at {}",
+                operation.getId(),
+                operation.getStartTime());
 
         // Create a ProductConfig
-
         RedHatProductProcessorConfig redHatProductProcessorConfig = null;
 
         if (config.getErrata() != null) {
@@ -366,20 +369,30 @@ public class SbomService {
                     operationConfigValidationRes.getErrors());
         }
 
-        GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
-                .withIdentifier(operation.getId())
-                .withStatus(SbomGenerationStatus.NO_OP)
-                .build();
+        // Generate a NO-OP generation to be reused later
+        String configData = null;
         try {
-            req.setConfig(ObjectMapperProvider.yaml().writeValueAsString(operationConfig));
+            configData = ObjectMapperProvider.yaml().writeValueAsString(operationConfig);
         } catch (JsonProcessingException e) {
             throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
         }
 
-        // We actually do not need to create the ConfigMap because it would be a no-operation anyway. We can only
-        // create the placeholder inside the DB with the metadata and wait for the UMB message once the deliverable
-        // analysis from PNC finishes.
-        return SbomGenerationRequest.sync(requestEvent, req);
+        RequestEvent dbRequestEvent = RequestEvent.findById(requestEvent.getId());
+        if (dbRequestEvent == null) {
+            dbRequestEvent = requestEvent.save();
+        }
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
+                .withId(RandomStringIdGenerator.generate())
+                .withIdentifier(operation.getId())
+                .withType(GenerationRequestType.OPERATION)
+                .withStatus(SbomGenerationStatus.NO_OP)
+                .withConfig(Config.fromString(configData))
+                .withRequest(dbRequestEvent)
+                .build();
+
+        // Store it in the database
+        sbomGenerationRequest.persistAndFlush();
+        return sbomGenerationRequest;
     }
 
     /**
