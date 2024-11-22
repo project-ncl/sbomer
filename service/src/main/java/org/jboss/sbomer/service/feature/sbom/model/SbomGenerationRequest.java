@@ -20,7 +20,6 @@ package org.jboss.sbomer.service.feature.sbom.model;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
@@ -37,7 +36,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -109,7 +107,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_generationrequest_request"))
     private RequestEvent request;
 
@@ -123,6 +121,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
      */
     @Transactional
     public static SbomGenerationRequest sync(RequestEvent request, GenerationRequest generationRequest) {
+
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.findById(generationRequest.getId()); // NOSONAR
 
         // Create the entity if it's not there
@@ -150,7 +149,10 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         // If the request is null (e.g. sync called from the controllers) do not override it
         if (request != null) {
             RequestEvent dbRequestEvent = RequestEvent.findById(request.getId());
-            sbomGenerationRequest.setRequest(Optional.ofNullable(dbRequestEvent).orElse(request));
+            if (dbRequestEvent == null) {
+                dbRequestEvent = request.save();
+            }
+            sbomGenerationRequest.setRequest(dbRequestEvent);
         }
 
         // Store it in the database
@@ -171,6 +173,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
      * @param generationRequest
      * @return Updated {@link SbomGenerationRequest} entity
      */
+    @Transactional
     public static SbomGenerationRequest sync(GenerationRequest generationRequest) {
         return sync(null, generationRequest);
     }

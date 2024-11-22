@@ -26,12 +26,13 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY
 
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.SecurityContext;
@@ -45,7 +46,6 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
 import org.yaml.snakeyaml.parser.ParserException;
 
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanContext;
 
 @Slf4j
 public class RestUtils {
@@ -111,6 +111,7 @@ public class RestUtils {
      * @param requestContext the container request context
      * @return the request object
      */
+    @Transactional(value = TxType.REQUIRES_NEW)
     public static RequestEvent createRequestFromRestEvent(
             RequestConfig requestConfig,
             ContainerRequestContext requestContext,
@@ -137,6 +138,6 @@ public class RestUtils {
                 EVENT_KEY_REST_SPAN_ID,
                 spanId);
 
-        return RequestEvent.createNew(requestConfig, RequestEventType.REST, event);
+        return RequestEvent.createNew(requestConfig, RequestEventType.REST, event).save();
     }
 }
