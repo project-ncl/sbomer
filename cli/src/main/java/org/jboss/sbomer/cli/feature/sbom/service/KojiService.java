@@ -224,11 +224,14 @@ public class KojiService {
         }
 
         if (rpm.size() > 1) {
-            log.warn("Multiple RPMs {} found in Brew, this should not happen. Did Kojiji have a breaking change" +
-                    " update? Selected the first one {}", nvra, rpmInfo.getId());
+            log.warn(
+                    "Multiple RPMs {} found in Brew, this should not happen. Did Kojiji have a breaking change"
+                            + " update? Selected the first one {}",
+                    nvra,
+                    rpmInfo.getId());
         }
 
-        if(rpmInfo.getBuildId() == null){
+        if (rpmInfo.getBuildId() == null) {
             log.debug("RPM {} does not have assigned build", rpmInfo.getId());
             return null;
         }

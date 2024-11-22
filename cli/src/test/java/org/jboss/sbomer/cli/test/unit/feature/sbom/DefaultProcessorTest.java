@@ -97,8 +97,7 @@ public class DefaultProcessorTest {
         buildConfig.setKojiWebURL(new URL("https://koji.web"));
 
         when(kojiServiceMock.getConfig()).thenReturn(buildConfig);
-        when(kojiServiceMock.findBuildByRPM(eq("audit-libs-3.0.7-103.el9.x86_64")))
-                .thenReturn(kojiBuildInfo);
+        when(kojiServiceMock.findBuildByRPM(eq("audit-libs-3.0.7-103.el9.x86_64"))).thenReturn(kojiBuildInfo);
 
         DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
 
@@ -107,9 +106,11 @@ public class DefaultProcessorTest {
 
         assertEquals(192, processed.getComponents().size());
 
-        Component rpmComponent = processed.getComponents().stream()
+        Component rpmComponent = processed.getComponents()
+                .stream()
                 .filter(c -> "pkg:rpm/redhat/audit-libs@3.0.7-103.el9?arch=x86_64".equals(c.getPurl()))
-                .findFirst().orElseThrow();
+                .findFirst()
+                .orElseThrow();
 
         assertNotNull(rpmComponent.getSupplier());
         assertEquals("Red Hat", rpmComponent.getSupplier().getName());
