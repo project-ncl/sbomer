@@ -313,8 +313,9 @@ class ErrataNotificationHandlerTest {
                 .collect(Collectors.toSet());
 
         // Check that both sets are equal
-        assertTrue(
-                fieldsExpectedSet.equals(fieldsResultSet),
+        assertEquals(
+                fieldsExpectedSet,
+                fieldsResultSet,
                 "The collections do not contain the same elements based on the specified fields.");
     }
 

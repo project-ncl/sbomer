@@ -1,6 +1,6 @@
 package org.jboss.sbomer.service.test.unit.feature.sbom.atlas;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -95,9 +95,9 @@ class AtlasHandlerTest {
 
         doThrow(new ClientException("A reason")).when(atlasBuildClient).upload(anyString(), any(JsonNode.class));
 
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            atlasHandler.publishBuildManifests(List.of(sbom));
-        });
+        ApplicationException ex = assertThrows(
+                ApplicationException.class,
+                () -> atlasHandler.publishBuildManifests(List.of(sbom)));
 
         verify(atlasBuildClient, times(1)).upload(eq("pkg:maven/compA@1.1.0?type=pom"), any(JsonNode.class));
 
