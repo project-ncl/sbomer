@@ -79,7 +79,7 @@ public class CachingKerberosClientSupport {
     private final String realKeytabPath;
 
     @Inject
-    private TicketCache ticketCache;
+    TicketCache ticketCache;
 
     @Inject
     public CachingKerberosClientSupport(
