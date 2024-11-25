@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
@@ -59,7 +60,7 @@ class RequestEventRepositoryIT {
         assertEquals(RequestEventType.UMB, requestEvent.getEventType());
 
         RequestConfig config = requestEvent.getRequestConfig();
-        assertTrue(config instanceof ErrataAdvisoryRequestConfig);
+        assertInstanceOf(ErrataAdvisoryRequestConfig.class, config);
         assertEquals(ErrataAdvisoryRequestConfig.TYPE_NAME, config.getType());
 
         ErrataAdvisoryRequestConfig advisoryConfig = (ErrataAdvisoryRequestConfig) config;

@@ -127,7 +127,7 @@ class SBOMServiceTestIT {
                                     .build());
 
             assertEquals("416640206274228224", sbom.getId());
-            assertEquals(sbom.getRootPurl(), purl);
+            assertEquals(purl, sbom.getRootPurl());
         }
     }
 }

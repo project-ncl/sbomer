@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -133,7 +134,7 @@ class PncBuildIT {
         requestEvent = RequestEvent.findById(requestEvent.getId());
         // Verify request config
         RequestConfig requestConfig = requestEvent.getRequestConfig();
-        assertTrue(requestConfig instanceof PncBuildRequestConfig);
+        assertInstanceOf(PncBuildRequestConfig.class, requestConfig);
         PncBuildRequestConfig pncBuildRequestConfig = (PncBuildRequestConfig) requestConfig;
         assertEquals("AX5TJMYHQAIAE", pncBuildRequestConfig.getBuildId());
 
@@ -189,7 +190,7 @@ class PncBuildIT {
 
         // Verify request config
         RequestConfig requestConfig = requestEvent.getRequestConfig();
-        assertTrue(requestConfig instanceof PncOperationRequestConfig);
+        assertInstanceOf(PncOperationRequestConfig.class, requestConfig);
         PncOperationRequestConfig pncOperationRequestConfig = (PncOperationRequestConfig) requestConfig;
         assertEquals("A6DFVW2SACIAA", pncOperationRequestConfig.getOperationId());
 
@@ -204,8 +205,8 @@ class PncBuildIT {
                 .readValue(msg, PncDelAnalysisNotificationMessageBody.class);
 
         // See "payloads/umb-pnc-del-analysis-body.json" file
-        assertEquals(operationMsgBody.getOperationId(), "A6DFVW2SACIAA");
-        assertEquals(operationMsgBody.getMilestoneId(), "2712");
+        assertEquals("A6DFVW2SACIAA", operationMsgBody.getOperationId());
+        assertEquals("2712", operationMsgBody.getMilestoneId());
     }
 
     @Test
