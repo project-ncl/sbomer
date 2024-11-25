@@ -18,6 +18,7 @@
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,7 +32,13 @@ public class PncBuildAdjuster extends AbstractAdjuster {
     @Override
     public Bom adjust(Bom bom) {
         addMissingSerialNumber(bom);
+        cleanupComponents(bom);
 
         return bom;
+    }
+
+    @Override
+    protected void cleanupComponent(Component component) {
+        cleanupExternalReferences(component.getExternalReferences());
     }
 }
