@@ -29,8 +29,6 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.Property;
-import org.jboss.pnc.common.Strings;
-import org.jboss.sbomer.cli.feature.sbom.utils.UriValidator;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
@@ -50,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
  * @see SyftImageConfig
  */
 @Slf4j
-public class SyftImageAdjuster implements Adjuster {
+public class SyftImageAdjuster extends AbstractAdjuster {
     /**
      * <p>
      * For non-RPM content, a list of paths within the container image for which when a component is found it will be
@@ -125,11 +123,7 @@ public class SyftImageAdjuster implements Adjuster {
         adjustProperties(bom);
         adjustNameAndPurl(bom, workDir);
 
-        // Cleanup main component
-        cleanupComponent(bom.getMetadata().getComponent());
-
-        // ...and all other components
-        cleanupComponents(bom.getComponents());
+        cleanupComponents(bom);
 
         adjustComponents(bom);
 
@@ -521,27 +515,8 @@ public class SyftImageAdjuster implements Adjuster {
                 });
     }
 
-    /**
-     * Adjusts all provided {@link Component}s according to our standards.
-     *
-     * @param components the components
-     */
-    private void cleanupComponents(List<Component> components) {
-        if (components == null) {
-            return;
-        }
-
-        for (Component component : components) {
-            cleanupComponent(component);
-        }
-    }
-
-    /**
-     * Adjusts the provided {@link Component} according to our standards.
-     *
-     * @param component
-     */
-    private void cleanupComponent(Component component) {
+    @Override
+    protected void cleanupComponent(Component component) {
         log.debug("Cleaning up component '{}'", component.getPurl());
 
         // Remove CPE, we don't use it now
@@ -597,15 +572,7 @@ public class SyftImageAdjuster implements Adjuster {
             }
         }
 
-        if (component.getExternalReferences() != null) {
-            component.getExternalReferences()
-                    .removeIf(er -> !Strings.isEmpty(er.getUrl()) && !UriValidator.isUriValid(er.getUrl()));
-        }
-
-        if (component.getComponents() != null && !component.getComponents().isEmpty()) {
-            component.getComponents().forEach(c -> cleanupComponent(c));
-        }
-
+        cleanupExternalReferences(component.getExternalReferences());
         log.debug("Component '{}' adjusted", component.getPurl());
     }
 }

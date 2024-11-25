@@ -17,14 +17,8 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.util.UUID;
-
-import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Dependency;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,20 +27,10 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public class PncOperationAdjuster implements Adjuster {
+public class PncOperationAdjuster extends AbstractAdjuster {
     @Override
     public Bom adjust(Bom bom) {
-        if (bom.getSerialNumber() == null || bom.getSerialNumber().isEmpty()) {
-            log.debug("Setting 'serialNumber' for manifest with purl '{}'", bom.getMetadata().getComponent().getPurl());
-
-            try {
-                String jsonContent = SbomUtils.toJson(bom);
-                bom.setSerialNumber("urn:uuid:" + UUID.nameUUIDFromBytes(jsonContent.getBytes(UTF_8)).toString());
-            } catch (GeneratorException e) {
-                log.warn("Could not generate serialNumber out of the manifest content, setting random UUID");
-                bom.setSerialNumber(UUID.randomUUID().toString());
-            }
-        }
+        addMissingSerialNumber(bom);
 
         // Remove the dependencies which depends on the same parent bom-ref (SBOMER-245)
         if (bom.getDependencies() != null) {
