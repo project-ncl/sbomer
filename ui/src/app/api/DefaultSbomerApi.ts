@@ -17,7 +17,7 @@
 ///
 
 import axios, { Axios, AxiosError } from 'axios';
-import { SbomerApi, SbomerGeneration, SbomerManifest, SbomerStats } from '../types';
+import { SbomerApi, SbomerGeneration, SbomerManifest, SbomerStats, SbomerRequest } from '../types';
 
 type Options = {
   baseUrl: string;
@@ -189,5 +189,34 @@ export class DefaultSbomerApi implements SbomerApi {
       });
 
     return request;
+  }
+
+  async getRequestEvents(pagination: {
+    pageSize: number;
+    pageIndex: number;
+  }): Promise<{ data: SbomerRequest[]; total: number }> {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1beta1/requests?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+    );
+
+    if (response.status != 200) {
+      const body = await response.text();
+
+      throw new Error(
+        'Failed fetching request events from SBOMer, got: ' + response.status + " response: '" + body + "'",
+      );
+    }
+
+    const data = await response.json();
+
+    const requests: SbomerRequest[] = [];
+
+    if (data.content) {
+      data.content.forEach((request: any) => {
+        requests.push(new SbomerRequest(request));
+      });
+    }
+
+    return { data: requests, total: data.totalHits };
   }
 }

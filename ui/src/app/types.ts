@@ -98,6 +98,81 @@ export class SbomerManifest {
   }
 }
 
+export class SbomerRequest {
+  public id: string;
+  public receivalTime: Date;
+  public eventType: string;
+  public requestConfig: string;
+  public requestConfigTypeName: string;
+  public requestConfigTypeValue: string;
+  public event: any;
+  public eventDestination: string;
+
+  constructor(payload: any) {
+    this.id = payload.id;
+    this.receivalTime = new Date(payload.receival_time);
+    this.eventType = payload.eventType;
+    
+    // Parse `request_config` if it exists
+    if (payload.requestConfig) {
+      try {
+        
+        this.requestConfig = JSON.stringify(payload.requestConfig);
+        var rConfig = JSON.parse(this.requestConfig); // Convert to JSON object
+        this.requestConfigTypeName = rConfig.type;
+
+        // Match the type and extract the value
+        switch (this.requestConfigTypeName) {
+          case 'errata-advisory':
+            this.requestConfigTypeValue = rConfig.advisoryId;
+            break;
+          case 'image':
+            this.requestConfigTypeValue = rConfig.image;
+            break;
+          case 'pnc-build':
+            this.requestConfigTypeValue = rConfig.buildId;
+            break;
+          case 'pnc-operation':
+            this.requestConfigTypeValue = rConfig.operationId;
+            break;
+          case 'pnc-analysis':
+            this.requestConfigTypeValue = rConfig.milestoneId;
+            break;
+          default:
+            this.requestConfigTypeName = '';
+            this.requestConfigTypeValue = '';
+        }
+      } catch (error) {
+        console.error('Failed to parse requestConfig:', error);
+        this.requestConfig = ''; // Set to null if parsing fails
+        this.requestConfigTypeName = '';
+        this.requestConfigTypeValue = '';
+      }
+    } else {
+      this.requestConfig = '';
+      this.requestConfigTypeName = '';
+      this.requestConfigTypeValue = '';
+    }
+
+    // Parse `request_config` if it exists
+    if (payload.event) {
+      try {
+        this.event = JSON.parse(JSON.stringify(payload.event)); // Convert to JSON object
+        this.eventDestination = this.event.destination;
+      } catch (error) {
+        console.error('Failed to parse event:', error);
+        this.event = null; // Set to null if parsing fails
+        this.eventDestination = '';
+      }
+    } else {
+      this.event = null; // Set to null if parsing fails
+      this.eventDestination = '';
+    }
+
+    this.event = payload.event;
+  }
+}
+
 export type GenerateParams = {
   config: string;
 };
@@ -118,4 +193,9 @@ export type SbomerApi = {
   getGeneration(id: string): Promise<SbomerGeneration>;
 
   getManifest(id: string): Promise<SbomerManifest>;
+
+  getRequestEvents(pagination: {
+    pageSize: number;
+    pageIndex: number;
+  }): Promise<{ data: SbomerRequest[]; total: number }>;
 };
