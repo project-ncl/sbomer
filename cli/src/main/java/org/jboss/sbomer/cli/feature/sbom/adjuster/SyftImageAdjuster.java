@@ -506,13 +506,15 @@ public class SyftImageAdjuster extends AbstractAdjuster {
         });
 
         properties.stream()
-                .filter(property -> "sbomer:image:labels:vendor".equals(property.getName()))
-                .findFirst()
-                .ifPresent(property -> {
+                .filter(
+                        property -> "sbomer:image:labels:vendor".equals(property.getName())
+                                || "sbomer:image:labels:maintainer".equals(property.getName()))
+                .forEach(property -> {
                     if ("Red Hat, Inc.".equals(property.getValue())) {
                         property.setValue(Constants.SUPPLIER_NAME);
                     }
                 });
+
     }
 
     @Override
