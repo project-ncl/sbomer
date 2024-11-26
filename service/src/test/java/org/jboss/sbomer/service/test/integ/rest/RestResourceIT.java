@@ -29,10 +29,10 @@ import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
-import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -475,6 +475,61 @@ class RestResourceIT {
                     .and()
                     .body("[0].status", CoreMatchers.is("NEW"));
         }
+
+        @Test
+        void testExistenceOfRequestEndpoint() {
+            Mockito.when(sbomService.searchRequestRecordsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
+            given().when()
+                    .get("/api/v1beta1/requests")
+                    .then()
+                    .statusCode(200)
+                    .body("content.id", CoreMatchers.hasItem("build_ARYT3LBXDVYAC"))
+                    .and()
+                    .body("content.id", CoreMatchers.hasItem("errata_139787"));
+        }
+
+        @Test
+        void testExistenceOfRequestEndpointWithRESTEvents() {
+            Mockito.when(sbomService.searchRequestRecordsByQueryPaginated(0, 50, null, null)).thenReturn(new Page<>());
+            given().when()
+                    .get("/api/v1beta1/requests?query=eventType=eq=REST")
+                    .then()
+                    .statusCode(200)
+                    .body("totalHits", CoreMatchers.is(1))
+                    .and()
+                    .body("content[0].id", CoreMatchers.is("build_ARYT3LBXDVYAC_rest"))
+                    .and()
+                    .body("content[0].eventType", CoreMatchers.is("REST"));
+        }
+
+        @Test
+        void testExistenceOfRequestEndpointWithErrataEventTypeEvents() throws IOException {
+
+            given().when()
+                    .get("/api/v1beta1/requests/pnc-build=ARYT3LBXDVYAC")
+                    .then()
+                    .log()
+                    .all(true)
+                    .statusCode(200)
+                    .body("[0].id", CoreMatchers.is("build_ARYT3LBXDVYAC"))
+                    .and()
+                    .body("[1].id", CoreMatchers.is("build_ARYT3LBXDVYAC_rest"))
+                    .and()
+                    .body("requestConfig.type", CoreMatchers.hasItem("pnc-build"))
+                    .and()
+                    .body("requestConfig.buildId", CoreMatchers.hasItem("ARYT3LBXDVYAC"))
+                    .and()
+                    .body("[0].manifests", Matchers.hasSize(1))
+                    .and()
+                    .body("[0].manifests[0].id", Matchers.equalTo("416640206274228224"))
+                    .and()
+                    .body("[0].manifests[0].id", Matchers.equalTo("416640206274228224"))
+                    .and()
+                    .body("[0].manifests[0].identifier", Matchers.equalTo("ARYT3LBXDVYAC"))
+                    .and()
+                    .body("[1].manifests", Matchers.nullValue());
+        }
+
     }
 
     /**

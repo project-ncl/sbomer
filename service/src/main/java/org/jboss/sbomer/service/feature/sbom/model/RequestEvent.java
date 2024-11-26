@@ -25,6 +25,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.config.request.RequestConfig;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.annotation.JsonInclude;

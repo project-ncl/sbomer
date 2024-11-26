@@ -30,6 +30,8 @@ import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1BaseBeta1RequestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ValidationException;
@@ -87,6 +89,9 @@ public class SbomService {
 
     @Inject
     SbomGenerationRequestRepository sbomRequestRepository;
+
+    @Inject
+    RequestEventRepository requestEventRepository;
 
     @Inject
     Validator validator;
@@ -162,6 +167,31 @@ public class SbomService {
         Long count = sbomRequestRepository.countByRsqlQuery(parameters.getRsqlQuery());
 
         return toPage(content, parameters, count);
+    }
+
+    @WithSpan
+    public Page<V1BaseBeta1RequestRecord> searchRequestRecordsByQueryPaginated(
+            @SpanAttribute(value = "pageIndex") int pageIndex,
+            @SpanAttribute(value = "pageSize") int pageSize,
+            @SpanAttribute(value = "rsqlQuery") String rsqlQuery,
+            @SpanAttribute(value = "sort") String sort) {
+
+        QueryParameters parameters = QueryParameters.builder()
+                .rsqlQuery(rsqlQuery)
+                .sort(sort)
+                .pageSize(pageSize)
+                .pageIndex(pageIndex)
+                .build();
+
+        List<V1BaseBeta1RequestRecord> content = requestEventRepository.searchRequestRecords(parameters);
+        Long count = requestEventRepository.countByRsqlQuery(parameters.getRsqlQuery());
+
+        return toPage(content, parameters, count);
+    }
+
+    @WithSpan
+    public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter) {
+        return requestEventRepository.searchAggregatedResultsNatively(filter);
     }
 
     /**
@@ -391,8 +421,7 @@ public class SbomService {
                 .build();
 
         // Store it in the database
-        sbomGenerationRequest.persistAndFlush();
-        return sbomGenerationRequest;
+        return sbomRequestRepository.save(sbomGenerationRequest);
     }
 
     /**

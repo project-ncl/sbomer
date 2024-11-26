@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
+import static org.jboss.sbomer.core.features.sbom.enums.RequestEventType.UMB;
 import static org.jboss.sbomer.core.features.sbom.enums.UMBConsumer.ERRATA;
 import static org.jboss.sbomer.core.features.sbom.enums.UMBConsumer.PNC;
 import static org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus.ACK;
@@ -28,23 +29,47 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.REQUEST_CONFIG_TYPE;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.REQUEST_EVENT_TYPE;
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEventType.UMB;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
+import org.jboss.sbomer.core.config.request.ImageRequestConfig;
+import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
+import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
+import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
+import org.jboss.sbomer.core.dto.v1beta1.V1BaseBeta1RequestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseGenerationRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseManifestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
+import org.jboss.sbomer.core.errors.ClientException;
+import org.jboss.sbomer.core.features.sbom.config.Config;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
-import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
+import org.jboss.sbomer.service.rest.QueryParameters;
+import org.jboss.sbomer.service.rest.criteria.CriteriaAwareRepository;
 
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.Query;
 
 @ApplicationScoped
-public class RequestEventRepository implements PanacheRepository<RequestEvent> {
+public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent> {
+
+    public RequestEventRepository() {
+        super(RequestEvent.class);
+    }
 
     private static final String BASE_COUNT_QUERY = "SELECT COUNT(*) FROM request";
     private static final String BASE_SELECT_QUERY = "SELECT * FROM request";
@@ -194,6 +219,10 @@ public class RequestEventRepository implements PanacheRepository<RequestEvent> {
         return ((Number) q.getSingleResult()).longValue();
     }
 
+    protected Instant convertFromTimestamp(Object rawTimeObject) {
+        return (Instant) rawTimeObject;
+    }
+
     private String getValueOfField(Class<? extends RequestConfig> configClass, String fieldName) {
         try {
             Field field = configClass.getDeclaredField(fieldName);
@@ -204,6 +233,150 @@ public class RequestEventRepository implements PanacheRepository<RequestEvent> {
                             + " field.",
                     e);
         }
+    }
+
+    public List<V1BaseBeta1RequestRecord> searchRequestRecords(QueryParameters parameters) {
+        return searchProjected(V1BaseBeta1RequestRecord.class, parameters, (query, builder, root) -> {
+            return query.select(
+                    builder.construct(
+                            V1BaseBeta1RequestRecord.class,
+                            root.get("id"),
+                            root.get("receivalTime"),
+                            root.get("eventType"),
+                            root.get("requestConfig"),
+                            root.get("event")));
+        });
+    }
+
+    private static final Set<String> ALLOWED_TYPE_KEYS = Set
+            .of("id", "errata-advisory", "image", "pnc-analysis", "pnc-build", "pnc-operation");
+
+    private static final Map<String, Class<? extends RequestConfig>> TYPE_TO_CONFIG_CLASS = Map.of(
+            "image",
+            ImageRequestConfig.class,
+            "errata-advisory",
+            ErrataAdvisoryRequestConfig.class,
+            "pnc-analysis",
+            PncAnalysisRequestConfig.class,
+            "pnc-operation",
+            PncOperationRequestConfig.class,
+            "pnc-build",
+            PncBuildRequestConfig.class);
+
+    public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter) {
+        if (filter == null || filter.isBlank()) {
+            throw new ClientException("Filter cannot be null or empty.");
+        }
+        String[] parameters = filter.split("=");
+        if (parameters.length != 2 || parameters[1] == null || parameters[1].isBlank()) {
+            throw new ClientException("Invalid filter format. Expected 'key=value'.");
+        }
+
+        String typeKey = parameters[0].trim();
+        String typeValue = parameters[1].trim();
+        if (!ALLOWED_TYPE_KEYS.contains(typeKey)) {
+            throw new ClientException("Unsupported typeKey '" + typeKey + "'. Allowed values: " + ALLOWED_TYPE_KEYS);
+        }
+
+        // Build the native SQL query
+        StringBuilder sb = new StringBuilder().append("SELECT ")
+                .append("re.id AS request_id, ")
+                .append("re.receival_time AS receival_time, ")
+                .append("re.event_type AS event_type, ")
+                .append("re.request_config AS request_config, ")
+                .append("re.event AS event, ")
+                .append("s.id AS sbom_id, ")
+                .append("s.identifier AS sbom_identifier, ")
+                .append("s.root_purl AS sbom_root_purl, ")
+                .append("s.creation_time AS sbom_creation_time, ")
+                .append("s.config_index AS sbom_config_index, ")
+                .append("s.status_msg AS sbom_status_msg, ")
+                .append("sgr.id AS generation_request_id, ")
+                .append("sgr.identifier AS generation_request_identifier, ")
+                .append("sgr.config AS generation_request_config, ")
+                .append("sgr.type AS generation_request_type, ")
+                .append("sgr.creation_time AS generation_request_creation_time ")
+                .append("FROM request re ")
+                .append("LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id ")
+                .append("LEFT JOIN sbom s ON sgr.id = s.generationrequest_id ");
+
+        Map<String, Object> params = filterAndBuildQueryParams(sb, typeKey, typeValue);
+        Query query = getEntityManager().createNativeQuery(sb.toString());
+        params.forEach(query::setParameter);
+
+        // Execute the query and fetch results
+        return aggregateResults(query.getResultList());
+    }
+
+    private Map<String, Object> filterAndBuildQueryParams(StringBuilder sb, String typeKey, String typeValue) {
+        if ("id".equals(typeKey)) {
+            sb.append("WHERE re.id = :id");
+            return Map.of("id", typeValue);
+        }
+
+        String identifierKey = getValueOfField(TYPE_TO_CONFIG_CLASS.get(typeKey), "IDENTIFIER_KEY");
+        addConfigCondition(sb, "WHERE", REQUEST_CONFIG_TYPE, "=");
+        addConfigCondition(sb, "AND", identifierKey, "=");
+        return Map.of(REQUEST_CONFIG_TYPE, typeKey, identifierKey, typeValue);
+    }
+
+    private List<V1Beta1RequestRecord> aggregateResults(List<Object[]> results) {
+
+        // Aggregate results into a Map for grouping by RequestEvent
+        Map<String, V1Beta1RequestRecord> aggregatedResults = new LinkedHashMap<>();
+
+        results.forEach(row -> {
+            String requestId = (String) row[0];
+            Instant receivalTime = convertFromTimestamp(row[1]);
+            RequestEventType eventType = RequestEventType.valueOf((String) row[2]);
+            RequestConfig requestConfig = RequestConfig.fromString((String) row[3], RequestConfig.class);
+            JsonNode event = SbomUtils.toJsonNode((String) row[4]);
+            String sbomId = (String) row[5];
+
+            if (sbomId != null) {
+                V1Beta1BaseManifestRecord manifest = new V1Beta1BaseManifestRecord(
+                        sbomId,
+                        (String) row[6],
+                        (String) row[7],
+                        convertFromTimestamp(row[8]),
+                        (Integer) row[9],
+                        (String) row[10],
+                        new V1Beta1BaseGenerationRecord(
+                                (String) row[11],
+                                (String) row[12],
+                                Config.fromString((String) row[13]),
+                                GenerationRequestType.valueOf((String) row[14]),
+                                convertFromTimestamp(row[15])));
+
+                aggregatedResults
+                        .computeIfAbsent(
+                                requestId,
+                                id -> new V1Beta1RequestRecord(
+                                        id,
+                                        receivalTime,
+                                        eventType,
+                                        requestConfig,
+                                        event,
+                                        new ArrayList<>()))
+                        .manifests()
+                        .add(manifest);
+            } else {
+                aggregatedResults.computeIfAbsent(
+                        requestId,
+                        id -> new V1Beta1RequestRecord(
+                                id,
+                                receivalTime,
+                                eventType,
+                                requestConfig,
+                                event,
+                                new ArrayList<>()));
+            }
+        });
+
+        return aggregatedResults.values()
+                .stream()
+                .sorted((record1, record2) -> record2.receivalTime().compareTo(record1.receivalTime()))
+                .toList();
     }
 
 }

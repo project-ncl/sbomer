@@ -824,6 +824,22 @@ public class SbomUtils {
     }
 
     /**
+     * Converts the given string into a {@link JsonNode} object.
+     *
+     * @param jsonString The string to convert
+     * @return {@link JsonNode} representation of the string.
+     */
+    public static JsonNode toJsonNode(String jsonString) {
+
+        try {
+            return ObjectMapperProvider.json().readTree(jsonString);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
      * Converts the given environment config {@link Map} into a {@link JsonNode} object.
      *
      * @param envConfig The environment config {@link Map} to convert
