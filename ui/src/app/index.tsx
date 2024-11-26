@@ -3,7 +3,6 @@ import '@patternfly/react-core/dist/styles/base.css';
 import * as React from 'react';
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 
-
 import { IAppRoute, routes } from './routes';
 
 const App = () => {

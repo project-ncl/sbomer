@@ -4,6 +4,7 @@ import { GenerationRequestPage } from './components/Pages/GenerationRequests/Gen
 import { GenerationRequestsPage } from './components/Pages/GenerationRequests/GenerationRequestsPage';
 import { ManifestPage } from './components/Pages/Manifests/ManifestPage';
 import { ManifestsPage } from './components/Pages/Manifests/ManifestsPage';
+import { RequestEventsPage } from './components/Pages/RequestEvents/RequestsEventsPage';
 import { NotFoundPage } from './components/Pages/NotFound/NotFoundPage';
 
 let routeFocusTimer: number;
@@ -52,6 +53,11 @@ const routes: AppRouteConfig[] = [
   {
     element: <ManifestPage />,
     path: '/manifests/:id',
+  },
+  {
+    element: <RequestEventsPage />,
+    label: 'Request Events',
+    path: '/requestevents',
   },
   {
     element: <NotFoundPage />,
