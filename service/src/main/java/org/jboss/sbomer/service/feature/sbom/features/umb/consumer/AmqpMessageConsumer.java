@@ -38,13 +38,13 @@ import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
-import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

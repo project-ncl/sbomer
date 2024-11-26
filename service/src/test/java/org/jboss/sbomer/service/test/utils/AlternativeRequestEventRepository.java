@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.test.utils;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
@@ -74,6 +76,12 @@ public class AlternativeRequestEventRepository extends RequestEventRepository {
                 .append(" :")
                 .append(property);
         return query;
+    }
+
+    @Override
+    protected Instant convertFromTimestamp(Object rawTimeObject) {
+        OffsetDateTime offsetDateTime = (OffsetDateTime) rawTimeObject;
+        return offsetDateTime.toInstant();
     }
 
 }

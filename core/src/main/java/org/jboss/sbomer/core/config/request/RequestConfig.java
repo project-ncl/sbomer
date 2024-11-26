@@ -19,6 +19,7 @@ package org.jboss.sbomer.core.config.request;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.util.Strings;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -59,6 +60,19 @@ public abstract class RequestConfig {
             return ObjectMapperProvider.json().writerWithDefaultPrettyPrinter().writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new ApplicationException("Cannot serialize configuration into a JSON string", e);
+        }
+    }
+
+    public static <T extends RequestConfig> T fromString(String value, Class<T> clazz) {
+        if (value == null || Strings.isEmpty(value)) {
+            return null;
+        }
+
+        try {
+            return ObjectMapperProvider.json().readValue(value.strip(), clazz);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 

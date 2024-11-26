@@ -41,8 +41,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.validator.engine.HibernateConstraintViolation;
 import org.jboss.sbomer.core.config.request.RequestConfig;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
-import org.jboss.sbomer.service.feature.sbom.model.RequestEventType;
 import org.yaml.snakeyaml.parser.ParserException;
 
 import io.opentelemetry.api.trace.Span;
