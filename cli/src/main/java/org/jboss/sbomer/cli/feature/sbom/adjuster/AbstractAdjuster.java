@@ -78,14 +78,13 @@ public abstract class AbstractAdjuster implements Adjuster {
      *
      * @param component
      */
-    protected void cleanupComponent(Component component){
+    protected void cleanupComponent(Component component) {
         log.debug("No cleanup done for {}", this.getClass());
     }
 
     protected void cleanupExternalReferences(List<ExternalReference> externalReferences) {
         if (externalReferences != null) {
-            externalReferences
-                .removeIf(er -> !Strings.isEmpty(er.getUrl()) && !UriValidator.isUriValid(er.getUrl()));
+            externalReferences.removeIf(er -> !Strings.isEmpty(er.getUrl()) && !UriValidator.isUriValid(er.getUrl()));
         }
     }
 }

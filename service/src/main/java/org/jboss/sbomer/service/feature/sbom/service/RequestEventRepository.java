@@ -248,19 +248,24 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         });
     }
 
-    private static final Set<String> ALLOWED_TYPE_KEYS = Set
-            .of("id", "errata-advisory", "image", "pnc-analysis", "pnc-build", "pnc-operation");
+    private static final Set<String> ALLOWED_TYPE_KEYS = Set.of(
+            "id",
+            ErrataAdvisoryRequestConfig.TYPE_NAME,
+            ImageRequestConfig.TYPE_NAME,
+            PncAnalysisRequestConfig.TYPE_NAME,
+            PncBuildRequestConfig.TYPE_NAME,
+            PncOperationRequestConfig.TYPE_NAME);
 
     private static final Map<String, Class<? extends RequestConfig>> TYPE_TO_CONFIG_CLASS = Map.of(
-            "image",
+            ImageRequestConfig.TYPE_NAME,
             ImageRequestConfig.class,
-            "errata-advisory",
+            ErrataAdvisoryRequestConfig.TYPE_NAME,
             ErrataAdvisoryRequestConfig.class,
-            "pnc-analysis",
+            PncAnalysisRequestConfig.TYPE_NAME,
             PncAnalysisRequestConfig.class,
-            "pnc-operation",
+            PncOperationRequestConfig.TYPE_NAME,
             PncOperationRequestConfig.class,
-            "pnc-build",
+            PncBuildRequestConfig.TYPE_NAME,
             PncBuildRequestConfig.class);
 
     public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter) {
