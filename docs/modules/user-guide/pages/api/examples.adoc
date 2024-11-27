@@ -58,12 +58,12 @@ $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \
 
 TIP: See xref:generation/configuration/pnc-analysis.adoc[PNC analysis configuration].
 
-Request manifest generation for following zips, storing the results under PNC miletone ID 0:
+Request manifest generation for following zips, storing the results under PNC milestone ID 1234:
 
 - https://download.host.com/staging/product-a/release-b/first.zip
 - https://download.host.com/staging/product-a/release-b/second.zip
 
-Please note that you must provide a valid PNC miletone ID or analysis will fail.
+Please note that you must provide a valid PNC milestone ID or analysis will fail.
 
 [source,console,subs="attributes+"]
 ----
@@ -71,7 +71,7 @@ $ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/generations \
   -H 'accept: application/json' -H 'Content-Type: application/json' \
   -d '{
   "type": "pnc-analysis",
-  "milestoneId": "0",
+  "milestoneId": "1234",
   "urls": [
     "https://download.host.com/staging/product-a/release-b/first.zip",
     "https://download.host.com/staging/product-a/release-b/second.zip"
