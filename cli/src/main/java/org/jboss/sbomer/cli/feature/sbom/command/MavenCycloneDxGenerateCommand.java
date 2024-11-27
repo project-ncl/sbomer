@@ -63,6 +63,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
         cmd.add(String.format("org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom", toolVersion()));
         cmd.add("-DoutputFormat=json");
         cmd.add("-DoutputName=bom");
+        cmd.add("-DschemaVersion=1.4");
 
         if (settingsXmlPath != null) {
             log.debug("Using provided Maven settings.xml configuration file located at '{}'", settingsXmlPath);
