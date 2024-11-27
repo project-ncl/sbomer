@@ -52,7 +52,7 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
         List<String> cmd = new ArrayList<>();
 
         cmd.add("cyclonedx-npm");
-        cmd.addAll(Arrays.asList("--output-format", "JSON", "--output-file", BOM_FILE_NAME));
+        cmd.addAll(Arrays.asList("--output-format", "JSON", "--spec-version", "1.4", "--output-file", BOM_FILE_NAME));
 
         cmd.addAll(Arrays.asList(generatorArgs().split(" ")));
 
