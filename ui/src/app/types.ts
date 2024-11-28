@@ -102,6 +102,8 @@ export class SbomerRequest {
   public id: string;
   public receivalTime: Date;
   public eventType: string;
+  public eventStatus: string;
+  public reason: string;
   public requestConfig: string;
   public requestConfigTypeName: string;
   public requestConfigTypeValue: string;
@@ -110,8 +112,10 @@ export class SbomerRequest {
 
   constructor(payload: any) {
     this.id = payload.id;
-    this.receivalTime = new Date(payload.receival_time);
+    this.receivalTime = new Date(payload.receivalTime);
     this.eventType = payload.eventType;
+    this.eventStatus = payload.eventStatus;
+    this.reason = payload.reason;
     
     // Parse `request_config` if it exists
     if (payload.requestConfig) {
