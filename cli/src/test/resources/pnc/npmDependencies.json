@@ -1,0 +1,143 @@
+[
+    {
+        "id": "2160610",
+        "identifier": "once:1.4.0",
+        "purl": "pkg:npm/once@1.4.0",
+        "artifactQuality": "IMPORTED",
+        "buildCategory": "STANDARD",
+        "md5": "fac2afc3cbe5e133d7a5c34ec3f862ac",
+        "sha1": "583b1aa775961d4b113ac17d9c50baef9dd76bd1",
+        "sha256": "cf51460ba370c698f68b976e514d113497339ba018b6003e8e8eb569c6fccfcf",
+        "filename": "once-1.4.0.tgz",
+        "deployPath": "/once/-/once-1.4.0.tgz",
+        "importDate": "2019-09-11T06:50:45.947Z",
+        "originUrl": "https://repository.example.com/nexus/repository/registry.npmjs.org/once/-/once-1.4.0.tgz",
+        "size": 1979,
+        "deployUrl": "https://indy-gateway.example.com/api/content/npm/hosted/shared-imports/once/-/once-1.4.0.tgz",
+        "publicUrl": "https://indy.example.com/api/content/npm/hosted/shared-imports/once/-/once-1.4.0.tgz",
+        "creationTime": null,
+        "modificationTime": null,
+        "qualityLevelReason": null,
+        "targetRepository": {
+            "id": "17150",
+            "temporaryRepo": false,
+            "identifier": "indy-npm",
+            "repositoryType": "NPM",
+            "repositoryPath": "/api/content/npm/hosted/shared-imports/"
+        },
+        "build": null,
+        "creationUser": null,
+        "modificationUser": null
+    },
+    {
+        "id": "6116934",
+        "identifier": "@redhat/kogito-tooling-keyboard-shortcuts:0.9.0-2",
+        "purl": "pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2",
+        "artifactQuality": "NEW",
+        "buildCategory": "STANDARD",
+        "md5": "b5c81fca09d16618cfd942923f4a7dd7",
+        "sha1": "3518b676be22b30c35be3b7c0ea1763906ef65c4",
+        "sha256": "8ff524ef30e4e6bd5dda25a3e347fd244b4ee106f751603867019871e34cabc5",
+        "filename": "kogito-tooling-keyboard-shortcuts-0.9.0-2.tgz",
+        "deployPath": "/@redhat/kogito-tooling-keyboard-shortcuts/-/kogito-tooling-keyboard-shortcuts-0.9.0-2.tgz",
+        "importDate": null,
+        "originUrl": null,
+        "size": 158593,
+        "deployUrl": "https://indy-gateway.example.com/api/content/npm/hosted/pnc-builds/@redhat/kogito-tooling-keyboard-shortcuts/-/kogito-tooling-keyboard-shortcuts-0.9.0-2.tgz",
+        "publicUrl": "https://indy.example.com/api/content/npm/hosted/pnc-builds/@redhat/kogito-tooling-keyboard-shortcuts/-/kogito-tooling-keyboard-shortcuts-0.9.0-2.tgz",
+        "creationTime": null,
+        "modificationTime": "2021-06-02T14:29:42.533Z",
+        "qualityLevelReason": null,
+        "targetRepository": {
+            "id": "25080",
+            "temporaryRepo": false,
+            "identifier": "indy-npm",
+            "repositoryType": "NPM",
+            "repositoryPath": "/api/content/npm/hosted/pnc-builds/"
+        },
+        "build": {
+            "id": "96015",
+            "submitTime": "2021-06-02T13:43:32.482Z",
+            "startTime": "2021-06-02T13:43:32.488Z",
+            "endTime": "2021-06-02T14:29:53.043Z",
+            "progress": "FINISHED",
+            "status": "SUCCESS",
+            "buildContentId": "build-96015",
+            "temporaryBuild": false,
+            "alignmentPreference": null,
+            "scmUrl": "http://git.example.com/gerrit/kiegroup/kogito-tooling.git",
+            "scmRevision": "88c1a77824c7bf0b636f24b4bde2b87c0b38d8a1",
+            "scmTag": "0.9.0",
+            "buildOutputChecksum": "5ac8ad0ab9b907d4280533bc1b9def22",
+            "lastUpdateTime": "2021-06-02T14:29:53.043Z",
+            "scmBuildConfigRevision": null,
+            "scmBuildConfigRevisionInternal": null,
+            "project": {
+                "id": "937",
+                "name": "kiegroup/kogito-tooling",
+                "description": null,
+                "issueTrackerUrl": null,
+                "projectUrl": null,
+                "engineeringTeam": null,
+                "technicalLeader": null
+            },
+            "scmRepository": {
+                "id": "953",
+                "internalUrl": "git@git.example.com:pnc-workspace/kiegroup/kogito-tooling.git",
+                "externalUrl": "https://github.com/kiegroup/kogito-tooling.git",
+                "preBuildSyncEnabled": true
+            },
+            "environment": {
+                "id": "107",
+                "name": "NodeJS 12; NPM 6; Git 2.24.1",
+                "description": "NodeJS 12; NPM 6; Git 2.24.1 [builder-rhel-7-nodejs12-git-2.24.1:1.0.2]",
+                "systemImageRepositoryUrl": "quay.io/rh-newcastle",
+                "systemImageId": "builder-rhel-7-nodejs12-git-2.24.1:1.0.2",
+                "attributes": {
+                    "OS": "Linux",
+                    "NPM": "6",
+                    "Nodejs": "12"
+                },
+                "systemImageType": "DOCKER_IMAGE",
+                "deprecated": false,
+                "hidden": false
+            },
+            "attributes": {
+                "BREW_BUILD_VERSION": "0.0.0",
+                "BREW_BUILD_NAME": "kogito-tooling",
+                "BUILD_ARCHIVED": "true",
+                "BUILD_OUTPUT_OK": "true"
+            },
+            "user": {
+                "id": "189",
+                "username": "emingora"
+            },
+            "buildConfigRevision": {
+                "id": "5405",
+                "rev": 2543874,
+                "name": "org.kie.kogito-tooling-0.9.0-DR1",
+                "buildScript": "npm deploy",
+                "scmRevision": "0.9.0",
+                "creationTime": "2021-04-23T05:34:19.106Z",
+                "modificationTime": "2021-06-02T13:42:22.052Z",
+                "buildType": "NPM",
+                "defaultAlignmentParams": "-DversioningStrategy=HYPHENED -DversionIncrementalSuffix=redhat",
+                "brewPullActive": true
+            },
+            "productMilestone": {
+                "id": "1160",
+                "version": "0.9.0",
+                "endDate": null,
+                "startingDate": "2021-03-31T12:00:00Z",
+                "plannedEndDate": "2021-04-29T12:00:00Z"
+            },
+            "groupBuild": null,
+            "noRebuildCause": null
+        },
+        "creationUser": null,
+        "modificationUser": {
+            "id": "189",
+            "username": "emingora"
+        }
+    }
+]

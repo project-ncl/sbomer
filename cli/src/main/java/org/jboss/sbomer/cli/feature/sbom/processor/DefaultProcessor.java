@@ -22,6 +22,9 @@ import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRON
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addHashIfMissing;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMrrc;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHash;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.hasExternalReference;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
@@ -31,21 +34,27 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPublisher;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setSupplier;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.updatePurl;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Property;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.enums.BuildType;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.PncBuildAdjuster;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -266,7 +275,103 @@ public class DefaultProcessor implements Processor {
         // If there are any purl relcoations, process these.
         purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
+        addMissingNpmDependencies(bom);
+
         return bom;
+    }
+
+    private void addMissingNpmDependencies(Bom bom) {
+        if (bom.getMetadata() == null || bom.getMetadata().getComponent() == null) {
+            // No main component
+            return;
+        }
+        Component component = bom.getMetadata().getComponent();
+        List<ExternalReference> externalReferences = getExternalReferences(component, ExternalReference.Type.BUILD_SYSTEM, SBOM_RED_HAT_PNC_BUILD_ID);
+        if (externalReferences.isEmpty()) {
+            // Not a PNC build
+            return;
+        }
+        if (externalReferences.size() > 1) {
+            log.warn("Component {} has more than one {}/{} external reference", component.getPurl(), ExternalReference.Type.BUILD_SYSTEM, SBOM_RED_HAT_PNC_BUILD_ID);
+            return;
+        }
+        String buildID = parseBuildIdFromURL(externalReferences.get(0).getUrl());
+        if (buildID == null) {
+            log.warn("Could not parse PNC build ID from url {}", externalReferences.get(0).getUrl());
+            return;
+        }
+        Build build = pncService.getBuild(buildID);
+        if (build == null) {
+            log.warn("Could not obtain PNC build for build id {}", buildID);
+            return;
+        }
+        if (build.getBuildConfigRevision().getBuildType() == BuildType.NPM) {
+            // Not processing pure NPM builds, cyclonedx-nodejs plugin handles them correctly
+            return;
+        }
+        Collection<Artifact> npmDependencies = pncService.getNPMDependencies(buildID);
+        if (npmDependencies.isEmpty()) {
+            // No NPM dependencies to add
+            return;
+        }
+
+        addMissingNpmDependencies(bom, npmDependencies, build.getBuildConfigRevision().getBuildType());
+    }
+
+    private void addMissingNpmDependencies(Bom bom, Collection<Artifact> npmDependencies, BuildType buildType) {
+        Set<String> listedPurls = bom.getComponents().stream()
+            .map(DefaultProcessor::getPackageURL)
+            .map(PackageURL::getCoordinates)
+            .collect(Collectors.toSet());
+
+        Set<String> dependencyRefs = new HashSet<>();
+        for (Artifact artifact : npmDependencies) {
+            String coordinates;
+            try {
+                coordinates = new PackageURL(artifact.getPurl()).getCoordinates();
+            } catch (MalformedPackageURLException e) {
+                log.warn("Unable to parse artifact purl '{}'.", artifact.getPurl());
+                continue;
+            }
+            if (listedPurls.contains(coordinates)) {
+                continue;
+            }
+            Component newComponent = createComponent(artifact, Component.Scope.REQUIRED, Component.Type.LIBRARY, buildType);
+            setArtifactMetadata(newComponent, artifact, pncService.getApiUrl());
+            setPncBuildMetadata(newComponent, artifact.getBuild(), pncService.getApiUrl());
+            bom.addComponent(newComponent);
+            dependencyRefs.add(newComponent.getBomRef());
+        }
+        addMainComponentDependencies(bom, dependencyRefs);
+    }
+
+    private void addMainComponentDependencies(Bom bom, Set<String> dependencies) {
+        String mainComponentRef = bom.getMetadata().getComponent().getBomRef();
+
+        Dependency mainComponentDependencies = bom.getDependencies().stream()
+            .filter(d -> mainComponentRef.equals(d.getRef()))
+            .findFirst()
+            .orElseGet(() -> addNewDependency(bom, mainComponentRef));
+
+        dependencies.stream().map(SbomUtils::createDependency).forEach( d-> {
+            mainComponentDependencies.addDependency(d);
+            bom.addDependency(d);
+        });
+    }
+
+    public static Dependency addNewDependency(Bom bom, String bomRef){
+        Dependency dependency = createDependency(bomRef);
+        bom.addDependency(dependency);
+        return dependency;
+    }
+
+    private static String parseBuildIdFromURL(String buildURL) {
+        int lastSlashIndex = buildURL.lastIndexOf('/');
+        if (lastSlashIndex != -1) {
+            return buildURL.substring(lastSlashIndex + 1);
+        } else {
+            return null;
+        }
     }
 
     private void processRpmComponent(Component component, PackageURL purl) {
