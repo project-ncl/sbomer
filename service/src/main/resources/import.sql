@@ -34,8 +34,8 @@
  * limitations under the License.
  */
 -- UMB request event for the pnc build ARYT3LBXDVYAC
-INSERT INTO request (id, receival_time, event_type, request_config, event)
-  VALUES ('build_ARYT3LBXDVYAC', '2024-10-14 14:18:45.148407', 'UMB', 
+INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
+  VALUES ('build_ARYT3LBXDVYAC', '2024-10-14 14:18:45.148407', 'UMB', 'SUCCESS',
   '{
      "type": "pnc-build",
      "apiVersion": "sbomer.jboss.org/v1alpha1",
@@ -93,8 +93,8 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
 );
 
 -- UMB request event for the pnc operation BDQXCNRZJYYAA
-INSERT INTO request (id, receival_time, event_type, request_config, event)
-  VALUES ('operation_BDQXCNRZJYYAA', '2024-10-14 14:18:45.148407', 'UMB', 
+INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
+  VALUES ('operation_BDQXCNRZJYYAA', '2024-10-14 14:18:45.148407', 'UMB', 'IGNORED', 
   '{
      "type": "pnc-operation",
      "apiVersion": "sbomer.jboss.org/v1alpha1",
@@ -121,8 +121,8 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
 );
 
 -- UMB request event for the status change of errata advisory 139787
-INSERT INTO request (id, receival_time, event_type, request_config, event)
-  VALUES ('errata_139787', '2024-10-14 14:18:45.148407', 'UMB', 
+INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
+  VALUES ('errata_139787', '2024-10-14 14:18:45.148407', 'UMB', 'IGNORED',
   '{
      "type": "errata-advisory",
      "apiVersion": "sbomer.jboss.org/v1alpha1",
@@ -156,8 +156,8 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
 );
 
 -- Unkown UMB request event from PNC
-INSERT INTO request (id, receival_time, event_type, request_config, event)
-  VALUES ('XXXYYYY', '2023-10-14 14:18:45.148407', 'UMB', 
+INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
+  VALUES ('XXXYYYY', '2023-10-14 14:18:45.148407', 'UMB', 'IGNORED',
     null,
   '{
      "creation_time": "2024-10-14 12:18:45.148407",
@@ -173,8 +173,8 @@ INSERT INTO request (id, receival_time, event_type, request_config, event)
 );
 
 -- REST request event for the pnc build ARYT3LBXDVYAC
-INSERT INTO request (id, receival_time, event_type, request_config, event)
-  VALUES ('build_ARYT3LBXDVYAC_rest', '2023-10-14 14:18:45.148407', 'REST', 
+INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
+  VALUES ('build_ARYT3LBXDVYAC_rest', '2023-10-14 14:18:45.148407', 'REST', 'IGNORED',
   '{
      "type": "pnc-build",
      "apiVersion": "sbomer.jboss.org/v1alpha1",
