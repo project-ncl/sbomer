@@ -26,6 +26,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -56,13 +57,20 @@ import lombok.extern.slf4j.Slf4j;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @ToString
-@Table(name = "request", indexes = { @Index(name = "idx_request_eventtype", columnList = "event_type") })
+@Table(
+        name = "request",
+        indexes = { @Index(name = "idx_request_eventtype", columnList = "event_type"),
+                @Index(name = "idx_request_eventstatus", columnList = "event_status") })
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(setterPrefix = "with")
 @RegisterForReflection
 public class RequestEvent extends PanacheEntityBase {
+
+    public static final String IGNORED_UNKNOWN_REASON = "The message type is unknown";
+    public static final String IGNORED_DUPLICATED_REASON = "The message was already acknowledged";
+    public static final String FAILED_GENERIC_REASON = "An error occurred while processing";
 
     // The event keys for UMB event type
     public final static String EVENT_KEY_UMB_CONSUMER = "consumer";
@@ -100,6 +108,10 @@ public class RequestEvent extends PanacheEntityBase {
     @Enumerated(EnumType.STRING)
     private RequestEventType eventType;
 
+    @Column(name = "event_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RequestEventStatus eventStatus;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "request_config", nullable = true)
     @ToString.Exclude
@@ -112,6 +124,10 @@ public class RequestEvent extends PanacheEntityBase {
     @Schema(implementation = Map.class)
     private JsonNode event;
 
+    @Column(name = "reason", nullable = true, updatable = true)
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    String reason;
+
     public static RequestEvent createNew(RequestConfig requestConfig, RequestEventType eventType, Object event) {
         JsonNode eventNode = (event instanceof Map) ? ObjectMapperProvider.json().valueToTree(event) : (JsonNode) event;
 
@@ -120,6 +136,7 @@ public class RequestEvent extends PanacheEntityBase {
                 .withRequestConfig(requestConfig)
                 .withReceivalTime(Instant.now())
                 .withEventType(eventType)
+                .withEventStatus(RequestEventStatus.IN_PROGRESS)
                 .withEvent(eventNode)
                 .build();
     }
