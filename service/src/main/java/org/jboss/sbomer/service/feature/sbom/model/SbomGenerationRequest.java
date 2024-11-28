@@ -28,6 +28,7 @@ import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
@@ -47,6 +48,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Query;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -155,6 +157,9 @@ public class SbomGenerationRequest extends PanacheEntityBase {
             sbomGenerationRequest.setRequest(dbRequestEvent);
         }
 
+        // Update the status of the request of this generation
+        updateRequestEventStatus(sbomGenerationRequest);
+
         // Store it in the database
         sbomGenerationRequest.persistAndFlush();
 
@@ -164,6 +169,59 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                 generationRequest.getMetadata().getName());
 
         return sbomGenerationRequest;
+    }
+
+    @Transactional
+    private static void updateRequestEventStatus(SbomGenerationRequest sbomGenerationRequest) {
+
+        if (sbomGenerationRequest.getRequest() == null) {
+            return;
+        }
+        // If this is not a final status update, mark the request as in progress
+        if (!sbomGenerationRequest.getStatus().isFinal()) {
+            sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.IN_PROGRESS);
+            return;
+        }
+        // This is a final status (FAILED or FINISHED)
+        Object[] results = countSbomGenerationRequestsOf(sbomGenerationRequest.getRequest());
+        Long generationsInProgress = ((Number) results[0]).longValue();
+        Long generationsFailed = ((Number) results[1]).longValue();
+        Long generationsTotal = ((Number) results[2]).longValue();
+
+        if (generationsInProgress > 0) {
+            // There are still generations in progress for this request
+            sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.IN_PROGRESS);
+            sbomGenerationRequest.getRequest()
+                    .setReason(generationsInProgress + "/" + generationsTotal + " in progress");
+
+        } else if (generationsFailed > 0 || SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus())) {
+            // There are no more generations in progress and some failed
+            Long failed = generationsFailed
+                    + (SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus()) ? 1L : 0L);
+            sbomGenerationRequest.getRequest().setReason(failed + "/" + generationsTotal + " failed");
+            sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.FAILED);
+        } else {
+            // There are no generations in progress nor failed
+            sbomGenerationRequest.getRequest()
+                    .setReason(generationsTotal + "/" + generationsTotal + " completed with success");
+            sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.SUCCESS);
+        }
+    }
+
+    @Transactional
+    private static Object[] countSbomGenerationRequestsOf(RequestEvent request) {
+
+        Query query = getEntityManager()
+                .createQuery(
+                        "SELECT SUM(CASE WHEN status != ?1 AND status != ?2 THEN 1 ELSE 0 END), "
+                                + "SUM(CASE WHEN status = ?3 THEN 1 ELSE 0 END), " + "COUNT(*) AS total_count "
+                                + "FROM SbomGenerationRequest WHERE request.id = ?4")
+                .setParameter(1, SbomGenerationStatus.FAILED)
+                .setParameter(2, SbomGenerationStatus.FINISHED)
+                .setParameter(3, SbomGenerationStatus.FAILED)
+                .setParameter(4, request.getId());
+
+        return (Object[]) query.getSingleResult();
     }
 
     /**
