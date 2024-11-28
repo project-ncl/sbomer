@@ -28,7 +28,7 @@ Run the `java -jar domino.jar report --help` command to get a list of all possib
 
 === `version`
 
-Default version: `0.0.107`.
+Default version: `0.0.117`.
 
 == Execution
 
@@ -39,5 +39,13 @@ Below you can find the command that will be running the generator:
 $ java -jar domino.jar report --project-dir=[DIR] --output-file=[OUTPUT_DIR]/bom.json --manifest -s [PATH_TO_SETTINGS_XML_FILE] [ARGS]
 ----
 
+== CycloneDX Schema Version
 
+The default CycloneDX schema version for the generated SBOMs is 1.6. A different schema version can be requested by adding argument `--cdx-schema-version` with the desired value. For example
 
+[source,console]
+----
+java -jar domino.jar report --config-file quarkus-bom-config.json --manifest --legacy-scm-locator --output-file quarkus-bom-sbom.json --cdx-schema-version 1.4
+----
+
+will generate a CycloneDX SBOM using the schema version 1.4.
