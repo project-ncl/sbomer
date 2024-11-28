@@ -23,14 +23,17 @@ import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatu
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.ErrataStatusChangeMessageBody;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
+import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,10 +57,14 @@ public class ErrataNotificationHandler {
     @Setter
     FeatureFlags featureFlags;
 
+    @Inject
+    RequestEventRepository requestEventRepository;
+
     public void handle(RequestEvent requestEvent) throws JsonProcessingException, IOException {
 
         if (!featureFlags.errataIntegrationEnabled()) {
             log.warn("Errata API integration is disabled, the UMB message won't be used!!");
+            ignoreRequestEvent(requestEvent, "Errata API integration is disabled");
             return;
         }
 
@@ -67,6 +74,7 @@ public class ErrataNotificationHandler {
 
         if (!isRelevantStatus(errataStatusChange.getStatus())) {
             log.warn("Received a status change that is not QE nor SHIPPED_LIVE, ignoring it");
+            ignoreRequestEvent(requestEvent, "Errata status change is not QE nor SHIPPED_LIVE");
             return;
         }
 
@@ -82,9 +90,14 @@ public class ErrataNotificationHandler {
 
     @Transactional(value = TxType.REQUIRES_NEW)
     protected RequestEvent addErrataAdvisoryRequestConfig(RequestEvent requestEvent, String errataId) {
-        requestEvent = RequestEvent.findById(requestEvent.getId());
-        requestEvent.setRequestConfig(ErrataAdvisoryRequestConfig.builder().withAdvisoryId(errataId).build());
-        return requestEvent.save();
+        return requestEventRepository.updateRequestConfig(
+                requestEvent,
+                ErrataAdvisoryRequestConfig.builder().withAdvisoryId(errataId).build());
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected RequestEvent ignoreRequestEvent(RequestEvent requestEvent, String reason) {
+        return requestEventRepository.updateRequestEvent(requestEvent, RequestEventStatus.IGNORED, Map.of(), reason);
     }
 
 }
