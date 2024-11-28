@@ -480,4 +480,20 @@ public class PncService {
         }
     }
 
+    /**
+     * <p>
+     * Fetch NPM dependencies of a PNC {@link Build} identified by the particular {@code buildId}.
+     * </p>
+     *
+     * @param buildID Tbe {@link Build} identifier in PNC
+     * @return The collection of {@link Artifact} objects or {@code null} in case the {@link Build} could not be found.
+     */
+    public Collection<Artifact> getNPMDependencies(String buildID) {
+        log.debug("Fetching NPM Dependencies from PNC build with id '{}'", buildID);
+        try {
+            return buildClient.getDependencyArtifacts(buildID, Optional.empty(), Optional.of("purl=LIKE=pkg:npm*")).getAll();
+        } catch (RemoteResourceException ex) {
+            throw new ClientException("Dependencies could not be retrieved because PNC responded with an error", ex);
+        }
+    }
 }
