@@ -51,6 +51,7 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
@@ -60,6 +61,7 @@ import org.jboss.sbomer.service.rest.QueryParameters;
 import org.jboss.sbomer.service.rest.criteria.CriteriaAwareRepository;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.Query;
@@ -133,6 +135,40 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         String identifierKey = getValueOfField(configClass, "IDENTIFIER_KEY");
 
         return countEventsForTypeAndIdentifier(typeName, identifierKey, identifierValue);
+    }
+
+    public RequestEvent updateRequestConfig(RequestEvent requestEvent, RequestConfig config) {
+        requestEvent = RequestEvent.findById(requestEvent.getId());
+        requestEvent.setRequestConfig(config);
+        return requestEvent.save();
+    }
+
+    public RequestEvent updateRequestEvent(
+            RequestEvent requestEvent,
+            RequestEventStatus status,
+            Map<String, String> extra,
+            String reason) {
+        requestEvent = RequestEvent.findById(requestEvent.getId());
+        extra.forEach(((ObjectNode) requestEvent.getEvent())::put);
+
+        if (status != null) {
+            requestEvent.setEventStatus(status);
+        }
+        if (reason != null) {
+            requestEvent.setReason(reason);
+        }
+        return requestEvent.save();
+    }
+
+    public RequestEvent createRequestEvent(RequestEventStatus status, ObjectNode event, String reason) {
+        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event);
+        if (status != null) {
+            requestEvent.setEventStatus(status);
+        }
+        if (reason != null) {
+            requestEvent.setReason(reason);
+        }
+        return requestEvent.save();
     }
 
     public long countAllEventsOfType(RequestEventType eventType) {
@@ -243,6 +279,8 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
                             root.get("id"),
                             root.get("receivalTime"),
                             root.get("eventType"),
+                            root.get("eventStatus"),
+                            root.get("reason"),
                             root.get("requestConfig"),
                             root.get("event")));
         });
@@ -288,6 +326,8 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
                 .append("re.id AS request_id, ")
                 .append("re.receival_time AS receival_time, ")
                 .append("re.event_type AS event_type, ")
+                .append("re.event_status AS event_status, ")
+                .append("re.reason AS reason, ")
                 .append("re.request_config AS request_config, ")
                 .append("re.event AS event, ")
                 .append("s.id AS sbom_id, ")
@@ -334,24 +374,26 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
             String requestId = (String) row[0];
             Instant receivalTime = convertFromTimestamp(row[1]);
             RequestEventType eventType = RequestEventType.valueOf((String) row[2]);
-            RequestConfig requestConfig = RequestConfig.fromString((String) row[3], RequestConfig.class);
-            JsonNode event = SbomUtils.toJsonNode((String) row[4]);
-            String sbomId = (String) row[5];
+            RequestEventStatus eventStatus = RequestEventStatus.valueOf((String) row[3]);
+            String reason = (String) row[4];
+            RequestConfig requestConfig = RequestConfig.fromString((String) row[5], RequestConfig.class);
+            JsonNode event = SbomUtils.toJsonNode((String) row[6]);
+            String sbomId = (String) row[7];
 
             if (sbomId != null) {
                 V1Beta1BaseManifestRecord manifest = new V1Beta1BaseManifestRecord(
                         sbomId,
-                        (String) row[6],
-                        (String) row[7],
-                        convertFromTimestamp(row[8]),
-                        (Integer) row[9],
-                        (String) row[10],
+                        (String) row[8],
+                        (String) row[9],
+                        convertFromTimestamp(row[10]),
+                        (Integer) row[11],
+                        (String) row[12],
                         new V1Beta1BaseGenerationRecord(
-                                (String) row[11],
-                                (String) row[12],
-                                Config.fromString((String) row[13]),
-                                GenerationRequestType.valueOf((String) row[14]),
-                                convertFromTimestamp(row[15])));
+                                (String) row[13],
+                                (String) row[14],
+                                Config.fromString((String) row[15]),
+                                GenerationRequestType.valueOf((String) row[16]),
+                                convertFromTimestamp(row[17])));
 
                 aggregatedResults
                         .computeIfAbsent(
@@ -360,6 +402,8 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
                                         id,
                                         receivalTime,
                                         eventType,
+                                        eventStatus,
+                                        reason,
                                         requestConfig,
                                         event,
                                         new ArrayList<>()))
@@ -372,6 +416,8 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
                                 id,
                                 receivalTime,
                                 eventType,
+                                eventStatus,
+                                reason,
                                 requestConfig,
                                 event,
                                 new ArrayList<>()));

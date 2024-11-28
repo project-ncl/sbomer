@@ -21,6 +21,7 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_TYPE;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.api.enums.BuildStatus;
@@ -30,6 +31,7 @@ import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -40,6 +42,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
@@ -49,6 +52,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.pnc.PncClient;
@@ -81,6 +85,9 @@ public class PncNotificationHandler {
 
     @Inject
     SbomGenerationRequestRepository sbomGenerationRequestRepository;
+
+    @Inject
+    RequestEventRepository requestEventRepository;
 
     @Inject
     SbomService sbomService;
@@ -122,6 +129,7 @@ public class PncNotificationHandler {
     private void handle(PncBuildNotificationMessageBody messageBody, RequestEvent requestEvent) {
         if (messageBody == null) {
             log.warn("Received message does not contain body, ignoring");
+            ignoreRequestEvent(requestEvent, "Received message does not contain body");
             return;
         }
 
@@ -129,11 +137,13 @@ public class PncNotificationHandler {
 
         if (Strings.isEmpty(messageBody.getBuild().getId())) {
             log.warn("Received message without PNC Build ID specified");
+            ignoreRequestEvent(requestEvent, "Received message without PNC Build ID");
             return;
         }
 
         if (!isSuccessfulPersistentBuild(messageBody)) {
             log.info("Received message is not a successful persistent build, skipping...");
+            ignoreRequestEvent(requestEvent, "Received message is not a successful persistent build");
             return;
         }
 
@@ -145,6 +155,7 @@ public class PncNotificationHandler {
                     "Received notification for PNC build '{}', but we already handled it in request '{}', skipping",
                     messageBody.getBuild().getId(),
                     existingRequest.getId());
+            ignoreRequestEvent(requestEvent, RequestEvent.IGNORED_DUPLICATED_REASON);
             return;
         }
 
@@ -175,6 +186,7 @@ public class PncNotificationHandler {
     private void handle(PncDelAnalysisNotificationMessageBody messageBody, RequestEvent requestEvent) {
         if (messageBody == null) {
             log.warn("Received message does not contain body, ignoring");
+            ignoreRequestEvent(requestEvent, "Received message does not contain body");
             return;
         }
 
@@ -182,6 +194,7 @@ public class PncNotificationHandler {
 
         if (Strings.isEmpty(messageBody.getOperationId())) {
             log.warn("Received message without PNC Operation ID specified");
+            ignoreRequestEvent(requestEvent, "Received message without PNC Operation ID");
             return;
         }
 
@@ -189,6 +202,7 @@ public class PncNotificationHandler {
             log.debug(
                     "The '{}' deliverable analyzer operation is still in progress, skipping...",
                     messageBody.getOperationId());
+            ignoreRequestEvent(requestEvent, "Deliverable analyzer operation still in progress");
             return;
         }
 
@@ -215,6 +229,9 @@ public class PncNotificationHandler {
             }
 
             // If there are no pending requests, we just ignore the message.
+            failRequestEvent(
+                    requestEvent,
+                    "Deliverable analyzer operation '" + messageBody.getOperationId() + "' failed");
             return;
         }
 
@@ -246,17 +263,26 @@ public class PncNotificationHandler {
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
+    protected RequestEvent ignoreRequestEvent(RequestEvent requestEvent, String reason) {
+        return requestEventRepository.updateRequestEvent(requestEvent, RequestEventStatus.IGNORED, Map.of(), reason);
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected RequestEvent failRequestEvent(RequestEvent requestEvent, String reason) {
+        return requestEventRepository.updateRequestEvent(requestEvent, RequestEventStatus.FAILED, Map.of(), reason);
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
     protected RequestEvent addPncBuildRequestConfig(RequestEvent requestEvent, String buildId) {
-        requestEvent = RequestEvent.findById(requestEvent.getId());
-        requestEvent.setRequestConfig(PncBuildRequestConfig.builder().withBuildId(buildId).build());
-        return requestEvent.save();
+        return requestEventRepository
+                .updateRequestConfig(requestEvent, PncBuildRequestConfig.builder().withBuildId(buildId).build());
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
     protected RequestEvent addPncOperationRequestConfig(RequestEvent requestEvent, String operationId) {
-        requestEvent = RequestEvent.findById(requestEvent.getId());
-        requestEvent.setRequestConfig(PncOperationRequestConfig.builder().withOperationId(operationId).build());
-        return requestEvent.save();
+        return requestEventRepository.updateRequestConfig(
+                requestEvent,
+                PncOperationRequestConfig.builder().withOperationId(operationId).build());
     }
 
     @Transactional

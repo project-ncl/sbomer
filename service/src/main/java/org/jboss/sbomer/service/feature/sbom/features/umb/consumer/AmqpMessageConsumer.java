@@ -28,6 +28,7 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_VAL
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
@@ -38,7 +39,7 @@ import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -82,7 +83,7 @@ public class AmqpMessageConsumer {
     ErrataNotificationHandler errataNotificationHandler;
 
     @Inject
-    RequestEventRepository repository;
+    RequestEventRepository requestEventRepository;
 
     public void init(@Observes StartupEvent ev) {
         if (!umbConfig.isEnabled()) {
@@ -257,77 +258,85 @@ public class AmqpMessageConsumer {
 
     @Transactional(value = TxType.REQUIRES_NEW)
     protected CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
-        requestEvent = RequestEvent.findById(requestEvent.getId());
-        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString());
-        requestEvent.save();
-
+        requestEventRepository.updateRequestEvent(
+                requestEvent,
+                RequestEventStatus.FAILED,
+                Map.of(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString()),
+                RequestEvent.FAILED_GENERIC_REASON);
         return message.nack(e);
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
     protected CompletionStage<Void> ackAndSave(Message<?> message, RequestEvent requestEvent) {
-        requestEvent = RequestEvent.findById(requestEvent.getId());
-        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
-        requestEvent.save();
-
+        requestEventRepository.updateRequestEvent(
+                requestEvent,
+                null,
+                Map.of(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString()),
+                null);
         return message.ack();
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
     protected CompletionStage<Void> skipAndSave(Message<?> message, RequestEvent requestEvent) {
-        requestEvent = RequestEvent.findById(requestEvent.getId());
-        ((ObjectNode) requestEvent.getEvent()).put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.SKIPPED.toString());
-        requestEvent.save();
-
+        requestEventRepository.updateRequestEvent(
+                requestEvent,
+                RequestEventStatus.IGNORED,
+                Map.of(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.SKIPPED.toString()),
+                RequestEvent.IGNORED_DUPLICATED_REASON);
         return message.ack();
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
     protected CompletionStage<Void> ackAndSaveUnknownMessage(Message<?> message, ObjectNode event) {
-        event.put(EVENT_KEY_UMB_MSG_TYPE, EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE)
-                .put(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.ACK.toString());
-        RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+        Map<String, String> extra = Map.of(
+                EVENT_KEY_UMB_MSG_TYPE,
+                EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE,
+                EVENT_KEY_UMB_MSG_STATUS,
+                UMBMessageStatus.ACK.toString());
+        extra.forEach(event::put);
+        requestEventRepository
+                .createRequestEvent(RequestEventStatus.IGNORED, event, RequestEvent.IGNORED_UNKNOWN_REASON);
         return message.ack();
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
     protected RequestEvent saveNewEvent(ObjectNode event) {
-        return RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+        return requestEventRepository.createRequestEvent(null, event, null);
     }
 
     @Transactional
     public long getAlreadyAckedUMBEventsFor(String msgId) {
-        return repository.countAlreadyAckedUMBEventsFor(msgId);
+        return requestEventRepository.countAlreadyAckedUMBEventsFor(msgId);
     }
 
     @Transactional
     public long getPncProcessedMessages() {
-        return repository.countPncProcessedMessages();
+        return requestEventRepository.countPncProcessedMessages();
     }
 
     @Transactional
     public long getPncReceivedMessages() {
-        return repository.countPncReceivedMessages();
+        return requestEventRepository.countPncReceivedMessages();
     }
 
     @Transactional
     public long getErrataProcessedMessages() {
-        return repository.countErrataProcessedMessages();
+        return requestEventRepository.countErrataProcessedMessages();
     }
 
     @Transactional
     public long getErrataReceivedMessages() {
-        return repository.countErrataReceivedMessages();
+        return requestEventRepository.countErrataReceivedMessages();
     }
 
     @Transactional
     public long getPncSkippedMessages() {
-        return repository.countPncSkippedMessages();
+        return requestEventRepository.countPncSkippedMessages();
     }
 
     @Transactional
     public long getErrataSkippedMessages() {
-        return repository.countErrataSkippedMessages();
+        return requestEventRepository.countErrataSkippedMessages();
     }
 
 }
