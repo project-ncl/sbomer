@@ -22,6 +22,8 @@ const columnNames = {
   id: 'ID',
   receivalTime: 'Received',
   eventType: 'Type',
+  eventStatus: 'Request Status',
+  reason: 'Request Status Reason',
   requestConfig: 'Request Config',
   event: 'Event',
 };
@@ -68,6 +70,8 @@ export const RequestEventTable = () => {
             <Th>{columnNames.id}</Th>
             <Th>{columnNames.receivalTime}</Th>
             <Th>{columnNames.eventType}</Th>
+            <Th>{columnNames.eventStatus}</Th>
+            <Th>{columnNames.reason}</Th>
             <Th>{columnNames.requestConfig}</Th>
             <Th>{columnNames.event}</Th>
           </Tr>
@@ -83,15 +87,23 @@ export const RequestEventTable = () => {
                   {timestampToHumanReadable(Date.now() - requestEvent.receivalTime.getTime(), false, 'ago')}
                 </Timestamp>
               </Td>
-              <Td dataLabel={columnNames.event}>
+              <Td dataLabel={columnNames.eventType}>
                   <span className="pf-v5-c-timestamp pf-m-help-text">{requestEvent.eventType}</span>
+              </Td>
+              <Td dataLabel={columnNames.eventStatus}>
+                  <span className="p
+                  f-v5-c-timestamp pf-m-help-text">{requestEvent.eventStatus}</span>
+              </Td>
+              <Td dataLabel={columnNames.reason}>
+                  <span className="p
+                  f-v5-c-timestamp pf-m-help-text">{requestEvent.reason}</span>
               </Td>
               <Td dataLabel={columnNames.requestConfig}>
                 <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
                   <span className="pf-v5-c-timestamp pf-m-help-text">{requestEvent.requestConfigTypeName}={requestEvent.requestConfigTypeValue}</span>
                 </Tooltip>
               </Td>
-              <Td dataLabel={columnNames.eventType}>
+              <Td dataLabel={columnNames.event}>
                 <CodeBlock>
                   <ExpandableSection toggleTextExpanded="Hide" toggleTextCollapsed="Show">
                     <CodeBlockCode>{JSON.stringify(requestEvent.event, null, 2)}</CodeBlockCode>
