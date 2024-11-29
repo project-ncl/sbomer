@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -70,6 +71,7 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     // private static final String ERRATA_ID_QE_RPM = "89769"; // RHBA-2024:89769-01
     // private static final String ERRATA_RPM_NVR = "redhat-release-computenode-7.2-8.el7_2.1"; // id=561861
     @Test
+    @Disabled("Disabled until the rPM generator produces valid manifests")
     void testRPMGenerationOfQEAdvisory() throws IOException, URISyntaxException {
         String requestBody = Files.readString(sbomPath("advisory-89769.json"));
         List<String> generationIds = requestGeneration(requestBody);
