@@ -179,9 +179,9 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         }
 
         Object[] results = countSbomGenerationRequestsOf(sbomGenerationRequest.getRequest());
-        Long generationsInProgress = ((Number) results[0]).longValue();
-        Long generationsFailed = ((Number) results[1]).longValue();
-        Long generationsTotal = ((Number) results[2]).longValue();
+        Long generationsInProgress = results[0] == null ? 0L : ((Number) results[0]).longValue();
+        Long generationsFailed = results[1] == null ? 0L : ((Number) results[1]).longValue();
+        Long generationsTotal = results[2] == null ? 0L : ((Number) results[2]).longValue();
 
         // If this is not a final status update, mark the request as in progress
         if (!sbomGenerationRequest.getStatus().isFinal()) {
