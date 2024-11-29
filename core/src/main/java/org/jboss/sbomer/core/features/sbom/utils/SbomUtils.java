@@ -98,7 +98,7 @@ public class SbomUtils {
     private static Pattern gitProtocolPattern = Pattern.compile("git@(.+):(.+)", Pattern.CASE_INSENSITIVE);
 
     public static Version schemaVersion() {
-        return Version.VERSION_14;
+        return Version.VERSION_16;
     }
 
     public static Bom createBom() {

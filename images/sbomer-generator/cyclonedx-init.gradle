@@ -64,8 +64,8 @@ allprojects {
     skipConfigs = ["testRuntimeClasspath", "testCompileClasspath"]
     // Specified the type of project being built. Defaults to 'library'
     projectType = "library"
-    // Specified the version of the CycloneDX specification to use. Defaults to '1.4'
-    schemaVersion = "1.4"
+    // Specified the version of the CycloneDX specification to use. Defaults to '1.6'
+    schemaVersion = "1.6"
     // Boms destination directory. Defaults to 'build/reports'
     destination = file("build/sbom")
     // The file name for the generated BOMs (before the file format suffix). Defaults to 'bom'

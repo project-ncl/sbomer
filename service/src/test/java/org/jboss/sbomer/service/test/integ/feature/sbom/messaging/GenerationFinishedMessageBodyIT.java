@@ -81,7 +81,7 @@ class GenerationFinishedMessageBodyIT {
                                 .bom(
                                         Bom.builder()
                                                 .format(BomFormat.CYCLONEDX)
-                                                .version("1.4")
+                                                .version("1.6")
                                                 .link("https://sbomer/api/v1alpha3/sboms/429305915731435500/bom")
                                                 .build())
                                 .generationRequest(
@@ -120,7 +120,7 @@ class GenerationFinishedMessageBodyIT {
                                 .bom(
                                         Bom.builder()
                                                 .format(BomFormat.CYCLONEDX)
-                                                .version("1.4")
+                                                .version("1.6")
                                                 .link("https://sbomer/api/v1alpha3/sboms/429305915731435500/bom")
                                                 .build())
                                 .generationRequest(
