@@ -70,6 +70,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
+import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +99,7 @@ class ErrataNotificationHandlerTest {
     ClientSession clientSession = mock(ClientSession.class);
     AdvisoryService advisoryService = mock(AdvisoryService.class);
     SbomService sbomService = mock(SbomService.class);
+    RequestEventRepository requestEventRepository = mock(RequestEventRepository.class);
 
     @BeforeEach
     void beforeEach() {
@@ -111,6 +113,7 @@ class ErrataNotificationHandlerTest {
         when(featureFlags.textOnlyErrataManifestGenerationEnabled()).thenReturn(true);
         errataNotificationHandler.setFeatureFlags(featureFlags);
         errataNotificationHandler.setAdvisoryService(advisoryService);
+        errataNotificationHandler.setRequestEventRepository(requestEventRepository);
         advisoryService.setErrataClient(errataClient);
         advisoryService.setSbomService(sbomService);
     }
@@ -164,15 +167,19 @@ class ErrataNotificationHandlerTest {
         event.put(EVENT_KEY_UMB_MSG, umbErrataStatusChangeMsg);
         event.put(EVENT_KEY_UMB_MSG_TYPE, ErrataAdvisoryRequestConfig.TYPE_NAME);
 
-        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("139856").build();
-
         // Create the initial requestEvent
-        RequestEvent requestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+
+        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("139856").build();
+        RequestEvent initializedRequestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event);
+        initializedRequestEvent.setId(requestEvent.getId());
 
         when(errataClient.getErratum("139856")).thenReturn(errata);
         when(errataClient.getBuildsList("139856")).thenReturn(buildList);
         when(errataClient.getRelease("2096")).thenReturn(release);
         when(clientSession.getBuild(3338841)).thenReturn(kojiBuildInfo);
+        when(requestEventRepository.updateRequestConfig(requestEvent, requestConfig))
+                .thenReturn(initializedRequestEvent);
 
         errataNotificationHandler.handle(requestEvent);
 
@@ -201,10 +208,12 @@ class ErrataNotificationHandlerTest {
         event.put(EVENT_KEY_UMB_MSG, umbErrataStatusChangeMsg);
         event.put(EVENT_KEY_UMB_MSG_TYPE, ErrataAdvisoryRequestConfig.TYPE_NAME);
 
-        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("140268").build();
-
         // Create the initial requestEvent
-        RequestEvent requestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+
+        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("140268").build();
+        RequestEvent initializedRequestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event);
+        initializedRequestEvent.setId(requestEvent.getId());
 
         ArgumentMatcher<RequestEvent> hasAdvisoryId = cfg -> cfg != null
                 && "140268".equals(((ErrataAdvisoryRequestConfig) cfg.getRequestConfig()).getAdvisoryId());
@@ -222,12 +231,14 @@ class ErrataNotificationHandlerTest {
         when(errataClient.getErratum("140268")).thenReturn(errata);
         when(errataClient.getBuildsList("140268")).thenReturn(buildList);
         when(errataClient.getRelease("1245")).thenReturn(release);
+        when(requestEventRepository.updateRequestConfig(requestEvent, requestConfig))
+                .thenReturn(initializedRequestEvent);
         when(advisoryService.generateFromAdvisory(argThat(hasAdvisoryId))).thenReturn(expectedResult);
 
         errataNotificationHandler.handle(requestEvent);
 
         verify(advisoryService, times(1)).generateFromAdvisory(argThat(hasAdvisoryId));
-        Collection<SbomGenerationRequest> actualResult = advisoryService.generateFromAdvisory(requestEvent);
+        Collection<SbomGenerationRequest> actualResult = advisoryService.generateFromAdvisory(initializedRequestEvent);
         assertEquals(expectedResult, actualResult);
     }
 
@@ -256,10 +267,12 @@ class ErrataNotificationHandlerTest {
         event.put(EVENT_KEY_UMB_MSG, umbErrataStatusChangeMsg);
         event.put(EVENT_KEY_UMB_MSG_TYPE, ErrataAdvisoryRequestConfig.TYPE_NAME);
 
-        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("140268").build();
-
         // Create the initial requestEvent
-        RequestEvent requestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+
+        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("140268").build();
+        RequestEvent initializedRequestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event);
+        initializedRequestEvent.setId(requestEvent.getId());
 
         ArgumentMatcher<RequestEvent> hasAdvisoryId = cfg -> cfg != null
                 && "140268".equals(((ErrataAdvisoryRequestConfig) cfg.getRequestConfig()).getAdvisoryId());
@@ -278,6 +291,8 @@ class ErrataNotificationHandlerTest {
         when(errataClient.getBuildsList("140268")).thenReturn(buildList);
         when(errataClient.getRelease("1245")).thenReturn(release);
         when(sbomService.doAnalyzeDeliverables(config)).thenReturn(operation);
+        when(requestEventRepository.updateRequestConfig(requestEvent, requestConfig))
+                .thenReturn(initializedRequestEvent);
 
         Collection<SbomGenerationRequest> expectedResult = new ArrayList<SbomGenerationRequest>();
         expectedResult.add(expectPncBuildSbomGenerationRequest("ABCD"));
@@ -290,7 +305,7 @@ class ErrataNotificationHandlerTest {
         errataNotificationHandler.handle(requestEvent);
 
         verify(advisoryService, times(1)).generateFromAdvisory(argThat(hasAdvisoryId));
-        Collection<SbomGenerationRequest> actualResult = advisoryService.generateFromAdvisory(requestEvent);
+        Collection<SbomGenerationRequest> actualResult = advisoryService.generateFromAdvisory(initializedRequestEvent);
 
         assertEquals(expectedResult.size(), actualResult.size());
 
@@ -339,15 +354,19 @@ class ErrataNotificationHandlerTest {
         event.put(EVENT_KEY_UMB_MSG, umbErrataStatusChangeMsg);
         event.put(EVENT_KEY_UMB_MSG_TYPE, ErrataAdvisoryRequestConfig.TYPE_NAME);
 
-        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("139856").build();
-
         // Create the initial requestEvent
-        RequestEvent requestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+
+        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("139856").build();
+        RequestEvent initializedRequestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event);
+        initializedRequestEvent.setId(requestEvent.getId());
 
         when(errataClient.getErratum("139856")).thenReturn(errata);
         when(errataClient.getBuildsList("139856")).thenReturn(buildList);
         when(errataClient.getRelease("2096")).thenReturn(release);
         when(clientSession.getBuild(3338841)).thenReturn(kojiBuildInfo);
+        when(requestEventRepository.updateRequestConfig(requestEvent, requestConfig))
+                .thenReturn(initializedRequestEvent);
 
         ArgumentMatcher<RequestEvent> hasAdvisoryId = cfg -> cfg != null
                 && "139856".equals(((ErrataAdvisoryRequestConfig) cfg.getRequestConfig()).getAdvisoryId());
@@ -383,15 +402,19 @@ class ErrataNotificationHandlerTest {
         event.put(EVENT_KEY_UMB_MSG, umbErrataStatusChangeMsg);
         event.put(EVENT_KEY_UMB_MSG_TYPE, ErrataAdvisoryRequestConfig.TYPE_NAME);
 
-        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("139856").build();
-
         // Create the initial requestEvent
-        RequestEvent requestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event).save();
+        RequestEvent requestEvent = RequestEvent.createNew(null, RequestEventType.UMB, event).save();
+
+        RequestConfig requestConfig = ErrataAdvisoryRequestConfig.builder().withAdvisoryId("139856").build();
+        RequestEvent initializedRequestEvent = RequestEvent.createNew(requestConfig, RequestEventType.UMB, event);
+        initializedRequestEvent.setId(requestEvent.getId());
 
         when(errataClient.getErratum("139856")).thenReturn(errata);
         when(errataClient.getBuildsList("139856")).thenReturn(buildList);
         when(errataClient.getRelease("2096")).thenReturn(release);
         when(clientSession.getBuild(3338841)).thenReturn(kojiBuildInfo);
+        when(requestEventRepository.updateRequestConfig(requestEvent, requestConfig))
+                .thenReturn(initializedRequestEvent);
 
         ArgumentMatcher<RequestEvent> hasAdvisoryId = cfg -> cfg != null
                 && "139856".equals(((ErrataAdvisoryRequestConfig) cfg.getRequestConfig()).getAdvisoryId());

@@ -58,6 +58,7 @@ public class ErrataNotificationHandler {
     FeatureFlags featureFlags;
 
     @Inject
+    @Setter
     RequestEventRepository requestEventRepository;
 
     public void handle(RequestEvent requestEvent) throws JsonProcessingException, IOException {
@@ -80,7 +81,6 @@ public class ErrataNotificationHandler {
 
         // Update the requestEvent with the requestConfig
         requestEvent = addErrataAdvisoryRequestConfig(requestEvent, String.valueOf(errataStatusChange.getErrataId()));
-
         advisoryService.generateFromAdvisory(requestEvent);
     }
 
