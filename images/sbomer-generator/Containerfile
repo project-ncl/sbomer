@@ -1,5 +1,5 @@
 # https://catalog.redhat.com/software/containers/ubi9/618326f8c0d15aff4912fe0b
-FROM registry.access.redhat.com/ubi9@sha256:2bae9062eddbbc18e76555972e7026ffe02cef560a0076e6d7f72bed2c05723f
+FROM registry.access.redhat.com/ubi9@sha256:1057dab827c782abcfb9bda0c3900c0966b5066e671d54976a7bcb3a2d1a5e53
 
 RUN dnf -y --noplugins --setopt=install_weak_deps=0 --setopt=tsflags=nodocs upgrade
 RUN INSTALL_PKGS="jq wget unzip zip git skopeo" && \
