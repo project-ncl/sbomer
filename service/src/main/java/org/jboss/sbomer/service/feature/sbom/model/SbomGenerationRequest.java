@@ -177,17 +177,25 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         if (sbomGenerationRequest.getRequest() == null) {
             return;
         }
-        // If this is not a final status update, mark the request as in progress
-        if (!sbomGenerationRequest.getStatus().isFinal()) {
-            sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.IN_PROGRESS);
-            return;
-        }
-        // This is a final status (FAILED or FINISHED)
+
         Object[] results = countSbomGenerationRequestsOf(sbomGenerationRequest.getRequest());
         Long generationsInProgress = ((Number) results[0]).longValue();
         Long generationsFailed = ((Number) results[1]).longValue();
         Long generationsTotal = ((Number) results[2]).longValue();
 
+        // If this is not a final status update, mark the request as in progress
+        if (!sbomGenerationRequest.getStatus().isFinal()) {
+            sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.IN_PROGRESS);
+            if (generationsInProgress == 0) {
+                // At least this one is in progress (it might have not been stored in DB yet)
+                generationsInProgress = 1L;
+            }
+            sbomGenerationRequest.getRequest()
+                    .setReason(generationsInProgress + "/" + generationsTotal + " in progress");
+            return;
+        }
+
+        // This is a final status (FAILED or FINISHED)
         if (generationsInProgress > 0) {
             // There are still generations in progress for this request
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.IN_PROGRESS);
