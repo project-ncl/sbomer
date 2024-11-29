@@ -39,7 +39,7 @@ class SbomerConfigProviderTest {
         assertEquals(GeneratorType.MAVEN_CYCLONEDX, defaultGenerationConfig.defaultGenerator());
         assertEquals(5, defaultGenerationConfig.generators().size());
         assertEquals(
-                "--batch-mode -DschemaVersion=1.4",
+                "--batch-mode -DschemaVersion=1.6",
                 defaultGenerationConfig.generators().get(GeneratorType.MAVEN_CYCLONEDX).defaultArgs());
         assertEquals(
                 "--warn-on-missing-scm --legacy-scm-locator",
@@ -111,7 +111,7 @@ class SbomerConfigProviderTest {
             assertInstanceOf(DefaultProcessorConfig.class, product.getProcessors().get(0));
             assertInstanceOf(RedHatProductProcessorConfig.class, product.getProcessors().get(1));
             assertEquals(GeneratorType.MAVEN_CYCLONEDX, product.getGenerator().getType());
-            assertEquals("--batch-mode -DschemaVersion=1.4", product.getGenerator().getArgs());
+            assertEquals("--batch-mode -DschemaVersion=1.6", product.getGenerator().getArgs());
             assertEquals("2.9.0", product.getGenerator().getVersion());
         }
 
@@ -128,7 +128,7 @@ class SbomerConfigProviderTest {
             assertInstanceOf(DefaultProcessorConfig.class, product.getProcessors().get(0));
             assertInstanceOf(RedHatProductProcessorConfig.class, product.getProcessors().get(1));
             assertEquals(GeneratorType.MAVEN_CYCLONEDX, product.getGenerator().getType());
-            assertEquals("--batch-mode -DschemaVersion=1.4", product.getGenerator().getArgs());
+            assertEquals("--batch-mode -DschemaVersion=1.6", product.getGenerator().getArgs());
             assertEquals("1.1.1", product.getGenerator().getVersion());
         }
 

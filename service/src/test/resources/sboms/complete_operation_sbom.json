@@ -1,6 +1,6 @@
 {
   "bomFormat": "CycloneDX",
-  "specVersion": "1.4",
+  "specVersion": "1.6",
   "version": 1,
   "metadata": {
     "timestamp": "2024-02-14T17:42:25Z",
