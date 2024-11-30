@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,6 +63,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
+import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -303,20 +305,23 @@ public class AdvisoryService {
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
         SyftImageConfig config = SyftImageConfig.builder().withIncludeRpms(true).build();
 
-        buildDetails.forEach((pVersion, items) -> {
-            log.debug("Processing container builds of Errata Product Version: '{}'", pVersion);
+        // Collect all the docker build ids so we can query Koji in one go
+        List<Long> buildIds = buildDetails.values()
+                .stream()
+                .flatMap(List::stream)
+                .map(BuildItem::getId)
+                .collect(Collectors.toList());
 
-            items.forEach(item -> {
-                log.debug("Getting image information from Brew for build '{}' ({})", item.getNvr(), item.getId());
-
-                String imageName = getImageNameFromBuild(item.getId());
-                if (imageName != null) {
-                    config.setImage(imageName);
-                    log.debug("Creating GenerationRequest Kubernetes resource...");
-                    sbomRequests.add(sbomService.generateSyftImage(requestEvent, config));
-                }
-            });
+        Map<Long, String> imageNamesFromBuilds = getImageNamesFromBuilds(buildIds);
+        imageNamesFromBuilds.forEach((buildId, imageName) -> {
+            log.debug("Retrieved imageName '{}' for buildId {}", imageName, buildId);
+            if (imageName != null) {
+                config.setImage(imageName);
+                log.debug("Creating GenerationRequest Kubernetes resource...");
+                sbomRequests.add(sbomService.generateSyftImage(requestEvent, config));
+            }
         });
+
         return sbomRequests;
     }
 
@@ -395,36 +400,40 @@ public class AdvisoryService {
         return null;
     }
 
-    private String getImageNameFromBuild(Long buildId) {
-        try {
-            KojiBuildInfo buildInfo = kojiSession.getBuild(buildId.intValue());
-            if (buildInfo == null) {
-                return null;
-            }
+    private Map<Long, String> getImageNamesFromBuilds(List<Long> buildIds) {
+        Map<Long, String> buildsToImageName = new HashMap<Long, String>();
 
-            // Get the image name from the extra.image.index.pull
-            // Retrieve the image name with the sha256 if available, otherwise the first in the list
-            return Optional.ofNullable(buildInfo.getExtra())
-                    .map(extra -> (Map<String, Object>) extra.get("image"))
-                    .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
-                    .map(indexMap -> (List<String>) indexMap.get("pull"))
-                    .flatMap(
-                            list -> list != null && !list.isEmpty()
-                                    ? list.stream().filter(item -> item.contains("sha256")).findFirst()
-                                    : Optional.empty())
-                    .or(
-                            () -> Optional.ofNullable(buildInfo.getExtra())
-                                    .map(extra -> (Map<String, Object>) extra.get("image"))
-                                    .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
-                                    .map(indexMap -> (List<String>) indexMap.get("pull"))
-                                    .flatMap(
-                                            list -> list != null && !list.isEmpty() ? list.stream().findFirst()
-                                                    : Optional.empty()))
-                    .orElse(null);
+        try {
+            List<KojiIdOrName> kojiIdOrNames = buildIds.stream()
+                    .map(id -> KojiIdOrName.getFor(id.toString()))
+                    .collect(Collectors.toList());
+
+            List<KojiBuildInfo> buildInfos = kojiSession.getBuild(kojiIdOrNames);
+            for (KojiBuildInfo kojiBuildInfo : buildInfos) {
+                String imageName = Optional.ofNullable(kojiBuildInfo.getExtra())
+                        .map(extra -> (Map<String, Object>) extra.get("image"))
+                        .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
+                        .map(indexMap -> (List<String>) indexMap.get("pull"))
+                        .flatMap(
+                                list -> list != null && !list.isEmpty()
+                                        ? list.stream().filter(item -> item.contains("sha256")).findFirst()
+                                        : Optional.empty())
+                        .or(
+                                () -> Optional.ofNullable(kojiBuildInfo.getExtra())
+                                        .map(extra -> (Map<String, Object>) extra.get("image"))
+                                        .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
+                                        .map(indexMap -> (List<String>) indexMap.get("pull"))
+                                        .flatMap(
+                                                list -> list != null && !list.isEmpty() ? list.stream().findFirst()
+                                                        : Optional.empty()))
+                        .orElse(null);
+                buildsToImageName.put(Long.valueOf(kojiBuildInfo.getId()), imageName);
+            }
         } catch (KojiClientException e) {
-            log.error("Unable to fetch containers information for buildID: {}", buildId, e);
+            log.error("Unable to fetch containers information for buildIDs: {}", buildIds, e);
             return null;
         }
+        return buildsToImageName;
     }
 
     private void printAllErratumData(Errata erratum) {
