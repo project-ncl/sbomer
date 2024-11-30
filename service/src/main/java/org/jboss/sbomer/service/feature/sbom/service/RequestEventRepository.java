@@ -46,12 +46,11 @@ import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.dto.v1beta1.V1BaseBeta1RequestRecord;
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseGenerationRecord;
-import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseManifestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
-import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
@@ -344,7 +343,10 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
                 .append("sgr.identifier AS generation_request_identifier, ")
                 .append("sgr.config AS generation_request_config, ")
                 .append("sgr.type AS generation_request_type, ")
-                .append("sgr.creation_time AS generation_request_creation_time ")
+                .append("sgr.creation_time AS generation_request_creation_time, ")
+                .append("sgr.status AS generation_request_status, ")
+                .append("sgr.result AS generation_request_result, ")
+                .append("sgr.reason AS generation_request_reason ")
                 .append("FROM request re ")
                 .append("LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id ")
                 .append("LEFT JOIN sbom s ON sgr.id = s.generationrequest_id ");
@@ -385,19 +387,22 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
             String sbomId = (String) row[7];
 
             if (sbomId != null) {
-                V1Beta1BaseManifestRecord manifest = new V1Beta1BaseManifestRecord(
+                V1Beta1RequestManifestRecord manifest = new V1Beta1RequestManifestRecord(
                         sbomId,
                         (String) row[8],
                         (String) row[9],
                         convertFromTimestamp(row[10]),
                         (Integer) row[11],
                         (String) row[12],
-                        new V1Beta1BaseGenerationRecord(
+                        new V1Beta1GenerationRecord(
                                 (String) row[13],
                                 (String) row[14],
                                 Config.fromString((String) row[15]),
-                                GenerationRequestType.valueOf((String) row[16]),
-                                convertFromTimestamp(row[17])));
+                                (String) row[16],
+                                convertFromTimestamp(row[17]),
+                                (String) row[18],
+                                (String) row[19],
+                                (String) row[20]));
 
                 aggregatedResults
                         .computeIfAbsent(

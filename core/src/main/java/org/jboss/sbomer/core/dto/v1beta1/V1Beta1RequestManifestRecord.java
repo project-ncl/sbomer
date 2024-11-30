@@ -18,24 +18,14 @@
 package org.jboss.sbomer.core.dto.v1beta1;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Map;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.jboss.sbomer.core.config.request.RequestConfig;
-import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
-import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
+public record V1Beta1RequestManifestRecord(
+        String id,
+        String identifier,
+        String rootPurl,
+        Instant creationTime,
+        Integer configIndex,
+        String statusMessage,
+        V1Beta1GenerationRecord generation) {
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-@Schema(name = "V1Beta1RequestRecord")
-public record V1Beta1RequestRecord (
-    String id,
-    Instant receivalTime,
-    RequestEventType eventType,
-    RequestEventStatus eventStatus,
-    String reason,
-    @Schema(implementation = Map.class) RequestConfig requestConfig,
-    @Schema(implementation = Map.class) JsonNode event,
-    Collection<V1Beta1RequestManifestRecord> manifests) {
 }
