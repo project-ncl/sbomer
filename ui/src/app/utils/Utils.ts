@@ -16,7 +16,7 @@
 /// limitations under the License.
 ///
 
-import { SbomerGeneration } from '@app/types';
+import { SbomerGeneration, SbomerRequest } from '@app/types';
 import { Label } from '@patternfly/react-core';
 
 const GenerationRequestTypes = new Map<string, { description?: string }>([
@@ -45,6 +45,16 @@ const GenerationRequestResults = new Map<
   ['ERR_SYSTEM', { description: 'System error', color: 'red' }],
   ['ERR_MULTI', { description: 'Multiple errors', color: 'red' }],
   ['SUCCESS', { description: 'Success', color: 'green' }],
+]);
+
+const RequestEventStatuses = new Map<
+  string,
+  { description?: string; color: React.ComponentProps<typeof Label>['color'] }
+>([
+  ['FAILED', { description: 'Failed', color: 'red' }],
+  ['IGNORED', { description: 'Ignored', color: 'grey' }],
+  ['IN_PROGRESS', { description: 'In progress', color: 'blue' }],
+  ['SUCCESS', { description: 'Successfully finished', color: 'green' }],
 ]);
 
 /**
@@ -94,6 +104,12 @@ export function statusToDescription(request: SbomerGeneration): string {
   return resolved?.description ?? request.status;
 }
 
+export function requestEventStatusToDescription(request: SbomerRequest): string {
+  var resolved = RequestEventStatuses.get(request.eventStatus);
+
+  return resolved?.description ?? request.eventStatus;
+}
+
 export function resultToDescription(request: SbomerGeneration): string {
   if (request.result == null) {
     return 'In progress';
@@ -110,6 +126,18 @@ export function statusToColor(request: SbomerGeneration): React.ComponentProps<t
   }
 
   return 'grey';
+}
+
+export function requestEventStatusToColor(request: SbomerRequest): React.ComponentProps<typeof Label>['color'] {
+  if (request.eventStatus == 'FAILED') {
+    return 'red';
+  } else if (request.eventStatus == 'IN_PROGRESS') {
+    return 'blue';
+  } else if (request.eventStatus == 'SUCCESS') {
+    return 'green';
+  } else {
+    return 'grey';
+  }
 }
 
 export function resultToColor(request: SbomerGeneration): React.ComponentProps<typeof Label>['color'] {
