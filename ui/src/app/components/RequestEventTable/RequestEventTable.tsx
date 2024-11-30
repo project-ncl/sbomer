@@ -76,7 +76,7 @@ export const RequestEventTable = () => {
         </Thead>
         <Tbody>
           {value.map((requestEvent) => (
-            <Tr>
+            <Tr key={requestEvent.id} isClickable onRowClick={() => navigate('/requestevents/' + requestEvent.id)}>
               <Td dataLabel={columnNames.eventStatus}>
                   <Tooltip
                   isContentLeftAligned={true}
@@ -89,8 +89,8 @@ export const RequestEventTable = () => {
                     </div>
                   }
                 >
-                  <Label style={{ cursor: 'pointer' }} color={requestEventStatusToColor(requestEvent)}>
-                    {requestEventStatusToDescription(requestEvent)}
+                  <Label style={{ cursor: 'pointer' }} color={requestEventStatusToColor(requestEvent.eventStatus)}>
+                    {requestEventStatusToDescription(requestEvent.eventStatus)}
                   </Label>
 
                   {/* <span className="pf-v5-c-timestamp pf-m-help-text">{requestEvent.eventStatus}</span> */}
