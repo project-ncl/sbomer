@@ -31,6 +31,7 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.REQUEST_C
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.REQUEST_EVENT_TYPE;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -256,6 +257,9 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
     }
 
     protected Instant convertFromTimestamp(Object rawTimeObject) {
+        if (rawTimeObject instanceof Timestamp) {
+            return ((Timestamp) rawTimeObject).toInstant();
+        }
         return (Instant) rawTimeObject;
     }
 
