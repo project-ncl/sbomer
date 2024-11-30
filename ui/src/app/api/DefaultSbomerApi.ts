@@ -17,7 +17,7 @@
 ///
 
 import axios, { Axios, AxiosError } from 'axios';
-import { SbomerApi, SbomerGeneration, SbomerManifest, SbomerStats, SbomerRequest } from '../types';
+import { SbomerApi, SbomerGeneration, SbomerManifest, SbomerStats, SbomerRequest, SbomerRequestManifest } from '../types';
 
 type Options = {
   baseUrl: string;
@@ -219,4 +219,15 @@ export class DefaultSbomerApi implements SbomerApi {
 
     return { data: requests, total: data.totalHits };
   }
+
+  async getRequestEvent(id: string): Promise<SbomerRequestManifest> {
+    const request = await this.client
+      .get<SbomerRequestManifest>(`/api/v1beta1/requests/id=${id}`)
+      .then((response) => {
+        return new SbomerRequestManifest(response.data[0]);
+      });
+
+    return request;
+  }
+
 }

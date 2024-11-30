@@ -104,10 +104,10 @@ export function statusToDescription(request: SbomerGeneration): string {
   return resolved?.description ?? request.status;
 }
 
-export function requestEventStatusToDescription(request: SbomerRequest): string {
-  var resolved = RequestEventStatuses.get(request.eventStatus);
+export function requestEventStatusToDescription(eventStatus: string): string {
+  var resolved = RequestEventStatuses.get(eventStatus);
 
-  return resolved?.description ?? request.eventStatus;
+  return resolved?.description ?? eventStatus;
 }
 
 export function resultToDescription(request: SbomerGeneration): string {
@@ -128,12 +128,12 @@ export function statusToColor(request: SbomerGeneration): React.ComponentProps<t
   return 'grey';
 }
 
-export function requestEventStatusToColor(request: SbomerRequest): React.ComponentProps<typeof Label>['color'] {
-  if (request.eventStatus == 'FAILED') {
+export function requestEventStatusToColor(status: string): React.ComponentProps<typeof Label>['color'] {
+  if (status == 'FAILED') {
     return 'red';
-  } else if (request.eventStatus == 'IN_PROGRESS') {
+  } else if (status == 'IN_PROGRESS') {
     return 'blue';
-  } else if (request.eventStatus == 'SUCCESS') {
+  } else if (status == 'SUCCESS') {
     return 'green';
   } else {
     return 'grey';
