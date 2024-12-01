@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.model;
 
+import static org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryCommentEventFiringUtil.notifyCompletedRequestEvent;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
+import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryCommentEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
@@ -209,11 +212,16 @@ public class SbomGenerationRequest extends PanacheEntityBase {
             failed = (failed > generationsTotal) ? generationsTotal : failed;
             sbomGenerationRequest.getRequest().setReason(failed + "/" + generationsTotal + " failed");
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.FAILED);
+
+            notifyCompletedRequestEvent(AdvisoryCommentEvent.builder().withRequestEvent(sbomGenerationRequest.getRequest()).build());
+
         } else {
             // There are no generations in progress nor failed
             sbomGenerationRequest.getRequest()
                     .setReason(generationsTotal + "/" + generationsTotal + " completed with success");
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.SUCCESS);
+
+            notifyCompletedRequestEvent(AdvisoryCommentEvent.builder().withRequestEvent(sbomGenerationRequest.getRequest()).build());
         }
     }
 
