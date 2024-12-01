@@ -27,6 +27,7 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
@@ -51,8 +52,16 @@ public class AdvisoryCommentEventListener {
     @Inject
     RequestEventRepository repository;
 
+    @Inject
+    FeatureFlags featureFlags;
+
     public void onAdvisoryCommentEvent(@ObservesAsync AdvisoryCommentEvent event) {
         log.debug("Async event received: {}", event.getRequestEvent());
+        if (!featureFlags.errataCommentsGenerationsEnabled()) {
+            log.warn(
+                    "Errata comments generation feature is disabled, no comments will be added to the Errata advisory!!");
+            return;
+        }
 
         RequestEvent requestEvent = event.getRequestEvent();
         if (!validateRequestEvent(requestEvent)) {
