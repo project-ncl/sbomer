@@ -62,6 +62,7 @@ public class FeatureFlags implements UnleashSubscriber {
     public static final String TOGGLE_STANDARD_ERRATA_RPM_MANIFEST_GENERATION = "errata-standard-rpm-manifest-generation";
     public static final String TOGGLE_STANDARD_ERRATA_IMAGE_MANIFEST_GENERATION = "errata-standard-image-manifest-generation";
     public static final String TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION = "errata-textonly-manifest-generation";
+    public static final String TOGGLE_ERRATA_COMMENTS_GENERATION = "errata-comment-generation";
 
     /**
      * A map holding all toggle values we are interested in. This is used for logging purposes. We are retrieving the
@@ -95,6 +96,9 @@ public class FeatureFlags implements UnleashSubscriber {
 
     @ConfigProperty(name = "SBOMER_FEATURE_TEXTONLY_ERRATA_MANIFEST_ENABLED", defaultValue = "false")
     boolean textonlyErrataGeneration;
+
+    @ConfigProperty(name = "SBOMER_FEATURE_ERRATA_COMMENTS_GENERATION_ENABLED", defaultValue = "false")
+    boolean errataCommentsGeneration;
 
     /**
      * Returns {@code true} in case the dry-run mode is enabled.
@@ -162,6 +166,15 @@ public class FeatureFlags implements UnleashSubscriber {
     }
 
     /**
+     * Returns {@code true} if the manifest generation should be reflected in Errata comments.
+     *
+     * @return {@code true} if the manifest generation should be reflected in Errata comments, {@code false} otherwise
+     */
+    public boolean errataCommentsGenerationsEnabled() {
+        return unleash.isEnabled(TOGGLE_ERRATA_COMMENTS_GENERATION, errataCommentsGeneration);
+    }
+
+    /**
      * Returns {@code true} if we should send a UMB message for a successfully generated manifest where the generation
      * request source is of a given type.
      *
@@ -194,7 +207,8 @@ public class FeatureFlags implements UnleashSubscriber {
                 TOGGLE_ERRATA_INTEGRATION,
                 TOGGLE_STANDARD_ERRATA_RPM_MANIFEST_GENERATION,
                 TOGGLE_STANDARD_ERRATA_IMAGE_MANIFEST_GENERATION,
-                TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION)) {
+                TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION,
+                TOGGLE_ERRATA_COMMENTS_GENERATION)) {
             FeatureToggle toggle = toggleResponse.getToggleCollection().getToggle(toggleName);
 
             if (toggle != null) {

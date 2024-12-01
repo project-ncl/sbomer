@@ -204,8 +204,10 @@ public class SbomGenerationRequest extends PanacheEntityBase {
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.IN_PROGRESS);
             sbomGenerationRequest.getRequest()
                     .setReason(generationsInProgress + "/" + generationsTotal + " in progress");
+            return;
+        }
 
-        } else if (generationsFailed > 0 || SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus())) {
+        if (generationsFailed > 0 || SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus())) {
             // There are no more generations in progress and some failed
             Long failed = generationsFailed
                     + (SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus()) ? 1L : 0L);
@@ -213,16 +215,17 @@ public class SbomGenerationRequest extends PanacheEntityBase {
             sbomGenerationRequest.getRequest().setReason(failed + "/" + generationsTotal + " failed");
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.FAILED);
 
-            notifyCompletedRequestEvent(AdvisoryCommentEvent.builder().withRequestEvent(sbomGenerationRequest.getRequest()).build());
-
         } else {
             // There are no generations in progress nor failed
             sbomGenerationRequest.getRequest()
                     .setReason(generationsTotal + "/" + generationsTotal + " completed with success");
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.SUCCESS);
 
-            notifyCompletedRequestEvent(AdvisoryCommentEvent.builder().withRequestEvent(sbomGenerationRequest.getRequest()).build());
         }
+
+        // Send an async notification for the completed generations (will be used to add comments to Errata)
+        notifyCompletedRequestEvent(
+                AdvisoryCommentEvent.builder().withRequestEvent(sbomGenerationRequest.getRequest()).build());
     }
 
     @Transactional
