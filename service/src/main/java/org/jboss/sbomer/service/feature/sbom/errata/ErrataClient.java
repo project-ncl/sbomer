@@ -46,6 +46,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -89,10 +90,10 @@ public interface ErrataClient {
     @Path("/variants")
     public ErrataPage<ErrataVariant.VariantData> getAllVariants(@Valid @BeanParam ErrataQueryParameters pageParameters);
 
-    // Get Brew build details. - NOT NEEDED? LEAVING HERE FOR NOW
-    // @GET
-    // @Path("/build/{id_or_nvr}")
-    // public String getBrewBuildDetails(@PathParam("id_or_nvr") String brewIdOrNvr);
+    // Add a comment to an advisory. Example request body: {"comment": "This is my comment"}
+    @POST
+    @Path("/erratum/{id}/add_comment")
+    public Errata addCommentToErratum(@PathParam("id") String erratumId, String comment);
 
     // Fetch the Brew builds associated with an advisory.
     @GET
