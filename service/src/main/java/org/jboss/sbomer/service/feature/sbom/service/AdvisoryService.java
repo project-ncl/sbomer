@@ -303,7 +303,6 @@ public class AdvisoryService {
         log.debug("Processing docker builds: {}", buildDetails);
 
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
-        SyftImageConfig config = SyftImageConfig.builder().withIncludeRpms(true).build();
 
         // Collect all the docker build ids so we can query Koji in one go
         List<Long> buildIds = buildDetails.values()
@@ -316,7 +315,7 @@ public class AdvisoryService {
         imageNamesFromBuilds.forEach((buildId, imageName) -> {
             log.debug("Retrieved imageName '{}' for buildId {}", imageName, buildId);
             if (imageName != null) {
-                config.setImage(imageName);
+                SyftImageConfig config = SyftImageConfig.builder().withIncludeRpms(true).withImage(imageName).build();
                 log.debug("Creating GenerationRequest Kubernetes resource...");
                 sbomRequests.add(sbomService.generateSyftImage(requestEvent, config));
             }
