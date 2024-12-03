@@ -24,7 +24,7 @@ import lombok.Data;
 
 @Data
 @Builder(setterPrefix = "with")
-public class AdvisoryCommentEvent {
+public class RequestEventStatusUpdateEvent {
 
     private final RequestEvent requestEvent;
 
