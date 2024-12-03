@@ -17,7 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event;
 
-import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
+import org.jboss.sbomer.core.config.request.RequestConfig;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +27,8 @@ import lombok.Data;
 @Builder(setterPrefix = "with")
 public class RequestEventStatusUpdateEvent {
 
-    private final RequestEvent requestEvent;
+    private final String requestEventId;
+    private final RequestEventStatus requestEventStatus;
+    private final RequestConfig requestEventConfig;
 
 }

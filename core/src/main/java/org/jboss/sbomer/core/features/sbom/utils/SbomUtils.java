@@ -728,7 +728,7 @@ public class SbomUtils {
         Property r = findPropertyWithNameInComponent("sbomer:image:labels:release", mainComponent).orElse(null);
 
         if (n != null && v != null && r != null) {
-            return n + "-" + v + "-" + r;
+            return n.getValue() + "-" + v.getValue() + "-" + r.getValue();
         }
 
         return null;

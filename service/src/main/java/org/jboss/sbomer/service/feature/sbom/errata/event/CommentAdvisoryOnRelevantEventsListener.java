@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.errata.event;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,12 +40,12 @@ import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
-import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
-import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
@@ -65,89 +64,153 @@ public class CommentAdvisoryOnRelevantEventsListener {
     ErrataClient errataClient;
 
     @Inject
-    RequestEventRepository requestEventRepository;
-
-    @Inject
-    SbomRepository sbomRepository;
+    SbomService sbomService;
 
     @Inject
     FeatureFlags featureFlags;
 
     public void onRequestEventStatusUpdate(@ObservesAsync RequestEventStatusUpdateEvent event) {
-        log.debug("Advisory comment event received for request event completion: {}", event.getRequestEvent());
+        log.debug("Event received for request event status update...");
         if (!featureFlags.errataCommentsGenerationsEnabled()) {
             log.warn(
                     "Errata comments generation feature is disabled, no comments will be added to the Errata advisory!!");
             return;
         }
 
-        RequestEvent requestEvent = event.getRequestEvent();
-        if (!isValidRequestEvent(requestEvent)) {
+        if (!isValidRequestEvent(event)) {
             return;
         }
 
-        ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+        ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) event.getRequestEventConfig();
         Errata errata = errataClient.getErratum(config.getAdvisoryId());
         if (!isValidErrata(errata, config.getAdvisoryId())) {
             return;
         }
 
-        // Searching all manifest generated from this request event
-        List<V1Beta1RequestRecord> v1Beta1RequestRecords = requestEventRepository
-                .searchAggregatedResultsNatively("id=" + requestEvent.getId());
-        if (v1Beta1RequestRecords == null || v1Beta1RequestRecords.isEmpty()) {
+        if (event.getRequestEventId() != null) {
+            // Advisories which produced request events which handled the manifestation.
+            // Standard advisories and text-only advisories with "deliverables" notes content fall in this category.
+            handleAutomatedManifestationAdvisory(event, config);
+        } else {
+            // Advisories whose manifestation was handled autonomously.
+            // Text-only advisories with "manifest" notes content fall in this category.
+            handleManualManifestationAdvisory(errata, config);
+        }
+    }
+
+    private void handleAutomatedManifestationAdvisory(
+            RequestEventStatusUpdateEvent event,
+            ErrataAdvisoryRequestConfig config) {
+        List<V1Beta1RequestRecord> requestRecords = sbomService
+                .searchAggregatedResultsNatively("id=" + event.getRequestEventId());
+
+        if (requestRecords == null || requestRecords.isEmpty()) {
             log.warn(
-                    "Could not find any information for the manifests generated from request event {}, ignoring the event!",
-                    requestEvent.getId());
+                    "Could not find information for manifests generated from request event {}, ignoring the event!",
+                    event.getRequestEventId());
             return;
         }
-        V1Beta1RequestRecord requestRecord = v1Beta1RequestRecords.get(0);
+
+        V1Beta1RequestRecord requestRecord = requestRecords.get(0);
+        List<String> processedGenerationsIds = new ArrayList<>();
+        Map<SbomGenerationStatus, Long> generationsCounts = countGenerationsByStatus(requestRecord);
 
         StringBuilder commentSb = new StringBuilder();
-        List<String> processedGenerationsIds = new ArrayList<String>();
+        commentSb.append(createSummaryStatusSection(generationsCounts))
+                .append(
+                        createGenerationsSectionForStatus(
+                                requestRecord,
+                                processedGenerationsIds,
+                                SbomGenerationStatus.FINISHED,
+                                "\nSucceeded generations:\n"))
+                .append(
+                        createGenerationsSectionForStatus(
+                                requestRecord,
+                                processedGenerationsIds,
+                                SbomGenerationStatus.FAILED,
+                                "\nFailed generations:\n"))
+                .append(generateRequestEventFinalSection(event.getRequestEventId()));
 
-        String summaryStatusSection = createSummaryStatusSection(requestRecord);
-        String succeededGenerationSection = createGenerationsSectionForStatus(
-                requestRecord,
-                processedGenerationsIds,
-                SbomGenerationStatus.FINISHED,
-                "\nSucceeded generations:\n");
-        String failedGenerationSection = createGenerationsSectionForStatus(
-                requestRecord,
-                processedGenerationsIds,
-                SbomGenerationStatus.FAILED,
-                "\nFailed generations:\n");
-        String finalSection = generateRequestEventFinalSection(requestEvent);
-        commentSb.append(summaryStatusSection)
-                .append(succeededGenerationSection)
-                .append(failedGenerationSection)
-                .append(finalSection);
+        log.debug("Adding comment to advisoryId {} : '{}'", config.getAdvisoryId(), commentSb.toString());
+        doAddCommentToErratum(commentSb.toString(), config.getAdvisoryId());
+    }
 
+    private void handleManualManifestationAdvisory(Errata errata, ErrataAdvisoryRequestConfig config) {
+        JsonNode notesMapping = errata.getNotesMapping().orElse(null);
+        if (notesMapping == null || !notesMapping.has("manifest")) {
+            log.warn(
+                    "The text-only advisory {} does not have 'manifests' listed, no comments will be added!",
+                    config.getAdvisoryId());
+            return;
+        }
+
+        List<String> manifestsPurls = extractPurlUris(notesMapping);
+        List<SbomGenerationRequest> generations = findGenerationsByPurls(manifestsPurls);
+
+        List<String> processedGenerationsIds = new ArrayList<>();
+        Map<SbomGenerationStatus, Long> generationsCounts = countGenerationsByStatus(generations);
+
+        StringBuilder commentSb = new StringBuilder();
+        commentSb.append(createSummaryStatusSection(generationsCounts))
+                .append(
+                        createGenerationsSectionForStatus(
+                                generations,
+                                processedGenerationsIds,
+                                SbomGenerationStatus.FINISHED,
+                                "\nSucceeded generations:\n"))
+                .append(
+                        createGenerationsSectionForStatus(
+                                generations,
+                                processedGenerationsIds,
+                                SbomGenerationStatus.FAILED,
+                                "\nFailed generations:\n"));
+
+        log.debug("Adding comment to advisoryId {} : '{}'", config.getAdvisoryId(), commentSb.toString());
         doAddCommentToErratum(commentSb.toString(), config.getAdvisoryId());
     }
 
     @Retry(maxRetries = 10)
     public void doAddCommentToErratum(String comment, String advisoryId) {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("comment", comment);
-        payload.put("type", "AutomatedComment");
-
-        // Serialize to JSON
         try {
-            String jsonPayload = ObjectMapperProvider.json().writeValueAsString(payload);
+            String jsonPayload = ObjectMapperProvider.json()
+                    .writeValueAsString(Map.of("comment", comment, "type", "AutomatedComment"));
             errataClient.addCommentToErratum(advisoryId, jsonPayload);
         } catch (JsonProcessingException e) {
             log.error("An error occured during the processing of the advisory comment", e);
         }
     }
 
-    private String createSummaryStatusSection(V1Beta1RequestRecord requestRecord) {
-        Map<SbomGenerationStatus, Long> generationsCounts = countGenerationsByStatus(requestRecord);
+    public static List<String> extractPurlUris(JsonNode manifestNode) {
+        return Optional.ofNullable(manifestNode.path("manifest").path("refs")).filter(JsonNode::isArray).map(refs -> {
+            List<String> purlUris = new ArrayList<>();
+            refs.forEach(ref -> {
+                if ("purl".equals(ref.path("type").asText())) {
+                    purlUris.add(ref.path("uri").asText());
+                }
+            });
+            return purlUris;
+        }).orElse(Collections.emptyList());
+    }
+
+    private List<SbomGenerationRequest> findGenerationsByPurls(List<String> purls) {
+        List<SbomGenerationRequest> generations = new ArrayList<>();
+        purls.forEach(purl -> {
+            Sbom sbom = sbomService.findByPurl(purl);
+            if (sbom != null && sbom.getGenerationRequest() != null) {
+                generations.add(sbom.getGenerationRequest());
+            }
+        });
+        return generations;
+    }
+
+    private String createSummaryStatusSection(Map<SbomGenerationStatus, Long> generationsCounts) {
         long successful = generationsCounts.getOrDefault(SbomGenerationStatus.FINISHED, 0L);
         long failed = generationsCounts.getOrDefault(SbomGenerationStatus.FAILED, 0L);
-
-        return (successful + failed) + " builds manifested. " + successful + " generations succeeded," + failed
-                + " failed.\n\n";
+        return String.format(
+                "%d builds manifested. %d generations succeeded, %d failed.%n%n",
+                (successful + failed),
+                successful,
+                failed);
     }
 
     private String createGenerationsSectionForStatus(
@@ -156,7 +219,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
             SbomGenerationStatus status,
             String prefix) {
 
-        StringBuilder generationsSection = new StringBuilder(prefix);
+        StringBuilder generationsSection = new StringBuilder();
         if (requestRecord.manifests() != null && !requestRecord.manifests().isEmpty()) {
             for (V1Beta1RequestManifestRecord manifest : requestRecord.manifests()) {
                 if (processedGenerationsIds.contains(manifest.generation().id())) {
@@ -174,12 +237,45 @@ public class CommentAdvisoryOnRelevantEventsListener {
                 }
             }
         }
+        // If no generations were added, do not output anything in the comment
+        if (generationsSection.length() > 0) {
+            generationsSection.insert(0, prefix);
+        }
+
         return generationsSection.toString();
     }
 
-    private String generateRequestEventFinalSection(RequestEvent requestEvent) {
-        return "\n\nList of all manifests generated: " + "https://" + sbomerHost + "/requestevents/"
-                + requestEvent.getId() + "\n";
+    private String createGenerationsSectionForStatus(
+            List<SbomGenerationRequest> generations,
+            List<String> processedGenerationsIds,
+            SbomGenerationStatus status,
+            String prefix) {
+
+        StringBuilder generationsSection = new StringBuilder();
+        if (generations != null && !generations.isEmpty()) {
+            for (SbomGenerationRequest generation : generations) {
+                if (processedGenerationsIds.contains(generation.getId())) {
+                    continue;
+                }
+
+                if (status.equals(generation.getStatus())) {
+                    generationsSection.append("\n")
+                            .append("https://" + sbomerHost + "/generations/" + generation.getId());
+                    processedGenerationsIds.add(generation.getId());
+                }
+            }
+        }
+
+        // If no generations were added, do not output anything in the comment
+        if (generationsSection.length() > 0) {
+            generationsSection.insert(0, prefix);
+        }
+        return generationsSection.toString();
+    }
+
+    private String generateRequestEventFinalSection(String requestEventId) {
+        return "\n\nList of all manifests generated: " + "https://" + sbomerHost + "/requestevents/" + requestEventId
+                + "\n";
     }
 
     private String getGenerationNVRFromManifest(V1Beta1RequestManifestRecord manifestRecord) {
@@ -194,7 +290,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
         if (GenerationRequestType.CONTAINERIMAGE.equals(generationRequestType)) {
             // The NVR is not stored inside the generation, we need to get it from the manifest. Might be optimized in
             // future.
-            Sbom sbom = sbomRepository.findById(manifestRecord.id());
+            Sbom sbom = sbomService.get(manifestRecord.id());
             String nvr = SbomUtils.computeNVRFromContainerManifest(sbom.getSbom());
 
             return nvr != null ? (nvr + ": ") : "";
@@ -205,16 +301,16 @@ public class CommentAdvisoryOnRelevantEventsListener {
         return "";
     }
 
-    private boolean isValidRequestEvent(RequestEvent requestEvent) {
-        if (!isFinalStatus(requestEvent.getEventStatus())) {
+    private boolean isValidRequestEvent(RequestEventStatusUpdateEvent event) {
+        if (!isFinalStatus(event.getRequestEventStatus())) {
             log.warn("The request event is not a final expected status, ignoring the event!");
             return false;
         }
-        if (requestEvent.getRequestConfig() == null) {
+        if (event.getRequestEventConfig() == null) {
             log.warn("The event request config is null, ignoring the event!");
             return false;
         }
-        if (!(requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig)) {
+        if (!(event.getRequestEventConfig() instanceof ErrataAdvisoryRequestConfig)) {
             log.warn("The event request config is not of errata advisory type, ignoring the event!");
             return false;
         }
@@ -252,6 +348,13 @@ public class CommentAdvisoryOnRelevantEventsListener {
                         Collectors.groupingBy(
                                 generation -> SbomGenerationStatus.fromName(generation.status()),
                                 Collectors.counting()));
+    }
+
+    private Map<SbomGenerationStatus, Long> countGenerationsByStatus(List<SbomGenerationRequest> generations) {
+        return generations.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.groupingBy(SbomGenerationRequest::getStatus, Collectors.counting()));
     }
 
 }
