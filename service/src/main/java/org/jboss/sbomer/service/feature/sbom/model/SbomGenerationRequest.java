@@ -225,7 +225,11 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
         // Send an async notification for the completed generations (will be used to add comments to Errata)
         notifyRequestEventStatusUpdate(
-                RequestEventStatusUpdateEvent.builder().withRequestEvent(sbomGenerationRequest.getRequest()).build());
+                RequestEventStatusUpdateEvent.builder()
+                        .withRequestEventId(sbomGenerationRequest.getRequest().getId())
+                        .withRequestEventConfig(sbomGenerationRequest.getRequest().getRequestConfig())
+                        .withRequestEventStatus(sbomGenerationRequest.getRequest().getEventStatus())
+                        .build());
     }
 
     @Transactional

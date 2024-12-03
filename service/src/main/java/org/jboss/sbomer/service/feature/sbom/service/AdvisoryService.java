@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
+import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyRequestEventStatusUpdate;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +43,7 @@ import org.jboss.sbomer.core.features.sbom.config.DeliverableAnalysisConfig;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
@@ -53,6 +56,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildIte
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
+import org.jboss.sbomer.service.feature.sbom.errata.event.RequestEventStatusUpdateEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -182,6 +186,16 @@ public class AdvisoryService {
                     erratum.getDetails().get().getFulladvisory(),
                     erratum.getDetails().get().getId(),
                     manifestContent);
+
+            // Send an async notification for the completed generations (will be used to add comments to Errata)
+            notifyRequestEventStatusUpdate(
+                    RequestEventStatusUpdateEvent.builder()
+                            .withRequestEventConfig(
+                                    ErrataAdvisoryRequestConfig.builder()
+                                            .withAdvisoryId(String.valueOf(erratum.getDetails().get().getId()))
+                                            .build())
+                            .withRequestEventStatus(RequestEventStatus.SUCCESS)
+                            .build());
         }
 
         return requestConfigsWithinNotes.isEmpty() ? Collections.emptyList()

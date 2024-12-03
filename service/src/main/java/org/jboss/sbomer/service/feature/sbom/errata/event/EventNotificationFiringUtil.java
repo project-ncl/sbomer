@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event;
 
-import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
-
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.event.Event;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +25,11 @@ import lombok.extern.slf4j.Slf4j;
 public class EventNotificationFiringUtil {
 
     public static void notifyRequestEventStatusUpdate(Object requestEventNotification) {
-        RequestEvent requestEvent = (RequestEvent) requestEventNotification;
+        RequestEventStatusUpdateEvent requestEvent = (RequestEventStatusUpdateEvent) requestEventNotification;
         log.info(
-                "Firing async event for status update of request id: {}",
-                requestEvent.getId());
+                "Firing async event for status update of request event with id: {} and config: {}",
+                requestEvent.getRequestEventId(),
+                requestEvent.getRequestEventConfig());
         Event<Object> event = Arc.container().beanManager().getEvent();
         event.fireAsync(requestEventNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {
