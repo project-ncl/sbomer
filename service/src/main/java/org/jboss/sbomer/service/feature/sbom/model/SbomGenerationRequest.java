@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.model;
 
-import static org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryCommentEventFiringUtil.notifyCompletedRequestEvent;
+import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyRequestEventStatusUpdate;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,7 +31,7 @@ import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
-import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryCommentEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.RequestEventStatusUpdateEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
@@ -224,8 +224,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         }
 
         // Send an async notification for the completed generations (will be used to add comments to Errata)
-        notifyCompletedRequestEvent(
-                AdvisoryCommentEvent.builder().withRequestEvent(sbomGenerationRequest.getRequest()).build());
+        notifyRequestEventStatusUpdate(
+                RequestEventStatusUpdateEvent.builder().withRequestEvent(sbomGenerationRequest.getRequest()).build());
     }
 
     @Transactional

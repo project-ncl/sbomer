@@ -24,14 +24,15 @@ import jakarta.enterprise.event.Event;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AdvisoryCommentEventFiringUtil {
+public class EventNotificationFiringUtil {
 
-    public static void notifyCompletedRequestEvent(Object advisoryCommentEvent) {
+    public static void notifyRequestEventStatusUpdate(Object requestEventNotification) {
+        RequestEvent requestEvent = (RequestEvent) requestEventNotification;
         log.info(
-                "Firing async event for advisory comment on request id: {}",
-                ((RequestEvent) advisoryCommentEvent).getId());
+                "Firing async event for status update of request id: {}",
+                requestEvent.getId());
         Event<Object> event = Arc.container().beanManager().getEvent();
-        event.fireAsync(advisoryCommentEvent).whenComplete((result, throwable) -> {
+        event.fireAsync(requestEventNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 log.error("Error occurred while processing the async event.", throwable);
             }

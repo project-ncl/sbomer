@@ -715,6 +715,25 @@ public class SbomUtils {
         }
     }
 
+    public static String computeNVRFromContainerManifest(JsonNode jsonNode) {
+        Bom bom = fromJsonNode(jsonNode);
+        if (bom == null || bom.getComponents() == null || bom.getComponents().isEmpty()) {
+            return null;
+        }
+
+        Component mainComponent = bom.getComponents().get(0);
+        Property n = findPropertyWithNameInComponent("sbomer:image:labels:com.redhat.component", mainComponent)
+                .orElse(null);
+        Property v = findPropertyWithNameInComponent("sbomer:image:labels:version", mainComponent).orElse(null);
+        Property r = findPropertyWithNameInComponent("sbomer:image:labels:release", mainComponent).orElse(null);
+
+        if (n != null && v != null && r != null) {
+            return n + "-" + v + "-" + r;
+        }
+
+        return null;
+    }
+
     public static Bom fromPath(Path path) {
         try {
             return new JsonParser().parse(path.toFile());
