@@ -36,6 +36,8 @@ quarkus:
   rest-client:
     "errata":
       url: "https://dummy"
+    "pyxis":
+      url: "https://dummy"
 
   operator-sdk:
     start-operator: false
