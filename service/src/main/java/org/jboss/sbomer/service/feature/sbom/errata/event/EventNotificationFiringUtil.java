@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event;
 
+import org.jboss.sbomer.service.feature.sbom.errata.event.comment.RequestEventStatusUpdateEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.AdvisoryReleaseEvent;
+
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.event.Event;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +35,20 @@ public class EventNotificationFiringUtil {
                 requestEvent.getRequestEventConfig());
         Event<Object> event = Arc.container().beanManager().getEvent();
         event.fireAsync(requestEventNotification).whenComplete((result, throwable) -> {
+            if (throwable != null) {
+                log.error("Error occurred while processing the async event.", throwable);
+            }
+        });
+    }
+
+    public static void notifyAdvisoryRelease(Object advisoryReleaseNotification) {
+        AdvisoryReleaseEvent releaseEvent = (AdvisoryReleaseEvent) advisoryReleaseNotification;
+        log.info(
+                "Firing async event for advisory release update of advisory '{}'[{}]",
+                releaseEvent.getErratum().getDetails().get().getFulladvisory(),
+                releaseEvent.getErratum().getDetails().get().getId());
+        Event<Object> event = Arc.container().beanManager().getEvent();
+        event.fireAsync(advisoryReleaseNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 log.error("Error occurred while processing the async event.", throwable);
             }
