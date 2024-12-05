@@ -80,6 +80,8 @@ quarkus:
       url: "https://${sbomer.pnc.host}"
     "errata":
       url: "https://${sbomer.errata.host}"
+    "pyxis":
+      url: "https://${sbomer.pyxis.host}"
 
   # Support for feature-flags
   unleash:
