@@ -1,0 +1,780 @@
+{
+  "version": 1,
+  "metadata": {
+    "tools": [
+      {
+        "name": "CycloneDX Maven plugin",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "b1946ac92492d2347c6235b4d2611184"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "f572d396fae9206628714fb2ce00f72e94f2258f"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "e7c22b994c59d9cf2b48e549b1e24666636045930d3da7c1acb299d1c3b7f931f94aae41edda2c2b207a36e10f8bcb8d45223e54878f5b316e7ce3b6bc019629"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "1d0f284efe3edea4b9ca3bd514fa134b17eae361ccc7a1eefeff801b9bd6604e01f21f6bf249ef030599f0c218f2ba8c"
+          },
+          {
+            "alg": "SHA3-384",
+            "content": "1d0f284efe3edea4b9ca3bd514fa134b17eae361ccc7a1eefeff801b9bd6604e01f21f6bf249ef030599f0c218f2ba8c"
+          },
+          {
+            "alg": "SHA3-256",
+            "content": "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"
+          },
+          {
+            "alg": "SHA3-512",
+            "content": "e7c22b994c59d9cf2b48e549b1e24666636045930d3da7c1acb299d1c3b7f931f94aae41edda2c2b207a36e10f8bcb8d45223e54878f5b316e7ce3b6bc019629"
+          }
+        ],
+        "vendor": "OWASP Foundation",
+        "version": "2.7.9"
+      }
+    ],
+    "component": {
+      "name": "keycloak-parent",
+      "purl": "pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
+      "type": "library",
+      "group": "org.keycloak",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "c39d2243e5b33aa835373e5e4a0de2a2"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "0518977dc4c0ea5ca093dcd338bedb80003afd07"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "4e1daa192f22e2d62e2e8b68861975b23a4523dda8059b6f4b84f0392823e804"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
+      "version": "24.0.6.redhat-00001",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "aadc1955c030f723e9d89ed9d486b4eef5b0d1c6",
+            "url": "https://gitlab.example.com/keycloak-prod.git#24.0.6.redhat-00001"
+          }
+        ]
+      },
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "publisher": "Red Hat",
+      "description": "Keycloak SSO",
+      "externalReferences": [
+        {
+          "url": "http://keycloak.org",
+          "type": "website"
+        },
+        {
+          "url": "https://maven.repository.redhat.com/ga/",
+          "type": "distribution"
+        },
+        {
+          "url": "https://github.com/keycloak/keycloak/issues",
+          "type": "issue-tracker"
+        },
+        {
+          "url": "http://lists.jboss.org/pipermail/jboss-user/",
+          "type": "mailing-list"
+        },
+        {
+          "url": "https://github.com/keycloak/keycloak/tree/master/",
+          "type": "vcs"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/187875",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/builds/BALVSAEVTGYAY",
+          "type": "build-system",
+          "comment": "pnc-build-id"
+        },
+        {
+          "url": "repository.example.com/environmets/builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.6",
+          "type": "build-meta",
+          "comment": "pnc-environment-image"
+        }
+      ]
+    },
+    "timestamp": "2024-07-16T16:01:44Z",
+    "properties": [
+      {
+        "name": "maven.goal",
+        "value": "makeAggregateBom"
+      },
+      {
+        "name": "maven.scopes",
+        "value": "compile,provided,runtime,system"
+      }
+    ]
+  },
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "name": "keycloak-bom-parent",
+      "purl": "pkg:maven/org.keycloak.bom/keycloak-bom-parent@24.0.6.redhat-00001?type=pom",
+      "type": "library",
+      "group": "org.keycloak.bom",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "4ae3a43b2dcb5e195be1838408a0c5cb"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "d7f2138b6f3cacd09a31b7a4719b580c37ed3893"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "32e791da8732cd94d2f087ed47186eabd691c1aa32834d6dfedc5426da45fb28"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.keycloak.bom/keycloak-bom-parent@24.0.6.redhat-00001?type=pom",
+      "version": "24.0.6.redhat-00001",
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "d3685e3d5ff234389d2ad95f83a35b2900c9e83c",
+            "url": "https://git.example.com/keycloak-prod.git#24.0.6.redhat-00001"
+          }
+        ]
+      },
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "publisher": "Red Hat",
+      "externalReferences": [
+        {
+          "url": "https://maven.repository.redhat.com/ga/",
+          "type": "distribution"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/12618177",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/builds/BBLWSAQVTEYAA",
+          "type": "build-system",
+          "comment": "pnc-build-id"
+        },
+        {
+          "url": "repository.example.com/environment/builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.6",
+          "type": "build-meta",
+          "comment": "pnc-environment-image"
+        },
+        {
+          "url": "ssh://git@git.example.com/keycloak/keycloak-prod.git",
+          "type": "vcs",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "keycloak-adapter-bom",
+      "purl": "pkg:maven/org.keycloak.bom/keycloak-adapter-bom@24.0.6.redhat-00001?type=pom",
+      "type": "library",
+      "group": "org.keycloak.bom",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "a5a04ec70cf5281615cb1f07e7bedf26"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "a116e75689952c08681341028c8df5975a0c86f7"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "87774c232e5e0b2266c92df6041bd849e01be6e7f2bf4391021846a1c684b40c"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.keycloak.bom/keycloak-adapter-bom@24.0.6.redhat-00001?type=pom",
+      "version": "24.0.6.redhat-00001",
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "d3685e3d5ff234389d2ad95f83a35b2900c9e83c",
+            "url": "https://git.example.com/keycloak-prod.git#24.0.6.redhat-00001"
+          }
+        ]
+      },
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "publisher": "Red Hat",
+      "externalReferences": [
+        {
+          "url": "https://maven.repository.redhat.com/ga/",
+          "type": "distribution"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/12617764",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/builds/BBLWSAQVTEYAA",
+          "type": "build-system",
+          "comment": "pnc-build-id"
+        },
+        {
+          "url": "repository.example.com/environment/builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.6",
+          "type": "build-meta",
+          "comment": "pnc-environment-image"
+        },
+        {
+          "url": "ssh://git@git.example.com/keycloak/keycloak-prod.git",
+          "type": "vcs",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "keycloak-spi-bom",
+      "purl": "pkg:maven/org.keycloak.bom/keycloak-spi-bom@24.0.6.redhat-00001?type=pom",
+      "type": "library",
+      "group": "org.keycloak.bom",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "31b2dd00cb851fc7621db51ee2c8c855"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "b402003aabfaa6a4426194e04833ca2d307a5f35"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "7006cf5a522c4af3c4b3e3315cb1977907ac04212df36f815fb524f0a25a7190"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.keycloak.bom/keycloak-spi-bom@24.0.6.redhat-00001?type=pom",
+      "version": "24.0.6.redhat-00001",
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "d3685e3d5ff234389d2ad95f83a35b2900c9e83c",
+            "url": "https://git.example.com/keycloak-prod.git#24.0.6.redhat-00001"
+          }
+        ]
+      },
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "publisher": "Red Hat",
+      "externalReferences": [
+        {
+          "url": "https://maven.repository.redhat.com/ga/",
+          "type": "distribution"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/12618099",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/builds/BBLWSAQVTEYAA",
+          "type": "build-system",
+          "comment": "pnc-build-id"
+        },
+        {
+          "url": "repository.example.com/environment/builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.6",
+          "type": "build-meta",
+          "comment": "pnc-environment-image"
+        },
+        {
+          "url": "ssh://git@git.example.com/keycloak/keycloak-prod.git",
+          "type": "vcs",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "keycloak-misc-bom",
+      "purl": "pkg:maven/org.keycloak.bom/keycloak-misc-bom@24.0.6.redhat-00001?type=pom",
+      "type": "library",
+      "group": "org.keycloak.bom",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "8d95eb334c0a95755c367d49f1b2ddbc"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "e289e64e35e68c12a6a1a8d7124b6791c3fd6eb3"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "ed0a61c269ac8c58cdeac8c548edb39d318b5243cf229a83a804e3bbbb4166da"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.keycloak.bom/keycloak-misc-bom@24.0.6.redhat-00001?type=pom",
+      "version": "24.0.6.redhat-00001",
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "d3685e3d5ff234389d2ad95f83a35b2900c9e83c",
+            "url": "https://git.example.com/keycloak-prod.git#24.0.6.redhat-00001"
+          }
+        ]
+      },
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "publisher": "Red Hat",
+      "externalReferences": [
+        {
+          "url": "https://maven.repository.redhat.com/ga/",
+          "type": "distribution"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/12617813",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/builds/BBLWSAQVTEYAA",
+          "type": "build-system",
+          "comment": "pnc-build-id"
+        },
+        {
+          "url": "repository.example.com/environment/builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.6",
+          "type": "build-meta",
+          "comment": "pnc-environment-image"
+        },
+        {
+          "url": "ssh://git@git.example.com/keycloak/keycloak-prod.git",
+          "type": "vcs",
+          "comment": ""
+        }
+      ]
+    },
+    {
+      "name": "keycloak-common",
+      "purl": "pkg:maven/org.keycloak/keycloak-common@24.0.6.redhat-00001?type=jar",
+      "type": "library",
+      "group": "org.keycloak",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "88a784e4ffa677c4bbe185d5e1deb2d8"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "8b8808c92b977fd1f8319184e2093dc9614966d3"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "a7578992e9fae46bbf551447b7d7f4abfadbbcc6b32682ad5f4e35684fff8d80"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.keycloak/keycloak-common@24.0.6.redhat-00001?type=jar",
+      "version": "24.0.6.redhat-00001",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "d3685e3d5ff234389d2ad95f83a35b2900c9e83c",
+            "url": "https://git.example.com/keycloak-prod.git#24.0.6.redhat-00001"
+          }
+        ]
+      },
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "publisher": "Red Hat",
+      "description": "Common library and dependencies shared with server and all adapters",
+      "externalReferences": [
+        {
+          "url": "http://keycloak.org/keycloak-common",
+          "type": "website"
+        },
+        {
+          "url": "https://maven.repository.redhat.com/ga/",
+          "type": "distribution"
+        },
+        {
+          "url": "https://github.com/keycloak/keycloak/issues",
+          "type": "issue-tracker"
+        },
+        {
+          "url": "http://lists.jboss.org/pipermail/jboss-user/",
+          "type": "mailing-list"
+        },
+        {
+          "url": "https://github.com/keycloak/keycloak/tree/master/keycloak-common/",
+          "type": "vcs"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/12617964",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/builds/BBLWSAQVTEYAA",
+          "type": "build-system",
+          "comment": "pnc-build-id"
+        },
+        {
+          "url": "repository.example.com/environment/builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.6",
+          "type": "build-meta",
+          "comment": "pnc-environment-image"
+        }
+      ]
+    },
+    {
+      "name": "jboss-logging",
+      "purl": "pkg:maven/org.jboss.logging/jboss-logging@3.5.3.Final-redhat-00001?type=jar",
+      "type": "library",
+      "group": "org.jboss.logging",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "41d966e749cba49f8dc76932bde43b48"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "d6f46b1c0fc1a356ec13e78bf7bce6bcda2d647f"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "2e6b6ba98a20b4ed47f6db45f7a7abe4a0a68c666c1efdff60bdaa84edbe16cd"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "81ae825b1c8bd6606ff4b7d869f32bf4491695be921fbde06b8430f902d5cfbd5196c74e887e5e3403440b095229eb71ef778b3144cecfee67f0501b36a3a351"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "99d7ea7eb9bd80d6a3555d330a78b9000d1c358b494619d5ad5b89b533bd37d355f23fb8f63d3391350f751c828b24c5"
+        },
+        {
+          "alg": "SHA3-384",
+          "content": "eab2796bdbb180b27a5b557029ba7bf056ab951f1153aa250f22ad7cdc48ac04e88306b4fb4f37f715fc2e75573391ea"
+        },
+        {
+          "alg": "SHA3-256",
+          "content": "d5e30e291aaece72720305ea3452d698dd8acf175ca79589c69917091d57bf7e"
+        },
+        {
+          "alg": "SHA3-512",
+          "content": "5d362d5a9b26491c5f89b6ed21e83a63162d1ce5cb8a4fb8ff00a0d19b66f03a813015517e2348529918f4a50b9b0e116824bb9599aa9fdc33fc524828a40d4d"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.jboss.logging/jboss-logging@3.5.3.Final-redhat-00001?type=jar",
+      "version": "3.5.3.Final-redhat-00001",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "16aa93198b0487f6e5a1f446c492efdd94254569",
+            "url": "https://code.engineering.redhat.com/gerrit/jboss-logging.git#3.5.3.Final-redhat-00001"
+          },
+          {
+            "uid": "c649ff885faa9d6ea662e5af9aed7020d2ceb3a9",
+            "url": "https://github.com/jboss-logging/jboss-logging.git#3.5.3.Final"
+          }
+        ]
+      },
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "publisher": "Red Hat",
+      "description": "The JBoss Logging Framework",
+      "externalReferences": [
+        {
+          "url": "http://www.jboss.org",
+          "type": "website"
+        },
+        {
+          "url": "https://maven.repository.redhat.com/ga/",
+          "type": "distribution"
+        },
+        {
+          "url": "https://issues.redhat.com/",
+          "type": "issue-tracker"
+        },
+        {
+          "url": "http://lists.jboss.org/pipermail/jboss-user/",
+          "type": "mailing-list"
+        },
+        {
+          "url": "https://github.com/jboss-logging/jboss-logging/tree/main/",
+          "type": "vcs"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/12140767",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/builds/A7D6XSQNSDYAA",
+          "type": "build-system",
+          "comment": "pnc-build-id"
+        },
+        {
+          "url": "repository.example.com/environment/builder-rhel-7-j11.0.14-9-mvn3.8.4-gradle7.4.2:1.0.3",
+          "type": "build-meta",
+          "comment": "pnc-environment-image"
+        }
+      ]
+    },
+    {
+      "name": "junit",
+      "purl": "pkg:maven/junit/junit@4.13.2?type=jar",
+      "type": "library",
+      "group": "junit",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "d98a9a02a99a9acd22d7653cbcc1f31f"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "8e495b634469d64fb8acfa3495a065cbacc8a0fff55ce1e31007be4c16dc57d3"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "a31b9950f929a7e5a600d89787ef40e42a8a8e2392e210d0c0f45b3572937670a18a524f1815508cd1152cd1eaa7275cb7430ba45c053be365c83c231bccd3f0"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "9f85c56a77c699eb87630b9e8224068a34c296bcd9aadb52248dd4665036f5bf1048fe75e5cb590b59e7855ca716acae"
+        },
+        {
+          "alg": "SHA3-384",
+          "content": "590cfd9396424583879ca8ad732870406bab18325ac72fb2bbe188b9611278d6341700badf7cfc32525b8ff42900c905"
+        },
+        {
+          "alg": "SHA3-256",
+          "content": "a06b3fd2fd1d9f4306b58125484e3605a395afe5ffe2c801e43ae462f366a430"
+        },
+        {
+          "alg": "SHA3-512",
+          "content": "a6d25ce3c14f9065f06dfd0e68e1dad5c03bd5de0a302c44ca4733d2cb87ec1bc6f0abd36d65aeee8caf328b6881432c4b682fa4b4b1fa931c3c950de5129fb2"
+        }
+      ],
+      "bom-ref": "pkg:maven/junit/junit@4.13.2?type=jar",
+      "version": "4.13.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "EPL-1.0",
+            "url": "http://www.eclipse.org/legal/epl-v10.html"
+          }
+        }
+      ],
+      "publisher": "JUnit",
+      "description": "JUnit is a unit testing framework for Java, created by Erich Gamma and Kent Beck.",
+      "externalReferences": [
+        {
+          "url": "http://junit.org",
+          "type": "website"
+        },
+        {
+          "url": "https://github.com/junit-team/junit4/actions",
+          "type": "build-system"
+        },
+        {
+          "url": "https://github.com/junit-team/junit4/wiki/Download-and-Install",
+          "type": "distribution"
+        },
+        {
+          "url": "https://github.com/junit-team/junit4/issues",
+          "type": "issue-tracker"
+        },
+        {
+          "url": "https://github.com/junit-team/junit4",
+          "type": "vcs"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/5569109",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        }
+      ]
+    },
+    {
+      "name": "hamcrest-core",
+      "purl": "pkg:maven/org.hamcrest/hamcrest-core@1.3?type=jar",
+      "type": "library",
+      "group": "org.hamcrest",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "6393363b47ddcbba82321110c3e07519"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "42a25dc3219429f0e5d060061f71acb49bf010a0"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "66fdef91e9739348df7a096aa384a5685f4e875584cce89386a7a47251c4d8e9"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "e237ae735aac4fa5a7253ec693191f42ef7ddce384c11d29fbf605981c0be077d086757409acad53cb5b9e53d86a07cc428d459ff0f5b00d32a8cbbca390be49"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "4b5297d2a12cc32b824153afc83f1ba9f1869ca288330f0a2f759659d09e4c420eb6ba4a1efbfa0657b625edd41293d5"
+        },
+        {
+          "alg": "SHA3-384",
+          "content": "b14d34985c0a78cf0ba19b5a18bffd403e08adcb2afde228ddef6e16121c7046dbebf58c04d3419311c4496c48aa93be"
+        },
+        {
+          "alg": "SHA3-256",
+          "content": "f679af77deedf69b3c3066f7916583848c6fd32a950f9c0b0e2ef1da121717ba"
+        },
+        {
+          "alg": "SHA3-512",
+          "content": "bca821931e438a1977b7b4356b5f8cebf485634f82159d505c48267c34e6a0f4fde9c2917331365f66dc0e52e2ca3a2db5256863584110c27ecebefc28741f63"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.hamcrest/hamcrest-core@1.3?type=jar",
+      "version": "1.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "description": "This is the core API of hamcrest matcher framework to be used by third-party framework providers. This includes the a foundation set of matcher implementations for common operations.",
+      "externalReferences": [
+        {
+          "url": "https://github.com/hamcrest/JavaHamcrest/hamcrest-core",
+          "type": "website"
+        },
+        {
+          "url": "https://github.com/hamcrest/JavaHamcrest/hamcrest-core",
+          "type": "vcs"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/12596801",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        }
+      ]
+    }
+  ],
+  "specVersion": "1.4",
+  "dependencies": [
+    {
+      "ref": "pkg:maven/org.keycloak.bom/keycloak-bom-parent@24.0.6.redhat-00001?type=pom",
+      "dependsOn": [
+        "pkg:maven/org.keycloak.bom/keycloak-adapter-bom@24.0.6.redhat-00001?type=pom",
+        "pkg:maven/org.keycloak.bom/keycloak-spi-bom@24.0.6.redhat-00001?type=pom",
+        "pkg:maven/org.keycloak.bom/keycloak-misc-bom@24.0.6.redhat-00001?type=pom"
+      ]
+    },
+    {
+      "ref": "pkg:maven/org.keycloak.bom/keycloak-adapter-bom@24.0.6.redhat-00001?type=pom",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:maven/org.keycloak.bom/keycloak-spi-bom@24.0.6.redhat-00001?type=pom",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:maven/org.keycloak.bom/keycloak-misc-bom@24.0.6.redhat-00001?type=pom",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
+      "dependsOn": [
+        "pkg:maven/org.keycloak/keycloak-common@24.0.6.redhat-00001?type=jar"
+      ]
+    },
+    {
+      "ref": "pkg:maven/org.keycloak/keycloak-common@24.0.6.redhat-00001?type=jar",
+      "dependsOn": [
+        "pkg:maven/org.jboss.logging/jboss-logging@3.5.3.Final-redhat-00001?type=jar"
+      ]
+    },
+    {
+      "ref": "pkg:maven/org.jboss.logging/jboss-logging@3.5.3.Final-redhat-00001?type=jar",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:maven/junit/junit@4.13.2?type=jar",
+      "dependsOn": [
+        "pkg:maven/org.hamcrest/hamcrest-core@1.3?type=jar"
+      ]
+    },
+    {
+      "ref": "pkg:maven/org.hamcrest/hamcrest-core@1.3?type=jar",
+      "dependsOn": []
+    }
+  ],
+  "serialNumber": "urn:uuid:36eb56bf-fc51-4340-a494-e72f3d037f3c"
+}
