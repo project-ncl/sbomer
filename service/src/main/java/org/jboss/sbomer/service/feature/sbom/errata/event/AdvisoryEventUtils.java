@@ -39,7 +39,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.PyxisRepositoryDetails;
+import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.packageurl.MalformedPackageURLException;
