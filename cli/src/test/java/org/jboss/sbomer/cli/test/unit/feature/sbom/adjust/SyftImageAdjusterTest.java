@@ -21,7 +21,6 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
-import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.BeforeEach;
