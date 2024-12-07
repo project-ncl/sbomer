@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,11 +22,16 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
+import org.jboss.sbomer.core.features.sbom.Constants;
+import org.jboss.sbomer.core.features.sbom.utils.PurlSanitizer;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 
 public class SyftImageAdjusterTest {
 
@@ -293,5 +299,25 @@ public class SyftImageAdjusterTest {
                 .map(Component::getExternalReferences)
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream);
+    }
+
+    @Test
+    void shouldSanitizeBogusPurls() throws IOException {
+        String bogusPurl = "pkg:rpm/redhat/passt@0^20230222.g4ddbcb9-4.el9_2?arch=x86_64&distro=rhel-9.2&upstream=passt-0^20230222.g4ddbcb9-4.el9_2.src.rpm";
+
+        try {
+            new PackageURL(bogusPurl);
+            fail("Should fail the parsing to PURL of " + bogusPurl);
+        } catch (MalformedPackageURLException e) {
+        }
+
+        String sanitizedPurl = PurlSanitizer.sanitizePurl(bogusPurl);
+        System.out.println("Sanitized purl " + bogusPurl + " to " + sanitizedPurl);
+
+        try {
+            new PackageURL(sanitizedPurl);
+        } catch (MalformedPackageURLException e) {
+            fail("Failed parsing to PURL of sanitized " + sanitizedPurl);
+        }
     }
 }
