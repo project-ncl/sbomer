@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -87,6 +89,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURLBuilder;
 
 public class SbomUtils {
 
@@ -109,6 +113,16 @@ public class SbomUtils {
             log.error("Unable to create a new Bom", e);
             return null;
         }
+    }
+
+    public static Component createComponent(Component component) {
+        return createComponent(
+                component.getGroup(),
+                component.getName(),
+                component.getVersion(),
+                component.getDescription(),
+                component.getPurl(),
+                component.getType());
     }
 
     public static Component createComponent(
@@ -902,4 +916,51 @@ public class SbomUtils {
         }
     }
 
+    /**
+     * Creates a purl of OCI type for the image
+     *
+     * @param imageName the image name (can contain registry and repository)
+     * @param imageDigest the image digest (sha)
+     */
+    public static String createContainerImageOCIPurl(String imageName, String imageDigest) {
+        // Extract last fragment from the imageName (in case of nested repositories or registry)
+        String repositoryName = Optional.ofNullable(imageName).map(repo -> {
+            int lastSlashIndex = repo.lastIndexOf('/');
+            return lastSlashIndex != -1 ? repo.substring(lastSlashIndex + 1) : repo;
+        }).orElseThrow(() -> new IllegalArgumentException("Repository name is null"));
+
+        if (imageDigest == null || imageDigest.isEmpty()) {
+            new IllegalArgumentException("Image digest is null or empty");
+        }
+
+        try {
+            return PackageURLBuilder.aPackageURL()
+                    .withType("oci")
+                    .withName(repositoryName)
+                    .withVersion(imageDigest)
+                    .build()
+                    .toString();
+        } catch (MalformedPackageURLException | IllegalArgumentException e) {
+            log.warn(
+                    "Error while creating summary PURL for imageName {} and imageDigest {}",
+                    imageName,
+                    imageDigest,
+                    e);
+            return null;
+        }
+    }
+
+    public static void addMissingSerialNumber(Bom bom) {
+        if (bom.getSerialNumber() == null || bom.getSerialNumber().isEmpty()) {
+            log.debug("Setting 'serialNumber' for manifest with purl '{}'", bom.getMetadata().getComponent().getPurl());
+
+            try {
+                String jsonContent = SbomUtils.toJson(bom);
+                bom.setSerialNumber("urn:uuid:" + UUID.nameUUIDFromBytes(jsonContent.getBytes(UTF_8)).toString());
+            } catch (GeneratorException e) {
+                log.warn("Could not generate serialNumber out of the manifest content, setting random UUID");
+                bom.setSerialNumber(UUID.randomUUID().toString());
+            }
+        }
+    }
 }

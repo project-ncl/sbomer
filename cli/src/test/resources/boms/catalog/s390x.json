@@ -1,0 +1,107 @@
+{
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "syft",
+            "type": "application",
+            "author": "anchore",
+            "version": "1.16.0"
+          }
+        ]
+      },
+      "component": {
+        "name": "ubi9/ubi-micro",
+        "purl": "pkg:oci/ubi-micro@sha256%3A2c9e70f4174747c6b53d253e879177c52731cc4bdc5fe9c6a2555412d849a952?arch=s390x&os=linux&tag=9.4-6.1716471860",
+        "type": "container"
+      },
+      "timestamp": "2024-12-04T15:02:50Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "ubi9/ubi-micro",
+        "purl": "pkg:oci/ubi-micro@sha256%3A2c9e70f4174747c6b53d253e879177c52731cc4bdc5fe9c6a2555412d849a952?arch=s390x&os=linux&tag=9.4-6.1716471860",
+        "type": "container",
+        "bom-ref": "bc2758402c4e4517",
+        "version": "sha256:2c9e70f4174747c6b53d253e879177c52731cc4bdc5fe9c6a2555412d849a952",
+        "properties": [
+          {
+            "name": "sbomer:image:labels:architecture",
+            "value": "s390x"
+          },
+          {
+            "name": "sbomer:image:labels:build-date",
+            "value": "2024-05-23T13:47:39"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.component",
+            "value": "ubi9-micro-container"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.license_terms",
+            "value": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI"
+          },
+          {
+            "name": "sbomer:image:labels:description",
+            "value": "Very small image which doesn't install the package manager."
+          },
+          {
+            "name": "sbomer:image:labels:distribution-scope",
+            "value": "public"
+          },
+          {
+            "name": "sbomer:image:labels:io.buildah.version",
+            "value": "1.29.0"
+          },
+          {
+            "name": "sbomer:image:labels:io.k8s.description",
+            "value": "Very small image which doesn't install the package manager."
+          },
+          {
+            "name": "sbomer:image:labels:io.k8s.display-name",
+            "value": "Ubi9-micro"
+          },
+          {
+            "name": "sbomer:image:labels:maintainer",
+            "value": "Red Hat"
+          },
+          {
+            "name": "sbomer:image:labels:name",
+            "value": "ubi9/ubi-micro"
+          },
+          {
+            "name": "sbomer:image:labels:release",
+            "value": "6.1716471860"
+          },
+          {
+            "name": "sbomer:image:labels:summary",
+            "value": "ubi9 micro image"
+          },
+          {
+            "name": "sbomer:image:labels:url",
+            "value": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi9/ubi-micro/images/9.4-6.1716471860"
+          },
+          {
+            "name": "sbomer:image:labels:vcs-ref",
+            "value": "433dec61d526247ac9533c1d9b97e98a1127c782"
+          },
+          {
+            "name": "sbomer:image:labels:vcs-type",
+            "value": "git"
+          },
+          {
+            "name": "sbomer:image:labels:vendor",
+            "value": "Red Hat"
+          },
+          {
+            "name": "sbomer:image:labels:version",
+            "value": "9.4"
+          }
+        ]
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:20449f07-8f4a-4a4e-98b9-2a868afd05cf"
+  }
