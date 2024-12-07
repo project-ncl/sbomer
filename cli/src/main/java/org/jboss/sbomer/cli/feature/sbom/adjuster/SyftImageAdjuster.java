@@ -34,6 +34,7 @@ import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.PurlSanitizer;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import com.github.packageurl.MalformedPackageURLException;
@@ -169,20 +170,21 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                 return true;
             }
 
-            PackageURL purl = null;
-
             try {
-                purl = new PackageURL(c.getPurl());
+                // Validate the PURL
+                new PackageURL(c.getPurl());
             } catch (MalformedPackageURLException e) {
-                throw new ApplicationException("Unable to parse provided purl: '{}'", c.getPurl(), e);
+                String sanitizedPurl = PurlSanitizer.sanitizePurl(c.getPurl());
+                log.debug("Sanitized purl {} to {}", c.getPurl(), sanitizedPurl);
+                c.setPurl(sanitizedPurl);
             }
 
-            log.debug("Handling component '{}'", purl);
+            log.debug("Handling component '{}'", c.getPurl());
 
             // Handle RPMs
-            if (purl.getType().equals("rpm")) {
+            if (c.getPurl().startsWith("pkg:" + PackageURL.StandardTypes.RPM)) {
                 // Remove all components that are RPMs if the includeRpms is not set to true
-                log.debug("Component is of type RPM, to be removed: {} (includeRpms: {})", purl, includeRpms);
+                log.debug("Component is of type RPM, to be removed: {} (includeRpms: {})", c.getPurl(), includeRpms);
                 return !includeRpms;
             } else {
                 // Handle everything else
@@ -543,29 +545,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                                 "Adjusting purl for the '{}' RPM component by removing all qualifiers besides 'arch' and 'epoch'...",
                                 component.getPurl());
 
-                        try {
-                            PackageURL packageURL = new PackageURL(component.getPurl());
-
-                            TreeMap<String, String> qualifiers = new TreeMap<>(packageURL.getQualifiers());
-
-                            // If we removed any qualifiers, we need to rebuild the purl
-                            if (qualifiers.entrySet()
-                                    .removeIf(q -> !q.getKey().equals("arch") && !q.getKey().equals("epoch"))) {
-                                String updatedPurl = new PackageURL(
-                                        packageURL.getType(),
-                                        packageURL.getNamespace(),
-                                        packageURL.getName(),
-                                        packageURL.getVersion(),
-                                        qualifiers,
-                                        packageURL.getSubpath()).canonicalize();
-
-                                log.debug("Updating purl to: '{}'", updatedPurl);
-
-                                component.setPurl(updatedPurl);
-                            }
-                        } catch (MalformedPackageURLException e) {
-                            log.warn("Could not clean up purl '{}'", component.getPurl(), e);
-                        }
+                        cleanupPurl(component);
                         break;
 
                     default:
@@ -577,4 +557,44 @@ public class SyftImageAdjuster extends AbstractAdjuster {
         cleanupExternalReferences(component.getExternalReferences());
         log.debug("Component '{}' adjusted", component.getPurl());
     }
+
+    private void cleanupPurl(Component component) {
+        try {
+            String cleanedUpPurl = doCleanupPurl(component.getPurl());
+            component.setPurl(cleanedUpPurl);
+        } catch (MalformedPackageURLException e) {
+            String sanitizedPurl = PurlSanitizer.sanitizePurl(component.getPurl());
+            log.debug("Sanitized purl {} to {}, cleaning up one more time", component.getPurl(), sanitizedPurl);
+            component.setPurl(sanitizedPurl);
+
+            try {
+                String cleanedUpPurl = doCleanupPurl(component.getPurl());
+                component.setPurl(cleanedUpPurl);
+            } catch (MalformedPackageURLException e1) {
+                log.warn("Could not clean up purl '{}'", component.getPurl(), e);
+            }
+        }
+    }
+
+    private String doCleanupPurl(String purl) throws MalformedPackageURLException {
+        PackageURL packageURL = new PackageURL(purl);
+
+        TreeMap<String, String> qualifiers = new TreeMap<>(packageURL.getQualifiers());
+
+        // If we removed any qualifiers, we need to rebuild the purl
+        if (qualifiers.entrySet().removeIf(q -> !q.getKey().equals("arch") && !q.getKey().equals("epoch"))) {
+            String updatedPurl = new PackageURL(
+                    packageURL.getType(),
+                    packageURL.getNamespace(),
+                    packageURL.getName(),
+                    packageURL.getVersion(),
+                    qualifiers,
+                    packageURL.getSubpath()).canonicalize();
+
+            log.debug("Updating purl to: '{}'", updatedPurl);
+            return updatedPurl;
+        }
+        return packageURL.toString();
+    }
+
 }
