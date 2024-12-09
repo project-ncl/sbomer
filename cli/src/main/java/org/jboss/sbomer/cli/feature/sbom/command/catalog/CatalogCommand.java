@@ -50,7 +50,6 @@ public class CatalogCommand {
             required = true,
             paramLabel = "FILE",
             description = "Container image name to be catalogued",
-            converter = PathConverter.class,
             scope = ScopeType.INHERIT)
     String imageName;
 
@@ -60,7 +59,6 @@ public class CatalogCommand {
             required = true,
             paramLabel = "FILE",
             description = "Container image digest to be catalogued",
-            converter = PathConverter.class,
             scope = ScopeType.INHERIT)
     String imageDigest;
 
