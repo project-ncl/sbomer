@@ -72,7 +72,7 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
 
         final Response response = getManifestsForGeneration(generationId);
 
-        assertEquals(2, response.body().jsonPath().getInt("totalHits"));
+        assertEquals(3, response.body().jsonPath().getInt("totalHits"));
 
         log.info("Mandrel container image passed");
     }
