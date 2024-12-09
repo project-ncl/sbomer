@@ -312,12 +312,15 @@ public class SyftImageAdjusterTest {
         }
 
         String sanitizedPurl = PurlSanitizer.sanitizePurl(bogusPurl);
-        System.out.println("Sanitized purl " + bogusPurl + " to " + sanitizedPurl);
 
         try {
             new PackageURL(sanitizedPurl);
         } catch (MalformedPackageURLException e) {
             fail("Failed parsing to PURL of sanitized " + sanitizedPurl);
         }
+
+        assertEquals(
+                "pkg:rpm/redhat/passt@0-20230222.g4ddbcb9-4.el9_2?arch=x86_64&distro=rhel-9.2&upstream=passt-0-20230222.g4ddbcb9-4.el9_2.src.rpm",
+                sanitizedPurl);
     }
 }
