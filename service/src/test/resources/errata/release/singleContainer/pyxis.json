@@ -1,0 +1,452 @@
+{
+    "data": [
+      {
+        "repositories": [
+          {
+            "registry": "registry-proxy.engineering.redhat.com",
+            "repository": "rh-osbs/ubi8-ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:14.360000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:14.360000+00:00",
+                "name": "rhel-8.10.0-z-containers-candidate-82959-20241205143111-ppc64le",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25/tag/rhel-8.10.0-z-containers-candidate-82959-20241205143111-ppc64le"
+                  }
+                }
+              }
+            ],
+            "published": false,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25"
+              }
+            }
+          },
+          {
+            "registry": "registry.access.redhat.com",
+            "repository": "rhel8/ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:14.360000+00:00",
+                "name": "1",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/1"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:14.360000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:14.360000+00:00",
+                "name": "latest",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/latest"
+                  }
+                }
+              }
+            ],
+            "published": true,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry.access.redhat.com/repository/rhel8/ruby-25"
+              }
+            }
+          },
+          {
+            "registry": "registry.access.redhat.com",
+            "repository": "ubi8/ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:14.360000+00:00",
+                "name": "1",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/1"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:14.360000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:14.360000+00:00",
+                "name": "latest",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/latest"
+                  }
+                }
+              }
+            ],
+            "published": true,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry.access.redhat.com/repository/ubi8/ruby-25"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "repositories": [
+          {
+            "registry": "registry-proxy.engineering.redhat.com",
+            "repository": "rh-osbs/ubi8-ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:18.803000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:18.803000+00:00",
+                "name": "rhel-8.10.0-z-containers-candidate-82959-20241205143111-aarch64",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25/tag/rhel-8.10.0-z-containers-candidate-82959-20241205143111-aarch64"
+                  }
+                }
+              }
+            ],
+            "published": false,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25"
+              }
+            }
+          },
+          {
+            "registry": "registry.access.redhat.com",
+            "repository": "rhel8/ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:18.803000+00:00",
+                "name": "1",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/1"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:18.803000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:18.803000+00:00",
+                "name": "latest",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/latest"
+                  }
+                }
+              }
+            ],
+            "published": true,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry.access.redhat.com/repository/rhel8/ruby-25"
+              }
+            }
+          },
+          {
+            "registry": "registry.access.redhat.com",
+            "repository": "ubi8/ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:18.803000+00:00",
+                "name": "1",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/1"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:18.803000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:18.803000+00:00",
+                "name": "latest",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/latest"
+                  }
+                }
+              }
+            ],
+            "published": true,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry.access.redhat.com/repository/ubi8/ruby-25"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "repositories": [
+          {
+            "registry": "registry-proxy.engineering.redhat.com",
+            "repository": "rh-osbs/ubi8-ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:27.486000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:27.486000+00:00",
+                "name": "rhel-8.10.0-z-containers-candidate-82959-20241205143111-x86_64",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25/tag/rhel-8.10.0-z-containers-candidate-82959-20241205143111-x86_64"
+                  }
+                }
+              }
+            ],
+            "published": false,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25"
+              }
+            }
+          },
+          {
+            "registry": "registry.access.redhat.com",
+            "repository": "rhel8/ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:27.486000+00:00",
+                "name": "1",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/1"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:27.486000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:27.486000+00:00",
+                "name": "latest",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/latest"
+                  }
+                }
+              }
+            ],
+            "published": true,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry.access.redhat.com/repository/rhel8/ruby-25"
+              }
+            }
+          },
+          {
+            "registry": "registry.access.redhat.com",
+            "repository": "ubi8/ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:27.486000+00:00",
+                "name": "1",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/1"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:27.486000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:27.486000+00:00",
+                "name": "latest",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/latest"
+                  }
+                }
+              }
+            ],
+            "published": true,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry.access.redhat.com/repository/ubi8/ruby-25"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "repositories": [
+          {
+            "registry": "registry-proxy.engineering.redhat.com",
+            "repository": "rh-osbs/ubi8-ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:23.187000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:23.187000+00:00",
+                "name": "rhel-8.10.0-z-containers-candidate-82959-20241205143111-s390x",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25/tag/rhel-8.10.0-z-containers-candidate-82959-20241205143111-s390x"
+                  }
+                }
+              }
+            ],
+            "published": false,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/ubi8-ruby-25"
+              }
+            }
+          },
+          {
+            "registry": "registry.access.redhat.com",
+            "repository": "rhel8/ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:23.187000+00:00",
+                "name": "1",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/1"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:23.187000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:23.187000+00:00",
+                "name": "latest",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/rhel8/ruby-25/tag/latest"
+                  }
+                }
+              }
+            ],
+            "published": true,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry.access.redhat.com/repository/rhel8/ruby-25"
+              }
+            }
+          },
+          {
+            "registry": "registry.access.redhat.com",
+            "repository": "ubi8/ruby-25",
+            "tags": [
+              {
+                "added_date": "2024-12-05T15:29:23.187000+00:00",
+                "name": "1",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/1"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:23.187000+00:00",
+                "name": "1-260.1733408998",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/1-260.1733408998"
+                  }
+                }
+              },
+              {
+                "added_date": "2024-12-05T15:29:23.187000+00:00",
+                "name": "latest",
+                "_links": {
+                  "tag_history": {
+                    "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/ubi8/ruby-25/tag/latest"
+                  }
+                }
+              }
+            ],
+            "published": true,
+            "_links": {
+              "repository": {
+                "href": "/v1/repositories/registry/registry.access.redhat.com/repository/ubi8/ruby-25"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }

@@ -1,0 +1,27 @@
+{
+  "RHEL-8.10.0.Z.MAIN+EUS": {
+    "name": "RHEL-8.10.0.Z.MAIN+EUS",
+    "description": "Red Hat Enterprise Linux 8",
+    "builds": [
+      {
+        "ruby-25-container-1-260.1733408998": {
+          "nvr": "ruby-25-container-1-260.1733408998",
+          "nevr": "ruby-25-container-0:1-260.1733408998",
+          "id": 3427623,
+          "is_module": false,
+          "variant_arch": {
+            "AppStream-8.10.0.Z.MAIN.EUS": {
+              "multi": [
+                "docker-image-sha256:f9a5db5670df3e47090132d26541cd554e0405eee8094b2bdcdd46776d79d7c9.ppc64le.tar.gz",
+                "docker-image-sha256:1f0105a8deaf465b65859833e7a74b54adedec6b0446a602b12b70cbfb47dfa7.aarch64.tar.gz",
+                "docker-image-sha256:f57ab86c6570e7ec9b08bd7dbbc31a112bef053b9f6b05766e49b30f7d1b50a1.s390x.tar.gz",
+                "docker-image-sha256:3c11044b4f4dd3ce9f3e4d2ac3780d53a2dc3c0009ac4adcfbab0419e02f971f.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "botas/pnt-devops-rad-jenkins.rhev-ci-vms.eng.rdu2.redhat.com"
+        }
+      }
+    ]
+  }
+}
