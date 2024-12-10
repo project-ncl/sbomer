@@ -54,7 +54,7 @@ import jakarta.ws.rs.core.Response;
 public interface PyxisClient {
 
     @GET
-    @Path("/images/nvr/{nvr}?include=data.repositories.registry&include=data.repositories.repository&include=data.repositories.tags")
+    @Path("/images/nvr/{nvr}?include=data.repositories.registry&include=data.repositories.repository&include=data.repositories.tags&include=data.repositories.published")
     public PyxisRepositoryDetails getRepositoriesDetails(@PathParam("nvr") String nvr);
 
     @GET

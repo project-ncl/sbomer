@@ -45,10 +45,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-<<<<<<< HEAD
 import java.util.UUID;
-=======
->>>>>>> 22a3cba3 (feat(SBOMER-213): implement the generation of the release time manifests for docker containers)
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -96,6 +93,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
 
 public class SbomUtils {
@@ -953,7 +951,7 @@ public class SbomUtils {
         }).orElseThrow(() -> new IllegalArgumentException("Repository name is null"));
 
         if (imageDigest == null || imageDigest.isEmpty()) {
-            new IllegalArgumentException("Image digest is null or empty");
+            throw new IllegalArgumentException("Image digest is null or empty");
         }
 
         try {
@@ -971,6 +969,23 @@ public class SbomUtils {
                     e);
             return null;
         }
+    }
+
+    /**
+     * Creates a purl of OCI type for the image
+     *
+     * @param imageName the image fullname
+     */
+    public static String createContainerImageOCIPurl(String imageFullname) {
+        if (imageFullname == null || imageFullname.isEmpty()) {
+            throw new IllegalArgumentException("Image full name is null or empty");
+        }
+
+        String[] imageTokens = imageFullname.split("@");
+        if (imageTokens == null || imageTokens.length != 2) {
+            throw new IllegalArgumentException("Image full name has wrong format");
+        }
+        return createContainerImageOCIPurl(imageTokens[0], imageTokens[1]);
     }
 
     public static void addMissingSerialNumber(Bom bom) {
