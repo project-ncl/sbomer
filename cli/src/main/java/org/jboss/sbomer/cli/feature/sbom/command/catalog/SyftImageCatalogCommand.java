@@ -83,6 +83,9 @@ public class SyftImageCatalogCommand extends AbstractCatalogCommand {
         pedigree.setVariants(indexVariants);
         mainComponent.setPedigree(pedigree);
 
+        // Let's retain the main properties in the index manifest
+        copyProperties(mainComponent, boms.get(0).getComponents().get(0));
+
         setMetadataComponent(indexBom, mainComponent);
 
         indexBom.setComponents(List.of(mainComponent));
@@ -92,6 +95,21 @@ public class SyftImageCatalogCommand extends AbstractCatalogCommand {
         SbomUtils.addMissingSerialNumber(indexBom);
 
         return indexBom;
+    }
+
+    private void copyProperties(Component destination, Component origin) {
+        List<String> propertyNames = List.of(
+                "sbomer:image:labels:com.redhat.component",
+                "sbomer:image:labels:name",
+                "sbomer:image:labels:release",
+                "sbomer:image:labels:version");
+
+        propertyNames.forEach(propertyName -> {
+            SbomUtils.findPropertyWithNameInComponent(propertyName, origin)
+                    .ifPresent(
+                            property -> SbomUtils
+                                    .addPropertyIfMissing(destination, property.getName(), property.getValue()));
+        });
     }
 
     private Component createVariant(Component mainComponent, String bomRefPrefix) {
