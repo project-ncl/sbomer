@@ -142,7 +142,7 @@ public class GenerationsV1Beta1 {
                             @ExampleObject(
                                     name = "Container image",
                                     description = "Requests manifest generation for a container image with iodentifier: registry.access.redhat.com/ubi9/ubi-micro:9.4",
-                                    value = "{\"type\": \"syft-image\", \"image\": \"registry.access.redhat.com/ubi9/ubi-micro:9.4\"}") //
+                                    value = "{\"type\": \"image\", \"image\": \"registry.access.redhat.com/ubi9/ubi-micro:9.4\"}") //
                     }))
     @APIResponse(
             responseCode = "202",
