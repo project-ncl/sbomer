@@ -78,20 +78,6 @@ public class AdvisoryEventUtils {
         }).filter(Objects::nonNull).toList();
     }
 
-    public static void addMissingSerialNumber(Bom bom) {
-        if (bom.getSerialNumber() == null || bom.getSerialNumber().isEmpty()) {
-            log.debug("Setting 'serialNumber' for manifest with purl '{}'", bom.getMetadata().getComponent().getPurl());
-
-            try {
-                String jsonContent = SbomUtils.toJson(bom);
-                bom.setSerialNumber("urn:uuid:" + UUID.nameUUIDFromBytes(jsonContent.getBytes(UTF_8)).toString());
-            } catch (GeneratorException e) {
-                log.warn("Could not generate serialNumber out of the manifest content, setting random UUID");
-                bom.setSerialNumber(UUID.randomUUID().toString());
-            }
-        }
-    }
-
     public static Component.Type getComponentTypeForGeneration(V1Beta1GenerationRecord generation) {
         GenerationRequestType generationRequestType = GenerationRequestType.fromName(generation.type());
         if (GenerationRequestType.CONTAINERIMAGE.equals(generationRequestType)) {
@@ -106,25 +92,14 @@ public class AdvisoryEventUtils {
         return productShortName.equals("RHEL") ? Component.Type.OPERATING_SYSTEM : Component.Type.FRAMEWORK;
     }
 
-    public static Hash retrieveHashFromGeneration(V1Beta1GenerationRecord generation) {
-        GenerationRequestType generationRequestType = GenerationRequestType.fromName(generation.type());
-        if (GenerationRequestType.CONTAINERIMAGE.equals(generationRequestType)) {
-            String[] checksumString = (generation.identifier().split("@")[1]).split(":");
-            String alg = checksumString[0].replace("sha", "SHA-");
-            String checksum = checksumString[1];
-            return new Hash(Algorithm.fromSpec(alg), checksum);
-        }
-        throw new ApplicationException("**** NOT IMPLEMENTED ****");
-    }
-
     public static Set<String> createPurls(
             List<PyxisRepositoryDetails.Repository> repositories,
-            Hash hash,
-            boolean summaryPurl) {
+            String version,
+            boolean includeRepositoryQualifiers) {
         return repositories.stream()
-                .flatMap(repository -> createPurls(repository, hash, summaryPurl).stream())
+                .flatMap(repository -> createPurls(repository, version, includeRepositoryQualifiers).stream())
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(String::length).reversed())
+                .sorted(Comparator.comparingInt(String::length).reversed()) // longest first
                 .collect(Collectors.toSet());
     }
 
@@ -142,8 +117,8 @@ public class AdvisoryEventUtils {
 
     private static Set<String> createPurls(
             PyxisRepositoryDetails.Repository repository,
-            Hash hash,
-            boolean summaryPurl) {
+            String version,
+            boolean includeRepositoryQualifiers) {
 
         // Extract last fragment from the repository
         String repositoryName = Optional.ofNullable(repository.getRepository()).map(repo -> {
@@ -151,13 +126,13 @@ public class AdvisoryEventUtils {
             return lastSlashIndex != -1 ? repo.substring(lastSlashIndex + 1) : repo;
         }).orElseThrow(() -> new IllegalArgumentException("Repository name is null"));
 
-        if (!summaryPurl) {
+        if (includeRepositoryQualifiers) {
             return repository.getTags().stream().map(tag -> {
                 try {
                     return PackageURLBuilder.aPackageURL()
                             .withType("oci")
                             .withName(repositoryName)
-                            .withVersion(hash.getAlgorithm().replace("SHA-", "sha") + ":" + hash.getValue())
+                            .withVersion(version)
                             .withQualifier(
                                     "repository_url",
                                     repository.getRegistry() + "/" + repository.getRepository())
@@ -175,7 +150,7 @@ public class AdvisoryEventUtils {
                         PackageURLBuilder.aPackageURL()
                                 .withType("oci")
                                 .withName(repositoryName)
-                                .withVersion(hash.getAlgorithm().replace("SHA-", "sha") + ":" + hash.getValue())
+                                .withVersion(version)
                                 .build()
                                 .toString());
             } catch (MalformedPackageURLException | IllegalArgumentException e) {

@@ -36,6 +36,6 @@ public class AdvisoryReleaseEvent {
     final Errata erratum;
     final V1Beta1RequestRecord latestAdvisoryManifestsRecord;
     final Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails;
-    final Map<ProductVersionEntry, SbomGenerationRequest> pendingGenerations;
+    final Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations;
 
 }

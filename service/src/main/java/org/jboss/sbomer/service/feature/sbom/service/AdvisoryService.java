@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
-import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyRequestEventStatusUpdate;
 import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyAdvisoryRelease;
+import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyRequestEventStatusUpdate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,9 +56,9 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.Build;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.errata.event.comment.RequestEventStatusUpdateEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.AdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -396,7 +396,7 @@ public class AdvisoryService {
             Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
 
         // We need to create 1 release manifest per ProductVersion
-        // We will identify the Generation with the {Errata}#{ProductVersion}
+        // We will identify the Generation with the {Errata}#{ProductVersion} identifier
         Map<ProductVersionEntry, SbomGenerationRequest> pvToGenerations = new HashMap<ProductVersionEntry, SbomGenerationRequest>();
         buildDetails.keySet().forEach(pv -> {
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
@@ -442,7 +442,7 @@ public class AdvisoryService {
             return doIgnoreRequest(requestEvent, "Standard Errata container images manifest generation is disabled");
         }
 
-        Map<ProductVersionEntry, SbomGenerationRequest> pendingGenerations = createReleaseManifestsGenerationsForDockerBuilds(
+        Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForDockerBuilds(
                 erratum,
                 requestEvent,
                 buildDetails);
@@ -453,10 +453,10 @@ public class AdvisoryService {
                         .withErratum(erratum)
                         .withLatestAdvisoryManifestsRecord(successfulAdvisoryRequestRecord)
                         .withAdvisoryBuildDetails(buildDetails)
-                        .withPendingGenerations(pendingGenerations)
+                        .withReleaseGenerations(releaseGenerations)
                         .build());
 
-        return pendingGenerations.values();
+        return releaseGenerations.values();
     }
 
     @Transactional
