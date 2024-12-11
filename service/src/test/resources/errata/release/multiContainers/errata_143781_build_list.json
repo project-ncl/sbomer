@@ -1,0 +1,190 @@
+{
+  "OSE-4.15-RHEL-9": {
+    "name": "OSE-4.15-RHEL-9",
+    "description": "Red Hat OpenShift Container Platform 4.15",
+    "builds": [
+      {
+        "ose-clusterresourceoverride-operator-metadata-container-v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1": {
+          "nvr": "ose-clusterresourceoverride-operator-metadata-container-v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1",
+          "nevr": "ose-clusterresourceoverride-operator-metadata-container-0:v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1",
+          "id": 3421076,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:481348ccc4f7664262d02f88e08050c03f961661f48d56357956718e5417e29c.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "ose-vertical-pod-autoscaler-operator-metadata-container-v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1": {
+          "nvr": "ose-vertical-pod-autoscaler-operator-metadata-container-v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1",
+          "nevr": "ose-vertical-pod-autoscaler-operator-metadata-container-0:v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1",
+          "id": 3421077,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:1db1c6d7938180efd39bfdc4ebe24bf067648cea486de9bd9ef6e916251e7252.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "cluster-nfd-operator-metadata-container-v4.15.0.202412041605.p0.gabdfb61.assembly.stream.el9-2": {
+          "nvr": "cluster-nfd-operator-metadata-container-v4.15.0.202412041605.p0.gabdfb61.assembly.stream.el9-2",
+          "nevr": "cluster-nfd-operator-metadata-container-0:v4.15.0.202412041605.p0.gabdfb61.assembly.stream.el9-2",
+          "id": 3427588,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:17f331d25ed9a7839723cb0ac4ab4d25047df2c8965cbbfa0477f994952f6891.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "ingress-node-firewall-operator-bundle-container-v4.15.0.202412041605.p0.g135f832.assembly.stream.el9-2": {
+          "nvr": "ingress-node-firewall-operator-bundle-container-v4.15.0.202412041605.p0.g135f832.assembly.stream.el9-2",
+          "nevr": "ingress-node-firewall-operator-bundle-container-0:v4.15.0.202412041605.p0.g135f832.assembly.stream.el9-2",
+          "id": 3427589,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:b32dbe5372ed36393d32e707603c024fa0bb2cbde44741d6f33c91e0726f1216.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "local-storage-operator-metadata-container-v4.15.0.202412041605.p0.gcc4f213.assembly.stream.el9-2": {
+          "nvr": "local-storage-operator-metadata-container-v4.15.0.202412041605.p0.gcc4f213.assembly.stream.el9-2",
+          "nevr": "local-storage-operator-metadata-container-0:v4.15.0.202412041605.p0.gcc4f213.assembly.stream.el9-2",
+          "id": 3427592,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:7db5a2fe1321d5e2ee1caf9547b82a20f628a094d5d3acb71e99150f24a56630.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "ose-metallb-operator-bundle-container-v4.15.0.202412041605.p0.g359620b.assembly.stream.el9-2": {
+          "nvr": "ose-metallb-operator-bundle-container-v4.15.0.202412041605.p0.g359620b.assembly.stream.el9-2",
+          "nevr": "ose-metallb-operator-bundle-container-0:v4.15.0.202412041605.p0.g359620b.assembly.stream.el9-2",
+          "id": 3427593,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:fd7394c283face7c9047baa727c8e3befaa9c01de8fe99910b2af1d4c75c6573.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "ose-kubernetes-nmstate-operator-bundle-container-v4.15.0.202412041605.p0.g0d290b4.assembly.stream.el9-2": {
+          "nvr": "ose-kubernetes-nmstate-operator-bundle-container-v4.15.0.202412041605.p0.g0d290b4.assembly.stream.el9-2",
+          "nevr": "ose-kubernetes-nmstate-operator-bundle-container-0:v4.15.0.202412041605.p0.g0d290b4.assembly.stream.el9-2",
+          "id": 3427594,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:95e74f7aaed181b539f119b0d354a9c5b25bcfcaea9462ec7d0677e038c9ffa7.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "ose-ptp-operator-metadata-container-v4.15.0.202412041605.p0.g6fb51fd.assembly.stream.el9-2": {
+          "nvr": "ose-ptp-operator-metadata-container-v4.15.0.202412041605.p0.g6fb51fd.assembly.stream.el9-2",
+          "nevr": "ose-ptp-operator-metadata-container-0:v4.15.0.202412041605.p0.g6fb51fd.assembly.stream.el9-2",
+          "id": 3427595,
+          "is_module": false,
+          "variant_arch": {
+            "9Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:3fc053b5c63a26ee74a5e40689c40b45a9802b47df42f381d90bd3fdc1f804aa.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      }
+    ]
+  },
+  "OSE-4.15-RHEL-8": {
+    "name": "OSE-4.15-RHEL-8",
+    "description": "Red Hat OpenShift Container Platform 4.15",
+    "builds": [
+      {
+        "ose-gcp-filestore-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2": {
+          "nvr": "ose-gcp-filestore-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2",
+          "nevr": "ose-gcp-filestore-csi-driver-operator-bundle-container-0:v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2",
+          "id": 3427596,
+          "is_module": false,
+          "variant_arch": {
+            "8Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:777991c386b171303d246e258ac5c66e8b44d0825463708e4faf9d0fd0b4a522.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "ose-aws-efs-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.gb0f13a0.assembly.stream.el8-2": {
+          "nvr": "ose-aws-efs-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.gb0f13a0.assembly.stream.el8-2",
+          "nevr": "ose-aws-efs-csi-driver-operator-bundle-container-0:v4.15.0.202412041605.p0.gb0f13a0.assembly.stream.el8-2",
+          "id": 3427616,
+          "is_module": false,
+          "variant_arch": {
+            "8Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:033a74640fc6ac4d8a113500b7c8f7bc15689561cb9dfc54b8544af421c06ce1.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      },
+      {
+        "ose-secrets-store-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.gef602a5.assembly.stream.el8-2": {
+          "nvr": "ose-secrets-store-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.gef602a5.assembly.stream.el8-2",
+          "nevr": "ose-secrets-store-csi-driver-operator-bundle-container-0:v4.15.0.202412041605.p0.gef602a5.assembly.stream.el8-2",
+          "id": 3427615,
+          "is_module": false,
+          "variant_arch": {
+            "8Base-RHOSE-4.15": {
+              "multi": [
+                "docker-image-sha256:e2098fa1c8d06ca97a22288f7808d543fe63aa851b2c3c2379a53bcef6e080fe.x86_64.tar.gz"
+              ]
+            }
+          },
+          "added_by": "exd-ocp-buildvm-bot-prod"
+        }
+      }
+    ]
+  }
+}

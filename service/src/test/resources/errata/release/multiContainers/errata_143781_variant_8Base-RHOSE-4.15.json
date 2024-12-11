@@ -1,0 +1,52 @@
+{
+  "data": {
+    "id": 4270,
+    "type": "variants",
+    "attributes": {
+      "name": "8Base-RHOSE-4.15",
+      "description": "Red Hat OpenShift Container Platform 4.15",
+      "cpe": "cpe:/a:redhat:openshift:4.15::el8",
+      "override_ftp_base_folder": null,
+      "enabled": true,
+      "buildroot": false,
+      "tps_stream": "",
+      "relationships": {
+        "product": {
+          "id": 79,
+          "name": "Red Hat OpenShift Enterprise",
+          "short_name": "RHOSE"
+        },
+        "product_version": {
+          "id": 1960,
+          "name": "OSE-4.15-RHEL-8"
+        },
+        "rhel_release": {
+          "id": 87,
+          "name": "RHEL-8"
+        },
+        "rhel_variant": {
+          "id": 2235,
+          "name": "8Base"
+        },
+        "push_targets": [
+          {
+            "id": 7,
+            "name": "cdn_stage"
+          },
+          {
+            "id": 10,
+            "name": "cdn_docker_stage"
+          },
+          {
+            "id": 9,
+            "name": "cdn_docker"
+          },
+          {
+            "id": 4,
+            "name": "cdn"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "id": "8FEBABB08A614E6",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+  "rootPurl": "pkg:oci/openshift-ose-local-storage-operator-bundle@sha256%3A20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+  "creationTime": "2024-12-10T23:34:01.464329Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-local-storage-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-local-storage-operator-bundle@sha256%3A20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-local-storage-operator-bundle@sha256%3A20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37"
+      },
+      "timestamp": "2024-12-10T23:33:49Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-local-storage-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-local-storage-operator-bundle@sha256%3A20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+        "type": "container",
+        "bom-ref": "local-storage-operator-metadata-container_image-index",
+        "version": "sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-local-storage-operator-bundle",
+              "purl": "pkg:oci/ose-local-storage-operator-bundle@sha256%3A48fc5ee22597d523ef1c29c02be5692c914e2d0e7f449de1b03d50fec067a37e?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.gcc4f213.assembly.stream.el9-2",
+              "type": "container",
+              "bom-ref": "local-storage-operator-metadata-container_amd64",
+              "version": "sha256:48fc5ee22597d523ef1c29c02be5692c914e2d0e7f449de1b03d50fec067a37e",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:851fde5c-459f-394c-8188-523d1e1982de"
+  },
+  "generationRequest": {
+    "id": "00F835B4E67C48D",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:11.938868Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: 972A7D1C755548A, 8FEBABB08A614E6"
+  }
+}

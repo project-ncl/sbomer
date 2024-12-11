@@ -1,0 +1,530 @@
+[
+  {
+    "id": "E2DDBAB2B3A94E6",
+    "receivalTime": "2024-12-10T23:32:05.757502Z",
+    "eventType": "REST",
+    "eventStatus": "SUCCESS",
+    "reason": "11/11 completed with success",
+    "requestConfig": {
+      "type": "errata-advisory",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "advisoryId": "143781"
+    },
+    "event": {
+      "method": "POST",
+      "address": "10.39.192.79",
+      "span_id": "cc3ebf1c68f3d208",
+      "trace_id": "92f6540f83a7ae749f2f59542c46bb80",
+      "username": "<none>",
+      "destination": "http://sbomer.pnc.engineering.redhat.com/api/v1beta1/generations"
+    },
+    "manifests": [
+      {
+        "id": "3192918668C2431",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+        "rootPurl": "pkg:oci/ose-secrets-store-csi-driver-operator-bundle@sha256%3A1acd121afb1ea812b2bd2613baa14938db4dababdfc664393b78caa560b0f05c?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.gef602a5.assembly.stream.el8-2",
+        "creationTime": "2024-12-10T23:33:24.993124Z",
+        "generation": {
+          "id": "5E664B7C1859402",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:11.650319Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 3192918668C2431, 505A5B90871046D"
+        }
+      },
+      {
+        "id": "505A5B90871046D",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+        "rootPurl": "pkg:oci/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256%3Ac3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+        "creationTime": "2024-12-10T23:33:25.000144Z",
+        "generation": {
+          "id": "5E664B7C1859402",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:11.650319Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 3192918668C2431, 505A5B90871046D"
+        }
+      },
+      {
+        "id": "415DE22239C9439",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+        "rootPurl": "pkg:oci/ose-vertical-pod-autoscaler-operator-bundle@sha256%3A45bb51f57ef6829a74b4f6ebf45fa508bfe9230334c1e4d6e41410e4a52b2dab?arch=amd64&os=linux&tag=v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1",
+        "creationTime": "2024-12-10T23:33:48.455620Z",
+        "generation": {
+          "id": "0DDF61BF763C45A",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:10.505395Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 415DE22239C9439, 47F4BC6A1C1641B"
+        }
+      },
+      {
+        "id": "47F4BC6A1C1641B",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+        "rootPurl": "pkg:oci/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256%3A0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+        "creationTime": "2024-12-10T23:33:48.462875Z",
+        "generation": {
+          "id": "0DDF61BF763C45A",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:10.505395Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 415DE22239C9439, 47F4BC6A1C1641B"
+        }
+      },
+      {
+        "id": "972A7D1C755548A",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+        "rootPurl": "pkg:oci/ose-local-storage-operator-bundle@sha256%3A48fc5ee22597d523ef1c29c02be5692c914e2d0e7f449de1b03d50fec067a37e?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.gcc4f213.assembly.stream.el9-2",
+        "creationTime": "2024-12-10T23:34:01.457604Z",
+        "generation": {
+          "id": "00F835B4E67C48D",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:11.938868Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 972A7D1C755548A, 8FEBABB08A614E6"
+        }
+      },
+      {
+        "id": "8FEBABB08A614E6",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+        "rootPurl": "pkg:oci/openshift-ose-local-storage-operator-bundle@sha256%3A20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+        "creationTime": "2024-12-10T23:34:01.464329Z",
+        "generation": {
+          "id": "00F835B4E67C48D",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-local-storage-operator-bundle@sha256:20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:11.938868Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 972A7D1C755548A, 8FEBABB08A614E6"
+        }
+      },
+      {
+        "id": "D8820BD0227F430",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+        "rootPurl": "pkg:oci/ose-metallb-operator-bundle@sha256%3Acb98201739f46cc4858d0280c81abd8dda90d8455fe3f643d166a00b969d07aa?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.g359620b.assembly.stream.el9-2",
+        "creationTime": "2024-12-10T23:33:35.033654Z",
+        "generation": {
+          "id": "274EF9237E0E431",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:12.224412Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: D8820BD0227F430, 2B7738D0D6964CB"
+        }
+      },
+      {
+        "id": "2B7738D0D6964CB",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+        "rootPurl": "pkg:oci/openshift-ose-metallb-operator-bundle@sha256%3A28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+        "creationTime": "2024-12-10T23:33:35.040532Z",
+        "generation": {
+          "id": "274EF9237E0E431",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:12.224412Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: D8820BD0227F430, 2B7738D0D6964CB"
+        }
+      },
+      {
+        "id": "96D539F40D73483",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+        "rootPurl": "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A80ef5fe21fc456cca6f10e1e02d738196c7a1515754c3bd0794b625cb496682c?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2",
+        "creationTime": "2024-12-10T23:33:24.023994Z",
+        "generation": {
+          "id": "9CC5AB57497D4B6",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:11.364045Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 96D539F40D73483, 1251FF8155D74B5"
+        }
+      },
+      {
+        "id": "1251FF8155D74B5",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+        "rootPurl": "pkg:oci/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+        "creationTime": "2024-12-10T23:33:24.031206Z",
+        "generation": {
+          "id": "9CC5AB57497D4B6",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:11.364045Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 96D539F40D73483, 1251FF8155D74B5"
+        }
+      },
+      {
+        "id": "CDCBA3AA014747E",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+        "rootPurl": "pkg:oci/ose-aws-efs-csi-driver-operator-bundle@sha256%3A6b9d1f5095b2530d627cb0ac688006ddc1a9af3724cce43443d1d1ff4f272795?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.gb0f13a0.assembly.stream.el8-2",
+        "creationTime": "2024-12-10T23:33:37.317173Z",
+        "generation": {
+          "id": "5591286D54D34AB",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:11.079405Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: CDCBA3AA014747E, AB81F89CF06645A"
+        }
+      },
+      {
+        "id": "AB81F89CF06645A",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+        "rootPurl": "pkg:oci/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256%3A6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+        "creationTime": "2024-12-10T23:33:37.324211Z",
+        "generation": {
+          "id": "5591286D54D34AB",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:11.079405Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: CDCBA3AA014747E, AB81F89CF06645A"
+        }
+      },
+      {
+        "id": "6AC3057851CB480",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+        "rootPurl": "pkg:oci/ose-ingress-node-firewall-operator-bundle@sha256%3A71297c00c3469b22adba6349cfc728323fb191c8b737bbeb10809e5edf6b95e6?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.g135f832.assembly.stream.el9-2",
+        "creationTime": "2024-12-10T23:33:25.988683Z",
+        "generation": {
+          "id": "08F12A3B3524447",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:10.792682Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 6AC3057851CB480, 9598ACF8368F49E"
+        }
+      },
+      {
+        "id": "9598ACF8368F49E",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+        "rootPurl": "pkg:oci/openshift-ose-ingress-node-firewall-operator-bundle@sha256%3A13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+        "creationTime": "2024-12-10T23:33:25.994983Z",
+        "generation": {
+          "id": "08F12A3B3524447",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:10.792682Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 6AC3057851CB480, 9598ACF8368F49E"
+        }
+      },
+      {
+        "id": "C67D863805F6463",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+        "rootPurl": "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Aea282700c83493165abfbfaa1a697f942175aac6fc7fbbe4ddc09778ca39a4d8?arch=amd64&os=linux&tag=v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1",
+        "creationTime": "2024-12-10T23:33:40.048635Z",
+        "generation": {
+          "id": "0EA3F5A21D1C458",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:09.931494Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: C67D863805F6463, EAABD415A3C7420"
+        }
+      },
+      {
+        "id": "EAABD415A3C7420",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+        "rootPurl": "pkg:oci/openshift-ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+        "creationTime": "2024-12-10T23:33:40.058365Z",
+        "generation": {
+          "id": "0EA3F5A21D1C458",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:09.931494Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: C67D863805F6463, EAABD415A3C7420"
+        }
+      },
+      {
+        "id": "1DEFC26D4700433",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+        "rootPurl": "pkg:oci/ose-cluster-nfd-operator-bundle@sha256%3Aab62c5a0ffadbeed87c8e7645be3bf2085cc91fed892ff49b79f949e9a20750e?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.gabdfb61.assembly.stream.el9-2",
+        "creationTime": "2024-12-10T23:33:50.415378Z",
+        "generation": {
+          "id": "786421905167419",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:10.219793Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 1DEFC26D4700433, FD64B2D3C6484CF"
+        }
+      },
+      {
+        "id": "FD64B2D3C6484CF",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+        "rootPurl": "pkg:oci/openshift-ose-cluster-nfd-operator-bundle@sha256%3A3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+        "creationTime": "2024-12-10T23:33:50.421738Z",
+        "generation": {
+          "id": "786421905167419",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:10.219793Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 1DEFC26D4700433, FD64B2D3C6484CF"
+        }
+      },
+      {
+        "id": "E0527227ABA94B9",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+        "rootPurl": "pkg:oci/ose-ptp-operator-bundle@sha256%3A474be88961c42614784fffe91fd2d7fbc84ca968f878e48b1d93c65fb7ce86ee?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.g6fb51fd.assembly.stream.el9-2",
+        "creationTime": "2024-12-10T23:34:04.411758Z",
+        "generation": {
+          "id": "28387631F1B1465",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:12.796131Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: E0527227ABA94B9, 0B7A5E98F9CE46E"
+        }
+      },
+      {
+        "id": "0B7A5E98F9CE46E",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+        "rootPurl": "pkg:oci/openshift-ose-ptp-operator-bundle@sha256%3Af0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+        "creationTime": "2024-12-10T23:34:04.418581Z",
+        "generation": {
+          "id": "28387631F1B1465",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:12.796131Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: E0527227ABA94B9, 0B7A5E98F9CE46E"
+        }
+      },
+      {
+        "id": "5095B5376819410",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+        "rootPurl": "pkg:oci/ose-openshift-kubernetes-nmstate-operator-bundle@sha256%3A4f62df92ab3596bb9af6638444b1eec798af4c56dd042bd8d9de4275f466208e?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.g0d290b4.assembly.stream.el9-2",
+        "creationTime": "2024-12-10T23:35:23.544252Z",
+        "generation": {
+          "id": "105C884D7EA645A",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:12.508890Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 5095B5376819410, DC8F6347901E470"
+        }
+      },
+      {
+        "id": "DC8F6347901E470",
+        "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+        "rootPurl": "pkg:oci/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256%3A20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+        "creationTime": "2024-12-10T23:35:23.551342Z",
+        "generation": {
+          "id": "105C884D7EA645A",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+          "config": {
+            "type": "syft-image",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "paths": [],
+            "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+            "processors": [],
+            "rpms": true
+          },
+          "type": "CONTAINERIMAGE",
+          "creationTime": "2024-12-10T23:32:12.508890Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 5095B5376819410, DC8F6347901E470"
+        }
+      }
+    ]
+  }
+]

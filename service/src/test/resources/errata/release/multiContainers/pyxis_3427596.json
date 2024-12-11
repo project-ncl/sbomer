@@ -1,0 +1,56 @@
+{
+  "data": [
+    {
+      "repositories": [
+        {
+          "registry": "registry.access.redhat.com",
+          "repository": "openshift4/ose-gcp-filestore-csi-driver-operator-bundle",
+          "tags": [
+            {
+              "added_date": "2024-12-05T14:33:00.321000+00:00",
+              "name": "latest",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/openshift4/ose-gcp-filestore-csi-driver-operator-bundle/tag/latest"
+                }
+              }
+            },
+            {
+              "added_date": "2024-12-05T14:33:00.321000+00:00",
+              "name": "v4.15",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/openshift4/ose-gcp-filestore-csi-driver-operator-bundle/tag/v4.15"
+                }
+              }
+            },
+            {
+              "added_date": "2024-12-05T14:33:00.321000+00:00",
+              "name": "v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/openshift4/ose-gcp-filestore-csi-driver-operator-bundle/tag/v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8"
+                }
+              }
+            },
+            {
+              "added_date": "2024-12-05T14:33:00.321000+00:00",
+              "name": "v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/openshift4/ose-gcp-filestore-csi-driver-operator-bundle/tag/v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2"
+                }
+              }
+            }
+          ],
+          "published": true,
+          "_links": {
+            "repository": {
+              "href": "/v1/repositories/registry/registry.access.redhat.com/repository/openshift4/ose-gcp-filestore-csi-driver-operator-bundle"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

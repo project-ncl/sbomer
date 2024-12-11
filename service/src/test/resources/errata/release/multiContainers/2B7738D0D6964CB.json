@@ -1,0 +1,82 @@
+{
+  "id": "2B7738D0D6964CB",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+  "rootPurl": "pkg:oci/openshift-ose-metallb-operator-bundle@sha256%3A28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+  "creationTime": "2024-12-10T23:33:35.040532Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-metallb-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-metallb-operator-bundle@sha256%3A28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-metallb-operator-bundle@sha256%3A28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d"
+      },
+      "timestamp": "2024-12-10T23:33:21Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-metallb-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-metallb-operator-bundle@sha256%3A28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+        "type": "container",
+        "bom-ref": "ose-metallb-operator-bundle-container_image-index",
+        "version": "sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-metallb-operator-bundle",
+              "purl": "pkg:oci/ose-metallb-operator-bundle@sha256%3Acb98201739f46cc4858d0280c81abd8dda90d8455fe3f643d166a00b969d07aa?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.g359620b.assembly.stream.el9-2",
+              "type": "container",
+              "bom-ref": "ose-metallb-operator-bundle-container_amd64",
+              "version": "sha256:cb98201739f46cc4858d0280c81abd8dda90d8455fe3f643d166a00b969d07aa",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:c8d8cac3-2b6c-3ca6-b0d3-d0d09b93fc99"
+  },
+  "generationRequest": {
+    "id": "274EF9237E0E431",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-metallb-operator-bundle@sha256:28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:12.224412Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: D8820BD0227F430, 2B7738D0D6964CB"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "id": "1251FF8155D74B5",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+  "rootPurl": "pkg:oci/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+  "creationTime": "2024-12-10T23:33:24.031206Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-gcp-filestore-csi-driver-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4"
+      },
+      "timestamp": "2024-12-10T23:33:12Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-gcp-filestore-csi-driver-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+        "type": "container",
+        "bom-ref": "ose-gcp-filestore-csi-driver-operator-bundle-container_image-index",
+        "version": "sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-gcp-filestore-csi-driver-operator-bundle",
+              "purl": "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A80ef5fe21fc456cca6f10e1e02d738196c7a1515754c3bd0794b625cb496682c?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2",
+              "type": "container",
+              "bom-ref": "ose-gcp-filestore-csi-driver-operator-bundle-container_amd64",
+              "version": "sha256:80ef5fe21fc456cca6f10e1e02d738196c7a1515754c3bd0794b625cb496682c",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:22952838-377e-32ed-8ea4-946877f7430e"
+  },
+  "generationRequest": {
+    "id": "9CC5AB57497D4B6",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-gcp-filestore-csi-driver-operator-bundle@sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:11.364045Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: 96D539F40D73483, 1251FF8155D74B5"
+  }
+}
