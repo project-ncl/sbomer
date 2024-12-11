@@ -1,0 +1,82 @@
+{
+  "id": "505A5B90871046D",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+  "rootPurl": "pkg:oci/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256%3Ac3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+  "creationTime": "2024-12-10T23:33:25.000144Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-secrets-store-csi-driver-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256%3Ac3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256%3Ac3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0"
+      },
+      "timestamp": "2024-12-10T23:33:11Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-secrets-store-csi-driver-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256%3Ac3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+        "type": "container",
+        "bom-ref": "ose-secrets-store-csi-driver-operator-bundle-container_image-index",
+        "version": "sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-secrets-store-csi-driver-operator-bundle",
+              "purl": "pkg:oci/ose-secrets-store-csi-driver-operator-bundle@sha256%3A1acd121afb1ea812b2bd2613baa14938db4dababdfc664393b78caa560b0f05c?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.gef602a5.assembly.stream.el8-2",
+              "type": "container",
+              "bom-ref": "ose-secrets-store-csi-driver-operator-bundle-container_amd64",
+              "version": "sha256:1acd121afb1ea812b2bd2613baa14938db4dababdfc664393b78caa560b0f05c",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:240b7ebf-bff4-3f1a-890a-83e8ce109ffb"
+  },
+  "generationRequest": {
+    "id": "5E664B7C1859402",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-secrets-store-csi-driver-operator-bundle@sha256:c3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:11.650319Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: 3192918668C2431, 505A5B90871046D"
+  }
+}

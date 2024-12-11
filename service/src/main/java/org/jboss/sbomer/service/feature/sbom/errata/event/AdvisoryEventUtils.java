@@ -24,28 +24,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.cyclonedx.exception.GeneratorException;
-import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Hash;
-import org.cyclonedx.model.Hash.Algorithm;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
-import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURLBuilder;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 import lombok.extern.slf4j.Slf4j;
 

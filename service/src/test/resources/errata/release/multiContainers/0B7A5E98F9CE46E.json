@@ -1,0 +1,82 @@
+{
+  "id": "0B7A5E98F9CE46E",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+  "rootPurl": "pkg:oci/openshift-ose-ptp-operator-bundle@sha256%3Af0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+  "creationTime": "2024-12-10T23:34:04.418581Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-ptp-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-ptp-operator-bundle@sha256%3Af0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-ptp-operator-bundle@sha256%3Af0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9"
+      },
+      "timestamp": "2024-12-10T23:33:51Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-ptp-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-ptp-operator-bundle@sha256%3Af0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+        "type": "container",
+        "bom-ref": "ose-ptp-operator-metadata-container_image-index",
+        "version": "sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-ptp-operator-bundle",
+              "purl": "pkg:oci/ose-ptp-operator-bundle@sha256%3A474be88961c42614784fffe91fd2d7fbc84ca968f878e48b1d93c65fb7ce86ee?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.g6fb51fd.assembly.stream.el9-2",
+              "type": "container",
+              "bom-ref": "ose-ptp-operator-metadata-container_amd64",
+              "version": "sha256:474be88961c42614784fffe91fd2d7fbc84ca968f878e48b1d93c65fb7ce86ee",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:d2b80330-7e8d-35d1-a7a9-c6db6fcd6473"
+  },
+  "generationRequest": {
+    "id": "28387631F1B1465",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ptp-operator-bundle@sha256:f0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:12.796131Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: E0527227ABA94B9, 0B7A5E98F9CE46E"
+  }
+}

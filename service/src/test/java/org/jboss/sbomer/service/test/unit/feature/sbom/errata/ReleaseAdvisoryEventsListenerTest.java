@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.test.unit.feature.sbom.errata;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -33,8 +34,6 @@ import java.util.stream.Collectors;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
-import org.cyclonedx.model.Evidence;
-import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.component.evidence.Identity;
 import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
@@ -73,84 +72,8 @@ import groovy.util.logging.Slf4j;
 @Slf4j
 public class ReleaseAdvisoryEventsListenerTest {
 
-    static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseAdvisoryEventsListener {
-
-        @Override
-        protected Sbom saveReleaseManifestForPendingGeneration(SbomGenerationRequest pendingGeneration, Bom bom) {
-
-            Metadata metadata = bom.getMetadata();
-            Component metadataComponent = metadata.getComponent();
-            Evidence evidence = metadataComponent.getEvidence();
-
-            Component.Type type = metadataComponent.getType();
-            String name = metadataComponent.getName();
-            String version = metadataComponent.getVersion();
-            String bomRef = metadataComponent.getBomRef();
-
-            assertEquals(Component.Type.OPERATING_SYSTEM, type);
-            assertEquals("Red Hat Enterprise Linux 8", name);
-            assertEquals("RHEL-8.10.0.Z.MAIN+EUS", version);
-            assertEquals("RHEL-8.10.0.Z.MAIN+EUS", bomRef);
-
-            List<Identity> identities = evidence.getIdentities();
-            List<String> expectedConcludedCPEValues = List.of(
-                    "cpe:/a:redhat:enterprise_linux:8.10::appstream",
-                    "cpe:/a:redhat:enterprise_linux:8::appstream");
-
-            assertEquals(expectedConcludedCPEValues.size(), identities.size());
-
-            for (int i = 0; i < expectedConcludedCPEValues.size(); i++) {
-                assertEquals(expectedConcludedCPEValues.get(i), identities.get(i).getConcludedValue());
-                assertEquals(Field.CPE, identities.get(i).getField());
-            }
-
-            Component mainComponent = bom.getComponents().get(0);
-            Component.Type mType = mainComponent.getType();
-            String mName = mainComponent.getName();
-            String mVersion = mainComponent.getVersion();
-            String mBomRef = mainComponent.getBomRef();
-            String mPurl = mainComponent.getPurl();
-
-            assertEquals(Component.Type.CONTAINER, mType);
-            assertEquals("ubi8/ruby-25", mName);
-            assertEquals("sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94", mVersion);
-            assertEquals(
-                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
-                    mBomRef);
-            assertEquals(
-                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
-                    mPurl);
-            assertEquals(4, mainComponent.getEvidence().getIdentities().size());
-
-            List<String> expectedConcludedPurlValues = List.of(
-                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Fubi8%2Fruby-25&tag=1",
-                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Fubi8%2Fruby-25&tag=1-260.1733408998",
-                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Frhel8%2Fruby-25&tag=1-260.1733408998",
-                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Frhel8%2Fruby-25&tag=1");
-
-            List<Identity> mIdentities = mainComponent.getEvidence().getIdentities();
-            assertEquals(expectedConcludedPurlValues.size(), mIdentities.size());
-
-            for (int i = 0; i < expectedConcludedPurlValues.size(); i++) {
-                assertEquals(expectedConcludedPurlValues.get(i), mIdentities.get(i).getConcludedValue());
-                assertEquals(Field.PURL, mIdentities.get(i).getField());
-            }
-
-            List<Dependency> dependencies = bom.getDependencies();
-            assertEquals(1, dependencies.size());
-            assertEquals("RHEL-8.10.0.Z.MAIN+EUS", dependencies.get(0).getRef());
-            assertNull(dependencies.get(0).getDependencies());
-            assertEquals(1, dependencies.get(0).getProvides().size());
-            assertEquals(
-                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
-                    dependencies.get(0).getProvides().get(0).getRef());
-
-            printRawBom(bom);
-            return null;
-        }
-    }
-
-    ReleaseAdvisoryEventsListenerSingleContainer listener;
+    ReleaseAdvisoryEventsListenerSingleContainer listenerSingle;
+    ReleaseAdvisoryEventsListenerMultiContainer listenerMulti;
     ErrataClient errataClient = mock(ErrataClient.class);
     PyxisClient pyxisClient = mock(PyxisClient.class);
     StatsService statsService = mock(StatsService.class);
@@ -168,39 +91,106 @@ public class ReleaseAdvisoryEventsListenerTest {
         }
     }
 
-    @Test
-    void testReleaseErrataWithDockerBuilds() throws IOException {
+    private static void validateComponent(
+            Component component,
+            Component.Type expectedType,
+            String expectedName,
+            String expectedVersion,
+            String expectedBomRef,
+            String expectedPurl,
+            List<String> expectedConcludedValues,
+            Field expectedField) {
+        assertEquals(expectedType, component.getType());
+        assertEquals(expectedName, component.getName());
+        assertEquals(expectedVersion, component.getVersion());
+        assertEquals(expectedBomRef, component.getBomRef());
+        assertEquals(expectedPurl, component.getPurl());
 
-        listener = new ReleaseAdvisoryEventsListenerSingleContainer();
-        listener.setErrataClient(errataClient);
-        listener.setPyxisClient(pyxisClient);
-        listener.setStatsService(statsService);
-        listener.setSbomService(sbomService);
-        listener.setGenerationRequestRepository(generationRequestRepository);
+        List<Identity> identities = component.getEvidence().getIdentities();
+        assertEquals(expectedConcludedValues.size(), identities.size());
+        for (int i = 0; i < expectedConcludedValues.size(); i++) {
+            assertEquals(expectedConcludedValues.get(i), identities.get(i).getConcludedValue());
+            assertEquals(expectedField, identities.get(i).getField());
+        }
+    }
+
+    private static void validateDependencies(
+            List<Dependency> dependencies,
+            int expectedDepSize,
+            String expectedMainDepRef,
+            List<String> expectedProvidesRef) {
+        assertEquals(expectedDepSize, dependencies.size());
+        assertEquals(expectedMainDepRef, dependencies.get(0).getRef());
+        assertNull(dependencies.get(0).getDependencies());
+        assertEquals(expectedProvidesRef.size(), dependencies.get(0).getProvides().size());
+        for (int i = 0; i < expectedProvidesRef.size(); i++) {
+            assertEquals(expectedProvidesRef.get(i), dependencies.get(0).getProvides().get(i).getRef());
+        }
+    }
+
+    static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseAdvisoryEventsListener {
+
+        @Override
+        protected Sbom saveReleaseManifestForPendingGeneration(SbomGenerationRequest pendingGeneration, Bom bom) {
+
+            validateComponent(
+                    bom.getMetadata().getComponent(),
+                    Component.Type.OPERATING_SYSTEM,
+                    "Red Hat Enterprise Linux 8",
+                    "RHEL-8.10.0.Z.MAIN+EUS",
+                    "RHEL-8.10.0.Z.MAIN+EUS",
+                    null,
+                    List.of(
+                            "cpe:/a:redhat:enterprise_linux:8.10::appstream",
+                            "cpe:/a:redhat:enterprise_linux:8::appstream"),
+                    Field.CPE);
+
+            validateComponent(
+                    bom.getComponents().get(0),
+                    Component.Type.CONTAINER,
+                    "ubi8/ruby-25",
+                    "sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+                    "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+                    List.of(
+                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Fubi8%2Fruby-25&tag=1",
+                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Fubi8%2Fruby-25&tag=1-260.1733408998",
+                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Frhel8%2Fruby-25&tag=1-260.1733408998",
+                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Frhel8%2Fruby-25&tag=1"),
+                    Field.PURL);
+
+            validateDependencies(
+                    bom.getDependencies(),
+                    1,
+                    "RHEL-8.10.0.Z.MAIN+EUS",
+                    List.of(
+                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94"));
+
+            printRawBom(bom);
+            return null;
+        }
+    }
+
+    @Test
+    void testReleaseErrataWithSingleDockerBuild() throws IOException {
+
+        listenerSingle = new ReleaseAdvisoryEventsListenerSingleContainer();
+        listenerSingle.setErrataClient(errataClient);
+        listenerSingle.setPyxisClient(pyxisClient);
+        listenerSingle.setStatsService(statsService);
+        listenerSingle.setSbomService(sbomService);
+        listenerSingle.setGenerationRequestRepository(generationRequestRepository);
 
         // Get all objects required
-        String rawErrata = TestResources.asString("errata/release/singleContainer/errata_143793.json");
-        String rawErrataBuildList = TestResources
-                .asString("errata/release/singleContainer/errata_143793_build_list.json");
-        String rawErrataVariant = TestResources.asString("errata/release/singleContainer/errata_143793_variant.json");
-        String rawErrataRecords = TestResources.asString("errata/release/singleContainer/errata_143793_records.json");
-        String rawEvent = TestResources.asString("errata/release/singleContainer/request_event.json");
-        String rawFirstManifest = TestResources.asString("errata/release/singleContainer/A14FF4DDB7DB47D.json");
-        String rawIndexManifest = TestResources.asString("errata/release/singleContainer/2A5F7CA4166C470.json");
-        String rawPyxisRepositoryDetails = TestResources.asString("errata/release/singleContainer/pyxis.json");
-
-        Errata errata = ObjectMapperProvider.json().readValue(rawErrata, Errata.class);
-        ErrataBuildList erratumBuildList = ObjectMapperProvider.json()
-                .readValue(rawErrataBuildList, ErrataBuildList.class);
-        ErrataVariant variant = ObjectMapperProvider.json().readValue(rawErrataVariant, ErrataVariant.class);
-        List<V1Beta1RequestRecord> allAdvisoryRequestRecords = ObjectMapperProvider.json()
-                .readValue(rawErrataRecords, new TypeReference<List<V1Beta1RequestRecord>>() {
-                });
-        RequestEvent requestEvent = ObjectMapperProvider.json().readValue(rawEvent, RequestEvent.class);
-        Sbom firstManifest = ObjectMapperProvider.json().readValue(rawFirstManifest, Sbom.class);
-        Sbom indexManifest = ObjectMapperProvider.json().readValue(rawIndexManifest, Sbom.class);
-        PyxisRepositoryDetails repositoriesDetails = ObjectMapperProvider.json()
-                .readValue(rawPyxisRepositoryDetails, PyxisRepositoryDetails.class);
+        Errata errata = loadErrata("singleContainer/errata_143793.json");
+        ErrataBuildList erratumBuildList = loadErrataBuildList("singleContainer/errata_143793_build_list.json");
+        ErrataVariant variant = loadErrataVariant("singleContainer/errata_143793_variant.json");
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecords = loadRequestRecords(
+                "singleContainer/errata_143793_records.json");
+        RequestEvent requestEvent = loadRequestEvent("singleContainer/request_event.json");
+        Sbom firstManifest = loadSbom("singleContainer/A14FF4DDB7DB47D.json");
+        Sbom indexManifest = loadSbom("singleContainer/2A5F7CA4166C470.json");
+        PyxisRepositoryDetails repositoriesDetails = loadPyxisRepositoryDetails("singleContainer/pyxis.json");
 
         Map<ProductVersionEntry, List<BuildItem>> buildDetails = erratumBuildList.getProductVersions()
                 .values()
@@ -249,7 +239,268 @@ public class ReleaseAdvisoryEventsListenerTest {
                 .withLatestAdvisoryManifestsRecord(latestAdvisoryRequestManifest)
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listener.onReleaseAdvisoryEvent(event);
+        listenerSingle.onReleaseAdvisoryEvent(event);
+    }
+
+    static class ReleaseAdvisoryEventsListenerMultiContainer extends ReleaseAdvisoryEventsListener {
+
+        @Override
+        protected Sbom saveReleaseManifestForPendingGeneration(SbomGenerationRequest pendingGeneration, Bom bom) {
+
+            assertTrue(
+                    bom.getMetadata().getComponent().getVersion().equals("OSE-4.15-RHEL-8")
+                            || bom.getMetadata().getComponent().getVersion().equals("OSE-4.15-RHEL-9"));
+
+            if (bom.getMetadata().getComponent().getVersion().equals("OSE-4.15-RHEL-8")) {
+
+                validateComponent(
+                        bom.getMetadata().getComponent(),
+                        Component.Type.FRAMEWORK,
+                        "Red Hat OpenShift Container Platform 4.15",
+                        "OSE-4.15-RHEL-8",
+                        "OSE-4.15-RHEL-8",
+                        null,
+                        List.of("cpe:/a:redhat:openshift:4.15::el8"),
+                        Field.CPE);
+
+                validateComponent(
+                        bom.getComponents().get(0),
+                        Component.Type.CONTAINER,
+                        "openshift/ose-gcp-filestore-csi-driver-operator-bundle",
+                        "sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+                        "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+                        "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+                        List.of(
+                                "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-gcp-filestore-csi-driver-operator-bundle&tag=v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8",
+                                "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-gcp-filestore-csi-driver-operator-bundle&tag=v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2",
+                                "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-gcp-filestore-csi-driver-operator-bundle&tag=v4.15"),
+                        Field.PURL);
+
+                validateDependencies(
+                        bom.getDependencies(),
+                        1,
+                        "OSE-4.15-RHEL-8",
+                        List.of(
+                                "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
+                                "pkg:oci/ose-aws-efs-csi-driver-operator-bundle@sha256%3A6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+                                "pkg:oci/ose-secrets-store-csi-driver-operator-bundle@sha256%3Ac3eb47f4c962949a1f8446de39963f20b299fbd1bf27e742232f1a9c144e7be0"));
+
+            } else if (bom.getMetadata().getComponent().getVersion().equals("OSE-4.15-RHEL-9")) {
+
+                validateComponent(
+                        bom.getMetadata().getComponent(),
+                        Component.Type.FRAMEWORK,
+                        "Red Hat OpenShift Container Platform 4.15",
+                        "OSE-4.15-RHEL-9",
+                        "OSE-4.15-RHEL-9",
+                        null,
+                        List.of("cpe:/a:redhat:openshift:4.15::el9"),
+                        Field.CPE);
+
+                validateComponent(
+                        bom.getComponents().get(0),
+                        Component.Type.CONTAINER,
+                        "openshift/ose-clusterresourceoverride-operator-bundle",
+                        "sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+                        "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+                        "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+                        List.of(
+                                "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-clusterresourceoverride-operator-bundle&tag=v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1",
+                                "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-clusterresourceoverride-operator-bundle&tag=v4.15",
+                                "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-clusterresourceoverride-operator-bundle&tag=v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9"),
+                        Field.PURL);
+
+                validateDependencies(
+                        bom.getDependencies(),
+                        1,
+                        "OSE-4.15-RHEL-9",
+                        List.of(
+                                "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+                                "pkg:oci/ose-vertical-pod-autoscaler-operator-bundle@sha256%3A0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+                                "pkg:oci/openshift-ose-cluster-nfd-operator-bundle@sha256%3A3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+                                "pkg:oci/openshift-ose-ingress-node-firewall-operator-bundle@sha256%3A13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+                                "pkg:oci/openshift-ose-local-storage-operator-bundle@sha256%3A20f5923ea4ba9fdef4779efb1423274b479efbb1278dd13010518a159cf32e37",
+                                "pkg:oci/openshift-ose-metallb-operator-bundle@sha256%3A28b9c5ae08d95f9ae01bbf9fabab2d0bb7c93104243652e2b934dace47e3426d",
+                                "pkg:oci/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256%3A20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+                                "pkg:oci/openshift-ose-ptp-operator-bundle@sha256%3Af0bcb875bc379e1c6a2508796d69febe3891c5717956bcade2e1df6708f376b9"));
+            }
+
+            printRawBom(bom);
+            return null;
+        }
+    }
+
+    @Test
+    void testReleaseErrataWithMultiDockerBuilds() throws IOException {
+
+        listenerMulti = new ReleaseAdvisoryEventsListenerMultiContainer();
+        listenerMulti.setErrataClient(errataClient);
+        listenerMulti.setPyxisClient(pyxisClient);
+        listenerMulti.setStatsService(statsService);
+        listenerMulti.setSbomService(sbomService);
+        listenerMulti.setGenerationRequestRepository(generationRequestRepository);
+
+        // Get all objects required
+        //
+        Map<String, PyxisRepositoryDetails> pyxisRepositories = new HashMap<String, PyxisRepositoryDetails>();
+        pyxisRepositories.put(
+                "ose-clusterresourceoverride-operator-metadata-container-v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3421076.json"));
+        pyxisRepositories.put(
+                "ose-vertical-pod-autoscaler-operator-metadata-container-v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3421077.json"));
+        pyxisRepositories.put(
+                "cluster-nfd-operator-metadata-container-v4.15.0.202412041605.p0.gabdfb61.assembly.stream.el9-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427588.json"));
+        pyxisRepositories.put(
+                "ingress-node-firewall-operator-bundle-container-v4.15.0.202412041605.p0.g135f832.assembly.stream.el9-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427589.json"));
+        pyxisRepositories.put(
+                "local-storage-operator-metadata-container-v4.15.0.202412041605.p0.gcc4f213.assembly.stream.el9-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427592.json"));
+        pyxisRepositories.put(
+                "ose-metallb-operator-bundle-container-v4.15.0.202412041605.p0.g359620b.assembly.stream.el9-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427593.json"));
+        pyxisRepositories.put(
+                "ose-kubernetes-nmstate-operator-bundle-container-v4.15.0.202412041605.p0.g0d290b4.assembly.stream.el9-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427594.json"));
+        pyxisRepositories.put(
+                "ose-ptp-operator-metadata-container-v4.15.0.202412041605.p0.g6fb51fd.assembly.stream.el9-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427595.json"));
+        pyxisRepositories.put(
+                "ose-gcp-filestore-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427596.json"));
+        pyxisRepositories.put(
+                "ose-aws-efs-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.gb0f13a0.assembly.stream.el8-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427616.json"));
+        pyxisRepositories.put(
+                "ose-secrets-store-csi-driver-operator-bundle-container-v4.15.0.202412041605.p0.gef602a5.assembly.stream.el8-2",
+                loadPyxisRepositoryDetails("multiContainers/pyxis_3427615.json"));
+
+        Errata errata = loadErrata("multiContainers/errata_143781.json");
+        ErrataBuildList erratumBuildList = loadErrataBuildList("multiContainers/errata_143781_build_list.json");
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecords = loadRequestRecords(
+                "multiContainers/errata_143781_records.json");
+        RequestEvent requestEvent = loadRequestEvent("multiContainers/request_event.json");
+
+        Map<String, Sbom> sboms = new HashMap<String, Sbom>();
+        sboms.put("505A5B90871046D", loadSbom("multiContainers/505A5B90871046D.json"));
+        sboms.put("415DE22239C9439", loadSbom("multiContainers/415DE22239C9439.json"));
+        sboms.put("47F4BC6A1C1641B", loadSbom("multiContainers/47F4BC6A1C1641B.json"));
+        sboms.put("972A7D1C755548A", loadSbom("multiContainers/972A7D1C755548A.json"));
+        sboms.put("8FEBABB08A614E6", loadSbom("multiContainers/8FEBABB08A614E6.json"));
+        sboms.put("D8820BD0227F430", loadSbom("multiContainers/D8820BD0227F430.json"));
+        sboms.put("2B7738D0D6964CB", loadSbom("multiContainers/2B7738D0D6964CB.json"));
+        sboms.put("96D539F40D73483", loadSbom("multiContainers/96D539F40D73483.json"));
+        sboms.put("1251FF8155D74B5", loadSbom("multiContainers/1251FF8155D74B5.json"));
+        sboms.put("CDCBA3AA014747E", loadSbom("multiContainers/CDCBA3AA014747E.json"));
+        sboms.put("AB81F89CF06645A", loadSbom("multiContainers/AB81F89CF06645A.json"));
+        sboms.put("6AC3057851CB480", loadSbom("multiContainers/6AC3057851CB480.json"));
+        sboms.put("9598ACF8368F49E", loadSbom("multiContainers/9598ACF8368F49E.json"));
+        sboms.put("C67D863805F6463", loadSbom("multiContainers/C67D863805F6463.json"));
+        sboms.put("EAABD415A3C7420", loadSbom("multiContainers/EAABD415A3C7420.json"));
+        sboms.put("1DEFC26D4700433", loadSbom("multiContainers/1DEFC26D4700433.json"));
+        sboms.put("FD64B2D3C6484CF", loadSbom("multiContainers/FD64B2D3C6484CF.json"));
+        sboms.put("E0527227ABA94B9", loadSbom("multiContainers/E0527227ABA94B9.json"));
+        sboms.put("0B7A5E98F9CE46E", loadSbom("multiContainers/0B7A5E98F9CE46E.json"));
+        sboms.put("5095B5376819410", loadSbom("multiContainers/5095B5376819410.json"));
+        sboms.put("3192918668C2431", loadSbom("multiContainers/3192918668C2431.json"));
+        sboms.put("DC8F6347901E470", loadSbom("multiContainers/DC8F6347901E470.json"));
+
+        ErrataVariant variant8BaseRHOSE415 = loadErrataVariant(
+                "multiContainers/errata_143781_variant_8Base-RHOSE-4.15.json");
+        ErrataVariant variant9BaseRHOSE415 = loadErrataVariant(
+                "multiContainers/errata_143781_variant_9Base-RHOSE-4.15.json");
+
+        Map<ProductVersionEntry, List<BuildItem>> buildDetails = erratumBuildList.getProductVersions()
+                .values()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                productVersionEntry -> productVersionEntry,
+                                productVersionEntry -> productVersionEntry.getBuilds()
+                                        .stream()
+                                        .flatMap(build -> build.getBuildItems().values().stream())
+                                        .collect(Collectors.toList())));
+
+        V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
+        Map<ProductVersionEntry, SbomGenerationRequest> pvToGenerations = new HashMap<ProductVersionEntry, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
+
+        buildDetails.keySet().forEach(pv -> {
+            String generationId = RandomStringIdGenerator.generate();
+            SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
+                    .withId(generationId)
+                    .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + pv.getName())
+                    .withType(GenerationRequestType.CONTAINERIMAGE)
+                    .withStatus(SbomGenerationStatus.GENERATING)
+                    .withConfig(null) // I really don't know what to put here
+                    .withRequest(requestEvent)
+                    .build();
+
+            generationsMap.put(generationId, sbomGenerationRequest);
+            pvToGenerations.put(pv, sbomGenerationRequest);
+        });
+
+        when(errataClient.getVariant("8Base-RHOSE-4.15")).thenReturn(variant8BaseRHOSE415);
+        when(errataClient.getVariant("9Base-RHOSE-4.15")).thenReturn(variant9BaseRHOSE415);
+        when(statsService.getStats())
+                .thenReturn(Stats.builder().withVersion("ReleaseAdvisoryEventsListenerTest_1.0.0").build());
+
+        when(sbomService.get(anyString())).thenAnswer(invocation -> sboms.get(invocation.getArgument(0)));
+        when(pyxisClient.getRepositoriesDetails(anyString()))
+                .thenAnswer(invocation -> pyxisRepositories.get(invocation.getArgument(0)));
+        when(generationRequestRepository.findById(anyString())).thenAnswer(invocation -> {
+            String generationId = invocation.getArgument(0);
+            return generationsMap.get(generationId);
+        });
+        when(sbomService.save(any(Sbom.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AdvisoryReleaseEvent event = AdvisoryReleaseEvent.builder()
+                .withAdvisoryBuildDetails(buildDetails)
+                .withErratum(errata)
+                .withLatestAdvisoryManifestsRecord(latestAdvisoryRequestManifest)
+                .withReleaseGenerations(pvToGenerations)
+                .build();
+        listenerMulti.onReleaseAdvisoryEvent(event);
+    }
+
+    private PyxisRepositoryDetails loadPyxisRepositoryDetails(String fileName) throws IOException {
+        return parseResource(fileName, PyxisRepositoryDetails.class);
+    }
+
+    private Sbom loadSbom(String fileName) throws IOException {
+        return parseResource(fileName, Sbom.class);
+    }
+
+    private Errata loadErrata(String fileName) throws IOException {
+        return parseResource(fileName, Errata.class);
+    }
+
+    private ErrataVariant loadErrataVariant(String fileName) throws IOException {
+        return parseResource(fileName, ErrataVariant.class);
+    }
+
+    private ErrataBuildList loadErrataBuildList(String fileName) throws IOException {
+        return parseResource(fileName, ErrataBuildList.class);
+    }
+
+    private RequestEvent loadRequestEvent(String fileName) throws IOException {
+        return parseResource(fileName, RequestEvent.class);
+    }
+
+    private List<V1Beta1RequestRecord> loadRequestRecords(String fileName) throws IOException {
+        return parseResource(fileName, new TypeReference<List<V1Beta1RequestRecord>>() {
+        });
+    }
+
+    private <T> T parseResource(String fileName, Class<T> type) throws IOException {
+        return ObjectMapperProvider.json().readValue(TestResources.asString("errata/release/" + fileName), type);
+    }
+
+    private <T> T parseResource(String fileName, TypeReference<T> typeReference) throws IOException {
+        return ObjectMapperProvider.json()
+                .readValue(TestResources.asString("errata/release/" + fileName), typeReference);
     }
 
 }

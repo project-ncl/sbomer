@@ -1,0 +1,38 @@
+{
+  "data": [
+    {
+      "repositories": [
+        {
+          "registry": "registry-proxy.engineering.redhat.com",
+          "repository": "rh-osbs/openshift-ose-ptp-operator-bundle",
+          "tags": [
+            {
+              "added_date": "2024-12-05T14:33:20.921000+00:00",
+              "name": "v4.15.0.202412041605.p0.g6fb51fd.assembly.stream.el9-2",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/openshift-ose-ptp-operator-bundle/tag/v4.15.0.202412041605.p0.g6fb51fd.assembly.stream.el9-2"
+                }
+              }
+            },
+            {
+              "added_date": "2024-12-05T14:33:20.921000+00:00",
+              "name": "rhaos-4.15-rhel-9-candidate-31211-20241205140840-x86_64",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/openshift-ose-ptp-operator-bundle/tag/rhaos-4.15-rhel-9-candidate-31211-20241205140840-x86_64"
+                }
+              }
+            }
+          ],
+          "published": true,
+          "_links": {
+            "repository": {
+              "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/openshift-ose-ptp-operator-bundle"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
