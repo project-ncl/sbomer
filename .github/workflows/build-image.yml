@@ -38,14 +38,11 @@ jobs:
       - name: Populate certificates
         env:
           IT_ROOT_CA_2022: ${{ secrets.IT_ROOT_CA_2022 }}
-          IT_ROOT_CA_2015: ${{ secrets.IT_ROOT_CA_2015 }}
           CA_CHAIN: ${{ secrets.CA_CHAIN }}
         run: |
           mkdir certs
           echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
-          echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
 
-          openssl x509 -in certs/2015-IT-Root-CA.pem -text > /dev/null
           openssl x509 -in certs/2022-IT-Root-CA.pem -text > /dev/null
       - name: Download ${{ inputs.artifact }}
         if: "${{ inputs.artifact != 'false' }}"
