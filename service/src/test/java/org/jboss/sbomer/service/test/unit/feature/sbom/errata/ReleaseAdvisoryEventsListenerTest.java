@@ -56,6 +56,7 @@ import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
+import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.stats.StatsService;
@@ -131,7 +132,11 @@ public class ReleaseAdvisoryEventsListenerTest {
     static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForPendingGeneration(SbomGenerationRequest pendingGeneration, Bom bom) {
+        protected Sbom saveReleaseManifestForGeneration(
+                SbomGenerationRequest releaseGeneration,
+                Bom bom,
+                V1Beta1RequestRecord advisoryManifestsRecord,
+                Map<String, List<RepositoryCoordinates>> generationToRepositories) {
 
             validateComponent(
                     bom.getMetadata().getComponent(),
@@ -245,7 +250,11 @@ public class ReleaseAdvisoryEventsListenerTest {
     static class ReleaseAdvisoryEventsListenerMultiContainer extends ReleaseAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForPendingGeneration(SbomGenerationRequest pendingGeneration, Bom bom) {
+        protected Sbom saveReleaseManifestForGeneration(
+                SbomGenerationRequest releaseGeneration,
+                Bom bom,
+                V1Beta1RequestRecord advisoryManifestsRecord,
+                Map<String, List<RepositoryCoordinates>> generationToRepositories) {
 
             assertTrue(
                     bom.getMetadata().getComponent().getVersion().equals("OSE-4.15-RHEL-8")
