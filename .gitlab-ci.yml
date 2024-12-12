@@ -69,14 +69,12 @@ build:
     - dnf -y --noplugins --setopt=install_weak_deps=0 --setopt=tsflags=nodocs upgrade
     - dnf install -y --setopt=tsflags=nodocs unzip zip
     - mkdir certs
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o certs/2015-IT-Root-CA.pem
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2024-IT-Root-CA.pem" -o certs/2024-IT-Root-CA.pem
     - curl -s "https://get.sdkman.io" | bash
     - echo "sdkman_auto_answer=true" > $HOME/.sdkman/etc/config
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
     - sdk install java 17.0.12-tem
-    - keytool -import -trustcacerts -alias 2022-IT-Root-CA -file certs/2022-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.12-tem/lib/security/cacerts" -noprompt -storepass changeit
-    - keytool -import -trustcacerts -alias 2015-IT-Root-CA -file certs/2015-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.12-tem/lib/security/cacerts" -noprompt -storepass changeit
+    - keytool -import -trustcacerts -alias 2024-IT-Root-CA -file certs/2024-IT-Root-CA.pem -keystore "$HOME/.sdkman/candidates/java/17.0.12-tem/lib/security/cacerts" -noprompt -storepass changeit
   script:
     - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -DbuildNumber=${CI_COMMIT_SHORT_SHA} jacoco:report sonar:sonar -Dsonar.projectKey=SBOMer
   artifacts:
@@ -128,8 +126,7 @@ build-image-service:
     CONTAINERFILE: images/sbomer-service/Containerfile
   before_script:
     - mkdir certs
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o certs/2015-IT-Root-CA.pem
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2024-IT-Root-CA.pem" -o certs/2024-IT-Root-CA.pem
   dependencies:
     - build
   needs:
@@ -143,8 +140,7 @@ build-image-generator:
     CONTAINERFILE: images/sbomer-generator/Containerfile
   before_script:
     - mkdir certs
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2022-IT-Root-CA.pem" -o certs/2022-IT-Root-CA.pem
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2015-IT-Root-CA.pem" -o certs/2015-IT-Root-CA.pem
+    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/2024-IT-Root-CA.pem" -o certs/2024-IT-Root-CA.pem
   dependencies:
     - build
   needs:
