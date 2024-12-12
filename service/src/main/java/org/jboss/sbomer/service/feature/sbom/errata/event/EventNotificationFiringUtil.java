@@ -44,9 +44,8 @@ public class EventNotificationFiringUtil {
     public static void notifyAdvisoryRelease(Object advisoryReleaseNotification) {
         AdvisoryReleaseEvent releaseEvent = (AdvisoryReleaseEvent) advisoryReleaseNotification;
         log.info(
-                "Firing async event for advisory release update of advisory '{}'[{}]",
-                releaseEvent.getErratum().getDetails().get().getFulladvisory(),
-                releaseEvent.getErratum().getDetails().get().getId());
+                "Firing async event for advisory release update upon event with id: {}",
+                releaseEvent.getRequestEventId());
         Event<Object> event = Arc.container().beanManager().getEvent();
         event.fireAsync(advisoryReleaseNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {

@@ -27,6 +27,7 @@ import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.ConfigSchemaValidator;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
@@ -45,6 +46,7 @@ import org.jboss.sbomer.core.features.sbom.config.runtime.ProductConfig;
 import org.jboss.sbomer.core.features.sbom.config.runtime.RedHatProductProcessorConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -548,6 +550,26 @@ public class SbomService {
     public void notifyCompleted(@SpanAttribute(value = "sbom") Sbom sbom) {
         log.info("Notifying the generation of SBOM: {}", sbom);
         notificationService.notifyCompleted(List.of(sbom));
+    }
+
+    @Transactional
+    public V1Beta1RequestRecord searchLastSuccessfulAdvisoryRequestRecord(String advisoryId) {
+        // Get all the request events generations for this advisory
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecords = searchAggregatedResultsNatively(
+                ErrataAdvisoryRequestConfig.TYPE_NAME + "=" + advisoryId);
+
+        // Check whether the last one was completed successfully
+        if (allAdvisoryRequestRecords == null || allAdvisoryRequestRecords.isEmpty()
+                || !RequestEventStatus.SUCCESS.equals(allAdvisoryRequestRecords.get(0).eventStatus())) {
+            return null;
+        }
+
+        // Get the latest request and verify there are manifests
+        V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
+        if (latestAdvisoryRequestManifest.manifests() == null || latestAdvisoryRequestManifest.manifests().isEmpty()) {
+            return null;
+        }
+        return latestAdvisoryRequestManifest;
     }
 
     public DeliverableAnalyzerOperation doAnalyzeDeliverables(DeliverableAnalysisConfig config) {

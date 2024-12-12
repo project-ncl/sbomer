@@ -281,8 +281,8 @@ public class AdvisoryService {
             // Otherwise SBOMer will default to the creation of build manifests. Will change in future!
             V1Beta1RequestRecord successfulRequestRecord = null;
             if (ErrataStatus.SHIPPED_LIVE.equals(details.getStatus())) {
-                successfulRequestRecord = searchLastSuccessfulAdvisoryRequestRecord(
-                        String.valueOf(erratum.getDetails().get().getId()));
+                successfulRequestRecord = sbomService
+                        .searchLastSuccessfulAdvisoryRequestRecord(String.valueOf(erratum.getDetails().get().getId()));
             }
 
             if (successfulRequestRecord == null) {
@@ -390,10 +390,11 @@ public class AdvisoryService {
     }
 
     @Transactional
-    protected Map<ProductVersionEntry, SbomGenerationRequest> createReleaseManifestsGenerationsForDockerBuilds(
+    protected Map<ProductVersionEntry, SbomGenerationRequest> createReleaseManifestsGenerationsForType(
             Errata erratum,
             RequestEvent requestEvent,
-            Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
+            Map<ProductVersionEntry, List<BuildItem>> buildDetails,
+            GenerationRequestType type) {
 
         // We need to create 1 release manifest per ProductVersion
         // We will identify the Generation with the {Errata}#{ProductVersion} identifier
@@ -402,7 +403,7 @@ public class AdvisoryService {
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                     .withId(RandomStringIdGenerator.generate())
                     .withIdentifier(erratum.getDetails().get().getFulladvisory() + "#" + pv.getName())
-                    .withType(GenerationRequestType.CONTAINERIMAGE)
+                    .withType(type)
                     .withStatus(SbomGenerationStatus.GENERATING)
                     .withConfig(null) // I really don't know what to put here
                     .withRequest(requestEvent)
@@ -411,25 +412,6 @@ public class AdvisoryService {
             pvToGenerations.put(pv, generationRequestRepository.save(sbomGenerationRequest));
         });
         return pvToGenerations;
-    }
-
-    private V1Beta1RequestRecord searchLastSuccessfulAdvisoryRequestRecord(String advisoryId) {
-        // Get all the request events generations for this advisory
-        List<V1Beta1RequestRecord> allAdvisoryRequestRecords = sbomService
-                .searchAggregatedResultsNatively(ErrataAdvisoryRequestConfig.TYPE_NAME + "=" + advisoryId);
-
-        // Check whether the last one was completed successfully
-        if (allAdvisoryRequestRecords == null || allAdvisoryRequestRecords.isEmpty()
-                || !RequestEventStatus.SUCCESS.equals(allAdvisoryRequestRecords.get(0).eventStatus())) {
-            return null;
-        }
-
-        // Get the latest request and verify there are manifests
-        V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
-        if (latestAdvisoryRequestManifest.manifests() == null || latestAdvisoryRequestManifest.manifests().isEmpty()) {
-            return null;
-        }
-        return latestAdvisoryRequestManifest;
     }
 
     protected Collection<SbomGenerationRequest> createReleaseManifestsForDockerBuilds(
@@ -442,17 +424,16 @@ public class AdvisoryService {
             return doIgnoreRequest(requestEvent, "Standard Errata container images manifest generation is disabled");
         }
 
-        Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForDockerBuilds(
+        Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
                 erratum,
                 requestEvent,
-                buildDetails);
+                buildDetails,
+                GenerationRequestType.CONTAINERIMAGE);
 
         // Send an async notification for the completed generations (will be used to add comments to Errata)
         notifyAdvisoryRelease(
                 AdvisoryReleaseEvent.builder()
-                        .withErratum(erratum)
-                        .withLatestAdvisoryManifestsRecord(successfulAdvisoryRequestRecord)
-                        .withAdvisoryBuildDetails(buildDetails)
+                        .withRequestEventId(requestEvent.getId())
                         .withReleaseGenerations(releaseGenerations)
                         .build());
 

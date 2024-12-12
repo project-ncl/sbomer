@@ -33,6 +33,7 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
@@ -40,17 +41,22 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata.Details;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
+import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.stats.StatsService;
@@ -59,6 +65,7 @@ import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,36 +98,79 @@ public class ReleaseAdvisoryEventsListener {
     @Setter
     SbomGenerationRequestRepository generationRequestRepository;
 
+    @Inject
+    @Setter
+    RequestEventRepository requestEventRepository;
+
     private static final String NVR_STANDARD_SEPARATOR = "-";
 
     public void onReleaseAdvisoryEvent(@ObservesAsync AdvisoryReleaseEvent event) {
         log.debug("Event received for advisory release ...");
 
-        if (event.getErratum().getDetails().get().getContentTypes().contains("docker")) {
-            releaseManifestsForDockerBuilds(event);
+        RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
+
+        ErrataAdvisoryRequestConfig advisoryRequestConfig = (ErrataAdvisoryRequestConfig) requestEvent
+                .getRequestConfig();
+
+        // Fetching Erratum
+        Errata erratum = errataClient.getErratum(advisoryRequestConfig.getAdvisoryId());
+        Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
+                advisoryRequestConfig.getAdvisoryId());
+        V1Beta1RequestRecord advisoryManifestsRecord = sbomService
+                .searchLastSuccessfulAdvisoryRequestRecord(advisoryRequestConfig.getAdvisoryId());
+
+        if (erratum.getDetails().get().getContentTypes().contains("docker")) {
+
+            log.debug(
+                    "Creating release manifests for Docker builds of advisory: '{}'[{}]",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+
+            releaseManifestsForDockerBuilds(
+                    erratum,
+                    advisoryBuildDetails,
+                    advisoryManifestsRecord,
+                    event.getReleaseGenerations());
         } else {
+
+            log.debug(
+                    "Creating release manifests for RPM builds of advisory: '{}'[{}]",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+
             releaseManifestsForRPMBuilds();
         }
+    }
+
+    @Transactional
+    protected Map<ProductVersionEntry, List<BuildItem>> getAdvisoryBuildDetails(String advisoryId) {
+        ErrataBuildList erratumBuildList = errataClient.getBuildsList(advisoryId);
+        Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = erratumBuildList.getProductVersions()
+                .values()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                productVersionEntry -> productVersionEntry,
+                                productVersionEntry -> productVersionEntry.getBuilds()
+                                        .stream()
+                                        .flatMap(build -> build.getBuildItems().values().stream())
+                                        .collect(Collectors.toList())));
+        return advisoryBuildDetails;
     }
 
     protected void releaseManifestsForRPMBuilds() {
         throw new ApplicationException("**** NOT IMPLEMENTED ****");
     }
 
-    protected void releaseManifestsForDockerBuilds(AdvisoryReleaseEvent event) {
-
-        Details details = event.getErratum().getDetails().get();
-        V1Beta1RequestRecord advisoryManifestsRecord = event.getLatestAdvisoryManifestsRecord();
-        Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = event.getAdvisoryBuildDetails();
-        Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations = event.getReleaseGenerations();
-
-        log.debug(
-                "Creating release manifests for Docker builds of advisory: '{}'[{}]",
-                details.getFulladvisory(),
-                details.getId());
+    protected void releaseManifestsForDockerBuilds(
+            Errata erratum,
+            Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails,
+            V1Beta1RequestRecord advisoryManifestsRecord,
+            Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations) {
 
         String toolVersion = statsService.getStats().getVersion();
-        Component.Type productType = AdvisoryEventUtils.getComponentTypeForProduct(details.getProduct().getShortName());
+        Component.Type productType = AdvisoryEventUtils
+                .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
 
         // Associate each build (NVR) in an advisory to its build manifest generation
         Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration = mapNVRToBuildGeneration(advisoryManifestsRecord);
@@ -136,7 +186,7 @@ public class ReleaseAdvisoryEventsListener {
                     productVersion.getName(),
                     productType,
                     productVersionToCPEs.get(productVersion),
-                    Date.from(details.getActualShipDate()),
+                    Date.from(erratum.getDetails().get().getActualShipDate()),
                     toolVersion);
             productVersionBom.setMetadata(productVersionMetadata);
             Dependency productVersionDependency = new Dependency(productVersionMetadata.getComponent().getBomRef());
@@ -171,7 +221,7 @@ public class ReleaseAdvisoryEventsListener {
                     sbom,
                     releaseGeneration.getId(),
                     productVersion.getName(),
-                    details.getFulladvisory());
+                    erratum.getDetails().get().getFulladvisory());
         });
     }
 

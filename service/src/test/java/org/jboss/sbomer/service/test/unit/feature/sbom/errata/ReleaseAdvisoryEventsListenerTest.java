@@ -57,6 +57,7 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
+import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.stats.StatsService;
@@ -80,6 +81,7 @@ public class ReleaseAdvisoryEventsListenerTest {
     StatsService statsService = mock(StatsService.class);
     SbomService sbomService = mock(SbomService.class);
     SbomGenerationRequestRepository generationRequestRepository = mock(SbomGenerationRequestRepository.class);
+    RequestEventRepository requestEventRepository = mock(RequestEventRepository.class);
 
     private static void printRawBom(Bom bom) {
         try {
@@ -185,6 +187,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         listenerSingle.setStatsService(statsService);
         listenerSingle.setSbomService(sbomService);
         listenerSingle.setGenerationRequestRepository(generationRequestRepository);
+        listenerSingle.setRequestEventRepository(requestEventRepository);
 
         // Get all objects required
         Errata errata = loadErrata("singleContainer/errata_143793.json");
@@ -227,21 +230,29 @@ public class ReleaseAdvisoryEventsListenerTest {
             pvToGenerations.put(pv, sbomGenerationRequest);
         });
         when(errataClient.getVariant("AppStream-8.10.0.Z.MAIN.EUS")).thenReturn(variant);
+        when(errataClient.getBuildsList(String.valueOf(errata.getDetails().get().getId())))
+                .thenReturn(erratumBuildList);
+        when(errataClient.getErratum(String.valueOf(errata.getDetails().get().getId()))).thenReturn(errata);
+
         when(statsService.getStats())
                 .thenReturn(Stats.builder().withVersion("ReleaseAdvisoryEventsListenerTest_1.0.0").build());
-        when(sbomService.get("A14FF4DDB7DB47D")).thenReturn(firstManifest);
-        when(sbomService.get("2A5F7CA4166C470")).thenReturn(indexManifest);
+
         when(pyxisClient.getRepositoriesDetails("ruby-25-container-1-260.1733408998")).thenReturn(repositoriesDetails);
+
         when(generationRequestRepository.findById(anyString())).thenAnswer(invocation -> {
             String generationId = invocation.getArgument(0);
             return generationsMap.get(generationId);
         });
+        when(requestEventRepository.findById(anyString())).thenReturn(requestEvent);
+
+        when(sbomService.get("A14FF4DDB7DB47D")).thenReturn(firstManifest);
+        when(sbomService.get("2A5F7CA4166C470")).thenReturn(indexManifest);
         when(sbomService.save(any(Sbom.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString()))
+                .thenReturn(latestAdvisoryRequestManifest);
 
         AdvisoryReleaseEvent event = AdvisoryReleaseEvent.builder()
-                .withAdvisoryBuildDetails(buildDetails)
-                .withErratum(errata)
-                .withLatestAdvisoryManifestsRecord(latestAdvisoryRequestManifest)
+                .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerSingle.onReleaseAdvisoryEvent(event);
@@ -348,6 +359,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         listenerMulti.setStatsService(statsService);
         listenerMulti.setSbomService(sbomService);
         listenerMulti.setGenerationRequestRepository(generationRequestRepository);
+        listenerMulti.setRequestEventRepository(requestEventRepository);
 
         // Get all objects required
         //
@@ -453,22 +465,29 @@ public class ReleaseAdvisoryEventsListenerTest {
 
         when(errataClient.getVariant("8Base-RHOSE-4.15")).thenReturn(variant8BaseRHOSE415);
         when(errataClient.getVariant("9Base-RHOSE-4.15")).thenReturn(variant9BaseRHOSE415);
+        when(errataClient.getBuildsList(String.valueOf(errata.getDetails().get().getId())))
+                .thenReturn(erratumBuildList);
+        when(errataClient.getErratum(String.valueOf(errata.getDetails().get().getId()))).thenReturn(errata);
+
         when(statsService.getStats())
                 .thenReturn(Stats.builder().withVersion("ReleaseAdvisoryEventsListenerTest_1.0.0").build());
 
-        when(sbomService.get(anyString())).thenAnswer(invocation -> sboms.get(invocation.getArgument(0)));
         when(pyxisClient.getRepositoriesDetails(anyString()))
                 .thenAnswer(invocation -> pyxisRepositories.get(invocation.getArgument(0)));
+
         when(generationRequestRepository.findById(anyString())).thenAnswer(invocation -> {
             String generationId = invocation.getArgument(0);
             return generationsMap.get(generationId);
         });
+        when(requestEventRepository.findById(anyString())).thenReturn(requestEvent);
+
+        when(sbomService.get(anyString())).thenAnswer(invocation -> sboms.get(invocation.getArgument(0)));
         when(sbomService.save(any(Sbom.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString()))
+                .thenReturn(latestAdvisoryRequestManifest);
 
         AdvisoryReleaseEvent event = AdvisoryReleaseEvent.builder()
-                .withAdvisoryBuildDetails(buildDetails)
-                .withErratum(errata)
-                .withLatestAdvisoryManifestsRecord(latestAdvisoryRequestManifest)
+                .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerMulti.onReleaseAdvisoryEvent(event);
