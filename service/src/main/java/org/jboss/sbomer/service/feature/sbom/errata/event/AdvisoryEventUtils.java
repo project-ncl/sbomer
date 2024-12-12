@@ -52,6 +52,14 @@ public class AdvisoryEventUtils {
      * cpe:/a:redhat:enterprise_linux:9::highavailability -> cpe:/a:redhat:enterprise_linux:9.4::highavailability
      * cpe:/a:redhat:enterprise_linux:9::server -> cpe:/a:redhat:enterprise_linux:9.4::server
      */
+    /**
+     * In case of mainline RHEL releases if the ProductVersion contains a {major}.{minor} pattern, augment the original
+     * CPEs with the {minor} value, if not present already.
+     *
+     * @param productVersion {@link ProductVersionEntry} to analyze
+     * @param originalCPEs the set of original CPEs to augment with more granular {minor} value
+     * @return The list of CPEs with additional more granular values
+     */
     public static List<String> createGranularCPEs(ProductVersionEntry productVersion, Set<String> originalCPEs) {
         String majorMinor = captureMajorMinorVersion(productVersion);
         if (majorMinor == null) {
@@ -71,6 +79,12 @@ public class AdvisoryEventUtils {
         }).filter(Objects::nonNull).toList();
     }
 
+    /**
+     * Returns {@link Component.Type} for the specified generation based on its {@link GenerationRequestType}.
+     *
+     * @param generation the {@link V1Beta1GenerationRecord}.
+     * @return The {@link Component.Type} value.
+     */
     public static Component.Type getComponentTypeForGeneration(V1Beta1GenerationRecord generation) {
         GenerationRequestType generationRequestType = GenerationRequestType.fromName(generation.type());
         if (GenerationRequestType.CONTAINERIMAGE.equals(generationRequestType)) {
@@ -79,12 +93,24 @@ public class AdvisoryEventUtils {
         return Component.Type.LIBRARY;
     }
 
+    /**
+     * Returns {@link Component.Type} for the specified product short name.
+     *
+     * @param productShortName the Product short name
+     * @return The {@link Component.Type} value.
+     */
     public static Component.Type getComponentTypeForProduct(String productShortName) {
         // Products MUST use the type "operating-system" (in case of RHEL) or "framework" (for all other, non-OS
         // products).
         return productShortName.equals("RHEL") ? Component.Type.OPERATING_SYSTEM : Component.Type.FRAMEWORK;
     }
 
+    /**
+     * Returns the list of purls from the specific {@link JsonNode} of type "manifest" for text-only advisories
+     *
+     * @param manifestNode the specific {@link JsonNode} of type "manifest"
+     * @return The list of purls as strings.
+     */
     public static List<String> extractPurlUrisFromManifestNode(JsonNode manifestNode) {
         return Optional.ofNullable(manifestNode.path("manifest").path("refs")).filter(JsonNode::isArray).map(refs -> {
             List<String> purlUris = new ArrayList<>();
@@ -97,6 +123,15 @@ public class AdvisoryEventUtils {
         }).orElse(Collections.emptyList());
     }
 
+    /**
+     * Creates a set of purls from the given list of {@link RepositoryCoordinates} and with a specified version
+     *
+     * @param repositories the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
+     * @param version the version to setup on the purls
+     * @param includeRepositoryQualifiers the flag which specifies whether the purls should contain the repository
+     *        coordinates as qualifiers
+     * @return The list of purls as strings.
+     */
     public static Set<String> createPurls(
             List<RepositoryCoordinates> repositories,
             String version,
@@ -109,6 +144,15 @@ public class AdvisoryEventUtils {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Creates a purl from the given {@link RepositoryCoordinates} and with a specified version
+     *
+     * @param repositories the {@link RepositoryCoordinates} which contains registry, repository and tag values
+     * @param version the version to setup on the purl
+     * @param includeRepositoryQualifiers the flag which specifies whether the purl should contain the repository
+     *        coordinates as qualifiers
+     * @return The purl as string.
+     */
     public static String createPurl(
             RepositoryCoordinates repository,
             String version,
@@ -131,6 +175,16 @@ public class AdvisoryEventUtils {
         }
     }
 
+    /**
+     * Given an input purl, creates a new purl with the same name, namespace, subpath, type, version and qualifiers.
+     * Additionally, add new qualifiers "tag" and "repository_url" with the values provided in the
+     * {@link RepositoryCoordinates}. Finally rebuilds the purl to make sure it is valid and qualifiers are properly
+     * sorted.
+     *
+     * @param originalPurl the input purl string
+     * @param repository the {@link RepositoryCoordinates} which contains registry, repository and tag values
+     * @return The new validated purl as string.
+     */
     public static String rebuildPurl(String originalPurl, RepositoryCoordinates repository) {
         try {
 
@@ -158,16 +212,40 @@ public class AdvisoryEventUtils {
         }
     }
 
+    /**
+     * Given an input purl, creates a set of new purls with the same name, namespace, subpath, type, version and
+     * qualifiers. Additionally, add new qualifiers "tag" and "repository_url" with the values provided in the
+     * {@link RepositoryCoordinates}. Finally rebuilds the purls to make sure they are valid and qualifiers are properly
+     * sorted.
+     *
+     * @param originalPurl the input purl string
+     * @param repository the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
+     * @return The new validated set of purls as string.
+     */
     public static Set<String> rebuildPurls(String originalPurl, List<RepositoryCoordinates> repositories) {
         return repositories.stream().map(repo -> rebuildPurl(originalPurl, repo)).collect(Collectors.toSet());
     }
 
+    /**
+     * Given a list of {@link RepositoryCoordinates} find the preferred one (based on a score which gives the highest
+     * value to (repository fragment + tag) highest length).
+     *
+     * @param repository the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
+     * @return The preferred {@link RepositoryCoordinates}.
+     */
     public static RepositoryCoordinates findPreferredRepo(List<RepositoryCoordinates> repositories) {
         return repositories.stream()
                 .max(Comparator.comparingInt(RepositoryCoordinates::getScore))
                 .orElseThrow(() -> new ApplicationException("Cannot find any preferred repository"));
     }
 
+    /**
+     * Given a {@link ProductVersionEntry} finds any {major}.{minor} pattern (in case of RHEL product versions) and
+     * returns the {minor} value
+     *
+     * @param productVersion {@link ProductVersionEntry} to analyze
+     * @return The {minor} value found if any.
+     */
     private static String captureMajorMinorVersion(ProductVersionEntry productVersion) {
         Pattern pattern = Pattern.compile("(?:RHEL-)(\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(productVersion.getName());
