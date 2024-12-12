@@ -1,0 +1,129 @@
+{
+    "id": "2A5F7CA4166C470",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+    "rootPurl": "pkg:oci/ubi8-ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+    "creationTime": "2024-12-09T15:55:07.326682Z",
+    "configIndex": 0,
+    "sbom": {
+      "version": 1,
+      "metadata": {
+        "tools": {
+          "components": [
+            {
+              "name": "SBOMer",
+              "type": "application",
+              "author": "Red Hat",
+              "version": "5bfc1899"
+            }
+          ]
+        },
+        "component": {
+          "name": "ubi8/ruby-25",
+          "purl": "pkg:oci/ubi8-ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "type": "container",
+          "description": "Image index manifest of pkg:oci/ubi8-ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94"
+        },
+        "timestamp": "2024-12-09T15:53:33Z"
+      },
+      "bomFormat": "CycloneDX",
+      "components": [
+        {
+          "name": "ubi8/ruby-25",
+          "purl": "pkg:oci/ubi8-ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "type": "container",
+          "bom-ref": "ruby-25-container_image-index",
+          "version": "sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "pedigree": {
+            "variants": [
+              {
+                "name": "ubi8/ruby-25",
+                "purl": "pkg:oci/ruby-25@sha256%3A51114a80de5f48af17cbb362d33f4994c840720222b8fc9f17ea043432d87726?arch=amd64&os=linux&tag=1-260.1733408998",
+                "type": "container",
+                "bom-ref": "ruby-25-container_amd64",
+                "version": "sha256:51114a80de5f48af17cbb362d33f4994c840720222b8fc9f17ea043432d87726",
+                "supplier": {
+                  "url": [
+                    "https://www.redhat.com"
+                  ],
+                  "name": "Red Hat"
+                },
+                "publisher": "Red Hat"
+              },
+              {
+                "name": "ubi8/ruby-25",
+                "purl": "pkg:oci/ruby-25@sha256%3A67301ffad3c7d7df9c954a7db736eb17e311bc0bdffb23fa9d5e98b9761c2d4b?arch=arm64&os=linux&tag=1-260.1733408998",
+                "type": "container",
+                "bom-ref": "ruby-25-container_arm64",
+                "version": "sha256:67301ffad3c7d7df9c954a7db736eb17e311bc0bdffb23fa9d5e98b9761c2d4b",
+                "supplier": {
+                  "url": [
+                    "https://www.redhat.com"
+                  ],
+                  "name": "Red Hat"
+                },
+                "publisher": "Red Hat"
+              },
+              {
+                "name": "ubi8/ruby-25",
+                "purl": "pkg:oci/ruby-25@sha256%3A1ff4b6764e7bc51a8040e6bf8fae99557ca4568fa9791abf0bb872f8c0cf7a13?arch=ppc64le&os=linux&tag=1-260.1733408998",
+                "type": "container",
+                "bom-ref": "ruby-25-container_ppc64le",
+                "version": "sha256:1ff4b6764e7bc51a8040e6bf8fae99557ca4568fa9791abf0bb872f8c0cf7a13",
+                "supplier": {
+                  "url": [
+                    "https://www.redhat.com"
+                  ],
+                  "name": "Red Hat"
+                },
+                "publisher": "Red Hat"
+              },
+              {
+                "name": "ubi8/ruby-25",
+                "purl": "pkg:oci/ruby-25@sha256%3Ac4643047777b8f15c0503515e45a0884c6344e4cedf5c9c9c2d0fa1298fb670c?arch=s390x&os=linux&tag=1-260.1733408998",
+                "type": "container",
+                "bom-ref": "ruby-25-container_s390x",
+                "version": "sha256:c4643047777b8f15c0503515e45a0884c6344e4cedf5c9c9c2d0fa1298fb670c",
+                "supplier": {
+                  "url": [
+                    "https://www.redhat.com"
+                  ],
+                  "name": "Red Hat"
+                },
+                "publisher": "Red Hat"
+              }
+            ]
+          },
+          "supplier": {
+            "url": [
+              "https://www.redhat.com"
+            ],
+            "name": "Red Hat"
+          },
+          "publisher": "Red Hat"
+        }
+      ],
+      "specVersion": "1.6",
+      "serialNumber": "urn:uuid:3925b812-49a0-3741-b609-e651d0ffbdf8"
+    },
+    "generationRequest": {
+      "id": "A221585A59F34A5",
+      "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+      "config": {
+        "type": "syft-image",
+        "apiVersion": "sbomer.jboss.org/v1alpha1",
+        "paths": [
+          
+        ],
+        "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+        "processors": [
+          
+        ],
+        "rpms": true
+      },
+      "type": "CONTAINERIMAGE",
+      "creationTime": "2024-12-09T15:49:04.166296Z",
+      "status": "FINISHED",
+      "result": "SUCCESS",
+      "reason": "Generation finished successfully. Generated SBOMs: A14FF4DDB7DB47D, 9F6DD61E8C7546B, 419B339066FA4CE, DE64ED9F55A8436, 2A5F7CA4166C470"
+    }
+  }

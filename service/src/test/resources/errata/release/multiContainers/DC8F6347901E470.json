@@ -1,0 +1,82 @@
+{
+  "id": "DC8F6347901E470",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+  "rootPurl": "pkg:oci/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256%3A20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+  "creationTime": "2024-12-10T23:35:23.551342Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-openshift-kubernetes-nmstate-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256%3A20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256%3A20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275"
+      },
+      "timestamp": "2024-12-10T23:35:10Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-openshift-kubernetes-nmstate-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256%3A20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+        "type": "container",
+        "bom-ref": "ose-kubernetes-nmstate-operator-bundle-container_image-index",
+        "version": "sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-openshift-kubernetes-nmstate-operator-bundle",
+              "purl": "pkg:oci/ose-openshift-kubernetes-nmstate-operator-bundle@sha256%3A4f62df92ab3596bb9af6638444b1eec798af4c56dd042bd8d9de4275f466208e?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.g0d290b4.assembly.stream.el9-2",
+              "type": "container",
+              "bom-ref": "ose-kubernetes-nmstate-operator-bundle-container_amd64",
+              "version": "sha256:4f62df92ab3596bb9af6638444b1eec798af4c56dd042bd8d9de4275f466208e",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:9196b0ba-73f6-3bbb-b98f-7cfa8e16d4ee"
+  },
+  "generationRequest": {
+    "id": "105C884D7EA645A",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-openshift-kubernetes-nmstate-operator-bundle@sha256:20c3af0b0c80da26b4ea948b705e073d9df7181e58852a89ec6ee783933f4275",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:12.508890Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: 5095B5376819410, DC8F6347901E470"
+  }
+}

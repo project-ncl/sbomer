@@ -1,0 +1,82 @@
+{
+  "id": "9598ACF8368F49E",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+  "rootPurl": "pkg:oci/openshift-ose-ingress-node-firewall-operator-bundle@sha256%3A13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+  "creationTime": "2024-12-10T23:33:25.994983Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-ingress-node-firewall-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-ingress-node-firewall-operator-bundle@sha256%3A13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-ingress-node-firewall-operator-bundle@sha256%3A13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef"
+      },
+      "timestamp": "2024-12-10T23:33:12Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-ingress-node-firewall-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-ingress-node-firewall-operator-bundle@sha256%3A13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+        "type": "container",
+        "bom-ref": "ingress-node-firewall-operator-bundle-container_image-index",
+        "version": "sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-ingress-node-firewall-operator-bundle",
+              "purl": "pkg:oci/ose-ingress-node-firewall-operator-bundle@sha256%3A71297c00c3469b22adba6349cfc728323fb191c8b737bbeb10809e5edf6b95e6?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.g135f832.assembly.stream.el9-2",
+              "type": "container",
+              "bom-ref": "ingress-node-firewall-operator-bundle-container_amd64",
+              "version": "sha256:71297c00c3469b22adba6349cfc728323fb191c8b737bbeb10809e5edf6b95e6",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:29d8ebc4-3d75-3f61-bbe6-0186aa3a7610"
+  },
+  "generationRequest": {
+    "id": "08F12A3B3524447",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle@sha256:13f5bc757b25b359680938a06bbc83609b87f6797ede99f97953e5464ed380ef",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:10.792682Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: 6AC3057851CB480, 9598ACF8368F49E"
+  }
+}

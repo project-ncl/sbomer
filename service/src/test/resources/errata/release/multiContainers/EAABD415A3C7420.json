@@ -1,0 +1,82 @@
+{
+  "id": "EAABD415A3C7420",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+  "rootPurl": "pkg:oci/openshift-ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+  "creationTime": "2024-12-10T23:33:40.058365Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-clusterresourceoverride-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d"
+      },
+      "timestamp": "2024-12-10T23:33:26Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-clusterresourceoverride-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+        "type": "container",
+        "bom-ref": "ose-clusterresourceoverride-operator-metadata-container_image-index",
+        "version": "sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-clusterresourceoverride-operator-bundle",
+              "purl": "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Aea282700c83493165abfbfaa1a697f942175aac6fc7fbbe4ddc09778ca39a4d8?arch=amd64&os=linux&tag=v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1",
+              "type": "container",
+              "bom-ref": "ose-clusterresourceoverride-operator-metadata-container_amd64",
+              "version": "sha256:ea282700c83493165abfbfaa1a697f942175aac6fc7fbbe4ddc09778ca39a4d8",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:c81023ae-2179-3ee7-861d-b783aab36629"
+  },
+  "generationRequest": {
+    "id": "0EA3F5A21D1C458",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-clusterresourceoverride-operator-bundle@sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:09.931494Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: C67D863805F6463, EAABD415A3C7420"
+  }
+}

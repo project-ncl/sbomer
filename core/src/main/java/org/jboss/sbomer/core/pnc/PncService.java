@@ -491,7 +491,8 @@ public class PncService {
     public Collection<Artifact> getNPMDependencies(String buildID) {
         log.debug("Fetching NPM Dependencies from PNC build with id '{}'", buildID);
         try {
-            return buildClient.getDependencyArtifacts(buildID, Optional.empty(), Optional.of("purl=LIKE=pkg:npm*")).getAll();
+            return buildClient.getDependencyArtifacts(buildID, Optional.empty(), Optional.of("purl=LIKE=pkg:npm*"))
+                    .getAll();
         } catch (RemoteResourceException ex) {
             throw new ClientException("Dependencies could not be retrieved because PNC responded with an error", ex);
         }

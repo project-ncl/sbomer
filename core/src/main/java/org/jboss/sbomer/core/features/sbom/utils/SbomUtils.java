@@ -61,9 +61,12 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
 import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.Evidence;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
+import org.cyclonedx.model.component.evidence.Identity;
+import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.cyclonedx.model.License;
 import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.model.Metadata;
@@ -90,6 +93,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
 
 public class SbomUtils {
@@ -499,6 +503,10 @@ public class SbomUtils {
         }
     }
 
+    public static void addHashIfMissing(Component component, String hash, String algorithmSpec) {
+        addHashIfMissing(component, hash, Hash.Algorithm.fromSpec(algorithmSpec));
+    }
+
     public static void addProperty(Component component, String key, String value) {
         log.debug("addProperty {}: {}", key, value);
         List<Property> properties = new ArrayList<Property>();
@@ -729,7 +737,7 @@ public class SbomUtils {
         }
     }
 
-    public static String computeNVRFromContainerManifest(JsonNode jsonNode) {
+    public static String[] computeNVRFromContainerManifest(JsonNode jsonNode) {
         Bom bom = fromJsonNode(jsonNode);
         if (bom == null || bom.getComponents() == null || bom.getComponents().isEmpty()) {
             return null;
@@ -742,10 +750,23 @@ public class SbomUtils {
         Property r = findPropertyWithNameInComponent("sbomer:image:labels:release", mainComponent).orElse(null);
 
         if (n != null && v != null && r != null) {
-            return n.getValue() + "-" + v.getValue() + "-" + r.getValue();
+            return new String[] { n.getValue(), v.getValue(), r.getValue() };
         }
 
         return null;
+    }
+
+    public static void setEvidenceIdentities(Component c, Set<String> concludedValues, Field field) {
+        List<Identity> identities = concludedValues.stream().map(concludedValue -> {
+            Identity identity = new Identity();
+            identity.setField(field);
+            identity.setConcludedValue(concludedValue);
+            return identity;
+        }).toList();
+
+        Evidence evidence = new Evidence();
+        evidence.setIdentities(identities);
+        c.setEvidence(evidence);
     }
 
     public static Bom fromPath(Path path) {
@@ -930,7 +951,7 @@ public class SbomUtils {
         }).orElseThrow(() -> new IllegalArgumentException("Repository name is null"));
 
         if (imageDigest == null || imageDigest.isEmpty()) {
-            new IllegalArgumentException("Image digest is null or empty");
+            throw new IllegalArgumentException("Image digest is null or empty");
         }
 
         try {
@@ -948,6 +969,23 @@ public class SbomUtils {
                     e);
             return null;
         }
+    }
+
+    /**
+     * Creates a purl of OCI type for the image
+     *
+     * @param imageName the image fullname
+     */
+    public static String createContainerImageOCIPurl(String imageFullname) {
+        if (imageFullname == null || imageFullname.isEmpty()) {
+            throw new IllegalArgumentException("Image full name is null or empty");
+        }
+
+        String[] imageTokens = imageFullname.split("@");
+        if (imageTokens == null || imageTokens.length != 2) {
+            throw new IllegalArgumentException("Image full name has wrong format");
+        }
+        return createContainerImageOCIPurl(imageTokens[0], imageTokens[1]);
     }
 
     public static void addMissingSerialNumber(Bom bom) {

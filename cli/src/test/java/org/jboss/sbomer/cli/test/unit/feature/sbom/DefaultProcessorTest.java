@@ -120,7 +120,8 @@ public class DefaultProcessorTest {
 
         assertEquals(192, processed.getComponents().size());
 
-        Component rpmComponent = getComponent(processed, "pkg:rpm/redhat/audit-libs@3.0.7-103.el9?arch=x86_64").orElseThrow();
+        Component rpmComponent = getComponent(processed, "pkg:rpm/redhat/audit-libs@3.0.7-103.el9?arch=x86_64")
+                .orElseThrow();
 
         assertNotNull(rpmComponent.getSupplier());
         assertEquals("Red Hat", rpmComponent.getSupplier().getName());
@@ -146,13 +147,14 @@ public class DefaultProcessorTest {
         PncService pncServiceMock = Mockito.mock(PncService.class);
         KojiService kojiServiceMock = Mockito.mock(KojiService.class);
 
-        List<Artifact> artifacts = OBJECT_MAPPER.readValue(TestResources.asString("pnc/npmDependencies.json"), new TypeReference<List<Artifact>>() {
-        });
+        List<Artifact> artifacts = OBJECT_MAPPER
+                .readValue(TestResources.asString("pnc/npmDependencies.json"), new TypeReference<List<Artifact>>() {
+                });
 
         Build build = Build.builder()
-            .id("BALVSAEVTGYAY")
-            .buildConfigRevision(BuildConfigurationRevisionRef.refBuilder().buildType(BuildType.MVN).build())
-            .build();
+                .id("BALVSAEVTGYAY")
+                .buildConfigRevision(BuildConfigurationRevisionRef.refBuilder().buildType(BuildType.MVN).build())
+                .build();
 
         when(pncServiceMock.getApiUrl()).thenReturn("pnc.example.com");
         when(pncServiceMock.getBuild(eq("BALVSAEVTGYAY"))).thenReturn(build);
@@ -174,29 +176,42 @@ public class DefaultProcessorTest {
 
         // Then
         assertEquals(10, processed.getComponents().size());
-        Dependency mainDependency = getDependency("pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
+        Dependency mainDependency = getDependency(
+                "pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
                 processed.getDependencies()).orElseThrow();
 
         Component componentOnce = getComponent(processed, "pkg:npm/once@1.4.0").orElseThrow();
-        ExternalReference onceArtifact = SbomUtils.getExternalReferences(componentOnce, Type.BUILD_SYSTEM, Constants.SBOM_RED_HAT_PNC_ARTIFACT_ID).get(0);
+        ExternalReference onceArtifact = SbomUtils
+                .getExternalReferences(componentOnce, Type.BUILD_SYSTEM, Constants.SBOM_RED_HAT_PNC_ARTIFACT_ID)
+                .get(0);
         assertEquals("https://pnc.example.com/pnc-rest/v2/artifacts/2160610", onceArtifact.getUrl());
         assertTrue(getDependency("pkg:npm/once@1.4.0", mainDependency.getDependencies()).isPresent());
         assertTrue(getDependency("pkg:npm/once@1.4.0", processed.getDependencies()).isPresent());
 
-        Component componentKogito = getComponent(processed, "pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2").orElseThrow();
+        Component componentKogito = getComponent(
+                processed,
+                "pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2").orElseThrow();
         assertNotNull(componentKogito.getSupplier());
         assertEquals("Red Hat", componentKogito.getSupplier().getName());
         assertEquals("Red Hat", componentKogito.getPublisher());
-        ExternalReference buildSystem = SbomUtils.getExternalReferences(componentKogito, Type.BUILD_SYSTEM, Constants.SBOM_RED_HAT_PNC_BUILD_ID).get(0);
+        ExternalReference buildSystem = SbomUtils
+                .getExternalReferences(componentKogito, Type.BUILD_SYSTEM, Constants.SBOM_RED_HAT_PNC_BUILD_ID)
+                .get(0);
         assertEquals("https://pnc.example.com/pnc-rest/v2/builds/96015", buildSystem.getUrl());
         assertEquals(
-            "https://github.com/kiegroup/kogito-tooling.git",
-            SbomUtils.getExternalReferences(componentKogito, Type.VCS).get(0).getUrl());
+                "https://github.com/kiegroup/kogito-tooling.git",
+                SbomUtils.getExternalReferences(componentKogito, Type.VCS).get(0).getUrl());
         Commit commit = componentKogito.getPedigree().getCommits().get(0);
         assertEquals("88c1a77824c7bf0b636f24b4bde2b87c0b38d8a1", commit.getUid());
         assertEquals("http://git.example.com/gerrit/kiegroup/kogito-tooling.git#0.9.0", commit.getUrl());
-        assertTrue(getDependency("pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2", mainDependency.getDependencies()).isPresent());
-        assertTrue(getDependency("pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2", processed.getDependencies()).isPresent());
+        assertTrue(
+                getDependency(
+                        "pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2",
+                        mainDependency.getDependencies()).isPresent());
+        assertTrue(
+                getDependency(
+                        "pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2",
+                        processed.getDependencies()).isPresent());
     }
 
     private static Optional<Dependency> getDependency(String ref, List<Dependency> dependencies) {
@@ -204,10 +219,7 @@ public class DefaultProcessorTest {
     }
 
     private static Optional<Component> getComponent(Bom bom, String purl) {
-        return bom.getComponents()
-            .stream()
-            .filter(c -> purl.equals(c.getPurl()))
-            .findFirst();
+        return bom.getComponents().stream().filter(c -> purl.equals(c.getPurl())).findFirst();
     }
 
     @Test

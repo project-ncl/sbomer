@@ -1,0 +1,82 @@
+{
+  "id": "FD64B2D3C6484CF",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+  "rootPurl": "pkg:oci/openshift-ose-cluster-nfd-operator-bundle@sha256%3A3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+  "creationTime": "2024-12-10T23:33:50.421738Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-cluster-nfd-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-cluster-nfd-operator-bundle@sha256%3A3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-cluster-nfd-operator-bundle@sha256%3A3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771"
+      },
+      "timestamp": "2024-12-10T23:33:37Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-cluster-nfd-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-cluster-nfd-operator-bundle@sha256%3A3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+        "type": "container",
+        "bom-ref": "cluster-nfd-operator-metadata-container_image-index",
+        "version": "sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-cluster-nfd-operator-bundle",
+              "purl": "pkg:oci/ose-cluster-nfd-operator-bundle@sha256%3Aab62c5a0ffadbeed87c8e7645be3bf2085cc91fed892ff49b79f949e9a20750e?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.gabdfb61.assembly.stream.el9-2",
+              "type": "container",
+              "bom-ref": "cluster-nfd-operator-metadata-container_amd64",
+              "version": "sha256:ab62c5a0ffadbeed87c8e7645be3bf2085cc91fed892ff49b79f949e9a20750e",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:d6db2b27-e430-3bc5-b050-ac9db8f84161"
+  },
+  "generationRequest": {
+    "id": "786421905167419",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-nfd-operator-bundle@sha256:3b8a3f00c2eb483d25ad43a44e0140f699cd4d7a9a5c4f43e2eecc21ea8a6771",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:10.219793Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: 1DEFC26D4700433, FD64B2D3C6484CF"
+  }
+}

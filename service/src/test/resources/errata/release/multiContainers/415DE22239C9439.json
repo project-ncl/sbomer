@@ -1,0 +1,195 @@
+{
+  "id": "415DE22239C9439",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+  "rootPurl": "pkg:oci/ose-vertical-pod-autoscaler-operator-bundle@sha256%3A45bb51f57ef6829a74b4f6ebf45fa508bfe9230334c1e4d6e41410e4a52b2dab?arch=amd64&os=linux&tag=v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1",
+  "creationTime": "2024-12-10T23:33:48.455620Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "syft",
+            "type": "application",
+            "author": "anchore",
+            "version": "1.16.0"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-vertical-pod-autoscaler-operator-bundle",
+        "purl": "pkg:oci/ose-vertical-pod-autoscaler-operator-bundle@sha256%3A45bb51f57ef6829a74b4f6ebf45fa508bfe9230334c1e4d6e41410e4a52b2dab?arch=amd64&os=linux&tag=v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1",
+        "type": "container"
+      },
+      "timestamp": "2024-12-10T23:33:24Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-vertical-pod-autoscaler-operator-bundle",
+        "purl": "pkg:oci/ose-vertical-pod-autoscaler-operator-bundle@sha256%3A45bb51f57ef6829a74b4f6ebf45fa508bfe9230334c1e4d6e41410e4a52b2dab?arch=amd64&os=linux&tag=v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1",
+        "type": "container",
+        "bom-ref": "7cf4f547647d57bd",
+        "version": "sha256:45bb51f57ef6829a74b4f6ebf45fa508bfe9230334c1e4d6e41410e4a52b2dab",
+        "pedigree": {
+          "commits": [
+            {
+              "uid": "e8e57155eb86fde3ac2121f46d3a75eaa07fee74",
+              "url": "https://pkgs.devel.redhat.com/git/containers/vertical-pod-autoscaler-operator-bundle#e8e57155eb86fde3ac2121f46d3a75eaa07fee74"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat",
+        "properties": [
+          {
+            "name": "sbomer:image:labels:architecture",
+            "value": "x86_64"
+          },
+          {
+            "name": "sbomer:image:labels:build-date",
+            "value": "2024-12-02T19:01:41"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.component",
+            "value": "ose-vertical-pod-autoscaler-operator-metadata-container"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.delivery.operator.bundle",
+            "value": "true"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.license_terms",
+            "value": "https://www.redhat.com/agreements"
+          },
+          {
+            "name": "sbomer:image:labels:com.redhat.openshift.versions",
+            "value": "=v4.15"
+          },
+          {
+            "name": "sbomer:image:labels:distribution-scope",
+            "value": "public"
+          },
+          {
+            "name": "sbomer:image:labels:io.buildah.version",
+            "value": "1.33.8"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.build.commit.id",
+            "value": "88762560196b4a2965a058f2225891f009655926"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.build.commit.url",
+            "value": "https://github.com/openshift/vertical-pod-autoscaler-operator/commit/88762560196b4a2965a058f2225891f009655926"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.build.source-location",
+            "value": "https://github.com/openshift/vertical-pod-autoscaler-operator"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.maintainer.component",
+            "value": "Pod Autoscaler"
+          },
+          {
+            "name": "sbomer:image:labels:io.openshift.maintainer.project",
+            "value": "OCPBUGS"
+          },
+          {
+            "name": "sbomer:image:labels:name",
+            "value": "openshift/ose-vertical-pod-autoscaler-operator-bundle"
+          },
+          {
+            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.channel.default.v1",
+            "value": "stable"
+          },
+          {
+            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.channels.v1",
+            "value": "stable"
+          },
+          {
+            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.manifests.v1",
+            "value": "manifests/"
+          },
+          {
+            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.mediatype.v1",
+            "value": "registry+v1"
+          },
+          {
+            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.metadata.v1",
+            "value": "metadata/"
+          },
+          {
+            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.package.v1",
+            "value": "vertical-pod-autoscaler"
+          },
+          {
+            "name": "sbomer:image:labels:release",
+            "value": "1"
+          },
+          {
+            "name": "sbomer:image:labels:url",
+            "value": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift/ose-vertical-pod-autoscaler-operator-bundle/images/v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1"
+          },
+          {
+            "name": "sbomer:image:labels:vcs-ref",
+            "value": "e8e57155eb86fde3ac2121f46d3a75eaa07fee74"
+          },
+          {
+            "name": "sbomer:image:labels:vcs-type",
+            "value": "git"
+          },
+          {
+            "name": "sbomer:image:labels:vendor",
+            "value": "Red Hat"
+          },
+          {
+            "name": "sbomer:image:labels:version",
+            "value": "v4.15.0.202412021736.p0.g8876256.assembly.stream.el9"
+          }
+        ],
+        "externalReferences": [
+          {
+            "url": "https://brewweb.engineering.redhat.com/brew/buildinfo?buildID=3421077",
+            "type": "build-system",
+            "comment": "brew-build-id"
+          },
+          {
+            "url": "https://pkgs.devel.redhat.com/git/containers/vertical-pod-autoscaler-operator-bundle#e8e57155eb86fde3ac2121f46d3a75eaa07fee74",
+            "type": "vcs",
+            "comment": ""
+          }
+        ]
+      }
+    ],
+    "specVersion": "1.6",
+    "dependencies": [
+      {
+        "ref": "7cf4f547647d57bd",
+        "dependsOn": []
+      }
+    ],
+    "serialNumber": "urn:uuid:4bfcda75-d03b-4167-91c8-c37c1b80af5f"
+  },
+  "generationRequest": {
+    "id": "0DDF61BF763C45A",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-vertical-pod-autoscaler-operator-bundle@sha256:0c1507509cd03b183011726b11dc0f7834af8a097c9ffd5a4b389b8f2eae3bad",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:10.505395Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: 415DE22239C9439, 47F4BC6A1C1641B"
+  }
+}

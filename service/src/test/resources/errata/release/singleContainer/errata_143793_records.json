@@ -1,0 +1,398 @@
+[
+    {
+      "id": "69436F788E634CB",
+      "receivalTime": "2024-12-09T15:49:02.983293Z",
+      "eventType": "REST",
+      "eventStatus": "SUCCESS",
+      "reason": "1/1 completed with success",
+      "requestConfig": {
+        "type": "errata-advisory",
+        "apiVersion": "sbomer.jboss.org/v1alpha1",
+        "advisoryId": "143793"
+      },
+      "event": {
+        "method": "POST",
+        "address": "10.39.192.91",
+        "span_id": "de455e026ad1ad3e",
+        "trace_id": "713ccadb60ec75148909afc9b92ab46f",
+        "username": "<none>",
+        "destination": "http://sbomer.pnc.engineering.redhat.com/api/v1beta1/generations"
+      },
+      "manifests": [
+        {
+          "id": "A14FF4DDB7DB47D",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A51114a80de5f48af17cbb362d33f4994c840720222b8fc9f17ea043432d87726?arch=amd64&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-09T15:55:06.821649Z",
+          "generation": {
+            "id": "A221585A59F34A5",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-09T15:49:04.166296Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: A14FF4DDB7DB47D, 9F6DD61E8C7546B, 419B339066FA4CE, DE64ED9F55A8436, 2A5F7CA4166C470"
+          }
+        },
+        {
+          "id": "9F6DD61E8C7546B",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A67301ffad3c7d7df9c954a7db736eb17e311bc0bdffb23fa9d5e98b9761c2d4b?arch=arm64&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-09T15:55:06.928003Z",
+          "generation": {
+            "id": "A221585A59F34A5",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-09T15:49:04.166296Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: A14FF4DDB7DB47D, 9F6DD61E8C7546B, 419B339066FA4CE, DE64ED9F55A8436, 2A5F7CA4166C470"
+          }
+        },
+        {
+          "id": "419B339066FA4CE",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A1ff4b6764e7bc51a8040e6bf8fae99557ca4568fa9791abf0bb872f8c0cf7a13?arch=ppc64le&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-09T15:55:07.036675Z",
+          "generation": {
+            "id": "A221585A59F34A5",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-09T15:49:04.166296Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: A14FF4DDB7DB47D, 9F6DD61E8C7546B, 419B339066FA4CE, DE64ED9F55A8436, 2A5F7CA4166C470"
+          }
+        },
+        {
+          "id": "DE64ED9F55A8436",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3Ac4643047777b8f15c0503515e45a0884c6344e4cedf5c9c9c2d0fa1298fb670c?arch=s390x&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-09T15:55:07.216327Z",
+          "generation": {
+            "id": "A221585A59F34A5",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-09T15:49:04.166296Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: A14FF4DDB7DB47D, 9F6DD61E8C7546B, 419B339066FA4CE, DE64ED9F55A8436, 2A5F7CA4166C470"
+          }
+        },
+        {
+          "id": "2A5F7CA4166C470",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ubi8-ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "creationTime": "2024-12-09T15:55:07.326682Z",
+          "generation": {
+            "id": "A221585A59F34A5",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-09T15:49:04.166296Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: A14FF4DDB7DB47D, 9F6DD61E8C7546B, 419B339066FA4CE, DE64ED9F55A8436, 2A5F7CA4166C470"
+          }
+        }
+      ]
+    },
+    {
+      "id": "5418EA549AFC459",
+      "receivalTime": "2024-12-05T16:39:04.053068Z",
+      "eventType": "UMB",
+      "eventStatus": "SUCCESS",
+      "reason": "1/1 completed with success",
+      "requestConfig": {
+        "type": "errata-advisory",
+        "apiVersion": "sbomer.jboss.org/v1alpha1",
+        "advisoryId": "143793"
+      },
+      "event": {
+        "msg": "{\"who\":\"botas/pnt-devops-rad-jenkins.rhev-ci-vms.eng.rdu2.redhat.com@REDHAT.COM\",\"when\":\"2024-12-05 15:28:47 UTC\",\"errata_id\":143793,\"product\":\"RHEL\",\"release\":\"RHEL-8.10.0.Z.MAIN+EUS\",\"type\":\"RHBA\",\"from\":\"NEW_FILES\",\"to\":\"QE\",\"errata_status\":\"QE\",\"synopsis\":\"updated ubi8/ruby-25 container image\",\"fulladvisory\":\"RHBA-2024:143793-01\",\"skip_customer_notifications\":false,\"content_types\":[\"docker\"]}",
+        "msg_id": "ID:umb-prod-1.umb-001.prod.us-east-1.aws.redhat.com-33839-1732722209628-9:396882:-1:1:1",
+        "consumer": "ERRATA",
+        "msg_type": "errata-advisory",
+        "msg_status": "ACK",
+        "destination": "topic://VirtualTopic.eng.errata.activity.status",
+        "creation_time": "2024-12-05T15:28:51.430Z"
+      },
+      "manifests": [
+        {
+          "id": "78FFDEC44E174E3",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A51114a80de5f48af17cbb362d33f4994c840720222b8fc9f17ea043432d87726?arch=amd64&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-05T17:04:13.745920Z",
+          "generation": {
+            "id": "80E0532464A64C6",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-05T16:39:07.013742Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: 667663DF9DEE45C, C5597B022879439, A0CCDE5C576E4BC, 5AE2C6F006E0454"
+          }
+        },
+        {
+          "id": "0D501E4E4520441",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A67301ffad3c7d7df9c954a7db736eb17e311bc0bdffb23fa9d5e98b9761c2d4b?arch=arm64&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-05T17:04:13.821826Z",
+          "generation": {
+            "id": "80E0532464A64C6",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-05T16:39:07.013742Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: 667663DF9DEE45C, C5597B022879439, A0CCDE5C576E4BC, 5AE2C6F006E0454"
+          }
+        },
+        {
+          "id": "0F35C45BE64640C",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A1ff4b6764e7bc51a8040e6bf8fae99557ca4568fa9791abf0bb872f8c0cf7a13?arch=ppc64le&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-05T17:04:13.850698Z",
+          "generation": {
+            "id": "80E0532464A64C6",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-05T16:39:07.013742Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: 667663DF9DEE45C, C5597B022879439, A0CCDE5C576E4BC, 5AE2C6F006E0454"
+          }
+        },
+        {
+          "id": "2AFF0E12BB21434",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3Ac4643047777b8f15c0503515e45a0884c6344e4cedf5c9c9c2d0fa1298fb670c?arch=s390x&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-05T17:04:14.008824Z",
+          "generation": {
+            "id": "80E0532464A64C6",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-05T16:39:07.013742Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: 667663DF9DEE45C, C5597B022879439, A0CCDE5C576E4BC, 5AE2C6F006E0454"
+          }
+        },
+        {
+          "id": "667663DF9DEE45C",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A51114a80de5f48af17cbb362d33f4994c840720222b8fc9f17ea043432d87726?arch=amd64&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-05T17:05:22.032680Z",
+          "generation": {
+            "id": "80E0532464A64C6",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-05T16:39:07.013742Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: 667663DF9DEE45C, C5597B022879439, A0CCDE5C576E4BC, 5AE2C6F006E0454"
+          }
+        },
+        {
+          "id": "C5597B022879439",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A67301ffad3c7d7df9c954a7db736eb17e311bc0bdffb23fa9d5e98b9761c2d4b?arch=arm64&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-05T17:05:22.629763Z",
+          "generation": {
+            "id": "80E0532464A64C6",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-05T16:39:07.013742Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: 667663DF9DEE45C, C5597B022879439, A0CCDE5C576E4BC, 5AE2C6F006E0454"
+          }
+        },
+        {
+          "id": "A0CCDE5C576E4BC",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3A1ff4b6764e7bc51a8040e6bf8fae99557ca4568fa9791abf0bb872f8c0cf7a13?arch=ppc64le&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-05T17:05:23.226355Z",
+          "generation": {
+            "id": "80E0532464A64C6",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-05T16:39:07.013742Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: 667663DF9DEE45C, C5597B022879439, A0CCDE5C576E4BC, 5AE2C6F006E0454"
+          }
+        },
+        {
+          "id": "5AE2C6F006E0454",
+          "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+          "rootPurl": "pkg:oci/ruby-25@sha256%3Ac4643047777b8f15c0503515e45a0884c6344e4cedf5c9c9c2d0fa1298fb670c?arch=s390x&os=linux&tag=1-260.1733408998",
+          "creationTime": "2024-12-05T17:05:23.439569Z",
+          "generation": {
+            "id": "80E0532464A64C6",
+            "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+            "config": {
+              "type": "syft-image",
+              "apiVersion": "sbomer.jboss.org/v1alpha1",
+              "paths": [
+                
+              ],
+              "image": "registry-proxy.engineering.redhat.com/rh-osbs/ubi8-ruby-25@sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
+              "processors": [
+                
+              ],
+              "rpms": true
+            },
+            "type": "CONTAINERIMAGE",
+            "creationTime": "2024-12-05T16:39:07.013742Z",
+            "status": "FINISHED",
+            "result": "SUCCESS",
+            "reason": "Generation finished successfully. Generated SBOMs: 667663DF9DEE45C, C5597B022879439, A0CCDE5C576E4BC, 5AE2C6F006E0454"
+          }
+        }
+      ]
+    }
+  ]

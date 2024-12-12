@@ -1,0 +1,52 @@
+{
+  "data": {
+    "id": 4409,
+    "type": "variants",
+    "attributes": {
+      "name": "AppStream-8.10.0.Z.MAIN.EUS",
+      "description": "Red Hat Enterprise Linux AppStream (v. 8)",
+      "cpe": "cpe:/a:redhat:enterprise_linux:8::appstream",
+      "override_ftp_base_folder": null,
+      "enabled": true,
+      "buildroot": false,
+      "tps_stream": "RHEL-8.10-Z-Base",
+      "relationships": {
+        "product": {
+          "id": 16,
+          "name": "Red Hat Enterprise Linux",
+          "short_name": "RHEL"
+        },
+        "product_version": {
+          "id": 2058,
+          "name": "RHEL-8.10.0.Z.MAIN+EUS"
+        },
+        "rhel_release": {
+          "id": 173,
+          "name": "RHEL-8.10.0.Z.MAIN+EUS"
+        },
+        "rhel_variant": {
+          "id": 4409,
+          "name": "AppStream-8.10.0.Z.MAIN.EUS"
+        },
+        "push_targets": [
+          {
+            "id": 7,
+            "name": "cdn_stage"
+          },
+          {
+            "id": 10,
+            "name": "cdn_docker_stage"
+          },
+          {
+            "id": 9,
+            "name": "cdn_docker"
+          },
+          {
+            "id": 4,
+            "name": "cdn"
+          }
+        ]
+      }
+    }
+  }
+}

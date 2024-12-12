@@ -60,17 +60,7 @@ public abstract class AbstractAdjuster implements Adjuster {
     }
 
     protected static void addMissingSerialNumber(Bom bom) {
-        if (bom.getSerialNumber() == null || bom.getSerialNumber().isEmpty()) {
-            log.debug("Setting 'serialNumber' for manifest with purl '{}'", bom.getMetadata().getComponent().getPurl());
-
-            try {
-                String jsonContent = SbomUtils.toJson(bom);
-                bom.setSerialNumber("urn:uuid:" + UUID.nameUUIDFromBytes(jsonContent.getBytes(UTF_8)).toString());
-            } catch (GeneratorException e) {
-                log.warn("Could not generate serialNumber out of the manifest content, setting random UUID");
-                bom.setSerialNumber(UUID.randomUUID().toString());
-            }
-        }
+        SbomUtils.addMissingSerialNumber(bom);
     }
 
     /**

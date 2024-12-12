@@ -1,0 +1,82 @@
+{
+  "id": "AB81F89CF06645A",
+  "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+  "rootPurl": "pkg:oci/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256%3A6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+  "creationTime": "2024-12-10T23:33:37.324211Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "SBOMer",
+            "type": "application",
+            "author": "Red Hat",
+            "version": "5bfc1899"
+          }
+        ]
+      },
+      "component": {
+        "name": "openshift/ose-aws-efs-csi-driver-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256%3A6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+        "type": "container",
+        "description": "Image index manifest of pkg:oci/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256%3A6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf"
+      },
+      "timestamp": "2024-12-10T23:33:24Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-aws-efs-csi-driver-operator-bundle",
+        "purl": "pkg:oci/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256%3A6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+        "type": "container",
+        "bom-ref": "ose-aws-efs-csi-driver-operator-bundle-container_image-index",
+        "version": "sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+        "pedigree": {
+          "variants": [
+            {
+              "name": "openshift/ose-aws-efs-csi-driver-operator-bundle",
+              "purl": "pkg:oci/ose-aws-efs-csi-driver-operator-bundle@sha256%3A6b9d1f5095b2530d627cb0ac688006ddc1a9af3724cce43443d1d1ff4f272795?arch=amd64&os=linux&tag=v4.15.0.202412041605.p0.gb0f13a0.assembly.stream.el8-2",
+              "type": "container",
+              "bom-ref": "ose-aws-efs-csi-driver-operator-bundle-container_amd64",
+              "version": "sha256:6b9d1f5095b2530d627cb0ac688006ddc1a9af3724cce43443d1d1ff4f272795",
+              "supplier": {
+                "url": [
+                  "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+              },
+              "publisher": "Red Hat"
+            }
+          ]
+        },
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "publisher": "Red Hat"
+      }
+    ],
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:5be0d3de-e2ef-3a1a-94af-1348e9ad21ca"
+  },
+  "generationRequest": {
+    "id": "5591286D54D34AB",
+    "identifier": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+    "config": {
+      "type": "syft-image",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "paths": [],
+      "image": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-aws-efs-csi-driver-operator-bundle@sha256:6e697d697a394f08cb9a669c7a85cb867e02fbfba79848390a518771ad3558cf",
+      "processors": [],
+      "rpms": true
+    },
+    "type": "CONTAINERIMAGE",
+    "creationTime": "2024-12-10T23:32:11.079405Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: CDCBA3AA014747E, AB81F89CF06645A"
+  }
+}

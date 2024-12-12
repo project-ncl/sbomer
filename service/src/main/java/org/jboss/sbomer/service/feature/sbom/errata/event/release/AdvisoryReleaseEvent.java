@@ -15,20 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errata.event;
+package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
-import org.jboss.sbomer.core.config.request.RequestConfig;
-import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
+import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder(setterPrefix = "with")
-public class RequestEventStatusUpdateEvent {
+public class AdvisoryReleaseEvent {
 
-    private final String requestEventId;
-    private final RequestEventStatus requestEventStatus;
-    private final RequestConfig requestEventConfig;
+    final Errata erratum;
+    final V1Beta1RequestRecord latestAdvisoryManifestsRecord;
+    final Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails;
+    final Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations;
 
 }

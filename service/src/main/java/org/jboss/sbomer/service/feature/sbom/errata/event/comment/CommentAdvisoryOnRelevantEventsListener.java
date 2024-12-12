@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.errata.event;
+package org.jboss.sbomer.service.feature.sbom.errata.event.comment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +39,7 @@ import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
+import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -144,7 +145,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
             return;
         }
 
-        List<String> manifestsPurls = extractPurlUris(notesMapping);
+        List<String> manifestsPurls = AdvisoryEventUtils.extractPurlUrisFromManifestNode(notesMapping);
         List<SbomGenerationRequest> generations = findGenerationsByPurls(manifestsPurls);
 
         List<String> processedGenerationsIds = new ArrayList<>();
@@ -178,18 +179,6 @@ public class CommentAdvisoryOnRelevantEventsListener {
         } catch (JsonProcessingException e) {
             log.error("An error occured during the processing of the advisory comment", e);
         }
-    }
-
-    public static List<String> extractPurlUris(JsonNode manifestNode) {
-        return Optional.ofNullable(manifestNode.path("manifest").path("refs")).filter(JsonNode::isArray).map(refs -> {
-            List<String> purlUris = new ArrayList<>();
-            refs.forEach(ref -> {
-                if ("purl".equals(ref.path("type").asText())) {
-                    purlUris.add(ref.path("uri").asText());
-                }
-            });
-            return purlUris;
-        }).orElse(Collections.emptyList());
     }
 
     private List<SbomGenerationRequest> findGenerationsByPurls(List<String> purls) {
@@ -291,7 +280,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
             // The NVR is not stored inside the generation, we need to get it from the manifest. Might be optimized in
             // future.
             Sbom sbom = sbomService.get(manifestRecord.id());
-            String nvr = SbomUtils.computeNVRFromContainerManifest(sbom.getSbom());
+            String nvr = String.join("-", SbomUtils.computeNVRFromContainerManifest(sbom.getSbom()));
 
             return nvr != null ? (nvr + ": ") : "";
         }

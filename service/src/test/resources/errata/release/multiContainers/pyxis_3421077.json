@@ -1,0 +1,47 @@
+{
+  "data": [
+    {
+      "repositories": [
+        {
+          "registry": "registry.access.redhat.com",
+          "repository": "openshift4/ose-vertical-pod-autoscaler-operator-bundle",
+          "tags": [
+            {
+              "added_date": "2024-12-05T11:16:19.291000+00:00",
+              "name": "v4.15",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/openshift4/ose-vertical-pod-autoscaler-operator-bundle/tag/v4.15"
+                }
+              }
+            },
+            {
+              "added_date": "2024-12-05T11:16:19.291000+00:00",
+              "name": "v4.15.0.202412021736.p0.g8876256.assembly.stream.el9",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/openshift4/ose-vertical-pod-autoscaler-operator-bundle/tag/v4.15.0.202412021736.p0.g8876256.assembly.stream.el9"
+                }
+              }
+            },
+            {
+              "added_date": "2024-12-05T11:16:19.291000+00:00",
+              "name": "v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry.access.redhat.com/repository/openshift4/ose-vertical-pod-autoscaler-operator-bundle/tag/v4.15.0.202412021736.p0.g8876256.assembly.stream.el9-1"
+                }
+              }
+            }
+          ],
+          "published": true,
+          "_links": {
+            "repository": {
+              "href": "/v1/repositories/registry/registry.access.redhat.com/repository/openshift4/ose-vertical-pod-autoscaler-operator-bundle"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

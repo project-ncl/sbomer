@@ -286,13 +286,20 @@ public class DefaultProcessor implements Processor {
             return;
         }
         Component component = bom.getMetadata().getComponent();
-        List<ExternalReference> externalReferences = getExternalReferences(component, ExternalReference.Type.BUILD_SYSTEM, SBOM_RED_HAT_PNC_BUILD_ID);
+        List<ExternalReference> externalReferences = getExternalReferences(
+                component,
+                ExternalReference.Type.BUILD_SYSTEM,
+                SBOM_RED_HAT_PNC_BUILD_ID);
         if (externalReferences.isEmpty()) {
             // Not a PNC build
             return;
         }
         if (externalReferences.size() > 1) {
-            log.warn("Component {} has more than one {}/{} external reference", component.getPurl(), ExternalReference.Type.BUILD_SYSTEM, SBOM_RED_HAT_PNC_BUILD_ID);
+            log.warn(
+                    "Component {} has more than one {}/{} external reference",
+                    component.getPurl(),
+                    ExternalReference.Type.BUILD_SYSTEM,
+                    SBOM_RED_HAT_PNC_BUILD_ID);
             return;
         }
         String buildID = parseBuildIdFromURL(externalReferences.get(0).getUrl());
@@ -319,10 +326,11 @@ public class DefaultProcessor implements Processor {
     }
 
     private void addMissingNpmDependencies(Bom bom, Collection<Artifact> npmDependencies, BuildType buildType) {
-        Set<String> listedPurls = bom.getComponents().stream()
-            .map(DefaultProcessor::getPackageURL)
-            .map(PackageURL::getCoordinates)
-            .collect(Collectors.toSet());
+        Set<String> listedPurls = bom.getComponents()
+                .stream()
+                .map(DefaultProcessor::getPackageURL)
+                .map(PackageURL::getCoordinates)
+                .collect(Collectors.toSet());
 
         Set<String> dependencyRefs = new HashSet<>();
         for (Artifact artifact : npmDependencies) {
@@ -336,7 +344,11 @@ public class DefaultProcessor implements Processor {
             if (listedPurls.contains(coordinates)) {
                 continue;
             }
-            Component newComponent = createComponent(artifact, Component.Scope.REQUIRED, Component.Type.LIBRARY, buildType);
+            Component newComponent = createComponent(
+                    artifact,
+                    Component.Scope.REQUIRED,
+                    Component.Type.LIBRARY,
+                    buildType);
             setArtifactMetadata(newComponent, artifact, pncService.getApiUrl());
             setPncBuildMetadata(newComponent, artifact.getBuild(), pncService.getApiUrl());
             bom.addComponent(newComponent);
@@ -348,18 +360,19 @@ public class DefaultProcessor implements Processor {
     private void addMainComponentDependencies(Bom bom, Set<String> dependencies) {
         String mainComponentRef = bom.getMetadata().getComponent().getBomRef();
 
-        Dependency mainComponentDependencies = bom.getDependencies().stream()
-            .filter(d -> mainComponentRef.equals(d.getRef()))
-            .findFirst()
-            .orElseGet(() -> addNewDependency(bom, mainComponentRef));
+        Dependency mainComponentDependencies = bom.getDependencies()
+                .stream()
+                .filter(d -> mainComponentRef.equals(d.getRef()))
+                .findFirst()
+                .orElseGet(() -> addNewDependency(bom, mainComponentRef));
 
-        dependencies.stream().map(SbomUtils::createDependency).forEach( d-> {
+        dependencies.stream().map(SbomUtils::createDependency).forEach(d -> {
             mainComponentDependencies.addDependency(d);
             bom.addDependency(d);
         });
     }
 
-    public static Dependency addNewDependency(Bom bom, String bomRef){
+    public static Dependency addNewDependency(Bom bom, String bomRef) {
         Dependency dependency = createDependency(bomRef);
         bom.addDependency(dependency);
         return dependency;

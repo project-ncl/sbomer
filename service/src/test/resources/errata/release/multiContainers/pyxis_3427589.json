@@ -1,0 +1,38 @@
+{
+  "data": [
+    {
+      "repositories": [
+        {
+          "registry": "registry-proxy.engineering.redhat.com",
+          "repository": "rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle",
+          "tags": [
+            {
+              "added_date": "2024-12-05T14:33:14.391000+00:00",
+              "name": "v4.15.0.202412041605.p0.g135f832.assembly.stream.el9-2",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle/tag/v4.15.0.202412041605.p0.g135f832.assembly.stream.el9-2"
+                }
+              }
+            },
+            {
+              "added_date": "2024-12-05T14:33:14.391000+00:00",
+              "name": "rhaos-4.15-rhel-9-candidate-39757-20241205140103-x86_64",
+              "_links": {
+                "tag_history": {
+                  "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle/tag/rhaos-4.15-rhel-9-candidate-39757-20241205140103-x86_64"
+                }
+              }
+            }
+          ],
+          "published": true,
+          "_links": {
+            "repository": {
+              "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/openshift-ose-ingress-node-firewall-operator-bundle"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
