@@ -30,12 +30,14 @@ import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Component;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
-import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
+import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
 
 import lombok.extern.slf4j.Slf4j;
@@ -83,17 +85,6 @@ public class AdvisoryEventUtils {
         return productShortName.equals("RHEL") ? Component.Type.OPERATING_SYSTEM : Component.Type.FRAMEWORK;
     }
 
-    public static Set<String> createPurls(
-            List<PyxisRepositoryDetails.Repository> repositories,
-            String version,
-            boolean includeRepositoryQualifiers) {
-        return repositories.stream()
-                .flatMap(repository -> createPurls(repository, version, includeRepositoryQualifiers).stream())
-                .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(String::length).reversed()) // longest first
-                .collect(Collectors.toSet());
-    }
-
     public static List<String> extractPurlUrisFromManifestNode(JsonNode manifestNode) {
         return Optional.ofNullable(manifestNode.path("manifest").path("refs")).filter(JsonNode::isArray).map(refs -> {
             List<String> purlUris = new ArrayList<>();
@@ -106,49 +97,75 @@ public class AdvisoryEventUtils {
         }).orElse(Collections.emptyList());
     }
 
-    private static Set<String> createPurls(
-            PyxisRepositoryDetails.Repository repository,
+    public static Set<String> createPurls(
+            List<RepositoryCoordinates> repositories,
             String version,
             boolean includeRepositoryQualifiers) {
 
-        // Extract last fragment from the repository
-        String repositoryName = Optional.ofNullable(repository.getRepository()).map(repo -> {
-            int lastSlashIndex = repo.lastIndexOf('/');
-            return lastSlashIndex != -1 ? repo.substring(lastSlashIndex + 1) : repo;
-        }).orElseThrow(() -> new IllegalArgumentException("Repository name is null"));
+        return repositories.stream()
+                .map(repository -> createPurl(repository, version, includeRepositoryQualifiers))
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparingInt(String::length).reversed()) // longest first
+                .collect(Collectors.toSet());
+    }
+
+    public static String createPurl(
+            RepositoryCoordinates repository,
+            String version,
+            boolean includeRepositoryQualifiers) {
+
+        PackageURLBuilder builder = PackageURLBuilder.aPackageURL()
+                .withType("oci")
+                .withName(repository.getRepositoryFragment())
+                .withVersion(version);
 
         if (includeRepositoryQualifiers) {
-            return repository.getTags().stream().map(tag -> {
-                try {
-                    return PackageURLBuilder.aPackageURL()
-                            .withType("oci")
-                            .withName(repositoryName)
-                            .withVersion(version)
-                            .withQualifier(
-                                    "repository_url",
-                                    repository.getRegistry() + "/" + repository.getRepository())
-                            .withQualifier("tag", tag.getName())
-                            .build()
-                            .toString();
-                } catch (MalformedPackageURLException e) {
-                    log.warn("Error while creating PURL for tag {}", tag, e);
-                    return null;
-                }
-            }).filter(Objects::nonNull).collect(Collectors.toSet());
-        } else {
-            try {
-                return Set.of(
-                        PackageURLBuilder.aPackageURL()
-                                .withType("oci")
-                                .withName(repositoryName)
-                                .withVersion(version)
-                                .build()
-                                .toString());
-            } catch (MalformedPackageURLException | IllegalArgumentException e) {
-                log.warn("Error while creating summary PURL for repository {}", repository, e);
-                return null;
-            }
+            builder.withQualifier("repository_url", repository.getRegistry() + "/" + repository.getRepository())
+                    .withQualifier("tag", repository.getTag());
         }
+        try {
+            return builder.build().toString();
+        } catch (MalformedPackageURLException | IllegalArgumentException e) {
+            log.warn("Error while creating summary PURL for repository {}", repository, e);
+            return null;
+        }
+    }
+
+    public static String rebuildPurl(String originalPurl, RepositoryCoordinates repository) {
+        try {
+
+            PackageURL purl = new PackageURL(originalPurl);
+            PackageURLBuilder builder = PackageURLBuilder.aPackageURL()
+                    .withName(repository.getRepositoryFragment())
+                    .withNamespace(purl.getNamespace())
+                    .withSubpath(purl.getSubpath())
+                    .withType(purl.getType())
+                    .withVersion(purl.getVersion());
+
+            if (purl.getQualifiers() != null) {
+                // Copy all the original qualifiers
+                purl.getQualifiers().forEach((k, v) -> builder.withQualifier(k, v));
+            }
+
+            // Override tag and set repository url
+            builder.withQualifier("tag", repository.getTag())
+                    .withQualifier("repository_url", repository.getRegistry() + "/" + repository.getRepository());
+
+            return builder.build().toString();
+        } catch (MalformedPackageURLException | IllegalArgumentException e) {
+            log.warn("Error while creating summary PURL for repository {}", repository, e);
+            return null;
+        }
+    }
+
+    public static Set<String> rebuildPurls(String originalPurl, List<RepositoryCoordinates> repositories) {
+        return repositories.stream().map(repo -> rebuildPurl(originalPurl, repo)).collect(Collectors.toSet());
+    }
+
+    public static RepositoryCoordinates findPreferredRepo(List<RepositoryCoordinates> repositories) {
+        return repositories.stream()
+                .max(Comparator.comparingInt(RepositoryCoordinates::getScore))
+                .orElseThrow(() -> new ApplicationException("Cannot find any preferred repository"));
     }
 
     private static String captureMajorMinorVersion(ProductVersionEntry productVersion) {
