@@ -19,8 +19,10 @@ package org.jboss.sbomer.service.feature.sbom.errata;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,8 @@ import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.UnauthorizedException;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepo;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataPage;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
@@ -100,6 +104,11 @@ public interface ErrataClient {
     @Path("/erratum/{id}/builds_list")
     public ErrataBuildList getBuildsList(@PathParam("id") String erratumId);
 
+    // Get the CDN repositories
+    @GET
+    @Path("/cdn_repos")
+    public ErrataPage<ErrataCDNRepo> getAllCDNRepos(@Valid @BeanParam ErrataQueryParameters pageParameters);
+
     @ClientExceptionMapper
     @Blocking
     static RuntimeException toException(Response response) {
@@ -139,6 +148,34 @@ public interface ErrataClient {
                 .filter(
                         variant -> productVersionId
                                 .equals(variant.getAttributes().getRelationships().getProductVersion().getId()))
+                .collect(Collectors.toList());
+    }
+
+    default Map<String, Collection<ErrataCDNRepoNormalized>> getCDNReposOfVariant(
+            Set<String> variantNames,
+            String shortProductName) {
+        Map<String, Collection<ErrataCDNRepoNormalized>> variantToCDNs = new HashMap<String, Collection<ErrataCDNRepoNormalized>>();
+        variantNames.stream()
+                .forEach(variant -> variantToCDNs.put(variant, getCDNReposOfVariant(variant, shortProductName)));
+        return variantToCDNs;
+    }
+
+    default Collection<ErrataCDNRepoNormalized> getCDNReposOfVariant(String variantName, String shortProductName) {
+
+        Collection<ErrataCDNRepo> allCDNRepos = getAllEntities(
+                Map.of("filter[variant_name]", variantName),
+                this::getAllCDNRepos);
+
+        return allCDNRepos.stream()
+                .filter(
+                        cdn -> cdn.getType().equals("cdn_repos")
+                                && !cdn.getAttributes().getContentType().toLowerCase().equals("docker"))
+                .map(
+                        cdn -> new ErrataCDNRepoNormalized(
+                                cdn,
+                                variantName,
+                                !"rhel".equals(shortProductName.toLowerCase())))
+                .distinct()
                 .collect(Collectors.toList());
     }
 
