@@ -83,7 +83,7 @@ ENV LANGUAGE='en_US:en'
 
 USER root
 
-COPY certs/2022-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
+COPY certs/Current-IT-Root-CAs.pem /etc/pki/ca-trust/source/anchors/Current-IT-Root-CAs.pem
 RUN update-ca-trust
 
 # Install Kerberos
