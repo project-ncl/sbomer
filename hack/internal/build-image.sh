@@ -91,7 +91,7 @@ fi
 
 mkdir -p certs
 
-curl -L https://certs.corp.redhat.com/certs/2022-IT-Root-CA.pem -o certs/2022-IT-Root-CA.pem
+curl -L https://certs.corp.redhat.com/certs/Current-IT-Root-CAs.pem -o certs/Current-IT-Root-CAs.pem
 
 "${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "images/${IMAGE_SLUG}/${CONTAINERFILE}" .
 
