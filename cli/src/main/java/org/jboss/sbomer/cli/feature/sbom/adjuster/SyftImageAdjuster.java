@@ -487,7 +487,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
         properties.forEach(p -> {
             String newName = p.getName().replace("syft:", "sbomer:");
 
-            log.debug("Adjusting property name from '{}' to '{}'", p.getName(), newName);
+            //log.debug("Adjusting property name from '{}' to '{}'", p.getName(), newName);
 
             p.setName(newName);
         });
@@ -521,7 +521,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
     @Override
     protected void cleanupComponent(Component component) {
-        log.debug("Cleaning up component '{}'", component.getPurl());
+        //log.debug("Cleaning up component '{}'", component.getPurl());
 
         // Remove CPE, we don't use it now
         component.setCpe(null);
