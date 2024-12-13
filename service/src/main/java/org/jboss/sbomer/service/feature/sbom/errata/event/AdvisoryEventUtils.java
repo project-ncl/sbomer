@@ -34,6 +34,7 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataCDNContentType;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 
@@ -203,8 +204,9 @@ public class AdvisoryEventUtils {
                 // Select the "-source-rpms" CDN repositories and include all the archs provided
                 return cdns.stream()
                         .filter(
-                                cdn -> cdn.getCdnName().contains("-source-rpms") && manifestArches.stream()
-                                        .anyMatch(arch -> cdn.getCdnName().contains("-" + arch + "-")))
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.SOURCE)
+                                        && manifestArches.stream()
+                                                .anyMatch(arch -> cdn.getCdnName().contains("-" + arch + "-")))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
             } else if (componentArch.equals("noarch")) {
@@ -212,8 +214,7 @@ public class AdvisoryEventUtils {
                 // archs provided
                 return cdns.stream()
                         .filter(
-                                cdn -> !cdn.getCdnName().contains("-source-rpms")
-                                        && !cdn.getCdnName().contains("-debug-rpms")
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.BINARY)
                                         && manifestArches.stream()
                                                 .anyMatch(arch -> cdn.getCdnName().contains("-" + arch + "-")))
                         .map(cdn -> rebuildPurl(purl, cdn))
@@ -222,7 +223,7 @@ public class AdvisoryEventUtils {
                 // Select the "-source-rpms" CDN repositories and include only the component arch
                 return cdns.stream()
                         .filter(
-                                cdn -> cdn.getCdnName().contains("-source-rpms")
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.SOURCE)
                                         && cdn.getCdnName().contains("-" + componentArch + "-"))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
@@ -230,7 +231,7 @@ public class AdvisoryEventUtils {
                 // Select the "-debug-rpms" CDN repositories and include only the component arch
                 return cdns.stream()
                         .filter(
-                                cdn -> cdn.getCdnName().contains("-debug-rpms")
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.DEBUGINFO)
                                         && cdn.getCdnName().contains("-" + componentArch + "-"))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
@@ -239,8 +240,7 @@ public class AdvisoryEventUtils {
                 // component arch
                 return cdns.stream()
                         .filter(
-                                cdn -> !cdn.getCdnName().contains("-source-rpms")
-                                        && !cdn.getCdnName().contains("-debug-rpms")
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.BINARY)
                                         && cdn.getCdnName().contains("-" + componentArch + "-"))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
