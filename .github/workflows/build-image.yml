@@ -38,7 +38,6 @@ jobs:
       - name: Populate certificates
         env:
           IT_CURRENT_ROOT_CAS: ${{ secrets.IT_CURRENT_ROOT_CAS }}
-          CA_CHAIN: ${{ secrets.CA_CHAIN }}
         run: |
           mkdir certs
           echo "$IT_CURRENT_ROOT_CAS" > certs/Current-IT-Root-CAs.pem
