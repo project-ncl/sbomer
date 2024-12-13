@@ -134,7 +134,7 @@ public class ReleaseAdvisoryEventsListenerTest {
     static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForGeneration(
+        protected Sbom saveReleaseManifestForDockerGeneration(
                 SbomGenerationRequest releaseGeneration,
                 Bom bom,
                 V1Beta1RequestRecord advisoryManifestsRecord,
@@ -261,7 +261,7 @@ public class ReleaseAdvisoryEventsListenerTest {
     static class ReleaseAdvisoryEventsListenerMultiContainer extends ReleaseAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForGeneration(
+        protected Sbom saveReleaseManifestForDockerGeneration(
                 SbomGenerationRequest releaseGeneration,
                 Bom bom,
                 V1Beta1RequestRecord advisoryManifestsRecord,
