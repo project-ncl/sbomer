@@ -209,6 +209,9 @@ public class ReleaseAdvisoryEventsListener {
                     advisoryManifestsRecord,
                     generationToCDNs);
 
+            // Let's trigger the update of statuses and advisory comments
+            SbomGenerationRequest.updateRequestEventStatus(releaseGeneration);
+
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
                     sbom,
@@ -263,6 +266,9 @@ public class ReleaseAdvisoryEventsListener {
                     productVersionBom,
                     advisoryManifestsRecord,
                     generationToRepositories);
+
+            // Let's trigger the update of statuses and advisory comments
+            SbomGenerationRequest.updateRequestEventStatus(releaseGeneration);
 
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
