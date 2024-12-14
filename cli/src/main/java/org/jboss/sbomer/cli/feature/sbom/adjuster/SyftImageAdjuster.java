@@ -498,10 +498,10 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                     .anyMatch(prefix -> prop.getName().startsWith(prefix));
 
             if (!supportedProp) {
-                log.debug(
-                        "Property '{}' with value '{}' is not on the supported properties list, removing...",
-                        prop.getName(),
-                        prop.getValue());
+                //log.debug(
+                //        "Property '{}' with value '{}' is not on the supported properties list, removing...",
+                //        prop.getName(),
+                //        prop.getValue());
             }
 
             return !supportedProp;
@@ -534,16 +534,16 @@ public class SyftImageAdjuster extends AbstractAdjuster {
             if (component.getPurl() != null && propType != null) {
                 switch (propType.getValue()) {
                     case "java-archive":
-                        log.debug(
-                                "Adjusting purl for the '{}' Java component by adding '?type=jar' suffix...",
-                                component.getPurl());
+                        //log.debug(
+                        //        "Adjusting purl for the '{}' Java component by adding '?type=jar' suffix...",
+                        //        component.getPurl());
                         component.setPurl(component.getPurl() + "?type=jar");
                         break;
 
                     case "rpm":
-                        log.debug(
-                                "Adjusting purl for the '{}' RPM component by removing all qualifiers besides 'arch' and 'epoch'...",
-                                component.getPurl());
+                        //log.debug(
+                        //        "Adjusting purl for the '{}' RPM component by removing all qualifiers besides 'arch' and 'epoch'...",
+                        //        component.getPurl());
 
                         cleanupPurl(component);
                         break;
@@ -591,7 +591,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                     qualifiers,
                     packageURL.getSubpath()).canonicalize();
 
-            log.debug("Updating purl to: '{}'", updatedPurl);
+            //log.debug("Updating purl to: '{}'", updatedPurl);
             return updatedPurl;
         }
         return packageURL.toString();
