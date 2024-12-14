@@ -33,6 +33,7 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.component.evidence.Identity.Field;
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
@@ -173,10 +174,6 @@ public class ReleaseAdvisoryEventsListener {
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
 
-        // Associate each ProductVersion to its list of Variants
-        Map<ProductVersionEntry, Set<String>> productVersionToVariants = mapProductVersionToVariants(
-                advisoryBuildDetails);
-
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
             // Create the release manifest for this ProductVersion
@@ -187,29 +184,16 @@ public class ReleaseAdvisoryEventsListener {
                     erratum,
                     toolVersion);
 
-            // Associate each variant to the repositories where it is published to
-            Map<String, Collection<ErrataCDNRepoNormalized>> productVersionToCDNs = errataClient.getCDNReposOfVariant(
-                    productVersionToVariants.get(productVersion),
-                    erratum.getDetails().get().getProduct().getShortName());
-
-            Map<String, Collection<ErrataCDNRepoNormalized>> generationToCDNs = new HashMap<String, Collection<ErrataCDNRepoNormalized>>();
+            Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs = new HashMap<String, List<ErrataCDNRepoNormalized>>();
 
             for (BuildItem buildItem : buildItems) {
-
-                Collection<ErrataCDNRepoNormalized> allCDNs = new ArrayList<ErrataCDNRepoNormalized>();
-                Set<String> buildItemVariants = buildItem.getVariantArch().keySet();
-                buildItemVariants.stream().forEach(variant -> {
-                    allCDNs.addAll(productVersionToCDNs.get(variant));
-                });
-
-                V1Beta1GenerationRecord currentGeneration = nvrToBuildGeneration.get(buildItem.getNvr());
-                generationToCDNs.put(currentGeneration.id(), allCDNs);
 
                 Component nvrRootComponent = createRootComponentForRPMBuildItem(
                         buildItem,
                         nvrToBuildGeneration.get(buildItem.getNvr()),
                         advisoryManifestsRecord,
-                        allCDNs);
+                        erratum.getDetails().get().getProduct().getShortName(),
+                        generationToCDNs);
 
                 // Add the component to the release manifest components and add the purl to the "provides" list
                 productVersionBom.addComponent(nvrRootComponent);
@@ -315,7 +299,8 @@ public class ReleaseAdvisoryEventsListener {
             BuildItem buildItem,
             V1Beta1GenerationRecord generation,
             V1Beta1RequestRecord advisoryManifestsRecord,
-            Collection<ErrataCDNRepoNormalized> allCDNs) {
+            String productShortName,
+            Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs) {
 
         // From the generation triggered from this build (NVR), find the single manifest created and get the manifest
         // content, we need to copy the main component
@@ -327,9 +312,13 @@ public class ReleaseAdvisoryEventsListener {
                         () -> new ApplicationException(
                                 "Main manifest not found for generation '{}'",
                                 generation.identifier()));
+
         Sbom manifestSbom = sbomService.get(manifestRecord.id());
         Bom manifestBom = SbomUtils.fromJsonNode(manifestSbom.getSbom());
         Component manifestMainComponent = manifestBom.getComponents().get(0);
+
+        List<ErrataCDNRepoNormalized> allCDNs = getCDNDetails(buildItem, productShortName);
+        generationToCDNs.put(generation.id(), allCDNs);
 
         // From the manifest get all the archs from the purl 'arch' qualifier
         Set<String> manifestArches = getAllArchitectures(manifestBom);
@@ -337,7 +326,7 @@ public class ReleaseAdvisoryEventsListener {
         Set<String> evidencePurls = AdvisoryEventUtils
                 .createPurls(manifestMainComponent.getPurl(), allCDNs, manifestArches);
 
-        // Finally create the root component for this build (NVR) from the image index manifest
+        // Finally create the root component for this build (NVR) from the manifest
         Component nvrRootComponent = SbomUtils.createComponent(
                 null,
                 manifestMainComponent.getName(),
@@ -355,30 +344,6 @@ public class ReleaseAdvisoryEventsListener {
         return nvrRootComponent;
     }
 
-    // Helper method to get the all the architectures in the manifest
-    private Set<String> getAllArchitectures(Bom bom) {
-        Set<String> manifestArches = new HashSet<String>();
-
-        for (Component component : bom.getComponents()) {
-            PackageURL purl;
-            try {
-                purl = new PackageURL(component.getPurl());
-                Map<String, String> qualifiers = purl.getQualifiers();
-                if (qualifiers != null && qualifiers.containsKey("arch")) {
-                    String archValue = qualifiers.get("arch");
-                    if (!"src".equals(archValue)) {
-                        manifestArches.add(archValue);
-                    }
-                }
-            } catch (MalformedPackageURLException e) {
-                log.error("Unable to parse the purl {}", component.getPurl(), e);
-                e.printStackTrace();
-            }
-
-        }
-        return manifestArches;
-    }
-
     protected Component createRootComponentForDockerBuildItem(
             String generationNVR,
             V1Beta1GenerationRecord generation,
@@ -393,6 +358,7 @@ public class ReleaseAdvisoryEventsListener {
 
         // Find where this build (NVR) has been published to
         List<RepositoryCoordinates> repositories = getRepositoriesDetails(generationNVR);
+        generationToRepositories.put(generation.id(), repositories);
 
         // Create summary (pick the longest value) and evidence purl
         RepositoryCoordinates preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
@@ -415,17 +381,16 @@ public class ReleaseAdvisoryEventsListener {
         nvrRootComponent.setLicenses(imageIndexMainComponent.getLicenses());
         SbomUtils.setEvidenceIdentities(nvrRootComponent, evidencePurls, Field.PURL);
 
-        generationToRepositories.put(generation.id(), repositories);
-
         return nvrRootComponent;
     }
 
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
+    @Retry(maxRetries = 10)
     protected Sbom saveReleaseManifestForRPMGeneration(
             SbomGenerationRequest releaseGeneration,
             Bom productVersionBom,
             V1Beta1RequestRecord advisoryManifestsRecord,
-            Map<String, Collection<ErrataCDNRepoNormalized>> generationToCDNs) {
+            Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs) {
 
         try {
             QuarkusTransaction.begin(QuarkusTransaction.beginOptions().timeout(INCREASED_TIMEOUT_SEC));
@@ -467,31 +432,15 @@ public class ReleaseAdvisoryEventsListener {
                     // the purl.
                     // And getting them all to create the evidence
                     Set<String> manifestArches = getAllArchitectures(manifestBom);
-                    for (int k = 0; k < manifestBom.getComponents().size(); k++) {
 
-                        Component component = manifestBom.getComponents().get(k);
-                        Set<String> evidencePurls = AdvisoryEventUtils
-                                .createPurls(component.getPurl(), generationCDNs, manifestArches);
-                        String preferredRebuiltPurl = evidencePurls.stream()
-                                .max((str1, str2) -> Integer.compare(str1.length(), str2.length()))
-                                .orElse(null);
-                        originalToRebuiltPurl.put(component.getPurl(), preferredRebuiltPurl);
-
-                        component.setPurl(preferredRebuiltPurl);
-                        component.setBomRef(preferredRebuiltPurl);
-
-                        SbomUtils.setEvidenceIdentities(component, evidencePurls, Field.PURL);
-
-                        if (k == 0) {
-                            // This is the main component, update the metadata component as well
-                            if (manifestBom.getMetadata() != null && manifestBom.getMetadata().getComponent() != null) {
-                                manifestBom.getMetadata().getComponent().setPurl(preferredRebuiltPurl);
-                                SbomUtils.setEvidenceIdentities(
-                                        manifestBom.getMetadata().getComponent(),
-                                        evidencePurls,
-                                        Field.PURL);
-                            }
-                        }
+                    Component metadataComponent = manifestBom.getMetadata() != null
+                            ? manifestBom.getMetadata().getComponent()
+                            : null;
+                    if (metadataComponent != null) {
+                        adjustComponent(metadataComponent, generationCDNs, manifestArches, originalToRebuiltPurl);
+                    }
+                    for (Component component : manifestBom.getComponents()) {
+                        adjustComponent(component, generationCDNs, manifestArches, originalToRebuiltPurl);
                     }
 
                     // 2.7 - Update the original Sbom
@@ -519,6 +468,7 @@ public class ReleaseAdvisoryEventsListener {
     }
 
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
+    @Retry(maxRetries = 10)
     protected Sbom saveReleaseManifestForDockerGeneration(
             SbomGenerationRequest releaseGeneration,
             Bom productVersionBom,
@@ -639,7 +589,7 @@ public class ReleaseAdvisoryEventsListener {
         }
     }
 
-    @Transactional
+    @Retry(maxRetries = 10)
     protected Map<ProductVersionEntry, List<BuildItem>> getAdvisoryBuildDetails(String advisoryId) {
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(advisoryId);
         Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = erratumBuildList.getProductVersions()
@@ -653,6 +603,84 @@ public class ReleaseAdvisoryEventsListener {
                                         .flatMap(build -> build.getBuildItems().values().stream())
                                         .collect(Collectors.toList())));
         return advisoryBuildDetails;
+    }
+
+    @Retry(maxRetries = 10)
+    protected Map<ProductVersionEntry, Set<String>> mapProductVersionToCPEs(
+            Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails) {
+
+        Map<ProductVersionEntry, Set<String>> productVersionToCPEs = new HashMap<>();
+        advisoryBuildDetails.forEach((productVersionEntry, buildItems) -> {
+            // Map all VariantArch to ErrataVariant and collect distinct ErrataVariant objects
+            Set<String> productVersionCPEs = buildItems.stream()
+                    .flatMap(buildItem -> buildItem.getVariantArch().keySet().stream())
+                    .map(variantArch -> errataClient.getVariant(variantArch.toString()))
+                    .filter(Objects::nonNull)
+                    .map(errataVariant -> errataVariant.getData().getAttributes().getCpe())
+                    .collect(Collectors.toSet());
+
+            // Add more granular CPEs
+            productVersionCPEs.addAll(AdvisoryEventUtils.createGranularCPEs(productVersionEntry, productVersionCPEs));
+
+            productVersionToCPEs.put(productVersionEntry, productVersionCPEs);
+        });
+        return productVersionToCPEs;
+    }
+
+    @Retry(maxRetries = 10)
+    protected List<RepositoryCoordinates> getRepositoriesDetails(String nvr) {
+
+        PyxisRepositoryDetails repositoriesDetails = pyxisClient.getRepositoriesDetails(nvr);
+        return repositoriesDetails.getData()
+                .stream()
+                .flatMap(dataSection -> dataSection.getRepositories().stream())
+                .filter(PyxisRepositoryDetails.Repository::isPublished)
+                .filter(repository -> repository.getTags() != null)
+                .flatMap(
+                        repository -> repository.getTags()
+                                .stream()
+                                .filter(tag -> !"latest".equals(tag.getName()))
+                                .map(
+                                        tag -> new RepositoryCoordinates(
+                                                repository.getRegistry(),
+                                                repository.getRepository(),
+                                                tag.getName())))
+                .filter(repoCoordinate -> repoCoordinate.getRepositoryFragment() != null)
+                .collect(Collectors.toList());
+    }
+
+    @Retry(maxRetries = 10)
+    protected List<ErrataCDNRepoNormalized> getCDNDetails(BuildItem buildItem, String productShortName) {
+        List<ErrataCDNRepoNormalized> allCDNs = new ArrayList<ErrataCDNRepoNormalized>();
+        buildItem.getVariantArch().keySet().stream().forEach(variant -> {
+            allCDNs.addAll(errataClient.getCDNReposOfVariant(variant, productShortName));
+        });
+        return allCDNs.stream().distinct().collect(Collectors.toList());
+    }
+
+    /*
+     * Not used at the moment. Useful to understand if a repository has requires_terms = false meaning the repo is also
+     * accessible without authentication
+     */
+    @Retry(maxRetries = 10)
+    protected PyxisRepository getRepository(String registry, String repository) {
+        return pyxisClient.getRepository(registry, repository);
+    }
+
+    private void adjustComponent(
+            Component component,
+            Collection<ErrataCDNRepoNormalized> generationCDNs,
+            Set<String> manifestArches,
+            Map<String, String> originalToRebuiltPurl) {
+
+        Set<String> evidencePurls = AdvisoryEventUtils.createPurls(component.getPurl(), generationCDNs, manifestArches);
+        String preferredRebuiltPurl = evidencePurls.stream()
+                .max((str1, str2) -> Integer.compare(str1.length(), str2.length()))
+                .orElse(null);
+        originalToRebuiltPurl.put(component.getPurl(), preferredRebuiltPurl);
+
+        component.setPurl(preferredRebuiltPurl);
+        SbomUtils.setEvidenceIdentities(component, evidencePurls, Field.PURL);
     }
 
     private V1Beta1RequestManifestRecord findImageIndexManifest(
@@ -736,70 +764,24 @@ public class ReleaseAdvisoryEventsListener {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<ProductVersionEntry, Set<String>> mapProductVersionToCPEs(
-            Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails) {
-
-        Map<ProductVersionEntry, Set<String>> productVersionToCPEs = new HashMap<>();
-        advisoryBuildDetails.forEach((productVersionEntry, buildItems) -> {
-            // Map all VariantArch to ErrataVariant and collect distinct ErrataVariant objects
-            Set<String> productVersionCPEs = buildItems.stream()
-                    .flatMap(buildItem -> buildItem.getVariantArch().keySet().stream())
-                    .map(variantArch -> errataClient.getVariant(variantArch.toString()))
-                    .filter(Objects::nonNull)
-                    .map(errataVariant -> errataVariant.getData().getAttributes().getCpe())
-                    .collect(Collectors.toSet());
-
-            // Add more granular CPEs
-            productVersionCPEs.addAll(AdvisoryEventUtils.createGranularCPEs(productVersionEntry, productVersionCPEs));
-
-            productVersionToCPEs.put(productVersionEntry, productVersionCPEs);
-        });
-        return productVersionToCPEs;
-    }
-
-    private Map<ProductVersionEntry, Set<String>> mapProductVersionToVariants(
-            Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails) {
-
-        Map<ProductVersionEntry, Set<String>> productVersionToVariants = new HashMap<ProductVersionEntry, Set<String>>();
-        advisoryBuildDetails.forEach((productVersionEntry, buildItems) -> {
-            // Map all VariantArch to ErrataVariant and collect distinct ErrataVariant objects
-            Set<String> productVersionVariants = buildItems.stream()
-                    .flatMap(buildItem -> buildItem.getVariantArch().keySet().stream())
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-
-            productVersionToVariants.put(productVersionEntry, productVersionVariants);
-        });
-        return productVersionToVariants;
-    }
-
-    private List<RepositoryCoordinates> getRepositoriesDetails(String nvr) {
-
-        PyxisRepositoryDetails repositoriesDetails = pyxisClient.getRepositoriesDetails(nvr);
-        return repositoriesDetails.getData()
-                .stream()
-                .flatMap(dataSection -> dataSection.getRepositories().stream())
-                .filter(PyxisRepositoryDetails.Repository::isPublished)
-                .filter(repository -> repository.getTags() != null)
-                .flatMap(
-                        repository -> repository.getTags()
-                                .stream()
-                                .filter(tag -> !"latest".equals(tag.getName()))
-                                .map(
-                                        tag -> new RepositoryCoordinates(
-                                                repository.getRegistry(),
-                                                repository.getRepository(),
-                                                tag.getName())))
-                .filter(repoCoordinate -> repoCoordinate.getRepositoryFragment() != null)
-                .collect(Collectors.toList());
-    }
-
-    /*
-     * Not used at the moment. Useful to understand if a repository has requires_terms = false meaning the repo is also
-     * accessible without authentication
-     */
-    private PyxisRepository getRepository(String registry, String repository) {
-        return pyxisClient.getRepository(registry, repository);
+    // Helper method to get the all the architectures in the manifest
+    private Set<String> getAllArchitectures(Bom bom) {
+        Set<String> manifestArches = new HashSet<String>();
+        for (Component component : bom.getComponents()) {
+            try {
+                PackageURL purl = new PackageURL(component.getPurl());
+                Map<String, String> qualifiers = purl.getQualifiers();
+                if (qualifiers != null && qualifiers.containsKey("arch")) {
+                    String archValue = qualifiers.get("arch");
+                    if (!"src".equals(archValue)) {
+                        manifestArches.add(archValue);
+                    }
+                }
+            } catch (MalformedPackageURLException e) {
+                log.error("Unable to parse the purl {}", component.getPurl(), e);
+            }
+        }
+        return manifestArches;
     }
 
 }
