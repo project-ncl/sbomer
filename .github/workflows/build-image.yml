@@ -42,7 +42,7 @@ jobs:
           mkdir certs
           echo "$IT_CURRENT_ROOT_CAS" > certs/Current-IT-Root-CAs.pem
 
-          openssl x509 -in certs/Current-IT-Root-CAs -text > /dev/null
+          openssl x509 -in certs/Current-IT-Root-CAs.pem -text > /dev/null
       - name: Download ${{ inputs.artifact }}
         if: "${{ inputs.artifact != 'false' }}"
         uses: actions/download-artifact@v4
