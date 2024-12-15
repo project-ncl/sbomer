@@ -91,7 +91,15 @@ fi
 
 mkdir -p certs
 
-curl -L https://certs.corp.redhat.com/certs/Current-IT-Root-CAs.pem -o certs/Current-IT-Root-CAs.pem
+if [ ! -f certs/2022-IT-Root-CA.pem ]; then
+    echo "The certificate file 'certs/2022-IT-Root-CA.pem' does not exist, please contact the team on how to obtain it!"
+    exit 1
+fi
+
+if [ ! -f certs/2015-IT-Root-CA.pem ]; then
+    echo "The certificate file 'certs/2015-IT-Root-CA.pem' does not exist, please contact the team on how to obtain it!"
+    exit 1
+fi
 
 "${BUILD_SCRIPT[@]}" build -t "$IMAGE_TAG_LATEST" -f "images/${IMAGE_SLUG}/${CONTAINERFILE}" .
 
