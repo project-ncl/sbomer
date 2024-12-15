@@ -70,6 +70,8 @@ build:
     - dnf install -y --setopt=tsflags=nodocs unzip zip
     - mkdir certs
     - curl -L "https://${INTERNAL_CERTS_HOST}/certs/Current-IT-Root-CAs.pem" -o certs/Current-IT-Root-CAs.pem
+    - cp certs/Current-IT-Root-CAs.pem /etc/pki/ca-trust/source/anchors/Current-IT-Root-CAs.pem
+    - update-ca-trust
     - curl -s "https://get.sdkman.io" | bash
     - echo "sdkman_auto_answer=true" > $HOME/.sdkman/etc/config
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
