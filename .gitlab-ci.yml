@@ -68,15 +68,17 @@ build:
   before_script:
     - dnf -y --noplugins --setopt=install_weak_deps=0 --setopt=tsflags=nodocs upgrade
     - dnf install -y --setopt=tsflags=nodocs unzip zip
-    - mkdir certs
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/Current-IT-Root-CAs.pem" -o certs/Current-IT-Root-CAs.pem
-    - cp certs/Current-IT-Root-CAs.pem /etc/pki/ca-trust/source/anchors/Current-IT-Root-CAs.pem
-    - update-ca-trust
     - curl -s "https://get.sdkman.io" | bash
     - echo "sdkman_auto_answer=true" > $HOME/.sdkman/etc/config
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
     - sdk install java 17.0.12-tem
-    - keytool -import -trustcacerts -alias Current-IT-Root-CAs -file certs/Current-IT-Root-CAs.pem -keystore "$HOME/.sdkman/candidates/java/17.0.12-tem/lib/security/cacerts" -noprompt -storepass changeit
+    - >
+      mkdir certs
+      echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
+
+      keytool -import -trustcacerts -alias 2022-IT-Root-CA -file certs/2022-IT-Root-CA.pem -cacerts -noprompt -storepass changeit
+      keytool -import -trustcacerts -alias 2015-IT-Root-CA -file certs/2015-IT-Root-CA.pem -cacerts -noprompt -storepass changeit
   script:
     - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -Dquarkus.hibernate-orm.log.sql=false -DbuildNumber=${CI_COMMIT_SHORT_SHA} jacoco:report sonar:sonar -Dsonar.projectKey=SBOMer
 
@@ -128,8 +130,10 @@ build-image-service:
     OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-service
     CONTAINERFILE: images/sbomer-service/Containerfile
   before_script:
-    - mkdir certs
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/Current-IT-Root-CAs.pem" -o certs/Current-IT-Root-CAs.pem
+    - >
+      mkdir certs
+      echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:
@@ -142,8 +146,10 @@ build-image-generator:
     OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-generator
     CONTAINERFILE: images/sbomer-generator/Containerfile
   before_script:
-    - mkdir certs
-    - curl -L "https://${INTERNAL_CERTS_HOST}/certs/Current-IT-Root-CAs.pem" -o certs/Current-IT-Root-CAs.pem
+    - >
+      mkdir certs
+      echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:

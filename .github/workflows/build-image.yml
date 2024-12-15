@@ -37,12 +37,16 @@ jobs:
 
       - name: Populate certificates
         env:
-          IT_CURRENT_ROOT_CAS: ${{ secrets.IT_CURRENT_ROOT_CAS }}
+          IT_ROOT_CA_2022: ${{ secrets.IT_ROOT_CA_2022 }}
+          IT_ROOT_CA_2015: ${{ secrets.IT_ROOT_CA_2015 }}
         run: |
           mkdir certs
-          echo "$IT_CURRENT_ROOT_CAS" > certs/Current-IT-Root-CAs.pem
+          echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
+          echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
 
-          openssl x509 -in certs/Current-IT-Root-CAs.pem -text > /dev/null
+          # Ensure certs are valid
+          openssl x509 -in certs/2022-IT-Root-CA.pem -text > /dev/null
+          openssl x509 -in certs/2015-IT-Root-CA.pem -text > /dev/null
       - name: Download ${{ inputs.artifact }}
         if: "${{ inputs.artifact != 'false' }}"
         uses: actions/download-artifact@v4

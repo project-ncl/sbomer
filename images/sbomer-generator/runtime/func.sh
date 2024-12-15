@@ -61,7 +61,7 @@ function install_java() {
         ca_keystore_path="$HOME/.sdkman/candidates/java/${version}/lib/security/cacerts"
     fi
 
-    for cert in "Current-IT-Root-CAs"; do
+    for cert in "2015-IT-Root-CA" "2022-IT-Root-CA"; do
         keytool -delete -alias "${cert}" -keystore "${ca_keystore_path}" -noprompt -storepass changeit || true
         keytool -import -trustcacerts -alias "${cert}" -file "${certs_path}/${cert}.pem" -keystore "$ca_keystore_path" -noprompt -storepass changeit
     done
