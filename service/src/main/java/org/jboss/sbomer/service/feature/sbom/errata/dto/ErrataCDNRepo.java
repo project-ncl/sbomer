@@ -20,6 +20,8 @@ package org.jboss.sbomer.service.feature.sbom.errata.dto;
 import lombok.Data;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Data
 public class ErrataCDNRepo {
     private long id;
@@ -30,9 +32,13 @@ public class ErrataCDNRepo {
     @Data
     public static class Attributes {
         private String name;
+        @JsonProperty("release_type")
         private String releaseType;
+        @JsonProperty("use_for_tps")
         private boolean useForTps;
+        @JsonProperty("tps_stream")
         private String tpsStream;
+        @JsonProperty("content_type")
         private String contentType;
     }
 

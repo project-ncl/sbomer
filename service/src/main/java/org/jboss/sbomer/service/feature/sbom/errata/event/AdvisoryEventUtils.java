@@ -205,8 +205,7 @@ public class AdvisoryEventUtils {
                 return cdns.stream()
                         .filter(
                                 cdn -> cdn.getContentType().equals(ErrataCDNContentType.SOURCE)
-                                        && manifestArches.stream()
-                                                .anyMatch(arch -> cdn.getCdnName().contains("-" + arch + "-")))
+                                        && manifestArches.stream().anyMatch(arch -> cdn.getArchName().equals(arch)))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
             } else if (componentArch.equals("noarch")) {
@@ -215,8 +214,7 @@ public class AdvisoryEventUtils {
                 return cdns.stream()
                         .filter(
                                 cdn -> cdn.getContentType().equals(ErrataCDNContentType.BINARY)
-                                        && manifestArches.stream()
-                                                .anyMatch(arch -> cdn.getCdnName().contains("-" + arch + "-")))
+                                        && manifestArches.stream().anyMatch(arch -> cdn.getArchName().equals(arch)))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
             } else if (componentPurl.getName().endsWith("-debugsource")) {
@@ -224,7 +222,7 @@ public class AdvisoryEventUtils {
                 return cdns.stream()
                         .filter(
                                 cdn -> cdn.getContentType().equals(ErrataCDNContentType.SOURCE)
-                                        && cdn.getCdnName().contains("-" + componentArch + "-"))
+                                        && cdn.getArchName().equals(componentArch))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
             } else if (componentPurl.getName().endsWith("-debuginfo")) {
@@ -232,7 +230,7 @@ public class AdvisoryEventUtils {
                 return cdns.stream()
                         .filter(
                                 cdn -> cdn.getContentType().equals(ErrataCDNContentType.DEBUGINFO)
-                                        && cdn.getCdnName().contains("-" + componentArch + "-"))
+                                        && cdn.getArchName().equals(componentArch))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
             } else {
@@ -241,7 +239,7 @@ public class AdvisoryEventUtils {
                 return cdns.stream()
                         .filter(
                                 cdn -> cdn.getContentType().equals(ErrataCDNContentType.BINARY)
-                                        && cdn.getCdnName().contains("-" + componentArch + "-"))
+                                        && cdn.getArchName().equals(componentArch))
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
             }
