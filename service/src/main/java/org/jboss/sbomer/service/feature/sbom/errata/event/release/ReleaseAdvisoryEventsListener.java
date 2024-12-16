@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
@@ -41,6 +43,7 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
@@ -62,6 +65,8 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestReposi
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.stats.StatsService;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 
@@ -69,7 +74,6 @@ import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -137,6 +141,7 @@ public class ReleaseAdvisoryEventsListener {
                     erratum.getDetails().get().getId());
 
             releaseManifestsForDockerBuilds(
+                    requestEvent,
                     erratum,
                     advisoryBuildDetails,
                     advisoryManifestsRecord,
@@ -153,6 +158,7 @@ public class ReleaseAdvisoryEventsListener {
                     erratum.getDetails().get().getId());
 
             releaseManifestsForRPMBuilds(
+                    requestEvent,
                     erratum,
                     advisoryBuildDetails,
                     advisoryManifestsRecord,
@@ -165,6 +171,7 @@ public class ReleaseAdvisoryEventsListener {
     }
 
     protected void releaseManifestsForRPMBuilds(
+            RequestEvent requestEvent,
             Errata erratum,
             Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails,
             V1Beta1RequestRecord advisoryManifestsRecord,
@@ -204,6 +211,10 @@ public class ReleaseAdvisoryEventsListener {
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
             Sbom sbom = saveReleaseManifestForRPMGeneration(
+                    requestEvent,
+                    erratum,
+                    productVersion,
+                    toolVersion,
                     releaseGeneration,
                     productVersionBom,
                     advisoryManifestsRecord,
@@ -219,11 +230,10 @@ public class ReleaseAdvisoryEventsListener {
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
         });
-
-        throw new ApplicationException("**** NOT IMPLEMENTED ****");
     }
 
     protected void releaseManifestsForDockerBuilds(
+            RequestEvent requestEvent,
             Errata erratum,
             Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails,
             V1Beta1RequestRecord advisoryManifestsRecord,
@@ -262,6 +272,10 @@ public class ReleaseAdvisoryEventsListener {
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
             Sbom sbom = saveReleaseManifestForDockerGeneration(
+                    requestEvent,
+                    erratum,
+                    productVersion,
+                    toolVersion,
                     releaseGeneration,
                     productVersionBom,
                     advisoryManifestsRecord,
@@ -328,7 +342,6 @@ public class ReleaseAdvisoryEventsListener {
 
         // From the manifest get all the archs from the purl 'arch' qualifier
         Set<String> manifestArches = getAllArchitectures(manifestBom);
-
         Set<String> evidencePurls = AdvisoryEventUtils
                 .createPurls(manifestMainComponent.getPurl(), allCDNs, manifestArches);
 
@@ -393,6 +406,10 @@ public class ReleaseAdvisoryEventsListener {
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     protected Sbom saveReleaseManifestForRPMGeneration(
+            RequestEvent requestEvent,
+            Errata erratum,
+            ProductVersionEntry productVersion,
+            String toolVersion,
             SbomGenerationRequest releaseGeneration,
             Bom productVersionBom,
             V1Beta1RequestRecord advisoryManifestsRecord,
@@ -412,6 +429,15 @@ public class ReleaseAdvisoryEventsListener {
                     .withGenerationRequest(releaseGeneration)
                     .withConfigIndex(0)
                     .build();
+
+            // Add more information for this release so to find manifests more easily
+            ObjectNode metadataNode = collectReleaseInfo(
+                    requestEvent.getId(),
+                    erratum,
+                    productVersion,
+                    toolVersion,
+                    productVersionBom);
+            sbom.setReleaseMetadata(metadataNode);
             sbom = sbomService.save(sbom);
 
             // 2 - For every generation, find all the existing manifests and update the with release repo
@@ -452,8 +478,14 @@ public class ReleaseAdvisoryEventsListener {
                     // 2.7 - Update the original Sbom
                     buildManifest.setSbom(SbomUtils.toJsonNode(manifestBom));
 
-                    // TODO: should we add a "released" boolean to Sbom model?
-                    // manifest.setReleased(true);
+                    // 2.8 - Add more information for this release so to find manifests more easily
+                    ObjectNode buildManifestMetadataNode = collectReleaseInfo(
+                            requestEvent.getId(),
+                            erratum,
+                            productVersion,
+                            toolVersion,
+                            manifestBom);
+                    buildManifest.setReleaseMetadata(buildManifestMetadataNode);
                 }
             }
 
@@ -476,6 +508,10 @@ public class ReleaseAdvisoryEventsListener {
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     protected Sbom saveReleaseManifestForDockerGeneration(
+            RequestEvent requestEvent,
+            Errata erratum,
+            ProductVersionEntry productVersion,
+            String toolVersion,
             SbomGenerationRequest releaseGeneration,
             Bom productVersionBom,
             V1Beta1RequestRecord advisoryManifestsRecord,
@@ -495,6 +531,15 @@ public class ReleaseAdvisoryEventsListener {
                     .withGenerationRequest(releaseGeneration)
                     .withConfigIndex(0)
                     .build();
+
+            // Add more information for this release so to find manifests more easily
+            ObjectNode metadataNode = collectReleaseInfo(
+                    requestEvent.getId(),
+                    erratum,
+                    productVersion,
+                    toolVersion,
+                    productVersionBom);
+            sbom.setReleaseMetadata(metadataNode);
             sbom = sbomService.save(sbom);
 
             // 2 - For every generation, find all the existing manifests and update the with release repo
@@ -574,8 +619,14 @@ public class ReleaseAdvisoryEventsListener {
                     // 2.7 - Update the original Sbom
                     buildManifest.setSbom(SbomUtils.toJsonNode(manifestBom));
 
-                    // TODO: should we add a "released" boolean to Sbom model?
-                    // manifest.setReleased(true);
+                    // 2.8 - Add more information for this release so to find manifests more easily
+                    ObjectNode buildManifestMetadataNode = collectReleaseInfo(
+                            requestEvent.getId(),
+                            erratum,
+                            productVersion,
+                            toolVersion,
+                            manifestBom);
+                    buildManifest.setReleaseMetadata(buildManifestMetadataNode);
                 }
             }
 
@@ -671,6 +722,72 @@ public class ReleaseAdvisoryEventsListener {
     @Retry(maxRetries = 10)
     protected PyxisRepository getRepository(String registry, String repository) {
         return pyxisClient.getRepository(registry, repository);
+    }
+
+    public static final String REQUEST_ID = "request_id";
+    public static final String ERRATA = "errata_fullname";
+    public static final String ERRATA_ID = "errata_id";
+    public static final String ERRATA_SHIP_DATE = "errata_ship_date";
+    public static final String PRODUCT = "product_name";
+    public static final String PRODUCT_SHORTNAME = "product_shortname";
+    public static final String PRODUCT_VERSION = "product_version";
+    public static final String PURL_LIST = "purl_list";
+
+    protected ObjectNode collectReleaseInfo(
+            String requestEventId,
+            Errata erratum,
+            ProductVersionEntry versionEntry,
+            String toolVersion,
+            Bom manifest) {
+
+        ObjectNode releaseMetadata = ObjectMapperProvider.json().createObjectNode();
+        releaseMetadata.put(REQUEST_ID, requestEventId);
+        releaseMetadata.put(ERRATA, erratum.getDetails().get().getFulladvisory());
+        releaseMetadata.put(ERRATA_ID, erratum.getDetails().get().getId());
+        releaseMetadata.put(ERRATA_SHIP_DATE, Date.from(erratum.getDetails().get().getActualShipDate()).toString());
+        releaseMetadata.put(PRODUCT, versionEntry.getDescription());
+        releaseMetadata.put(PRODUCT_SHORTNAME, erratum.getDetails().get().getProduct().getShortName());
+        releaseMetadata.put(PRODUCT_VERSION, versionEntry.getName());
+
+        TreeSet<String> allPurls = new TreeSet<>();
+        if (manifest.getMetadata() != null) {
+            allPurls.addAll(getAllPurlsOfComponent(manifest.getMetadata().getComponent()));
+        }
+        for (Component component : manifest.getComponents()) {
+            allPurls.addAll(getAllPurlsOfComponent(component));
+        }
+        ArrayNode purlArray = ObjectMapperProvider.json().createArrayNode();
+        for (String purl : allPurls) {
+            purlArray.add(purl);
+        }
+        releaseMetadata.set(PURL_LIST, purlArray);
+        return releaseMetadata;
+    }
+
+    private Set<String> getAllPurlsOfComponent(Component component) {
+
+        if (component == null) {
+            return Collections.emptySet();
+        }
+
+        Set<String> allPurls = new HashSet<>();
+        if (component.getPurl() != null) {
+            allPurls.add(component.getPurl());
+        }
+
+        if (component.getEvidence() == null || component.getEvidence().getIdentities() == null
+                || component.getEvidence().getIdentities().isEmpty()) {
+            return allPurls;
+        }
+
+        Set<String> purls = component.getEvidence()
+                .getIdentities()
+                .stream()
+                .filter(identity -> Field.PURL.equals(identity.getField()))
+                .map(identity -> identity.getConcludedValue())
+                .collect(Collectors.toSet());
+        allPurls.addAll(purls);
+        return allPurls;
     }
 
     private void adjustComponent(

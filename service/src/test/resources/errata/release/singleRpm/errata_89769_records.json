@@ -1,0 +1,49 @@
+[
+  {
+    "id": "4186BB34453E473",
+    "receivalTime": "2024-12-04T08:45:17.705489Z",
+    "eventType": "REST",
+    "eventStatus": "SUCCESS",
+    "reason": "1/1 completed with success",
+    "requestConfig": {
+      "type": "errata-advisory",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "advisoryId": "89769"
+    },
+    "event": {
+      "method": "POST",
+      "address": "10.68.5.32",
+      "span_id": "6d16cc3c1ab12ef0",
+      "trace_id": "40dc9765f1c0a87d7966001b76a21c9c",
+      "username": "<none>",
+      "destination": "http://sbomer-stage.pnc.engineering.redhat.com/api/v1beta1/generations"
+    },
+    "manifests": [
+      {
+        "id": "356D95E8FF434C4",
+        "identifier": "redhat-release-computenode-7.2-8.el7_2.1",
+        "rootPurl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src",
+        "creationTime": "2024-12-04T08:45:40.741865Z",
+        "generation": {
+          "id": "AF66A5895B8E447",
+          "identifier": "redhat-release-computenode-7.2-8.el7_2.1",
+          "config": {
+            "type": "brew-rpm",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "advisoryId": 89769,
+            "advisory": "RHBA-2024:89769-01",
+            "productVersionId": 467,
+            "productVersion": "RHEL-7.2.Z",
+            "brewBuildId": 561861,
+            "brewBuildNVR": "redhat-release-computenode-7.2-8.el7_2.1"
+          },
+          "type": "BREW_RPM",
+          "creationTime": "2024-12-04T08:45:18.086186Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 356D95E8FF434C4"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,188 @@
+[
+  {
+    "id": 1277,
+    "type": "cdn_repos",
+    "attributes": {
+      "name": "rhel-7-hpc-node-debug-rpms__7ComputeNode__x86_64",
+      "release_type": "Primary",
+      "use_for_tps": true,
+      "tps_stream": null,
+      "content_type": "Debuginfo"
+    },
+    "relationships": {
+      "arch": {
+        "id": 13,
+        "name": "x86_64"
+      },
+      "variants": [
+        {
+          "id": 700,
+          "name": "7ComputeNode"
+        },
+        {
+          "id": 843,
+          "name": "7ComputeNode-7.0.Z"
+        },
+        {
+          "id": 1025,
+          "name": "7ComputeNode-7.1.Z"
+        },
+        {
+          "id": 1175,
+          "name": "7ComputeNode-7.2.Z"
+        },
+        {
+          "id": 3006,
+          "name": "7ComputeNode-7.9.Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": 2792,
+    "type": "cdn_repos",
+    "attributes": {
+      "name": "rhel-7-hpc-node-eus-debug-rpms__7_DOT_2__x86_64",
+      "release_type": "EUS",
+      "use_for_tps": false,
+      "tps_stream": null,
+      "content_type": "Debuginfo"
+    },
+    "relationships": {
+      "arch": {
+        "id": 13,
+        "name": "x86_64"
+      },
+      "variants": [
+        {
+          "id": 1175,
+          "name": "7ComputeNode-7.2.Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": 2793,
+    "type": "cdn_repos",
+    "attributes": {
+      "name": "rhel-7-hpc-node-eus-rpms__7_DOT_2__x86_64",
+      "release_type": "EUS",
+      "use_for_tps": false,
+      "tps_stream": null,
+      "content_type": "Binary"
+    },
+    "relationships": {
+      "arch": {
+        "id": 13,
+        "name": "x86_64"
+      },
+      "variants": [
+        {
+          "id": 1175,
+          "name": "7ComputeNode-7.2.Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": 2794,
+    "type": "cdn_repos",
+    "attributes": {
+      "name": "rhel-7-hpc-node-eus-source-rpms__7_DOT_2__x86_64",
+      "release_type": "EUS",
+      "use_for_tps": false,
+      "tps_stream": null,
+      "content_type": "Source"
+    },
+    "relationships": {
+      "arch": {
+        "id": 13,
+        "name": "x86_64"
+      },
+      "variants": [
+        {
+          "id": 1175,
+          "name": "7ComputeNode-7.2.Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": 1278,
+    "type": "cdn_repos",
+    "attributes": {
+      "name": "rhel-7-hpc-node-rpms__7ComputeNode__x86_64",
+      "release_type": "Primary",
+      "use_for_tps": true,
+      "tps_stream": "RHEL-7-Main-ComputeNode",
+      "content_type": "Binary"
+    },
+    "relationships": {
+      "arch": {
+        "id": 13,
+        "name": "x86_64"
+      },
+      "variants": [
+        {
+          "id": 700,
+          "name": "7ComputeNode"
+        },
+        {
+          "id": 843,
+          "name": "7ComputeNode-7.0.Z"
+        },
+        {
+          "id": 1025,
+          "name": "7ComputeNode-7.1.Z"
+        },
+        {
+          "id": 1175,
+          "name": "7ComputeNode-7.2.Z"
+        },
+        {
+          "id": 3006,
+          "name": "7ComputeNode-7.9.Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": 1279,
+    "type": "cdn_repos",
+    "attributes": {
+      "name": "rhel-7-hpc-node-source-rpms__7ComputeNode__x86_64",
+      "release_type": "Primary",
+      "use_for_tps": true,
+      "tps_stream": null,
+      "content_type": "Source"
+    },
+    "relationships": {
+      "arch": {
+        "id": 13,
+        "name": "x86_64"
+      },
+      "variants": [
+        {
+          "id": 700,
+          "name": "7ComputeNode"
+        },
+        {
+          "id": 843,
+          "name": "7ComputeNode-7.0.Z"
+        },
+        {
+          "id": 1025,
+          "name": "7ComputeNode-7.1.Z"
+        },
+        {
+          "id": 1175,
+          "name": "7ComputeNode-7.2.Z"
+        },
+        {
+          "id": 3006,
+          "name": "7ComputeNode-7.9.Z"
+        }
+      ]
+    }
+  }
+]
