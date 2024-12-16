@@ -65,6 +65,8 @@ build:
       -Dsurefire.useFile=false
       -Denforcer.skipRules=bannedRepositories
       --no-transfer-progress
+    IT_ROOT_CA_2022_CONTENT: $IT_ROOT_CA_2022
+    IT_ROOT_CA_2015_CONTENT: $IT_ROOT_CA_2015
   before_script:
     - dnf -y --noplugins --setopt=install_weak_deps=0 --setopt=tsflags=nodocs upgrade
     - dnf install -y --setopt=tsflags=nodocs unzip zip
@@ -74,8 +76,8 @@ build:
     - sdk install java 17.0.12-tem
     - >
       mkdir certs
-      echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
-      echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2022_CONTENT" > certs/2022-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2015_CONTENT" > certs/2015-IT-Root-CA.pem
 
       keytool -import -trustcacerts -alias 2022-IT-Root-CA -file certs/2022-IT-Root-CA.pem -cacerts -noprompt -storepass changeit
       keytool -import -trustcacerts -alias 2015-IT-Root-CA -file certs/2015-IT-Root-CA.pem -cacerts -noprompt -storepass changeit
@@ -129,11 +131,13 @@ build-image-service:
   variables:
     OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-service
     CONTAINERFILE: images/sbomer-service/Containerfile
+    IT_ROOT_CA_2022_CONTENT: $IT_ROOT_CA_2022
+    IT_ROOT_CA_2015_CONTENT: $IT_ROOT_CA_2015
   before_script:
     - >
       mkdir certs
-      echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
-      echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2022_CONTENT" > certs/2022-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2015_CONTENT" > certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:
@@ -145,11 +149,13 @@ build-image-generator:
   variables:
     OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-generator
     CONTAINERFILE: images/sbomer-generator/Containerfile
+    IT_ROOT_CA_2022_CONTENT: $IT_ROOT_CA_2022
+    IT_ROOT_CA_2015_CONTENT: $IT_ROOT_CA_2015
   before_script:
     - >
       mkdir certs
-      echo "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
-      echo "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2022_CONTENT" > certs/2022-IT-Root-CA.pem
+      echo "$IT_ROOT_CA_2015_CONTENT" > certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:
