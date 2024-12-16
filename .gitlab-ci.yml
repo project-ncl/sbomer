@@ -72,13 +72,8 @@ build:
     - echo "sdkman_auto_answer=true" > $HOME/.sdkman/etc/config
     - source "$HOME/.sdkman/bin/sdkman-init.sh"
     - sdk install java 17.0.12-tem
-    - >
-      mkdir certs
-      cat "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
-      cat "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
-
-      keytool -import -trustcacerts -alias 2022-IT-Root-CA -file certs/2022-IT-Root-CA.pem -cacerts -noprompt -storepass changeit
-      keytool -import -trustcacerts -alias 2015-IT-Root-CA -file certs/2015-IT-Root-CA.pem -cacerts -noprompt -storepass changeit
+    - keytool -import -trustcacerts -alias 2022-IT-Root-CA -file $IT_ROOT_CA_2022 -cacerts -noprompt -storepass changeit
+    - keytool -import -trustcacerts -alias 2015-IT-Root-CA -file $IT_ROOT_CA_2015 -cacerts -noprompt -storepass changeit
   script:
     - ./mvnw -s .ci/settings.xml verify ${MAVEN_CLI_OPTS} -Dquarkus.hibernate-orm.log.sql=false -DbuildNumber=${CI_COMMIT_SHORT_SHA} jacoco:report sonar:sonar -Dsonar.projectKey=SBOMer
 
@@ -132,8 +127,8 @@ build-image-service:
   before_script:
     - >
       mkdir certs
-      cat "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
-      cat "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
+      cp $IT_ROOT_CA_2022 certs/2022-IT-Root-CA.pem
+      cp $IT_ROOT_CA_2015 certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:
@@ -148,8 +143,8 @@ build-image-generator:
   before_script:
     - >
       mkdir certs
-      cat "$IT_ROOT_CA_2022" > certs/2022-IT-Root-CA.pem
-      cat "$IT_ROOT_CA_2015" > certs/2015-IT-Root-CA.pem
+      cp $IT_ROOT_CA_2022 certs/2022-IT-Root-CA.pem
+      cp $IT_ROOT_CA_2015 certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:
