@@ -125,10 +125,9 @@ build-image-service:
     OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-service
     CONTAINERFILE: images/sbomer-service/Containerfile
   before_script:
-    - >
-      mkdir certs
-      cp $IT_ROOT_CA_2022 certs/2022-IT-Root-CA.pem
-      cp $IT_ROOT_CA_2015 certs/2015-IT-Root-CA.pem
+    - mkdir certs
+    - cp $IT_ROOT_CA_2022 certs/2022-IT-Root-CA.pem
+    - cp $IT_ROOT_CA_2015 certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:
@@ -141,10 +140,9 @@ build-image-generator:
     OCI_IMAGE_NAME: ${IMAGE_REGISTRY_STAGE}/sbomer-generator
     CONTAINERFILE: images/sbomer-generator/Containerfile
   before_script:
-    - >
-      mkdir certs
-      cp $IT_ROOT_CA_2022 certs/2022-IT-Root-CA.pem
-      cp $IT_ROOT_CA_2015 certs/2015-IT-Root-CA.pem
+    - mkdir certs
+    - cp $IT_ROOT_CA_2022 certs/2022-IT-Root-CA.pem
+    - cp $IT_ROOT_CA_2015 certs/2015-IT-Root-CA.pem
   dependencies:
     - build
   needs:
