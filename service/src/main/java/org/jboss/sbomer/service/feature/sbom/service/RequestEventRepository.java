@@ -65,8 +65,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.Query;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
+@Slf4j
 public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent> {
 
     public RequestEventRepository() {
@@ -323,6 +325,8 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         if (!ALLOWED_TYPE_KEYS.contains(typeKey)) {
             throw new ClientException("Unsupported typeKey '" + typeKey + "'. Allowed values: " + ALLOWED_TYPE_KEYS);
         }
+
+        log.debug("Natively searching records for type '{}' and value '{}'", typeKey, typeValue);
 
         // Build the native SQL query
         StringBuilder sb = new StringBuilder().append("SELECT ")
