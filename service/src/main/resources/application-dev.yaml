@@ -91,3 +91,7 @@ sbomer:
         enabled: false
     kerberos:
         enabled: false
+        errata:
+          service-principal-name: errata-service-principal
+        pyxis:
+          service-principal-name: pyxis-service-principal

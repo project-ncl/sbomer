@@ -22,14 +22,16 @@ import java.io.IOException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
+import lombok.extern.slf4j.Slf4j;
 
-public class Krb5ClientRequestFilter implements ClientRequestFilter {
+@Slf4j
+public class ErrataKrb5ClientRequestFilter implements ClientRequestFilter {
 
     private static final String AUTHORIZATION = "Authorization";
     private static final String NEGOTIATE = "Negotiate";
 
     @Inject
-    CachingKerberosClientSupport kerberosClientSupport;
+    ErrataCachingKerberosClientSupport kerberosClientSupport;
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {

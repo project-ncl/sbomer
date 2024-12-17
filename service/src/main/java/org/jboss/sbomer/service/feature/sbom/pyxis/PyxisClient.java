@@ -26,7 +26,7 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.UnauthorizedException;
-import org.jboss.sbomer.service.feature.sbom.kerberos.Krb5ClientRequestFilter;
+import org.jboss.sbomer.service.feature.sbom.kerberos.PyxisKrb5ClientRequestFilter;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 
@@ -38,6 +38,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -48,20 +49,31 @@ import jakarta.ws.rs.core.Response;
 @ClientHeaderParam(name = "User-Agent", value = "SBOMer")
 @RegisterRestClient(configKey = "pyxis")
 @Path("/v1")
-@RegisterProvider(Krb5ClientRequestFilter.class)
+@RegisterProvider(PyxisKrb5ClientRequestFilter.class)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public interface PyxisClient {
 
-    @GET
-    @Path("/images/nvr/{nvr}?include=data.repositories.registry&include=data.repositories.repository&include=data.repositories.tags&include=data.repositories.published")
-    public PyxisRepositoryDetails getRepositoriesDetails(@PathParam("nvr") String nvr);
+    public static List<String> REPOSITORIES_DETAILS_INCLUDES = List.of(
+            "data.repositories.registry",
+            "data.repositories.repository",
+            "data.repositories.tags",
+            "data.repositories.published");
+    public static List<String> REPOSITORIES_REGISTRY_INCLUDES = List
+            .of("_id", "registry", "repository", "requires_terms");
 
     @GET
-    @Path("/repositories/registry/{registry}/repository/{repository}?include=_id&include=registry&include=repository&include=requires_terms")
+    @Path("/images/nvr/{nvr}")
+    public PyxisRepositoryDetails getRepositoriesDetails(
+            @PathParam("nvr") String nvr,
+            @QueryParam("include") List<String> includes);
+
+    @GET
+    @Path("/repositories/registry/{registry}/repository/{repository}")
     public PyxisRepository getRepository(
             @PathParam("registry") String registry,
-            @PathParam("repository") String repository);
+            @PathParam("repository") String repository,
+            @QueryParam("include") List<String> includes);
 
     @ClientExceptionMapper
     @Blocking

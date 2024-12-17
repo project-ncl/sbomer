@@ -47,6 +47,10 @@ sbomer:
         enabled: true
     kerberos:
         enabled: true
+        errata:
+          service-principal-name: errata-service-principal
+        pyxis:
+          service-principal-name: pyxis-service-principal
 
 quarkus:
   oidc:
