@@ -281,9 +281,12 @@ public class AdvisoryService {
             // Otherwise SBOMer will default to the creation of build manifests. Will change in future!
             V1Beta1RequestRecord successfulRequestRecord = null;
             if (ErrataStatus.SHIPPED_LIVE.equals(details.getStatus())) {
-                log.debug("Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}", erratum.getDetails().get().getId());
-                successfulRequestRecord = sbomService
-                        .searchLastSuccessfulAdvisoryRequestRecord(String.valueOf(erratum.getDetails().get().getId()));
+                log.debug(
+                        "Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}",
+                        erratum.getDetails().get().getId());
+                successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryRequestRecord(
+                        requestEvent.getId(),
+                        String.valueOf(erratum.getDetails().get().getId()));
             }
 
             log.debug("Successful request records found: {}", successfulRequestRecord);

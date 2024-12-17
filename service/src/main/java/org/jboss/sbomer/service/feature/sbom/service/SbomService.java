@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
@@ -553,19 +554,32 @@ public class SbomService {
     }
 
     @Transactional
-    public V1Beta1RequestRecord searchLastSuccessfulAdvisoryRequestRecord(String advisoryId) {
+    public V1Beta1RequestRecord searchLastSuccessfulAdvisoryRequestRecord(String ignoreRequestId, String advisoryId) {
         // Get all the request events generations for this advisory
         List<V1Beta1RequestRecord> allAdvisoryRequestRecords = searchAggregatedResultsNatively(
                 ErrataAdvisoryRequestConfig.TYPE_NAME + "=" + advisoryId);
 
+        if (allAdvisoryRequestRecords == null || allAdvisoryRequestRecords.isEmpty()) {
+            log.debug("No records found for advisory {}", advisoryId);
+            return null;
+        }
+
+        // Filter the results and remove the current (IN_PROGRESS) requestId
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecordsFiltered = allAdvisoryRequestRecords.stream()
+                .filter(record -> !record.id().equals(ignoreRequestId))
+                .collect(Collectors.toList());
+        log.debug("Filtering found records to ignore current IN_PROGRESS event {}", ignoreRequestId);
+
         // Check whether the last one was completed successfully
-        if (allAdvisoryRequestRecords == null || allAdvisoryRequestRecords.isEmpty()
-                || !RequestEventStatus.SUCCESS.equals(allAdvisoryRequestRecords.get(0).eventStatus())) {
+        if (allAdvisoryRequestRecordsFiltered.isEmpty()
+                || !RequestEventStatus.SUCCESS.equals(allAdvisoryRequestRecordsFiltered.get(0).eventStatus())) {
+
+            log.debug("No successful records found for advisory {}", advisoryId);
             return null;
         }
 
         // Get the latest request and verify there are manifests
-        V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
+        V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecordsFiltered.get(0);
         if (latestAdvisoryRequestManifest.manifests() == null || latestAdvisoryRequestManifest.manifests().isEmpty()) {
             return null;
         }
