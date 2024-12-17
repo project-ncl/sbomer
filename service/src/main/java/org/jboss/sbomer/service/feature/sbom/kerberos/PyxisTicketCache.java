@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j
-public class TicketCache {
+public class PyxisTicketCache {
 
     // Ticket-Granting Ticket (TGT) Cache
     private final ConcurrentMap<String, SubjectTgtPair> tgtCache = new ConcurrentHashMap<>();

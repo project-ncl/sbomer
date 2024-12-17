@@ -42,13 +42,11 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata.Details;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
-import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -117,7 +115,7 @@ public class ReleaseAdvisoryEventsListener {
         Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
                 advisoryRequestConfig.getAdvisoryId());
         V1Beta1RequestRecord advisoryManifestsRecord = sbomService
-                .searchLastSuccessfulAdvisoryRequestRecord(advisoryRequestConfig.getAdvisoryId());
+                .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), advisoryRequestConfig.getAdvisoryId());
 
         if (erratum.getDetails().get().getContentTypes().contains("docker")) {
 
@@ -491,7 +489,9 @@ public class ReleaseAdvisoryEventsListener {
 
     private List<RepositoryCoordinates> getRepositoriesDetails(String nvr) {
 
-        PyxisRepositoryDetails repositoriesDetails = pyxisClient.getRepositoriesDetails(nvr);
+        log.debug("Getting repositories details from Pyxis for NVR '{}'", nvr);
+        PyxisRepositoryDetails repositoriesDetails = pyxisClient
+                .getRepositoriesDetails(nvr, PyxisClient.REPOSITORIES_DETAILS_INCLUDES);
         return repositoriesDetails.getData()
                 .stream()
                 .flatMap(dataSection -> dataSection.getRepositories().stream())
@@ -515,7 +515,7 @@ public class ReleaseAdvisoryEventsListener {
      * accessible without authentication
      */
     private PyxisRepository getRepository(String registry, String repository) {
-        return pyxisClient.getRepository(registry, repository);
+        return pyxisClient.getRepository(registry, repository, PyxisClient.REPOSITORIES_REGISTRY_INCLUDES);
     }
 
 }

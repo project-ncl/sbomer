@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -237,7 +238,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         when(statsService.getStats())
                 .thenReturn(Stats.builder().withVersion("ReleaseAdvisoryEventsListenerTest_1.0.0").build());
 
-        when(pyxisClient.getRepositoriesDetails("ruby-25-container-1-260.1733408998")).thenReturn(repositoriesDetails);
+        when(pyxisClient.getRepositoriesDetails(anyString(), anyList())).thenReturn(repositoriesDetails);
 
         when(generationRequestRepository.findById(anyString())).thenAnswer(invocation -> {
             String generationId = invocation.getArgument(0);
@@ -248,7 +249,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         when(sbomService.get("A14FF4DDB7DB47D")).thenReturn(firstManifest);
         when(sbomService.get("2A5F7CA4166C470")).thenReturn(indexManifest);
         when(sbomService.save(any(Sbom.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString()))
+        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
                 .thenReturn(latestAdvisoryRequestManifest);
 
         AdvisoryReleaseEvent event = AdvisoryReleaseEvent.builder()
@@ -472,7 +473,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         when(statsService.getStats())
                 .thenReturn(Stats.builder().withVersion("ReleaseAdvisoryEventsListenerTest_1.0.0").build());
 
-        when(pyxisClient.getRepositoriesDetails(anyString()))
+        when(pyxisClient.getRepositoriesDetails(anyString(), anyList()))
                 .thenAnswer(invocation -> pyxisRepositories.get(invocation.getArgument(0)));
 
         when(generationRequestRepository.findById(anyString())).thenAnswer(invocation -> {
@@ -483,7 +484,7 @@ public class ReleaseAdvisoryEventsListenerTest {
 
         when(sbomService.get(anyString())).thenAnswer(invocation -> sboms.get(invocation.getArgument(0)));
         when(sbomService.save(any(Sbom.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString()))
+        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
                 .thenReturn(latestAdvisoryRequestManifest);
 
         AdvisoryReleaseEvent event = AdvisoryReleaseEvent.builder()

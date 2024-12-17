@@ -51,6 +51,7 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
+import org.jboss.sbomer.service.feature.sbom.config.features.KerberosServiceConfig;
 
 import io.quarkiverse.kerberos.client.KerberosCallbackHandler;
 import io.quarkiverse.kerberos.client.KerberosClientConfig;
@@ -59,7 +60,7 @@ import io.quarkus.runtime.configuration.ConfigurationException;
 
 @ApplicationScoped
 @Slf4j
-public class CachingKerberosClientSupport {
+public class PyxisCachingKerberosClientSupport {
 
     private static final String KRB5_LOGIN_MODULE = "com.sun.security.auth.module.Krb5LoginModule";
 
@@ -76,19 +77,23 @@ public class CachingKerberosClientSupport {
 
     private final KerberosClientConfig kerberosConfig;
 
+    private final KerberosServiceConfig kerberosServiceConfig;
+
     private final String realKeytabPath;
 
     @Inject
-    TicketCache ticketCache;
+    PyxisTicketCache ticketCache;
 
     @Inject
-    public CachingKerberosClientSupport(
+    public PyxisCachingKerberosClientSupport(
             Instance<KerberosCallbackHandler> callbackHandler,
             Instance<UserPrincipalSubjectFactory> userPrincipalSubjectFactory,
-            KerberosClientConfig kerberosConfig) {
+            KerberosClientConfig kerberosConfig,
+            KerberosServiceConfig kerberosServiceConfig) {
         this.callbackHandler = callbackHandler;
         this.userPrincipalSubjectFactory = userPrincipalSubjectFactory;
         this.kerberosConfig = kerberosConfig;
+        this.kerberosServiceConfig = kerberosServiceConfig;
         if (callbackHandler.isResolvable() && callbackHandler.isAmbiguous()) {
             throw new IllegalStateException("Multiple " + KerberosCallbackHandler.class + " beans registered");
         }
@@ -217,7 +222,7 @@ public class CachingKerberosClientSupport {
     public GSSContext createServiceContext() throws GSSException {
         Oid oid = new Oid(kerberosConfig.useSpnegoOid() ? SPNEGO_OID : KERBEROS_OID);
         GSSManager gssManager = GSSManager.getInstance();
-        GSSName serverName = gssManager.createName(kerberosConfig.servicePrincipalName(), null);
+        GSSName serverName = gssManager.createName(kerberosServiceConfig.pyxis().servicePrincipalName(), null);
         return gssManager.createContext(serverName, oid, null, GSSContext.DEFAULT_LIFETIME);
     }
 

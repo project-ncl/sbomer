@@ -17,18 +17,31 @@
  */
 package org.jboss.sbomer.service.feature.sbom.config.features;
 
+import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithDefault;
+import io.smallrye.config.WithName;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import io.smallrye.config.ConfigMapping;
-
 /**
- * @author Marek Goldmann
+ * @author Andrea Vibelli
  */
 @ApplicationScoped
-@ConfigMapping(prefix = "sbomer.features")
-public interface FeatureConfig {
+@ConfigMapping(prefix = "sbomer.features.kerberos")
+public interface KerberosServiceConfig {
 
-    UmbConfig umb();
+    @WithDefault("false")
+    @WithName("enabled")
+    boolean isEnabled();
 
-    KerberosServiceConfig kerberos();
+    ErrataServiceConfig errata();
+
+    PyxisServiceConfig pyxis();
+
+    interface ErrataServiceConfig {
+        String servicePrincipalName();
+    }
+
+    interface PyxisServiceConfig {
+        String servicePrincipalName();
+    }
 }
