@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.processor;
 
+import static org.jboss.sbomer.cli.feature.sbom.command.CycloneDxGenerateOperationCommand.SBOM_REPRESENTING_THE_DELIVERABLE;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
@@ -275,17 +276,23 @@ public class DefaultProcessor implements Processor {
         // If there are any purl relcoations, process these.
         purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
-        addMissingNpmDependencies(bom);
+
+        if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
+            addMissingNpmDependencies(bom, bom.getMetadata().getComponent());
+            // Add missing NPM Depenencies for CycloneDxGenerateOperationComand manifest
+            if (bom.getMetadata().getComponent().getDescription().contains(SBOM_REPRESENTING_THE_DELIVERABLE)) {
+                if (bom.getComponents() != null) {
+                    for (Component c : bom.getComponents()) {
+                        addMissingNpmDependencies(bom, c);
+                    }
+                }
+            }
+        }
 
         return bom;
     }
 
-    private void addMissingNpmDependencies(Bom bom) {
-        if (bom.getMetadata() == null || bom.getMetadata().getComponent() == null) {
-            // No main component
-            return;
-        }
-        Component component = bom.getMetadata().getComponent();
+    private void addMissingNpmDependencies(Bom bom, Component component) {
         List<ExternalReference> externalReferences = getExternalReferences(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM,
@@ -322,10 +329,10 @@ public class DefaultProcessor implements Processor {
             return;
         }
 
-        addMissingNpmDependencies(bom, npmDependencies, build.getBuildConfigRevision().getBuildType());
+        addMissingNpmDependencies(bom, component, npmDependencies, build.getBuildConfigRevision().getBuildType());
     }
 
-    private void addMissingNpmDependencies(Bom bom, Collection<Artifact> npmDependencies, BuildType buildType) {
+    private void addMissingNpmDependencies(Bom bom, Component component, Collection<Artifact> npmDependencies, BuildType buildType) {
         Set<String> listedPurls = bom.getComponents()
                 .stream()
                 .map(DefaultProcessor::getPackageURL)
@@ -354,20 +361,20 @@ public class DefaultProcessor implements Processor {
             bom.addComponent(newComponent);
             dependencyRefs.add(newComponent.getBomRef());
         }
-        addMainComponentDependencies(bom, dependencyRefs);
+        addComponentDependency(bom, component, dependencyRefs);
     }
 
-    private void addMainComponentDependencies(Bom bom, Set<String> dependencies) {
-        String mainComponentRef = bom.getMetadata().getComponent().getBomRef();
+    private void addComponentDependency(Bom bom, Component component, Set<String> dependencies) {
+        String componentRef = component.getBomRef();
 
-        Dependency mainComponentDependencies = bom.getDependencies()
+        Dependency cmponentDependencies = bom.getDependencies()
                 .stream()
-                .filter(d -> mainComponentRef.equals(d.getRef()))
+                .filter(d -> componentRef.equals(d.getRef()))
                 .findFirst()
-                .orElseGet(() -> addNewDependency(bom, mainComponentRef));
+                .orElseGet(() -> addNewDependency(bom, componentRef));
 
         dependencies.stream().map(SbomUtils::createDependency).forEach(d -> {
-            mainComponentDependencies.addDependency(d);
+            cmponentDependencies.addDependency(d);
             bom.addDependency(d);
         });
     }
