@@ -175,7 +175,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     }
 
     @Transactional
-    private static void updateRequestEventStatus(SbomGenerationRequest sbomGenerationRequest) {
+    public static void updateRequestEventStatus(SbomGenerationRequest sbomGenerationRequest) {
 
         if (sbomGenerationRequest.getRequest() == null) {
             return;

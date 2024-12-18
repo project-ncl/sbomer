@@ -1,0 +1,398 @@
+{
+  "id": "356D95E8FF434C4",
+  "identifier": "redhat-release-computenode-7.2-8.el7_2.1",
+  "rootPurl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src",
+  "creationTime": "2024-12-04T08:45:40.741865Z",
+  "sbom": {
+    "version": 1,
+    "metadata": {
+      "tools": {
+        "components": [
+          {
+            "name": "rpm-manifest-generator",
+            "type": "application",
+            "version": "0.0.1",
+            "manufacturer": {
+              "url": [
+                "https://www.redhat.com"
+              ],
+              "name": "Red Hat"
+            }
+          }
+        ]
+      },
+      "licenses": [
+        {
+          "expression": "GPL-2.0-only"
+        }
+      ],
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "component": {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src",
+        "type": "library",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "2fccfaa26eccfd3957f1e9b52c28d6d2"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      "timestamp": "2024-12-04T08:45:40Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "2fccfaa26eccfd3957f1e9b52c28d6d2"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "7b8dea3cb4ccdda4e06fcc4c52dc7987"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=s390",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=s390",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=s390"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "dbe1081f04ea88ce0e580a1a46de7c81"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc64le",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc64le",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc64le"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "92d884e519f1b3771c3681149ef32c32"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=aarch64",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=aarch64",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=aarch64"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "ae80dc6426f23464551f2c027448c712"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc64",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc64",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=ppc64"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "79ae6a1260e8a15e07a9995a1068bcf0"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=i686",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=i686",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=i686"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "37825d9d07d449a27a29eecf1475d3e2"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=s390x",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=s390x",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=s390x"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "76f722e810a7e5556f0a314bf3104e03"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      },
+      {
+        "name": "redhat-release-computenode",
+        "purl": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=x86_64",
+        "type": "library",
+        "bom-ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=x86_64",
+        "version": "7.2-8.el7_2.1",
+        "evidence": {
+          "identity": [
+            {
+              "field": "purl",
+              "concludedValue": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=x86_64"
+            }
+          ]
+        },
+        "licenses": [
+          {
+            "expression": "GPL-2.0-only"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "properties": [
+          {
+            "name": "package:rpm:sigmd5",
+            "value": "1990dcc50f44ef0ab50fdbd6521f5762"
+          }
+        ],
+        "description": "Red Hat Enterprise Linux ComputeNode release files"
+      }
+    ],
+    "specVersion": "1.6",
+    "dependencies": [
+      {
+        "ref": "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src",
+        "dependsOn": []
+      }
+    ],
+    "serialNumber": "urn:uuid:25082e28-a484-4b5d-925c-94a592abf1fb"
+  },
+  "generationRequest": {
+    "id": "AF66A5895B8E447",
+    "identifier": "redhat-release-computenode-7.2-8.el7_2.1",
+    "config": {
+      "type": "brew-rpm",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "advisoryId": 89769,
+      "advisory": "RHBA-2024:89769-01",
+      "productVersionId": 467,
+      "productVersion": "RHEL-7.2.Z",
+      "brewBuildId": 561861,
+      "brewBuildNVR": "redhat-release-computenode-7.2-8.el7_2.1"
+    },
+    "type": "BREW_RPM",
+    "creationTime": "2024-12-04T08:45:18.086186Z",
+    "status": "FINISHED",
+    "result": "SUCCESS",
+    "reason": "Generation finished successfully. Generated SBOMs: 356D95E8FF434C4"
+  }
+}
+

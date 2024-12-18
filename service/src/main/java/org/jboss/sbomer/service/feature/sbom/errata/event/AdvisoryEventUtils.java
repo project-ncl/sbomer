@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.errata.event;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +34,8 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataCDNContentType;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -171,6 +174,113 @@ public class AdvisoryEventUtils {
             return builder.build().toString();
         } catch (MalformedPackageURLException | IllegalArgumentException e) {
             log.warn("Error while creating summary PURL for repository {}", repository, e);
+            return null;
+        }
+    }
+
+    /**
+     * Creates a set of purls from the starting purl and the list of {@link ErrataCDNRepoNormalized} this build is
+     * publised to
+     *
+     * @param purl the purl to modify
+     * @param cdns the list of {@link ErrataCDNRepoNormalized} which contain the CDN information
+     * @param manifestArches the list of arches found in the purl's manifest to use as a match with
+     *        {@link ErrataCDNRepoNormalized}
+     * @return The list of purls as strings.
+     */
+    public static Set<String> createPurls(
+            String purl,
+            Collection<ErrataCDNRepoNormalized> cdns,
+            Set<String> manifestArches) {
+
+        try {
+            PackageURL componentPurl = new PackageURL(purl);
+            if (componentPurl.getQualifiers() == null || !componentPurl.getQualifiers().containsKey("arch")) {
+                return Collections.emptySet();
+            }
+
+            String componentArch = componentPurl.getQualifiers().get("arch");
+            if (componentArch.equals("src")) {
+                // Select the "-source-rpms" CDN repositories and include all the archs provided
+                return cdns.stream()
+                        .filter(
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.SOURCE)
+                                        && manifestArches.stream().anyMatch(arch -> cdn.getArchName().equals(arch)))
+                        .map(cdn -> rebuildPurl(purl, cdn))
+                        .collect(Collectors.toSet());
+            } else if (componentArch.equals("noarch")) {
+                // Select the "-rpms" CDN repositories (excluding -source-rpms and -debug-rpms) and include all the
+                // archs provided
+                return cdns.stream()
+                        .filter(
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.BINARY)
+                                        && manifestArches.stream().anyMatch(arch -> cdn.getArchName().equals(arch)))
+                        .map(cdn -> rebuildPurl(purl, cdn))
+                        .collect(Collectors.toSet());
+            } else if (componentPurl.getName().endsWith("-debugsource")) {
+                // Select the "-source-rpms" CDN repositories and include only the component arch
+                return cdns.stream()
+                        .filter(
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.SOURCE)
+                                        && cdn.getArchName().equals(componentArch))
+                        .map(cdn -> rebuildPurl(purl, cdn))
+                        .collect(Collectors.toSet());
+            } else if (componentPurl.getName().endsWith("-debuginfo")) {
+                // Select the "-debug-rpms" CDN repositories and include only the component arch
+                return cdns.stream()
+                        .filter(
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.DEBUGINFO)
+                                        && cdn.getArchName().equals(componentArch))
+                        .map(cdn -> rebuildPurl(purl, cdn))
+                        .collect(Collectors.toSet());
+            } else {
+                // Select the "-rpms" CDN repositories (excluding -source-rpms and -debug-rpms) and include only the
+                // component arch
+                return cdns.stream()
+                        .filter(
+                                cdn -> cdn.getContentType().equals(ErrataCDNContentType.BINARY)
+                                        && cdn.getArchName().equals(componentArch))
+                        .map(cdn -> rebuildPurl(purl, cdn))
+                        .collect(Collectors.toSet());
+            }
+        } catch (MalformedPackageURLException | IllegalArgumentException e) {
+            log.warn("Error while creating evidence PURLs for purl {} with CDNs{}", purl, cdns, e);
+            return Collections.emptySet();
+        }
+    }
+
+    /**
+     * Given an input purl, creates a new purl with the same name, namespace, subpath, type, version and qualifiers.
+     * Additionally, add the new qualifier "repository_id" with the values provided in the
+     * {@link ErrataCDNRepoNormalized}. Finally rebuilds the purl to make sure it is valid and qualifiers are properly
+     * sorted.
+     *
+     * @param originalPurl the input purl string
+     * @param cdn the {@link ErrataCDNRepoNormalized} which contains CDN information
+     * @return The new validated purl as string.
+     */
+    public static String rebuildPurl(String originalPurl, ErrataCDNRepoNormalized cdn) {
+        try {
+
+            PackageURL purl = new PackageURL(originalPurl);
+            PackageURLBuilder builder = PackageURLBuilder.aPackageURL()
+                    .withName(purl.getName())
+                    .withNamespace(purl.getNamespace())
+                    .withSubpath(purl.getSubpath())
+                    .withType(purl.getType())
+                    .withVersion(purl.getVersion());
+
+            if (purl.getQualifiers() != null) {
+                // Copy all the original qualifiers
+                purl.getQualifiers().forEach((k, v) -> builder.withQualifier(k, v));
+            }
+
+            // Add the repository_id name
+            builder.withQualifier("repository_id", cdn.getCdnName());
+
+            return builder.build().toString();
+        } catch (MalformedPackageURLException | IllegalArgumentException e) {
+            log.warn("Error while creating summary PURL for cdn {}", cdn, e);
             return null;
         }
     }
