@@ -137,16 +137,6 @@
       <groupId>org.cyclonedx</groupId>
       <artifactId>cyclonedx-core-java</artifactId>
       <version>${version.cyclonedx}</version>
-      <exclusions>
-          <exclusion>
-              <groupId>org.cyclonedx.model</groupId>
-              <artifactId>Dependency</artifactId>
-          </exclusion>
-          <exclusion>
-              <groupId>org.cyclonedx.util.serializer</groupId>
-              <artifactId>DependencySerializer</artifactId>
-          </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
