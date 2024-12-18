@@ -27,7 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;

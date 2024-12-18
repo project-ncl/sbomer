@@ -27,7 +27,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBomValidator;

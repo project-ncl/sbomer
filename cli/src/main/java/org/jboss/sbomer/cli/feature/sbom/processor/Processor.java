@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.processor;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 
 public interface Processor {

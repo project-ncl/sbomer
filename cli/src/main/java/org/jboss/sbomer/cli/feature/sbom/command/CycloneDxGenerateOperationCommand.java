@@ -29,9 +29,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
 import org.jboss.pnc.enums.BuildType;
@@ -45,6 +44,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Dependency;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;

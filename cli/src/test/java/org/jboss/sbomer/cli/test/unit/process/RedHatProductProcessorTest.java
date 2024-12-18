@@ -2,7 +2,7 @@ package org.jboss.sbomer.cli.test.unit.process;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.Property;

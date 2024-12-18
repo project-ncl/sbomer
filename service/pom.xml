@@ -51,11 +51,34 @@
       <artifactId>aws-crt-client</artifactId>
       <version>${version.aws}</version>
     </dependency>
+    <!-- Make sure there are no other cyclonedx classes loaded, sbomer-core already bundles them -->
     <dependency>
       <groupId>org.jboss.sbomer</groupId>
       <artifactId>sbomer-core</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.cyclonedx</groupId>
+          <artifactId>cyclonedx-core-java</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
+    <!-- Include all the necessary dependencies which are missing for the org.cyclonedx:cyclonedx-core-java exclusion - START - -->
+    <dependency>
+      <groupId>com.github.package-url</groupId>
+      <artifactId>packageurl-java</artifactId>
+      <version>${version.packageurl-java}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.networknt</groupId>
+      <artifactId>json-schema-validator</artifactId>
+      <version>${version.json-schema-validator}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
+    <!-- Include all the necessary dependencies which are missing for the org.cyclonedx:cyclonedx-core-java exclusion - END - -->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-oidc</artifactId>
@@ -132,21 +155,6 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-narayana-jta</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.cyclonedx</groupId>
-      <artifactId>cyclonedx-core-java</artifactId>
-      <version>${version.cyclonedx}</version>
-      <exclusions>
-          <exclusion>
-              <groupId>org.cyclonedx.model</groupId>
-              <artifactId>Dependency</artifactId>
-          </exclusion>
-          <exclusion>
-              <groupId>org.cyclonedx.util.serializer</groupId>
-              <artifactId>DependencySerializer</artifactId>
-          </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

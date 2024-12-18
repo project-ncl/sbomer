@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.model;
 import java.time.Instant;
 import java.util.Map;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;

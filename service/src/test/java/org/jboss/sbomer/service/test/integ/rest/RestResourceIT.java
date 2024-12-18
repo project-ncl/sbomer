@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.hamcrest.CoreMatchers;

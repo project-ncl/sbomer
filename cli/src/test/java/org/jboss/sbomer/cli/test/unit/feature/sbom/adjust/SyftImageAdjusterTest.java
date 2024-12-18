@@ -16,9 +16,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;

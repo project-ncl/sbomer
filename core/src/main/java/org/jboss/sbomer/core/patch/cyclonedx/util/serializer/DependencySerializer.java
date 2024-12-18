@@ -33,7 +33,7 @@
  * SPDX-License-Identifier: Apache-2.0
  * Copyright (c) OWASP Foundation. All Rights Reserved.
  */
-package org.cyclonedx.util.serializer;
+package org.jboss.sbomer.core.patch.cyclonedx.util.serializer;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,8 +51,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cyclonedx.CycloneDxSchema;
-import org.cyclonedx.model.Dependency;
-import org.cyclonedx.model.DependencyList;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Dependency;
+import org.jboss.sbomer.core.patch.cyclonedx.model.DependencyList;
 
 /*
  * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.

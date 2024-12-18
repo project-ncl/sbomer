@@ -81,16 +81,6 @@
       <groupId>org.cyclonedx</groupId>
       <artifactId>cyclonedx-core-java</artifactId>
       <version>${version.cyclonedx}</version>
-      <exclusions>
-          <exclusion>
-              <groupId>org.cyclonedx.model</groupId>
-              <artifactId>Dependency</artifactId>
-          </exclusion>
-          <exclusion>
-              <groupId>org.cyclonedx.util.serializer</groupId>
-              <artifactId>DependencySerializer</artifactId>
-          </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -145,6 +135,72 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase> <!-- Ensure the shading happens during the packaging phase -->
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>org.cyclonedx:cyclonedx-core-java</include>
+                </includes>
+              </artifactSet>
+              <relocations>
+                <relocation>
+                  <pattern>org.cyclonedx.model.Bom</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.model.Bom</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.model.Dependency</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.model.Dependency</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.model.DependencyList</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.model.DependencyList</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.parsers.JsonParser</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.parsers.JsonParser</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.parsers.Parser</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.parsers.Parser</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.util.deserializer.DependencyDeserializer</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.util.deserializer.DependencyDeserializer</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.util.serializer.DependencySerializer</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.util.serializer.DependencySerializer</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.generators.AbstractBomGenerator</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.generators.AbstractBomGenerator</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.generators.AbstractBomGenerator</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.generators.BomGeneratorFactory</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.generators.json.DependencySerializer</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.generators.json.DependencySerializer</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.cyclonedx.generators.xml.BomXmlGenerator</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.generators.xml.BomXmlGenerator</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>io.smallrye</groupId>
         <artifactId>jandex-maven-plugin</artifactId>

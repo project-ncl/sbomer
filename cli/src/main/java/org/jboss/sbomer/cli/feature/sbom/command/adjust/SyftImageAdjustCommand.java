@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 
 import lombok.extern.slf4j.Slf4j;

@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.command.RedHatProductProcessCommand;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;

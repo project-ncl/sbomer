@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.atlas;
 
 import java.util.List;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;

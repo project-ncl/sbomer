@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.exception.GeneratorException;
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.jboss.sbomer.cli.feature.sbom.command.catalog.SyftImageCatalogCommand;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;

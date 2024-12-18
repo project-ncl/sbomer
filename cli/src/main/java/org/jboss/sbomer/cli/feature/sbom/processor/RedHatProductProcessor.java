@@ -22,7 +22,7 @@ import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PROD
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 

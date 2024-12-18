@@ -20,7 +20,7 @@ package org.jboss.sbomer.cli.feature.sbom.command.adjust;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 

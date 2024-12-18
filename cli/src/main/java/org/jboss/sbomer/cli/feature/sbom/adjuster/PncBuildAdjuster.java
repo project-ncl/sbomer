@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 
 import lombok.extern.slf4j.Slf4j;

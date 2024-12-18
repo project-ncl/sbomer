@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 
 public interface Adjuster {
     public default Bom adjust(Bom bom) {

@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.cyclonedx.model.Commit;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;

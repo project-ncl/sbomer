@@ -20,7 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.atlas;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;

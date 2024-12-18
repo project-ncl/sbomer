@@ -29,6 +29,7 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.sbom.config.SbomerConfig;
@@ -100,7 +101,7 @@ public class NotificationService {
         }
 
         sboms.forEach(sbom -> {
-            org.cyclonedx.model.Bom bom = fromJsonNode(sbom.getSbom());
+            Bom bom = fromJsonNode(sbom.getSbom());
 
             if (bom == null) {
                 throw new NotificationException(
@@ -154,7 +155,7 @@ public class NotificationService {
 
     private GenerationFinishedMessageBody createGenerationFinishedMessage(
             org.jboss.sbomer.service.feature.sbom.model.Sbom sbom,
-            org.cyclonedx.model.Bom bom) {
+            Bom bom) {
 
         Component component = bom.getMetadata().getComponent();
         BomFormat bomFormat = null;

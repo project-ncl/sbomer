@@ -19,7 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.command.process;
 
 import java.nio.file.Path;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.command.AbstractProcessCommand;
 import org.jboss.sbomer.cli.feature.sbom.processor.DefaultProcessor;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;

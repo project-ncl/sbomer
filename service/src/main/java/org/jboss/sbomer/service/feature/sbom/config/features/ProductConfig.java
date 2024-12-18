@@ -23,7 +23,7 @@ import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PROD
 
 import java.util.Optional;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
