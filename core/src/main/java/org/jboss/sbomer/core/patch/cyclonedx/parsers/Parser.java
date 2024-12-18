@@ -27,6 +27,9 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.List;
 
+/*
+ * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
+ */
 public interface Parser {
 
     /**

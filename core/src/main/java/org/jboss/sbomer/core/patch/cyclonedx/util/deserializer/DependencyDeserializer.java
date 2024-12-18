@@ -28,6 +28,9 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
 
+/*
+ * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
+ */
 public class DependencyDeserializer extends StdDeserializer<List<Dependency>> {
     public DependencyDeserializer() {
         this(null);

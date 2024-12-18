@@ -37,6 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/*
+ * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
+ */
 /**
  * JsonParser is responsible for validating and parsing CycloneDX bill-of-material JSON documents and returning a
  * {@link Bom} object.

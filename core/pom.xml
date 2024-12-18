@@ -185,7 +185,7 @@
                   <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.generators.AbstractBomGenerator</shadedPattern>
                 </relocation>
                 <relocation>
-                  <pattern>org.cyclonedx.generators.AbstractBomGenerator</pattern>
+                  <pattern>org.cyclonedx.generators.BomGeneratorFactory</pattern>
                   <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.generators.BomGeneratorFactory</shadedPattern>
                 </relocation>
                 <relocation>

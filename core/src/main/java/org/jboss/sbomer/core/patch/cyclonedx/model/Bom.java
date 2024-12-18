@@ -49,6 +49,9 @@ import org.cyclonedx.util.deserializer.ExternalReferencesDeserializer;
 import org.cyclonedx.util.deserializer.VulnerabilityDeserializer;
 import org.jboss.sbomer.core.patch.cyclonedx.util.deserializer.DependencyDeserializer;
 
+/*
+ * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
+ */
 @SuppressWarnings("unused")
 @JacksonXmlRootElement(localName = "bom")
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -40,6 +40,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+/*
+ * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
+ */
 public class BomXmlGenerator extends AbstractBomGenerator {
     private final DefaultXmlPrettyPrinter prettyPrinter;
 

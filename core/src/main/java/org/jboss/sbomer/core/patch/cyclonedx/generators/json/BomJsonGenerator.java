@@ -37,6 +37,9 @@ import org.cyclonedx.util.serializer.TrimStringSerializer;
 import org.jboss.sbomer.core.patch.cyclonedx.generators.AbstractBomGenerator;
 import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 
+/*
+ * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
+ */
 public class BomJsonGenerator extends AbstractBomGenerator {
     private final DefaultPrettyPrinter prettyPrinter;
 

@@ -23,6 +23,9 @@ import org.jboss.sbomer.core.patch.cyclonedx.generators.json.BomJsonGenerator;
 import org.jboss.sbomer.core.patch.cyclonedx.generators.xml.BomXmlGenerator;
 import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 
+/*
+ * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
+ */
 public class BomGeneratorFactory {
     public static AbstractBomGenerator create(Version version, Bom bom, Format format) {
         AbstractBomGenerator generator;
