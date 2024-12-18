@@ -43,6 +43,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.cyclonedx</groupId>
+      <artifactId>cyclonedx-core-java</artifactId>
+      <version>${version.cyclonedx}</version>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.pnc</groupId>
       <artifactId>rest-client-jakarta</artifactId>
       <version>${version.pnc-rest}</version>
