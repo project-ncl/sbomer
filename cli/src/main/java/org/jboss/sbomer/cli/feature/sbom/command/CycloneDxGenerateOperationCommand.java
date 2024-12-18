@@ -78,6 +78,8 @@ import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVER
         description = "SBOM generation for deliverable analyzer operations by manually creating a CycloneDX compliant SBOM")
 public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperationCommand {
 
+    public static final String SBOM_REPRESENTING_THE_DELIVERABLE = "SBOM representing the deliverable ";
+
     @Override
     protected GeneratorType generatorType() {
         return GeneratorType.CYCLONEDX_OPERATION;
@@ -165,7 +167,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                 .findFirst();
 
         // Create the main component PURL and version, plus description
-        String desc = "SBOM representing the deliverable " + fileName + " with ";
+        String desc = SBOM_REPRESENTING_THE_DELIVERABLE + fileName + " with ";
         String distributionPurl = createGenericPurl(fileName, distributionSha256);
         String distributionVersion = productMilestone;
         if (distributionSha256.isPresent()) {

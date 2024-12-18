@@ -143,24 +143,8 @@ public class DefaultProcessorTest {
     }
 
     @Test
-    void testAddMissingNpmDependencies() throws IOException, KojiClientException {
-        PncService pncServiceMock = Mockito.mock(PncService.class);
-        KojiService kojiServiceMock = Mockito.mock(KojiService.class);
-
-        List<Artifact> artifacts = OBJECT_MAPPER
-                .readValue(TestResources.asString("pnc/npmDependencies.json"), new TypeReference<List<Artifact>>() {
-                });
-
-        Build build = Build.builder()
-                .id("BALVSAEVTGYAY")
-                .buildConfigRevision(BuildConfigurationRevisionRef.refBuilder().buildType(BuildType.MVN).build())
-                .build();
-
-        when(pncServiceMock.getApiUrl()).thenReturn("pnc.example.com");
-        when(pncServiceMock.getBuild(eq("BALVSAEVTGYAY"))).thenReturn(build);
-        when(pncServiceMock.getNPMDependencies(eq("BALVSAEVTGYAY"))).thenReturn(artifacts);
-
-        DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
+    void testAddMissingNpmDependencies() throws IOException {
+        DefaultProcessor defaultProcessor = mockForAddMissingNpmDependencies();
 
         // With
         Bom bom = SbomUtils.fromString(TestResources.asString("boms/pnc-build.json"));
@@ -176,6 +160,51 @@ public class DefaultProcessorTest {
 
         // Then
         assertEquals(10, processed.getComponents().size());
+        verifyAddedNpmDependencies(processed);
+    }
+
+    @Test
+    void testAddMissingNpmDependenciesToOperation() throws IOException {
+        DefaultProcessor defaultProcessor = mockForAddMissingNpmDependencies();
+
+        // With
+        Bom bom = SbomUtils.fromString(TestResources.asString("boms/operation.json"));
+        Optional<Component> missingComponent = getComponent(bom, "pkg:npm/once@1.4.0");
+        Optional<Dependency> missingDependency = getDependency("pkg:npm/once@1.4.0", bom.getDependencies());
+
+        assertTrue(missingComponent.isEmpty());
+        assertTrue(missingDependency.isEmpty());
+        assertEquals(3, bom.getComponents().size());
+
+        // When
+        Bom processed = defaultProcessor.process(bom);
+
+        // Then
+        assertEquals(5, processed.getComponents().size());
+        verifyAddedNpmDependencies(processed);
+    }
+
+    private static DefaultProcessor mockForAddMissingNpmDependencies() throws IOException {
+        PncService pncServiceMock = Mockito.mock(PncService.class);
+        KojiService kojiServiceMock = Mockito.mock(KojiService.class);
+
+        List<Artifact> artifacts = OBJECT_MAPPER
+                .readValue(TestResources.asString("pnc/npmDependencies.json"), new TypeReference<>() {
+                });
+
+        Build build = Build.builder()
+                .id("BALVSAEVTGYAY")
+                .buildConfigRevision(BuildConfigurationRevisionRef.refBuilder().buildType(BuildType.MVN).build())
+                .build();
+
+        when(pncServiceMock.getApiUrl()).thenReturn("pnc.example.com");
+        when(pncServiceMock.getBuild(eq("BALVSAEVTGYAY"))).thenReturn(build);
+        when(pncServiceMock.getNPMDependencies(eq("BALVSAEVTGYAY"))).thenReturn(artifacts);
+
+        return new DefaultProcessor(pncServiceMock, kojiServiceMock);
+    }
+
+    private static void verifyAddedNpmDependencies(Bom processed) {
         Dependency mainDependency = getDependency(
                 "pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
                 processed.getDependencies()).orElseThrow();

@@ -65,7 +65,87 @@
       } ],
       "type" : "library",
       "bom-ref" : "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar"
-    } ],
+    }, {
+      "name": "keycloak-parent",
+      "purl": "pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
+      "type": "library",
+      "group": "org.keycloak",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "c39d2243e5b33aa835373e5e4a0de2a2"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "0518977dc4c0ea5ca093dcd338bedb80003afd07"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "4e1daa192f22e2d62e2e8b68861975b23a4523dda8059b6f4b84f0392823e804"
+        }
+      ],
+      "bom-ref": "pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
+      "version": "24.0.6.redhat-00001",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "aadc1955c030f723e9d89ed9d486b4eef5b0d1c6",
+            "url": "https://gitlab.example.com/keycloak-prod.git#24.0.6.redhat-00001"
+          }
+        ]
+      },
+      "supplier": {
+        "url": [
+          "https://www.redhat.com"
+        ],
+        "name": "Red Hat"
+      },
+      "publisher": "Red Hat",
+      "externalReferences": [
+        {
+          "url": "http://keycloak.org",
+          "type": "website"
+        },
+        {
+          "url": "https://maven.repository.redhat.com/ga/",
+          "type": "distribution"
+        },
+        {
+          "url": "https://github.com/keycloak/keycloak/issues",
+          "type": "issue-tracker"
+        },
+        {
+          "url": "http://lists.jboss.org/pipermail/jboss-user/",
+          "type": "mailing-list"
+        },
+        {
+          "url": "https://github.com/keycloak/keycloak/tree/master/",
+          "type": "vcs"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/artifacts/187875",
+          "type": "build-system",
+          "comment": "pnc-artifact-id"
+        },
+        {
+          "url": "https://pnc.example.com/pnc-rest/v2/builds/BALVSAEVTGYAY",
+          "type": "build-system",
+          "comment": "pnc-build-id"
+        },
+        {
+          "url": "repository.example.com/environmets/builder-rhel-8-j17-mvn3.9.1-nodejs18-npm8:1.0.6",
+          "type": "build-meta",
+          "comment": "pnc-environment-image"
+        }
+      ]
+    }  ],
     "dependencies" : [ {
       "ref" : "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=A5RPHL7Y3AIAA",
       "dependsOn" : [ "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar", "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar" ]
@@ -74,6 +154,9 @@
       "dependsOn" : [ ]
     }, {
       "ref" : "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar",
+      "dependsOn" : [ ]
+    }, {
+      "ref" : "pkg:maven/org.keycloak/keycloak-parent@24.0.6.redhat-00001?type=pom",
       "dependsOn" : [ ]
     } ]
   }
