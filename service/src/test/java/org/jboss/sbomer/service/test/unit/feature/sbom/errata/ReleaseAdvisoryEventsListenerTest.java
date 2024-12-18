@@ -32,14 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.component.evidence.Identity;
 import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.patch.cyclonedx.model.Dependency;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
@@ -136,6 +136,7 @@ public class ReleaseAdvisoryEventsListenerTest {
 
         @Override
         protected Sbom saveReleaseManifestForGeneration(
+                RequestEvent requestEvent,
                 SbomGenerationRequest releaseGeneration,
                 Bom bom,
                 V1Beta1RequestRecord advisoryManifestsRecord,
@@ -263,6 +264,7 @@ public class ReleaseAdvisoryEventsListenerTest {
 
         @Override
         protected Sbom saveReleaseManifestForGeneration(
+                RequestEvent requestEvent,
                 SbomGenerationRequest releaseGeneration,
                 Bom bom,
                 V1Beta1RequestRecord advisoryManifestsRecord,
