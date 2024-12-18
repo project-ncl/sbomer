@@ -27,8 +27,8 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import org.cyclonedx.exception.ParseException;
-import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
+import org.jboss.sbomer.core.patch.cyclonedx.parsers.JsonParser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

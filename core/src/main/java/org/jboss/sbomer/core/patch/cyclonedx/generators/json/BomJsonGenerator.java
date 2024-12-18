@@ -32,10 +32,10 @@ import org.cyclonedx.model.BomReference;
 import org.cyclonedx.util.introspector.VersionJsonAnnotationIntrospector;
 import org.cyclonedx.util.mixin.MixInBomReference;
 import org.cyclonedx.util.serializer.ComponentWrapperSerializer;
-import org.cyclonedx.util.serializer.DependencySerializer;
 import org.cyclonedx.util.serializer.TrimStringSerializer;
 import org.jboss.sbomer.core.patch.cyclonedx.generators.AbstractBomGenerator;
 import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.util.serializer.DependencySerializer;
 
 /*
  * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
