@@ -223,7 +223,7 @@ public class ReleaseAdvisoryEventsListener {
                     generationToCDNs);
 
             // Let's trigger the update of statuses and advisory comments
-            SbomGenerationRequest.updateRequestEventStatus(releaseGeneration);
+            doUpdateRequestEventStatus(releaseGeneration);
 
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
@@ -232,6 +232,14 @@ public class ReleaseAdvisoryEventsListener {
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
         });
+    }
+
+    @Transactional
+    protected SbomGenerationRequest doUpdateRequestEventStatus(SbomGenerationRequest releaseGeneration) {
+        // Let's trigger the update of statuses and advisory comments
+        releaseGeneration = generationRequestRepository.findById(releaseGeneration.getId());
+        SbomGenerationRequest.updateRequestEventStatus(releaseGeneration);
+        return releaseGeneration;
     }
 
     protected void releaseManifestsForDockerBuilds(
@@ -284,7 +292,7 @@ public class ReleaseAdvisoryEventsListener {
                     generationToRepositories);
 
             // Let's trigger the update of statuses and advisory comments
-            SbomGenerationRequest.updateRequestEventStatus(releaseGeneration);
+            doUpdateRequestEventStatus(releaseGeneration);
 
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
