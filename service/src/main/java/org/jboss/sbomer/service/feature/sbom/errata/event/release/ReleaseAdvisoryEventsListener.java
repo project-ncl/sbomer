@@ -39,6 +39,8 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
@@ -125,6 +127,7 @@ public class ReleaseAdvisoryEventsListener {
                     erratum.getDetails().get().getId());
 
             releaseManifestsForDockerBuilds(
+                    requestEvent,
                     erratum,
                     advisoryBuildDetails,
                     advisoryManifestsRecord,
@@ -161,6 +164,7 @@ public class ReleaseAdvisoryEventsListener {
     }
 
     protected void releaseManifestsForDockerBuilds(
+            RequestEvent requestEvent,
             Errata erratum,
             Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails,
             V1Beta1RequestRecord advisoryManifestsRecord,
@@ -209,6 +213,7 @@ public class ReleaseAdvisoryEventsListener {
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
             Sbom sbom = saveReleaseManifestForGeneration(
+                    requestEvent,
                     releaseGeneration,
                     productVersionBom,
                     advisoryManifestsRecord,
@@ -266,6 +271,7 @@ public class ReleaseAdvisoryEventsListener {
 
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     protected Sbom saveReleaseManifestForGeneration(
+            RequestEvent requestEvent,
             SbomGenerationRequest releaseGeneration,
             Bom productVersionBom,
             V1Beta1RequestRecord advisoryManifestsRecord,
@@ -277,6 +283,7 @@ public class ReleaseAdvisoryEventsListener {
             // 1 - Save the release generation with the release manifest
             releaseGeneration = generationRequestRepository.findById(releaseGeneration.getId());
             releaseGeneration.setStatus(SbomGenerationStatus.FINISHED);
+            releaseGeneration.setResult(GenerationResult.SUCCESS);
 
             // 1.1 - Create the Sbom entity
             Sbom sbom = Sbom.builder()
@@ -289,6 +296,7 @@ public class ReleaseAdvisoryEventsListener {
 
             // 2 - For every generation, find all the existing manifests and update the with release repo
             // data
+            log.debug("Processing {} generations...", generationToRepositories.keySet().size());
             for (String generationId : generationToRepositories.keySet()) {
 
                 // 2.1 - Select the repository with longest repoFragment + tag
@@ -305,6 +313,7 @@ public class ReleaseAdvisoryEventsListener {
                 buildManifests.stream().forEach(manifestRecord -> {
                     String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo);
                     originalToRebuiltPurl.put(manifestRecord.rootPurl(), rebuiltPurl);
+                    log.debug("Regenerated rootPurl '{}' to '{}'", manifestRecord.rootPurl(), rebuiltPurl);
                 });
 
                 // 2.3 - For every manifest previously generated from this generation
@@ -316,6 +325,7 @@ public class ReleaseAdvisoryEventsListener {
                     // 2.4 Update rootPurl, metadata.component.purl, bom.component[0].purl with the rebuiltPurl
                     String rebuiltPurl = originalToRebuiltPurl.get(buildManifest.getRootPurl());
                     buildManifest.setRootPurl(rebuiltPurl);
+                    log.debug("Updated manifest '{}' to rootPurl '{}'", buildManifestRecord.id(), rebuiltPurl);
 
                     if (manifestBom.getMetadata() != null && manifestBom.getMetadata().getComponent() != null) {
                         manifestBom.getMetadata().getComponent().setPurl(rebuiltPurl);
@@ -358,6 +368,7 @@ public class ReleaseAdvisoryEventsListener {
                         // 2.6 - Add an evidence.identity list with all the rebuilt purls
                         Set<String> evidencePurls = AdvisoryEventUtils
                                 .rebuildPurls(buildManifest.getRootPurl(), repositories);
+                        log.debug("Rebuilt evidence purl '{}'", String.join(", ", evidencePurls));
                         SbomUtils.setEvidenceIdentities(manifestBom.getComponents().get(0), evidencePurls, Field.PURL);
                     }
 
@@ -368,6 +379,9 @@ public class ReleaseAdvisoryEventsListener {
                     // manifest.setReleased(true);
                 }
             }
+
+            requestEvent = requestEventRepository.findById(requestEvent.getId());
+            requestEvent.setEventStatus(RequestEventStatus.SUCCESS);
 
             QuarkusTransaction.commit();
 

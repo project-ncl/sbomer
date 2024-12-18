@@ -136,6 +136,7 @@ public class ReleaseAdvisoryEventsListenerTest {
 
         @Override
         protected Sbom saveReleaseManifestForGeneration(
+                RequestEvent requestEvent,
                 SbomGenerationRequest releaseGeneration,
                 Bom bom,
                 V1Beta1RequestRecord advisoryManifestsRecord,
@@ -263,6 +264,7 @@ public class ReleaseAdvisoryEventsListenerTest {
 
         @Override
         protected Sbom saveReleaseManifestForGeneration(
+                RequestEvent requestEvent,
                 SbomGenerationRequest releaseGeneration,
                 Bom bom,
                 V1Beta1RequestRecord advisoryManifestsRecord,
