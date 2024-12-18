@@ -106,6 +106,12 @@ public class Sbom extends PanacheEntityBase {
     @Column(name = "status_msg")
     private String statusMessage;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "release_metadata", nullable = true)
+    @ToString.Exclude
+    @Schema(implementation = Map.class)
+    private JsonNode releaseMetadata;
+
     /**
      * Updates the purl for the object based on the SBOM content, if provided.
      *

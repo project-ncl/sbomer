@@ -1,0 +1,28 @@
+{
+  "RHEL-7.2.Z": {
+    "name": "RHEL-7.2.Z",
+    "description": "Red Hat Enterprise Linux 7",
+    "builds": [
+      {
+        "redhat-release-computenode-7.2-8.el7_2.1": {
+          "nvr": "redhat-release-computenode-7.2-8.el7_2.1",
+          "nevr": "redhat-release-computenode-0:7.2-8.el7_2.1",
+          "id": 561861,
+          "is_module": false,
+          "variant_arch": {
+            "7ComputeNode-7.2.Z": {
+              "SRPMS": [
+                "redhat-release-computenode-7.2-8.el7_2.1.src.rpm"
+              ],
+              "x86_64": [
+                "redhat-release-computenode-7.2-8.el7_2.1.x86_64.rpm"
+              ]
+            }
+          },
+          "added_by": "lzhuang"
+        }
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,53 @@
+{
+  "data": {
+    "id": 1175,
+    "type": "variants",
+    "attributes": {
+      "name": "7ComputeNode-7.2.Z",
+      "description": "Red Hat Enterprise Linux ComputeNode (v. 7)",
+      "cpe": "cpe:/o:redhat:enterprise_linux:7::computenode",
+      "override_ftp_base_folder": null,
+      "enabled": true,
+      "buildroot": false,
+      "tps_stream": "RHEL-7-Main-ComputeNode",
+      "relationships": {
+        "product": {
+          "id": 16,
+          "name": "Red Hat Enterprise Linux",
+          "short_name": "RHEL"
+        },
+        "product_version": {
+          "id": 467,
+          "name": "RHEL-7.2.Z"
+        },
+        "rhel_release": {
+          "id": 51,
+          "name": "RHEL-7.2.Z"
+        },
+        "rhel_variant": {
+          "id": 1175,
+          "name": "7ComputeNode-7.2.Z"
+        },
+        "push_targets": [
+          {
+            "id": 2,
+            "name": "rhn_stage"
+          },
+          {
+            "id": 1,
+            "name": "rhn_live"
+          },
+          {
+            "id": 7,
+            "name": "cdn_stage"
+          },
+          {
+            "id": 4,
+            "name": "cdn"
+          }
+        ]
+      }
+    }
+  }
+}
+

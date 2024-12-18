@@ -274,36 +274,42 @@ public class AdvisoryService {
                                         .flatMap(build -> build.getBuildItems().values().stream())
                                         .collect(Collectors.toList())));
 
+        // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
+        // manifests. Otherwise SBOMer will default to the creation of build manifests. Will change in future!
+        V1Beta1RequestRecord successfulRequestRecord = null;
+        if (ErrataStatus.SHIPPED_LIVE.equals(details.getStatus())) {
+            log.debug(
+                    "Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}",
+                    erratum.getDetails().get().getId());
+            successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryRequestRecord(
+                    requestEvent.getId(),
+                    String.valueOf(erratum.getDetails().get().getId()));
+        }
+
         if (details.getContentTypes().contains("docker")) {
-
-            // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
-            // manifests.
-            // Otherwise SBOMer will default to the creation of build manifests. Will change in future!
-            V1Beta1RequestRecord successfulRequestRecord = null;
-            if (ErrataStatus.SHIPPED_LIVE.equals(details.getStatus())) {
-                log.debug(
-                        "Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}",
-                        erratum.getDetails().get().getId());
-                successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryRequestRecord(
-                        requestEvent.getId(),
-                        String.valueOf(erratum.getDetails().get().getId()));
-            }
-
             log.debug("Successful request records found: {}", successfulRequestRecord);
 
             if (successfulRequestRecord == null) {
                 return createBuildManifestsForDockerBuilds(requestEvent, buildDetails);
             } else {
-                return createReleaseManifestsForDockerBuilds(
+                return createReleaseManifestsForBuildsOfType(
                         erratum,
                         requestEvent,
                         buildDetails,
-                        successfulRequestRecord);
+                        GenerationRequestType.CONTAINERIMAGE);
             }
 
         } else {
-            ErrataProduct product = errataClient.getProduct(details.getProduct().getShortName());
-            return createBuildManifestsForRPMBuilds(requestEvent, details, product, buildDetails);
+            if (successfulRequestRecord == null) {
+                ErrataProduct product = errataClient.getProduct(details.getProduct().getShortName());
+                return createBuildManifestsForRPMBuilds(requestEvent, details, product, buildDetails);
+            } else {
+                return createReleaseManifestsForBuildsOfType(
+                        erratum,
+                        requestEvent,
+                        buildDetails,
+                        GenerationRequestType.BREW_RPM);
+            }
         }
     }
 
@@ -420,23 +426,21 @@ public class AdvisoryService {
         return pvToGenerations;
     }
 
-    protected Collection<SbomGenerationRequest> createReleaseManifestsForDockerBuilds(
+    protected Collection<SbomGenerationRequest> createReleaseManifestsForBuildsOfType(
             Errata erratum,
             RequestEvent requestEvent,
             Map<ProductVersionEntry, List<BuildItem>> buildDetails,
-            V1Beta1RequestRecord successfulAdvisoryRequestRecord) {
+            GenerationRequestType type) {
 
         if (!featureFlags.standardErrataImageManifestGenerationEnabled()) {
             return doIgnoreRequest(requestEvent, "Standard Errata container images manifest generation is disabled");
         }
 
-        log.debug("Creating release manifests for Docker builds for advisory {}", erratum.getDetails().get().getId());
-
         Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
                 erratum,
                 requestEvent,
                 buildDetails,
-                GenerationRequestType.CONTAINERIMAGE);
+                type);
 
         // Send an async notification for the completed generations (will be used to add comments to Errata)
         notifyAdvisoryRelease(
