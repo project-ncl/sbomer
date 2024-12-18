@@ -157,6 +157,10 @@
                   <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.model.Bom</shadedPattern>
                 </relocation>
                 <relocation>
+                  <pattern>org.cyclonedx.model.BomReference</pattern>
+                  <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.model.BomReference</shadedPattern>
+                </relocation>
+                <relocation>
                   <pattern>org.cyclonedx.model.Dependency</pattern>
                   <shadedPattern>org.jboss.sbomer.core.patch.cyclonedx.model.Dependency</shadedPattern>
                 </relocation>

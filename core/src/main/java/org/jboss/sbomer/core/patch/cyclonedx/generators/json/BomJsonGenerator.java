@@ -28,13 +28,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.cyclonedx.Format;
 import org.cyclonedx.Version;
 import org.cyclonedx.exception.GeneratorException;
-import org.cyclonedx.model.BomReference;
 import org.cyclonedx.util.introspector.VersionJsonAnnotationIntrospector;
 import org.cyclonedx.util.mixin.MixInBomReference;
 import org.cyclonedx.util.serializer.ComponentWrapperSerializer;
 import org.cyclonedx.util.serializer.TrimStringSerializer;
 import org.jboss.sbomer.core.patch.cyclonedx.generators.AbstractBomGenerator;
 import org.jboss.sbomer.core.patch.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.patch.cyclonedx.model.BomReference;
 import org.jboss.sbomer.core.patch.cyclonedx.util.serializer.DependencySerializer;
 
 /*
