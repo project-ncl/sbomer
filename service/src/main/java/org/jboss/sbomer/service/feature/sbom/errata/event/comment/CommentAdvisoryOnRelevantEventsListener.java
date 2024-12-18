@@ -193,6 +193,11 @@ public class CommentAdvisoryOnRelevantEventsListener {
     }
 
     private String createSummaryStatusSection(Map<SbomGenerationStatus, Long> generationsCounts) {
+        if (generationsCounts.isEmpty()) {
+            // If there are no manifests generated
+            return "0 builds manifested. 0 generations succeeded, all failed.\n\n";
+        }
+
         long successful = generationsCounts.getOrDefault(SbomGenerationStatus.FINISHED, 0L);
         long failed = generationsCounts.getOrDefault(SbomGenerationStatus.FAILED, 0L);
         return String.format(
@@ -277,12 +282,14 @@ public class CommentAdvisoryOnRelevantEventsListener {
         }
 
         if (GenerationRequestType.CONTAINERIMAGE.equals(generationRequestType)) {
-            // The NVR is not stored inside the generation, we need to get it from the manifest. Might be optimized in
-            // future.
+            // The NVR is not stored inside the generation, we need to get it from the manifest. If it is null, it might
+            // be a release manifest, we will return the identifier
             Sbom sbom = sbomService.get(manifestRecord.id());
-            String nvr = String.join("-", SbomUtils.computeNVRFromContainerManifest(sbom.getSbom()));
-
-            return nvr != null ? (nvr + ": ") : "";
+            String[] nvrArray = SbomUtils.computeNVRFromContainerManifest(sbom.getSbom());
+            if (nvrArray != null && nvrArray.length > 0) {
+                return String.join("-", nvrArray);
+            }
+            return manifestRecord.identifier() + ": ";
         }
 
         // The are no NVRs associated with GenerationRequestType.BUILD or GenerationRequestType.OPERATION or
