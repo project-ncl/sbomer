@@ -83,7 +83,13 @@ public class RequestsV1Beta1 {
                             name = "Filter requests of events generated for the PNC analysis on the for the specified milestone"),
                     @ExampleObject(
                             value = "pnc-operation=BDQXCNRZJYYAA",
-                            name = "Filter requests of events generated for the specified PNC operation") })
+                            name = "Filter requests of events generated for the specified PNC operation"),
+                    @ExampleObject(
+                            value = "release.errata_id=1234",
+                            name = "Filter requests of events generated for the specified Errata release by advisory id "),
+                    @ExampleObject(
+                            value = "release.errata_fullname=ERRATA",
+                            name = "Filter requests of events generated for the specified Errata release by advisory name") })
     @APIResponse(
             responseCode = "200",
             description = "The request event with all the manifest generated",
