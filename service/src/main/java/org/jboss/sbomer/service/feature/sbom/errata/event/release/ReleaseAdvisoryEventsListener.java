@@ -77,6 +77,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -119,56 +120,84 @@ public class ReleaseAdvisoryEventsListener {
         log.debug("Event received for advisory release ...");
 
         RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
-        ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
-        Errata erratum = errataClient.getErratum(config.getAdvisoryId());
-        Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
-                config.getAdvisoryId());
-        V1Beta1RequestRecord advisoryManifestsRecord = sbomService
-                .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
+        try {
+            ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+            Errata erratum = errataClient.getErratum(config.getAdvisoryId());
+            Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
+                    config.getAdvisoryId());
+            V1Beta1RequestRecord advisoryManifestsRecord = sbomService
+                    .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
 
-        String toolVersion = statsService.getStats().getVersion();
-        Component.Type productType = AdvisoryEventUtils
-                .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
+            String toolVersion = statsService.getStats().getVersion();
+            Component.Type productType = AdvisoryEventUtils
+                    .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
 
-        // Associate each ProductVersion to its list of CPEs
-        Map<ProductVersionEntry, Set<String>> productVersionToCPEs = mapProductVersionToCPEs(advisoryBuildDetails);
+            // Associate each ProductVersion to its list of CPEs
+            Map<ProductVersionEntry, Set<String>> productVersionToCPEs = mapProductVersionToCPEs(advisoryBuildDetails);
 
-        // Associate each build (NVR) in an advisory to its build manifest generation
-        Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration = mapNVRToBuildGeneration(advisoryManifestsRecord);
+            // Associate each build (NVR) in an advisory to its build manifest generation
+            Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration = mapNVRToBuildGeneration(
+                    advisoryManifestsRecord);
 
-        if (erratum.getDetails().get().getContentTypes().contains("docker")) {
+            if (erratum.getDetails().get().getContentTypes().contains("docker")) {
 
-            log.debug(
-                    "Creating release manifests for Docker builds of advisory: '{}'[{}]",
-                    erratum.getDetails().get().getFulladvisory(),
-                    erratum.getDetails().get().getId());
-            releaseManifestsForDockerBuilds(
-                    requestEvent,
-                    erratum,
-                    advisoryBuildDetails,
-                    advisoryManifestsRecord,
-                    event.getReleaseGenerations(),
-                    toolVersion,
-                    productType,
-                    productVersionToCPEs,
-                    nvrToBuildGeneration);
-        } else {
+                log.debug(
+                        "Creating release manifests for Docker builds of advisory: '{}'[{}]",
+                        erratum.getDetails().get().getFulladvisory(),
+                        erratum.getDetails().get().getId());
+                releaseManifestsForDockerBuilds(
+                        requestEvent,
+                        erratum,
+                        advisoryBuildDetails,
+                        advisoryManifestsRecord,
+                        event.getReleaseGenerations(),
+                        toolVersion,
+                        productType,
+                        productVersionToCPEs,
+                        nvrToBuildGeneration);
+            } else {
 
-            log.debug(
-                    "Creating release manifests for RPM builds of advisory: '{}'[{}]",
-                    erratum.getDetails().get().getFulladvisory(),
-                    erratum.getDetails().get().getId());
+                log.debug(
+                        "Creating release manifests for RPM builds of advisory: '{}'[{}]",
+                        erratum.getDetails().get().getFulladvisory(),
+                        erratum.getDetails().get().getId());
 
-            releaseManifestsForRPMBuilds(
-                    requestEvent,
-                    erratum,
-                    advisoryBuildDetails,
-                    advisoryManifestsRecord,
-                    event.getReleaseGenerations(),
-                    toolVersion,
-                    productType,
-                    productVersionToCPEs,
-                    nvrToBuildGeneration);
+                releaseManifestsForRPMBuilds(
+                        requestEvent,
+                        erratum,
+                        advisoryBuildDetails,
+                        advisoryManifestsRecord,
+                        event.getReleaseGenerations(),
+                        toolVersion,
+                        productType,
+                        productVersionToCPEs,
+                        nvrToBuildGeneration);
+            }
+        } catch (Exception e) {
+            log.error(
+                    "An error occured during the creation of release manifests for event '{}'",
+                    requestEvent.getId(),
+                    e);
+            markRequestFailed(requestEvent, event.getReleaseGenerations().values());
+        }
+
+        // Let's trigger the update of statuses and advisory comments
+        doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected void markRequestFailed(RequestEvent requestEvent, Collection<SbomGenerationRequest> releaseGenerations) {
+        String reason = "An error occured during the creation of the release manifest";
+        log.error(reason);
+
+        requestEvent = requestEventRepository.findById(requestEvent.getId());
+        requestEvent.setEventStatus(RequestEventStatus.FAILED);
+        requestEvent.setReason(reason);
+
+        for (SbomGenerationRequest generation : releaseGenerations) {
+            generation = generationRequestRepository.findById(generation.getId());
+            generation.setStatus(SbomGenerationStatus.FAILED);
+            generation.setReason(reason);
         }
     }
 
@@ -222,9 +251,6 @@ public class ReleaseAdvisoryEventsListener {
                     advisoryManifestsRecord,
                     generationToCDNs);
 
-            // Let's trigger the update of statuses and advisory comments
-            doUpdateRequestEventStatus(releaseGeneration);
-
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
                     sbom,
@@ -235,11 +261,11 @@ public class ReleaseAdvisoryEventsListener {
     }
 
     @Transactional
-    protected SbomGenerationRequest doUpdateRequestEventStatus(SbomGenerationRequest releaseGeneration) {
-        // Let's trigger the update of statuses and advisory comments
-        releaseGeneration = generationRequestRepository.findById(releaseGeneration.getId());
-        SbomGenerationRequest.updateRequestEventStatus(releaseGeneration);
-        return releaseGeneration;
+    protected void doUpdateGenerationsStatus(Collection<SbomGenerationRequest> releaseGenerations) {
+        for (SbomGenerationRequest releaseGeneration : releaseGenerations) {
+            releaseGeneration = generationRequestRepository.findById(releaseGeneration.getId());
+            SbomGenerationRequest.updateRequestEventStatus(releaseGeneration);
+        }
     }
 
     protected void releaseManifestsForDockerBuilds(
@@ -291,9 +317,6 @@ public class ReleaseAdvisoryEventsListener {
                     advisoryManifestsRecord,
                     generationToRepositories);
 
-            // Let's trigger the update of statuses and advisory comments
-            doUpdateRequestEventStatus(releaseGeneration);
-
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
                     sbom,
@@ -317,7 +340,9 @@ public class ReleaseAdvisoryEventsListener {
                 productVersion.getName(),
                 productType,
                 productVersionToCPEs.get(productVersion),
-                Date.from(erratum.getDetails().get().getActualShipDate()),
+                erratum.getDetails().get().getActualShipDate() != null
+                        ? Date.from(erratum.getDetails().get().getActualShipDate())
+                        : null,
                 toolVersion);
         productVersionBom.setMetadata(productVersionMetadata);
         Dependency productVersionDependency = new Dependency(productVersionMetadata.getComponent().getBomRef());
@@ -468,6 +493,10 @@ public class ReleaseAdvisoryEventsListener {
                 Map<String, String> originalToRebuiltPurl = new HashMap<String, String>();
 
                 for (V1Beta1RequestManifestRecord buildManifestRecord : buildManifests) {
+                    log.debug(
+                            "Updating build manifest '{}' for release event {}...",
+                            buildManifestRecord.id(),
+                            requestEvent.getId());
 
                     Sbom buildManifest = sbomService.get(buildManifestRecord.id());
                     Bom manifestBom = SbomUtils.fromJsonNode(buildManifest.getSbom());
@@ -476,6 +505,7 @@ public class ReleaseAdvisoryEventsListener {
                     // the purl.
                     // And getting them all to create the evidence
                     Set<String> manifestArches = getAllArchitectures(manifestBom);
+                    log.debug("Archs detected in the manifest: {}", manifestArches);
 
                     Component metadataComponent = manifestBom.getMetadata() != null
                             ? manifestBom.getMetadata().getComponent()
@@ -766,7 +796,9 @@ public class ReleaseAdvisoryEventsListener {
         releaseMetadata.put(REQUEST_ID, requestEventId);
         releaseMetadata.put(ERRATA, erratum.getDetails().get().getFulladvisory());
         releaseMetadata.put(ERRATA_ID, erratum.getDetails().get().getId());
-        releaseMetadata.put(ERRATA_SHIP_DATE, Date.from(erratum.getDetails().get().getActualShipDate()).toString());
+        if (erratum.getDetails().get().getActualShipDate() != null) {
+            releaseMetadata.put(ERRATA_SHIP_DATE, Date.from(erratum.getDetails().get().getActualShipDate()).toString());
+        }
         releaseMetadata.put(PRODUCT, versionEntry.getDescription());
         releaseMetadata.put(PRODUCT_SHORTNAME, erratum.getDetails().get().getProduct().getShortName());
         releaseMetadata.put(PRODUCT_VERSION, versionEntry.getName());
@@ -819,9 +851,11 @@ public class ReleaseAdvisoryEventsListener {
             Map<String, String> originalToRebuiltPurl) {
 
         Set<String> evidencePurls = AdvisoryEventUtils.createPurls(component.getPurl(), generationCDNs, manifestArches);
+        log.debug("Calculated evidence purls: {}", evidencePurls);
         String preferredRebuiltPurl = evidencePurls.stream()
                 .max((str1, str2) -> Integer.compare(str1.length(), str2.length()))
                 .orElse(null);
+        log.debug("Preferred rebuilt purl: {}", preferredRebuiltPurl);
         originalToRebuiltPurl.put(component.getPurl(), preferredRebuiltPurl);
 
         component.setPurl(preferredRebuiltPurl);
@@ -863,7 +897,9 @@ public class ReleaseAdvisoryEventsListener {
         SbomUtils.setEvidenceIdentities(metadataProductComponent, cpes, Field.CPE);
 
         metadata.setComponent(metadataProductComponent);
-        metadata.setTimestamp(shipDate);
+        if (shipDate != null) {
+            metadata.setTimestamp(shipDate);
+        }
         metadata.setToolChoice(SbomUtils.createToolInformation(toolVersion));
         return metadata;
     }
