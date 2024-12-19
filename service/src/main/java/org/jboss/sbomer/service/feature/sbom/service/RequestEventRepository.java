@@ -249,6 +249,24 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         return query;
     }
 
+    protected StringBuilder addReleaseMetadataCondition(
+            StringBuilder query,
+            String condition,
+            String sbomAlias,
+            String property,
+            String operator) {
+        query.append(" ")
+                .append(condition)
+                .append(sbomAlias != null && sbomAlias.length() > 0 ? " " + sbomAlias + "." : " ")
+                .append("release_metadata ->> '")
+                .append(property)
+                .append("' ")
+                .append(operator)
+                .append(" :")
+                .append(property);
+        return query;
+    }
+
     protected long executeCountQuery(String query, Map<String, Object> params) {
         Query q = getEntityManager().createNativeQuery(query);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
@@ -291,13 +309,18 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         });
     }
 
+    private static final String RELEASE_METADATA_ERRATA_ID = "release.errata_id";
+    private static final String RELEASE_METADATA_ERRATA_FULLNAME = "release.errata_fullname";
+
     private static final Set<String> ALLOWED_TYPE_KEYS = Set.of(
             "id",
             ErrataAdvisoryRequestConfig.TYPE_NAME,
             ImageRequestConfig.TYPE_NAME,
             PncAnalysisRequestConfig.TYPE_NAME,
             PncBuildRequestConfig.TYPE_NAME,
-            PncOperationRequestConfig.TYPE_NAME);
+            PncOperationRequestConfig.TYPE_NAME,
+            RELEASE_METADATA_ERRATA_ID,
+            RELEASE_METADATA_ERRATA_FULLNAME);
 
     private static final Map<String, Class<? extends RequestConfig>> TYPE_TO_CONFIG_CLASS = Map.of(
             ImageRequestConfig.TYPE_NAME,
@@ -367,6 +390,16 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         if ("id".equals(typeKey)) {
             sb.append("WHERE re.id = :id");
             return Map.of("id", typeValue);
+        }
+        if (RELEASE_METADATA_ERRATA_ID.equals(typeKey)) {
+            sb.append("WHERE s.release_metadata is not null");
+            addReleaseMetadataCondition(sb, "AND", "s", "errata_id", "=");
+            return Map.of("errata_id", typeValue);
+        }
+        if (RELEASE_METADATA_ERRATA_FULLNAME.equals(typeKey)) {
+            sb.append("WHERE s.release_metadata is not null");
+            addReleaseMetadataCondition(sb, "AND", "s", "errata_fullname", "=");
+            return Map.of("errata_fullname", typeValue);
         }
 
         String identifierKey = getValueOfField(TYPE_TO_CONFIG_CLASS.get(typeKey), "IDENTIFIER_KEY");

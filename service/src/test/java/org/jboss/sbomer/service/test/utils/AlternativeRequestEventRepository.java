@@ -79,6 +79,27 @@ public class AlternativeRequestEventRepository extends RequestEventRepository {
     }
 
     @Override
+    protected StringBuilder addReleaseMetadataCondition(
+            StringBuilder query,
+            String condition,
+            String sbomAlias,
+            String property,
+            String operator) {
+        query.append(" ")
+                .append(condition)
+                .append(
+                        sbomAlias != null && sbomAlias.length() > 0 ? " JSON_EXTRACT(" + sbomAlias + "."
+                                : " JSON_EXTRACT(")
+                .append("release_metadata, '$.")
+                .append(property)
+                .append("') ")
+                .append(operator)
+                .append(" :")
+                .append(property);
+        return query;
+    }
+
+    @Override
     protected Instant convertFromTimestamp(Object rawTimeObject) {
         OffsetDateTime offsetDateTime = (OffsetDateTime) rawTimeObject;
         return offsetDateTime.toInstant();
