@@ -996,7 +996,7 @@ public class SbomUtils {
                 String jsonContent = SbomUtils.toJson(bom);
                 bom.setSerialNumber("urn:uuid:" + UUID.nameUUIDFromBytes(jsonContent.getBytes(UTF_8)).toString());
             } catch (GeneratorException e) {
-                log.warn("Could not generate serialNumber out of the manifest content, setting random UUID");
+                log.warn("Could not generate serialNumber out of the manifest content, setting random UUID", e);
                 bom.setSerialNumber(UUID.randomUUID().toString());
             }
         }
