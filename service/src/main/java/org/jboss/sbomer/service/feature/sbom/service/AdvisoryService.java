@@ -432,8 +432,11 @@ public class AdvisoryService {
             Map<ProductVersionEntry, List<BuildItem>> buildDetails,
             GenerationRequestType type) {
 
-        if (!featureFlags.standardErrataImageManifestGenerationEnabled()) {
-            return doIgnoreRequest(requestEvent, "Standard Errata container images manifest generation is disabled");
+        if (type.equals(GenerationRequestType.CONTAINERIMAGE) && !featureFlags.standardErrataImageReleaseManifestGenerationEnabled()) {
+            return doIgnoreRequest(requestEvent, "Standard Errata container images release manifest generation is disabled");
+        }
+        else if (type.equals(GenerationRequestType.BREW_RPM) && !featureFlags.standardErrataRPMReleaseManifestGenerationEnabled()) {
+            return doIgnoreRequest(requestEvent, "Standard Errata RPM release manifest generation is disabled");
         }
 
         Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(

@@ -63,6 +63,10 @@ public class FeatureFlags implements UnleashSubscriber {
     public static final String TOGGLE_STANDARD_ERRATA_IMAGE_MANIFEST_GENERATION = "errata-standard-image-manifest-generation";
     public static final String TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION = "errata-textonly-manifest-generation";
     public static final String TOGGLE_ERRATA_COMMENTS_GENERATION = "errata-comment-generation";
+    // Release manifest configuration
+    public static final String TOGGLE_STANDARD_ERRATA_RPM_RELEASE_MANIFEST_GENERATION = "errata-standard-rpm-release-manifest-generation";
+    public static final String TOGGLE_STANDARD_ERRATA_IMAGE_RELEASE_MANIFEST_GENERATION = "errata-standard-image-release-manifest-generation";
+    public static final String TOGGLE_TEXTONLY_ERRATA_RELEASE_MANIFEST_GENERATION = "errata-textonly-release-manifest-generation";
 
     /**
      * A map holding all toggle values we are interested in. This is used for logging purposes. We are retrieving the
@@ -99,6 +103,15 @@ public class FeatureFlags implements UnleashSubscriber {
 
     @ConfigProperty(name = "SBOMER_FEATURE_ERRATA_COMMENTS_GENERATION_ENABLED", defaultValue = "false")
     boolean errataCommentsGeneration;
+
+    @ConfigProperty(name = "SBOMER_FEATURE_STANDARD_ERRATA_RPM_RELEASE_MANIFEST_ENABLED", defaultValue = "false")
+    boolean standardErrataRPMReleaseManifestGeneration;
+
+    @ConfigProperty(name = "SBOMER_FEATURE_STANDARD_ERRATA_CONTAINERIMAGE_RELEASE_MANIFEST_ENABLED", defaultValue = "false")
+    boolean standardErrataImageReleaseManifestGeneration;
+
+    @ConfigProperty(name = "SBOMER_FEATURE_TEXTONLY_ERRATA_RELEASE_MANIFEST_ENABLED", defaultValue = "false")
+    boolean textonlyErrataReleaseGeneration;
 
     /**
      * Returns {@code true} in case the dry-run mode is enabled.
@@ -174,6 +187,35 @@ public class FeatureFlags implements UnleashSubscriber {
         return unleash.isEnabled(TOGGLE_ERRATA_COMMENTS_GENERATION, errataCommentsGeneration);
     }
 
+   /**
+     * Returns {@code true} if the release manifest generation of standard Errata RPM builds is enabled.
+     *
+     * @return {@code true} if the release manifest generation of standard Errata RPM builds is enabled, {@code false} otherwise
+     */
+    public boolean standardErrataRPMReleaseManifestGenerationEnabled() {
+        return unleash.isEnabled(TOGGLE_STANDARD_ERRATA_RPM_RELEASE_MANIFEST_GENERATION, standardErrataRPMReleaseManifestGeneration);
+    }
+
+    /**
+     * Returns {@code true} if the release manifest generation of standard Errata container images builds is enabled.
+     *
+     * @return {@code true} if the release  manifest generation of standard Errata container images builds is enabled,
+     *         {@code false} otherwise
+     */
+    public boolean standardErrataImageReleaseManifestGenerationEnabled() {
+        return unleash
+                .isEnabled(TOGGLE_STANDARD_ERRATA_IMAGE_RELEASE_MANIFEST_GENERATION, standardErrataImageReleaseManifestGeneration);
+    }
+
+    /**
+     * Returns {@code true} if the release  manifest generation of text only Errata is enabled.
+     *
+     * @return {@code true} if the release manifest generation of text only Errata is enabled, {@code false} otherwise
+     */
+    public boolean textOnlyErrataReleaseManifestGenerationEnabled() {
+        return unleash.isEnabled(TOGGLE_TEXTONLY_ERRATA_RELEASE_MANIFEST_GENERATION, textonlyErrataReleaseGeneration);
+    }
+
     /**
      * Returns {@code true} if we should send a UMB message for a successfully generated manifest where the generation
      * request source is of a given type.
@@ -208,7 +250,10 @@ public class FeatureFlags implements UnleashSubscriber {
                 TOGGLE_STANDARD_ERRATA_RPM_MANIFEST_GENERATION,
                 TOGGLE_STANDARD_ERRATA_IMAGE_MANIFEST_GENERATION,
                 TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION,
-                TOGGLE_ERRATA_COMMENTS_GENERATION)) {
+                TOGGLE_ERRATA_COMMENTS_GENERATION,
+                TOGGLE_STANDARD_ERRATA_RPM_RELEASE_MANIFEST_GENERATION,
+                TOGGLE_STANDARD_ERRATA_IMAGE_RELEASE_MANIFEST_GENERATION,
+                TOGGLE_TEXTONLY_ERRATA_RELEASE_MANIFEST_GENERATION)) {
             FeatureToggle toggle = toggleResponse.getToggleCollection().getToggle(toggleName);
 
             if (toggle != null) {
