@@ -107,7 +107,9 @@ public class FeatureFlags implements UnleashSubscriber {
     @ConfigProperty(name = "SBOMER_FEATURE_STANDARD_ERRATA_RPM_RELEASE_MANIFEST_ENABLED", defaultValue = "false")
     boolean standardErrataRPMReleaseManifestGeneration;
 
-    @ConfigProperty(name = "SBOMER_FEATURE_STANDARD_ERRATA_CONTAINERIMAGE_RELEASE_MANIFEST_ENABLED", defaultValue = "false")
+    @ConfigProperty(
+            name = "SBOMER_FEATURE_STANDARD_ERRATA_CONTAINERIMAGE_RELEASE_MANIFEST_ENABLED",
+            defaultValue = "false")
     boolean standardErrataImageReleaseManifestGeneration;
 
     @ConfigProperty(name = "SBOMER_FEATURE_TEXTONLY_ERRATA_RELEASE_MANIFEST_ENABLED", defaultValue = "false")
@@ -187,28 +189,32 @@ public class FeatureFlags implements UnleashSubscriber {
         return unleash.isEnabled(TOGGLE_ERRATA_COMMENTS_GENERATION, errataCommentsGeneration);
     }
 
-   /**
+    /**
      * Returns {@code true} if the release manifest generation of standard Errata RPM builds is enabled.
      *
-     * @return {@code true} if the release manifest generation of standard Errata RPM builds is enabled, {@code false} otherwise
+     * @return {@code true} if the release manifest generation of standard Errata RPM builds is enabled, {@code false}
+     *         otherwise
      */
     public boolean standardErrataRPMReleaseManifestGenerationEnabled() {
-        return unleash.isEnabled(TOGGLE_STANDARD_ERRATA_RPM_RELEASE_MANIFEST_GENERATION, standardErrataRPMReleaseManifestGeneration);
+        return unleash.isEnabled(
+                TOGGLE_STANDARD_ERRATA_RPM_RELEASE_MANIFEST_GENERATION,
+                standardErrataRPMReleaseManifestGeneration);
     }
 
     /**
      * Returns {@code true} if the release manifest generation of standard Errata container images builds is enabled.
      *
-     * @return {@code true} if the release  manifest generation of standard Errata container images builds is enabled,
+     * @return {@code true} if the release manifest generation of standard Errata container images builds is enabled,
      *         {@code false} otherwise
      */
     public boolean standardErrataImageReleaseManifestGenerationEnabled() {
-        return unleash
-                .isEnabled(TOGGLE_STANDARD_ERRATA_IMAGE_RELEASE_MANIFEST_GENERATION, standardErrataImageReleaseManifestGeneration);
+        return unleash.isEnabled(
+                TOGGLE_STANDARD_ERRATA_IMAGE_RELEASE_MANIFEST_GENERATION,
+                standardErrataImageReleaseManifestGeneration);
     }
 
     /**
-     * Returns {@code true} if the release  manifest generation of text only Errata is enabled.
+     * Returns {@code true} if the release manifest generation of text only Errata is enabled.
      *
      * @return {@code true} if the release manifest generation of text only Errata is enabled, {@code false} otherwise
      */
