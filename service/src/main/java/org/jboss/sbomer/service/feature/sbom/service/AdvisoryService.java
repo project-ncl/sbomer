@@ -29,8 +29,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.koji.ClientSession;
+import org.jboss.pnc.build.finder.koji.KojiClientSession;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
@@ -46,6 +48,7 @@ import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
+import org.jboss.sbomer.core.features.sbom.provider.KojiProvider;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
@@ -92,8 +95,9 @@ public class AdvisoryService {
     ErrataClient errataClient;
 
     @Inject
-    @Setter
-    ClientSession kojiSession;
+    KojiProvider kojiProvider;
+
+    KojiClientSession kojiSession;
 
     @Inject
     KubernetesClient kubernetesClient;
@@ -388,7 +392,16 @@ public class AdvisoryService {
                 .map(BuildItem::getId)
                 .collect(Collectors.toList());
 
-        Map<Long, String> imageNamesFromBuilds = getImageNamesFromBuilds(buildIds);
+        Map<Long, String> imageNamesFromBuilds = null;
+
+        // Try to get the image names from builds, with retries handled in getImageNamesFromBuilds()
+        try {
+            imageNamesFromBuilds = getImageNamesFromBuilds(buildIds);
+        } catch (KojiClientException e) {
+            log.error("Failed to retrieve image names after retries", e);
+            return doFailRequest(requestEvent, "Unable to fetch image names after retries");
+        }
+
         imageNamesFromBuilds.forEach((buildId, imageName) -> {
             log.debug("Retrieved imageName '{}' for buildId {}", imageName, buildId);
             if (imageName != null) {
@@ -531,15 +544,25 @@ public class AdvisoryService {
         return null;
     }
 
-    private Map<Long, String> getImageNamesFromBuilds(List<Long> buildIds) {
-        Map<Long, String> buildsToImageName = new HashMap<Long, String>();
+    @Retry(maxRetries = 10, retryOn = KojiClientException.class)
+    protected KojiClientSession getKojiSession() throws KojiClientException {
+        if (kojiSession == null) {
+            kojiSession = kojiProvider.createSession();
+        }
+        return kojiSession;
+    }
+
+    // This method will be retried up to 10 times if a KojiClientException is thrown
+    @Retry(maxRetries = 10, retryOn = KojiClientException.class)
+    protected Map<Long, String> getImageNamesFromBuilds(List<Long> buildIds) throws KojiClientException {
+        Map<Long, String> buildsToImageName = new HashMap<>();
 
         try {
             List<KojiIdOrName> kojiIdOrNames = buildIds.stream()
                     .map(id -> KojiIdOrName.getFor(id.toString()))
                     .collect(Collectors.toList());
 
-            List<KojiBuildInfo> buildInfos = kojiSession.getBuild(kojiIdOrNames);
+            List<KojiBuildInfo> buildInfos = getKojiSession().getBuild(kojiIdOrNames);
             for (KojiBuildInfo kojiBuildInfo : buildInfos) {
                 String imageName = Optional.ofNullable(kojiBuildInfo.getExtra())
                         .map(extra -> (Map<String, Object>) extra.get("image"))
@@ -562,7 +585,9 @@ public class AdvisoryService {
             }
         } catch (KojiClientException e) {
             log.error("Unable to fetch containers information for buildIDs: {}", buildIds, e);
-            return null;
+            // Explicitly throw the exception again so that retry can happen
+            kojiSession = null;
+            throw e;
         }
         return buildsToImageName;
     }
