@@ -257,13 +257,13 @@ public class AdvisoryService {
             String reason = String.format(
                     "The standard errata advisory has zero or multiple content-types (%s)",
                     details.getContentTypes());
-            doFailRequest(requestEvent, reason);
+            doIgnoreRequest(requestEvent, reason);
         }
 
         if (details.getContentTypes().stream().noneMatch(type -> type.equals("docker") || type.equals("rpm"))) {
             String reason = String
                     .format("The standard errata advisory has unknown content-types (%s)", details.getContentTypes());
-            doFailRequest(requestEvent, reason);
+            doIgnoreRequest(requestEvent, reason);
         }
 
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(String.valueOf(details.getId()));
