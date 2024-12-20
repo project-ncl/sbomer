@@ -20,9 +20,11 @@ package org.jboss.sbomer.service.feature.sbom.errata.dto;
 import lombok.Data;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrataCDNRepo {
     private long id;
     private String type;
@@ -30,6 +32,7 @@ public class ErrataCDNRepo {
     private Relationships relationships;
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Attributes {
         private String name;
         @JsonProperty("release_type")
@@ -43,6 +46,7 @@ public class ErrataCDNRepo {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Relationships {
         private Arch arch;
         private List<Variant> variants;
