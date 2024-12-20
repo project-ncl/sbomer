@@ -262,9 +262,12 @@ public class ReleaseAdvisoryEventsListener {
 
     @Transactional
     protected void doUpdateGenerationsStatus(Collection<SbomGenerationRequest> releaseGenerations) {
-        for (SbomGenerationRequest releaseGeneration : releaseGenerations) {
-            releaseGeneration = generationRequestRepository.findById(releaseGeneration.getId());
-            SbomGenerationRequest.updateRequestEventStatus(releaseGeneration);
+        // Update only one SbomGenerationRequest, because the requestEvent associated is the same for all of them. This
+        // avoids duplicated comments in the advisory
+        if (releaseGenerations != null && !releaseGenerations.isEmpty()) {
+            SbomGenerationRequest generation = releaseGenerations.iterator().next();
+            generation = generationRequestRepository.findById(generation.getId());
+            SbomGenerationRequest.updateRequestEventStatus(generation);
         }
     }
 
