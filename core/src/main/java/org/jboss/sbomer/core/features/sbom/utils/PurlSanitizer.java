@@ -20,9 +20,12 @@ package org.jboss.sbomer.core.features.sbom.utils;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 import java.util.TreeMap;
 
+@Slf4j
 public class PurlSanitizer {
 
     private static final String NAME_VERSION_QKEY_QVALUE = "[^a-zA-Z0-9.+\\-_]";
@@ -39,13 +42,15 @@ public class PurlSanitizer {
             throw new IllegalArgumentException("PURL cannot be null or empty");
         }
 
+        log.debug("Sanitizig purl {}...", purl);
+
         // Attempt to parse the PURL using PackageURL
         try {
             PackageURL parsedPurl = new PackageURL(purl);
             return parsedPurl.canonicalize();
         } catch (MalformedPackageURLException e) {
             // If parsing fails, proceed to manual sanitization
-            System.err.println("Malformed PURL detected, attempting to sanitize: " + e.getMessage());
+            log.error("Malformed PURL detected, attempting to sanitize: {}", e.getMessage());
         }
 
         // Manually parse and sanitize the PURL components
