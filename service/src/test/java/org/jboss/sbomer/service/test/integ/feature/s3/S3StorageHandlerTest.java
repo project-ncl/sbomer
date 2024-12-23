@@ -38,7 +38,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(TestUmbProfile.class)
-public class S3StorageHandlerTestIT {
+public class S3StorageHandlerTest {
 
     @Inject
     S3StorageHandler storageHandler;

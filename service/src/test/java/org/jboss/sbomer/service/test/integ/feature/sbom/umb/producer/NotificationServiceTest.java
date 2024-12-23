@@ -57,7 +57,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(TestUmbProfile.class)
-class NotificationServiceIT {
+class NotificationServiceTest {
 
     @InjectMock
     FeatureFlags featureFlags;
@@ -67,7 +67,7 @@ class NotificationServiceIT {
     }
 
     private Sbom createOperationSBOM() throws IOException {
-        Bom bom = SbomUtils.fromPath(NotificationServiceIT.sbomPath("complete_operation_sbom.json"));
+        Bom bom = SbomUtils.fromPath(NotificationServiceTest.sbomPath("complete_operation_sbom.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withId("AABB")
@@ -86,7 +86,7 @@ class NotificationServiceIT {
     }
 
     private Sbom createSBOM() throws IOException {
-        Bom bom = SbomUtils.fromPath(NotificationServiceIT.sbomPath("sbom_with_errata.json"));
+        Bom bom = SbomUtils.fromPath(NotificationServiceTest.sbomPath("sbom_with_errata.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withId("AABB")
@@ -105,7 +105,7 @@ class NotificationServiceIT {
     }
 
     private Sbom createMinimalRpmManifest() throws IOException {
-        Bom bom = SbomUtils.fromPath(NotificationServiceIT.sbomPath("minimal-rpm.json"));
+        Bom bom = SbomUtils.fromPath(NotificationServiceTest.sbomPath("minimal-rpm.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
                 .withId("AABB")

@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.k8s.reconciler;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -43,6 +44,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.BuildController;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
+import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -63,16 +65,16 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.kubernetes.client.KubernetesTestServer;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import jakarta.inject.Inject;
+import okhttp3.mockwebserver.RecordedRequest;
 
 /**
  * Class responsible for testing reconciliation workflow for the generation phase.
  */
 @QuarkusTest
-@WithKubernetesTestServer
+@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
-class GenerationPhaseGenerationRequestReconcilerIT {
+class GenerationPhaseGenerationRequestReconcilerTest {
 
     @InjectMock
     GenerationRequestControllerConfig controllerConfig;
@@ -433,6 +435,8 @@ class GenerationPhaseGenerationRequestReconcilerIT {
 
     @Test
     void testFailedWithoutCleanup(@TempDir Path tempDir) throws Exception {
+        RecordedRequest lastRequestPriorToExecution = mockServer.getLastRequest();
+
         when(controllerConfig.cleanup()).thenReturn(false);
         when(controllerConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
 
@@ -449,7 +453,9 @@ class GenerationPhaseGenerationRequestReconcilerIT {
                 .reconcile(request, mockContext(Collections.emptySet()));
 
         assertTrue(updateControl.isNoUpdate());
-        assertNull(mockServer.getLastRequest());
+        // there is no proper way to reset the last request at the beginning of the method
+        // so let's just compare it's the same as before and no requests have been executed.
+        assertSame(lastRequestPriorToExecution, mockServer.getLastRequest());
         assertTrue(Files.exists(tempDir));
         assertTrue(Files.exists(filePath));
         assertTrue(Files.exists(newDirPath));

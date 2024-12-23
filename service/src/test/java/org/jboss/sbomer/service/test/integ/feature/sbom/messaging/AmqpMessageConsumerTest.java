@@ -33,7 +33,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(TestUmbProfile.class)
-class AmqpMessageConsumerIT {
+class AmqpMessageConsumerTest {
     @Inject
     AmqpMessageConsumer consumer;
 
