@@ -53,11 +53,12 @@
     <version.surefire-plugin>3.5.2</version.surefire-plugin>
 
     <!--
-    Keep "version.quarkus-platform" in sync with the Quarkus Operator SDK extension Quarkus version:
-    https://github.com/quarkiverse/quarkus-operator-sdk/blob/main/pom.xml#L15 for the Quarkus
+    Keep "version.quarkus-platform" in sync with the Quarkus Operator SDK extension.
+    Use the latest micro of the minor branch requested by the Quarkus Operator SDK extension.
+    See https://github.com/quarkiverse/quarkus-operator-sdk/blob/main/pom.xml#L15 for the Quarkus
     Operator SDK extension version defined below ("version.quarkus-operator-sdk").
     -->
-    <version.quarkus-platform>3.17.0</version.quarkus-platform>
+    <version.quarkus-platform>3.17.5</version.quarkus-platform>
     <version.quarkus-operator-sdk>6.9.1</version.quarkus-operator-sdk>
 
     <version.cyclonedx>9.1.0-patch</version.cyclonedx>
@@ -92,6 +93,13 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-bom</artifactId>
+        <version>${version.quarkus-platform}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>io.quarkiverse.operatorsdk</groupId>
         <artifactId>quarkus-operator-sdk-bom</artifactId>
