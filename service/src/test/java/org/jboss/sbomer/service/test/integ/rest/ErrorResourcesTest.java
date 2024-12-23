@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doThrow;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
-import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -39,7 +38,6 @@ import jakarta.ws.rs.NotAuthorizedException;
  * Ensures that we can handle errors properly.
  */
 @QuarkusTest
-@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 class ErrorResourcesTest {
 

@@ -50,7 +50,6 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.rest.QueryParameters;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
-import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
@@ -63,7 +62,6 @@ import jakarta.validation.Validator;
 
 @ApplicationScoped
 @QuarkusTransactionalTest
-@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 class SbomGenerationRequestRepositoryTest {
 
