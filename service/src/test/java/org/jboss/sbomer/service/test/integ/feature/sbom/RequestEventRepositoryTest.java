@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.test.integ.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
@@ -30,6 +29,7 @@ import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
+import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -39,16 +39,15 @@ import org.junit.jupiter.api.TestMethodOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.test.junit.TestProfile;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTransactionalTest
-@WithKubernetesTestServer
+@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j
-class RequestEventRepositoryIT {
+class RequestEventRepositoryTest {
 
     @Inject
     RequestEventRepository repository;

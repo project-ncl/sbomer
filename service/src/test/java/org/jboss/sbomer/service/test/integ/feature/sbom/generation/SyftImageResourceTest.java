@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,13 +12,12 @@ import org.junit.jupiter.api.Test;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.http.ContentType;
 
 @QuarkusTest
-@WithKubernetesTestServer
+@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
-class SyftImageResourceIT {
+class SyftImageResourceTest {
 
     @InjectSpy
     SbomService sbomService;

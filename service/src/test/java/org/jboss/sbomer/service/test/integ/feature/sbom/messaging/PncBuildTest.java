@@ -51,6 +51,7 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.test.PncWireMock;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
+import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -63,7 +64,6 @@ import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.smallrye.reactive.messaging.memory.InMemoryConnector;
 import io.smallrye.reactive.messaging.memory.InMemorySource;
 import io.vertx.core.json.JsonObject;
@@ -71,11 +71,11 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
+@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 @WithTestResource(PncWireMock.class)
 @Slf4j
-@WithKubernetesTestServer
-class PncBuildIT {
+class PncBuildTest {
 
     @Inject
     AmqpMessageConsumer consumer;

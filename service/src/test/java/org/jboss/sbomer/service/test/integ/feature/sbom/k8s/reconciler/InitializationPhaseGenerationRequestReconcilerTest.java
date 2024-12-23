@@ -64,7 +64,7 @@ import jakarta.inject.Inject;
  */
 @QuarkusTest
 @TestProfile(TestUmbProfile.class)
-class InitializationPhaseGenerationRequestReconcilerIT {
+class InitializationPhaseGenerationRequestReconcilerTest {
 
     @Inject
     BuildController controller;

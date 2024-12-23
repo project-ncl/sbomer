@@ -22,6 +22,7 @@ import static org.mockito.Mockito.doThrow;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,10 +30,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
-import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.restassured.RestAssured;
 import jakarta.ws.rs.ForbiddenException;
-import jakarta.ws.rs.NotAcceptableException;
 import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.NotAuthorizedException;
 
@@ -40,9 +39,9 @@ import jakarta.ws.rs.NotAuthorizedException;
  * Ensures that we can handle errors properly.
  */
 @QuarkusTest
-@WithKubernetesTestServer
+@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
-class ErrorResourcesIT {
+class ErrorResourcesTest {
 
     @InjectSpy
     SbomService sbomService;
