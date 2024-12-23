@@ -51,7 +51,6 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.test.PncWireMock;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
-import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -71,7 +70,6 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
-@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 @WithTestResource(PncWireMock.class)
 @Slf4j

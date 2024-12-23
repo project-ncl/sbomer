@@ -22,7 +22,6 @@ import java.util.Map;
 import org.hamcrest.CoreMatchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.test.integ.rest.StatsResourceTest.CustomConfig;
-import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,6 @@ import io.quarkus.test.junit.mockito.InjectSpy;
 import io.restassured.RestAssured;
 
 @QuarkusTest
-@WithSharedKubernetesTestServer
 @TestProfile(CustomConfig.class)
 class StatsResourceTest {
     public static class CustomConfig extends TestUmbProfile {

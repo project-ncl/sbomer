@@ -1,9 +1,10 @@
 package org.jboss.sbomer.service.test.utils;
 
-import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.TestResourceScope;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.kubernetes.client.KubernetesServerTestResource;
 
-//@QuarkusTestResource(KubernetesServerTestResource.class)
+@WithTestResource(value = KubernetesServerTestResource.class, scope = TestResourceScope.GLOBAL)
 public class GlobalKubernetesServerResource {
 
 }

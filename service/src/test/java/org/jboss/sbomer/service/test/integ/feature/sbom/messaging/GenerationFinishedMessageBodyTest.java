@@ -39,7 +39,6 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.Bo
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.BomFormat;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.OperationGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.PncBuildGenerationRequest;
-import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +47,6 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 class GenerationFinishedMessageBodyTest {
 

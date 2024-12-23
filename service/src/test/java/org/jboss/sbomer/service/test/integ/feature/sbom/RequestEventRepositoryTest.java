@@ -29,7 +29,6 @@ import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
-import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -43,7 +42,6 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTransactionalTest
-@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j

@@ -42,7 +42,6 @@ import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.jboss.sbomer.service.rest.QueryParameters;
 import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
-import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +55,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
 @QuarkusTransactionalTest
-@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 class SbomRepositoryTest {
 

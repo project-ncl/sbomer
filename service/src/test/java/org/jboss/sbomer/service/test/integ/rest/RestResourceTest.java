@@ -47,7 +47,6 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.pnc.PncClient;
-import org.jboss.sbomer.service.test.utils.WithSharedKubernetesTestServer;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -70,7 +69,6 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-@WithSharedKubernetesTestServer
 @TestProfile(TestUmbProfile.class)
 class RestResourceTest {
 
