@@ -100,11 +100,13 @@ export const RequestEventDetailsTable = () => {
             <DescriptionListGroup>
               <DescriptionListTerm>Request Event Config</DescriptionListTerm>
               <DescriptionListDescription>
-                <Tooltip isContentLeftAligned={true} content={<code>{sbomerRequestManifest.reqConfig}</code>}>
-                  <Label>
-                    {sbomerRequestManifest.reqConfigTypeName}={sbomerRequestManifest.reqConfigTypeValue}
-                  </Label>
-                </Tooltip>
+                {sbomerRequestManifest.reqConfigTypeName ? (
+                  <Tooltip isContentLeftAligned={true} content={<code>{sbomerRequestManifest.reqConfig}</code>}>
+                    <Label>
+                      {sbomerRequestManifest.reqConfigTypeName}={sbomerRequestManifest.reqConfigTypeValue}
+                    </Label>
+                  </Tooltip>
+                ) : null}
               </DescriptionListDescription>
             </DescriptionListGroup>
 
@@ -150,171 +152,183 @@ export const RequestEventDetailsTable = () => {
           <Tabs defaultActiveKey={0} mountOnEnter>
        
             <Tab key={0} eventKey={0} title={<TabTitleText>Generations triggered</TabTitleText>}>
-              <Table aria-label="Generations table" variant="compact">
-                <Caption></Caption>
-                <Thead>
-                  <Tr>
-                    <Th>{columnNames.id}</Th>
-                    <Th>{columnNames.type}</Th>
-                    <Th>{columnNames.identifier}</Th>
-                    <Th>{columnNames.status}</Th>
-                    <Th>{columnNames.creationTime}</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                {sbomerRequestGenerations.data.map((generation) => (
-                    <Tr key={generation.id}>
-                      <Td dataLabel={columnNames.id}>
-                        <Link 
-                          to={`/generations/${generation.id}`} 
-                          style={{ textDecoration: 'none', color: 'blue' }}
-                        >
-                        <pre>{generation.id}</pre>
-                        </Link>
-                      </Td>
-                      <Td dataLabel={columnNames.type}>
-                        <Tooltip content={generation.type}>
-                          <Label style={{ cursor: 'pointer' }} color="purple">
-                            {typeToDescription(generation)}
-                          </Label>
-                        </Tooltip>
-                      </Td>
-                      <Td dataLabel={columnNames.identifier}>
-                        <span className="pf-v5-c-timestamp pf-m-help-text">{generation.identifier}</span>
-                      </Td>
-                      <Td dataLabel={columnNames.status}>
-                        <Tooltip
-                          isContentLeftAligned={true}
-                          content={
-                            <div>
-                              <div>
-                                <strong>{generation.result}</strong>
-                              </div>
-                              <div>{generation.reason}</div>
-                            </div>
-                          }
-                        >
-                          <Label style={{ cursor: 'pointer' }} color={statusToColor(generation)}>
-                            {statusToDescription(generation)}
-                          </Label>
-                        </Tooltip>
-                      </Td>
-                      <Td dataLabel={columnNames.creationTime}>
-                        <Timestamp date={generation.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                          {/* {timestampToHumanReadable(Date.now() - request.creationTime.getTime(), false, 'ago')} */}
-                        </Timestamp>
-                      </Td>
-                      {/* Expandable Section for Children (e.g., linked manifests) */}
-                      <Td colSpan={5}>
-                        <ExpandableSection
-                          toggleText={expandedGenerations[generation.id] ? 'Hide Manifests' : 'Show Manifests'}
-                          onToggle={() => {toggleExpandable(generation.id);}}
-                        >
-                        {sbomerRequestManifest.manifests.length > 0 ? (
-                        <div>
-                          <Table aria-label="Child Manifests" variant="compact">
-                            <Thead>
-                              <Tr>
-                                <Th>{columnNames.mId}</Th>
-                                <Th>{columnNames.mRootPurl}</Th>
-                              </Tr>
-                            </Thead>
-                            <Tbody>
-                              {sbomerRequestManifest.manifests
-                                .filter((manifest) => manifest.generation.id === generation.id)
-                                .map((manifest) => (
-                                  <Tr key={manifest.id}>
-                                    <Td dataLabel={columnNames.mId}>
-                                      <Link to={`/manifests/${manifest.id}`} style={{ textDecoration: 'none', color: 'blue' }}>
-                                        <pre>{manifest.id}</pre>
-                                      </Link>
-                                    </Td>
-                                    <Td dataLabel={columnNames.mRootPurl}>
-                                      <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.rootPurl}</span>
-                                    </Td>
-                                  </Tr>
-                                ))}
-                            </Tbody>
-                          </Table>
-                        </div>
-                      ) : (
-                        <p>No child manifests available</p>
-                      )}
-                        </ExpandableSection>
-                      </Td>
+              {sbomerRequestGenerations.data.length === 0 ? (
+                <div>
+                <br /><br /><br />
+                <h2>No generations triggered</h2>
+                </div>
+              ) : (
+                <Table aria-label="Generations table" variant="compact">
+                  <Caption></Caption>
+                  <Thead>
+                    <Tr>
+                      <Th>{columnNames.id}</Th>
+                      <Th>{columnNames.type}</Th>
+                      <Th>{columnNames.identifier}</Th>
+                      <Th>{columnNames.status}</Th>
+                      <Th>{columnNames.creationTime}</Th>
                     </Tr>
-                  ))} 
-                </Tbody>
-              </Table>
-            </Tab>
-            <Tab key={1} eventKey={1} title={<TabTitleText>All Manifests generated</TabTitleText>}>
-              <Table aria-label="Manifests table" variant="compact">
-                <Caption></Caption>
-                <Thead>
-                  <Tr>
-                    <Th>{columnNames.mId}</Th>
-                    <Th>{columnNames.mRootPurl}</Th>
-                    <Th>{columnNames.mCreationTime}</Th>
-                    <Th>{columnNames.id}</Th>
-                    <Th>{columnNames.type}</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {sbomerRequestManifest.manifests.map((manifest) => (
-                    <Tr key={manifest.id}>
-                      <Td dataLabel={columnNames.mId}>
-                        <Link 
-                          to={`/manifests/${manifest.id}`} 
-                          style={{ textDecoration: 'none', color: 'blue' }}
-                        >
-                        <pre>{manifest.id}</pre>
-                        </Link>
-                      </Td>
-                      <Td dataLabel={columnNames.mRootPurl}>
-                        <Tooltip
-                          isContentLeftAligned={true}
-                          content={
-                            <div>
-                              <div>
-                                <strong>Identifier</strong>
-                              </div>
-                              <div>{manifest.identifier}</div>
-                            </div>
-                          }
-                        >
-                          <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.rootPurl}</span>
-                        </Tooltip>
-                      </Td>
-                      <Td dataLabel={columnNames.mCreationTime}>
-                        <Timestamp date={manifest.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                          {/*timestampToHumanReadable(Date.now() - new Date(manifest.creationTime).getTime(), false, 'ago')*/}
-                        </Timestamp>
-                      </Td>
-                      <Td dataLabel={columnNames.id}>
-                        <Link 
-                            to={`/generations/${manifest.generation.id}`} 
+                  </Thead>
+                  <Tbody>
+                  {sbomerRequestGenerations.data.map((generation) => (
+                      <Tr key={generation.id}>
+                        <Td dataLabel={columnNames.id}>
+                          <Link 
+                            to={`/generations/${generation.id}`} 
                             style={{ textDecoration: 'none', color: 'blue' }}
                           >
-                          <pre>{manifest.generation.id}</pre>
+                          <pre>{generation.id}</pre>
                           </Link>
-                      </Td>
-                      <Td dataLabel={columnNames.type}>
-                        <Tooltip content={manifest.generation.type}>
-                          <Label style={{ cursor: 'pointer' }} color="purple">
-                            {typeToDescription(manifest.generation)}
-                          </Label>
-                        </Tooltip>
-                      </Td>
-
-                    </Tr>
-                  ))} 
-                </Tbody>
-              </Table>
+                        </Td>
+                        <Td dataLabel={columnNames.type}>
+                          <Tooltip content={generation.type}>
+                            <Label style={{ cursor: 'pointer' }} color="purple">
+                              {typeToDescription(generation)}
+                            </Label>
+                          </Tooltip>
+                        </Td>
+                        <Td dataLabel={columnNames.identifier}>
+                          <span className="pf-v5-c-timestamp pf-m-help-text">{generation.identifier}</span>
+                        </Td>
+                        <Td dataLabel={columnNames.status}>
+                          <Tooltip
+                            isContentLeftAligned={true}
+                            content={
+                              <div>
+                                <div>
+                                  <strong>{generation.result}</strong>
+                                </div>
+                                <div>{generation.reason}</div>
+                              </div>
+                            }
+                          >
+                            <Label style={{ cursor: 'pointer' }} color={statusToColor(generation)}>
+                              {statusToDescription(generation)}
+                            </Label>
+                          </Tooltip>
+                        </Td>
+                        <Td dataLabel={columnNames.creationTime}>
+                          <Timestamp date={generation.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                            {/* {timestampToHumanReadable(Date.now() - request.creationTime.getTime(), false, 'ago')} */}
+                          </Timestamp>
+                        </Td>
+                        {/* Expandable Section for Children (e.g., linked manifests) */}
+                        <Td colSpan={5}>
+                          <ExpandableSection
+                            toggleText={expandedGenerations[generation.id] ? 'Hide Manifests' : 'Show Manifests'}
+                            onToggle={() => {toggleExpandable(generation.id);}}
+                          >
+                          {sbomerRequestManifest.manifests.length > 0 ? (
+                          <div>
+                            <Table aria-label="Child Manifests" variant="compact">
+                              <Thead>
+                                <Tr>
+                                  <Th>{columnNames.mId}</Th>
+                                  <Th>{columnNames.mRootPurl}</Th>
+                                </Tr>
+                              </Thead>
+                              <Tbody>
+                                {sbomerRequestManifest.manifests
+                                  .filter((manifest) => manifest.generation.id === generation.id)
+                                  .map((manifest) => (
+                                    <Tr key={manifest.id}>
+                                      <Td dataLabel={columnNames.mId}>
+                                        <Link to={`/manifests/${manifest.id}`} style={{ textDecoration: 'none', color: 'blue' }}>
+                                          <pre>{manifest.id}</pre>
+                                        </Link>
+                                      </Td>
+                                      <Td dataLabel={columnNames.mRootPurl}>
+                                        <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.rootPurl}</span>
+                                      </Td>
+                                    </Tr>
+                                  ))}
+                              </Tbody>
+                            </Table>
+                          </div>
+                        ) : (
+                          <p>No child manifests available</p>
+                        )}
+                          </ExpandableSection>
+                        </Td>
+                      </Tr>
+                    ))} 
+                  </Tbody>
+                </Table>
+              )}
             </Tab>
-       
-          </Tabs>
+            <Tab key={1} eventKey={1} title={<TabTitleText>All Manifests generated</TabTitleText>}>
+              {/* Check if there are no manifests */}
+              {sbomerRequestManifest.manifests.length === 0 ? (
+                <div>
+                <br /><br /><br />
+                <h2>No manifests generated</h2>
+                </div>
+              ) : (
+                <Table aria-label="Manifests table" variant="compact">
+                  <Caption></Caption>
+                  <Thead>
+                    <Tr>
+                      <Th>{columnNames.mId}</Th>
+                      <Th>{columnNames.mRootPurl}</Th>
+                      <Th>{columnNames.mCreationTime}</Th>
+                      <Th>{columnNames.id}</Th>
+                      <Th>{columnNames.type}</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {sbomerRequestManifest.manifests.map((manifest) => (
+                      <Tr key={manifest.id}>
+                        <Td dataLabel={columnNames.mId}>
+                          <Link 
+                            to={`/manifests/${manifest.id}`} 
+                            style={{ textDecoration: 'none', color: 'blue' }}
+                          >
+                          <pre>{manifest.id}</pre>
+                          </Link>
+                        </Td>
+                        <Td dataLabel={columnNames.mRootPurl}>
+                          <Tooltip
+                            isContentLeftAligned={true}
+                            content={
+                              <div>
+                                <div>
+                                  <strong>Identifier</strong>
+                                </div>
+                                <div>{manifest.identifier}</div>
+                              </div>
+                            }
+                          >
+                            <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.rootPurl}</span>
+                          </Tooltip>
+                        </Td>
+                        <Td dataLabel={columnNames.mCreationTime}>
+                          <Timestamp date={manifest.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                            {/*timestampToHumanReadable(Date.now() - new Date(manifest.creationTime).getTime(), false, 'ago')*/}
+                          </Timestamp>
+                        </Td>
+                        <Td dataLabel={columnNames.id}>
+                          <Link 
+                              to={`/generations/${manifest.generation.id}`} 
+                              style={{ textDecoration: 'none', color: 'blue' }}
+                            >
+                            <pre>{manifest.generation.id}</pre>
+                            </Link>
+                        </Td>
+                        <Td dataLabel={columnNames.type}>
+                          <Tooltip content={manifest.generation.type}>
+                            <Label style={{ cursor: 'pointer' }} color="purple">
+                              {typeToDescription(manifest.generation)}
+                            </Label>
+                          </Tooltip>
+                        </Td>
 
-      
+                      </Tr>
+                    ))} 
+                  </Tbody>
+                </Table>
+              )}
+            </Tab>
+          </Tabs>
       </GridItem>
       </Grid>
     
