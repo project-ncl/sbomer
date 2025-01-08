@@ -136,6 +136,14 @@ const ManifestPageContent: React.FunctionComponent = () => {
                 </Button>
               </DescriptionListDescription>
             </DescriptionListGroup>
+            <DescriptionListGroup>
+              <DescriptionListTerm>Purl</DescriptionListTerm>
+              <DescriptionListDescription>
+                <Tooltip content="Root purl">
+                  <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.rootPurl}</span>
+                </Tooltip>
+              </DescriptionListDescription>
+            </DescriptionListGroup>
           </DescriptionList>
 
           <br />
