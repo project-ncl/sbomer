@@ -5,7 +5,7 @@ import { GenerationRequestsPage } from './components/Pages/GenerationRequests/Ge
 import { ManifestPage } from './components/Pages/Manifests/ManifestPage';
 import { ManifestsPage } from './components/Pages/Manifests/ManifestsPage';
 import { RequestEventsPage } from './components/Pages/RequestEvents/RequestEventsPage';
-import { RequestEventManifestsPage } from './components/Pages/RequestEvents/RequestEventManifestsPage';
+import { RequestEventDetailsPage } from './components/Pages/RequestEvents/RequestEventDetailsPage';
 import { NotFoundPage } from './components/Pages/NotFound/NotFoundPage';
 
 let routeFocusTimer: number;
@@ -61,7 +61,7 @@ const routes: AppRouteConfig[] = [
     path: '/requestevents',
   },
   {
-    element: <RequestEventManifestsPage />,
+    element: <RequestEventDetailsPage />,
     path: '/requestevents/:id',
   },
   {

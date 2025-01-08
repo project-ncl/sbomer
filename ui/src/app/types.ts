@@ -257,4 +257,6 @@ export type SbomerApi = {
 
   getRequestEvent(id: string): Promise<SbomerRequestManifest>;
 
+  getRequestEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }>;
+
 };

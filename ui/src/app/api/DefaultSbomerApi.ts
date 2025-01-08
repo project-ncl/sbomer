@@ -230,4 +230,49 @@ export class DefaultSbomerApi implements SbomerApi {
     return request;
   }
 
+  async getRequestEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }> {
+    let pageIndex = 0;
+    let totalHits = 0;
+    const pageSize = 200;
+    const requests: SbomerGeneration[] = [];
+
+    // Loop through pages until all content is retrieved
+    while (true) {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1beta1/generations?query=request.id=eq=${id}&sort=creationTime=desc=&pageSize=${pageSize}&pageIndex=${pageIndex}`,
+      );
+
+      if (response.status !== 200) {
+        const body = await response.text();
+        throw new Error(
+          'Failed fetching generation requests from SBOMer, got: ' + response.status + " response: '" + body + "'",
+        );
+      }
+
+      const data = await response.json();
+
+      // Update totalHits on first page
+      if (pageIndex === 0) {
+        totalHits = data.totalHits;
+      }
+
+      // Add content to the results
+      if (data.content) {
+        data.content.forEach((request: any) => {
+          requests.push(new SbomerGeneration(request));
+        });
+      }
+
+      // If there is no more content, break the loop
+      if (data.pageIndex >= data.totalPages - 1) {
+        break;
+      }
+
+      // Move to the next page
+      pageIndex++;
+    }
+
+    return { data: requests, total: totalHits };
+  }
+
 }
