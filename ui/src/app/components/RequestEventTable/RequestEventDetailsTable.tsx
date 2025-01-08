@@ -90,7 +90,7 @@ export const RequestEventDetailsTable = () => {
               </DescriptionListDescription>
             </DescriptionListGroup>
             <DescriptionListGroup>
-              <DescriptionListTerm>Request Event Type</DescriptionListTerm>
+              <DescriptionListTerm>Request Event Source</DescriptionListTerm>
               <DescriptionListDescription>
                 <Label style={{ cursor: 'pointer' }} color="yellow">
                   {sbomerRequestManifest.reqEventType}
