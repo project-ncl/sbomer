@@ -56,6 +56,12 @@ export const RequestEventDetailsTable = () => {
     return null;
   }
 
+  // UseState does not seem to work, keep expansion toggling state
+  const expandedGenerations = {};
+  const toggleExpandable = (generationId: string) => {
+    expandedGenerations[generationId] = !expandedGenerations[generationId];
+  };
+
   return (
       <Grid hasGutter span={12}>
         <GridItem span={12}>
@@ -198,18 +204,56 @@ export const RequestEventDetailsTable = () => {
                           {/* {timestampToHumanReadable(Date.now() - request.creationTime.getTime(), false, 'ago')} */}
                         </Timestamp>
                       </Td>
+                      {/* Expandable Section for Children (e.g., linked manifests) */}
+                      <Td colSpan={5}>
+                        <ExpandableSection
+                          toggleText={expandedGenerations[generation.id] ? 'Hide Manifests' : 'Show Manifests'}
+                          onToggle={() => {toggleExpandable(generation.id);}}
+                        >
+                        {sbomerRequestManifest.manifests.length > 0 ? (
+                        <div>
+                          <Table aria-label="Child Manifests" variant="compact">
+                            <Thead>
+                              <Tr>
+                                <Th>{columnNames.mId}</Th>
+                                <Th>{columnNames.mRootPurl}</Th>
+                              </Tr>
+                            </Thead>
+                            <Tbody>
+                              {sbomerRequestManifest.manifests
+                                .filter((manifest) => manifest.generation.id === generation.id)
+                                .map((manifest) => (
+                                  <Tr key={manifest.id}>
+                                    <Td dataLabel={columnNames.mId}>
+                                      <Link to={`/manifests/${manifest.id}`} style={{ textDecoration: 'none', color: 'blue' }}>
+                                        <pre>{manifest.id}</pre>
+                                      </Link>
+                                    </Td>
+                                    <Td dataLabel={columnNames.mRootPurl}>
+                                      <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.rootPurl}</span>
+                                    </Td>
+                                  </Tr>
+                                ))}
+                            </Tbody>
+                          </Table>
+                        </div>
+                      ) : (
+                        <p>No child manifests available</p>
+                      )}
+                        </ExpandableSection>
+                      </Td>
                     </Tr>
                   ))} 
                 </Tbody>
               </Table>
             </Tab>
-            <Tab key={1} eventKey={1} title={<TabTitleText>Manifests generated</TabTitleText>}>
+            <Tab key={1} eventKey={1} title={<TabTitleText>All Manifests generated</TabTitleText>}>
               <Table aria-label="Manifests table" variant="compact">
                 <Caption></Caption>
                 <Thead>
                   <Tr>
                     <Th>{columnNames.mId}</Th>
-                    <Th>{columnNames.mIdentifier}</Th>
+                    <Th>{columnNames.mRootPurl}</Th>
                     <Th>{columnNames.mCreationTime}</Th>
                     <Th>{columnNames.id}</Th>
                     <Th>{columnNames.type}</Th>
@@ -226,19 +270,19 @@ export const RequestEventDetailsTable = () => {
                         <pre>{manifest.id}</pre>
                         </Link>
                       </Td>
-                      <Td dataLabel={columnNames.mIdentifier}>
+                      <Td dataLabel={columnNames.mRootPurl}>
                         <Tooltip
                           isContentLeftAligned={true}
                           content={
                             <div>
                               <div>
-                                <strong>Purl</strong>
+                                <strong>Identifier</strong>
                               </div>
-                              <div>{manifest.rootPurl}</div>
+                              <div>{manifest.identifier}</div>
                             </div>
                           }
                         >
-                          <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.identifier}</span>
+                          <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.rootPurl}</span>
                         </Tooltip>
                       </Td>
                       <Td dataLabel={columnNames.mCreationTime}>
