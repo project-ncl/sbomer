@@ -21,7 +21,7 @@ import { useRequestEvents } from './useRequestEvents';
 const columnNames = {
   id: 'ID',
   receivalTime: 'Received',
-  eventType: 'Type',
+  eventType: 'Source',
   eventStatus: 'Request Status',
   requestConfig: 'Request Config',
   event: 'Event',
@@ -66,17 +66,19 @@ export const RequestEventTable = () => {
         <Caption>Latest request events</Caption>
         <Thead>
           <Tr>
+            <Th>{columnNames.id}</Th>
             <Th>{columnNames.eventStatus}</Th>
             <Th>{columnNames.eventType}</Th>
             <Th>{columnNames.requestConfig}</Th>
             <Th>{columnNames.receivalTime}</Th>
-            <Th>{columnNames.id}</Th>
-            <Th>{columnNames.event}</Th>
           </Tr>
         </Thead>
         <Tbody>
           {value.map((requestEvent) => (
             <Tr key={requestEvent.id} isClickable onRowClick={() => navigate('/requestevents/' + requestEvent.id)}>
+              <Td dataLabel={columnNames.id}>
+                <pre>{requestEvent.id}</pre>
+              </Td>
               <Td dataLabel={columnNames.eventStatus}>
                   <Tooltip
                   isContentLeftAligned={true}
@@ -97,27 +99,23 @@ export const RequestEventTable = () => {
                 </Tooltip>
               </Td>
               <Td dataLabel={columnNames.eventType}>
-                  <span className="pf-v5-c-timestamp pf-m-help-text">{requestEvent.eventType}</span>
+                <Label style={{ cursor: 'pointer' }} color="yellow">
+                  {requestEvent.eventType}
+                </Label>
               </Td>
               <Td dataLabel={columnNames.requestConfig}>
-                <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
-                  <span className="pf-v5-c-timestamp pf-m-help-text">{requestEvent.requestConfigTypeName}={requestEvent.requestConfigTypeValue}</span>
-                </Tooltip>
+                {requestEvent.requestConfigTypeName ? (
+                  <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
+                    <span className="pf-v5-c-timestamp pf-m-help-text">
+                      {requestEvent.requestConfigTypeName}={requestEvent.requestConfigTypeValue}
+                    </span>
+                  </Tooltip>
+                ) : null}
               </Td>
               <Td dataLabel={columnNames.receivalTime}>
                 <Timestamp date={requestEvent.receivalTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
                   {timestampToHumanReadable(Date.now() - requestEvent.receivalTime.getTime(), false, 'ago')}
                 </Timestamp>
-              </Td>
-              <Td dataLabel={columnNames.id}>
-                <pre>{requestEvent.id}</pre>
-              </Td>
-              <Td dataLabel={columnNames.event}>
-                <CodeBlock>
-                  <ExpandableSection toggleTextExpanded="Hide" toggleTextCollapsed="Show">
-                    <CodeBlockCode>{JSON.stringify(requestEvent.event, null, 2).replace(/\\"/g, '"')}</CodeBlockCode>
-                  </ExpandableSection> 
-                </CodeBlock>
               </Td>
             </Tr>
           ))}
