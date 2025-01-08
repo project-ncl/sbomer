@@ -1,5 +1,6 @@
-import { timestampToHumanReadable } from '@app/utils/Utils';
+import { timestampToHumanReadable, typeToDescription } from '@app/utils/Utils';
 import {
+  Label,
   Pagination,
   PaginationVariant,
   Skeleton,
@@ -74,7 +75,9 @@ export const ManifestsTable = () => {
                 <pre>{manifest.id}</pre>
               </Td>
               <Td dataLabel={columnNames.type}>
-                <pre>{manifest.generation.type}</pre>
+                <Label style={{ cursor: 'pointer' }} color="purple">
+                  {typeToDescription(manifest.generation)}
+                </Label>
               </Td>
               <Td dataLabel={columnNames.identifier}>
                 <Tooltip

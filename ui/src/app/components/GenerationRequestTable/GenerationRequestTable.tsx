@@ -1,4 +1,4 @@
-import { statusToColor, statusToDescription, timestampToHumanReadable } from '@app/utils/Utils';
+import { statusToColor, statusToDescription, typeToDescription, timestampToHumanReadable } from '@app/utils/Utils';
 import {
   Label,
   Pagination,
@@ -62,15 +62,18 @@ export const GenerationRequestTable = () => {
         <Caption>Latest manifest generations</Caption>
         <Thead>
           <Tr>
+            <Th>{columnNames.id}</Th>
             <Th>{columnNames.status}</Th>
             <Th>{columnNames.type}</Th>
-            <Th>{columnNames.id}</Th>
             <Th>{columnNames.creationTime}</Th>
           </Tr>
         </Thead>
         <Tbody>
           {value.map((generation) => (
             <Tr key={generation.id} isClickable onRowClick={() => navigate('/generations/' + generation.id)}>
+              <Td dataLabel={columnNames.id}>
+                <pre>{generation.id}</pre>
+              </Td>
               <Td dataLabel={columnNames.status}>
                 <Tooltip
                   isContentLeftAligned={true}
@@ -92,11 +95,10 @@ export const GenerationRequestTable = () => {
               </Td>
               <Td dataLabel={columnNames.type}>
                 <Tooltip isContentLeftAligned={true} content={<code>{generation.identifier}</code>}>
-                  <span className="pf-v5-c-timestamp pf-m-help-text">{generation.type}</span>
+                  <Label style={{ cursor: 'pointer' }} color="purple">
+                    {typeToDescription(generation)}
+                  </Label>
                 </Tooltip>
-              </Td>
-              <Td dataLabel={columnNames.id}>
-                <pre>{generation.id}</pre>
               </Td>
               <Td dataLabel={columnNames.creationTime}>
                 <Timestamp date={generation.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
