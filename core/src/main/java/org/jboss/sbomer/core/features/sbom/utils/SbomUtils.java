@@ -50,6 +50,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.commonjava.atlas.maven.ident.ref.SimpleArtifactRef;
+import org.commonjava.atlas.npm.ident.ref.NpmPackageRef;
 import org.cyclonedx.Version;
 import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.exception.ParseException;
@@ -81,6 +83,7 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.enums.BuildType;
+import org.jboss.pnc.restclient.util.ArtifactUtil;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
@@ -161,27 +164,33 @@ public class SbomUtils {
         return component;
     }
 
-    private static void setCoordinates(Component component, String identifier, BuildType buildType) {
-
-        switch (buildType) {
-            case NPM:
-                String[] gv = identifier.split(":");
-                if (gv.length >= 1) {
-                    component.setGroup(gv[0]);
-                    component.setVersion(gv[1]);
+    private static void setCoordinates(Component component, Artifact artifact) {
+        switch (artifact.getTargetRepository().getRepositoryType()) {
+            case NPM: {
+                NpmPackageRef coordinates = ArtifactUtil.parseNPMCoordinates(artifact);
+                String[] scopeName = coordinates.getName().split("/");
+                if (scopeName.length == 2) {
+                    component.setGroup(scopeName[0]);
+                    component.setName(scopeName[1]);
+                } else if (scopeName.length == 1) {
+                    component.setName(scopeName[0]);
+                } else {
+                    log.warn("Unexpected number of slashes in NPM artifact name {}, using it fully", coordinates.getName());
+                    component.setName(coordinates.getName());
                 }
+                component.setVersion(coordinates.getVersionString());
                 break;
-            case MVN:
-            case GRADLE:
-            case SBT:
-            default:
-                String[] gaecv = identifier.split(":");
-
-                if (gaecv.length >= 3) {
-                    component.setGroup(gaecv[0]);
-                    component.setName(gaecv[1]);
-                    component.setVersion(gaecv[3]);
-                }
+            }
+            case MAVEN: {
+                SimpleArtifactRef coordinates = ArtifactUtil.parseMavenCoordinates(artifact);
+                component.setGroup(coordinates.getGroupId());
+                component.setName(coordinates.getArtifactId());
+                component.setVersion(coordinates.getVersionString());
+                break;
+            }
+            default: {
+                component.setName(artifact.getFilename());
+            }
         }
     }
 
@@ -311,14 +320,10 @@ public class SbomUtils {
                                 }));
     }
 
-    public static Component createComponent(Artifact artifact, Scope scope, Type type, BuildType buildType) {
+    public static Component createComponent(Artifact artifact, Scope scope, Type type) {
 
         Component component = new Component();
-        if (buildType != null) {
-            setCoordinates(component, artifact.getIdentifier(), buildType);
-        } else {
-            component.setName(artifact.getFilename());
-        }
+        setCoordinates(component, artifact);
         component.setScope(scope);
         component.setType(type);
         component.setPurl(artifact.getPurl());

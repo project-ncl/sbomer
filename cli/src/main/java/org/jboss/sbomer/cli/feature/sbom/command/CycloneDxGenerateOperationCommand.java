@@ -206,13 +206,11 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             // pom.xml)
             if (!purlToComponents.containsKey(artifact.getArtifact().getPurl())) {
                 KojiBuild brewBuild = null;
-                BuildType buildType = null;
 
                 if (artifact.getArtifact().getBuild() != null) {
-                    buildType = artifact.getArtifact().getBuild().getBuildConfigRevision().getBuildType();
+                    // Artifact was built in PNC, so it has all the data we need
                 } else if (artifact.getBrewId() != null && artifact.getBrewId() > 0) {
                     brewBuild = kojiService.findBuild(artifact.getArtifact());
-                    buildType = BuildType.MVN;
                 } else {
                     log.warn(
                             "An artifact has been found with no associated build: '{}'. It will be added in the SBOM with generic type.",
@@ -220,7 +218,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                 }
 
                 // Create a component entry for the artifact
-                Component component = createComponent(artifact.getArtifact(), Scope.REQUIRED, Type.LIBRARY, buildType);
+                Component component = createComponent(artifact.getArtifact(), Scope.REQUIRED, Type.LIBRARY);
                 setArtifactMetadata(component, artifact.getArtifact(), pncService.getApiUrl());
                 setPncBuildMetadata(component, artifact.getArtifact().getBuild(), pncService.getApiUrl());
 
