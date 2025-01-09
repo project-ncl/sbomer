@@ -2,6 +2,7 @@ package org.jboss.sbomer.cli.test.unit.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -216,6 +217,9 @@ public class DefaultProcessorTest {
         assertEquals("https://pnc.example.com/pnc-rest/v2/artifacts/2160610", onceArtifact.getUrl());
         assertTrue(getDependency("pkg:npm/once@1.4.0", mainDependency.getDependencies()).isPresent());
         assertTrue(getDependency("pkg:npm/once@1.4.0", processed.getDependencies()).isPresent());
+        assertNull(componentOnce.getGroup());
+        assertEquals("once", componentOnce.getName());
+        assertEquals("1.4.0", componentOnce.getVersion());
 
         Component componentKogito = getComponent(
                 processed,
@@ -241,6 +245,9 @@ public class DefaultProcessorTest {
                 getDependency(
                         "pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2",
                         processed.getDependencies()).isPresent());
+        assertEquals("@redhat", componentKogito.getGroup());
+        assertEquals("kogito-tooling-keyboard-shortcuts", componentKogito.getName());
+        assertEquals("0.9.0-2", componentKogito.getVersion());
     }
 
     private static Optional<Dependency> getDependency(String ref, List<Dependency> dependencies) {

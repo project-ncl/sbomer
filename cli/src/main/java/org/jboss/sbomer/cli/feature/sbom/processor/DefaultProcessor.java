@@ -332,10 +332,10 @@ public class DefaultProcessor implements Processor {
             return;
         }
 
-        addMissingNpmDependencies(bom, component, npmDependencies, build.getBuildConfigRevision().getBuildType());
+        addMissingNpmDependencies(bom, component, npmDependencies);
     }
 
-    private void addMissingNpmDependencies(Bom bom, Component component, Collection<Artifact> npmDependencies, BuildType buildType) {
+    private void addMissingNpmDependencies(Bom bom, Component component, Collection<Artifact> npmDependencies) {
         Set<String> listedPurls = bom.getComponents()
                 .stream()
                 .map(DefaultProcessor::getPackageURL)
@@ -357,8 +357,7 @@ public class DefaultProcessor implements Processor {
             Component newComponent = createComponent(
                     artifact,
                     Component.Scope.REQUIRED,
-                    Component.Type.LIBRARY,
-                    buildType);
+                    Component.Type.LIBRARY);
             setArtifactMetadata(newComponent, artifact, pncService.getApiUrl());
             setPncBuildMetadata(newComponent, artifact.getBuild(), pncService.getApiUrl());
             bom.addComponent(newComponent);
