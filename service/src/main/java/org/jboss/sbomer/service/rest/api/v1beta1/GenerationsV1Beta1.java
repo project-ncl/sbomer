@@ -136,6 +136,10 @@ public class GenerationsV1Beta1 {
                                     description = "Requests manifest generation for a PNC operation with identifier: A5WL3DFZ3AIAA",
                                     value = "{\"type\": \"pnc-operation\", \"operationId\": \"A5WL3DFZ3AIAA\"}"),
                             @ExampleObject(
+                                    name = "PNC analysis",
+                                    description = "Request manifest generation for following zips, storing the results under PNC milestone ID 1234",
+                                    value = "{\"type\": \"pnc-analysis\", \"milestoneId\": \"1234\", \"urls\": [\"https://download.host.com/staging/product-a/release-b/first.zip\", \"https://download.host.com/staging/product-a/release-b/second.zip\"]}"),
+                            @ExampleObject(
                                     name = "Errata Tool advisory",
                                     description = "Requests manifest generation for the 12345 advisory",
                                     value = "{\"type\": \"advisory\", \"advisoryId\": 12345}"),
