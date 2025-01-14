@@ -277,12 +277,12 @@ public class DefaultProcessor implements Processor {
         // If there are any purl relcoations, process these.
         purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
-
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             Component mainComponent = bom.getMetadata().getComponent();
             addMissingNpmDependencies(bom, mainComponent);
             // Add missing NPM Depenencies for CycloneDxGenerateOperationComand manifest
-            if (mainComponent.getDescription() != null && mainComponent.getDescription().contains(SBOM_REPRESENTING_THE_DELIVERABLE)) {
+            if (mainComponent.getDescription() != null
+                    && mainComponent.getDescription().contains(SBOM_REPRESENTING_THE_DELIVERABLE)) {
                 if (bom.getComponents() != null) {
                     ArrayList<Component> copyOfComponents = new ArrayList<>(bom.getComponents());
                     for (Component c : copyOfComponents) { // We modify bom.components, so need to iterate over a copy
@@ -354,10 +354,7 @@ public class DefaultProcessor implements Processor {
             if (listedPurls.contains(coordinates)) {
                 continue;
             }
-            Component newComponent = createComponent(
-                    artifact,
-                    Component.Scope.REQUIRED,
-                    Component.Type.LIBRARY);
+            Component newComponent = createComponent(artifact, Component.Scope.REQUIRED, Component.Type.LIBRARY);
             setArtifactMetadata(newComponent, artifact, pncService.getApiUrl());
             setPncBuildMetadata(newComponent, artifact.getBuild(), pncService.getApiUrl());
             bom.addComponent(newComponent);

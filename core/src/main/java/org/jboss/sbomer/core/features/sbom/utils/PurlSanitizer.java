@@ -50,7 +50,7 @@ public class PurlSanitizer {
             return parsedPurl.canonicalize();
         } catch (MalformedPackageURLException e) {
             // If parsing fails, proceed to manual sanitization
-            log.error("Malformed PURL detected, attempting to sanitize: {}", e.getMessage());
+            log.error("Malformed PURL detected, attempting to sanitize: {}", purl, e.getMessage());
         }
 
         // Manually parse and sanitize the PURL components
@@ -119,15 +119,15 @@ public class PurlSanitizer {
             return sanitizedPurl.canonicalize();
 
         } catch (Exception ex) {
-            throw new IllegalArgumentException("Failed to sanitize PURL: " + ex.getMessage(), ex);
+            throw new IllegalArgumentException("Failed to sanitize PURL: " + purl, ex);
         }
     }
 
-    private static String sanitizeType(String type) {
+    public static String sanitizeType(String type) {
         return type.replaceAll(TYPE_INVALID_CHARS, "-").toLowerCase();
     }
 
-    private static String sanitizeNamespace(String namespace) {
+    public static String sanitizeNamespace(String namespace) {
         if (namespace == null)
             return null;
         String[] segments = namespace.split("/");
@@ -137,17 +137,17 @@ public class PurlSanitizer {
         return String.join("/", segments);
     }
 
-    private static String sanitizeName(String name) {
+    public static String sanitizeName(String name) {
         return name.replaceAll(NAME_VERSION_QKEY_QVALUE, "-");
     }
 
-    private static String sanitizeVersion(String version) {
+    public static String sanitizeVersion(String version) {
         if (version == null)
             return null;
         return version.replaceAll(NAME_VERSION_QKEY_QVALUE, "-");
     }
 
-    private static String sanitizeSubpath(String subpath) {
+    public static String sanitizeSubpath(String subpath) {
         if (subpath == null)
             return null;
         String[] segments = subpath.split("/");
@@ -157,7 +157,7 @@ public class PurlSanitizer {
         return String.join("/", segments);
     }
 
-    private static TreeMap<String, String> sanitizeQualifiers(TreeMap<String, String> qualifiers) {
+    public static TreeMap<String, String> sanitizeQualifiers(TreeMap<String, String> qualifiers) {
         if (qualifiers == null)
             return null;
         TreeMap<String, String> sanitized = new TreeMap<>();

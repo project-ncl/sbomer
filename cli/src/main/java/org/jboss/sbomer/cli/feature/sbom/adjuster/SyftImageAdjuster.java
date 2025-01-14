@@ -170,13 +170,9 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                 return true;
             }
 
-            try {
-                // Validate the PURL
-                new PackageURL(c.getPurl());
-            } catch (MalformedPackageURLException e) {
-                String sanitizedPurl = PurlSanitizer.sanitizePurl(c.getPurl());
-                log.debug("Sanitized purl {} to {}", c.getPurl(), sanitizedPurl);
-                c.setPurl(sanitizedPurl);
+            if (!SbomUtils.hasValidOrSanitizablePurl(c)) {
+                log.debug("Component has a purl ({}) which cannot be made valid!", c.getPurl());
+                return true;
             }
 
             log.debug("Handling component '{}'", c.getPurl());
