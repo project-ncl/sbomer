@@ -1006,4 +1006,64 @@ public class SbomUtils {
             }
         }
     }
+
+    /**
+     *
+     * @param component the component whose purl needs to be analyzed
+     * @return true if the component has a valid purl, false if the purl is not valid even after a sanitization
+     */
+    public static boolean hasValidOrSanitizablePurl(Component component) {
+        String purl = component.getPurl();
+
+        // Try to validate the PURL first
+        if (isValidPurl(purl)) {
+            return true;
+        }
+
+        // Try to sanitize the PURL if invalid
+        String sanitizedPurl = sanitizePurl(purl);
+        if (sanitizedPurl != null) {
+            component.setPurl(sanitizedPurl);
+            log.debug("Sanitized purl {} to {}", purl, sanitizedPurl);
+            return true;
+        }
+
+        // Attempt to rebuild the PURL if sanitization failed
+        String rebuiltPurl = rebuildPurl(component);
+        if (rebuiltPurl != null) {
+            component.setPurl(rebuiltPurl);
+            log.debug("Rebuilt purl {} to {}", purl, rebuiltPurl);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean isValidPurl(String purl) {
+        try {
+            new PackageURL(purl);
+            return true;
+        } catch (MalformedPackageURLException e) {
+            return false;
+        }
+    }
+
+    public static String sanitizePurl(String purl) {
+        try {
+            return PurlSanitizer.sanitizePurl(purl);
+        } catch (Exception e) {
+            log.debug("Failed to sanitize purl {}", purl, e);
+            return null;
+        }
+    }
+
+    private static String rebuildPurl(Component component) {
+        try {
+            log.debug("Purl was not valid and could not be sanitized, trying to rebuild it!");
+            return PurlRebuilder.rebuildPurlFromSyftComponent(component);
+        } catch (MalformedPackageURLException e) {
+            log.debug("Purl {} could not be rebuilt!", component.getPurl());
+            return null;
+        }
+    }
 }

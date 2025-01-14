@@ -18,11 +18,11 @@ import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Component.Type;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
-import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.PurlSanitizer;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -322,5 +322,27 @@ public class SyftImageAdjusterTest {
         assertEquals(
                 "pkg:rpm/redhat/passt@0-20230222.g4ddbcb9-4.el9_2?arch=x86_64&distro=rhel-9.2&upstream=passt-0-20230222.g4ddbcb9-4.el9_2.src.rpm",
                 sanitizedPurl);
+    }
+
+    @Test
+    void shouldRebuildBogusPurls() throws IOException {
+        // Initialize the bogus component generated from Syft and verify it's not fixable, and remains unchanged
+        Component component = SbomUtils
+                .createComponent(null, "../", "(devel)", null, "pkg:golang/../@(devel)", Component.Type.LIBRARY);
+        component.setBomRef("a02ebe2f06983d18");
+        SbomUtils.addPropertyIfMissing(component, "syft:package:type", "go-module");
+
+        // Verify that the purl is not valid
+        boolean isValid = SbomUtils.isValidPurl(component.getPurl());
+        assertFalse(isValid);
+
+        // Verify that the purl cannot be sanitized
+        String sanitizedPurl = SbomUtils.sanitizePurl(component.getPurl());
+        assertNull(sanitizedPurl);
+
+        // Verify that the purl can be rebuilt
+        boolean isValidAfterRebuilding = SbomUtils.hasValidOrSanitizablePurl(component);
+        assertTrue(isValidAfterRebuilding);
+        assertTrue(SbomUtils.isValidPurl(component.getPurl()));
     }
 }
