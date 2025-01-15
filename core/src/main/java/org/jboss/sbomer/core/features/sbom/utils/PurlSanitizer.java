@@ -50,7 +50,7 @@ public class PurlSanitizer {
             return parsedPurl.canonicalize();
         } catch (MalformedPackageURLException e) {
             // If parsing fails, proceed to manual sanitization
-            log.error("Malformed PURL detected, attempting to sanitize: {}", purl, e.getMessage());
+            log.error("Malformed PURL detected, attempting to sanitize: {}", purl);
         }
 
         // Manually parse and sanitize the PURL components
