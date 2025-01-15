@@ -52,7 +52,7 @@ function install_java() {
 
     sdk install java "${version}"
     # Make an alias for major version
-    sdk install java ${version%%.*} "$(sdk home java ${version})"
+    sdk install java ${version%%.*} "$(sdk home java ${version} | tail -n 1)"
 
     # Of course JDK 8 uses different paths and the keytool command does not have the '-cacerts' flag
     local ca_keystore_path="$HOME/.sdkman/candidates/java/${version}/jre/lib/security/cacerts"
