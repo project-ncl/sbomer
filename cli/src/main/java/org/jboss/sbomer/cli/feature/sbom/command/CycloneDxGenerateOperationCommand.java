@@ -41,6 +41,7 @@ import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.PncOperationAdjuster;
+import org.jboss.sbomer.cli.feature.sbom.processor.WorkaroundMissingNpmDependencies;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
@@ -200,6 +201,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
 
         purlToComponents.put(distributionPurl, mainComponent);
         purl256ToDependencies.put(distributionPurl, mainDependency);
+        WorkaroundMissingNpmDependencies workaround = new WorkaroundMissingNpmDependencies(pncService);
 
         for (AnalyzedArtifact artifact : artifactsToManifest) {
             // Create the component if not already created (e.g. the same pom can be a plain .pom or embedded as
@@ -212,6 +214,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
 
                 if (artifact.getArtifact().getBuild() != null) {
                     // Artifact was built in PNC, so it has all the data we need
+                    workaround.analyzeBuild(component, artifact.getArtifact().getBuild());
                 } else if (artifact.getBrewId() != null && artifact.getBrewId() > 0) {
                     setBrewBuildMetadata(component, artifact);
                 } else {
@@ -249,6 +252,8 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             Dependency parent = maybeParent.isPresent() ? maybeParent.get() : mainDependency;
             parent.addDependency(dependency);
         }
+
+        workaround.addMissingDependencies(bom);
 
         // Adjust the bom if needed (e.g. add the serial number)
         new PncOperationAdjuster().adjust(bom);
