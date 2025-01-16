@@ -279,118 +279,13 @@ public class DefaultProcessor implements Processor {
 
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             Component mainComponent = bom.getMetadata().getComponent();
-            addMissingNpmDependencies(bom, mainComponent);
-            // Add missing NPM Depenencies for CycloneDxGenerateOperationComand manifest
-            if (mainComponent.getDescription() != null
-                    && mainComponent.getDescription().contains(SBOM_REPRESENTING_THE_DELIVERABLE)) {
-                if (bom.getComponents() != null) {
-                    ArrayList<Component> copyOfComponents = new ArrayList<>(bom.getComponents());
-                    for (Component c : copyOfComponents) { // We modify bom.components, so need to iterate over a copy
-                        addMissingNpmDependencies(bom, c);
-                    }
-                }
-            }
+
+            WorkaroundMissingNpmDependencies workaround = new WorkaroundMissingNpmDependencies(pncService);
+            workaround.analyzeComponentsBuild(mainComponent);
+            workaround.addMissingDependencies(bom);
         }
 
         return bom;
-    }
-
-    private void addMissingNpmDependencies(Bom bom, Component component) {
-        List<ExternalReference> externalReferences = getExternalReferences(
-                component,
-                ExternalReference.Type.BUILD_SYSTEM,
-                SBOM_RED_HAT_PNC_BUILD_ID);
-        if (externalReferences.isEmpty()) {
-            // Not a PNC build
-            return;
-        }
-        if (externalReferences.size() > 1) {
-            log.warn(
-                    "Component {} has more than one {}/{} external reference",
-                    component.getPurl(),
-                    ExternalReference.Type.BUILD_SYSTEM,
-                    SBOM_RED_HAT_PNC_BUILD_ID);
-            return;
-        }
-        String buildID = parseBuildIdFromURL(externalReferences.get(0).getUrl());
-        if (buildID == null) {
-            log.warn("Could not parse PNC build ID from url {}", externalReferences.get(0).getUrl());
-            return;
-        }
-        Build build = pncService.getBuild(buildID);
-        if (build == null) {
-            log.warn("Could not obtain PNC build for build id {}", buildID);
-            return;
-        }
-        if (build.getBuildConfigRevision().getBuildType() == BuildType.NPM) {
-            // Not processing pure NPM builds, cyclonedx-nodejs plugin handles them correctly
-            return;
-        }
-        Collection<Artifact> npmDependencies = pncService.getNPMDependencies(buildID);
-        if (npmDependencies.isEmpty()) {
-            // No NPM dependencies to add
-            return;
-        }
-
-        addMissingNpmDependencies(bom, component, npmDependencies);
-    }
-
-    private void addMissingNpmDependencies(Bom bom, Component component, Collection<Artifact> npmDependencies) {
-        Set<String> listedPurls = bom.getComponents()
-                .stream()
-                .map(DefaultProcessor::getPackageURL)
-                .map(PackageURL::getCoordinates)
-                .collect(Collectors.toSet());
-
-        Set<String> dependencyRefs = new HashSet<>();
-        for (Artifact artifact : npmDependencies) {
-            String coordinates;
-            try {
-                coordinates = new PackageURL(artifact.getPurl()).getCoordinates();
-            } catch (MalformedPackageURLException e) {
-                log.warn("Unable to parse artifact purl '{}'.", artifact.getPurl());
-                continue;
-            }
-            if (listedPurls.contains(coordinates)) {
-                continue;
-            }
-            Component newComponent = createComponent(artifact, Component.Scope.REQUIRED, Component.Type.LIBRARY);
-            setArtifactMetadata(newComponent, artifact, pncService.getApiUrl());
-            setPncBuildMetadata(newComponent, artifact.getBuild(), pncService.getApiUrl());
-            bom.addComponent(newComponent);
-            dependencyRefs.add(newComponent.getBomRef());
-        }
-        addComponentDependency(bom, component, dependencyRefs);
-    }
-
-    private void addComponentDependency(Bom bom, Component component, Set<String> dependencies) {
-        String componentRef = component.getBomRef();
-
-        Dependency componentDependencies = bom.getDependencies()
-                .stream()
-                .filter(d -> componentRef.equals(d.getRef()))
-                .findFirst()
-                .orElseGet(() -> addNewDependency(bom, componentRef));
-
-        dependencies.stream().map(SbomUtils::createDependency).forEach(d -> {
-            componentDependencies.addDependency(d);
-            bom.addDependency(d);
-        });
-    }
-
-    public static Dependency addNewDependency(Bom bom, String bomRef) {
-        Dependency dependency = createDependency(bomRef);
-        bom.addDependency(dependency);
-        return dependency;
-    }
-
-    private static String parseBuildIdFromURL(String buildURL) {
-        int lastSlashIndex = buildURL.lastIndexOf('/');
-        if (lastSlashIndex != -1) {
-            return buildURL.substring(lastSlashIndex + 1);
-        } else {
-            return null;
-        }
     }
 
     private void processRpmComponent(Component component, PackageURL purl) {
@@ -479,7 +374,7 @@ public class DefaultProcessor implements Processor {
         return ProcessorType.DEFAULT;
     }
 
-    private static PackageURL getPackageURL(Component component) {
+    public static PackageURL getPackageURL(Component component) {
         try {
             return new PackageURL(component.getPurl());
         } catch (MalformedPackageURLException e) {

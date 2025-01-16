@@ -1,0 +1,61 @@
+[
+    {
+        "id": "2160610",
+        "identifier": "once:1.4.0",
+        "purl": "pkg:npm/once@1.4.0",
+        "artifactQuality": "IMPORTED",
+        "buildCategory": "STANDARD",
+        "md5": "fac2afc3cbe5e133d7a5c34ec3f862ac",
+        "sha1": "583b1aa775961d4b113ac17d9c50baef9dd76bd1",
+        "sha256": "cf51460ba370c698f68b976e514d113497339ba018b6003e8e8eb569c6fccfcf",
+        "filename": "once-1.4.0.tgz",
+        "deployPath": "/once/-/once-1.4.0.tgz",
+        "importDate": "2019-09-11T06:50:45.947Z",
+        "originUrl": "https://repository.example.com/nexus/repository/registry.npmjs.org/once/-/once-1.4.0.tgz",
+        "size": 1979,
+        "deployUrl": "https://indy-gateway.example.com/api/content/npm/hosted/shared-imports/once/-/once-1.4.0.tgz",
+        "publicUrl": "https://indy.example.com/api/content/npm/hosted/shared-imports/once/-/once-1.4.0.tgz",
+        "creationTime": null,
+        "modificationTime": null,
+        "qualityLevelReason": null,
+        "targetRepository": {
+            "id": "17150",
+            "temporaryRepo": false,
+            "identifier": "indy-npm",
+            "repositoryType": "NPM",
+            "repositoryPath": "/api/content/npm/hosted/shared-imports/"
+        },
+        "build": null,
+        "creationUser": null,
+        "modificationUser": null
+    },{
+        "id": "2160611",
+        "identifier": "twice:1.4.0",
+        "purl": "pkg:npm/twice@1.4.0",
+        "artifactQuality": "IMPORTED",
+        "buildCategory": "STANDARD",
+        "md5": "123456789be5e133d7a5c34ec3f862ac",
+        "sha1": "1234567985961d4b113ac17d9c50baef9dd76bd1",
+        "sha256": "123456789370c698f68b976e514d113497339ba018b6003e8e8eb569c6fccfcf",
+        "filename": "twice-1.4.0.tgz",
+        "deployPath": "/twice/-/twice-1.4.0.tgz",
+        "importDate": "2019-09-11T06:50:45.947Z",
+        "originUrl": "https://repository.example.com/nexus/repository/registry.npmjs.org/twice/-/twice-1.4.0.tgz",
+        "size": 1979,
+        "deployUrl": "https://indy-gateway.example.com/api/content/npm/hosted/shared-imports/twice/-/twice-1.4.0.tgz",
+        "publicUrl": "https://indy.example.com/api/content/npm/hosted/shared-imports/twice/-/twice-1.4.0.tgz",
+        "creationTime": null,
+        "modificationTime": null,
+        "qualityLevelReason": null,
+        "targetRepository": {
+            "id": "17150",
+            "temporaryRepo": false,
+            "identifier": "indy-npm",
+            "repositoryType": "NPM",
+            "repositoryPath": "/api/content/npm/hosted/shared-imports/"
+        },
+        "build": null,
+        "creationUser": null,
+        "modificationUser": null
+    }
+]

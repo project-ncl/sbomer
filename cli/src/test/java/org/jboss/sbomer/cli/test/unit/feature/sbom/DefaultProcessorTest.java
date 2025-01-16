@@ -164,27 +164,6 @@ public class DefaultProcessorTest {
         verifyAddedNpmDependencies(processed);
     }
 
-    @Test
-    void testAddMissingNpmDependenciesToOperation() throws IOException {
-        DefaultProcessor defaultProcessor = mockForAddMissingNpmDependencies();
-
-        // With
-        Bom bom = SbomUtils.fromString(TestResources.asString("boms/operation.json"));
-        Optional<Component> missingComponent = getComponent(bom, "pkg:npm/once@1.4.0");
-        Optional<Dependency> missingDependency = getDependency("pkg:npm/once@1.4.0", bom.getDependencies());
-
-        assertTrue(missingComponent.isEmpty());
-        assertTrue(missingDependency.isEmpty());
-        assertEquals(3, bom.getComponents().size());
-
-        // When
-        Bom processed = defaultProcessor.process(bom);
-
-        // Then
-        assertEquals(5, processed.getComponents().size());
-        verifyAddedNpmDependencies(processed);
-    }
-
     private static DefaultProcessor mockForAddMissingNpmDependencies() throws IOException {
         PncService pncServiceMock = Mockito.mock(PncService.class);
         KojiService kojiServiceMock = Mockito.mock(KojiService.class);
