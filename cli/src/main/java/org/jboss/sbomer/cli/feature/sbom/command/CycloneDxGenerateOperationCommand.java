@@ -25,17 +25,17 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
+import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
-import org.jboss.pnc.enums.BuildType;
-import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
@@ -54,6 +54,7 @@ import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import picocli.CommandLine.Command;
 
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
@@ -63,7 +64,6 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependen
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setBrewBuildMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setProductMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.toJsonNode;
@@ -142,13 +142,15 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         List<AnalyzedArtifact> artifactsToManifest = isLegacyAnalysis ? allAnalyzedArtifacts
                 : allAnalyzedArtifacts.stream()
                         .filter(a -> deliverableUrl.equals(a.getDistribution().getDistributionUrl()))
-                        .collect(Collectors.toList());
+                        .toList();
 
+        Optional<String> distributionSha256;
         if (isLegacyAnalysis) {
             log.info(
                     "The deliverable analysis operation '{}' seems to be old because it does not have the distribution metadata and all the filename match info; filtering cannot be done so the final manifest will contain ALL the content of ALL the deliverable urls (if multiple). Total analyzed artifacts in the operation: '{}'",
                     config.getOperationId(),
                     allAnalyzedArtifacts.size());
+            distributionSha256 = Optional.empty();
         } else {
             log.info(
                     "Retrieved {} artifacts in the specified deliverable: '{}', out of {} total analyzed artifacts in the operation: '{}'",
@@ -156,15 +158,13 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                     deliverableUrl,
                     allAnalyzedArtifacts.size(),
                     config.getOperationId());
+            distributionSha256 = artifactsToManifest.stream()
+                    .map(a -> a.getDistribution().getSha256())
+                    .filter(Objects::nonNull)
+                    .findFirst();
         }
 
         String fileName = extractFilenameFromURL(deliverableUrl);
-        Optional<String> distributionSha256 = artifactsToManifest.stream()
-                .filter(
-                        a -> a.getDistribution() != null && a.getDistribution().getSha256() != null
-                                && deliverableUrl.equals(a.getDistribution().getDistributionUrl()))
-                .map(a -> a.getDistribution().getSha256())
-                .findFirst();
 
         // Create the main component PURL and version, plus description
         String desc = SBOM_REPRESENTING_THE_DELIVERABLE + fileName + " with ";
@@ -205,29 +205,19 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             // Create the component if not already created (e.g. the same pom can be a plain .pom or embedded as
             // pom.xml)
             if (!purlToComponents.containsKey(artifact.getArtifact().getPurl())) {
-                KojiBuild brewBuild = null;
-
-                if (artifact.getArtifact().getBuild() != null) {
-                    // Artifact was built in PNC, so it has all the data we need
-                } else if (artifact.getBrewId() != null && artifact.getBrewId() > 0) {
-                    brewBuild = kojiService.findBuild(artifact.getArtifact());
-                } else {
-                    log.warn(
-                            "An artifact has been found with no associated build: '{}'. It will be added in the SBOM with generic type.",
-                            artifact.getArtifact().getFilename());
-                }
-
                 // Create a component entry for the artifact
                 Component component = createComponent(artifact.getArtifact(), Scope.REQUIRED, Type.LIBRARY);
                 setArtifactMetadata(component, artifact.getArtifact(), pncService.getApiUrl());
                 setPncBuildMetadata(component, artifact.getArtifact().getBuild(), pncService.getApiUrl());
 
-                if (brewBuild != null) {
-                    setBrewBuildMetadata(
-                            component,
-                            String.valueOf(brewBuild.getBuildInfo().getId()),
-                            brewBuild.getSource(),
-                            kojiService.getConfig().getKojiWebURL().toString());
+                if (artifact.getArtifact().getBuild() != null) {
+                    // Artifact was built in PNC, so it has all the data we need
+                } else if (artifact.getBrewId() != null && artifact.getBrewId() > 0) {
+                    setBrewBuildMetadata(component, artifact);
+                } else {
+                    log.warn(
+                            "An artifact has been found with no associated build: '{}'. It will be added in the SBOM with generic type.",
+                            artifact.getArtifact().getFilename());
                 }
 
                 // Add the component to the SBOM and to the internal cache
@@ -285,6 +275,22 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         }
 
         return sbomDirPath;
+    }
+
+    private void setBrewBuildMetadata(Component component, AnalyzedArtifact artifact) {
+        KojiBuildInfo brewBuild;
+        try {
+            brewBuild = kojiService.findBuild(artifact.getBrewId().intValue());
+            if (brewBuild != null) {
+                SbomUtils.setBrewBuildMetadata(
+                        component,
+                        String.valueOf(brewBuild.getId()),
+                        Optional.ofNullable(brewBuild.getSource()),
+                        kojiService.getConfig().getKojiWebURL().toString());
+            }
+        } catch (KojiClientException e) {
+            log.error("Failed to retrieve brew build.", e);
+        }
     }
 
     private String extractFilenameFromURL(String url) {

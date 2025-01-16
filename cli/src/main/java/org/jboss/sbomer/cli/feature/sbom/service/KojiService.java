@@ -242,6 +242,19 @@ public class KojiService {
         return buildInfo;
     }
 
+    public KojiBuildInfo findBuild(int id) throws KojiClientException {
+        log.debug("Retrieving Brew build with id '{}'...", id);
+
+        KojiBuildInfo build = kojiSession.getBuild(id);
+
+        if (build == null) {
+            log.warn("Build with id {} not found", id);
+            return null;
+        }
+
+        return build;
+    }
+
     public KojiBuildInfo findBuild(String nvr) throws KojiClientException {
         if (nvr == null) {
             return null;
