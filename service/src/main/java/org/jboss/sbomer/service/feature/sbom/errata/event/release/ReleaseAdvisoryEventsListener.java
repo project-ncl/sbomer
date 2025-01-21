@@ -116,8 +116,8 @@ public class ReleaseAdvisoryEventsListener {
 
     private static final String NVR_STANDARD_SEPARATOR = "-";
 
-    public void onReleaseAdvisoryEvent(@ObservesAsync AdvisoryReleaseEvent event) {
-        log.debug("Event received for advisory release ...");
+    public void onReleaseAdvisoryEvent(@ObservesAsync StandardAdvisoryReleaseEvent event) {
+        log.debug("Event received for standard advisory release ...");
 
         RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
         try {
@@ -206,7 +206,7 @@ public class ReleaseAdvisoryEventsListener {
             Errata erratum,
             Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails,
             V1Beta1RequestRecord advisoryManifestsRecord,
-            Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations,
+            Map<String, SbomGenerationRequest> releaseGenerations,
             String toolVersion,
             Component.Type productType,
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
@@ -240,7 +240,7 @@ public class ReleaseAdvisoryEventsListener {
 
             SbomUtils.addMissingSerialNumber(productVersionBom);
 
-            SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
+            SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
             Sbom sbom = saveReleaseManifestForRPMGeneration(
                     requestEvent,
                     erratum,
@@ -276,7 +276,7 @@ public class ReleaseAdvisoryEventsListener {
             Errata erratum,
             Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails,
             V1Beta1RequestRecord advisoryManifestsRecord,
-            Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations,
+            Map<String, SbomGenerationRequest> releaseGenerations,
             String toolVersion,
             Component.Type productType,
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
@@ -309,7 +309,7 @@ public class ReleaseAdvisoryEventsListener {
 
             SbomUtils.addMissingSerialNumber(productVersionBom);
 
-            SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
+            SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
             Sbom sbom = saveReleaseManifestForDockerGeneration(
                     requestEvent,
                     erratum,

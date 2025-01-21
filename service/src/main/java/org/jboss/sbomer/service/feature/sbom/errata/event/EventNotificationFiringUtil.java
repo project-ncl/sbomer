@@ -18,7 +18,8 @@
 package org.jboss.sbomer.service.feature.sbom.errata.event;
 
 import org.jboss.sbomer.service.feature.sbom.errata.event.comment.RequestEventStatusUpdateEvent;
-import org.jboss.sbomer.service.feature.sbom.errata.event.release.AdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.TextOnlyAdvisoryReleaseEvent;
 
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.event.Event;
@@ -42,10 +43,18 @@ public class EventNotificationFiringUtil {
     }
 
     public static void notifyAdvisoryRelease(Object advisoryReleaseNotification) {
-        AdvisoryReleaseEvent releaseEvent = (AdvisoryReleaseEvent) advisoryReleaseNotification;
-        log.info(
-                "Firing async event for advisory release update upon event with id: {}",
-                releaseEvent.getRequestEventId());
+        if (advisoryReleaseNotification instanceof StandardAdvisoryReleaseEvent) {
+            StandardAdvisoryReleaseEvent releaseEvent = (StandardAdvisoryReleaseEvent) advisoryReleaseNotification;
+            log.info(
+                    "Firing async event for standard advisory release update upon event with id: {}",
+                    releaseEvent.getRequestEventId());
+        } else {
+            TextOnlyAdvisoryReleaseEvent releaseEvent = (TextOnlyAdvisoryReleaseEvent) advisoryReleaseNotification;
+            log.info(
+                    "Firing async event for text-only advisory release update upon event with id: {}",
+                    releaseEvent.getRequestEventId());
+        }
+
         Event<Object> event = Arc.container().beanManager().getEvent();
         event.fireAsync(advisoryReleaseNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {
@@ -53,5 +62,4 @@ public class EventNotificationFiringUtil {
             }
         });
     }
-
 }
