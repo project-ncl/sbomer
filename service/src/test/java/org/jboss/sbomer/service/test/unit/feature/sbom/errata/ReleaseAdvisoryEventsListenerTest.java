@@ -52,7 +52,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductV
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepo;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
-import org.jboss.sbomer.service.feature.sbom.errata.event.release.AdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseAdvisoryEventsListener;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
@@ -488,7 +488,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                                         .collect(Collectors.toList())));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
-        Map<ProductVersionEntry, SbomGenerationRequest> pvToGenerations = new HashMap<ProductVersionEntry, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
         Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
 
         buildDetails.keySet().forEach(pv -> {
@@ -503,7 +503,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                     .build();
 
             generationsMap.put(generationId, sbomGenerationRequest);
-            pvToGenerations.put(pv, sbomGenerationRequest);
+            pvToGenerations.put(pv.getName(), sbomGenerationRequest);
         });
         when(errataClient.getVariant("AppStream-8.10.0.Z.MAIN.EUS")).thenReturn(variant);
         when(errataClient.getBuildsList(String.valueOf(errata.getDetails().get().getId())))
@@ -527,7 +527,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
                 .thenReturn(latestAdvisoryRequestManifest);
 
-        AdvisoryReleaseEvent event = AdvisoryReleaseEvent.builder()
+        StandardAdvisoryReleaseEvent event = StandardAdvisoryReleaseEvent.builder()
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
@@ -629,7 +629,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                                         .collect(Collectors.toList())));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
-        Map<ProductVersionEntry, SbomGenerationRequest> pvToGenerations = new HashMap<ProductVersionEntry, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
         Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
 
         buildDetails.keySet().forEach(pv -> {
@@ -644,7 +644,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                     .build();
 
             generationsMap.put(generationId, sbomGenerationRequest);
-            pvToGenerations.put(pv, sbomGenerationRequest);
+            pvToGenerations.put(pv.getName(), sbomGenerationRequest);
         });
 
         when(errataClient.getVariant("8Base-RHOSE-4.15")).thenReturn(variant8BaseRHOSE415);
@@ -670,7 +670,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
                 .thenReturn(latestAdvisoryRequestManifest);
 
-        AdvisoryReleaseEvent event = AdvisoryReleaseEvent.builder()
+        StandardAdvisoryReleaseEvent event = StandardAdvisoryReleaseEvent.builder()
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
@@ -713,7 +713,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                                         .collect(Collectors.toList())));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
-        Map<ProductVersionEntry, SbomGenerationRequest> pvToGenerations = new HashMap<ProductVersionEntry, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
         Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
 
         buildDetails.keySet().forEach(pv -> {
@@ -728,7 +728,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                     .build();
 
             generationsMap.put(generationId, sbomGenerationRequest);
-            pvToGenerations.put(pv, sbomGenerationRequest);
+            pvToGenerations.put(pv.getName(), sbomGenerationRequest);
         });
         when(errataClient.getVariant("7ComputeNode-7.2.Z")).thenReturn(variant);
         when(errataClient.getBuildsList(String.valueOf(errata.getDetails().get().getId())))
@@ -751,7 +751,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
                 .thenReturn(latestAdvisoryRequestManifest);
 
-        AdvisoryReleaseEvent event = AdvisoryReleaseEvent.builder()
+        StandardAdvisoryReleaseEvent event = StandardAdvisoryReleaseEvent.builder()
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();

@@ -27,12 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.pnc.build.finder.koji.ClientSession;
 import org.jboss.pnc.build.finder.koji.KojiClientSession;
+import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
@@ -59,11 +60,13 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.Build;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease.ErrataProductVersion;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.errata.event.comment.RequestEventStatusUpdateEvent;
-import org.jboss.sbomer.service.feature.sbom.errata.event.release.AdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.TextOnlyAdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -194,9 +197,126 @@ public class AdvisoryService {
             return doIgnoreRequest(requestEvent, reason);
         }
 
-        List<RequestConfig> requestConfigsWithinNotes = new ArrayList<>();
         JsonNode notes = maybeNotes.get();
 
+        // The SBOMs are manually provided inside the notes field "manifest" as a list of purls
+        if (notes.has("manifest")) {
+
+            log.debug(
+                    "Text-Only Errata Advisory '{}'({}) has a \"manifest\" Notes field",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+
+            if (ErrataStatus.SHIPPED_LIVE.equals(erratum.getDetails().get().getStatus())) {
+                // We can proceed with the release event notification, we trust the owners of the advisory to push live
+                // when appropriate
+                String productVersionText = erratum.getContent().getContent().getProductVersionText();
+                String cpeText = erratum.getContent().getContent().getTextOnlyCpe();
+                if (Strings.isEmpty(productVersionText) || Strings.isEmpty(cpeText)) {
+                    String reason = String.format(
+                            "Text-Only Errata Advisory '%s'(%s) does not have Product Version or CPE configured",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
+
+                    return doIgnoreRequest(requestEvent, reason);
+                }
+
+                Map<String, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
+                        erratum,
+                        requestEvent,
+                        Set.of(productVersionText),
+                        GenerationRequestType.BUILD);
+
+                // Send an async notification for the release event
+                notifyAdvisoryRelease(
+                        TextOnlyAdvisoryReleaseEvent.builder()
+                                .withRequestEventId(requestEvent.getId())
+                                .withReleaseGenerations(releaseGenerations)
+                                .build());
+
+                return releaseGenerations.values();
+
+            } else if (ErrataStatus.QE.equals(erratum.getDetails().get().getStatus())) {
+
+                // Send an async notification for the completed generations (will be used to add comments to Errata)
+                notifyRequestEventStatusUpdate(
+                        RequestEventStatusUpdateEvent.builder()
+                                .withRequestEventConfig(
+                                        ErrataAdvisoryRequestConfig.builder()
+                                                .withAdvisoryId(String.valueOf(erratum.getDetails().get().getId()))
+                                                .build())
+                                .withRequestEventStatus(RequestEventStatus.SUCCESS)
+                                .build());
+            }
+
+            // There is nothing to do for SBOMer, beside adding comments to the Errata
+            updateRequest(requestEvent, RequestEventStatus.SUCCESS, null);
+
+            return Collections.emptyList();
+        } else {
+            // The notes contain 1 or more configurations inside a "deliverables" field that SBOMer needs to handle by
+            // converting them to generations
+            log.debug(
+                    "Text-Only Errata Advisory '{}'({}) has a \"deliverables\" Notes field",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+
+            // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
+            // manifests. Otherwise SBOMer will default to the creation of build manifests. Will change in future!
+            V1Beta1RequestRecord successfulRequestRecord = null;
+            if (ErrataStatus.SHIPPED_LIVE.equals(erratum.getDetails().get().getStatus())) {
+                log.debug(
+                        "Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}",
+                        erratum.getDetails().get().getId());
+                successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryRequestRecord(
+                        requestEvent.getId(),
+                        String.valueOf(erratum.getDetails().get().getId()));
+            }
+
+            if (successfulRequestRecord == null) {
+                List<RequestConfig> requestConfigsWithinNotes = parseRequestConfigsFromJsonNotes(
+                        notes,
+                        requestEvent,
+                        erratum);
+                return processRequestConfigsWithinNotes(requestEvent, requestConfigsWithinNotes);
+            } else {
+                // We can proceed with the release event notification, we trust the owners of the advisory to push live
+                // when appropriate
+                String productVersionText = erratum.getContent().getContent().getProductVersionText();
+                String cpeText = erratum.getContent().getContent().getTextOnlyCpe();
+                if (Strings.isEmpty(productVersionText) || Strings.isEmpty(cpeText)) {
+                    String reason = String.format(
+                            "Text-Only Errata Advisory '%s'(%s) does not have Product Version or CPE configured",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
+
+                    return doIgnoreRequest(requestEvent, reason);
+                }
+
+                Map<String, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
+                        erratum,
+                        requestEvent,
+                        Set.of(productVersionText),
+                        GenerationRequestType.BUILD);
+
+                // Send an async notification for the release event
+                notifyAdvisoryRelease(
+                        TextOnlyAdvisoryReleaseEvent.builder()
+                                .withRequestEventId(requestEvent.getId())
+                                .withReleaseGenerations(releaseGenerations)
+                                .build());
+
+                return releaseGenerations.values();
+            }
+        }
+    }
+
+    private List<RequestConfig> parseRequestConfigsFromJsonNotes(
+            JsonNode notes,
+            RequestEvent requestEvent,
+            Errata erratum) {
+
+        List<RequestConfig> requestConfigsWithinNotes = new ArrayList<>();
         if (notes.has("deliverables")) {
             JsonNode deliverables = notes.path("deliverables");
 
@@ -209,6 +329,7 @@ public class AdvisoryService {
                     if (requestConfig != null) {
                         requestConfigsWithinNotes.add(requestConfig);
                     } else {
+                        // While it is fine to ignore empty notes, an invalid json notes field should trigger an error
                         String reason = String.format(
                                 "Unsupported deliverable type '%s' in Text-Only Errata Advisory '%s' (%s)",
                                 type,
@@ -225,23 +346,8 @@ public class AdvisoryService {
                     "Text-Only Errata Advisory '{}'({}) has a \"manifest\" Notes field",
                     erratum.getDetails().get().getFulladvisory(),
                     erratum.getDetails().get().getId());
-
-            // There is nothing to do for SBOMer, beside adding comments to the Errata
-            updateRequest(requestEvent, RequestEventStatus.SUCCESS, null);
-
-            // Send an async notification for the completed generations (will be used to add comments to Errata)
-            notifyRequestEventStatusUpdate(
-                    RequestEventStatusUpdateEvent.builder()
-                            .withRequestEventConfig(
-                                    ErrataAdvisoryRequestConfig.builder()
-                                            .withAdvisoryId(String.valueOf(erratum.getDetails().get().getId()))
-                                            .build())
-                            .withRequestEventStatus(RequestEventStatus.SUCCESS)
-                            .build());
         }
-
-        return requestConfigsWithinNotes.isEmpty() ? Collections.emptyList()
-                : processRequestConfigsWithinNotes(requestEvent, requestConfigsWithinNotes);
+        return requestConfigsWithinNotes;
     }
 
     private Collection<SbomGenerationRequest> handleStandardAdvisory(RequestEvent requestEvent, Errata erratum) {
@@ -415,26 +521,26 @@ public class AdvisoryService {
     }
 
     @Transactional
-    protected Map<ProductVersionEntry, SbomGenerationRequest> createReleaseManifestsGenerationsForType(
+    protected Map<String, SbomGenerationRequest> createReleaseManifestsGenerationsForType(
             Errata erratum,
             RequestEvent requestEvent,
-            Map<ProductVersionEntry, List<BuildItem>> buildDetails,
+            Set<String> productVersions,
             GenerationRequestType type) {
 
         // We need to create 1 release manifest per ProductVersion
         // We will identify the Generation with the {Errata}#{ProductVersion} identifier
-        Map<ProductVersionEntry, SbomGenerationRequest> pvToGenerations = new HashMap<ProductVersionEntry, SbomGenerationRequest>();
-        buildDetails.keySet().forEach(pv -> {
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
+        productVersions.forEach(pvName -> {
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                     .withId(RandomStringIdGenerator.generate())
-                    .withIdentifier(erratum.getDetails().get().getFulladvisory() + "#" + pv.getName())
+                    .withIdentifier(erratum.getDetails().get().getFulladvisory() + "#" + pvName)
                     .withType(type)
                     .withStatus(SbomGenerationStatus.GENERATING)
                     .withConfig(null) // I really don't know what to put here
                     .withRequest(requestEvent)
                     .build();
 
-            pvToGenerations.put(pv, generationRequestRepository.save(sbomGenerationRequest));
+            pvToGenerations.put(pvName, generationRequestRepository.save(sbomGenerationRequest));
         });
         return pvToGenerations;
     }
@@ -455,15 +561,18 @@ public class AdvisoryService {
             return doIgnoreRequest(requestEvent, "Standard Errata RPM release manifest generation is disabled");
         }
 
-        Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
+        Map<String, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
                 erratum,
                 requestEvent,
-                buildDetails,
+                buildDetails.keySet()
+                        .stream()
+                        .map(prodVersionEntry -> prodVersionEntry.getName())
+                        .collect(Collectors.toSet()),
                 type);
 
         // Send an async notification for the completed generations (will be used to add comments to Errata)
         notifyAdvisoryRelease(
-                AdvisoryReleaseEvent.builder()
+                StandardAdvisoryReleaseEvent.builder()
                         .withRequestEventId(requestEvent.getId())
                         .withReleaseGenerations(releaseGenerations)
                         .build());

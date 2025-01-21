@@ -99,6 +99,8 @@ import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
 
+import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
+
 public class SbomUtils {
 
     private SbomUtils() {
@@ -175,7 +177,9 @@ public class SbomUtils {
                 } else if (scopeName.length == 1) {
                     component.setName(scopeName[0]);
                 } else {
-                    log.warn("Unexpected number of slashes in NPM artifact name {}, using it fully", coordinates.getName());
+                    log.warn(
+                            "Unexpected number of slashes in NPM artifact name {}, using it fully",
+                            coordinates.getName());
                     component.setName(coordinates.getName());
                 }
                 component.setVersion(coordinates.getVersionString());
@@ -1064,6 +1068,52 @@ public class SbomUtils {
         } catch (MalformedPackageURLException e) {
             log.debug("Purl {} could not be rebuilt!", component.getPurl());
             return null;
+        }
+    }
+
+    /**
+     * Creates a new purl with the same name, namespace, subpath, type, version and qualifiers and add the specified
+     * qualifier. If "redHatComponentsOnly" is true, add the qualifiers only if the component has a Red Hat version.
+     * Finally rebuilds the purl to make sure it is valid and qualifiers are properly sorted.
+     *
+     * @param component the input component which has the purl to modify
+     * @param qualifiers the Map with the qualifiers key-value
+     * @param redHatComponentsOnly boolean, true if the qualifiers should be added only to components with Red Hat
+     *        version
+     * @return The new validated purl as string.
+     */
+    public static String addQualifiersToPurlOfComponent(
+            Component component,
+            Map<String, String> qualifiers,
+            boolean redHatComponentsOnly) {
+
+        // In case this is not a RH artifact, do not update the purl
+        if (redHatComponentsOnly && !RhVersionPattern.isRhVersion(component.getVersion())
+                && !RhVersionPattern.isRhPurl(component.getPurl())) {
+            return component.getPurl();
+        }
+
+        try {
+            PackageURL purl = new PackageURL(component.getPurl());
+            PackageURLBuilder builder = PackageURLBuilder.aPackageURL()
+                    .withName(purl.getName())
+                    .withNamespace(purl.getNamespace())
+                    .withSubpath(purl.getSubpath())
+                    .withType(purl.getType())
+                    .withVersion(purl.getVersion());
+
+            if (purl.getQualifiers() != null) {
+                // Copy all the original qualifiers
+                purl.getQualifiers().forEach((k, v) -> builder.withQualifier(k, v));
+            }
+
+            // Add the qualifiers
+            qualifiers.forEach((k, v) -> builder.withQualifier(k, v));
+
+            return builder.build().toString();
+        } catch (MalformedPackageURLException | IllegalArgumentException e) {
+            log.warn("Error while adding new qualifiers to component with purl {}", component.getPurl(), e);
+            return component.getPurl();
         }
     }
 }

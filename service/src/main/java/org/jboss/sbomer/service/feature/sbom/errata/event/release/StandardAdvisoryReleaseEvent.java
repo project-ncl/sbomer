@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
 import java.util.Map;
 
-import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 
 import lombok.Builder;
@@ -27,9 +26,9 @@ import lombok.Data;
 
 @Data
 @Builder(setterPrefix = "with")
-public class AdvisoryReleaseEvent {
+public class StandardAdvisoryReleaseEvent {
 
     final String requestEventId;
-    final Map<ProductVersionEntry, SbomGenerationRequest> releaseGenerations;
+    final Map<String, SbomGenerationRequest> releaseGenerations;
 
 }
