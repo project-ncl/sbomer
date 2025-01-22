@@ -1,0 +1,20 @@
+{
+    "id": "69436F788E634CB",
+    "receivalTime": "2024-12-09T15:49:02.983293Z",
+    "eventType": "REST",
+    "eventStatus": "SUCCESS",
+    "reason": "1/1 completed with success",
+    "requestConfig": {
+      "type": "errata-advisory",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "advisoryId": "130278"
+    },
+    "event": {
+      "method": "POST",
+      "address": "10.39.192.91",
+      "span_id": "de455e026ad1ad3e",
+      "trace_id": "713ccadb60ec75148909afc9b92ab46f",
+      "username": "<none>",
+      "destination": "http://sbomer.pnc.engineering.redhat.com/api/v1beta1/generations"
+    }
+  }

@@ -40,6 +40,7 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.component.evidence.Identity;
 import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -53,7 +54,9 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepo;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
-import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseAdvisoryEventsListener;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.TextOnlyAdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseStandardAdvisoryEventsListener;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseTextOnlyAdvisoryEventsListener;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
@@ -75,6 +78,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+import com.github.packageurl.PackageURLBuilder;
 
 import groovy.util.logging.Slf4j;
 import io.quarkus.test.junit.QuarkusTest;
@@ -86,6 +92,7 @@ public class ReleaseAdvisoryEventsListenerTest {
     ReleaseAdvisoryEventsListenerSingleContainer listenerSingleContainer;
     ReleaseAdvisoryEventsListenerMultiContainer listenerMultiContainers;
     ReleaseAdvisoryEventsListenerSingleRPM listenerSingleRpm;
+    ReleaseTextOnlyAdvisoryEventsListenerManifests listenerTextOnlyManifests;
     ErrataClient errataClient = mock(ErrataClient.class);
     PyxisClient pyxisClient = mock(PyxisClient.class);
     StatsService statsService = mock(StatsService.class);
@@ -107,16 +114,22 @@ public class ReleaseAdvisoryEventsListenerTest {
     private static void validateComponent(
             Component component,
             Component.Type expectedType,
+            String expectedGroup,
             String expectedName,
             String expectedVersion,
             String expectedBomRef,
             String expectedPurl,
             List<String> expectedConcludedValues,
             Field expectedField) {
+
+        if (expectedGroup != null) {
+            assertEquals(expectedGroup, component.getGroup());
+        }
         assertEquals(expectedType, component.getType());
         assertEquals(expectedName, component.getName());
         assertEquals(expectedVersion, component.getVersion());
         assertEquals(expectedBomRef, component.getBomRef());
+
         assertEquals(expectedPurl, component.getPurl());
 
         List<Identity> identities = component.getEvidence().getIdentities();
@@ -141,7 +154,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         }
     }
 
-    static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseAdvisoryEventsListener {
+    static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
         protected Sbom saveReleaseManifestForDockerGeneration(
@@ -157,6 +170,7 @@ public class ReleaseAdvisoryEventsListenerTest {
             validateComponent(
                     bom.getMetadata().getComponent(),
                     Component.Type.OPERATING_SYSTEM,
+                    null,
                     "Red Hat Enterprise Linux 8",
                     "RHEL-8.10.0.Z.MAIN+EUS",
                     "RHEL-8.10.0.Z.MAIN+EUS",
@@ -169,6 +183,7 @@ public class ReleaseAdvisoryEventsListenerTest {
             validateComponent(
                     bom.getComponents().get(0),
                     Component.Type.CONTAINER,
+                    null,
                     "ubi8/ruby-25",
                     "sha256:b1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
                     "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
@@ -192,7 +207,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         }
     }
 
-    static class ReleaseAdvisoryEventsListenerMultiContainer extends ReleaseAdvisoryEventsListener {
+    static class ReleaseAdvisoryEventsListenerMultiContainer extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
         protected Sbom saveReleaseManifestForDockerGeneration(
@@ -214,6 +229,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                 validateComponent(
                         bom.getMetadata().getComponent(),
                         Component.Type.FRAMEWORK,
+                        null,
                         "Red Hat OpenShift Container Platform 4.15",
                         "OSE-4.15-RHEL-8",
                         "OSE-4.15-RHEL-8",
@@ -224,6 +240,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                 validateComponent(
                         bom.getComponents().get(0),
                         Component.Type.CONTAINER,
+                        null,
                         "openshift/ose-gcp-filestore-csi-driver-operator-bundle",
                         "sha256:201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
                         "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
@@ -248,6 +265,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                 validateComponent(
                         bom.getMetadata().getComponent(),
                         Component.Type.FRAMEWORK,
+                        null,
                         "Red Hat OpenShift Container Platform 4.15",
                         "OSE-4.15-RHEL-9",
                         "OSE-4.15-RHEL-9",
@@ -258,6 +276,7 @@ public class ReleaseAdvisoryEventsListenerTest {
                 validateComponent(
                         bom.getComponents().get(0),
                         Component.Type.CONTAINER,
+                        null,
                         "openshift/ose-clusterresourceoverride-operator-bundle",
                         "sha256:d37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
                         "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
@@ -301,13 +320,15 @@ public class ReleaseAdvisoryEventsListenerTest {
                     bom);
             sbom.setReleaseMetadata(metadataNode);
 
-            assertEquals("E2DDBAB2B3A94E6", metadataNode.get(ReleaseAdvisoryEventsListener.REQUEST_ID).asText());
-            assertEquals("RHBA-2024:10840-02", metadataNode.get(ReleaseAdvisoryEventsListener.ERRATA).asText());
-            assertEquals("143781", metadataNode.get(ReleaseAdvisoryEventsListener.ERRATA_ID).asText());
+            assertEquals(
+                    "E2DDBAB2B3A94E6",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.REQUEST_ID).asText());
+            assertEquals("RHBA-2024:10840-02", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA).asText());
+            assertEquals("143781", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA_ID).asText());
             assertEquals(
                     "Red Hat OpenShift Container Platform 4.15",
-                    metadataNode.get(ReleaseAdvisoryEventsListener.PRODUCT).asText());
-            assertEquals("RHOSE", metadataNode.get(ReleaseAdvisoryEventsListener.PRODUCT_SHORTNAME).asText());
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT).asText());
+            assertEquals("RHOSE", metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_SHORTNAME).asText());
 
             String productVersionString = null;
             List<String> allPurls = new ArrayList<String>();
@@ -360,8 +381,8 @@ public class ReleaseAdvisoryEventsListenerTest {
             }
             assertEquals(
                     productVersionString,
-                    metadataNode.get(ReleaseAdvisoryEventsListener.PRODUCT_VERSION).asText());
-            ArrayNode arrayNode = (ArrayNode) metadataNode.get(ReleaseAdvisoryEventsListener.PURL_LIST);
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_VERSION).asText());
+            ArrayNode arrayNode = (ArrayNode) metadataNode.get(ReleaseStandardAdvisoryEventsListener.PURL_LIST);
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode node = arrayNode.get(i);
                 assertEquals(node.asText(), allPurls.get(i));
@@ -370,7 +391,7 @@ public class ReleaseAdvisoryEventsListenerTest {
         }
     }
 
-    static class ReleaseAdvisoryEventsListenerSingleRPM extends ReleaseAdvisoryEventsListener {
+    static class ReleaseAdvisoryEventsListenerSingleRPM extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
         protected Sbom saveReleaseManifestForRPMGeneration(
@@ -386,6 +407,7 @@ public class ReleaseAdvisoryEventsListenerTest {
             validateComponent(
                     bom.getMetadata().getComponent(),
                     Component.Type.OPERATING_SYSTEM,
+                    null,
                     "Red Hat Enterprise Linux 7",
                     "RHEL-7.2.Z",
                     "RHEL-7.2.Z",
@@ -398,6 +420,7 @@ public class ReleaseAdvisoryEventsListenerTest {
             validateComponent(
                     bom.getComponents().get(0),
                     Component.Type.LIBRARY,
+                    null,
                     "redhat-release-computenode",
                     "7.2-8.el7_2.1",
                     "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src",
@@ -431,16 +454,20 @@ public class ReleaseAdvisoryEventsListenerTest {
                     bom);
             sbom.setReleaseMetadata(metadataNode);
 
-            assertEquals("4186BB34453E473", metadataNode.get(ReleaseAdvisoryEventsListener.REQUEST_ID).asText());
-            assertEquals("RHBA-2024:89769-01", metadataNode.get(ReleaseAdvisoryEventsListener.ERRATA).asText());
-            assertEquals("89769", metadataNode.get(ReleaseAdvisoryEventsListener.ERRATA_ID).asText());
+            assertEquals(
+                    "4186BB34453E473",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.REQUEST_ID).asText());
+            assertEquals("RHBA-2024:89769-01", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA).asText());
+            assertEquals("89769", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA_ID).asText());
             assertEquals(
                     "Red Hat Enterprise Linux 7",
-                    metadataNode.get(ReleaseAdvisoryEventsListener.PRODUCT).asText());
-            assertEquals("RHEL", metadataNode.get(ReleaseAdvisoryEventsListener.PRODUCT_SHORTNAME).asText());
-            assertEquals("RHEL-7.2.Z", metadataNode.get(ReleaseAdvisoryEventsListener.PRODUCT_VERSION).asText());
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT).asText());
+            assertEquals("RHEL", metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_SHORTNAME).asText());
+            assertEquals(
+                    "RHEL-7.2.Z",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_VERSION).asText());
 
-            ArrayNode arrayNode = (ArrayNode) metadataNode.get(ReleaseAdvisoryEventsListener.PURL_LIST);
+            ArrayNode arrayNode = (ArrayNode) metadataNode.get(ReleaseStandardAdvisoryEventsListener.PURL_LIST);
             List<String> allPurls = List.of(
                     "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src",
                     "pkg:rpm/redhat/redhat-release-computenode@7.2-8.el7_2.1?arch=src&repository_id=rhel-7-hpc-node-eus-source-rpms__7_DOT_2__x86_64",
@@ -452,6 +479,144 @@ public class ReleaseAdvisoryEventsListenerTest {
             }
             return sbom;
         }
+    }
+
+    static class ReleaseTextOnlyAdvisoryEventsListenerManifests extends ReleaseTextOnlyAdvisoryEventsListener {
+        @Override
+        protected Sbom saveReleaseManifestForTextOnlyAdvisories(
+                RequestEvent requestEvent,
+                Errata erratum,
+                String productName,
+                String productVersion,
+                String toolVersion,
+                SbomGenerationRequest releaseGeneration,
+                Bom bom,
+                List<Sbom> sboms) {
+
+            validateComponent(
+                    bom.getMetadata().getComponent(),
+                    Component.Type.FRAMEWORK,
+                    null,
+                    "Red Hat build of Quarkus",
+                    "Red Hat build of Quarkus 2.13.9.SP2",
+                    "Red Hat build of Quarkus 2.13.9.SP2",
+                    null,
+                    List.of("cpe:/a:redhat:quarkus:2.13"),
+                    Field.CPE);
+
+            assertEquals(1, sboms.size());
+            Bom manifestBom = SbomUtils.fromJsonNode(sboms.get(0).getSbom());
+            String expectedPurl = SbomUtils.addQualifiersToPurlOfComponent(
+                    manifestBom.getComponents().get(0),
+                    Map.of("repository_url", Constants.MRRC_URL),
+                    true);
+
+            validateComponent(
+                    bom.getComponents().get(0),
+                    Component.Type.LIBRARY,
+                    "com.redhat.quarkus.platform",
+                    "quarkus-bom",
+                    "2.13.9.SP2-redhat-00003",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?type=pom",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?type=pom",
+                    List.of(expectedPurl),
+                    Field.PURL);
+
+            validateDependencies(
+                    bom.getDependencies(),
+                    1,
+                    "Red Hat build of Quarkus 2.13.9.SP2",
+                    List.of("pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?type=pom"));
+
+            printRawBom(bom);
+
+            Sbom sbom = Sbom.builder()
+                    .withIdentifier(releaseGeneration.getIdentifier())
+                    .withSbom(SbomUtils.toJsonNode(bom))
+                    .withGenerationRequest(releaseGeneration)
+                    .withConfigIndex(0)
+                    .build();
+
+            // Add more information for this release so to find manifests more easily
+            ObjectNode metadataNode = collectReleaseInfo(
+                    requestEvent.getId(),
+                    erratum,
+                    productName,
+                    productVersion,
+                    toolVersion,
+                    bom);
+            sbom.setReleaseMetadata(metadataNode);
+
+            assertEquals(
+                    "69436F788E634CB",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.REQUEST_ID).asText());
+            assertEquals("RHSA-2024:1797-02", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA).asText());
+            assertEquals("130278", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA_ID).asText());
+            assertEquals(
+                    "Red Hat build of Quarkus",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT).asText());
+            assertEquals("RHBQ", metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_SHORTNAME).asText());
+            assertEquals(
+                    "Red Hat build of Quarkus 2.13.9.SP2",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_VERSION).asText());
+
+            ArrayNode arrayNode = (ArrayNode) metadataNode.get(ReleaseStandardAdvisoryEventsListener.PURL_LIST);
+            List<String> allPurls = List.of(
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?type=pom");
+
+            for (int i = 0; i < arrayNode.size(); i++) {
+                JsonNode node = arrayNode.get(i);
+                assertEquals(node.asText(), allPurls.get(i));
+            }
+            return sbom;
+        }
+    }
+
+    @Test
+    void testTextOnlyReleaseErrataWithManifests() throws IOException {
+        listenerTextOnlyManifests = new ReleaseTextOnlyAdvisoryEventsListenerManifests();
+        listenerTextOnlyManifests.setErrataClient(errataClient);
+        listenerTextOnlyManifests.setStatsService(statsService);
+        listenerTextOnlyManifests.setSbomService(sbomService);
+        listenerTextOnlyManifests.setGenerationRequestRepository(generationRequestRepository);
+        listenerTextOnlyManifests.setRequestEventRepository(requestEventRepository);
+
+        Errata errata = loadErrata("textOnly/manifests/errata.json");
+        RequestEvent requestEvent = loadRequestEvent("textOnly/manifests/request_event.json");
+        Sbom sbom = loadSbom("textOnly/manifests/6346322A131A437.json");
+
+        String purlRef = "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?repository_url=https://maven.repository.redhat.com/ga/&type=pom";
+        String productVersionText = "Red Hat build of Quarkus 2.13.9.SP2";
+
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
+                .withId(RandomStringIdGenerator.generate())
+                .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + productVersionText)
+                .withType(GenerationRequestType.BUILD)
+                .withStatus(SbomGenerationStatus.GENERATING)
+                .withConfig(null) // I really don't know what to put here
+                .withRequest(requestEvent)
+                .build();
+        generationsMap.put(sbomGenerationRequest.getId(), sbomGenerationRequest);
+        pvToGenerations.put(productVersionText, sbomGenerationRequest);
+
+        when(errataClient.getErratum(String.valueOf(errata.getDetails().get().getId()))).thenReturn(errata);
+        when(statsService.getStats())
+                .thenReturn(Stats.builder().withVersion("ReleaseAdvisoryEventsListenerTest_1.0.0").build());
+        when(generationRequestRepository.findById(anyString())).thenAnswer(invocation -> {
+            String generationId = invocation.getArgument(0);
+            return generationsMap.get(generationId);
+        });
+        when(requestEventRepository.findById(anyString())).thenReturn(requestEvent);
+        when(sbomService.findByPurl(purlRef)).thenReturn(sbom);
+
+        TextOnlyAdvisoryReleaseEvent event = TextOnlyAdvisoryReleaseEvent.builder()
+                .withRequestEventId(requestEvent.getId())
+                .withReleaseGenerations(pvToGenerations)
+                .build();
+        listenerTextOnlyManifests.onReleaseAdvisoryEvent(event);
     }
 
     @Test
