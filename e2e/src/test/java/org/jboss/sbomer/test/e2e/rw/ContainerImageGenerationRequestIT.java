@@ -20,6 +20,7 @@ package org.jboss.sbomer.test.e2e.rw;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,11 +28,22 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.jboss.sbomer.test.e2e.E2EStageBase;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.restassured.response.Response;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -43,6 +55,14 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
     }
 
     private final static String MANDREL_IMAGE = "registry.redhat.io/quarkus/mandrel-for-jdk-21-rhel8@sha256:a406de0fd344785fb39eba81cbef01cf7fb3e2be43d0e671a8587d1abe1418b4";
+
+    static Stream<JsonObject> requestBodys() throws IOException, URISyntaxException {
+        String requestBodys = Files.readString(sbomPath("skinny-manifest-images.json"));
+        JsonReader jsonReader = Json.createReader(new StringReader(requestBodys));
+        JsonArray requestBodyJO = jsonReader.readArray();
+        jsonReader.close();
+        return requestBodyJO.stream().map(jo -> jo.asJsonObject());
+    }
 
     @Test
     void testMultiArchImage() throws IOException, URISyntaxException {
@@ -75,5 +95,31 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
         assertEquals(3, response.body().jsonPath().getInt("totalHits"));
 
         log.info("Mandrel container image passed");
+    }
+
+    /*
+     * SBOMER-280 https://issues.redhat.com/browse/SBOMER-280
+     *
+     * Test the following weird manifest formats application/vnd.docker.image.rootfs.foreign.diff.tar.gzip: “Layer”, as
+     * a gzipped tar that should never be pushed application/vnd.docker.plugin.v1+json
+     */
+    @ParameterizedTest
+    @MethodSource("requestBodys")
+    void testSkinnyManifests(JsonObject requestBody) {
+        List<String> generationIds = requestGeneration(requestBody.toString());
+        assertEquals(1, generationIds.size());
+        String generationId = generationIds.get(0);
+
+        log.info(
+                "{} container image - Generation Request created: {}",
+                requestBody.getValue("/image").toString(),
+                generationId);
+        waitForGeneration(generationId);
+
+        final Response response = getManifestsForGeneration(generationId);
+
+        assertEquals(3, response.body().jsonPath().getInt("totalHits"));
+
+        log.info("{} container image passed", requestBody.getValue("image"));
     }
 }
