@@ -1,0 +1,12 @@
+[
+{
+    "apiVersion": "sbomer.jboss.org/v1alpha1",
+    "type": "image",
+    "image": "registry.redhat.io/openshift4/ose-egress-http-proxy@sha256:ce1e5acecb4dfa89d2b3a4ed97faa84dfbeecc115083c8f0017b4fb89fc6e400"
+},
+{
+    "apiVersion": "sbomer.jboss.org/v1alpha1",
+    "type": "image",
+    "image": "registry.redhat.io/openshift4/oc-mirror-plugin-rhel8@sha256:80acc20087bec702fcb2624345f3dda071cd78092e5d3c972d75615b837549de"
+}
+]
