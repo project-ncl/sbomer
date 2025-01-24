@@ -257,14 +257,20 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
     protected Component createRootComponentForSbom(Sbom sbom) {
 
         Bom manifestBom = SbomUtils.fromJsonNode(sbom.getSbom());
-        Component manifestMainComponent = (manifestBom.getComponents() != null
-                && !manifestBom.getComponents().isEmpty()) ? manifestBom.getComponents().get(0)
-                        : manifestBom.getMetadata().getComponent();
+        Component manifestMainComponent = null;
+        Component metadataComponent = manifestBom.getMetadata().getComponent();
+        // If the are no components or the manifest is a ZIP manifest, get the main component from the metadata
+        if (manifestBom.getComponents() == null || manifestBom.getComponents().isEmpty()
+                || SbomUtils.hasProperty(metadataComponent, "deliverable-url")) {
+            manifestMainComponent = metadataComponent;
+        } else {
+            manifestMainComponent = manifestBom.getComponents().get(0);
+        }
 
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
                 manifestMainComponent,
                 Map.of("repository_url", Constants.MRRC_URL),
-                true);
+                !SbomUtils.hasProperty(manifestMainComponent, "deliverable-url"));
 
         // Finally create the root component for this build (NVR) from the manifest
         Component sbomRootComponent = SbomUtils.createComponent(manifestMainComponent);
@@ -397,10 +403,10 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
 
         TreeSet<String> allPurls = new TreeSet<>();
         if (manifest.getMetadata() != null) {
-            allPurls.addAll(getAllPurlsOfComponent(manifest.getMetadata().getComponent()));
+            allPurls.addAll(SbomUtils.getAllPurlsOfComponent(manifest.getMetadata().getComponent()));
         }
         for (Component component : manifest.getComponents()) {
-            allPurls.addAll(getAllPurlsOfComponent(component));
+            allPurls.addAll(SbomUtils.getAllPurlsOfComponent(component));
         }
         ArrayNode purlArray = ObjectMapperProvider.json().createArrayNode();
         for (String purl : allPurls) {
@@ -408,32 +414,6 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
         }
         releaseMetadata.set(PURL_LIST, purlArray);
         return releaseMetadata;
-    }
-
-    private Set<String> getAllPurlsOfComponent(Component component) {
-
-        if (component == null) {
-            return Collections.emptySet();
-        }
-
-        TreeSet<String> allPurls = new TreeSet<>();
-        if (component.getPurl() != null) {
-            allPurls.add(component.getPurl());
-        }
-
-        if (component.getEvidence() == null || component.getEvidence().getIdentities() == null
-                || component.getEvidence().getIdentities().isEmpty()) {
-            return allPurls;
-        }
-
-        Set<String> purls = component.getEvidence()
-                .getIdentities()
-                .stream()
-                .filter(identity -> Field.PURL.equals(identity.getField()))
-                .map(identity -> identity.getConcludedValue())
-                .collect(Collectors.toSet());
-        allPurls.addAll(purls);
-        return allPurls;
     }
 
     private void adjustComponent(Component component) {
