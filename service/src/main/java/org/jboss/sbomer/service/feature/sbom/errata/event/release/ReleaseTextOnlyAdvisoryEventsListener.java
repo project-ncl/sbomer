@@ -266,7 +266,6 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
         } else {
             manifestMainComponent = manifestBom.getComponents().get(0);
         }
-
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
                 manifestMainComponent,
                 Map.of("repository_url", Constants.MRRC_URL),
@@ -418,8 +417,10 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
 
     private void adjustComponent(Component component) {
 
-        String evidencePurl = SbomUtils
-                .addQualifiersToPurlOfComponent(component, Map.of("repository_url", Constants.MRRC_URL), true);
+        String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
+                component,
+                Map.of("repository_url", Constants.MRRC_URL),
+                !SbomUtils.hasProperty(component, "deliverable-url"));
         log.debug("Calculated evidence purl: {}", evidencePurl);
         component.setPurl(evidencePurl);
         SbomUtils.setEvidenceIdentities(component, Set.of(evidencePurl), Field.PURL);
