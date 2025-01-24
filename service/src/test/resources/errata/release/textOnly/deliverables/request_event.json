@@ -1,0 +1,21 @@
+{
+  "id": "12747AFC7413496",
+  "receivalTime": "2024-11-28T11:16:19.097108Z",
+  "eventType": "UMB",
+  "eventStatus": "SUCCESS",
+  "reason": "2/2 completed with success",
+  "requestConfig": {
+    "type": "errata-advisory",
+    "apiVersion": "sbomer.jboss.org/v1alpha1",
+    "advisoryId": "129589"
+  },
+  "event": {
+    "msg": "{}",
+    "msg_id": "ID:umb-stage-5.umb-001.38517-1732721053925-12:124:-1:1:1",
+    "consumer": "ERRATA",
+    "msg_type": "errata-advisory",
+    "msg_status": "ACK",
+    "destination": "topic://VirtualTopic.eng.errata.activity.status",
+    "creation_time": "2024-11-27T15:41:06.185Z"
+  }
+}

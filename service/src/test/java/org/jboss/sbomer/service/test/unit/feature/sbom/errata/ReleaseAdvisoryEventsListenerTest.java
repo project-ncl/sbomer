@@ -78,9 +78,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.packageurl.MalformedPackageURLException;
-import com.github.packageurl.PackageURL;
-import com.github.packageurl.PackageURLBuilder;
 
 import groovy.util.logging.Slf4j;
 import io.quarkus.test.junit.QuarkusTest;
@@ -93,6 +90,7 @@ public class ReleaseAdvisoryEventsListenerTest {
     ReleaseAdvisoryEventsListenerMultiContainer listenerMultiContainers;
     ReleaseAdvisoryEventsListenerSingleRPM listenerSingleRpm;
     ReleaseTextOnlyAdvisoryEventsListenerManifests listenerTextOnlyManifests;
+    ReleaseTextOnlyAdvisoryEventsListenerDeliverables listenerTextOnlyDeliverables;
     ErrataClient errataClient = mock(ErrataClient.class);
     PyxisClient pyxisClient = mock(PyxisClient.class);
     StatsService statsService = mock(StatsService.class);
@@ -573,6 +571,121 @@ public class ReleaseAdvisoryEventsListenerTest {
         }
     }
 
+    static class ReleaseTextOnlyAdvisoryEventsListenerDeliverables extends ReleaseTextOnlyAdvisoryEventsListener {
+        @Override
+        protected Sbom saveReleaseManifestForTextOnlyAdvisories(
+                RequestEvent requestEvent,
+                Errata erratum,
+                String productName,
+                String productVersion,
+                String toolVersion,
+                SbomGenerationRequest releaseGeneration,
+                Bom bom,
+                List<Sbom> sboms) {
+
+            validateComponent(
+                    bom.getMetadata().getComponent(),
+                    Component.Type.FRAMEWORK,
+                    null,
+                    "Red Hat build of Quarkus",
+                    "Red Hat build of Quarkus 3.2.11",
+                    "Red Hat build of Quarkus 3.2.11",
+                    null,
+                    List.of("cpe:/a:redhat:quarkus:3.2::el8"),
+                    Field.CPE);
+
+            // Verify that all the sboms are represented inside the release manifest
+            assertEquals(2, sboms.size());
+            assertEquals(2, bom.getComponents().size());
+
+            Bom buildManifestBom = SbomUtils.fromJsonNode(sboms.get(0).getSbom());
+            String buildExpectedPurl = SbomUtils.addQualifiersToPurlOfComponent(
+                    buildManifestBom.getComponents().get(0),
+                    Map.of("repository_url", Constants.MRRC_URL),
+                    true);
+            validateComponent(
+                    bom.getComponents().get(0),
+                    Component.Type.LIBRARY,
+                    "com.redhat.quarkus.platform",
+                    "quarkus-bom",
+                    "3.2.11.Final-redhat-00001",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.2.11.Final-redhat-00001?type=pom",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.2.11.Final-redhat-00001?type=pom",
+                    List.of(buildExpectedPurl),
+                    Field.PURL);
+
+            Bom operationManifestBom = SbomUtils.fromJsonNode(sboms.get(1).getSbom());
+            String operationExpectedPurl = SbomUtils.addQualifiersToPurlOfComponent(
+                    operationManifestBom.getMetadata().getComponent(),
+                    Map.of("repository_url", Constants.MRRC_URL),
+                    false);
+            validateComponent(
+                    bom.getComponents().get(1),
+                    Component.Type.FILE,
+                    null,
+                    "jboss-unified-push-1.0.0.Beta1-maven-repository.zip",
+                    "sha256:1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1",
+                    "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1",
+                    "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1",
+                    List.of(operationExpectedPurl),
+                    Field.PURL);
+
+            validateDependencies(
+                    bom.getDependencies(),
+                    1,
+                    "Red Hat build of Quarkus 3.2.11",
+                    List.of(
+                            "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.2.11.Final-redhat-00001?type=pom",
+                            "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1"));
+
+            printRawBom(bom);
+
+            Sbom sbom = Sbom.builder()
+                    .withIdentifier(releaseGeneration.getIdentifier())
+                    .withSbom(SbomUtils.toJsonNode(bom))
+                    .withGenerationRequest(releaseGeneration)
+                    .withConfigIndex(0)
+                    .build();
+
+            // Add more information for this release so to find manifests more easily
+            ObjectNode metadataNode = collectReleaseInfo(
+                    requestEvent.getId(),
+                    erratum,
+                    productName,
+                    productVersion,
+                    toolVersion,
+                    bom);
+            sbom.setReleaseMetadata(metadataNode);
+
+            assertEquals(
+                    "12747AFC7413496",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.REQUEST_ID).asText());
+            assertEquals("RHSA-2024:1662-01", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA).asText());
+            assertEquals("129589", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA_ID).asText());
+            assertEquals(
+                    "Red Hat build of Quarkus",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT).asText());
+            assertEquals("RHBQ", metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_SHORTNAME).asText());
+            assertEquals(
+                    "Red Hat build of Quarkus 3.2.11",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_VERSION).asText());
+
+            ArrayNode arrayNode = (ArrayNode) metadataNode.get(ReleaseStandardAdvisoryEventsListener.PURL_LIST);
+            System.out.println("***********arrayNode: " + arrayNode);
+            List<String> allPurls = List.of(
+                    "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1",
+                    "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1&repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.2.11.Final-redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.2.11.Final-redhat-00001?type=pom");
+
+            for (int i = 0; i < arrayNode.size(); i++) {
+                JsonNode node = arrayNode.get(i);
+                assertEquals(node.asText(), allPurls.get(i));
+            }
+            return sbom;
+        }
+    }
+
     @Test
     void testTextOnlyReleaseErrataWithManifests() throws IOException {
         listenerTextOnlyManifests = new ReleaseTextOnlyAdvisoryEventsListenerManifests();
@@ -582,12 +695,10 @@ public class ReleaseAdvisoryEventsListenerTest {
         listenerTextOnlyManifests.setGenerationRequestRepository(generationRequestRepository);
         listenerTextOnlyManifests.setRequestEventRepository(requestEventRepository);
 
+        String productVersionText = "Red Hat build of Quarkus 2.13.9.SP2";
         Errata errata = loadErrata("textOnly/manifests/errata.json");
         RequestEvent requestEvent = loadRequestEvent("textOnly/manifests/request_event.json");
         Sbom sbom = loadSbom("textOnly/manifests/6346322A131A437.json");
-
-        String purlRef = "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?repository_url=https://maven.repository.redhat.com/ga/&type=pom";
-        String productVersionText = "Red Hat build of Quarkus 2.13.9.SP2";
 
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
         Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
@@ -610,6 +721,7 @@ public class ReleaseAdvisoryEventsListenerTest {
             return generationsMap.get(generationId);
         });
         when(requestEventRepository.findById(anyString())).thenReturn(requestEvent);
+        String purlRef = "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?repository_url=https://maven.repository.redhat.com/ga/&type=pom";
         when(sbomService.findByPurl(purlRef)).thenReturn(sbom);
 
         TextOnlyAdvisoryReleaseEvent event = TextOnlyAdvisoryReleaseEvent.builder()
@@ -617,6 +729,60 @@ public class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerTextOnlyManifests.onReleaseAdvisoryEvent(event);
+    }
+
+    @Test
+    void testTextOnlyReleaseErrataWithDeliverables() throws IOException {
+        listenerTextOnlyDeliverables = new ReleaseTextOnlyAdvisoryEventsListenerDeliverables();
+        listenerTextOnlyDeliverables.setErrataClient(errataClient);
+        listenerTextOnlyDeliverables.setStatsService(statsService);
+        listenerTextOnlyDeliverables.setSbomService(sbomService);
+        listenerTextOnlyDeliverables.setGenerationRequestRepository(generationRequestRepository);
+        listenerTextOnlyDeliverables.setRequestEventRepository(requestEventRepository);
+
+        String productVersionText = "Red Hat build of Quarkus 3.2.11";
+        Errata errata = loadErrata("textOnly/deliverables/errata.json");
+        RequestEvent requestEvent = loadRequestEvent("textOnly/deliverables/request_event.json");
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecords = loadRequestRecords(
+                "textOnly/deliverables/errata_records.json");
+
+        Sbom pncBuildSbom = loadSbom("textOnly/deliverables/E03673C8D82E484.json");
+        Sbom operationSbom = loadSbom("textOnly/deliverables/A8342BD50FB9496.json");
+
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
+                .withId(RandomStringIdGenerator.generate())
+                .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + productVersionText)
+                .withType(GenerationRequestType.BUILD)
+                .withStatus(SbomGenerationStatus.GENERATING)
+                .withConfig(null) // I really don't know what to put here
+                .withRequest(requestEvent)
+                .build();
+        generationsMap.put(sbomGenerationRequest.getId(), sbomGenerationRequest);
+        pvToGenerations.put(productVersionText, sbomGenerationRequest);
+
+        when(errataClient.getErratum(String.valueOf(errata.getDetails().get().getId()))).thenReturn(errata);
+        when(statsService.getStats())
+                .thenReturn(Stats.builder().withVersion("ReleaseAdvisoryEventsListenerTest_1.0.0").build());
+        when(generationRequestRepository.findById(anyString())).thenAnswer(invocation -> {
+            String generationId = invocation.getArgument(0);
+            return generationsMap.get(generationId);
+        });
+        when(requestEventRepository.findById(anyString())).thenReturn(requestEvent);
+        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
+                .thenReturn(allAdvisoryRequestRecords.get(0));
+
+        String pncBuildUrl = "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.2.11.Final-redhat-00001?type=pom";
+        String operationUrl = "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1";
+        when(sbomService.findByPurl(pncBuildUrl)).thenReturn(pncBuildSbom);
+        when(sbomService.findByPurl(operationUrl)).thenReturn(operationSbom);
+
+        TextOnlyAdvisoryReleaseEvent event = TextOnlyAdvisoryReleaseEvent.builder()
+                .withRequestEventId(requestEvent.getId())
+                .withReleaseGenerations(pvToGenerations)
+                .build();
+        listenerTextOnlyDeliverables.onReleaseAdvisoryEvent(event);
     }
 
     @Test

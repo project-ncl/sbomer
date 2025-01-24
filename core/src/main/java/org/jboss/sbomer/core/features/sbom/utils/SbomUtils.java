@@ -39,15 +39,18 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.commonjava.atlas.maven.ident.ref.SimpleArtifactRef;
@@ -1112,5 +1115,36 @@ public class SbomUtils {
             log.warn("Error while adding new qualifiers to component with purl {}", component.getPurl(), e);
             return component.getPurl();
         }
+    }
+
+    /**
+     * Returns a TreeSet containing the component PURL and any PURL found among the evidence identities'
+     * concludedValues.
+     *
+     * @param component
+     * @return The TreeSet containing all the found PURLs
+     */
+    public static Set<String> getAllPurlsOfComponent(Component component) {
+
+        if (component == null || component.getPurl() == null) {
+            return Collections.emptySet();
+        }
+
+        TreeSet<String> allPurls = new TreeSet<>();
+        allPurls.add(component.getPurl());
+
+        if (component.getEvidence() == null || component.getEvidence().getIdentities() == null
+                || component.getEvidence().getIdentities().isEmpty()) {
+            return allPurls;
+        }
+
+        Set<String> purls = component.getEvidence()
+                .getIdentities()
+                .stream()
+                .filter(identity -> Field.PURL.equals(identity.getField()))
+                .map(identity -> identity.getConcludedValue())
+                .collect(Collectors.toSet());
+        allPurls.addAll(purls);
+        return allPurls;
     }
 }

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "12747AFC7413496",
+    "receivalTime": "2024-11-28T11:16:19.097108Z",
+    "eventType": "UMB",
+    "eventStatus": "SUCCESS",
+    "reason": "2/2 completed with success",
+    "requestConfig": {
+      "type": "errata-advisory",
+      "apiVersion": "sbomer.jboss.org/v1alpha1",
+      "advisoryId": "129589"
+    },
+    "event": {
+      "msg": "{}",
+      "msg_id": "ID:umb-stage-5.umb-001.38517-1732721053925-12:124:-1:1:1",
+      "consumer": "ERRATA",
+      "msg_type": "errata-advisory",
+      "msg_status": "ACK",
+      "destination": "topic://VirtualTopic.eng.errata.activity.status",
+      "creation_time": "2024-11-27T15:41:06.185Z"
+    },
+    "manifests": [
+      {
+        "id": "E03673C8D82E484",
+        "identifier": "A67TNDXE2DYAA",
+        "rootPurl": "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.2.11.Final-redhat-00001?type=pom",
+        "creationTime": "2024-03-20T10:16:44.722963Z",
+        "configIndex": 0,
+        "generation": {
+          "id": "2116ABCCFBE04B3",
+          "identifier": "A67TNDXE2DYAA",
+          "config": {
+            "type": "pnc-build",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "buildId": "A67TNDXE2DYAA",
+            "environment": {
+              "java": "11",
+              "maven": "3.8.6",
+              "gradle": "7.5.1"
+            },
+            "products": [
+              {
+                "processors": [
+                  {
+                    "type": "default"
+                  },
+                  {
+                    "type": "redhat-product",
+                    "errata": {
+                      "productName": "RHBQ",
+                      "productVersion": "Middleware-RHBQ-3.2",
+                      "productVariant": "8Base-MW-RHBQ-3.2"
+                    }
+                  }
+                ],
+                "generator": {
+                  "type": "maven-domino",
+                  "args": "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm",
+                  "version": "0.0.100"
+                }
+              }
+            ]
+          },
+          "type": "BUILD",
+          "creationTime": "2024-03-20T10:09:29.888527Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: E03673C8D82E484"
+        }
+      },
+      {
+        "id": "6F4553678B7441F",
+        "identifier": "BD6CRKSFLRAAA",
+        "rootPurl": "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1",
+        "creationTime": "2024-11-28T11:21:09.509677Z",
+        "configIndex": 0,
+        "generation": {
+          "id": "D9AE49C3A478490",
+          "identifier": "BD6CRKSFLRAAA",
+          "config": {
+            "type": "operation",
+            "apiVersion": "sbomer.jboss.org/v1alpha1",
+            "operationId": "BD6CRKSFLRAAA",
+            "product": {
+              "generator": {
+                "type": "cyclonedx-operation"
+              }
+            },
+            "deliverableUrls": [
+              "http://download/1.0.0-Beta1/jboss-unified-push-1.0.0.Beta1-maven-repository.zip"
+            ]
+          },
+          "type": "OPERATION",
+          "creationTime": "2024-11-28T11:16:24.300005Z",
+          "status": "FINISHED",
+          "result": "SUCCESS",
+          "reason": "Generation finished successfully. Generated SBOMs: 6F4553678B7441F"
+        }
+      }
+    ]
+  }
+]

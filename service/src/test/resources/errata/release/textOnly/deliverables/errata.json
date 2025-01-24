@@ -1,0 +1,54 @@
+{
+    "errata": {
+      "rhsa": {
+        "id": 129589,
+        "revision": 1,
+        "fulladvisory": "RHSA-2024:1662-01",
+        "issue_date": "2024-04-03T10:50:54Z",
+        "update_date": "2024-04-03T10:50:54Z",
+        "release_date": null,
+        "synopsis": "Important: Red Hat build of Quarkus 3.2.11 release and security update",
+        "status": "SHIPPED_LIVE",
+        "group_id": 1245,
+        "created_at": "2024-03-26T16:21:37Z",
+        "updated_at": "2024-04-03T10:54:55Z",
+        "old_advisory": "RHSA-2024:129589-01",
+        "text_only": true,
+        "publish_date_override": null,
+        "actual_ship_date": "2024-04-03T10:53:02Z",
+        "errata_id": 1662,
+        "fulltype": "Red Hat Security Advisory",
+        "publish_date": null,
+        "labels": [
+          "mw_manifest_present"
+        ],
+        "product": {
+          "id": 153,
+          "name": "Red Hat build of Quarkus",
+          "short_name": "RHBQ"
+        }
+      }
+    },
+    "original_type": "RHSA",
+    "content": {
+      "content": {
+        "id": 127169,
+        "errata_id": 129589,
+        "topic": "An update is now available for Red Hat build of Quarkus",
+        "description": "This release of Red Hat build of Quarkus 3.2.11 includes security updates,\nbug fixes, and enhancements. ",
+        "solution": "Before applying this update, make sure all previously released errata\nrelevant to your system have been applied.\n\nFor details on how to apply this update, refer to:\n\nhttps://access.redhat.com/articles/11258",
+        "keywords": "",
+        "cve": "CVE-XXX",
+        "crossref": "",
+        "reference": "https://access.redhat.com/security/updates/classification/#important\nhttps://access.redhat.com/documentation/en-us/red_hat_build_of_quarkus/3.2/\nhttps://access.redhat.com/articles/4966181",
+        "how_to_test": "{\"deliverables\":[{\"type\":\"pnc-build\",\"buildId\":\"A67TNDXE2DYAA\"},{\"type\":\"pnc-operation\",\"operationId\":\"BD6CRKSFLRAAA\"}]}",
+        "updated_at": "2024-03-28T16:26:40Z",
+        "text_only_cpe": "cpe:/a:redhat:quarkus:3.2::el8",
+        "product_version_text": "Red Hat build of Quarkus 3.2.11",
+        "product_security_reviewer_id": 3004029
+      }
+    },
+    "diffs": {},
+    "is_embargoed": false
+  }
+  
