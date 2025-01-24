@@ -208,6 +208,11 @@ public class AdvisoryService {
                     erratum.getDetails().get().getId());
 
             if (ErrataStatus.SHIPPED_LIVE.equals(erratum.getDetails().get().getStatus())) {
+
+                if (!featureFlags.textOnlyErrataReleaseManifestGenerationEnabled()) {
+                    return doIgnoreRequest(requestEvent, "Text Only Errata release manifest generation is disabled");
+                }
+
                 // We can proceed with the release event notification, we trust the owners of the advisory to push live
                 // when appropriate
                 String productVersionText = erratum.getContent().getContent().getProductVersionText();
@@ -265,6 +270,11 @@ public class AdvisoryService {
             // manifests. Otherwise SBOMer will default to the creation of build manifests. Will change in future!
             V1Beta1RequestRecord successfulRequestRecord = null;
             if (ErrataStatus.SHIPPED_LIVE.equals(erratum.getDetails().get().getStatus())) {
+
+                if (!featureFlags.textOnlyErrataReleaseManifestGenerationEnabled()) {
+                    return doIgnoreRequest(requestEvent, "Text Only Errata release manifest generation is disabled");
+                }
+
                 log.debug(
                         "Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}",
                         erratum.getDetails().get().getId());
