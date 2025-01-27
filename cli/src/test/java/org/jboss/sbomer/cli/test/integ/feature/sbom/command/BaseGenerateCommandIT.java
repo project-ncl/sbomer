@@ -51,7 +51,7 @@ class BaseGenerateCommandIT {
         assertTrue(
                 result.getErrorOutput()
                         .contains(
-                                "Build 'IN_PROGRESS' is not valid! Progress needs to be 'FINISHED' with status 'SUCCESS' or 'NO_REBUILD_REQUIRED'. Currently: progress: 'IN_PROGRESS', status: 'BUILDING'"));
+                                "Build 'IN_PROGRESS' is not valid! Build cannot be temporary and progress needs to be 'FINISHED' with status 'SUCCESS' or 'NO_REBUILD_REQUIRED'. Currently: temporary: false, progress: 'IN_PROGRESS', status: 'BUILDING'"));
     }
 
     @Test
