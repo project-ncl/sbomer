@@ -147,7 +147,7 @@ class PncBuildTest {
                 .readValue(msg, PncBuildNotificationMessageBody.class);
 
         // See "payloads/umb-pnc-build-body.json" file
-        assertEquals(buildMsgBody.getBuild().getId(), "AX5TJMYHQAIAE");
+        assertEquals("AX5TJMYHQAIAE", buildMsgBody.getBuild().getId());
     }
 
     @Test
