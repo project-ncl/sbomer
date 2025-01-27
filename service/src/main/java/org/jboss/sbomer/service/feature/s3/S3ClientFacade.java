@@ -144,8 +144,8 @@ public class S3ClientFacade {
         for (String prop : Set.of("bucket.region", "bucket.name", "aws.access.key.id", "aws.secret.access.key")) {
             Optional<String> valueOpt = ConfigProvider.getConfig().getOptionalValue(prop, String.class);
 
-            if (!valueOpt.isPresent()) {
-                missingConfig.add(prop.toUpperCase().replaceAll("\\.", "_"));
+            if (valueOpt.isEmpty()) {
+                missingConfig.add(prop.toUpperCase().replace('.', '_'));
             }
         }
 
@@ -205,7 +205,7 @@ public class S3ClientFacade {
             log.debug("Found: '{}'", object.key());
 
             if (object.key().contains("/logs/")) {
-                paths.add(object.key().replaceAll(generationRequestId + "/", ""));
+                paths.add(object.key().replace(generationRequestId + "/", ""));
             }
         }
 
