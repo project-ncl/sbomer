@@ -137,6 +137,14 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
             }
 
             List<Sbom> sboms = findSbomsByPurls(manifestsPurls);
+            if (sboms.isEmpty()) {
+                markRequestFailed(
+                        requestEvent,
+                        event.getReleaseGenerations().values(),
+                        "There are no matching sboms for the content specified within the advisory notes.");
+                doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+                return;
+            }
             createReleaseManifestsForTextOnlyAdvisories(
                     requestEvent,
                     erratum,
@@ -149,7 +157,10 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
                     "An error occured during the creation of release manifests for event '{}'",
                     requestEvent.getId(),
                     e);
-            markRequestFailed(requestEvent, event.getReleaseGenerations().values());
+            markRequestFailed(
+                    requestEvent,
+                    event.getReleaseGenerations().values(),
+                    "An error occured during the creation of the release manifest");
         }
 
         // Let's trigger the update of statuses and advisory comments
@@ -164,8 +175,10 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
-    protected void markRequestFailed(RequestEvent requestEvent, Collection<SbomGenerationRequest> releaseGenerations) {
-        String reason = "An error occured during the creation of the release manifest";
+    protected void markRequestFailed(
+            RequestEvent requestEvent,
+            Collection<SbomGenerationRequest> releaseGenerations,
+            String reason) {
         log.error(reason);
 
         requestEvent = requestEventRepository.findById(requestEvent.getId());
