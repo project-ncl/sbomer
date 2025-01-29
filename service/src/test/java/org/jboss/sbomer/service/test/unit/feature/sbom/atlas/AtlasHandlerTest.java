@@ -1,5 +1,6 @@
 package org.jboss.sbomer.service.test.unit.feature.sbom.atlas;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,13 +70,13 @@ class AtlasHandlerTest {
     @Test
     void testUploadNothing() {
         // Should not fail, just a warning should be added
-        atlasHandler.publishBuildManifests(null);
+        assertDoesNotThrow(() -> atlasHandler.publishBuildManifests(null));
     }
 
     @Test
     void testUploadEmpty() {
         // Should not fail, just a warning should be added
-        atlasHandler.publishBuildManifests(Collections.emptyList());
+        assertDoesNotThrow(() -> atlasHandler.publishBuildManifests(Collections.emptyList()));
     }
 
     @Test

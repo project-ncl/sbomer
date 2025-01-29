@@ -21,6 +21,7 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_STATUS;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG_TYPE;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -145,7 +146,7 @@ class ErrataNotificationHandlerTest {
         when(errataClient.getBuildsList("139230")).thenReturn(buildList);
         when(errataClient.getRelease("2227")).thenReturn(release);
 
-        errataNotificationHandler.handle(requestEvent);
+        assertDoesNotThrow(() -> errataNotificationHandler.handle(requestEvent));
     }
 
     @Test

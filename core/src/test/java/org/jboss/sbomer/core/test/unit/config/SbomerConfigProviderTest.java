@@ -1,5 +1,6 @@
 package org.jboss.sbomer.core.test.unit.config;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -97,7 +98,7 @@ class SbomerConfigProviderTest {
         @Test
         void shouldNotFailOnEmptyProducts() {
             PncBuildConfig config = PncBuildConfig.builder().withBuildId("ABCDEFG").build();
-            SbomerConfigProvider.getInstance().adjust(config);
+            assertDoesNotThrow(() -> SbomerConfigProvider.getInstance().adjust(config));
         }
 
         @Test

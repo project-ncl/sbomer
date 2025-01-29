@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.core.test.unit;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,26 +64,27 @@ class SbomUtilsTest {
     @DisplayName("SbomUtils")
     class SbomUtilsTestNested {
         @Test
-        void shouldReadSbomFromFile() throws Exception {
+        void shouldReadSbomFromFile() {
             Bom bom = SbomUtils.fromPath(sbomPath("base.json"));
-
-            assertEquals(39, bom.getComponents().size());
+            assertNotNull(bom);
+            List<Component> components = bom.getComponents();
+            assertEquals(39, components.size());
 
             assertEquals(
                     "Apache-2.0",
-                    bom.getMetadata().getComponent().getLicenseChoice().getLicenses().get(0).getId());
+                    bom.getMetadata().getComponent().getLicenses().getLicenses().get(0).getId());
         }
 
         @Test
         void shouldReadSbomFromString() throws Exception {
             String bomStr = TestResources.asString(sbomPath("base.json"));
             Bom bom = SbomUtils.fromString(bomStr);
-
+            assertNotNull(bom);
             assertEquals(39, bom.getComponents().size());
 
             assertEquals(
                     "Apache-2.0",
-                    bom.getMetadata().getComponent().getLicenseChoice().getLicenses().get(0).getId());
+                    bom.getMetadata().getComponent().getLicenses().getLicenses().get(0).getId());
         }
 
         @Test
@@ -108,6 +110,7 @@ class SbomUtilsTest {
         @Test
         void shouldRemoveErrataPropertiesFromBom() {
             Bom bom = SbomUtils.fromPath(sbomPath("sbom_with_errata.json"));
+            assertNotNull(bom);
             assertNotNull(bom.getMetadata().getComponent());
 
             assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME));
@@ -166,26 +169,25 @@ class SbomUtilsTest {
 
         @Test
         void shouldNotFailOnNullRemoveErrataProperties() {
-            Bom bom = null;
-            SbomUtils.removeErrataProperties(bom);
+            assertDoesNotThrow(() -> SbomUtils.removeErrataProperties((Bom) null));
         }
 
         @Test
         void shouldNotFailOnNullFindProperty() {
-            assertEquals(Optional.ofNullable(null), SbomUtils.findPropertyWithNameInComponent("blah", null));
+            assertEquals(Optional.empty(), SbomUtils.findPropertyWithNameInComponent("blah", null));
         }
 
         @Test
         void shouldNotFailOnNullPropertiesFindProperty() {
             Component component = new Component();
-            assertEquals(Optional.ofNullable(null), SbomUtils.findPropertyWithNameInComponent("blah", component));
+            assertEquals(Optional.empty(), SbomUtils.findPropertyWithNameInComponent("blah", component));
         }
 
         @Test
         void shouldNotFailOnEmptyPropertiesFindProperty() {
             Component component = new Component();
             component.setProperties(List.of());
-            assertEquals(Optional.ofNullable(null), SbomUtils.findPropertyWithNameInComponent("blah", component));
+            assertEquals(Optional.empty(), SbomUtils.findPropertyWithNameInComponent("blah", component));
         }
 
         @Test
@@ -269,7 +271,6 @@ class SbomUtilsTest {
             String scmRevision = "c8ecca0d966250c5caef8174a20a4f1f1f50e6d7";
             String scmTag = "1.0.0.redhat-05289";
             String scmBuildConfigRevision = "e08bf4d4d3c09ef38ec4e4bd5ddfccf5f51d6168";
-            boolean scmInternal = false;
 
             BuildConfigurationRevision buildConfigurationRevision = BuildConfigurationRevision.builder()
                     .scmRevision(scmBuildConfigRevision)
