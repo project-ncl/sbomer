@@ -20,21 +20,22 @@
 
 set -e
 
-if [ "$#" -ne 0 ]; then
-    echo "Illegal number of parameters, provided $#, required: 0"
+if [ "$#" -gt 1 ]; then
+    echo "Illegal number of parameters, provided $#, required: 0 or 1"
     echo
     echo "Usage:"
     echo "    ${0}"
+    echo "    ${0} 3"
     exit 1
 fi
 
 KUBE_CONTEXT="${KUBE_CONTEXT:-aws-prod}"
-REVISIONS=5
+REVISIONS="${1:-5}"
 
 export TZ=":UTC"
 
 echo "---- Release history ----"
-history=$(helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int history --max ${REVISIONS} sbomer 2>/dev/null)
+history=$(helm --kube-context "${KUBE_CONTEXT}" -n sbomer--runtime-int history --max ${REVISIONS} sbomer)
 
 echo "$history"
 
@@ -61,7 +62,7 @@ for rev in $(echo "$history" | tail -${REVISIONS} | awk '{ print $1 }'); do
     echo "- TBD"
     echo "#### Details"
     echo "- Release \`${release_to}\`"
-    echo "- Revision ${revision}"
+    echo "- Revision ${rev}"
     echo "- [Code](https://github.com/project-ncl/sbomer/tree/${release_to})"
     echo "- [Commits](https://github.com/project-ncl/sbomer/compare/${release_from}...${release_to})"
 done
