@@ -175,7 +175,7 @@ class S3FeatureTest {
         request.setStatus(SbomGenerationStatus.FINISHED);
 
         PanacheMock.mock(SbomGenerationRequest.class);
-        when(SbomGenerationRequest.findById("REQUESTID")).thenReturn(request);
+        when(SbomGenerationRequest.findById("REQUESTID")).thenReturn(request);  // NOSONAR
 
         when(clientFacade.logFileNames("REQUESTID"))
                 .thenReturn(List.of("a/path/to/generate.log", "a/path/to/init.log"));
@@ -199,7 +199,7 @@ class S3FeatureTest {
         request.setStatus(SbomGenerationStatus.FINISHED);
 
         PanacheMock.mock(SbomGenerationRequest.class);
-        when(SbomGenerationRequest.findById("REQUESTID")).thenReturn(request);
+        when(SbomGenerationRequest.findById("REQUESTID")).thenReturn(request);  // NOSONAR
 
         when(clientFacade.log("REQUESTID", "a/path/to/generate.log")).thenReturn("This is a log content");
 
