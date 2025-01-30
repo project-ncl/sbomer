@@ -35,7 +35,7 @@ public class RandomStringIdGenerator implements IdentifierGenerator {
     }
 
     public static String generate() {
-        return UUID.randomUUID().toString().replaceAll("_", "").replaceAll("-", "").substring(0, 15).toUpperCase();
+        return UUID.randomUUID().toString().replace("_", "").replace("-", "").substring(0, 15).toUpperCase();
     }
 
 }
