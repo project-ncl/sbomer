@@ -138,8 +138,9 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         // Filter only valid PNC builds
         if (!isValidBuild(build)) {
             throw new InvalidPncBuildStateException(
-                    "Build '{}' is not valid! Progress needs to be 'FINISHED' with status 'SUCCESS' or 'NO_REBUILD_REQUIRED'. Currently: progress: '{}', status: '{}'",
+                    "Build '{}' is not valid! Build cannot be temporary and progress needs to be 'FINISHED' with status 'SUCCESS' or 'NO_REBUILD_REQUIRED'. Currently: temporary: {}, progress: '{}', status: '{}'",
                     parent.getBuildId(),
+                    build.getTemporaryBuild(),
                     build.getProgress(),
                     build.getStatus());
         }
