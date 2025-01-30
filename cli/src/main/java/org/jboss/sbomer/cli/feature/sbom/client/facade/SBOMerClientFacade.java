@@ -68,7 +68,7 @@ public class SBOMerClientFacade {
 
         try (Response response = sbomerClient.searchGenerationRequests(identifier, pagParams, rsqlQuery, sortQuery)) {
             String json = response.readEntity(String.class);
-            TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<Page<SbomGenerationRequest>>() {
+            TypeReference<Page<SbomGenerationRequest>> typeReference = new TypeReference<>() {
             };
             try {
                 Page<SbomGenerationRequest> sbomRequests = ObjectMapperProvider.json().readValue(json, typeReference);
@@ -106,7 +106,7 @@ public class SBOMerClientFacade {
 
         try (Response response = sbomerClient.searchSboms(requestId, pagParams, rsqlQuery, rsqlSort)) {
             String json = response.readEntity(String.class);
-            TypeReference<Page<Sbom>> typeReference = new TypeReference<Page<Sbom>>() {
+            TypeReference<Page<Sbom>> typeReference = new TypeReference<>() {
             };
 
             try {
@@ -133,7 +133,7 @@ public class SBOMerClientFacade {
     public String getSbomerVersion() {
         Response response = sbomerClient.getStats();
         String json = response.readEntity(String.class);
-        TypeReference<Stats> typeReference = new TypeReference<Stats>() {
+        TypeReference<Stats> typeReference = new TypeReference<>() {
         };
         try {
             Stats stats = ObjectMapperProvider.json().readValue(json, typeReference);

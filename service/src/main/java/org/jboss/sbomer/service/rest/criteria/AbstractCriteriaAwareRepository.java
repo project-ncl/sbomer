@@ -67,7 +67,7 @@ public abstract class AbstractCriteriaAwareRepository<T> implements PanacheRepos
 
         predicateParser = new RSQLParser(predicateOperators);
 
-        Set<ComparisonOperator> sortOperators = new HashSet<ComparisonOperator>();
+        Set<ComparisonOperator> sortOperators = new HashSet<>();
         sortOperators.add(ASC);
         sortOperators.add(DESC);
 

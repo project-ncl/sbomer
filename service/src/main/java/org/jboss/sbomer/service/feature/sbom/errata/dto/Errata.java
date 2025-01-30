@@ -88,7 +88,7 @@ public class Errata {
         @JsonProperty("text_only")
         private Boolean textonly;
         @JsonProperty("content_types")
-        private List<String> contentTypes = new ArrayList<String>();
+        private List<String> contentTypes = new ArrayList<>();
         @JsonProperty("created_at")
         private Instant createdAt;
         @JsonProperty("actual_ship_date")

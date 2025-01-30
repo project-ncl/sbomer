@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrataBuildList {
 
-    private Map<String, ProductVersionEntry> productVersions = new HashMap<String, ProductVersionEntry>();
+    private Map<String, ProductVersionEntry> productVersions = new HashMap<>();
 
     @JsonAnySetter
     public void addProductVersion(String name, ProductVersionEntry productVersionEntry) {
@@ -44,13 +44,13 @@ public class ErrataBuildList {
     public static class ProductVersionEntry {
         private String name;
         private String description;
-        private List<Build> builds = new ArrayList<Build>();
+        private List<Build> builds = new ArrayList<>();
     }
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Build {
-        private Map<String, BuildItem> buildItems = new HashMap<String, BuildItem>();
+        private Map<String, BuildItem> buildItems = new HashMap<>();
 
         @JsonAnySetter
         public void addBuildItem(String name, BuildItem buildItem) {
@@ -71,7 +71,7 @@ public class ErrataBuildList {
         @JsonProperty("is_signed")
         private boolean isSigned;
         @JsonProperty("variant_arch")
-        private Map<String, VariantArch> variantArch = new HashMap<String, VariantArch>();
+        private Map<String, VariantArch> variantArch = new HashMap<>();
 
         @JsonAnySetter
         public void addVariantArch(String variantName, VariantArch variantArchItem) {

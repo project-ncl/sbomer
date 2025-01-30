@@ -222,7 +222,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     erratum,
                     toolVersion);
 
-            Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs = new HashMap<String, List<ErrataCDNRepoNormalized>>();
+            Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs = new HashMap<>();
 
             for (BuildItem buildItem : buildItems) {
 
@@ -293,7 +293,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     toolVersion);
 
             // Associate each build (NVR == generation) in an advisory to the repositories where it is published to
-            Map<String, List<RepositoryCoordinates>> generationToRepositories = new HashMap<String, List<RepositoryCoordinates>>();
+            Map<String, List<RepositoryCoordinates>> generationToRepositories = new HashMap<>();
 
             for (BuildItem buildItem : buildItems) {
                 Component nvrRootComponent = createRootComponentForDockerBuildItem(
@@ -493,7 +493,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                         .filter(manifest -> manifest.generation().id().equals(generationId))
                         .collect(Collectors.toList());
 
-                Map<String, String> originalToRebuiltPurl = new HashMap<String, String>();
+                Map<String, String> originalToRebuiltPurl = new HashMap<>();
 
                 for (V1Beta1RequestManifestRecord buildManifestRecord : buildManifests) {
                     log.debug(
@@ -605,7 +605,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                         .stream()
                         .filter(manifest -> manifest.generation().id().equals(generationId))
                         .collect(Collectors.toList());
-                Map<String, String> originalToRebuiltPurl = new HashMap<String, String>();
+                Map<String, String> originalToRebuiltPurl = new HashMap<>();
                 buildManifests.stream().forEach(manifestRecord -> {
                     String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo);
                     originalToRebuiltPurl.put(manifestRecord.rootPurl(), rebuiltPurl);
@@ -763,7 +763,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
     @Retry(maxRetries = 10)
     protected List<ErrataCDNRepoNormalized> getCDNDetails(BuildItem buildItem, String productShortName) {
-        List<ErrataCDNRepoNormalized> allCDNs = new ArrayList<ErrataCDNRepoNormalized>();
+        List<ErrataCDNRepoNormalized> allCDNs = new ArrayList<>();
         buildItem.getVariantArch().keySet().stream().forEach(variant -> {
             allCDNs.addAll(errataClient.getCDNReposOfVariant(variant, productShortName));
         });
@@ -924,7 +924,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
     // Helper method to get the all the architectures in the manifest
     private Set<String> getAllArchitectures(Bom bom) {
-        Set<String> manifestArches = new HashSet<String>();
+        Set<String> manifestArches = new HashSet<>();
         for (Component component : bom.getComponents()) {
             try {
                 PackageURL purl = new PackageURL(component.getPurl());

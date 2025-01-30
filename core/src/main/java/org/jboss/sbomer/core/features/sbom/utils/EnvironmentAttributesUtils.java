@@ -48,7 +48,7 @@ public class EnvironmentAttributesUtils {
     private static final Pattern GRADLE_MAJOR_VERSION_PATTERN = Pattern.compile(GRADLE_MAJOR_VERSION_REGEX);
 
     public static Map<String, String> getSDKManCompliantAttributes(Map<String, String> environmentAttributes) {
-        Map<String, String> sdkManAttributes = new HashMap<String, String>();
+        Map<String, String> sdkManAttributes = new HashMap<>();
 
         // Find Maven
         Optional<String> mavenVersion = getMavenSDKManCompliantVersion(environmentAttributes);
@@ -147,7 +147,7 @@ public class EnvironmentAttributesUtils {
     }
 
     public static Map<String, String> getNvmCompliantAttributes(Map<String, String> environmentAttributes) {
-        Map<String, String> nvmAttributes = new HashMap<String, String>();
+        Map<String, String> nvmAttributes = new HashMap<>();
 
         // Find NodeJs
         Optional<String> nodeJSVersion = getNodeJsNvmCompliantVersion(environmentAttributes);

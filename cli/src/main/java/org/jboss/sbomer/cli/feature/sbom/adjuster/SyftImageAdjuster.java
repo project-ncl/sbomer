@@ -144,7 +144,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      */
     private void adjustEmptyComponents(Bom bom) {
         if (bom.getComponents() == null) {
-            bom.setComponents(new ArrayList<Component>());
+            bom.setComponents(new ArrayList<>());
         }
     }
 
@@ -379,7 +379,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         String[] nameParts = name.split(("/"));
 
-        TreeMap<String, String> qualifiers = new TreeMap<String, String>();
+        TreeMap<String, String> qualifiers = new TreeMap<>();
         qualifiers.put("os", inspectData.getOs());
         qualifiers.put("arch", inspectData.getArchitecture());
         qualifiers.put("tag", tag);

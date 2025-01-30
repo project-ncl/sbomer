@@ -49,6 +49,6 @@ public class ErrataPage<T> {
     }
 
     private Page page;
-    private List<T> data = new ArrayList<T>();
+    private List<T> data = new ArrayList<>();
 
 }

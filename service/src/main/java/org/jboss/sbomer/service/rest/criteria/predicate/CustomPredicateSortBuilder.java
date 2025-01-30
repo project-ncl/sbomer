@@ -56,7 +56,7 @@ public class CustomPredicateSortBuilder<T> {
 
         log.debug("Creating Order for logical node: {}", logical);
 
-        List<Order> orders = new ArrayList<Order>();
+        List<Order> orders = new ArrayList<>();
 
         for (Node node : logical.getChildren()) {
 

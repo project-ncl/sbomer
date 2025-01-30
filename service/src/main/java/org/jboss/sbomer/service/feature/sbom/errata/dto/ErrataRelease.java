@@ -49,7 +49,7 @@ public class ErrataRelease {
     public static class Relationships {
         private ErrataProduct product;
         @JsonProperty("product_versions")
-        private List<ErrataProductVersion> productVersions = new ArrayList<ErrataProductVersion>();
+        private List<ErrataProductVersion> productVersions = new ArrayList<>();
     }
 
     @Data

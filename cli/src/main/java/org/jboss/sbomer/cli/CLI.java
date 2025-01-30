@@ -78,7 +78,7 @@ public class CLI implements QuarkusApplication {
     public static class RunOnlyCallable extends RunAll {
         @Override
         protected List<Object> handle(ParseResult parseResult) throws ExecutionException {
-            return returnResultOrExit(recursivelyExecuteUserObject(parseResult, new ArrayList<Object>()));
+            return returnResultOrExit(recursivelyExecuteUserObject(parseResult, new ArrayList<>()));
         }
 
         private void runIfCallable(CommandLine parsed, List<Object> result) {
@@ -136,7 +136,7 @@ public class CLI implements QuarkusApplication {
                 return returnResultOrExit(Collections.emptyList());
             }
 
-            List<Object> result = new ArrayList<Object>();
+            List<Object> result = new ArrayList<>();
 
             for (CommandLine parsed : parsedCommands) {
                 runIfCallable(parsed, result);
