@@ -88,7 +88,7 @@ public class AlternativeRequestEventRepository extends RequestEventRepository {
         query.append(" ")
                 .append(condition)
                 .append(
-                        sbomAlias != null && sbomAlias.length() > 0 ? " JSON_EXTRACT(" + sbomAlias + "."
+                        sbomAlias != null && !sbomAlias.isEmpty() ? " JSON_EXTRACT(" + sbomAlias + "."
                                 : " JSON_EXTRACT(")
                 .append("release_metadata, '$.")
                 .append(property)

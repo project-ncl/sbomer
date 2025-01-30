@@ -441,7 +441,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         log.debug(
                 "Removing '{}' path being the working directory for the finished '{}' GenerationRequest",
-                workdirPath.toAbsolutePath().toString(),
+                workdirPath.toAbsolutePath(),
                 generationRequest.getName());
 
         // It should, but...
@@ -449,17 +449,14 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
             try (Stream<Path> stream = Files.walk(workdirPath)) {
                 stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             } catch (IOException e) {
-                log.error(
-                        "An error occurred while removing the '{}' directory",
-                        workdirPath.toAbsolutePath().toString(),
-                        e);
+                log.error("An error occurred while removing the '{}' directory", workdirPath.toAbsolutePath(), e);
             }
         }
 
         if (Files.exists(workdirPath)) {
-            log.warn("Directory '{}' still exists", workdirPath.toAbsolutePath().toString());
+            log.warn("Directory '{}' still exists", workdirPath.toAbsolutePath());
         } else {
-            log.debug("Directory '{}' removed", workdirPath.toAbsolutePath().toString());
+            log.debug("Directory '{}' removed", workdirPath.toAbsolutePath());
         }
 
         kubernetesClient.configMaps().withName(generationRequest.getMetadata().getName()).delete();

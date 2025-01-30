@@ -64,7 +64,7 @@ class SBOMServiceTest {
         String rsqlQuery = "identifier=eq=" + INITIAL_BUILD_ID;
         Collection<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(0, 1, rsqlQuery, null)
                 .getContent();
-        assertTrue(sboms.size() > 0);
+        assertTrue(!sboms.isEmpty());
     }
 
     @Test
@@ -81,7 +81,7 @@ class SBOMServiceTest {
         assertEquals(50, page.getPageSize());
         assertTrue(page.getTotalHits() > 0);
         assertEquals(1, page.getTotalPages());
-        assertTrue(page.getContent().size() > 0);
+        assertTrue(!page.getContent().isEmpty());
 
         BaseSbomRecord foundSbom = null;
         Iterator<BaseSbomRecord> contentIterator = page.getContent().iterator();

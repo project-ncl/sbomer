@@ -32,7 +32,7 @@ public enum ProcessorType {
     REDHAT_PRODUCT("redhat-product");
 
     @Getter
-    String slug;
+    final String slug;
 
     ProcessorType(String slug) {
         this.slug = slug;

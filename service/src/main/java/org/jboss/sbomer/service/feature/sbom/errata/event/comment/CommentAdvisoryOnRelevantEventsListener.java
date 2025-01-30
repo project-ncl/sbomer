@@ -132,7 +132,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
                                 "\nFailed generations:\n"))
                 .append(generateRequestEventFinalSection(event.getRequestEventId()));
 
-        log.debug("Adding comment to advisoryId {} : '{}'", config.getAdvisoryId(), commentSb.toString());
+        log.debug("Adding comment to advisoryId {} : '{}'", config.getAdvisoryId(), commentSb);
         doAddCommentToErratum(commentSb.toString(), config.getAdvisoryId());
     }
 
@@ -166,7 +166,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
                                 SbomGenerationStatus.FAILED,
                                 "\nFailed generations:\n"));
 
-        log.debug("Adding comment to advisoryId {} : '{}'", config.getAdvisoryId(), commentSb.toString());
+        log.debug("Adding comment to advisoryId {} : '{}'", config.getAdvisoryId(), commentSb);
         doAddCommentToErratum(commentSb.toString(), config.getAdvisoryId());
     }
 
@@ -232,7 +232,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
             }
         }
         // If no generations were added, do not output anything in the comment
-        if (generationsSection.length() > 0) {
+        if (!generationsSection.isEmpty()) {
             generationsSection.insert(0, prefix);
         }
 
@@ -261,7 +261,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
         }
 
         // If no generations were added, do not output anything in the comment
-        if (generationsSection.length() > 0) {
+        if (!generationsSection.isEmpty()) {
             generationsSection.insert(0, prefix);
         }
         return generationsSection.toString();

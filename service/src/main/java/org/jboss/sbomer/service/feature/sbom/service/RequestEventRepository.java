@@ -257,7 +257,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
             String operator) {
         query.append(" ")
                 .append(condition)
-                .append(sbomAlias != null && sbomAlias.length() > 0 ? " " + sbomAlias + "." : " ")
+                .append(sbomAlias != null && !sbomAlias.isEmpty() ? " " + sbomAlias + "." : " ")
                 .append("release_metadata ->> '")
                 .append(property)
                 .append("' ")

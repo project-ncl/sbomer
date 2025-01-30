@@ -20,7 +20,7 @@ package org.jboss.sbomer.cli.feature.sbom.adjuster;
 import org.cyclonedx.model.Bom;
 
 public interface Adjuster {
-    public default Bom adjust(Bom bom) {
+    default Bom adjust(Bom bom) {
         return bom;
     }
 }

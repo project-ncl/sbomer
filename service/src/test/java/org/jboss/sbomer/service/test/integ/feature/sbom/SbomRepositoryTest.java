@@ -76,7 +76,7 @@ class SbomRepositoryTest {
     }
 
     @Test
-    void testValidBom() throws JsonProcessingException, JsonMappingException {
+    void testValidBom() throws JsonProcessingException {
         String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
@@ -93,15 +93,13 @@ class SbomRepositoryTest {
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
             Log.error(
-                    "violations: " + violations.stream()
-                            .map(e -> e.getMessage().toString())
-                            .collect(Collectors.joining("\n\t")));
+                    "violations: " + violations.stream().map(e -> e.getMessage()).collect(Collectors.joining("\n\t")));
             fail("Validation errors on the baseSBOM entity should be empty!");
         }
     }
 
     @Test
-    void testValidConfiguration() throws JsonProcessingException, JsonMappingException {
+    void testValidConfiguration() throws JsonProcessingException {
         String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 
@@ -166,7 +164,7 @@ class SbomRepositoryTest {
     }
 
     @Test
-    void testValidOperationBom() throws JsonProcessingException, JsonMappingException {
+    void testValidOperationBom() throws JsonProcessingException {
         String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
@@ -184,15 +182,13 @@ class SbomRepositoryTest {
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
             Log.error(
-                    "violations: " + violations.stream()
-                            .map(e -> e.getMessage().toString())
-                            .collect(Collectors.joining("\n\t")));
+                    "violations: " + violations.stream().map(e -> e.getMessage()).collect(Collectors.joining("\n\t")));
             fail("Validation errors on the baseSBOM entity should be empty!");
         }
     }
 
     @Test
-    void testValidOperationConfiguration() throws JsonProcessingException, JsonMappingException {
+    void testValidOperationConfiguration() throws JsonProcessingException {
         String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 

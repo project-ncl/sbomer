@@ -230,11 +230,7 @@ class PncBuildTest {
         Awaitility.await().atMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
             SbomGenerationRequest updated = sbomGenerationRequestRepository.findById("FAILEDOPERATION");
 
-            if (updated != null && updated.getStatus().equals(SbomGenerationStatus.FAILED)) {
-                return true;
-            }
-
-            return false;
+            return updated != null && updated.getStatus().equals(SbomGenerationStatus.FAILED);
         });
 
         SbomGenerationRequest updatedRequest = sbomGenerationRequestRepository.findById("FAILEDOPERATION");

@@ -38,7 +38,7 @@ public class DefaultProcessorConfig extends ProcessorConfig {
 
     @Override
     public List<String> toCommand() {
-        return Arrays.asList("default");
+        return List.of("default");
     }
 
 }

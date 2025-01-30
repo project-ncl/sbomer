@@ -115,7 +115,7 @@ public class BuildController extends AbstractController {
     @Setter
     SbomRepository sbomRepository;
 
-    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+    final ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     @Override
     protected UpdateControl<GenerationRequest> updateRequest(
@@ -311,7 +311,7 @@ public class BuildController extends AbstractController {
                 generationRequest.getName());
 
         // Check for still running tasks
-        List<TaskRun> stillRunning = generateTaskRuns.stream().filter(tr -> isFinished(tr) == false).toList();
+        List<TaskRun> stillRunning = generateTaskRuns.stream().filter(tr -> !isFinished(tr)).toList();
 
         // If there are tasks that hasn't finished yet, we need to wait.
         if (!stillRunning.isEmpty()) {
@@ -325,7 +325,7 @@ public class BuildController extends AbstractController {
 
         // Get list of failed TaskRuns
         List<TaskRun> failedTaskRuns = generateTaskRuns.stream()
-                .filter(tr -> isSuccessful(tr) == false)
+                .filter(tr -> !isSuccessful(tr))
                 .sorted((tr1, tr2) -> tr1.getMetadata().getName().compareTo(tr2.getMetadata().getName()))
                 .toList();
 

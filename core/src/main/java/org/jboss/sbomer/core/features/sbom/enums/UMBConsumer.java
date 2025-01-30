@@ -18,6 +18,6 @@
 package org.jboss.sbomer.core.features.sbom.enums;
 
 public enum UMBConsumer {
-    PNC, ERRATA;
+    PNC, ERRATA
 
 }

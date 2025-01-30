@@ -52,21 +52,15 @@ public class EnvironmentAttributesUtils {
 
         // Find Maven
         Optional<String> mavenVersion = getMavenSDKManCompliantVersion(environmentAttributes);
-        if (mavenVersion.isPresent()) {
-            sdkManAttributes.put(MAVEN_SDKMAN_KEY, mavenVersion.get().trim());
-        }
+        mavenVersion.ifPresent(s -> sdkManAttributes.put(MAVEN_SDKMAN_KEY, s.trim()));
 
         // Find Gradle
         Optional<String> gradleVersion = getGradleSDKManCompliantVersion(environmentAttributes);
-        if (gradleVersion.isPresent()) {
-            sdkManAttributes.put(GRADLE_SDKMAN_KEY, gradleVersion.get().trim());
-        }
+        gradleVersion.ifPresent(s -> sdkManAttributes.put(GRADLE_SDKMAN_KEY, s.trim()));
 
         // Find Java. We need to do some ugly polishing due to the metadata available in PNC.
         Optional<String> javaVersion = getJavaSDKManCompliantVersion(environmentAttributes);
-        if (javaVersion.isPresent()) {
-            sdkManAttributes.put(SDK_SDKMAN_KEY, javaVersion.get().trim());
-        }
+        javaVersion.ifPresent(s -> sdkManAttributes.put(SDK_SDKMAN_KEY, s.trim()));
 
         return sdkManAttributes;
     }
@@ -157,9 +151,7 @@ public class EnvironmentAttributesUtils {
 
         // Find NodeJs
         Optional<String> nodeJSVersion = getNodeJsNvmCompliantVersion(environmentAttributes);
-        if (nodeJSVersion.isPresent()) {
-            nvmAttributes.put(NODEJS_NVM_KEY, nodeJSVersion.get().trim());
-        }
+        nodeJSVersion.ifPresent(s -> nvmAttributes.put(NODEJS_NVM_KEY, s.trim()));
 
         return nvmAttributes;
     }

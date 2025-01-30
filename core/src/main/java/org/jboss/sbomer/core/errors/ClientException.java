@@ -30,7 +30,7 @@ public class ClientException extends ApplicationException {
     List<String> errors;
 
     @Getter
-    String errorId;
+    final String errorId;
 
     public int getCode() {
         return defaultCode;

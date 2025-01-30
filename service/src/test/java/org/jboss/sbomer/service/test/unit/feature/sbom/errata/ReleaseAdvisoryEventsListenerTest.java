@@ -84,19 +84,19 @@ import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
 @Slf4j
-public class ReleaseAdvisoryEventsListenerTest {
+class ReleaseAdvisoryEventsListenerTest {
 
     ReleaseAdvisoryEventsListenerSingleContainer listenerSingleContainer;
     ReleaseAdvisoryEventsListenerMultiContainer listenerMultiContainers;
     ReleaseAdvisoryEventsListenerSingleRPM listenerSingleRpm;
     ReleaseTextOnlyAdvisoryEventsListenerManifests listenerTextOnlyManifests;
     ReleaseTextOnlyAdvisoryEventsListenerDeliverables listenerTextOnlyDeliverables;
-    ErrataClient errataClient = mock(ErrataClient.class);
-    PyxisClient pyxisClient = mock(PyxisClient.class);
-    StatsService statsService = mock(StatsService.class);
-    SbomService sbomService = mock(SbomService.class);
-    SbomGenerationRequestRepository generationRequestRepository = mock(SbomGenerationRequestRepository.class);
-    RequestEventRepository requestEventRepository = mock(RequestEventRepository.class);
+    final ErrataClient errataClient = mock(ErrataClient.class);
+    final PyxisClient pyxisClient = mock(PyxisClient.class);
+    final StatsService statsService = mock(StatsService.class);
+    final SbomService sbomService = mock(SbomService.class);
+    final SbomGenerationRequestRepository generationRequestRepository = mock(SbomGenerationRequestRepository.class);
+    final RequestEventRepository requestEventRepository = mock(RequestEventRepository.class);
 
     private static void printRawBom(Bom bom) {
         try {
@@ -1098,12 +1098,8 @@ public class ReleaseAdvisoryEventsListenerTest {
         List<ErrataCDNRepoNormalized> cdnReposNormalized = cdnRepos.stream()
                 .filter(
                         cdn -> cdn.getType().equals("cdn_repos")
-                                && !cdn.getAttributes().getContentType().toLowerCase().equals("docker"))
-                .map(
-                        cdn -> new ErrataCDNRepoNormalized(
-                                cdn,
-                                variantName,
-                                !"rhel".equals(shortProductName.toLowerCase())))
+                                && !cdn.getAttributes().getContentType().equalsIgnoreCase("docker"))
+                .map(cdn -> new ErrataCDNRepoNormalized(cdn, variantName, !"rhel".equalsIgnoreCase(shortProductName)))
                 .distinct()
                 .collect(Collectors.toList());
         return cdnReposNormalized;

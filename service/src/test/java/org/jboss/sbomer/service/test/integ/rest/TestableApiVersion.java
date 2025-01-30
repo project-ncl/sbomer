@@ -6,7 +6,7 @@ public enum TestableApiVersion {
     V1ALPHA3("v1alpha3"), V1BETA1("v1beta1");
 
     @Getter
-    String name;
+    final String name;
 
     TestableApiVersion(String name) {
         this.name = name;

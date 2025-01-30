@@ -33,7 +33,7 @@ import org.junit.jupiter.api.io.TempDir;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 
-public class SyftImageAdjusterTest {
+class SyftImageAdjusterTest {
 
     @TempDir
     File tmpDir;

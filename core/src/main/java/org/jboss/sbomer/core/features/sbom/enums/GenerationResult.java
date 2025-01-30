@@ -34,7 +34,7 @@ public enum GenerationResult {
     ERR_MULTI(100);
 
     @Getter
-    int code;
+    final int code;
 
     GenerationResult(int code) {
         this.code = code;

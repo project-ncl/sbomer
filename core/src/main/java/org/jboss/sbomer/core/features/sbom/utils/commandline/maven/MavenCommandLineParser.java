@@ -61,10 +61,10 @@ public class MavenCommandLineParser {
                                                                                                                                    // inputs
 
     @ToString.Exclude
-    private CommandLineParser parser;
+    private final CommandLineParser parser;
 
     @ToString.Exclude
-    private Options cmdOptions;
+    private final Options cmdOptions;
 
     private List<String> profiles;
     private Properties properties;

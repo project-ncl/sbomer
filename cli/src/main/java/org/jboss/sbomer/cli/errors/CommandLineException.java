@@ -24,7 +24,7 @@ package org.jboss.sbomer.cli.errors;
  * </p>
  */
 public interface CommandLineException {
-    public default int getExitCode() {
+    default int getExitCode() {
         return 1;
     }
 }

@@ -29,7 +29,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @Builder
 public class Sbom {
-    public static enum BomFormat {
+    public enum BomFormat {
         @JsonProperty("cyclonedx")
         CYCLONEDX
     }

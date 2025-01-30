@@ -67,7 +67,7 @@ class SBOMerClientTestIT {
     void testNotFoundSbom() {
         Response response = client.getById("1234", "1234");
         assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-        ErrorResponse errorResponse = (ErrorResponse) response.readEntity(ErrorResponse.class);
+        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
         assertEquals("Not Found", errorResponse.getMessage());
     }
 

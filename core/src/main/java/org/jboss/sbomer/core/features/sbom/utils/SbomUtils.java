@@ -108,7 +108,7 @@ public class SbomUtils {
     }
 
     private static final Logger log = LoggerFactory.getLogger(SbomUtils.class);
-    private static Pattern gitProtocolPattern = Pattern.compile("git@(.+):(.+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern gitProtocolPattern = Pattern.compile("git@(.+):(.+)", Pattern.CASE_INSENSITIVE);
 
     public static Version schemaVersion() {
         return Version.VERSION_16;
@@ -206,7 +206,7 @@ public class SbomUtils {
         addExternalReference(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM,
-                "https://" + pncApiUrl + "/pnc-rest/v2/builds/" + pncBuild.getId().toString(),
+                "https://" + pncApiUrl + "/pnc-rest/v2/builds/" + pncBuild.getId(),
                 SBOM_RED_HAT_PNC_BUILD_ID);
 
         addExternalReference(
@@ -249,7 +249,7 @@ public class SbomUtils {
         addExternalReference(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM,
-                "https://" + pncApiUrl + "/pnc-rest/v2/artifacts/" + artifact.getId().toString(),
+                "https://" + pncApiUrl + "/pnc-rest/v2/artifacts/" + artifact.getId(),
                 SBOM_RED_HAT_PNC_ARTIFACT_ID);
         return component;
     }
@@ -263,8 +263,7 @@ public class SbomUtils {
             addExternalReference(
                     component,
                     ExternalReference.Type.BUILD_SYSTEM,
-                    "https://" + pncApiUrl + "/pnc-rest/v2/operations/deliverable-analyzer/"
-                            + operation.getId().toString(),
+                    "https://" + pncApiUrl + "/pnc-rest/v2/operations/deliverable-analyzer/" + operation.getId(),
                     SBOM_RED_HAT_PNC_OPERATION_ID);
         }
 
@@ -557,9 +556,7 @@ public class SbomUtils {
                     .stream()
                     .filter(p -> p.getName().equalsIgnoreCase(name))
                     .findFirst();
-            if (property.isPresent()) {
-                component.getProperties().remove(property.get());
-            }
+            property.ifPresent(value -> component.getProperties().remove(value));
         }
     }
 
@@ -678,7 +675,7 @@ public class SbomUtils {
     public static void setSupplier(Component c) {
         OrganizationalEntity org = new OrganizationalEntity();
         org.setName(Constants.SUPPLIER_NAME);
-        org.setUrls(Arrays.asList(new String[] { Constants.SUPPLIER_URL }));
+        org.setUrls(Arrays.asList(Constants.SUPPLIER_URL));
         c.setSupplier(org);
     }
 
@@ -1003,7 +1000,7 @@ public class SbomUtils {
 
             try {
                 String jsonContent = SbomUtils.toJson(bom);
-                bom.setSerialNumber("urn:uuid:" + UUID.nameUUIDFromBytes(jsonContent.getBytes(UTF_8)).toString());
+                bom.setSerialNumber("urn:uuid:" + UUID.nameUUIDFromBytes(jsonContent.getBytes(UTF_8)));
             } catch (GeneratorException e) {
                 log.warn("Could not generate serialNumber out of the manifest content, setting random UUID", e);
                 bom.setSerialNumber(UUID.randomUUID().toString());

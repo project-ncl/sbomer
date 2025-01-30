@@ -38,7 +38,7 @@ class AtlasHandlerTest {
 
     AtlasHandlerAlt atlasHandler;
 
-    AtlasBuildClient atlasBuildClient = mock(AtlasBuildClient.class);
+    final AtlasBuildClient atlasBuildClient = mock(AtlasBuildClient.class);
 
     private Sbom generateSbom(String id, String purl) throws IOException {
         return generateSbom(id, purl, "sboms/complete_operation_sbom.json");

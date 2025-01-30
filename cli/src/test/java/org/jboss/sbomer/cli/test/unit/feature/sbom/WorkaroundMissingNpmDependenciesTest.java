@@ -46,7 +46,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class WorkaroundMissingNpmDependenciesTest {
+class WorkaroundMissingNpmDependenciesTest {
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperProvider.json();
 

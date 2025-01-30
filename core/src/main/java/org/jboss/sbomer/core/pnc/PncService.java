@@ -63,23 +63,23 @@ import lombok.extern.slf4j.Slf4j;
 public class PncService {
 
     @Getter
-    String apiUrl;
+    final String apiUrl;
 
-    ArtifactClient artifactClient;
+    final ArtifactClient artifactClient;
 
-    BuildClient buildClient;
+    final BuildClient buildClient;
 
-    BuildConfigurationClient buildConfigurationClient;
+    final BuildConfigurationClient buildConfigurationClient;
 
-    GroupConfigurationClient groupConfigurationClient;
+    final GroupConfigurationClient groupConfigurationClient;
 
-    OperationClient operationClient;
+    final OperationClient operationClient;
 
-    ProductMilestoneClient productMilestoneClient;
+    final ProductMilestoneClient productMilestoneClient;
 
-    ProductVersionClient productVersionClient;
+    final ProductVersionClient productVersionClient;
 
-    DeliverableAnalyzerReportClient deliverableAnalyzerReportClient;
+    final DeliverableAnalyzerReportClient deliverableAnalyzerReportClient;
 
     public PncService(String apiUrl) {
         this.apiUrl = apiUrl;
@@ -328,7 +328,7 @@ public class PncService {
         Map<String, GroupConfigurationRef> groupConfigs = buildConfig.getGroupConfigs();
 
         // It looks that there are no group configs, nothing to do then!
-        if (groupConfigs == null || groupConfigs.size() == 0) {
+        if (groupConfigs == null || groupConfigs.isEmpty()) {
             log.warn(
                     "BuildConfig does not have any Group COnfiguration, unable to proceed without product version, interrupting processing");
             return Collections.emptyList();
@@ -375,17 +375,11 @@ public class PncService {
             }
         }
 
-        if (sha256.isPresent()) {
-            query.add("sha256==" + sha256.get());
-        }
+        sha256.ifPresent(s -> query.add("sha256==" + s));
 
-        if (sha1.isPresent()) {
-            query.add("sha1==" + sha1.get());
-        }
+        sha1.ifPresent(s -> query.add("sha1==" + s));
 
-        if (md5.isPresent()) {
-            query.add("md5==" + md5.get());
-        }
+        md5.ifPresent(s -> query.add("md5==" + s));
 
         // If query was not provided and no hashes are provided either
         if (query.isEmpty()) {

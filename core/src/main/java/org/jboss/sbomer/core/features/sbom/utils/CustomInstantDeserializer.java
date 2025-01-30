@@ -33,7 +33,7 @@ public class CustomInstantDeserializer extends JsonDeserializer<Instant> {
      * This is to convert dates like "2024-10-01 08:03:25 UTC" into a java.time.Instant
      */
     @Override
-    public Instant deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public Instant deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         String date = p.getText().trim();
         // Remove the "UTC" and parse
         if (date.endsWith(" UTC")) {

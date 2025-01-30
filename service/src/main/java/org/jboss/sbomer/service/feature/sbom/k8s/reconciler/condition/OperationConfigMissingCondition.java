@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OperationConfigMissingCondition implements Condition<TaskRun, GenerationRequest> {
 
-    Boolean cleanup = ConfigProvider.getConfig()
+    final Boolean cleanup = ConfigProvider.getConfig()
             .getValue("sbomer.controller.generation-request.cleanup", Boolean.class);
 
     @Override

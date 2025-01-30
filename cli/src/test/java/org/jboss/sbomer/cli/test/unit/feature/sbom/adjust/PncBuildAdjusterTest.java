@@ -17,9 +17,9 @@ import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class PncBuildAdjusterTest {
+class PncBuildAdjusterTest {
 
-    PncBuildAdjuster adjuster = new PncBuildAdjuster();
+    final PncBuildAdjuster adjuster = new PncBuildAdjuster();
 
     Bom bom = null;
 

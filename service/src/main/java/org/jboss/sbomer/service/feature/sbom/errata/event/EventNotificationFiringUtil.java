@@ -43,8 +43,7 @@ public class EventNotificationFiringUtil {
     }
 
     public static void notifyAdvisoryRelease(Object advisoryReleaseNotification) {
-        if (advisoryReleaseNotification instanceof StandardAdvisoryReleaseEvent) {
-            StandardAdvisoryReleaseEvent releaseEvent = (StandardAdvisoryReleaseEvent) advisoryReleaseNotification;
+        if (advisoryReleaseNotification instanceof StandardAdvisoryReleaseEvent releaseEvent) {
             log.info(
                     "Firing async event for standard advisory release update upon event with id: {}",
                     releaseEvent.getRequestEventId());

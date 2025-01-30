@@ -45,7 +45,7 @@ public class ProductVersionMapper {
     @ConfigProperty(name = "sbomer.pnc.product-mapping")
     Optional<String> mappingEnvironment;
 
-    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+    final ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     public static class Mapping extends HashMap<String, PncBuildConfig> {
 

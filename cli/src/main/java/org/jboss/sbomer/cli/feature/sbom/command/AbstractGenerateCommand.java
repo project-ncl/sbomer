@@ -77,7 +77,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     @Inject
     protected SBOMerClientFacade sbomerClientFacade;
 
-    protected SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+    protected final SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
 
     /**
      * <p>
@@ -221,7 +221,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
                 } catch (NumberFormatException ex) {
                     log.warn(
                             "Could not find extract product index from workDir path '{}', will regenerate the SBOM...",
-                            parent.getWorkdir().toAbsolutePath().toString());
+                            parent.getWorkdir().toAbsolutePath());
                 }
 
             } else {

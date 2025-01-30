@@ -43,10 +43,10 @@ class StageGenerationRequestIT extends E2EStageBase {
         return Paths.get("src", "test", "resources", "requests", fileName);
     }
 
-    private final static String MAVEN_BUILD_ID = "BD44LZFQA5YAA";
-    private final static String GRADLE_5_BUILD_ID = "BD2NA27VAVIAA";
-    private final static String GRADLE_4_BUILD_ID = "BDW7L6D3DUQAA";
-    private final static String NODEJS_NPM_BUILD_ID = "BCT4ZINAVZYAA";
+    private static final String MAVEN_BUILD_ID = "BD44LZFQA5YAA";
+    private static final String GRADLE_5_BUILD_ID = "BD2NA27VAVIAA";
+    private static final String GRADLE_4_BUILD_ID = "BDW7L6D3DUQAA";
+    private static final String NODEJS_NPM_BUILD_ID = "BCT4ZINAVZYAA";
 
     @Test
     @Execution(ExecutionMode.CONCURRENT)

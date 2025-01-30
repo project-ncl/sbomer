@@ -77,7 +77,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
         try (MDC.MDCCloseable mdcTook = MDC.putCloseable(MDCKeys.REQUEST_TOOK, took);
                 MDC.MDCCloseable mdcStatus = MDC
-                        .putCloseable(MDCKeys.RESPONSE_STATUS, Integer.toString(responseContext.getStatus()));) {
+                        .putCloseable(MDCKeys.RESPONSE_STATUS, Integer.toString(responseContext.getStatus()))) {
             log.info("Completed {}, took: {}ms.", requestContext.getUriInfo().getPath(), took);
         }
     }

@@ -21,7 +21,7 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 
 public interface Processor {
-    public ProcessorType getType();
+    ProcessorType getType();
 
-    public Bom process(Bom bom);
+    Bom process(Bom bom);
 }

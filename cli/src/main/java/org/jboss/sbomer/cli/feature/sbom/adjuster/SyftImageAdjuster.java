@@ -68,7 +68,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      */
     boolean includeRpms = true;
 
-    Path workDir;
+    final Path workDir;
 
     /**
      * <p>
@@ -77,7 +77,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      *
      * @see SyftImageAdjuster#adjustProperties(List)
      */
-    final static private List<String> ALLOWED_PROPERTY_PREFIXES = List.of(
+    static final private List<String> ALLOWED_PROPERTY_PREFIXES = List.of(
             "sbomer:package:language",
             "sbomer:package:type",
             "sbomer:location:0:path",
@@ -321,7 +321,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
         }
 
         String currentPublisher = component.getPublisher();
-        if (currentPublisher != null && "Red Hat, Inc.".equals(currentPublisher)) {
+        if ("Red Hat, Inc.".equals(currentPublisher)) {
             component.setPublisher(Constants.PUBLISHER);
         }
     }
@@ -373,8 +373,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         if (name == null) {
             if (componentNameParts.length > 1) {
-                name = mainComponent.getName()
-                        .substring(mainComponent.getName().indexOf("/"), mainComponent.getName().length());
+                name = mainComponent.getName().substring(mainComponent.getName().indexOf("/"));
             }
         }
 

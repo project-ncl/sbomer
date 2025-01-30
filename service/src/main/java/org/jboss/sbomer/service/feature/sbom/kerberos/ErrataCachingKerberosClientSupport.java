@@ -244,7 +244,7 @@ public class ErrataCachingKerberosClientSupport {
     }
 
     private class DefaultJAASConfiguration extends Configuration {
-        String completeUserPrincipalName;
+        final String completeUserPrincipalName;
 
         public DefaultJAASConfiguration(String completeUserPrincipalName) {
             this.completeUserPrincipalName = completeUserPrincipalName;
@@ -290,11 +290,9 @@ public class ErrataCachingKerberosClientSupport {
         @Override
         public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
             for (Callback current : callbacks) {
-                if (current instanceof NameCallback) {
-                    NameCallback ncb = (NameCallback) current;
+                if (current instanceof NameCallback ncb) {
                     ncb.setName(username);
-                } else if (current instanceof PasswordCallback) {
-                    PasswordCallback pcb = (PasswordCallback) current;
+                } else if (current instanceof PasswordCallback pcb) {
                     pcb.setPassword(password);
                 } else {
                     throw new UnsupportedCallbackException(current);

@@ -28,11 +28,11 @@ import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 
 public class RedHatProductProcessor implements Processor {
 
-    protected String productName;
+    protected final String productName;
 
-    protected String productVersion;
+    protected final String productVersion;
 
-    protected String productVariant;
+    protected final String productVariant;
 
     public RedHatProductProcessor(String productName, String productVersion, String productVariant) {
         this.productName = productName;

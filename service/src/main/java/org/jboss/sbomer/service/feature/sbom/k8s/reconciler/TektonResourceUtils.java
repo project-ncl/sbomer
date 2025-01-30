@@ -32,11 +32,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TektonResourceUtils {
-    public static enum ResourceTarget {
+    public enum ResourceTarget {
         CPU, MEMORY
     }
 
-    public static enum ResourceType {
+    public enum ResourceType {
         REQUESTS, LIMITS
     }
 
@@ -91,7 +91,7 @@ public class TektonResourceUtils {
         log.info(
                 "Updating compute resources of TaskRun '{}' to: {}",
                 taskRun.getMetadata().getName(),
-                computeResources.toString());
+                computeResources);
 
         taskRun.getSpec().setComputeResources(computeResources);
     }
@@ -114,10 +114,7 @@ public class TektonResourceUtils {
                                 target.toString().toLowerCase()),
                         String.class);
 
-        if (value.isPresent()) {
-            return value.get();
-        }
+        return value.orElse(null);
 
-        return null;
     }
 }

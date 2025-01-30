@@ -25,7 +25,7 @@ import lombok.Data;
 @Data
 @Builder
 public class Operation {
-    public static enum BuildSystem {
+    public enum BuildSystem {
         @JsonProperty("pnc")
         PNC
     }

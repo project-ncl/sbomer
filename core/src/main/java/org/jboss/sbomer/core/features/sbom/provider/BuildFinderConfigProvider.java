@@ -72,7 +72,7 @@ public class BuildFinderConfigProvider {
     private static final Integer DEFAULT_KOJI_MULTICALL_SIZE = 4;
     private static final Integer DEFAULT_KOJI_NUM_THREADS = 4;
 
-    private BuildConfig config;
+    private final BuildConfig config;
 
     @Produces
     public BuildConfig getConfig() {

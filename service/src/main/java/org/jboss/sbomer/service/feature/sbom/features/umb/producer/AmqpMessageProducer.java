@@ -56,12 +56,12 @@ public class AmqpMessageProducer {
     /**
      * Total number of produced messages that were NACKed by the broker.
      */
-    private AtomicInteger nackedMessages = new AtomicInteger(0);
+    private final AtomicInteger nackedMessages = new AtomicInteger(0);
 
     /**
      * Total number of produced messages that were ACKed by the broker.
      */
-    private AtomicInteger ackedMessages = new AtomicInteger(0);
+    private final AtomicInteger ackedMessages = new AtomicInteger(0);
 
     /**
      * Publish the provided {@link GenerationFinishedMessageBody} {@code msg} to the channel by using an {@link Emitter}

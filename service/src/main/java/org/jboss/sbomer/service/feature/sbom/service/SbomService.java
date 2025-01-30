@@ -466,7 +466,7 @@ public class SbomService {
 
         validate(sbom);
 
-        log.debug("Storing SBOM in the database: {}", sbom.toString());
+        log.debug("Storing SBOM in the database: {}", sbom);
 
         sbom = sbomRepository.saveSbom(sbom);
 

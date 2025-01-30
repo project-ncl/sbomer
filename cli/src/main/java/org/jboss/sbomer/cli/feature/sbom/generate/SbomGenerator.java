@@ -31,6 +31,6 @@ public interface SbomGenerator {
      * @param dir The directory containing the source code to generate the SBOM for.
      * @return The {@link Path} to the generated SBOM.
      */
-    public Path run(Path workDir, String... generatorArgs);
+    Path run(Path workDir, String... generatorArgs);
 
 }

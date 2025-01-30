@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
@@ -55,7 +56,7 @@ class SBOMResourceRSQTest {
 
     @Nested
     class v1alpha3 {
-        static String API_PATH = "/api/v1alpha3";
+        static final String API_PATH = "/api/v1alpha3";
 
         @Test
         void testGetSbomContentWithSearch() {
@@ -82,8 +83,8 @@ class SBOMResourceRSQTest {
         @Nested
         class GetByPurl {
 
-            static String PURL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom";
-            static String PURL_WITH_REPOSITORY_URL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom";
+            static final String PURL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom";
+            static final String PURL_WITH_REPOSITORY_URL = "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom";
 
             @Test
             void testFetchSbomByPurl() throws Exception {
@@ -618,7 +619,7 @@ class SBOMResourceRSQTest {
                 pageSize,
                 totalPages,
                 totalHits,
-                Arrays.asList(createFirstBaseSbomRecord()));
+                List.of(createFirstBaseSbomRecord()));
     }
 
     private Page<BaseSbomRecord> initializeTwoResultsRecordPaginated(int pageIndex, int pageSize) throws Exception {
