@@ -208,7 +208,7 @@ class PncBuildTest {
     }
 
     @Test
-    public void testUMBConsumerFailedDelAnalysisOperation() throws Exception {
+    void testUMBConsumerFailedDelAnalysisOperation() throws Exception {
         log.info("Running testUMBConsumerFailedDelAnalysisOperation...");
 
         // Prepare initial NO_OP request.

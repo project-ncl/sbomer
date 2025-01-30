@@ -39,7 +39,7 @@ import io.quarkus.test.junit.main.QuarkusMainTest;
 @QuarkusMainTest
 @WithTestResource(PncWireMock.class)
 @TestProfile(CustomPncServiceProfile.class)
-public class CliFailFastIt {
+class CliFailFastIt {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {
         @Override
         public Set<Class<?>> getEnabledAlternatives() {
@@ -49,8 +49,7 @@ public class CliFailFastIt {
 
     @Test
     @DisplayName("Should fail after default processor fails")
-    void testShouldNotRunNextCommandIfPreviousFails(QuarkusMainLauncher launcher, @TempDir Path tempDir)
-            throws Exception {
+    void testShouldNotRunNextCommandIfPreviousFails(QuarkusMainLauncher launcher, @TempDir Path tempDir) {
 
         LaunchResult result = launcher.launch(
                 "-v",

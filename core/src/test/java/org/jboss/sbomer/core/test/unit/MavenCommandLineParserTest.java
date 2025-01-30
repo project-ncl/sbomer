@@ -189,7 +189,7 @@ class MavenCommandLineParserTest {
     }
 
     @Test
-    public void tackleDoubleMvnCommandTest() throws IOException, IllegalArgumentException {
+    void tackleDoubleMvnCommandTest() throws IOException, IllegalArgumentException {
         String script = TestResources.asString("maven/BAZAPVSUDEYAE.sh");
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
@@ -206,7 +206,7 @@ class MavenCommandLineParserTest {
     }
 
     @Test
-    public void tackleAlternativePomFileTest() throws IOException, IllegalArgumentException {
+    void tackleAlternativePomFileTest() throws IOException, IllegalArgumentException {
         String script = "mvn deploy -f productized/logic/pom.xml";
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);
