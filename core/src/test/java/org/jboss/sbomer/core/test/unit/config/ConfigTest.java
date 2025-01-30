@@ -17,7 +17,7 @@ import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class ConfigTest {
+class ConfigTest {
     @Test
     void shouldHandleNullValue() {
         assertNull(Config.fromString(null));

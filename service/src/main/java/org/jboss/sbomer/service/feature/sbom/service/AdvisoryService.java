@@ -688,7 +688,7 @@ public class AdvisoryService {
                         .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
                         .map(indexMap -> (List<String>) indexMap.get("pull"))
                         .flatMap(
-                                list -> list != null && !list.isEmpty()
+                                list -> !list.isEmpty()
                                         ? list.stream().filter(item -> item.contains("sha256")).findFirst()
                                         : Optional.empty())
                         .or(
@@ -697,10 +697,9 @@ public class AdvisoryService {
                                         .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
                                         .map(indexMap -> (List<String>) indexMap.get("pull"))
                                         .flatMap(
-                                                list -> list != null && !list.isEmpty() ? list.stream().findFirst()
-                                                        : Optional.empty()))
+                                                list -> !list.isEmpty() ? list.stream().findFirst() : Optional.empty()))
                         .orElse(null);
-                buildsToImageName.put(Long.valueOf(kojiBuildInfo.getId()), imageName);
+                buildsToImageName.put((long) kojiBuildInfo.getId(), imageName);
             }
         } catch (KojiClientException e) {
             log.error("Unable to fetch containers information for buildIDs: {}", buildIds, e);
@@ -748,7 +747,7 @@ public class AdvisoryService {
         summary.append("\nRelease: ").append(erratumRelease.getData().getAttributes().getName());
         summary.append("\n\nBuilds: ");
         if (erratumBuildList != null) {
-            if (erratumBuildList.getProductVersions() != null && erratumBuildList.getProductVersions().size() > 0) {
+            if (erratumBuildList.getProductVersions() != null && !erratumBuildList.getProductVersions().isEmpty()) {
                 for (ProductVersionEntry productVersionEntry : erratumBuildList.getProductVersions().values()) {
                     summary.append("\n\tProduct Version: ").append(productVersionEntry.getName());
                     for (Build build : productVersionEntry.getBuilds()) {
@@ -765,13 +764,13 @@ public class AdvisoryService {
             summary.append("\nJSON Notes:\n").append(notes.get().toPrettyString());
         } else {
             if (erratum.getContent().getContent().getNotes() != null
-                    && erratum.getContent().getContent().getNotes().trim().length() > 0) {
+                    && !erratum.getContent().getContent().getNotes().trim().isEmpty()) {
                 summary.append("\nNotes:\n").append(erratum.getContent().getContent().getNotes());
             }
         }
 
         summary.append("\n**********************************\n");
-        System.out.println(summary.toString());
+        System.out.println(summary);
     }
 
 }

@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 public class ArtifactJsonPropertyValidator implements ConstraintValidator<ArtifactJsonProperty, JsonNode> {
 
-    private ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+    private final ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     @Override
     public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
@@ -46,7 +46,7 @@ public class ArtifactJsonPropertyValidator implements ConstraintValidator<Artifa
             if (value instanceof ObjectNode on) {
                 mapper.readTree(on.asText());
             } else {
-                mapper.readTree(((TextNode) value).toString());
+                mapper.readTree(value.toString());
             }
 
         } catch (IOException e) {

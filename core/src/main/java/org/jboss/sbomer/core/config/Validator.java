@@ -26,5 +26,5 @@ public interface Validator<T> {
      * @param config The T object to validate.
      * @return a {@link ValidationResult} object.
      */
-    public ValidationResult validate(T config);
+    ValidationResult validate(T config);
 }

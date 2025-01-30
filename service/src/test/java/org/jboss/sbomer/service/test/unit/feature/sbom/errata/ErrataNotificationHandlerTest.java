@@ -87,7 +87,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 class ErrataNotificationHandlerTest {
 
     static class ErrataNotificationHandlerAlt extends ErrataNotificationHandler {
-        public void handle(RequestEvent requestEvent) throws JsonProcessingException, IOException {
+        public void handle(RequestEvent requestEvent) throws IOException {
             super.handle(requestEvent);
         }
     }
@@ -95,11 +95,11 @@ class ErrataNotificationHandlerTest {
     ErrataNotificationHandlerAlt errataNotificationHandler;
     ErrataNotesSchemaValidator notesSchemaValidator;
 
-    ErrataClient errataClient = mock(ErrataClient.class);
-    ClientSession clientSession = mock(ClientSession.class);
-    AdvisoryService advisoryService = mock(AdvisoryService.class);
-    SbomService sbomService = mock(SbomService.class);
-    RequestEventRepository requestEventRepository = mock(RequestEventRepository.class);
+    final ErrataClient errataClient = mock(ErrataClient.class);
+    final ClientSession clientSession = mock(ClientSession.class);
+    final AdvisoryService advisoryService = mock(AdvisoryService.class);
+    final SbomService sbomService = mock(SbomService.class);
+    final RequestEventRepository requestEventRepository = mock(RequestEventRepository.class);
 
     @BeforeEach
     void beforeEach() {
@@ -119,7 +119,7 @@ class ErrataNotificationHandlerTest {
     }
 
     @Test
-    void testHandleRealErrataWithNewFilesStatus() throws IOException, JsonProcessingException {
+    void testHandleRealErrataWithNewFilesStatus() throws IOException {
         String errataJsonString = TestResources.asString("errata/api/erratum.json");
         String releaseJsonString = TestResources.asString("errata/api/release.json");
         String errataBuildsJsonString = TestResources.asString("errata/api/build_list.json");
@@ -149,7 +149,7 @@ class ErrataNotificationHandlerTest {
     }
 
     @Test
-    void testHandleRealErrataDockerWithQEStatus() throws KojiClientException, IOException, JsonProcessingException {
+    void testHandleRealErrataDockerWithQEStatus() throws KojiClientException, IOException {
         String errataJsonString = TestResources.asString("errata/api/erratum_QE.json");
         String releaseJsonString = TestResources.asString("errata/api/erratum_QE_release.json");
         String errataBuildsJsonString = TestResources.asString("errata/api/erratum_QE_build_list.json");
@@ -190,8 +190,7 @@ class ErrataNotificationHandlerTest {
     }
 
     @Test
-    void testHandleTextOnlyErrataWithManifestWithQEStatus()
-            throws KojiClientException, IOException, JsonProcessingException {
+    void testHandleTextOnlyErrataWithManifestWithQEStatus() throws KojiClientException, IOException {
         String textOnlyErrataJsonString = TestResources.asString("errata/api/erratum_textonly_QE_manifest.json");
         String releaseJsonString = TestResources.asString("errata/api/erratum_textonly_QE_release.json");
         String errataBuildsJsonString = TestResources.asString("errata/api/erratum_textonly_QE_build_list.json");
@@ -243,8 +242,7 @@ class ErrataNotificationHandlerTest {
     }
 
     @Test
-    void testHandleTextOnlyErrataWithDeliverablesWithQEStatus()
-            throws KojiClientException, IOException, JsonProcessingException {
+    void testHandleTextOnlyErrataWithDeliverablesWithQEStatus() throws KojiClientException, IOException {
         String textOnlyErrataJsonString = TestResources.asString("errata/api/erratum_textonly_QE_deliverables.json");
         String releaseJsonString = TestResources.asString("errata/api/erratum_textonly_QE_release.json");
         String errataBuildsJsonString = TestResources.asString("errata/api/erratum_textonly_QE_build_list.json");
@@ -335,7 +333,7 @@ class ErrataNotificationHandlerTest {
     }
 
     @Test
-    void testHandleErrataWithUnknownContentType() throws KojiClientException, IOException, JsonProcessingException {
+    void testHandleErrataWithUnknownContentType() throws KojiClientException, IOException {
 
         String errataJsonString = TestResources.asString("errata/api/erratum_unknown_content_type.json");
         String releaseJsonString = TestResources.asString("errata/api/erratum_QE_release.json");
@@ -383,7 +381,7 @@ class ErrataNotificationHandlerTest {
     }
 
     @Test
-    void testHandleErrataWithShippedLiveStatus() throws KojiClientException, IOException, JsonProcessingException {
+    void testHandleErrataWithShippedLiveStatus() throws KojiClientException, IOException {
 
         String errataJsonString = TestResources.asString("errata/api/erratum_SHIPPED_LIVE.json");
         String releaseJsonString = TestResources.asString("errata/api/erratum_QE_release.json");

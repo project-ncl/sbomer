@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Slf4j
 public class ConfigReader {
-    private static String CONFIG_PATH = ".sbomer/config.yaml";
+    private static final String CONFIG_PATH = ".sbomer/config.yaml";
 
     @Inject
     @RestClient
@@ -57,10 +57,10 @@ public class ConfigReader {
     String gitLabHost;
 
     @Getter
-    ObjectMapper yamlObjectMapper = ObjectMapperProvider.yaml();
+    final ObjectMapper yamlObjectMapper = ObjectMapperProvider.yaml();
 
     @Getter
-    ObjectMapper jsonObjectMapper = ObjectMapperProvider.json();
+    final ObjectMapper jsonObjectMapper = ObjectMapperProvider.json();
 
     /**
      * Retreives the content of the SBOMer config file from a Gerrit server.

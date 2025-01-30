@@ -67,7 +67,7 @@ import picocli.CommandLine.Option;
 public class GenerateConfigCommand implements Callable<Integer> {
 
     public enum ConfigFormat {
-        YAML, JSON;
+        YAML, JSON
     }
 
     @Option(
@@ -101,9 +101,9 @@ public class GenerateConfigCommand implements Callable<Integer> {
     @Inject
     ConfigSchemaValidator configSchemaValidator;
 
-    SbomerConfigProvider configAdjuster = new SbomerConfigProvider();
+    final SbomerConfigProvider configAdjuster = new SbomerConfigProvider();
 
-    protected SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
+    protected final SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
 
     @Inject
     ProductVersionMapper productVersionMapper;

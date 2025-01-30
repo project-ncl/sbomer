@@ -22,7 +22,7 @@ import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
 import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
 
-public class TektonResourceUtilsTest {
+class TektonResourceUtilsTest {
 
     @Test
     void shouldHandleContainerImageResources() {

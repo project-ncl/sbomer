@@ -481,7 +481,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
             // 2 - For every generation, find all the existing manifests and update the with release repo
             // data
-            log.debug("Processing {} generations...", generationToCDNs.keySet().size());
+            log.debug("Processing {} generations...", generationToCDNs.size());
             for (String generationId : generationToCDNs.keySet()) {
 
                 // 2.1 Get all the CDNs associated with this request
@@ -592,7 +592,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
             // 2 - For every generation, find all the existing manifests and update the with release repo
             // data
-            log.debug("Processing {} generations...", generationToRepositories.keySet().size());
+            log.debug("Processing {} generations...", generationToRepositories.size());
             for (String generationId : generationToRepositories.keySet()) {
 
                 // 2.1 - Select the repository with longest repoFragment + tag
@@ -725,7 +725,7 @@ public class ReleaseStandardAdvisoryEventsListener {
             // Map all VariantArch to ErrataVariant and collect distinct ErrataVariant objects
             Set<String> productVersionCPEs = buildItems.stream()
                     .flatMap(buildItem -> buildItem.getVariantArch().keySet().stream())
-                    .map(variantArch -> errataClient.getVariant(variantArch.toString()))
+                    .map(variantArch -> errataClient.getVariant(variantArch))
                     .filter(Objects::nonNull)
                     .map(errataVariant -> errataVariant.getData().getAttributes().getCpe())
                     .collect(Collectors.toSet());

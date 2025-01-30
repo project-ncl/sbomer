@@ -77,13 +77,13 @@ class SbomGenerationRequestRepositoryTest {
     @Inject
     SbomService sbomService;
 
-    final static String REQUEST_ID = "FFAASSBB";
-    final static String OPERATION_REQUEST_ID = "OPFFAASSBB";
-    final static String BUILD_ID = "RRYT3LBXDVYAC";
-    final static String OPERATION_ID = "OPERATION13";
+    static final String REQUEST_ID = "FFAASSBB";
+    static final String OPERATION_REQUEST_ID = "OPFFAASSBB";
+    static final String BUILD_ID = "RRYT3LBXDVYAC";
+    static final String OPERATION_ID = "OPERATION13";
 
-    final static String REQUEST_ID_2_DELETE = "FFAASSBBDD";
-    final static String BUILD_ID_2_DELETE = "RRYT3LBXDVYACDD";
+    static final String REQUEST_ID_2_DELETE = "FFAASSBBDD";
+    static final String BUILD_ID_2_DELETE = "RRYT3LBXDVYACDD";
 
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "sboms", fileName);

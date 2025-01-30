@@ -61,7 +61,7 @@ public class ErrataNotificationHandler {
     @Setter
     RequestEventRepository requestEventRepository;
 
-    public void handle(RequestEvent requestEvent) throws JsonProcessingException, IOException {
+    public void handle(RequestEvent requestEvent) throws IOException {
 
         if (!featureFlags.errataIntegrationEnabled()) {
             log.warn("Errata API integration is disabled, the UMB message won't be used!!");

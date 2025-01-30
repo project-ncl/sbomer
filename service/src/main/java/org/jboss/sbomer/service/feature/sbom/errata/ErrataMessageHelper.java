@@ -36,7 +36,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ErrataMessageHelper {
 
-    static ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+    static final ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
             .registerModule(new SimpleModule().addDeserializer(Instant.class, new CustomInstantDeserializer()))
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)

@@ -203,7 +203,7 @@ public class NotificationService {
                 buildPayload = Build.builder()
                         .id(sbom.getIdentifier())
                         .buildSystem(pncBuildSystemRef.isPresent() ? BuildSystem.PNC : null)
-                        .link(pncBuildSystemRef.isPresent() ? pncBuildSystemRef.get().getUrl() : null)
+                        .link(pncBuildSystemRef.map(ExternalReference::getUrl).orElse(null))
                         .build();
 
                 generationRequest = PncBuildGenerationRequest.builder()
@@ -223,7 +223,7 @@ public class NotificationService {
                 operationPayload = Operation.builder()
                         .id(sbom.getIdentifier())
                         .buildSystem(pncOperationRef.isPresent() ? Operation.BuildSystem.PNC : null)
-                        .link(pncOperationRef.isPresent() ? pncOperationRef.get().getUrl() : null)
+                        .link(pncOperationRef.map(ExternalReference::getUrl).orElse(null))
                         .deliverable(component.getVersion())
                         .build();
 

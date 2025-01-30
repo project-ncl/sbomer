@@ -146,7 +146,7 @@ class DefaultProcessCommandIT {
             assertEquals(2, component.getProperties().size());
 
             Optional<String> sha256 = SbomUtils.getHash(component, Hash.Algorithm.SHA_256);
-            String sha = sha256.isPresent() ? sha256.get() : null;
+            String sha = sha256.orElse(null);
             Mockito.when(pncService.getArtifact(purl, sha256, Optional.empty(), Optional.empty()))
                     .thenReturn(generateArtifact(purl, sha));
         }

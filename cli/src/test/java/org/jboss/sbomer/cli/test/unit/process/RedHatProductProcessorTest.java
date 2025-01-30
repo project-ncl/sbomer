@@ -10,8 +10,8 @@ import org.jboss.sbomer.cli.feature.sbom.processor.RedHatProductProcessor;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.junit.jupiter.api.Test;
 
-public class RedHatProductProcessorTest {
-    RedHatProductProcessor processor = new RedHatProductProcessor("pName", "pVersion", "pVariant");
+class RedHatProductProcessorTest {
+    final RedHatProductProcessor processor = new RedHatProductProcessor("pName", "pVersion", "pVariant");
 
     @Test
     void addAll() {

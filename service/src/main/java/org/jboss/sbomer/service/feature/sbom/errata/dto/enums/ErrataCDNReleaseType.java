@@ -24,7 +24,7 @@ public enum ErrataCDNReleaseType {
     PRIMARY("Primary"), EUS("EUS"), FASTTRACK("FastTrack"), LONGLIFE("LongLife");
 
     @Getter
-    String type;
+    final String type;
 
     ErrataCDNReleaseType(String type) {
         this.type = type;

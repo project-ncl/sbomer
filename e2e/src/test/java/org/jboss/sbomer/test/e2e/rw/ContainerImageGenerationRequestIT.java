@@ -42,7 +42,7 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
         return Paths.get("src", "test", "resources", "requests", fileName);
     }
 
-    private final static String MANDREL_IMAGE = "registry.redhat.io/quarkus/mandrel-for-jdk-21-rhel8@sha256:a406de0fd344785fb39eba81cbef01cf7fb3e2be43d0e671a8587d1abe1418b4";
+    private static final String MANDREL_IMAGE = "registry.redhat.io/quarkus/mandrel-for-jdk-21-rhel8@sha256:a406de0fd344785fb39eba81cbef01cf7fb3e2be43d0e671a8587d1abe1418b4";
 
     @Test
     void testMultiArchImage() throws IOException, URISyntaxException {

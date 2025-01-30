@@ -249,7 +249,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         for (String key : pathToDependencies.keySet()) {
             Dependency dependency = pathToDependencies.get(key);
             Optional<Dependency> maybeParent = findClosestParent(pathToDependencies, key);
-            Dependency parent = maybeParent.isPresent() ? maybeParent.get() : mainDependency;
+            Dependency parent = maybeParent.orElse(mainDependency);
             parent.addDependency(dependency);
         }
 
@@ -311,9 +311,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             PackageURLBuilder purlBuilder = PackageURLBuilder.aPackageURL()
                     .withType(PackageURL.StandardTypes.GENERIC)
                     .withName(filename);
-            if (sha256.isPresent()) {
-                purlBuilder.withQualifier("checksum", "sha256:" + sha256.get());
-            }
+            sha256.ifPresent(s -> purlBuilder.withQualifier("checksum", "sha256:" + s));
 
             return purlBuilder.build().toString();
         } catch (MalformedPackageURLException e) {

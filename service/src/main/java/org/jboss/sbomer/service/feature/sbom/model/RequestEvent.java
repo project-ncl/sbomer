@@ -73,29 +73,29 @@ public class RequestEvent extends PanacheEntityBase {
     public static final String FAILED_GENERIC_REASON = "An error occurred while processing";
 
     // The event keys for UMB event type
-    public final static String EVENT_KEY_UMB_CONSUMER = "consumer";
-    public final static String EVENT_KEY_UMB_MSG_STATUS = "msg_status";
-    public final static String EVENT_KEY_UMB_MSG = "msg";
-    public final static String EVENT_KEY_UMB_MSG_TYPE = "msg_type";
-    public final static String EVENT_KEY_UMB_MSG_CREATION_TIME = "creation_time";
-    public final static String EVENT_KEY_UMB_MSG_ID = "msg_id";
-    public final static String EVENT_KEY_UMB_TOPIC = "destination";
+    public static final String EVENT_KEY_UMB_CONSUMER = "consumer";
+    public static final String EVENT_KEY_UMB_MSG_STATUS = "msg_status";
+    public static final String EVENT_KEY_UMB_MSG = "msg";
+    public static final String EVENT_KEY_UMB_MSG_TYPE = "msg_type";
+    public static final String EVENT_KEY_UMB_MSG_CREATION_TIME = "creation_time";
+    public static final String EVENT_KEY_UMB_MSG_ID = "msg_id";
+    public static final String EVENT_KEY_UMB_TOPIC = "destination";
 
-    public final static String EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE = "unknown";
+    public static final String EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE = "unknown";
 
     // The event keys for REST event type
-    public final static String EVENT_KEY_REST_METHOD = "method";
-    public final static String EVENT_KEY_REST_ADDRESS = "address";
-    public final static String EVENT_KEY_REST_USERNAME = "username";
-    public final static String EVENT_KEY_REST_TRACE_ID = "trace_id";
-    public final static String EVENT_KEY_REST_SPAN_ID = "span_id";
-    public final static String EVENT_KEY_REST_URI_PATH = "destination";
+    public static final String EVENT_KEY_REST_METHOD = "method";
+    public static final String EVENT_KEY_REST_ADDRESS = "address";
+    public static final String EVENT_KEY_REST_USERNAME = "username";
+    public static final String EVENT_KEY_REST_TRACE_ID = "trace_id";
+    public static final String EVENT_KEY_REST_SPAN_ID = "span_id";
+    public static final String EVENT_KEY_REST_URI_PATH = "destination";
 
     // The type of request event (UMB | REST)
-    public final static String REQUEST_EVENT_TYPE = "event_type";
+    public static final String REQUEST_EVENT_TYPE = "event_type";
 
     // The request config type (type of concrete classes of org.jboss.sbomer.core.config.request.RequestConfig)
-    public final static String REQUEST_CONFIG_TYPE = "type";
+    public static final String REQUEST_CONFIG_TYPE = "type";
 
     @Id
     @Column(nullable = false, updatable = false)

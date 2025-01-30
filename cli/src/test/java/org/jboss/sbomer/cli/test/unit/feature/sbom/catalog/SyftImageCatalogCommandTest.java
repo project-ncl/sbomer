@@ -15,7 +15,7 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Test;
 
-public class SyftImageCatalogCommandTest {
+class SyftImageCatalogCommandTest {
 
     static class SyftImageCatalogCommandAlt extends SyftImageCatalogCommand {
         @Override

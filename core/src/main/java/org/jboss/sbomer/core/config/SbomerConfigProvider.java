@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SbomerConfigProvider {
 
     @Getter
-    DefaultGenerationConfig defaultGenerationConfig;
+    final DefaultGenerationConfig defaultGenerationConfig;
 
     private static SbomerConfigProvider instance;
 

@@ -27,7 +27,7 @@ import lombok.Getter;
 
 public class InMemoryLogHandler extends Handler {
     @Getter
-    List<LogRecord> records = new ArrayList<>();
+    final List<LogRecord> records = new ArrayList<>();
 
     @Override
     public void publish(LogRecord record) {

@@ -103,7 +103,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
 
     private TaskRun dummyTaskRun(int index) {
         return new TaskRunBuilder().withNewMetadata()
-                .withName("generation-task-run-" + String.valueOf(index))
+                .withName("generation-task-run-" + index)
                 .withLabels(Map.of(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase()))
                 .endMetadata()
                 .withNewSpec()

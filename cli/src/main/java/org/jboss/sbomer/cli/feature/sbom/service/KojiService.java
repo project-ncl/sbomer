@@ -154,7 +154,7 @@ public class KojiService {
             throws InterruptedException, ExecutionException {
 
         int retry = 1;
-        while (!finderTask.isDone() && (retry * 500) < MAX_BREW_WAIT_5_MIN) {
+        while (!finderTask.isDone() && (retry * 500L) < MAX_BREW_WAIT_5_MIN) {
             try {
                 retry++;
                 Thread.sleep(500);
@@ -264,7 +264,7 @@ public class KojiService {
 
         List<KojiBuildInfo> builds = kojiSession.getBuild(List.of(KojiIdOrName.getFor(nvr)));
 
-        if (builds.size() == 0) {
+        if (builds.isEmpty()) {
             log.debug("No results found");
             return null;
         }

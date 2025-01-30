@@ -36,10 +36,10 @@ public enum GenerationRequestType {
     BREW_RPM(BrewRPMConfig.class, "brew_rpm_config.json");
 
     @Getter
-    Class<? extends Config> implementation;
+    final Class<? extends Config> implementation;
 
     @Getter
-    String schema;
+    final String schema;
 
     GenerationRequestType(Class<? extends Config> implementation, String schema) {
         this.implementation = implementation;

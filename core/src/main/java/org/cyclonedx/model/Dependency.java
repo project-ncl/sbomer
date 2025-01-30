@@ -108,9 +108,8 @@ public class Dependency extends BomReference {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (!(o instanceof Dependency))
+        if (!(o instanceof Dependency that))
             return false;
-        Dependency that = (Dependency) o;
         return Objects.equals(getRef(), that.getRef());
     }
 

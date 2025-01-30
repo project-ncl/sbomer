@@ -40,7 +40,7 @@ public class ObjectMapperProvider {
             .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .setSerializationInclusion(Include.NON_NULL);
 
-    static ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+    static final ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
             .setSerializationInclusion(Include.NON_NULL)

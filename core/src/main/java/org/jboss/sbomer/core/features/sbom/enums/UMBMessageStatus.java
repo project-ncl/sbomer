@@ -19,5 +19,5 @@ package org.jboss.sbomer.core.features.sbom.enums;
 
 public enum UMBMessageStatus {
 
-    NONE, ACK, NACK, SKIPPED;
+    NONE, ACK, NACK, SKIPPED
 }

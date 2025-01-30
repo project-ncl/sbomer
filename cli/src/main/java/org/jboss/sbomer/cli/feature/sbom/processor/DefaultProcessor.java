@@ -73,16 +73,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DefaultProcessor implements Processor {
 
-    protected PncService pncService;
+    protected final PncService pncService;
 
-    protected KojiService kojiService;
+    protected final KojiService kojiService;
 
     public DefaultProcessor(PncService pncService, KojiService kojiService) {
         this.pncService = pncService;
         this.kojiService = kojiService;
     }
 
-    private Map<String, String> purlRelocations = new HashMap<>();
+    private final Map<String, String> purlRelocations = new HashMap<>();
 
     /**
      * Performs processing for a given {@link Component}.

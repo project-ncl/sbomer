@@ -72,42 +72,42 @@ public interface ErrataClient {
     // Retrieve the advisory data, the id could be advisory id or advisory name.
     @GET
     @Path("/erratum/{id}")
-    public Errata getErratum(@PathParam("id") String erratumId);
+    Errata getErratum(@PathParam("id") String erratumId);
 
     // Get the details of a product by its id or short name
     @GET
     @Path("/products/{id}")
-    public ErrataProduct getProduct(@PathParam("id") String productId);
+    ErrataProduct getProduct(@PathParam("id") String productId);
 
     // Get the details of a release by its id or name
     @GET
     @Path("/releases/{id}")
-    public ErrataRelease getRelease(@PathParam("id") String releaseId);
+    ErrataRelease getRelease(@PathParam("id") String releaseId);
 
     // Get the details of a variant by its name or id
     @GET
     @Path("/variants/{id}")
-    public ErrataVariant getVariant(@PathParam("id") String variantId);
+    ErrataVariant getVariant(@PathParam("id") String variantId);
 
     // Get the details of a variant by its name or id
     @GET
     @Path("/variants")
-    public ErrataPage<ErrataVariant.VariantData> getAllVariants(@Valid @BeanParam ErrataQueryParameters pageParameters);
+    ErrataPage<ErrataVariant.VariantData> getAllVariants(@Valid @BeanParam ErrataQueryParameters pageParameters);
 
     // Add a comment to an advisory. Example request body: {"comment": "This is my comment"}
     @POST
     @Path("/erratum/{id}/add_comment")
-    public Errata addCommentToErratum(@PathParam("id") String erratumId, String comment);
+    Errata addCommentToErratum(@PathParam("id") String erratumId, String comment);
 
     // Fetch the Brew builds associated with an advisory.
     @GET
     @Path("/erratum/{id}/builds_list")
-    public ErrataBuildList getBuildsList(@PathParam("id") String erratumId);
+    ErrataBuildList getBuildsList(@PathParam("id") String erratumId);
 
     // Get the CDN repositories
     @GET
     @Path("/cdn_repos")
-    public ErrataPage<ErrataCDNRepo> getAllCDNRepos(@Valid @BeanParam ErrataQueryParameters pageParameters);
+    ErrataPage<ErrataCDNRepo> getAllCDNRepos(@Valid @BeanParam ErrataQueryParameters pageParameters);
 
     @ClientExceptionMapper
     @Blocking
@@ -169,12 +169,8 @@ public interface ErrataClient {
         return allCDNRepos.stream()
                 .filter(
                         cdn -> cdn.getType().equals("cdn_repos")
-                                && !cdn.getAttributes().getContentType().toLowerCase().equals("docker"))
-                .map(
-                        cdn -> new ErrataCDNRepoNormalized(
-                                cdn,
-                                variantName,
-                                !"rhel".equals(shortProductName.toLowerCase())))
+                                && !cdn.getAttributes().getContentType().equalsIgnoreCase("docker"))
+                .map(cdn -> new ErrataCDNRepoNormalized(cdn, variantName, !"rhel".equalsIgnoreCase(shortProductName)))
                 .distinct()
                 .collect(Collectors.toList());
     }

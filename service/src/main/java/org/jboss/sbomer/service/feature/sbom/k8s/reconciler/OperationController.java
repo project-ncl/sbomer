@@ -104,7 +104,7 @@ public class OperationController extends AbstractController {
     @Inject
     NotificationService notificationService;
 
-    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+    final ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     @Override
     protected UpdateControl<GenerationRequest> updateRequest(

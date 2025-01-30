@@ -24,7 +24,7 @@ public enum ErrataCDNContentType {
     BINARY("Binary"), DEBUGINFO("Debuginfo"), SOURCE("Source");
 
     @Getter
-    String type;
+    final String type;
 
     ErrataCDNContentType(String type) {
         this.type = type;

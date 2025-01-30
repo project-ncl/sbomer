@@ -54,23 +54,22 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public interface PyxisClient {
 
-    public static List<String> REPOSITORIES_DETAILS_INCLUDES = List.of(
+    List<String> REPOSITORIES_DETAILS_INCLUDES = List.of(
             "data.repositories.registry",
             "data.repositories.repository",
             "data.repositories.tags",
             "data.repositories.published");
-    public static List<String> REPOSITORIES_REGISTRY_INCLUDES = List
-            .of("_id", "registry", "repository", "requires_terms");
+    List<String> REPOSITORIES_REGISTRY_INCLUDES = List.of("_id", "registry", "repository", "requires_terms");
 
     @GET
     @Path("/images/nvr/{nvr}")
-    public PyxisRepositoryDetails getRepositoriesDetails(
+    PyxisRepositoryDetails getRepositoriesDetails(
             @PathParam("nvr") String nvr,
             @QueryParam("include") List<String> includes);
 
     @GET
     @Path("/repositories/registry/{registry}/repository/{repository}")
-    public PyxisRepository getRepository(
+    PyxisRepository getRepository(
             @PathParam("registry") String registry,
             @PathParam("repository") String repository,
             @QueryParam("include") List<String> includes);

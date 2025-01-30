@@ -61,15 +61,15 @@ public class ProcessRunner {
         if (!Files.exists(workDir)) {
             throw new ValidationException(
                     "Command execution validation failed",
-                    Collections.singletonList(
-                            String.format("Provided working directory '%s' does not exist", workDir.toString())));
+                    Collections
+                            .singletonList(String.format("Provided working directory '%s' does not exist", workDir)));
         }
 
         if (!Files.isDirectory(workDir)) {
             throw new ValidationException(
                     "Command execution validation failed",
                     Collections.singletonList(
-                            String.format("Provided working directory '%s' is not a directory", workDir.toString())));
+                            String.format("Provided working directory '%s' is not a directory", workDir)));
         }
 
         log.debug("Working directory '{}' will be used", workDir);

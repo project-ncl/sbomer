@@ -38,7 +38,7 @@ import org.mockito.Mockito;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
-public class DefaultProcessorTest {
+class DefaultProcessorTest {
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperProvider.json();
 

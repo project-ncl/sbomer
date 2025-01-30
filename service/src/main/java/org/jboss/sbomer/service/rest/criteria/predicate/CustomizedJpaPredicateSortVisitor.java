@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomizedJpaPredicateSortVisitor<T> {
 
     private Root<?> root;
-    protected Class<T> entityClass;
+    protected final Class<T> entityClass;
     protected BuilderTools builderTools = new SimpleBuilderTools();
 
     public CustomizedJpaPredicateSortVisitor(Class<T> type) {

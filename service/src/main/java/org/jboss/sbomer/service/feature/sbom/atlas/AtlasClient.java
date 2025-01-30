@@ -48,10 +48,10 @@ import jakarta.ws.rs.core.Response;
 public interface AtlasClient {
 
     @GET
-    public Bom get(@QueryParam("id") String purl);
+    Bom get(@QueryParam("id") String purl);
 
     @PUT
-    public void upload(@QueryParam("id") String purl, JsonNode bom);
+    void upload(@QueryParam("id") String purl, JsonNode bom);
 
     @ClientExceptionMapper
     @Blocking

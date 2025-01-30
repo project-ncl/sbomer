@@ -28,7 +28,7 @@ import io.smallrye.config.WithName;
  * @author Marek Goldmann
  */
 public interface DefaultProcessingConfig {
-    public interface ProcessorConfig {
+    interface ProcessorConfig {
         ProcessorType name();
     }
 

@@ -29,7 +29,7 @@ import io.smallrye.config.WithName;
  */
 @ConfigMapping(prefix = "sbomer.generation")
 public interface DefaultGenerationConfig {
-    public interface DefaultGeneratorConfig {
+    interface DefaultGeneratorConfig {
         String defaultVersion();
 
         String defaultArgs();

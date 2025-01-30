@@ -29,7 +29,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ConfigMapping(prefix = "sbomer.features.umb")
 public interface UmbConfig {
 
-    public interface UmbProducerConfig {
+    interface UmbProducerConfig {
         /**
          * Enables the UMB producer feature
          *

@@ -54,11 +54,7 @@ public class SchemaValidator {
                             Optional.ofNullable(outputUnit.getErrors())
                                     .map(Collection::stream)
                                     .orElseGet(Stream::empty)
-                                    .map(
-                                            unit -> new StringBuilder().append(unit.getInstanceLocation())
-                                                    .append(": ")
-                                                    .append(unit.getError())
-                                                    .toString())
+                                    .map(unit -> unit.getInstanceLocation() + ": " + unit.getError())
                                     .toList())
                     .build();
         }

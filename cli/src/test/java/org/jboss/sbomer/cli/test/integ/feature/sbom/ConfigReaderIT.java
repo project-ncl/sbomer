@@ -67,7 +67,7 @@ class ConfigReaderIT {
         @RestClient
         GitilesClient gitilesClient;
 
-        Build build = Build.builder()
+        final Build build = Build.builder()
                 .id("ARYT3LBXDVYAC")
                 .scmUrl("https://code.engineering.redhat.com/gerrit/eclipse/microprofile-graphql.git")
                 .scmTag("1.1.0.redhat-00008")
@@ -135,7 +135,7 @@ class ConfigReaderIT {
             });
 
             assertEquals("Unknown property 'dummy' at path $.products.[0].processors.[0].dummy", ex.getMessage());
-            assertTrue(((JsonMappingException) ex.getCause()).getMessage().startsWith("Unrecognized field \"dummy\""));
+            assertTrue(ex.getCause().getMessage().startsWith("Unrecognized field \"dummy\""));
         }
 
         @Test
@@ -185,7 +185,7 @@ class ConfigReaderIT {
         @RestClient
         GitLabClient gitLabClient;
 
-        Build build = Build.builder()
+        final Build build = Build.builder()
                 .id("ARYT3LBXDVYAC")
                 .scmUrl("https://gitlab.cee.redhat.com/pnc-workspace/eclipse/microprofile-graphql.git")
                 .scmTag("1.1.0.redhat-00008")
@@ -253,7 +253,7 @@ class ConfigReaderIT {
             });
 
             assertEquals("Unknown property 'dummy' at path $.products.[0].processors.[0].dummy", ex.getMessage());
-            assertTrue(((JsonMappingException) ex.getCause()).getMessage().startsWith("Unrecognized field \"dummy\""));
+            assertTrue(ex.getCause().getMessage().startsWith("Unrecognized field \"dummy\""));
         }
 
         @Test

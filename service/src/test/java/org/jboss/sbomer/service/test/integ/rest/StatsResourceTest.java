@@ -88,8 +88,8 @@ class StatsResourceTest {
 
         @Test
         void testStatsEndpoint() {
-            Mockito.when(sbomService.countSboms()).thenReturn(12l);
-            Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
+            Mockito.when(sbomService.countSboms()).thenReturn(12L);
+            Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500L);
 
             RestAssured.given()
                     .when()
@@ -129,8 +129,8 @@ class StatsResourceTest {
 
         @Test
         void testStatsEndpoint() {
-            Mockito.when(sbomService.countSboms()).thenReturn(12l);
-            Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500l);
+            Mockito.when(sbomService.countSboms()).thenReturn(12L);
+            Mockito.when(sbomService.countSbomGenerationRequests()).thenReturn(500L);
 
             RestAssured.given()
                     .when()

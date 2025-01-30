@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class ErrataMessageHelperTestCase {
+class ErrataMessageHelperTestCase {
 
     @Test
     void testErrataStatusChangeMessage() throws IOException {
@@ -248,8 +248,8 @@ public class ErrataMessageHelperTestCase {
         assertEquals("sudo-1.9.5p2-1.el8_6", firstBuildItem.get().getKey());
         assertEquals(2871088, firstBuildItem.get().getValue().getId());
         assertEquals("sudo-1.9.5p2-1.el8_6", firstBuildItem.get().getValue().getNvr());
-        assertEquals(1, firstBuildItem.get().getValue().getVariantArch().keySet().size());
-        assertTrue(firstBuildItem.get().getValue().getVariantArch().keySet().contains("BaseOS-8.6.0.Z.EUS"));
+        assertEquals(1, firstBuildItem.get().getValue().getVariantArch().size());
+        assertTrue(firstBuildItem.get().getValue().getVariantArch().containsKey("BaseOS-8.6.0.Z.EUS"));
 
         Optional<Entry<String, ProductVersionEntry>> secondValue = buildList.getProductVersions()
                 .entrySet()
@@ -268,7 +268,7 @@ public class ErrataMessageHelperTestCase {
         assertEquals("sudo-1.9.5p2-1.el8_8", secondBuildItem.get().getKey());
         assertEquals(2870637, secondBuildItem.get().getValue().getId());
         assertEquals("sudo-1.9.5p2-1.el8_8", secondBuildItem.get().getValue().getNvr());
-        assertEquals(1, secondBuildItem.get().getValue().getVariantArch().keySet().size());
+        assertEquals(1, secondBuildItem.get().getValue().getVariantArch().size());
         assertTrue(secondBuildItem.get().getValue().getVariantArch().containsKey("BaseOS-8.8.0.Z.EUS"));
     }
 

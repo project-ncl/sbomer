@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class ConfigSchemaValidatorTest {
-    ConfigSchemaValidator validator = new ConfigSchemaValidator();
+    final ConfigSchemaValidator validator = new ConfigSchemaValidator();
 
     @Nested
     class PncBuildConfigTests {

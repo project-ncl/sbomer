@@ -54,8 +54,8 @@ import picocli.CommandLine.Option;
         description = "Generates the runtime configuration used for automation for a given PNC operation")
 public class GenerateOperationConfigCommand implements Callable<Integer> {
 
-    public static enum ConfigFormat {
-        YAML, JSON;
+    public enum ConfigFormat {
+        YAML, JSON
     }
 
     @Option(

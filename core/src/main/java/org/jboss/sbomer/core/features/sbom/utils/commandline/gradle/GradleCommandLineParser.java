@@ -39,7 +39,7 @@ public class GradleCommandLineParser {
     private static final Pattern GRADLE_MAJOR_VERSION_PREFIX_PATTERN = Pattern
             .compile(GRADLE_MAJOR_VERSION_REGEX_PREFIX);
 
-    public static final Optional<Integer> extractGradleMajorVersion(String buildCmdOptions) {
+    public static Optional<Integer> extractGradleMajorVersion(String buildCmdOptions) {
         if (buildCmdOptions == null || buildCmdOptions.trim().isEmpty()) {
             return Optional.empty();
         }
@@ -51,7 +51,7 @@ public class GradleCommandLineParser {
         return Optional.empty();
     }
 
-    public static final Optional<String> extractGradleMainBuildCommand(String buildCmdOptions) {
+    public static Optional<String> extractGradleMainBuildCommand(String buildCmdOptions) {
         if (buildCmdOptions == null || buildCmdOptions.trim().isEmpty()) {
             return Optional.empty();
         }
