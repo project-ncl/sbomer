@@ -35,9 +35,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
-import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -63,7 +61,6 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -98,12 +95,6 @@ import lombok.extern.slf4j.Slf4j;
                         reconcilePrecondition = OperationConfigAvailableCondition.class) })
 @Slf4j
 public class OperationController extends AbstractController {
-    @Inject
-    S3StorageHandler s3LogHandler;
-
-    @Inject
-    NotificationService notificationService;
-
     final ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     @Override
