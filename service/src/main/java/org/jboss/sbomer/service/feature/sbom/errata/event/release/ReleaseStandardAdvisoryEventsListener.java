@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -491,7 +491,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                 Collection<V1Beta1RequestManifestRecord> buildManifests = advisoryManifestsRecord.manifests()
                         .stream()
                         .filter(manifest -> manifest.generation().id().equals(generationId))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 Map<String, String> originalToRebuiltPurl = new HashMap<>();
 
@@ -764,9 +764,7 @@ public class ReleaseStandardAdvisoryEventsListener {
     @Retry(maxRetries = 10)
     protected List<ErrataCDNRepoNormalized> getCDNDetails(BuildItem buildItem, String productShortName) {
         List<ErrataCDNRepoNormalized> allCDNs = new ArrayList<>();
-        buildItem.getVariantArch().keySet().stream().forEach(variant -> {
-            allCDNs.addAll(errataClient.getCDNReposOfVariant(variant, productShortName));
-        });
+        buildItem.getVariantArch().keySet().forEach(variant -> allCDNs.addAll(errataClient.getCDNReposOfVariant(variant, productShortName)));
         return allCDNs.stream().distinct().collect(Collectors.toList());
     }
 
@@ -830,7 +828,7 @@ public class ReleaseStandardAdvisoryEventsListener {
         Set<String> evidencePurls = AdvisoryEventUtils.createPurls(component.getPurl(), generationCDNs, manifestArches);
         log.debug("Calculated evidence purls: {}", evidencePurls);
         String preferredRebuiltPurl = evidencePurls.stream()
-                .max((str1, str2) -> Integer.compare(str1.length(), str2.length()))
+                .max(Comparator.comparingInt(String::length))
                 .orElse(null);
         log.debug("Preferred rebuilt purl: {}", preferredRebuiltPurl);
         originalToRebuiltPurl.put(component.getPurl(), preferredRebuiltPurl);
@@ -892,7 +890,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
         if (GenerationRequestType.CONTAINERIMAGE.equals(generationRequestType)) {
             // The NVR is not stored inside the generation, we need to get it from the manifest. Might be optimized in
-            // future.
+            // the future.
             Sbom sbom = sbomService.get(manifestRecord.id());
             String[] nvr = SbomUtils.computeNVRFromContainerManifest(sbom.getSbom());
             if (nvr != null) {
@@ -900,7 +898,7 @@ public class ReleaseStandardAdvisoryEventsListener {
             }
         }
 
-        // The are no NVRs associated with GenerationRequestType.BUILD or GenerationRequestType.OPERATION or
+        // There are no NVRs associated with GenerationRequestType.BUILD or GenerationRequestType.OPERATION or
         // GenerationRequestType.ANALYSIS
         return null;
     }

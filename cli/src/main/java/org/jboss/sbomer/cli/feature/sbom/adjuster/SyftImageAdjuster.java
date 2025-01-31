@@ -56,6 +56,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * retained in the generated manifest. In case the found component is not on a path in this list it will be removed
      * from the manifest.
      * </p>
+     * ffi
      *
      * <p>
      * If this is {@code null} or an empty list is provided -- all components will be retained in the manifest.
@@ -77,7 +78,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      *
      * @see SyftImageAdjuster#adjustProperties(List)
      */
-    static final private List<String> ALLOWED_PROPERTY_PREFIXES = List.of(
+    private static final List<String> ALLOWED_PROPERTY_PREFIXES = List.of(
             "sbomer:package:language",
             "sbomer:package:type",
             "sbomer:location:0:path",
@@ -106,7 +107,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
             return true;
         }
 
-        return paths.stream().anyMatch(prefix -> path.startsWith(prefix));
+        return paths.stream().anyMatch(path::startsWith);
     }
 
     @Override
@@ -311,7 +312,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // Adjust the publisher for all components in the BOM
         if (bom.getComponents() != null) {
-            bom.getComponents().forEach(component -> adjustComponentPublisher(component));
+            bom.getComponents().forEach(this::adjustComponentPublisher);
         }
     }
 

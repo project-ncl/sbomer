@@ -57,9 +57,9 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
     }
 
     private String[] command(String buildCmdOptions) {
-        List<String> cmd = new ArrayList<>();
 
-        cmd.addAll(List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES)));
+        List<String> cmd = new ArrayList<>(
+                List.of(buildCmdOptions.split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES)));
         cmd.add(String.format("org.cyclonedx:cyclonedx-maven-plugin:%s:makeAggregateBom", toolVersion()));
         cmd.add("-DoutputFormat=json");
         cmd.add("-DoutputName=bom");
@@ -73,7 +73,7 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
 
         cmd.addAll(Arrays.asList(generatorArgs().split(" ")));
 
-        return cmd.toArray(new String[cmd.size()]);
+        return cmd.toArray(new String[0]);
     }
 
     @Override

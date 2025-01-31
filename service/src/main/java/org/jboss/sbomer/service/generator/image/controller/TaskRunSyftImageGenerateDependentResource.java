@@ -28,7 +28,6 @@ import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
-import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonResourceUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.GenerateResourceDiscriminator;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 

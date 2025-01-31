@@ -46,7 +46,6 @@ import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.quarkus.logging.Log;
 import io.quarkus.test.junit.TestProfile;
@@ -93,7 +92,9 @@ class SbomRepositoryTest {
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
             Log.error(
-                    "violations: " + violations.stream().map(e -> e.getMessage()).collect(Collectors.joining("\n\t")));
+                    "violations: " + violations.stream()
+                            .map(ConstraintViolation::getMessage)
+                            .collect(Collectors.joining("\n\t")));
             fail("Validation errors on the baseSBOM entity should be empty!");
         }
     }
@@ -182,7 +183,9 @@ class SbomRepositoryTest {
         Set<ConstraintViolation<Sbom>> violations = validator.validate(sbom);
         if (!violations.isEmpty()) {
             Log.error(
-                    "violations: " + violations.stream().map(e -> e.getMessage()).collect(Collectors.joining("\n\t")));
+                    "violations: " + violations.stream()
+                            .map(ConstraintViolation::getMessage)
+                            .collect(Collectors.joining("\n\t")));
             fail("Validation errors on the baseSBOM entity should be empty!");
         }
     }

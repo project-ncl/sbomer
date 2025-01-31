@@ -48,7 +48,7 @@ class RedHatProductProcessCommandIT {
 
     @Test
     @DisplayName("Should successfully run redhat-product processor")
-    void testSuccessfulProcessing(QuarkusMainLauncher launcher, @TempDir Path tempDir) throws Exception {
+    void testSuccessfulProcessing(QuarkusMainLauncher launcher, @TempDir Path tempDir) {
 
         LaunchResult result = launcher.launch(
                 "-v",

@@ -104,12 +104,11 @@ public class SyftImageCatalogCommand extends AbstractCatalogCommand {
                 "sbomer:image:labels:release",
                 "sbomer:image:labels:version");
 
-        propertyNames.forEach(propertyName -> {
-            SbomUtils.findPropertyWithNameInComponent(propertyName, origin)
-                    .ifPresent(
-                            property -> SbomUtils
-                                    .addPropertyIfMissing(destination, property.getName(), property.getValue()));
-        });
+        propertyNames.forEach(
+                propertyName -> SbomUtils.findPropertyWithNameInComponent(propertyName, origin)
+                        .ifPresent(
+                                property -> SbomUtils
+                                        .addPropertyIfMissing(destination, property.getName(), property.getValue())));
     }
 
     private Component createVariant(Component mainComponent, String bomRefPrefix) {

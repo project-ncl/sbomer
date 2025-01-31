@@ -109,9 +109,7 @@ class ConfigReaderIT {
                                     Base64.getEncoder()
                                             .encode(getTestConfigAsBytes("invalid-wrong-processor-slug.yaml"))));
 
-            ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-                configReader.getConfig(build);
-            });
+            ApplicationException ex = assertThrows(ApplicationException.class, () -> configReader.getConfig(build));
 
             assertEquals("Invalid type 'doesntexist' found at path $.products.[0].processors.[0]", ex.getMessage());
             assertEquals(
@@ -130,9 +128,7 @@ class ConfigReaderIT {
                             new String(
                                     Base64.getEncoder().encode(getTestConfigAsBytes("invalid-processor-config.yaml"))));
 
-            ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-                configReader.getConfig(build);
-            });
+            ApplicationException ex = assertThrows(ApplicationException.class, () -> configReader.getConfig(build));
 
             assertEquals("Unknown property 'dummy' at path $.products.[0].processors.[0].dummy", ex.getMessage());
             assertTrue(ex.getCause().getMessage().startsWith("Unrecognized field \"dummy\""));
@@ -229,9 +225,7 @@ class ConfigReaderIT {
                             ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("invalid-wrong-processor-slug.yaml")));
 
-            ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-                configReader.getConfig(build);
-            });
+            ApplicationException ex = assertThrows(ApplicationException.class, () -> configReader.getConfig(build));
 
             assertEquals("Invalid type 'doesntexist' found at path $.products.[0].processors.[0]", ex.getMessage());
             assertEquals(
@@ -248,9 +242,7 @@ class ConfigReaderIT {
                             ".sbomer/config.yaml"))
                     .thenReturn(new String(getTestConfigAsBytes("invalid-processor-config.yaml")));
 
-            ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-                configReader.getConfig(build);
-            });
+            ApplicationException ex = assertThrows(ApplicationException.class, () -> configReader.getConfig(build));
 
             assertEquals("Unknown property 'dummy' at path $.products.[0].processors.[0].dummy", ex.getMessage());
             assertTrue(ex.getCause().getMessage().startsWith("Unrecognized field \"dummy\""));

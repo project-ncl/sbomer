@@ -82,7 +82,7 @@ public class SchemaValidator {
         if (!validationResult.isValid()) {
             log.error("Validation failed!");
 
-            validationResult.getErrors().forEach(msg -> log.error(msg));
+            validationResult.getErrors().forEach(log::error);
         }
 
         return validationResult;

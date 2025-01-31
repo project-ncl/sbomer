@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Component.Type;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
@@ -247,7 +246,7 @@ class SyftImageAdjusterTest {
     }
 
     @Test
-    void shouldAdjustVendorAndPublisher() throws IOException {
+    void shouldAdjustVendorAndPublisher() {
         SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath());
 
         Optional<Property> bogusVendor = bom.getMetadata()
@@ -302,7 +301,7 @@ class SyftImageAdjusterTest {
     }
 
     @Test
-    void shouldSanitizeBogusPurls() throws IOException {
+    void shouldSanitizeBogusPurls() {
         String bogusPurl = "pkg:rpm/redhat/passt@0^20230222.g4ddbcb9-4.el9_2?arch=x86_64&distro=rhel-9.2&upstream=passt-0^20230222.g4ddbcb9-4.el9_2.src.rpm";
 
         try {
@@ -325,7 +324,7 @@ class SyftImageAdjusterTest {
     }
 
     @Test
-    void shouldRebuildBogusPurls() throws IOException {
+    void shouldRebuildBogusPurls() {
         // Initialize the bogus component generated from Syft and verify it's not fixable, and remains unchanged
         Component component = SbomUtils
                 .createComponent(null, "../", "(devel)", null, "pkg:golang/../@(devel)", Component.Type.LIBRARY);

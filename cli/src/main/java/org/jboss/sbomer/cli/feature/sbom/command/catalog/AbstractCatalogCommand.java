@@ -59,9 +59,7 @@ public abstract class AbstractCatalogCommand implements Callable<Integer> {
             addContext();
 
             List<Path> sbomPaths = findManifests(parent.getPath());
-            List<Bom> boms = sbomPaths.stream()
-                    .map(sbomPath -> SbomUtils.fromPath(sbomPath))
-                    .collect(Collectors.toList());
+            List<Bom> boms = sbomPaths.stream().map(SbomUtils::fromPath).collect(Collectors.toList());
 
             log.info("Starting {} cataloguer", getCataloguerType());
 

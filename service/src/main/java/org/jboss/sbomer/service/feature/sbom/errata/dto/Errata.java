@@ -162,7 +162,7 @@ public class Errata {
             // Try to parse the string into a JsonNode
             return Optional.of(ObjectMapperProvider.json().readTree(content.content.notes));
         } catch (Exception e) {
-            log.info("The erratum does not contain a notes content with JSON text", e.getMessage());
+            log.info("The erratum does not contain a notes content with JSON text: {}", e.getMessage());
             return Optional.empty();
         }
     }

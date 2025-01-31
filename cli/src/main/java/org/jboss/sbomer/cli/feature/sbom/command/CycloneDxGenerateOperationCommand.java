@@ -241,7 +241,6 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             Dependency dep = purl256ToDependencies.get(artifact.getArtifact().getPurl());
             Optional.ofNullable(artifact.getArchiveFilenames())
                     .orElse(List.of())
-                    .stream()
                     .forEach(filename -> pathToDependencies.put(filename, dep));
         }
 

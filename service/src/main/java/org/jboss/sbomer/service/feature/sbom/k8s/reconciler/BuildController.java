@@ -350,7 +350,7 @@ public class BuildController extends AbstractController {
                     GenerationResult.SUCCESS,
                     String.format(
                             "Generation finished successfully. Generated SBOMs: %s",
-                            sboms.stream().map(sbom -> sbom.getId()).collect(Collectors.joining(", "))));
+                            sboms.stream().map(Sbom::getId).collect(Collectors.joining(", "))));
         }
 
         StringBuilder sb = new StringBuilder("Generation request failed. ");

@@ -64,10 +64,7 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
             description = "The PNC operation identifier, example: AYHJRDPEUMYAC")
     String operationId;
 
-    @Option(
-            names = { "--config" },
-            required = false,
-            description = "The PNC operation identifier, example: AYHJRDPEUMYAC")
+    @Option(names = { "--config" }, description = "The PNC operation identifier, example: AYHJRDPEUMYAC")
     Path partialConfigPath;
 
     @Option(names = { "--format" }, defaultValue = "yaml", description = "Format of the generated configuration.")
@@ -199,7 +196,7 @@ public class GenerateOperationConfigCommand implements Callable<Integer> {
         if (!result.isValid()) {
             log.error("Configuration is not valid!");
 
-            result.getErrors().forEach(msg -> log.error(msg));
+            result.getErrors().forEach(log::error);
             return GenerationResult.ERR_CONFIG_INVALID.getCode();
         }
 

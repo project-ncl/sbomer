@@ -24,7 +24,7 @@ import picocli.CommandLine.ITypeConverter;
 public class PathConverter implements ITypeConverter<Path> {
 
     @Override
-    public Path convert(String value) throws Exception {
+    public Path convert(String value) {
         return PathConverter.homeExpanded(value);
     }
 

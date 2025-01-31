@@ -112,7 +112,7 @@ class DefaultProcessCommandIT {
     }
 
     private List<String> getExternalReferences(Component component, ExternalReference.Type type) {
-        return SbomUtils.getExternalReferences(component, type).stream().map(ref -> ref.getUrl()).toList();
+        return SbomUtils.getExternalReferences(component, type).stream().map(ExternalReference::getUrl).toList();
     }
 
     private void assertExternalReference(Component component, ExternalReference.Type type, String value) {
@@ -161,7 +161,7 @@ class DefaultProcessCommandIT {
             assertTrue(componentOpt.isPresent());
             Component component = componentOpt.get();
 
-            List<String> hashes = component.getHashes().stream().map(h -> h.getValue()).toList();
+            List<String> hashes = component.getHashes().stream().map(Hash::getValue).toList();
 
             assertEquals(3, hashes.size());
             assertEquals(2, component.getProperties().size());

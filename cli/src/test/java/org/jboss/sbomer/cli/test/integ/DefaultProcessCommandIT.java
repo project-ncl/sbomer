@@ -56,7 +56,7 @@ class DefaultProcessCommandIT {
 
     @Test
     @DisplayName("Should successfully run default processor")
-    void testSuccessfulProcessing(QuarkusMainLauncher launcher, @TempDir Path tempDir) throws Exception {
+    void testSuccessfulProcessing(QuarkusMainLauncher launcher, @TempDir Path tempDir) {
 
         LaunchResult result = launcher.launch(
                 "-v",

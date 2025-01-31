@@ -123,7 +123,7 @@ public class S3ClientFacade {
 
     /**
      * <p>
-     * Validates configuration (env variables) so taht the S3 client can be instantiated.
+     * Validates configuration (env variables) so that the S3 client can be instantiated.
      * </p>
      *
      * <p>

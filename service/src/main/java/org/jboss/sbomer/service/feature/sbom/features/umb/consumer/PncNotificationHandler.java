@@ -31,7 +31,6 @@ import org.jboss.pnc.api.enums.ProgressStatus;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
-import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;

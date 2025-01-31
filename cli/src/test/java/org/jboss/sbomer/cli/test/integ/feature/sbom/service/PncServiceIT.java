@@ -51,7 +51,7 @@ class PncServiceIT {
     PncService service;
 
     @Test
-    void testFetchArtifact() throws Exception {
+    void testFetchArtifact() {
         log.info("testFetchArtifact ...");
         Artifact fromPNC = service.getArtifact(
                 "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@1.0.0.Final-redhat-1?type=jar",
@@ -63,7 +63,7 @@ class PncServiceIT {
     }
 
     @Test
-    void testFetchNonExistingArtifact() throws Exception {
+    void testFetchNonExistingArtifact() {
         assertNull(service.getArtifact("purlnonexisting", Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
@@ -99,7 +99,7 @@ class PncServiceIT {
     }
 
     @Test
-    void testFetchDuplicatedArtifactNoSha256() throws Exception {
+    void testFetchDuplicatedArtifactNoSha256() {
         log.info("testFetchDuplicatedArtifact ...");
         String purl = "pkg:maven/org.jboss.logging/commons-logging-jboss-logging@13.0.0.Final-redhat-1?type=jar";
 
@@ -110,7 +110,7 @@ class PncServiceIT {
     }
 
     @Test
-    void testFetchProductVersion() throws Exception {
+    void testFetchProductVersion() {
         log.info("testFetchProductVersion ...");
         ProductVersion productVersion = service.getProductVersion("316");
         assertNotNull(productVersion);
@@ -120,7 +120,7 @@ class PncServiceIT {
     }
 
     @Test
-    void testFetchProductMilestone() throws Exception {
+    void testFetchProductMilestone() {
         log.info("testFetchProductMilestone ...");
         ProductMilestone productMilestone = service.getMilestone("2655");
         assertNotNull(productMilestone);
@@ -131,7 +131,7 @@ class PncServiceIT {
     }
 
     @Test
-    void testFetchOperation() throws Exception {
+    void testFetchOperation() {
         log.info("testFetchOperation ...");
         DeliverableAnalyzerOperation operation = service.getDeliverableAnalyzerOperation("A5RPHL7Y3AIAA");
         assertNotNull(operation);
@@ -142,7 +142,7 @@ class PncServiceIT {
     }
 
     @Test
-    void testFetchOperationResults() throws Exception {
+    void testFetchOperationResults() {
         log.info("testFetchOperationResults ...");
         List<AnalyzedArtifact> artifacts = service.getAllAnalyzedArtifacts("A5RPHL7Y3AIAA");
         assertNotNull(artifacts);

@@ -177,7 +177,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
                     .writeValueAsString(Map.of("comment", comment, "type", "AutomatedComment"));
             errataClient.addCommentToErratum(advisoryId, jsonPayload);
         } catch (JsonProcessingException e) {
-            log.error("An error occured during the processing of the advisory comment", e);
+            log.error("An error occurred during the processing of the advisory comment", e);
         }
     }
 
@@ -225,8 +225,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
 
                     String nvr = getGenerationNVRFromManifest(manifest);
                     generationsSection.append("\n")
-                            .append(nvr)
-                            .append("https://" + sbomerHost + "/generations/" + manifest.generation().id());
+                        .append(nvr).append("https://").append(sbomerHost).append("/generations/").append(manifest.generation().id());
                     processedGenerationsIds.add(manifest.generation().id());
                 }
             }
@@ -253,8 +252,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
                 }
 
                 if (status.equals(generation.getStatus())) {
-                    generationsSection.append("\n")
-                            .append("https://" + sbomerHost + "/generations/" + generation.getId());
+                    generationsSection.append("\n").append("https://").append(sbomerHost).append("/generations/").append(generation.getId());
                     processedGenerationsIds.add(generation.getId());
                 }
             }
@@ -292,7 +290,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
             return manifestRecord.identifier() + ": ";
         }
 
-        // The are no NVRs associated with GenerationRequestType.BUILD or GenerationRequestType.OPERATION or
+        // There are no NVRs associated with GenerationRequestType.BUILD or GenerationRequestType.OPERATION or
         // GenerationRequestType.ANALYSIS
         return "";
     }

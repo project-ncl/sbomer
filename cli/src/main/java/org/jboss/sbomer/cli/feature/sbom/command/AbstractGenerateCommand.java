@@ -300,7 +300,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
 
             log.warn("Cleaning up the '{}' output directory before cloning...", path);
 
-            // Delete the output directory directory
+            // Delete the output directory
             FileUtils.rmdir(path);
 
             log.debug("Done.");
@@ -334,7 +334,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         // Please note that this ignores the block size of a particular storage,
         // and because of this, the number can be different compared to when
         // an utility like `du` is being used to determine the size.
-        log.info("Directory size: {} MB", String.format("%.02f", Float.valueOf(dirSize(path)) / 1024));
+        log.info("Directory size: {} MB", String.format("%.02f", (float) dirSize(path) / 1024));
     }
 
     /**

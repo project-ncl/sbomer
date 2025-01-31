@@ -119,11 +119,10 @@ public class MavenDominoGenerator implements SbomGenerator {
     }
 
     private String[] command(Path dominoToolPath, Path workDir, String... args) {
-        List<String> cmd = new ArrayList<>();
 
         log.debug("Using following Java binary to run Domino: '{}'", dominoJava);
 
-        cmd.addAll(
+        List<String> cmd = new ArrayList<>(
                 Arrays.asList(
                         dominoJava,
                         "-XX:InitialRAMPercentage=75.0",
@@ -161,6 +160,6 @@ public class MavenDominoGenerator implements SbomGenerator {
             cmd.add(settingsXmlPath.toString());
         }
 
-        return cmd.toArray(new String[cmd.size()]);
+        return cmd.toArray(new String[0]);
     }
 }

@@ -92,9 +92,7 @@ public class CLI implements QuarkusApplication {
                     parsed.setExecutionResult(executionResult);
 
                     result.add(executionResult);
-                } catch (ParameterException ex) {
-                    throw ex;
-                } catch (ExecutionException ex) {
+                } catch (ParameterException | ExecutionException ex) {
                     throw ex;
                 } catch (Exception ex) {
                     throw new ExecutionException(parsed, "Error while calling command (" + parsed + "): " + ex, ex);
@@ -106,7 +104,7 @@ public class CLI implements QuarkusApplication {
          * Checks whether one of previously run commands failed.
          *
          * @param result A {@link List} of return values from a command.
-         * @return {@code true} if one of previous cmmands failed, {@code false} otherwise.
+         * @return {@code true} if one of previous commands failed, {@code false} otherwise.
          */
         private boolean isFailed(List<Object> result) {
             return result.stream().anyMatch(r -> r instanceof Integer res && res != 0);
