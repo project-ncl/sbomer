@@ -700,18 +700,13 @@ class SBOMResourceRSQTest {
     private Page<BaseSbomRecord> initializeOneResultRecordPaginated(int pageIndex, int pageSize) throws Exception {
         int totalHits = 1;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
-        return new Page<BaseSbomRecord>(
-                pageIndex,
-                pageSize,
-                totalPages,
-                totalHits,
-                List.of(createFirstBaseSbomRecord()));
+        return new Page<>(pageIndex, pageSize, totalPages, totalHits, List.of(createFirstBaseSbomRecord()));
     }
 
     private Page<BaseSbomRecord> initializeTwoResultsRecordPaginated(int pageIndex, int pageSize) throws Exception {
         int totalHits = 2;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
-        return new Page<BaseSbomRecord>(
+        return new Page<>(
                 pageIndex,
                 pageSize,
                 totalPages,
@@ -722,7 +717,7 @@ class SBOMResourceRSQTest {
     private Page<BaseSbomRecord> initializeTwoResultsPaginatedInverted(int pageIndex, int pageSize) throws Exception {
         int totalHits = 2;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
-        return new Page<BaseSbomRecord>(
+        return new Page<>(
                 pageIndex,
                 pageSize,
                 totalPages,

@@ -106,7 +106,7 @@ class SBOMerClientTestIT {
             String json = response.readEntity(String.class);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
-            TypeReference<Page<SbomRecord>> typeReference = new TypeReference<Page<SbomRecord>>() {
+            TypeReference<Page<SbomRecord>> typeReference = new TypeReference<>() {
             };
             try {
                 Page<SbomRecord> sboms = objectMapper.readValue(json, typeReference);
@@ -132,7 +132,7 @@ class SBOMerClientTestIT {
             String json = response.readEntity(String.class);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
-            TypeReference<Page<SbomGenerationRequestRecord>> typeReference = new TypeReference<Page<SbomGenerationRequestRecord>>() {
+            TypeReference<Page<SbomGenerationRequestRecord>> typeReference = new TypeReference<>() {
             };
             try {
                 Page<SbomGenerationRequestRecord> sbomRequests = objectMapper.readValue(json, typeReference);

@@ -438,7 +438,7 @@ public class AdvisoryService {
             RequestEvent requestEvent,
             List<RequestConfig> requestConfigsWithinNotes) {
 
-        List<SbomGenerationRequest> generations = new ArrayList<SbomGenerationRequest>();
+        List<SbomGenerationRequest> generations = new ArrayList<>();
         for (RequestConfig config : requestConfigsWithinNotes) {
             if (config instanceof PncBuildRequestConfig) {
                 log.info("New PNC build request received");
@@ -499,7 +499,7 @@ public class AdvisoryService {
 
         log.debug("Creating build manifests for Docker builds: {}", buildDetails);
 
-        Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
+        Collection<SbomGenerationRequest> sbomRequests = new ArrayList<>();
 
         // Collect all the docker build ids so we can query Koji in one go
         List<Long> buildIds = buildDetails.values()
@@ -539,7 +539,7 @@ public class AdvisoryService {
 
         // We need to create 1 release manifest per ProductVersion
         // We will identify the Generation with the {Errata}#{ProductVersion} identifier
-        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
         productVersions.forEach(pvName -> {
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                     .withId(RandomStringIdGenerator.generate())
@@ -603,7 +603,7 @@ public class AdvisoryService {
 
         log.debug("Creating build manifests for RPM builds: {}", buildDetails);
 
-        Collection<SbomGenerationRequest> sbomRequests = new ArrayList<SbomGenerationRequest>();
+        Collection<SbomGenerationRequest> sbomRequests = new ArrayList<>();
 
         buildDetails.forEach((pVersion, items) -> {
             String productName = product.getData().getAttributes().getName();

@@ -31,7 +31,6 @@ public enum ProcessorType {
     DEFAULT("default"), @JsonProperty("redhat-product")
     REDHAT_PRODUCT("redhat-product");
 
-    @Getter
     final String slug;
 
     ProcessorType(String slug) {

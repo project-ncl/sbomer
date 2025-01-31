@@ -293,7 +293,7 @@ class ErrataNotificationHandlerTest {
         when(requestEventRepository.updateRequestConfig(requestEvent, requestConfig))
                 .thenReturn(initializedRequestEvent);
 
-        Collection<SbomGenerationRequest> expectedResult = new ArrayList<SbomGenerationRequest>();
+        Collection<SbomGenerationRequest> expectedResult = new ArrayList<>();
         expectedResult.add(expectPncBuildSbomGenerationRequest("ABCD"));
         expectedResult.add(expectPncOperationSbomGenerationRequest("1234"));
         expectedResult

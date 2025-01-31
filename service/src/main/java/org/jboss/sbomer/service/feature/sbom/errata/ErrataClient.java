@@ -154,7 +154,7 @@ public interface ErrataClient {
     default Map<String, Collection<ErrataCDNRepoNormalized>> getCDNReposOfVariant(
             Set<String> variantNames,
             String shortProductName) {
-        Map<String, Collection<ErrataCDNRepoNormalized>> variantToCDNs = new HashMap<String, Collection<ErrataCDNRepoNormalized>>();
+        Map<String, Collection<ErrataCDNRepoNormalized>> variantToCDNs = new HashMap<>();
         variantNames.stream()
                 .forEach(variant -> variantToCDNs.put(variant, getCDNReposOfVariant(variant, shortProductName)));
         return variantToCDNs;

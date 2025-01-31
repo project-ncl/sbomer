@@ -34,7 +34,7 @@ public class FileUtils {
 
     public static void rmdir(Path dir) {
         try {
-            Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(dir, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);

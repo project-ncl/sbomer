@@ -476,7 +476,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/bom.json");
 
-        Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+        Files.walkFileTree(directory, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
                 if (matcher.matches(path)) {

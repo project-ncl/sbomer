@@ -170,7 +170,7 @@ class ErrataMessageHelperTestCase {
     void testPagedErrataReleaseDTO() throws IOException {
         String pagedVariantsJson = TestResources.asString("errata/api/paged_variants.json");
         ErrataPage<ErrataVariant.VariantData> pagedVariants = ObjectMapperProvider.json()
-                .readValue(pagedVariantsJson, new TypeReference<ErrataPage<ErrataVariant.VariantData>>() {
+                .readValue(pagedVariantsJson, new TypeReference<>() {
                 });
 
         assertEquals(1L, pagedVariants.getPage().getPageNumber());

@@ -54,7 +54,7 @@ public class CustomPredicateBuilder<T> {
         log.debug("Creating Predicate for logical node: {}", logical);
 
         CriteriaBuilder builder = ema.getCriteriaBuilder();
-        List<Predicate> predicates = new ArrayList<Predicate>();
+        List<Predicate> predicates = new ArrayList<>();
 
         for (Node node : logical.getChildren()) {
 

@@ -331,7 +331,7 @@ class ReleaseAdvisoryEventsListenerTest {
             assertEquals("RHOSE", metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_SHORTNAME).asText());
 
             String productVersionString = null;
-            List<String> allPurls = new ArrayList<String>();
+            List<String> allPurls = new ArrayList<>();
             if (bom.getMetadata().getComponent().getVersion().equals("OSE-4.15-RHEL-8")) {
 
                 productVersionString = "OSE-4.15-RHEL-8";
@@ -702,8 +702,8 @@ class ReleaseAdvisoryEventsListenerTest {
         RequestEvent requestEvent = loadRequestEvent("textOnly/manifests/request_event.json");
         Sbom sbom = loadSbom("textOnly/manifests/6346322A131A437.json");
 
-        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
-        Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<>();
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                 .withId(RandomStringIdGenerator.generate())
                 .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + productVersionText)
@@ -752,8 +752,8 @@ class ReleaseAdvisoryEventsListenerTest {
         Sbom pncBuildSbom = loadSbom("textOnly/deliverables/E03673C8D82E484.json");
         Sbom operationSbom = loadSbom("textOnly/deliverables/A8342BD50FB9496.json");
 
-        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
-        Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<>();
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                 .withId(RandomStringIdGenerator.generate())
                 .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + productVersionText)
@@ -822,8 +822,8 @@ class ReleaseAdvisoryEventsListenerTest {
                                         .collect(Collectors.toList())));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
-        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
-        Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<>();
 
         buildDetails.keySet().forEach(pv -> {
             String generationId = RandomStringIdGenerator.generate();
@@ -881,7 +881,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
         // Get all objects required
         //
-        Map<String, PyxisRepositoryDetails> pyxisRepositories = new HashMap<String, PyxisRepositoryDetails>();
+        Map<String, PyxisRepositoryDetails> pyxisRepositories = new HashMap<>();
         pyxisRepositories.put(
                 "ose-clusterresourceoverride-operator-metadata-container-v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1",
                 loadPyxisRepositoryDetails("multiContainers/pyxis_3421076.json"));
@@ -922,7 +922,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 "multiContainers/errata_143781_records.json");
         RequestEvent requestEvent = loadRequestEvent("multiContainers/request_event.json");
 
-        Map<String, Sbom> sboms = new HashMap<String, Sbom>();
+        Map<String, Sbom> sboms = new HashMap<>();
         sboms.put("505A5B90871046D", loadSbom("multiContainers/505A5B90871046D.json"));
         sboms.put("415DE22239C9439", loadSbom("multiContainers/415DE22239C9439.json"));
         sboms.put("47F4BC6A1C1641B", loadSbom("multiContainers/47F4BC6A1C1641B.json"));
@@ -963,8 +963,8 @@ class ReleaseAdvisoryEventsListenerTest {
                                         .collect(Collectors.toList())));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
-        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
-        Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<>();
 
         buildDetails.keySet().forEach(pv -> {
             String generationId = RandomStringIdGenerator.generate();
@@ -1047,8 +1047,8 @@ class ReleaseAdvisoryEventsListenerTest {
                                         .collect(Collectors.toList())));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
-        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<String, SbomGenerationRequest>();
-        Map<String, SbomGenerationRequest> generationsMap = new HashMap<String, SbomGenerationRequest>();
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<>();
 
         buildDetails.keySet().forEach(pv -> {
             String generationId = RandomStringIdGenerator.generate();
@@ -1097,7 +1097,7 @@ class ReleaseAdvisoryEventsListenerTest {
             String fileName,
             String variantName,
             String shortProductName) throws IOException {
-        Collection<ErrataCDNRepo> cdnRepos = parseResource(fileName, new TypeReference<Collection<ErrataCDNRepo>>() {
+        Collection<ErrataCDNRepo> cdnRepos = parseResource(fileName, new TypeReference<>() {
         });
         List<ErrataCDNRepoNormalized> cdnReposNormalized = cdnRepos.stream()
                 .filter(
@@ -1134,7 +1134,7 @@ class ReleaseAdvisoryEventsListenerTest {
     }
 
     private List<V1Beta1RequestRecord> loadRequestRecords(String fileName) throws IOException {
-        return parseResource(fileName, new TypeReference<List<V1Beta1RequestRecord>>() {
+        return parseResource(fileName, new TypeReference<>() {
         });
     }
 

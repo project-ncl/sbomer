@@ -497,7 +497,7 @@ public class SbomUtils {
 
     public static void addHashIfMissing(Component component, String hash, Algorithm algorithm) {
 
-        List<Hash> hashes = new ArrayList<Hash>();
+        List<Hash> hashes = new ArrayList<>();
         if (component.getHashes() != null) {
             hashes.addAll(component.getHashes());
         }
@@ -517,7 +517,7 @@ public class SbomUtils {
 
     public static void addProperty(Component component, String key, String value) {
         log.debug("addProperty {}: {}", key, value);
-        List<Property> properties = new ArrayList<Property>();
+        List<Property> properties = new ArrayList<>();
         if (component.getProperties() != null) {
             properties.addAll(component.getProperties());
         }

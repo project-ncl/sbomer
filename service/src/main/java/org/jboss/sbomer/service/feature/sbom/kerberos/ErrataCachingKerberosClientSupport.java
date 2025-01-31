@@ -146,7 +146,7 @@ public class ErrataCachingKerberosClientSupport {
         log.debug("Getting a new service ticket for user principal subject ...");
 
         try {
-            return Subject.doAs(userPrincipalSubject, new PrivilegedExceptionAction<String>() {
+            return Subject.doAs(userPrincipalSubject, new PrivilegedExceptionAction<>() {
                 @Override
                 public String run() throws Exception {
                     /*
