@@ -152,7 +152,7 @@ public class CustomPredicateSortBuilder<T> {
             StringBuilder compliantSort = new StringBuilder();
             // OR (,) and AND (;) are meaningless in order sorting, can be interchanged. Using just one of them for
             // simplicity
-            sort = sort.replaceAll(",", ";");
+            sort = sort.replace(',', ';');
             String[] sortTokens = sort.split(";");
             for (int i = 0; i < sortTokens.length; i++) {
                 var token = sortTokens[i];
