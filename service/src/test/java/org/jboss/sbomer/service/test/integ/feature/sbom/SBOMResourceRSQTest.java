@@ -611,6 +611,92 @@ class SBOMResourceRSQTest {
         assertTrue(creationTime1.isAfter(creationTime2));
     }
 
+    @Test
+    void testRSQLSearchAndLogicalNodeWithLike() throws Exception {
+
+        int pageIndex = 0;
+        int pageSize = 50;
+
+        Page<BaseSbomRecord> oneContentPage = initializeOneResultRecordPaginated(1, 1);
+        Page<BaseSbomRecord> oneNPMContentPage = initializeOneNPMResultRecordPaginated(1, 1);
+
+        Mockito.when(
+                sbomService.searchSbomRecordsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'",
+                        "creationTime=desc="))
+                .thenReturn(oneContentPage);
+        given().when()
+                .contentType(ContentType.JSON)
+                .request(
+                        "GET",
+                        "/api/v1beta1/manifests?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                                + "&query=rootPurl=eq='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'")
+                .then()
+                .statusCode(200)
+                .body("content.id", CoreMatchers.hasItem("12345"))
+                .and()
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+
+        Mockito.when(
+                sbomService.searchSbomRecordsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "rootPurl=like='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'",
+                        "creationTime=desc="))
+                .thenReturn(oneContentPage);
+        given().when()
+                .contentType(ContentType.JSON)
+                .request(
+                        "GET",
+                        "/api/v1beta1/manifests?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                                + "&query=rootPurl=like='pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom'")
+                .then()
+                .statusCode(200)
+                .body("content.id", CoreMatchers.hasItem("12345"))
+                .and()
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+
+        Mockito.when(
+                sbomService.searchSbomRecordsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "rootPurl=LIKE='pkg:maven/org.apache.logging.log4j/log4j*'",
+                        "creationTime=desc="))
+                .thenReturn(oneContentPage);
+        given().when()
+                .contentType(ContentType.JSON)
+                .request(
+                        "GET",
+                        "/api/v1beta1/manifests?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                                + "&query=rootPurl=LIKE='pkg:maven/org.apache.logging.log4j/log4j*'")
+                .then()
+                .statusCode(200)
+                .body("content.id", CoreMatchers.hasItem("12345"))
+                .and()
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23YAA"));
+
+        Mockito.when(
+                sbomService.searchSbomRecordsByQueryPaginated(
+                        pageIndex,
+                        pageSize,
+                        "rootPurl=LIKE='pkg:npm*'",
+                        "creationTime=desc="))
+                .thenReturn(oneNPMContentPage);
+        given().when()
+                .contentType(ContentType.JSON)
+                .request(
+                        "GET",
+                        "/api/v1beta1/manifests?pageIndex=" + pageIndex + "&pageSize=" + pageSize
+                                + "&query=rootPurl=LIKE='pkg:npm*'")
+                .then()
+                .statusCode(200)
+                .body("content.id", CoreMatchers.hasItem("12345NPM"))
+                .and()
+                .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23NPM"));
+    }
+
     private Page<BaseSbomRecord> initializeOneResultRecordPaginated(int pageIndex, int pageSize) throws Exception {
         int totalHits = 1;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
@@ -642,6 +728,17 @@ class SBOMResourceRSQTest {
                 totalPages,
                 totalHits,
                 Arrays.asList(createSecondBaseSbomRecord(), createFirstBaseSbomRecord()));
+    }
+
+    private Page<BaseSbomRecord> initializeOneNPMResultRecordPaginated(int pageIndex, int pageSize) throws Exception {
+        int totalHits = 1;
+        int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
+        return new Page<BaseSbomRecord>(
+                pageIndex,
+                pageSize,
+                totalPages,
+                totalHits,
+                Arrays.asList(createFirstBaseNPMSbomRecord()));
     }
 
     private Sbom createFirstSbom() throws Exception {
@@ -696,6 +793,23 @@ class SBOMResourceRSQTest {
                 null,
                 GenerationRequestType.BUILD,
                 Instant.now());
+
+        return sbom;
+    }
+
+    private BaseSbomRecord createFirstBaseNPMSbomRecord() throws Exception {
+        BaseSbomRecord sbom = new BaseSbomRecord(
+                "12345NPM",
+                "AWI7P3EJ23NPM",
+                "pkg:npm/validate-npm-package-name@5.0.1?package-id=386465f2859b2926",
+                Instant.now().minus(Duration.ofDays(1)),
+                0,
+                "all went well for NPM",
+                "g12345",
+                "gAWI7P3EJ23NPM",
+                null,
+                GenerationRequestType.BUILD,
+                Instant.now().minus(Duration.ofDays(1)));
 
         return sbom;
     }
