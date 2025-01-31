@@ -243,7 +243,7 @@ class SbomGenerationRequestRepositoryTest {
 
     @Test
     void testFindByIdSbomGenerationRequest() {
-        SbomGenerationRequest request = SbomGenerationRequest.findById(REQUEST_ID);
+        SbomGenerationRequest request = SbomGenerationRequest.findById(REQUEST_ID);  // NOSONAR
 
         assertEquals(REQUEST_ID, request.getId());
         assertEquals(BUILD_ID, request.getIdentifier());
@@ -251,7 +251,7 @@ class SbomGenerationRequestRepositoryTest {
 
     @Test
     void testFindByOperationIdSbomGenerationRequest() {
-        SbomGenerationRequest request = SbomGenerationRequest.findById(OPERATION_REQUEST_ID);
+        SbomGenerationRequest request = SbomGenerationRequest.findById(OPERATION_REQUEST_ID);  // NOSONAR
 
         assertEquals(OPERATION_REQUEST_ID, request.getId());
         assertEquals(OPERATION_ID, request.getIdentifier());
