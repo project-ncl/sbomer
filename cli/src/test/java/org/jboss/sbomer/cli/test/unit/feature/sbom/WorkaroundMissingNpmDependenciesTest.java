@@ -51,7 +51,7 @@ class WorkaroundMissingNpmDependenciesTest {
     private static final ObjectMapper OBJECT_MAPPER = ObjectMapperProvider.json();
 
     @Test
-    public void testNpmDependencyAdded() throws IOException {
+    void testNpmDependencyAdded() throws IOException {
         // Mock PNC service
         PncService pncServiceMock = Mockito.mock(PncService.class);
         Build pncBuild = OBJECT_MAPPER.readValue(TestResources.asString("pnc/mavenBuild.json"), Build.class);
@@ -123,7 +123,7 @@ class WorkaroundMissingNpmDependenciesTest {
     }
 
     @Test
-    public void testSkipExistingComponent() throws IOException {
+    void testSkipExistingComponent() throws IOException {
         // Mock PNC service
         PncService pncServiceMock = Mockito.mock(PncService.class);
         Build pncBuild = OBJECT_MAPPER.readValue(TestResources.asString("pnc/mavenBuild.json"), Build.class);
@@ -182,7 +182,7 @@ class WorkaroundMissingNpmDependenciesTest {
     }
 
     @Test
-    public void testOverlappingBuilds() throws IOException {
+    void testOverlappingBuilds() throws IOException {
         // Mock PNC service
         PncService pncServiceMock = Mockito.mock(PncService.class);
         Build pncBuild1 = OBJECT_MAPPER.readValue(TestResources.asString("pnc/mavenBuild.json"), Build.class);
