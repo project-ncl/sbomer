@@ -18,6 +18,8 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.test.TestResources;
@@ -31,6 +33,8 @@ import io.quarkus.test.junit.TestProfile;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 @QuarkusTest
 @TestProfile(TestUmbProfile.class)
 class AmqpMessageConsumerTest {
@@ -38,15 +42,12 @@ class AmqpMessageConsumerTest {
     AmqpMessageConsumer consumer;
 
     @Test
-    void testParsingOfUnexpectedData() throws IOException {
-        JsonObject headers = new JsonObject();
-        headers.put("type", "DeliverableAnalysisStateChange");
-        headers.put("timestamp", 1698076061381L);
-        headers.put("message-id", "ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1");
-        headers.put("destination", "/topic/VirtualTopic.eng.pnc.builds");
-
-        Message<String> message = AmqpMessageHelper.toMessage(TestResources.asString("umb/unexpected.json"), headers);
-
-        consumer.process(message);
+    void testParsingOfUnexpectedData() {
+        Map<String, Object> map = Map.of("type", "DeliverableAnalysisStateChange",
+            "timestamp", 1698076061381L,
+            "message-id", "ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1",
+            "destination", "/topic/VirtualTopic.eng.pnc.builds");
+        JsonObject headers = new JsonObject(map);
+        assertDoesNotThrow(() -> consumer.process(AmqpMessageHelper.toMessage(TestResources.asString("umb/unexpected.json"), headers)));
     }
 }

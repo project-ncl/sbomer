@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -134,12 +135,12 @@ class NotificationServiceTest {
 
     @Test
     void shouldNotFailWhenNullIsPassed() {
-        notificationService.notifyCompleted(null);
+        assertDoesNotThrow(() -> notificationService.notifyCompleted(null));
     }
 
     @Test
     void shouldNotFailWhenEmptyListIsPassed() {
-        notificationService.notifyCompleted(Collections.emptyList());
+        assertDoesNotThrow(() -> notificationService.notifyCompleted(Collections.emptyList()));
     }
 
     @Test

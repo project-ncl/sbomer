@@ -17,9 +17,10 @@
  */
 package org.jboss.sbomer.service.test.unit.feature.sbom.errata;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -42,6 +43,7 @@ import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -729,6 +731,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerTextOnlyManifests.onReleaseAdvisoryEvent(event);
+        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     @Test
@@ -783,11 +786,11 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerTextOnlyDeliverables.onReleaseAdvisoryEvent(event);
+        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     @Test
     void testReleaseErrataWithSingleDockerBuild() throws IOException {
-
         listenerSingleContainer = new ReleaseAdvisoryEventsListenerSingleContainer();
         listenerSingleContainer.setErrataClient(errataClient);
         listenerSingleContainer.setPyxisClient(pyxisClient);
@@ -863,11 +866,11 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerSingleContainer.onReleaseAdvisoryEvent(event);
+        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     @Test
     void testReleaseErrataWithMultiDockerBuilds() throws IOException {
-
         listenerMultiContainers = new ReleaseAdvisoryEventsListenerMultiContainer();
         listenerMultiContainers.setErrataClient(errataClient);
         listenerMultiContainers.setPyxisClient(pyxisClient);
@@ -1006,11 +1009,11 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerMultiContainers.onReleaseAdvisoryEvent(event);
+        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     @Test
     void testReleaseErrataWithSingleRPMBuild() throws IOException {
-
         listenerSingleRpm = new ReleaseAdvisoryEventsListenerSingleRPM();
         listenerSingleRpm.setErrataClient(errataClient);
         listenerSingleRpm.setPyxisClient(pyxisClient);
@@ -1087,6 +1090,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerSingleRpm.onReleaseAdvisoryEvent(event);
+        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     private List<ErrataCDNRepoNormalized> loadCDNReposDetails(

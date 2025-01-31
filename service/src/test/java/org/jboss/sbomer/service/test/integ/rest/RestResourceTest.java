@@ -111,7 +111,7 @@ class RestResourceTest {
     void testListSbomsPageParams(TestableApiVersion apiVersion) {
         Mockito.when(sbomService.searchSbomRecordsByQueryPaginated(1, 20, null, null)).thenReturn(new Page<>());
         given().when()
-                .get(String.format("?pageIndex=1&pageSize=20", apiVersion.manifestsPath()))
+                .get(String.format("%s?pageIndex=1&pageSize=20", apiVersion.manifestsPath()))
                 .then()
                 .statusCode(200);
     }
