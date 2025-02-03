@@ -18,6 +18,7 @@
 package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -111,7 +112,15 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             throw new ApplicationException("Unable to create a new Bom");
         }
 
-        String deliverableUrl = config.getDeliverableUrls().get(getParent().getIndex());
+        String deliverableUrl;
+        try {
+            String url = config.getDeliverableUrls().get(getParent().getIndex());
+            deliverableUrl = URI.create(url).normalize().toURL().toString();
+        } catch (MalformedURLException e) {
+            String url = config.getDeliverableUrls().get(getParent().getIndex());
+            throw new ApplicationException("Could not parse deliverable URL " + url, e);
+        }
+
         log.info(
                 "Generating CycloneDX compliant SBOM for the deliverable: {}, with index: {}, with the provided config: {}",
                 deliverableUrl,
