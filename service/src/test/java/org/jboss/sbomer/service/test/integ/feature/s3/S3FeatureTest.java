@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.s3;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -126,17 +125,17 @@ class S3FeatureTest {
 
         // doNothing().when(clientFacade).upload(file.toFile().getAbsolutePath(),
         // "bucket-name/bucket-name/bom.json");
-        when(clientFacade.doesObjectExists(eq("AABBCC/bom.json"))).thenReturn(false);
-        when(clientFacade.doesObjectExists(eq("AABBCC/logs/init.log"))).thenReturn(true);
-        doNothing().when(clientFacade).upload(eq(file.toFile().getAbsolutePath()), eq("AABBCC/bom.json"));
-        doNothing().when(clientFacade).upload(eq(logFile.toFile().getAbsolutePath()), eq("AABBCC/logs/init.log"));
+        when(clientFacade.doesObjectExists("AABBCC/bom.json")).thenReturn(false);
+        when(clientFacade.doesObjectExists("AABBCC/logs/init.log")).thenReturn(true);
+        doNothing().when(clientFacade).upload(file.toFile().getAbsolutePath(), "AABBCC/bom.json");
+        doNothing().when(clientFacade).upload(logFile.toFile().getAbsolutePath(), "AABBCC/logs/init.log");
 
         storageHandler.storeFiles(generationRequest);
 
-        verify(clientFacade, times(1)).doesObjectExists(eq("AABBCC/bom.json"));
-        verify(clientFacade, times(1)).upload(eq(file.toFile().getAbsolutePath()), eq("AABBCC/bom.json"));
-        verify(clientFacade, times(1)).doesObjectExists(eq("AABBCC/logs/init.log"));
-        verify(clientFacade, times(0)).upload(eq(logFile.toFile().getAbsolutePath()), eq("AABBCC/logs/init.log"));
+        verify(clientFacade, times(1)).doesObjectExists("AABBCC/bom.json");
+        verify(clientFacade, times(1)).upload(file.toFile().getAbsolutePath(), "AABBCC/bom.json");
+        verify(clientFacade, times(1)).doesObjectExists("AABBCC/logs/init.log");
+        verify(clientFacade, times(0)).upload(logFile.toFile().getAbsolutePath(), "AABBCC/logs/init.log");
     }
 
     @Test

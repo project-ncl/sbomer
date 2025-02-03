@@ -120,7 +120,7 @@ public class ProcessRunner {
 
         log.info("Starting execution...");
 
-        Process process = null;
+        Process process;
 
         try {
             process = pb.start();

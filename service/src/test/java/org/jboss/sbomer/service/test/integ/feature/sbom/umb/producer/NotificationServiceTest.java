@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -67,7 +66,7 @@ class NotificationServiceTest {
         return Paths.get("src", "test", "resources", "sboms", fileName);
     }
 
-    private Sbom createOperationSBOM() throws IOException {
+    private Sbom createOperationSBOM() {
         Bom bom = SbomUtils.fromPath(NotificationServiceTest.sbomPath("complete_operation_sbom.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
@@ -86,7 +85,7 @@ class NotificationServiceTest {
         return sbom;
     }
 
-    private Sbom createSBOM() throws IOException {
+    private Sbom createSBOM() {
         Bom bom = SbomUtils.fromPath(NotificationServiceTest.sbomPath("sbom_with_errata.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
@@ -105,7 +104,7 @@ class NotificationServiceTest {
         return sbom;
     }
 
-    private Sbom createMinimalRpmManifest() throws IOException {
+    private Sbom createMinimalRpmManifest() {
         Bom bom = SbomUtils.fromPath(NotificationServiceTest.sbomPath("minimal-rpm.json"));
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()
@@ -144,8 +143,8 @@ class NotificationServiceTest {
     }
 
     @Test
-    void shouldSuccessfullyNotifyForContainerImage() throws IOException {
-        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.CONTAINERIMAGE))).thenReturn(true);
+    void shouldSuccessfullyNotifyForContainerImage() {
+        Mockito.when(featureFlags.shouldNotify(GenerationRequestType.CONTAINERIMAGE)).thenReturn(true);
 
         ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(GenerationFinishedMessageBody.class);
@@ -207,8 +206,8 @@ class NotificationServiceTest {
     }
 
     @Test
-    void shouldSuccessfullyNotifyForBuild() throws IOException {
-        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.BUILD))).thenReturn(true);
+    void shouldSuccessfullyNotifyForBuild() {
+        Mockito.when(featureFlags.shouldNotify(GenerationRequestType.BUILD)).thenReturn(true);
 
         ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(GenerationFinishedMessageBody.class);
@@ -273,8 +272,8 @@ class NotificationServiceTest {
     }
 
     @Test
-    void shouldSuccessfullyNotifyForOperation() throws IOException {
-        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.OPERATION))).thenReturn(true);
+    void shouldSuccessfullyNotifyForOperation() {
+        Mockito.when(featureFlags.shouldNotify(GenerationRequestType.OPERATION)).thenReturn(true);
 
         ArgumentCaptor<GenerationFinishedMessageBody> argumentCaptor = ArgumentCaptor
                 .forClass(GenerationFinishedMessageBody.class);
@@ -343,7 +342,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    void shouldSkipNotificationForNonProductBuilds() throws IOException {
+    void shouldSkipNotificationForNonProductBuilds() {
         Sbom sbom = createSBOM();
 
         // Remove all product properties
@@ -356,18 +355,18 @@ class NotificationServiceTest {
 
     @ParameterizedTest
     @EnumSource(GenerationRequestType.class)
-    void shouldSkipNotificationIfTypeIsDisabled(GenerationRequestType type) throws IOException {
-        Mockito.when(featureFlags.shouldNotify(eq(type))).thenReturn(false);
+    void shouldSkipNotificationIfTypeIsDisabled(GenerationRequestType type) {
+        Mockito.when(featureFlags.shouldNotify(type)).thenReturn(false);
 
         Sbom sbom = createSBOM();
         sbom.getGenerationRequest().setType(type);
 
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            notificationService.notifyCompleted(List.of(sbom));
-        });
+        ApplicationException ex = assertThrows(
+                ApplicationException.class,
+                () -> notificationService.notifyCompleted(List.of(sbom)));
 
         assertEquals(
-                "Notifications for '" + type.toString() + "' type are disabled, notification service won't send it",
+                "Notifications for '" + type + "' type are disabled, notification service won't send it",
                 ex.getMessage());
 
         verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));

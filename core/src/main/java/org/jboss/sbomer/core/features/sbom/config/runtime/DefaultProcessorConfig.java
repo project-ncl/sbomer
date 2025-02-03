@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.core.features.sbom.config.runtime;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;

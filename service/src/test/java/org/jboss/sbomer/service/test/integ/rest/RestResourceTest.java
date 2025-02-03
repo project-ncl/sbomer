@@ -18,7 +18,6 @@
 package org.jboss.sbomer.service.test.integ.rest;
 
 import static io.restassured.RestAssured.given;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
@@ -118,7 +117,7 @@ class RestResourceTest {
 
     @ParameterizedTest
     @EnumSource(TestableApiVersion.class)
-    void testGetSbomByIdShouldNotFailForMissing(TestableApiVersion apiVersion) throws IOException {
+    void testGetSbomByIdShouldNotFailForMissing(TestableApiVersion apiVersion) {
         given().when()
                 .contentType(ContentType.JSON)
                 .request("GET", String.format("%s/5644785", apiVersion.manifestsPath()))
@@ -131,7 +130,7 @@ class RestResourceTest {
 
     @ParameterizedTest
     @EnumSource(TestableApiVersion.class)
-    void testGetSbomById(TestableApiVersion apiVersion) throws IOException {
+    void testGetSbomById(TestableApiVersion apiVersion) {
         Sbom sbom = new Sbom();
         sbom.setIdentifier("AAAABBBB");
         sbom.setId("12345");
@@ -501,7 +500,7 @@ class RestResourceTest {
         }
 
         @Test
-        void testExistenceOfRequestEndpointWithErrataEventTypeEvents() throws IOException {
+        void testExistenceOfRequestEndpointWithErrataEventTypeEvents() {
 
             given().when()
                     .get("/api/v1beta1/requests/pnc-build=ARYT3LBXDVYAC")
@@ -541,7 +540,7 @@ class RestResourceTest {
     @ParameterizedTest
     @EnumSource(TestableApiVersion.class)
     void testUmbNotificationResend(TestableApiVersion apiVersion) throws IOException {
-        Mockito.when(featureFlags.shouldNotify(eq(GenerationRequestType.BUILD))).thenReturn(true);
+        Mockito.when(featureFlags.shouldNotify(GenerationRequestType.BUILD)).thenReturn(true);
 
         Bom bom = SbomUtils.fromString(TestResources.asString("sboms/sbom_with_errata.json"));
 

@@ -42,9 +42,9 @@ class MavenDominoGeneratorTest {
 
     @Test
     void testFailedWhenNoDominoDirProvided(@TempDir Path projectDir) {
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            MavenDominoGenerator.builder().withDominoDir(null).build().run(projectDir);
-        });
+        ValidationException thrown = Assertions.assertThrows(
+                ValidationException.class,
+                () -> MavenDominoGenerator.builder().withDominoDir(null).build().run(projectDir));
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
@@ -53,9 +53,9 @@ class MavenDominoGeneratorTest {
 
     @Test
     void testFailedWhenDominoDirDoesntExist(@TempDir Path projectDir) {
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            MavenDominoGenerator.builder().withDominoDir(Path.of("some/dir")).build().run(projectDir);
-        });
+        ValidationException thrown = Assertions.assertThrows(
+                ValidationException.class,
+                () -> MavenDominoGenerator.builder().withDominoDir(Path.of("some/dir")).build().run(projectDir));
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
@@ -64,9 +64,9 @@ class MavenDominoGeneratorTest {
 
     @Test
     void testFailedWhenDominoDoesntExistForDefaultVersion(@TempDir Path projectDir, @TempDir Path wrongDir) {
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            MavenDominoGenerator.builder().withDominoDir(wrongDir).build().run(projectDir);
-        });
+        ValidationException thrown = Assertions.assertThrows(
+                ValidationException.class,
+                () -> MavenDominoGenerator.builder().withDominoDir(wrongDir).build().run(projectDir));
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
@@ -77,9 +77,13 @@ class MavenDominoGeneratorTest {
 
     @Test
     void testFailedWhenDominoDirDoesntExistWithCustomVersion(@TempDir Path projectDir, @TempDir Path dominoDir) {
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            MavenDominoGenerator.builder().withDominoDir(dominoDir).withDominoVersion("1.2.3").build().run(projectDir);
-        });
+        ValidationException thrown = Assertions.assertThrows(
+                ValidationException.class,
+                () -> MavenDominoGenerator.builder()
+                        .withDominoDir(dominoDir)
+                        .withDominoVersion("1.2.3")
+                        .build()
+                        .run(projectDir));
 
         assertEquals("Domino validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());

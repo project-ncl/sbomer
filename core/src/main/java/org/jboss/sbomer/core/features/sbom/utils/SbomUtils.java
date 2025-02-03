@@ -491,7 +491,7 @@ public class SbomUtils {
 
         return hashes.stream()
                 .filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))
-                .map(h -> h.getValue())
+                .map(Hash::getValue)
                 .findFirst();
     }
 
@@ -1101,11 +1101,11 @@ public class SbomUtils {
 
             if (purl.getQualifiers() != null) {
                 // Copy all the original qualifiers
-                purl.getQualifiers().forEach((k, v) -> builder.withQualifier(k, v));
+                purl.getQualifiers().forEach(builder::withQualifier);
             }
 
             // Add the qualifiers
-            qualifiers.forEach((k, v) -> builder.withQualifier(k, v));
+            qualifiers.forEach(builder::withQualifier);
 
             return builder.build().toString();
         } catch (MalformedPackageURLException | IllegalArgumentException e) {
@@ -1139,7 +1139,7 @@ public class SbomUtils {
                 .getIdentities()
                 .stream()
                 .filter(identity -> Field.PURL.equals(identity.getField()))
-                .map(identity -> identity.getConcludedValue())
+                .map(Identity::getConcludedValue)
                 .collect(Collectors.toSet());
         allPurls.addAll(purls);
         return allPurls;

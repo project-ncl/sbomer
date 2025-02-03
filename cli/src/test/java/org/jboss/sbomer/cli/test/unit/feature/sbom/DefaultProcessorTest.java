@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -68,8 +67,7 @@ class DefaultProcessorTest {
         buildConfig.setKojiWebURL(new URL("https://koji.web"));
 
         when(kojiServiceMock.getConfig()).thenReturn(buildConfig);
-        when(kojiServiceMock.findBuild(eq("amqstreams-console-ui-container-2.7.0-8.1718294415")))
-                .thenReturn(kojiBuildInfo);
+        when(kojiServiceMock.findBuild("amqstreams-console-ui-container-2.7.0-8.1718294415")).thenReturn(kojiBuildInfo);
 
         DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
 
@@ -112,7 +110,7 @@ class DefaultProcessorTest {
         buildConfig.setKojiWebURL(new URL("https://koji.web"));
 
         when(kojiServiceMock.getConfig()).thenReturn(buildConfig);
-        when(kojiServiceMock.findBuildByRPM(eq("audit-libs-3.0.7-103.el9.x86_64"))).thenReturn(kojiBuildInfo);
+        when(kojiServiceMock.findBuildByRPM("audit-libs-3.0.7-103.el9.x86_64")).thenReturn(kojiBuildInfo);
 
         DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
 
@@ -178,8 +176,8 @@ class DefaultProcessorTest {
                 .build();
 
         when(pncServiceMock.getApiUrl()).thenReturn("pnc.example.com");
-        when(pncServiceMock.getBuild(eq("BALVSAEVTGYAY"))).thenReturn(build);
-        when(pncServiceMock.getNPMDependencies(eq("BALVSAEVTGYAY"))).thenReturn(artifacts);
+        when(pncServiceMock.getBuild("BALVSAEVTGYAY")).thenReturn(build);
+        when(pncServiceMock.getNPMDependencies("BALVSAEVTGYAY")).thenReturn(artifacts);
 
         return new DefaultProcessor(pncServiceMock, kojiServiceMock);
     }

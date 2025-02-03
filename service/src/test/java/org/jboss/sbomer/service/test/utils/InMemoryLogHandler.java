@@ -43,11 +43,11 @@ public class InMemoryLogHandler extends Handler {
     }
 
     public List<String> getMessages() {
-        return records.stream().map(e -> e.getMessage()).collect(Collectors.toList());
+        return records.stream().map(LogRecord::getMessage).collect(Collectors.toList());
 
     }
 
     public boolean contains(String message) {
-        return records.stream().map(e -> e.getMessage()).anyMatch(m -> m.equals(message));
+        return records.stream().map(LogRecord::getMessage).anyMatch(m -> m.equals(message));
     }
 }

@@ -152,7 +152,7 @@ public class ConfigReader {
             scmTag = build.getNoRebuildCause().getScmTag();
         }
 
-        byte[] configContent = null;
+        byte[] configContent;
 
         if (scmUrl.contains("gerrit")) {
             configContent = getGerritConfigContent(scmUrl, scmTag);

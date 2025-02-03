@@ -20,14 +20,11 @@ package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
@@ -37,6 +34,7 @@ import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
@@ -132,7 +130,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
                         .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
                 manifestsPurls = advisoryManifestsRecord.manifests()
                         .stream()
-                        .map(manifest -> manifest.rootPurl())
+                        .map(V1Beta1RequestManifestRecord::rootPurl)
                         .toList();
             }
 

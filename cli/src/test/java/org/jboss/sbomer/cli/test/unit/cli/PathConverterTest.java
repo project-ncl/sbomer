@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 class PathConverterTest {
     @Test
-    void testConvert() throws Exception {
+    void testConvert() {
         String userHome = System.getProperty("user.home");
         assertThat(userHome, notNullValue());
         assertThat(new PathConverter().convert("~"), is(Path.of(userHome)));

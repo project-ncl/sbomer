@@ -35,7 +35,6 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.AdvisoryService;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.enterprise.context.ApplicationScoped;

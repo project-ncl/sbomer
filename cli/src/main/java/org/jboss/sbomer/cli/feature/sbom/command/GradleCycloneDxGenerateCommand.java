@@ -82,7 +82,7 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
 
         cmd.addAll(Arrays.asList(generatorArgs().split(" ")));
 
-        return cmd.toArray(new String[cmd.size()]);
+        return cmd.toArray(new String[0]);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
     private void configureProcessEnvironmentVariable(String buildCmdOptions, Map<String, String> environment) {
         // If there is an hint about the major Gradle version required, use it.
         Optional<Integer> gradleMajorVersion = extractGradleMajorVersion(buildCmdOptions);
-        if (!gradleMajorVersion.isPresent() || gradleMajorVersion.get() >= 5) {
+        if (gradleMajorVersion.isEmpty() || gradleMajorVersion.get() >= 5) {
             environment.put(GRADLE_PLUGIN_VERSION_ENV_VARIABLE, toolVersion());
         } else {
             // If the version is previous 5, force the Gradle CycloneDX plugin version to 1.6.1 for backward
@@ -104,13 +104,11 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
 
     private void configureProcessMainBuildCommands(String buildCmdOptions, List<String> cmd) {
         Optional<String> mainGradleBuildCommand = extractGradleMainBuildCommand(buildCmdOptions);
-        if (!mainGradleBuildCommand.isPresent()) {
+        if (mainGradleBuildCommand.isEmpty()) {
             throw new ApplicationException("Gradle build command is empty.");
         }
 
-        List.of(mainGradleBuildCommand.get().split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES))
-                .stream()
-                .forEach(cmd::add);
+        cmd.addAll(Arrays.asList(mainGradleBuildCommand.get().split(SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES)));
     }
 
 }

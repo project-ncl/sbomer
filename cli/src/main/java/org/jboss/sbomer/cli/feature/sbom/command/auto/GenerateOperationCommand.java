@@ -199,7 +199,7 @@ public class GenerateOperationCommand implements Callable<Integer> {
         log.info("Running: '{}'", cmd);
 
         // Execute the generation
-        if (spec.root().commandLine().execute(command.toArray(new String[command.size()])) != 0) {
+        if (spec.root().commandLine().execute(command.toArray(new String[0])) != 0) {
             throw new ApplicationException("Command '{}' failed, see logs above", cmd);
         }
     }

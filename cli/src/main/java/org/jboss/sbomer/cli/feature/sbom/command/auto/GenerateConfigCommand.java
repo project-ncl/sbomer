@@ -194,7 +194,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
         if (configs.isEmpty()) {
             log.debug(
                     "No configuration found for product versions: {}",
-                    productVersions.stream().map(pv -> pv.getId()).collect(Collectors.toList()));
+                    productVersions.stream().map(ProductVersionRef::getId).collect(Collectors.toList()));
             return null;
         }
 
@@ -403,7 +403,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
         if (!result.isValid()) {
             log.error("Configuration is not valid!");
 
-            result.getErrors().forEach(msg -> log.error(msg));
+            result.getErrors().forEach(log::error);
             return GenerationResult.ERR_CONFIG_INVALID.getCode();
         }
 

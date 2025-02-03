@@ -56,7 +56,7 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
 
         cmd.addAll(Arrays.asList(generatorArgs().split(" ")));
 
-        return cmd.toArray(new String[cmd.size()]);
+        return cmd.toArray(new String[0]);
     }
 
     @Override

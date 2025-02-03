@@ -574,10 +574,7 @@ public class AdvisoryService {
         Map<String, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
                 erratum,
                 requestEvent,
-                buildDetails.keySet()
-                        .stream()
-                        .map(prodVersionEntry -> prodVersionEntry.getName())
-                        .collect(Collectors.toSet()),
+                buildDetails.keySet().stream().map(ProductVersionEntry::getName).collect(Collectors.toSet()),
                 type);
 
         // Send an async notification for the completed generations (will be used to add comments to Errata)

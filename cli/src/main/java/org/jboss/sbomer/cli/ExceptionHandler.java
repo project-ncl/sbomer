@@ -70,11 +70,10 @@ public class ExceptionHandler implements IExecutionExceptionHandler {
         String failureReasonPath = System.getenv("SBOMER_CLI_FAILURE_REASON_PATH");
 
         if (failureReasonPath != null) {
-            Files.write(
+            Files.writeString(
                     Path.of(failureReasonPath),
                     ObjectMapperProvider.json()
-                            .writeValueAsString(Map.of("message", ex.getMessage(), "exitCode", exitCode))
-                            .getBytes(StandardCharsets.UTF_8));
+                            .writeValueAsString(Map.of("message", ex.getMessage(), "exitCode", exitCode)));
         }
 
         return exitCode;

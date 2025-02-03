@@ -34,9 +34,8 @@ class ProcessRunnerTest {
     @Test
     void noCommandProvided() {
 
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            ProcessRunner.run(Path.of("some/dir"));
-        });
+        ValidationException thrown = Assertions
+                .assertThrows(ValidationException.class, () -> ProcessRunner.run(Path.of("some/dir")));
 
         assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
@@ -46,9 +45,8 @@ class ProcessRunnerTest {
     @Test
     void noWorkDirProvided() {
 
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            ProcessRunner.run(null, "command");
-        });
+        ValidationException thrown = Assertions
+                .assertThrows(ValidationException.class, () -> ProcessRunner.run(null, "command"));
 
         assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
@@ -57,9 +55,9 @@ class ProcessRunnerTest {
 
     @Test
     void nonExistingWorkingDirectoryProvided() {
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            ProcessRunner.run(Path.of("surely/doesnt/exist"), "command");
-        });
+        ValidationException thrown = Assertions.assertThrows(
+                ValidationException.class,
+                () -> ProcessRunner.run(Path.of("surely/doesnt/exist"), "command"));
 
         assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
@@ -70,9 +68,8 @@ class ProcessRunnerTest {
     void notAWorkingDirectoryDirectoryProvided(@TempDir Path tempDir) throws IOException {
         Path aFile = Files.createFile(Path.of(tempDir.toAbsolutePath().toString(), "a-file.txt"));
 
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
-            ProcessRunner.run(aFile, "command");
-        });
+        ValidationException thrown = Assertions
+                .assertThrows(ValidationException.class, () -> ProcessRunner.run(aFile, "command"));
 
         assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());

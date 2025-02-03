@@ -43,7 +43,7 @@ class StageStatsIT extends E2EStageBase {
     }
 
     @Test
-    void testStatsV1Alpha3() throws IOException {
+    void testStatsV1Alpha3() {
         Response stats = getStats("v1alpha3");
 
         stats.then()
@@ -62,7 +62,7 @@ class StageStatsIT extends E2EStageBase {
     }
 
     @Test
-    void testStatsV1beta1() throws IOException {
+    void testStatsV1beta1() {
         Response stats = getStats("v1beta1");
 
         stats.then()

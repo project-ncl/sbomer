@@ -9,7 +9,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless ruired by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,8 +57,8 @@ class WorkaroundMissingNpmDependenciesTest {
         List<Artifact> artifacts = OBJECT_MAPPER
                 .readValue(TestResources.asString("pnc/npmDependencies.json"), new TypeReference<>() {
                 });
-        when(pncServiceMock.getBuild(eq("FOOBAR012345"))).thenReturn(pncBuild);
-        when(pncServiceMock.getNPMDependencies(eq("FOOBAR012345"))).thenReturn(artifacts);
+        when(pncServiceMock.getBuild(("FOOBAR012345"))).thenReturn(pncBuild);
+        when(pncServiceMock.getNPMDependencies(("FOOBAR012345"))).thenReturn(artifacts);
 
         // Prepare test component
         Bom bom = Objects.requireNonNull(SbomUtils.createBom());
@@ -130,8 +129,8 @@ class WorkaroundMissingNpmDependenciesTest {
         List<Artifact> artifacts = OBJECT_MAPPER
                 .readValue(TestResources.asString("pnc/npmDependencies.json"), new TypeReference<>() {
                 });
-        when(pncServiceMock.getBuild(eq("FOOBAR012345"))).thenReturn(pncBuild);
-        when(pncServiceMock.getNPMDependencies(eq("FOOBAR012345"))).thenReturn(artifacts);
+        when(pncServiceMock.getBuild(("FOOBAR012345"))).thenReturn(pncBuild);
+        when(pncServiceMock.getNPMDependencies(("FOOBAR012345"))).thenReturn(artifacts);
 
         // Prepare test component
         Bom bom = Objects.requireNonNull(SbomUtils.createBom());
@@ -178,7 +177,7 @@ class WorkaroundMissingNpmDependenciesTest {
                         "pkg:npm/%40redhat/kogito-tooling-keyboard-shortcuts@0.9.0-2",
                         dependency1.getDependencies()).isPresent());
 
-        verify(pncServiceMock, times(1)).getNPMDependencies(eq("FOOBAR012345"));
+        verify(pncServiceMock, times(1)).getNPMDependencies(("FOOBAR012345"));
     }
 
     @Test
@@ -193,10 +192,10 @@ class WorkaroundMissingNpmDependenciesTest {
         List<Artifact> artifacts2 = OBJECT_MAPPER
                 .readValue(TestResources.asString("pnc/npmDependencies2.json"), new TypeReference<>() {
                 });
-        when(pncServiceMock.getBuild(eq("FOOBAR012345"))).thenReturn(pncBuild1);
-        when(pncServiceMock.getNPMDependencies(eq("FOOBAR012345"))).thenReturn(artifacts1);
-        when(pncServiceMock.getBuild(eq("FOOBAZ012345"))).thenReturn(pncBuild2);
-        when(pncServiceMock.getNPMDependencies(eq("FOOBAZ012345"))).thenReturn(artifacts2);
+        when(pncServiceMock.getBuild(("FOOBAR012345"))).thenReturn(pncBuild1);
+        when(pncServiceMock.getNPMDependencies(("FOOBAR012345"))).thenReturn(artifacts1);
+        when(pncServiceMock.getBuild(("FOOBAZ012345"))).thenReturn(pncBuild2);
+        when(pncServiceMock.getNPMDependencies(("FOOBAZ012345"))).thenReturn(artifacts2);
 
         // Prepare test component
         Bom bom = Objects.requireNonNull(SbomUtils.createBom());

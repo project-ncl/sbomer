@@ -15,7 +15,7 @@ import picocli.CommandLine.Command;
 public class FailedDefaultProcessCommand extends DefaultProcessCommand {
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         log.info("Mocking 'default' processor, failing the process");
         return 333;
     }

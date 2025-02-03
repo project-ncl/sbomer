@@ -272,7 +272,7 @@ public class AdvisoryEventUtils {
 
             if (purl.getQualifiers() != null) {
                 // Copy all the original qualifiers
-                purl.getQualifiers().forEach((k, v) -> builder.withQualifier(k, v));
+                purl.getQualifiers().forEach(builder::withQualifier);
             }
 
             // Add the repository_id name
@@ -308,7 +308,7 @@ public class AdvisoryEventUtils {
 
             if (purl.getQualifiers() != null) {
                 // Copy all the original qualifiers
-                purl.getQualifiers().forEach((k, v) -> builder.withQualifier(k, v));
+                purl.getQualifiers().forEach(builder::withQualifier);
             }
 
             // Override tag and set repository url

@@ -64,7 +64,7 @@ public class AtlasHandler {
         if (!featureFlags.atlasPublish()) {
             throw new FeatureDisabledException(
                     "Atlas integration is disabled, following manifests will not be published to Atlas: {}",
-                    sboms.stream().map(sbom -> sbom.getId()).collect(Collectors.joining(", ")));
+                    sboms.stream().map(Sbom::getId).collect(Collectors.joining(", ")));
         }
 
         log.info("Uploading {} manifests...", sboms.size());

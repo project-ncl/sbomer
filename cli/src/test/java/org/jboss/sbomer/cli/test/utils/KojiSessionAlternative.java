@@ -24,67 +24,67 @@ import jakarta.inject.Singleton;
 public class KojiSessionAlternative implements ClientSession {
 
     @Override
-    public List<KojiArchiveInfo> listArchives(KojiArchiveQuery query) throws KojiClientException {
+    public List<KojiArchiveInfo> listArchives(KojiArchiveQuery query) {
         throw new UnsupportedOperationException("Unimplemented method 'listArchives'");
     }
 
     @Override
-    public Map<String, KojiArchiveType> getArchiveTypeMap() throws KojiClientException {
+    public Map<String, KojiArchiveType> getArchiveTypeMap() {
         throw new UnsupportedOperationException("Unimplemented method 'getArchiveTypeMap'");
     }
 
     @Override
-    public KojiBuildInfo getBuild(int buildId) throws KojiClientException {
+    public KojiBuildInfo getBuild(int buildId) {
         throw new UnsupportedOperationException("Unimplemented method 'getBuild'");
     }
 
     @Override
-    public KojiTaskInfo getTaskInfo(int taskId, boolean request) throws KojiClientException {
+    public KojiTaskInfo getTaskInfo(int taskId, boolean request) {
         throw new UnsupportedOperationException("Unimplemented method 'getTaskInfo'");
     }
 
     @Override
-    public KojiTaskRequest getTaskRequest(int taskId) throws KojiClientException {
+    public KojiTaskRequest getTaskRequest(int taskId) {
         throw new UnsupportedOperationException("Unimplemented method 'getTaskRequest'");
     }
 
     @Override
-    public List<KojiTagInfo> listTags(int id) throws KojiClientException {
+    public List<KojiTagInfo> listTags(int id) {
         throw new UnsupportedOperationException("Unimplemented method 'listTags'");
     }
 
     @Override
-    public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException {
+    public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) {
         throw new UnsupportedOperationException("Unimplemented method 'enrichArchiveTypeInfo'");
     }
 
     @Override
-    public List<List<KojiArchiveInfo>> listArchives(List<KojiArchiveQuery> queries) throws KojiClientException {
+    public List<List<KojiArchiveInfo>> listArchives(List<KojiArchiveQuery> queries) {
         throw new UnsupportedOperationException("Unimplemented method 'listArchives'");
     }
 
     @Override
-    public List<KojiBuildInfo> getBuild(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+    public List<KojiBuildInfo> getBuild(List<KojiIdOrName> idsOrNames) {
         throw new UnsupportedOperationException("Unimplemented method 'getBuild'");
     }
 
     @Override
-    public List<KojiRpmInfo> getRPM(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+    public List<KojiRpmInfo> getRPM(List<KojiIdOrName> idsOrNames) {
         throw new UnsupportedOperationException("Unimplemented method 'getRPM'");
     }
 
     @Override
-    public List<KojiTaskInfo> getTaskInfo(List<Integer> taskIds, List<Boolean> requests) throws KojiClientException {
+    public List<KojiTaskInfo> getTaskInfo(List<Integer> taskIds, List<Boolean> requests) {
         throw new UnsupportedOperationException("Unimplemented method 'getTaskInfo'");
     }
 
     @Override
-    public List<List<KojiRpmInfo>> listBuildRPMs(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+    public List<List<KojiRpmInfo>> listBuildRPMs(List<KojiIdOrName> idsOrNames) {
         throw new UnsupportedOperationException("Unimplemented method 'listBuildRPMs'");
     }
 
     @Override
-    public List<List<KojiTagInfo>> listTags(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+    public List<List<KojiTagInfo>> listTags(List<KojiIdOrName> idsOrNames) {
         throw new UnsupportedOperationException("Unimplemented method 'listTags'");
     }
 

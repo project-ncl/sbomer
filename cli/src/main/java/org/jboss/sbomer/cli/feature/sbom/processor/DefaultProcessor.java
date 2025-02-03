@@ -17,15 +17,11 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.processor;
 
-import static org.jboss.sbomer.cli.feature.sbom.command.CycloneDxGenerateOperationCommand.SBOM_REPRESENTING_THE_DELIVERABLE;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addHashIfMissing;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMrrc;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHash;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.hasExternalReference;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
@@ -35,28 +31,19 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPublisher;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setSupplier;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.updatePurl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Property;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
-import org.jboss.pnc.dto.Build;
-import org.jboss.pnc.enums.BuildType;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.PncBuildAdjuster;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -337,13 +324,12 @@ public class DefaultProcessor implements Processor {
             return;
         }
 
-        String nvr = List.of(componentOpt.get().getValue(), versionOpt.get().getValue(), releaseOpt.get().getValue())
-                .stream()
-                .collect(Collectors.joining("-"));
+        String nvr = String
+                .join("-", componentOpt.get().getValue(), versionOpt.get().getValue(), releaseOpt.get().getValue());
 
         log.debug("Looking up container information in Brew for NVR '{}'", nvr);
 
-        KojiBuildInfo buildInfo = null;
+        KojiBuildInfo buildInfo;
 
         try {
             buildInfo = kojiService.findBuild(nvr);
