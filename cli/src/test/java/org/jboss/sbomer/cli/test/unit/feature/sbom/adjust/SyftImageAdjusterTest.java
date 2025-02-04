@@ -11,11 +11,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
@@ -112,10 +115,16 @@ class SyftImageAdjusterTest {
         assertEquals(
                 "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64&upstream=bzip2-1.0.8-8.el9.src.rpm&distro=rhel-9.2",
                 bom.getComponents().get(10).getPurl());
-
         assertEquals(
                 "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1&upstream=dbus-1.12.20-7.el9_2.1.src.rpm&distro=rhel-9.2",
                 bom.getComponents().get(21).getPurl());
+
+        assertEquals(
+                "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64&upstream=bzip2-1.0.8-8.el9.src.rpm&distro=rhel-9.2&package-id=b2b140771748e045",
+                bom.getComponents().get(10).getBomRef());
+        assertEquals(
+                "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1&upstream=dbus-1.12.20-7.el9_2.1.src.rpm&distro=rhel-9.2&package-id=55a4fbd380f817ef",
+                bom.getComponents().get(21).getBomRef());
 
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
@@ -126,6 +135,12 @@ class SyftImageAdjusterTest {
         assertEquals(
                 "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
                 adjusted.getComponents().get(22).getPurl());
+
+        assertEquals("pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64", adjusted.getComponents().get(11).getBomRef());
+        assertEquals(
+                "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
+                adjusted.getComponents().get(22).getBomRef());
+
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
@@ -174,7 +189,6 @@ class SyftImageAdjusterTest {
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
-
         // One component added (image) at position 0, one component removed (operating system), size is the same as
         // before
         assertEquals(459, adjusted.getComponents().size());
@@ -223,7 +237,9 @@ class SyftImageAdjusterTest {
         // Has name
         assertEquals("amq-streams/console-ui-rhel9", mainComponent.getName());
         // Other things, for example bom-ref
-        assertEquals("3893910a10b83660", mainComponent.getBomRef());
+        assertEquals(
+                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
+                mainComponent.getBomRef());
 
         // Is valid
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());

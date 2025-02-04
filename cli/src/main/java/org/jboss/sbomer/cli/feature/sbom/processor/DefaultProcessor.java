@@ -261,7 +261,7 @@ public class DefaultProcessor implements Processor {
             }
         }
 
-        // If there are any purl relcoations, process these.
+        // If there are any purl relocations, process these.
         purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
