@@ -414,12 +414,18 @@ public class SbomUtils {
      */
     public static void updatePurl(Bom bom, String oldPurl, String newPurl) {
         // Update main component's purl
-        updatePurl(bom.getMetadata().getComponent(), oldPurl, newPurl);
+        if (updatePurl(bom.getMetadata().getComponent(), oldPurl, newPurl)) {
+            updateBomRef(bom, bom.getMetadata().getComponent(), oldPurl, newPurl);
+        }
 
         // If we have any components (we really should!) then update these purls as well
         if (bom.getComponents() != null) {
             // Update all components' purls (if needed)
-            bom.getComponents().forEach(c -> updatePurl(c, oldPurl, newPurl));
+            bom.getComponents().forEach(c -> {
+                if (updatePurl(c, oldPurl, newPurl)) {
+                    updateBomRef(bom, c, oldPurl, newPurl);
+                }
+            });
         }
     }
 
@@ -439,6 +445,62 @@ public class SbomUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Updates the bom-ref for the given component, and update the refs in the dependencies hierarchy, looking for
+     * nested dependencies and provides.
+     *
+     * @param component
+     * @param newRef
+     * @return
+     */
+    public static void updateBomRef(Bom bom, Component component, String oldRef, String newRef) {
+        // Update the BOM reference of the component
+        // There might be cases (mainly for components detected by Syft) where the same purl is duplicated across
+        // components (which have different bom-refs), so we need to check if there are not already dependencies having
+        // the bom-ref equals to the new purl before updating it, otherwise we would have bom validation errors.
+        if (oldRef.equals(component.getBomRef())
+                && !bom.getDependencies().stream().map(Dependency::getRef).toList().contains(newRef)) {
+
+            component.setBomRef(newRef);
+
+            // Recursively update the dependencies in the BOM
+            if (bom.getDependencies() != null) {
+                Set<Dependency> updatedDependencies = new TreeSet<>();
+                for (Dependency dependency : bom.getDependencies()) {
+                    updateDependencyRef(dependency, oldRef, newRef);
+                    updatedDependencies.add(dependency);
+                }
+                bom.setDependencies(new ArrayList<>(updatedDependencies));
+            }
+        }
+    }
+
+    private static void updateDependencyRef(Dependency dependency, String oldRef, String newRef) {
+        // If the current dependency has the oldRef, replace it with newRef
+        if (dependency.getRef().equals(oldRef)) {
+            Dependency updatedDependency = new Dependency(newRef);
+            updatedDependency.setDependencies(dependency.getDependencies());
+            updatedDependency.setProvides(dependency.getProvides());
+
+            // Replace the old dependency with the updated one
+            dependency = updatedDependency;
+        }
+
+        // Recursively update sub-dependencies
+        if (dependency.getDependencies() != null) {
+            for (Dependency subDependency : dependency.getDependencies()) {
+                updateDependencyRef(subDependency, oldRef, newRef);
+            }
+        }
+
+        // Recursively update provided dependencies
+        if (dependency.getProvides() != null) {
+            for (Dependency subProvide : dependency.getProvides()) {
+                updateDependencyRef(subProvide, oldRef, newRef);
+            }
+        }
     }
 
     public static ToolInformation createToolInformation(String version) {

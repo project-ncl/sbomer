@@ -456,7 +456,11 @@ public class SyftImageAdjuster extends AbstractAdjuster {
         }
 
         components.forEach(component -> {
-            component.setBomRef(component.getPurl());
+            // Check that there isn't already a dependency with the bom-ref equals to the new purl, otherwise do not
+            // update it
+            if (!dependencies.stream().map(Dependency::getRef).toList().contains(component.getPurl())) {
+                component.setBomRef(component.getPurl());
+            }
             dependencies.add(SbomUtils.createDependency(component.getBomRef()));
             populateDependencies(dependencies, component.getComponents());
         });
