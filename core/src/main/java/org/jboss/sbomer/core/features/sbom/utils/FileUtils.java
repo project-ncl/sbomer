@@ -25,13 +25,17 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FileUtils {
+
+    public static final String MANIFEST_FILENAME = "bom.json";
+
     private FileUtils() {
         // this is a utlity class
     }
@@ -64,28 +68,23 @@ public class FileUtils {
      * @return List of {@link Path}s to found manifests.
      */
     public static List<Path> findManifests(Path directory) throws IOException {
-        List<Path> manifestPaths = new ArrayList<>();
+        // Check if directory exists and is a directory
+        if (Files.notExists(directory) || !Files.isDirectory(directory)) {
+            throw new IllegalArgumentException(
+                    "The provided path is not a valid directory: " + directory.toAbsolutePath());
+        }
 
         log.info("Finding manifests under the '{}' directory...", directory.toAbsolutePath());
 
-        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/bom.json");
+        try (Stream<Path> paths = Files.walk(directory)) {
+            List<Path> manifestPaths = paths.filter(path -> MANIFEST_FILENAME.equals(path.getFileName().toString()))
+                    .sorted()
+                    .peek(path -> log.info("Found manifest at path '{}'", path.toAbsolutePath()))
+                    .toList();
 
-        Files.walkFileTree(directory, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-                if (matcher.matches(path)) {
-                    log.info("Found manifest at path '{}'", path.toAbsolutePath());
-
-                    manifestPaths.add(path);
-
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-
-        log.info("Found {} generated manifests", manifestPaths.size());
-
-        return manifestPaths;
+            log.info("Found {} generated manifests", manifestPaths.size());
+            return manifestPaths;
+        }
     }
 
 }
