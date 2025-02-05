@@ -225,7 +225,11 @@ public class CommentAdvisoryOnRelevantEventsListener {
 
                     String nvr = getGenerationNVRFromManifest(manifest);
                     generationsSection.append("\n")
-                        .append(nvr).append("https://").append(sbomerHost).append("/generations/").append(manifest.generation().id());
+                            .append(nvr)
+                            .append("https://")
+                            .append(sbomerHost)
+                            .append("/generations/")
+                            .append(manifest.generation().id());
                     processedGenerationsIds.add(manifest.generation().id());
                 }
             }
@@ -252,7 +256,11 @@ public class CommentAdvisoryOnRelevantEventsListener {
                 }
 
                 if (status.equals(generation.getStatus())) {
-                    generationsSection.append("\n").append("https://").append(sbomerHost).append("/generations/").append(generation.getId());
+                    generationsSection.append("\n")
+                            .append("https://")
+                            .append(sbomerHost)
+                            .append("/generations/")
+                            .append(generation.getId());
                     processedGenerationsIds.add(generation.getId());
                 }
             }

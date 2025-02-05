@@ -17,21 +17,14 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command.catalog;
 
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
+import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
@@ -58,7 +51,7 @@ public abstract class AbstractCatalogCommand implements Callable<Integer> {
             // Call the hook to set a context, if needed.
             addContext();
 
-            List<Path> sbomPaths = findManifests(parent.getPath());
+            List<Path> sbomPaths = FileUtils.findManifests(parent.getPath());
             List<Bom> boms = sbomPaths.stream().map(SbomUtils::fromPath).collect(Collectors.toList());
 
             log.info("Starting {} cataloguer", getCataloguerType());
@@ -73,38 +66,6 @@ public abstract class AbstractCatalogCommand implements Callable<Integer> {
         } finally {
             MDCUtils.removeContext();
         }
-    }
-
-    /**
-     * Traverses through the directory tree and finds manifest (files that have {@code bom.json}) and returns all found
-     * files as a {@link List} of {@link Path}s.
-     *
-     * @param directory The top-level directory where search for manifests should be started.
-     * @return List of {@link Path}s to found manifests.
-     */
-    protected List<Path> findManifests(Path directory) throws IOException {
-        List<Path> manifestPaths = new ArrayList<>();
-
-        log.info("Finding manifests under the '{}' directory...", directory.toAbsolutePath());
-
-        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/bom.json");
-
-        Files.walkFileTree(directory, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-                if (matcher.matches(path)) {
-                    log.info("Found manifest at path '{}'", path.toAbsolutePath());
-
-                    manifestPaths.add(path);
-
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-
-        log.info("Found {} generated manifests", manifestPaths.size());
-
-        return manifestPaths;
     }
 
     /**

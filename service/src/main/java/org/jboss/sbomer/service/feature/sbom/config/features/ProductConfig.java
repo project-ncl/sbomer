@@ -54,8 +54,8 @@ public class ProductConfig {
 
         /**
          * <p>
-         * Generates the {@link ErrataProductConfig} object based on the data available in the CycloneDX {@link Bom}
-         * for the main component.
+         * Generates the {@link ErrataProductConfig} object based on the data available in the CycloneDX {@link Bom} for
+         * the main component.
          * </p>
          *
          * <p>

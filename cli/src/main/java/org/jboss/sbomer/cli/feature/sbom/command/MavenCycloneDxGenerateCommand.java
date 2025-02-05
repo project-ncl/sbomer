@@ -19,6 +19,7 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser.SPLIT_BY_SPACE_HONORING_SINGLE_AND_DOUBLE_QUOTES;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.sbomer.cli.feature.sbom.generate.ProcessRunner;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
+import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -53,7 +56,19 @@ public class MavenCycloneDxGenerateCommand extends AbstractMavenGenerateCommand 
                 parent.getWorkdir(),
                 command(buildCmdOptions));
 
-        return Path.of(parent.getWorkdir().toAbsolutePath().toString(), "target", "bom.json");
+        try {
+            List<Path> path = FileUtils.findManifests(parent.getWorkdir());
+            if (path.size() != 1) {
+                throw new ApplicationException(
+                        "Unable to find the generated SBOM under the '{}' directory",
+                        parent.getWorkdir().toAbsolutePath());
+            }
+            return path.get(0);
+        } catch (IOException e) {
+            throw new ApplicationException(
+                    "Unable to find the generated SBOM under the '{}' directory",
+                    parent.getWorkdir().toAbsolutePath());
+        }
     }
 
     private String[] command(String buildCmdOptions) {

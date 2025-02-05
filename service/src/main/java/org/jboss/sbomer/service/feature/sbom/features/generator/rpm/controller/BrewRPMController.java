@@ -29,6 +29,7 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -148,7 +149,7 @@ public class BrewRPMController extends AbstractController {
         List<Path> manifestPaths = null;
 
         try {
-            manifestPaths = findManifests(generationDir);
+            manifestPaths = FileUtils.findManifests(generationDir);
         } catch (IOException e) {
             log.error("Unexpected IO exception ocurred while trying to find generated manifests", e);
 
