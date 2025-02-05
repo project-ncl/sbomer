@@ -731,7 +731,9 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerTextOnlyManifests.onReleaseAdvisoryEvent(event);
-        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
+        event.getReleaseGenerations()
+                .values()
+                .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     @Test
@@ -786,7 +788,9 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerTextOnlyDeliverables.onReleaseAdvisoryEvent(event);
-        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
+        event.getReleaseGenerations()
+                .values()
+                .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     @Test
@@ -866,7 +870,9 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerSingleContainer.onReleaseAdvisoryEvent(event);
-        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
+        event.getReleaseGenerations()
+                .values()
+                .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     @Test
@@ -1009,7 +1015,9 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerMultiContainers.onReleaseAdvisoryEvent(event);
-        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
+        event.getReleaseGenerations()
+                .values()
+                .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     @Test
@@ -1090,7 +1098,9 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withReleaseGenerations(pvToGenerations)
                 .build();
         listenerSingleRpm.onReleaseAdvisoryEvent(event);
-        event.getReleaseGenerations().values().forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
+        event.getReleaseGenerations()
+                .values()
+                .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
     }
 
     private List<ErrataCDNRepoNormalized> loadCDNReposDetails(

@@ -21,6 +21,7 @@ import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
@@ -63,11 +64,6 @@ class SyftImageControllerTest {
         }
 
         @Override
-        public List<Path> findManifests(Path directory) throws IOException {
-            return super.findManifests(directory);
-        }
-
-        @Override
         public List<Bom> readManifests(List<Path> manifestPaths) {
             return super.readManifests(manifestPaths);
         }
@@ -105,7 +101,7 @@ class SyftImageControllerTest {
         Path aFile = tmpDir.resolve("init.log");
         Files.write(aFile, "Some content".getBytes());
 
-        assertEquals(0, controller.findManifests(tmpDir).size());
+        assertEquals(0, FileUtils.findManifests(tmpDir).size());
     }
 
     @Test
@@ -125,7 +121,7 @@ class SyftImageControllerTest {
         Files.write(twoManifest, "{}".getBytes());
         Files.write(threeManifest, "{}".getBytes());
 
-        List<Path> manifests = controller.findManifests(tmpDir);
+        List<Path> manifests = FileUtils.findManifests(tmpDir);
         Collections.sort(manifests);
 
         assertEquals(2, manifests.size());

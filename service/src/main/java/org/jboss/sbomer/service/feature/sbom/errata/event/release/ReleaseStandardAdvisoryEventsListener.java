@@ -764,7 +764,9 @@ public class ReleaseStandardAdvisoryEventsListener {
     @Retry(maxRetries = 10)
     protected List<ErrataCDNRepoNormalized> getCDNDetails(BuildItem buildItem, String productShortName) {
         List<ErrataCDNRepoNormalized> allCDNs = new ArrayList<>();
-        buildItem.getVariantArch().keySet().forEach(variant -> allCDNs.addAll(errataClient.getCDNReposOfVariant(variant, productShortName)));
+        buildItem.getVariantArch()
+                .keySet()
+                .forEach(variant -> allCDNs.addAll(errataClient.getCDNReposOfVariant(variant, productShortName)));
         return allCDNs.stream().distinct().collect(Collectors.toList());
     }
 
@@ -827,9 +829,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
         Set<String> evidencePurls = AdvisoryEventUtils.createPurls(component.getPurl(), generationCDNs, manifestArches);
         log.debug("Calculated evidence purls: {}", evidencePurls);
-        String preferredRebuiltPurl = evidencePurls.stream()
-                .max(Comparator.comparingInt(String::length))
-                .orElse(null);
+        String preferredRebuiltPurl = evidencePurls.stream().max(Comparator.comparingInt(String::length)).orElse(null);
         log.debug("Preferred rebuilt purl: {}", preferredRebuiltPurl);
         originalToRebuiltPurl.put(component.getPurl(), preferredRebuiltPurl);
 

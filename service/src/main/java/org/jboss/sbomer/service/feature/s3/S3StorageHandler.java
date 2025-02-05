@@ -150,7 +150,7 @@ public class S3StorageHandler {
      * @return
      */
     public List<String> listLogFilesInBucket(String generationRequestId) {
-        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId);  // NOSONAR
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId); // NOSONAR
 
         if (generationRequest == null) {
             throw new NotFoundException("GenerationRequest with id '{}' could not be found", generationRequestId);

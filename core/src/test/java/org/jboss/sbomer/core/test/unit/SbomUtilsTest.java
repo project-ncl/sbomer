@@ -70,9 +70,7 @@ class SbomUtilsTest {
             List<Component> components = bom.getComponents();
             assertEquals(39, components.size());
 
-            assertEquals(
-                    "Apache-2.0",
-                    bom.getMetadata().getComponent().getLicenses().getLicenses().get(0).getId());
+            assertEquals("Apache-2.0", bom.getMetadata().getComponent().getLicenses().getLicenses().get(0).getId());
         }
 
         @Test
@@ -82,9 +80,7 @@ class SbomUtilsTest {
             assertNotNull(bom);
             assertEquals(39, bom.getComponents().size());
 
-            assertEquals(
-                    "Apache-2.0",
-                    bom.getMetadata().getComponent().getLicenses().getLicenses().get(0).getId());
+            assertEquals("Apache-2.0", bom.getMetadata().getComponent().getLicenses().getLicenses().get(0).getId());
         }
 
         @Test

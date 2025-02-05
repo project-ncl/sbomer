@@ -43,11 +43,18 @@ class AmqpMessageConsumerTest {
 
     @Test
     void testParsingOfUnexpectedData() {
-        Map<String, Object> map = Map.of("type", "DeliverableAnalysisStateChange",
-            "timestamp", 1698076061381L,
-            "message-id", "ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1",
-            "destination", "/topic/VirtualTopic.eng.pnc.builds");
+        Map<String, Object> map = Map.of(
+                "type",
+                "DeliverableAnalysisStateChange",
+                "timestamp",
+                1698076061381L,
+                "message-id",
+                "ID:orch-86-qmrdq-33543-1697588407649-5:1:3:1:1",
+                "destination",
+                "/topic/VirtualTopic.eng.pnc.builds");
         JsonObject headers = new JsonObject(map);
-        assertDoesNotThrow(() -> consumer.process(AmqpMessageHelper.toMessage(TestResources.asString("umb/unexpected.json"), headers)));
+        assertDoesNotThrow(
+                () -> consumer
+                        .process(AmqpMessageHelper.toMessage(TestResources.asString("umb/unexpected.json"), headers)));
     }
 }
