@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useRequestEvents } from './useRequestEvents';
+import { openInNewTab } from '@app/utils/openInNewTab';
 
 const columnNames = {
   id: 'ID',
@@ -75,12 +76,17 @@ export const RequestEventTable = () => {
         </Thead>
         <Tbody>
           {value.map((requestEvent) => (
-            <Tr key={requestEvent.id} isClickable onRowClick={() => navigate('/requestevents/' + requestEvent.id)}>
+            <Tr
+              key={requestEvent.id}
+              isClickable
+              onRowClick={() => navigate('/requestevents/' + requestEvent.id)}
+              onAuxClick={() => openInNewTab('/requestevents/' + requestEvent.id)}
+            >
               <Td dataLabel={columnNames.id}>
                 <pre>{requestEvent.id}</pre>
               </Td>
               <Td dataLabel={columnNames.eventStatus}>
-                  <Tooltip
+                <Tooltip
                   isContentLeftAligned={true}
                   content={
                     <div>

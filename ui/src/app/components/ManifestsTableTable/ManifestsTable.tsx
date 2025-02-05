@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useManifests } from './useSboms';
+import { openInNewTab } from '@app/utils/openInNewTab';
 
 const columnNames = {
   id: 'ID',
@@ -70,7 +71,12 @@ export const ManifestsTable = () => {
         </Thead>
         <Tbody>
           {value.map((manifest) => (
-            <Tr key={manifest.id} isClickable onRowClick={() => navigate('/manifests/' + manifest.id)}>
+            <Tr
+              key={manifest.id}
+              isClickable
+              onRowClick={() => navigate('/manifests/' + manifest.id)}
+              onAuxClick={() => openInNewTab('/manifests/' + manifest.id)}
+            >
               <Td dataLabel={columnNames.id}>
                 <pre>{manifest.id}</pre>
               </Td>
