@@ -78,6 +78,7 @@ public class FileUtils {
 
         try (Stream<Path> paths = Files.walk(directory)) {
             List<Path> manifestPaths = paths.filter(path -> MANIFEST_FILENAME.equals(path.getFileName().toString()))
+                    .filter(Files::isRegularFile)
                     .sorted()
                     .peek(path -> log.info("Found manifest at path '{}'", path.toAbsolutePath()))
                     .toList();
