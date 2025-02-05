@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useGenerationRequests } from './useGenerationRequests';
+import { openInNewTab } from '@app/utils/openInNewTab';
 
 const columnNames = {
   id: 'ID',
@@ -70,7 +71,12 @@ export const GenerationRequestTable = () => {
         </Thead>
         <Tbody>
           {value.map((generation) => (
-            <Tr key={generation.id} isClickable onRowClick={() => navigate('/generations/' + generation.id)}>
+            <Tr
+              key={generation.id}
+              isClickable
+              onRowClick={() => navigate('/generations/' + generation.id)}
+              onAuxClick={() => openInNewTab('/generations/' + generation.id)}
+            >
               <Td dataLabel={columnNames.id}>
                 <pre>{generation.id}</pre>
               </Td>
