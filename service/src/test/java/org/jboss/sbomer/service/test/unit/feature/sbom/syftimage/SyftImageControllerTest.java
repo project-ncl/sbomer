@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,7 +121,6 @@ class SyftImageControllerTest {
         Files.write(threeManifest, "{}".getBytes());
 
         List<Path> manifests = FileUtils.findManifests(tmpDir);
-        Collections.sort(manifests);
 
         assertEquals(2, manifests.size());
         assertTrue(manifests.get(0).endsWith("two/bom.json"));
