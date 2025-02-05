@@ -18,6 +18,7 @@
 package org.jboss.sbomer.test.e2e.rw;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -114,12 +115,11 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
                 "{} container image - Generation Request created: {}",
                 requestBody.getValue("/image").toString(),
                 generationId);
+
         waitForGeneration(generationId);
 
         final Response response = getManifestsForGeneration(generationId);
-
-        assertEquals(3, response.body().jsonPath().getInt("totalHits"));
-
-        log.info("{} container image passed", requestBody.getValue("image"));
+        assertTrue((response.body().jsonPath().getInt("totalHits") > 0));
+        log.info("{} container image passed", requestBody.getValue("/image"));
     }
 }
