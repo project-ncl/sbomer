@@ -74,11 +74,11 @@ export const ManifestsTable = () => {
             <Tr
               key={manifest.id}
               isClickable
-              onRowClick={() => navigate('/manifests/' + manifest.id)}
-              onAuxClick={() => openInNewTab('/manifests/' + manifest.id)}
+              onRowClick={() => navigate(`/manifests/${manifest.id}`)}
+              onAuxClick={() => openInNewTab(`/manifests/${manifest.id}`)}
             >
               <Td dataLabel={columnNames.id}>
-                <Link to={'/manifests/' + manifest.id}>
+                <Link to={`/manifests/${manifest.id}`}>
                   <pre>{manifest.id}</pre>
                 </Link>
               </Td>
