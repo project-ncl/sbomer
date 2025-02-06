@@ -79,11 +79,11 @@ export const RequestEventTable = () => {
             <Tr
               key={requestEvent.id}
               isClickable
-              onRowClick={() => navigate('/requestevents/' + requestEvent.id)}
-              onAuxClick={() => openInNewTab('/requestevents/' + requestEvent.id)}
+              onRowClick={() => navigate(`/requestevents/${requestEvent.id}`)}
+              onAuxClick={() => openInNewTab(`/requestevents/${requestEvent.id}`)}
             >
               <Td dataLabel={columnNames.id}>
-                <Link to={'/requestevents/' + requestEvent.id}>
+                <Link to={`/requestevents/${requestEvent.id}`}>
                   <pre>{requestEvent.id}</pre>
                 </Link>
               </Td>
