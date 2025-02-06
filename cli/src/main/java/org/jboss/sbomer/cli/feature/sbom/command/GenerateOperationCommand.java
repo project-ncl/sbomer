@@ -24,6 +24,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
+@Getter
 @Command(
         mixinStandardHelpOptions = true,
         name = "generate-operation",
@@ -32,7 +33,6 @@ import picocli.CommandLine.ScopeType;
         subcommands = { CycloneDxGenerateOperationCommand.class })
 public class GenerateOperationCommand {
 
-    @Getter
     @Option(
             names = { "-c", "--config", },
             paramLabel = "FILE",
@@ -41,28 +41,24 @@ public class GenerateOperationCommand {
             scope = ScopeType.INHERIT)
     Path configPath;
 
-    @Getter
     @Option(
             names = { "--index" },
             description = "Index to select the product configuration passed in the --config option. Starts from 0. If not provided SBOM will be generated for every product in the config serially.",
             scope = ScopeType.INHERIT)
     Integer index;
 
-    @Getter
     @Option(
             names = { "-op", "--operation-id" },
             description = "Operation identifier to generate the SBOM for",
             required = true)
     String operationId;
 
-    @Getter
     @Option(
             names = { "-f", "--force" },
             description = "If the workdir directory should be cleaned up in case it already exists. Default: ${DEFAULT-VALUE}",
             scope = ScopeType.INHERIT)
     boolean force = false;
 
-    @Getter
     @Option(
             names = { "--workdir" },
             defaultValue = "workdir",
@@ -72,7 +68,6 @@ public class GenerateOperationCommand {
             scope = ScopeType.INHERIT)
     Path workdir;
 
-    @Getter
     @Option(
             names = { "-o", "--output" },
             defaultValue = "bom.json",

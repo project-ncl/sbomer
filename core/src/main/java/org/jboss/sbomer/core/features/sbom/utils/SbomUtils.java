@@ -37,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -46,12 +45,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.commonjava.atlas.maven.ident.ref.SimpleArtifactRef;
 import org.commonjava.atlas.npm.ident.ref.NpmPackageRef;
@@ -270,6 +269,7 @@ public class SbomUtils {
         return component;
     }
 
+    // FIXME: 'Optional<String>' used as type for parameter 'source'
     public static Component setBrewBuildMetadata(
             Component component,
             String brewBuildId,
@@ -356,7 +356,7 @@ public class SbomUtils {
         License license = new License();
         license.setId(SBOMER_LICENSE_ID);
         licenseChoice.setLicenses(List.of(license));
-        metadata.setLicenseChoice(licenseChoice);
+        metadata.setLicenses(licenseChoice);
 
         Property vcs = new Property();
         vcs.setName(ExternalReference.Type.VCS.name());
@@ -408,9 +408,9 @@ public class SbomUtils {
      * duplicates as well.
      * </p>
      *
-     * @param bom
-     * @param oldPurl
-     * @param newPurl
+     * @param bom the BOM
+     * @param oldPurl the old purl
+     * @param newPurl the new purl
      */
     public static void updatePurl(Bom bom, String oldPurl, String newPurl) {
         // Update main component's purl
@@ -426,10 +426,10 @@ public class SbomUtils {
     /**
      * Updates the purl for the given component if it matches the old purl.
      *
-     * @param component
-     * @param oldPurl
-     * @param newPurl
-     * @return
+     * @param component the component
+     * @param oldPurl the old purl
+     * @param newPurl the new purl
+     * @return {@code true} if the purl was updated, {@code false} otherwise
      */
     public static boolean updatePurl(Component component, String oldPurl, String newPurl) {
         if (component.getPurl().equals(oldPurl)) {
@@ -468,7 +468,7 @@ public class SbomUtils {
     }
 
     public static Optional<String> getHash(Component component, Algorithm algorithm) {
-        List<Hash> hashes = null;
+        List<Hash> hashes;
 
         if (component.getHashes() != null) {
             hashes = component.getHashes();
@@ -502,10 +502,7 @@ public class SbomUtils {
             hashes.addAll(component.getHashes());
         }
         // If there isn't already the same algorithm present (do not override), add it
-        if (!hashes.stream()
-                .filter(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))
-                .findAny()
-                .isPresent()) {
+        if (hashes.stream().noneMatch(h -> h.getAlgorithm().equalsIgnoreCase(algorithm.getSpec()))) {
             hashes.add(new Hash(algorithm.getSpec(), hash));
             component.setHashes(hashes);
         }
@@ -542,6 +539,7 @@ public class SbomUtils {
             log.info("Adding {} property with value: {}", property, value);
             addProperty(component, property, value);
         } else {
+            // FIXME: 'Optional.get()' without 'isPresent()' check
             log.debug(
                     "Property {} already exist, value: {}",
                     property,
@@ -585,27 +583,24 @@ public class SbomUtils {
     }
 
     public static List<ExternalReference> getExternalReferences(Component c, ExternalReference.Type type) {
-        List<ExternalReference> filteredExternalReferences = Optional.ofNullable(c.getExternalReferences())
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
+        return Optional.ofNullable(c.getExternalReferences())
+                .stream()
+                .flatMap(Collection::stream)
                 .filter(ref -> ref.getType().equals(type))
                 .toList();
-
-        return filteredExternalReferences;
     }
 
     public static List<ExternalReference> getExternalReferences(
             Component c,
             ExternalReference.Type type,
             String comment) {
-        List<ExternalReference> filteredExternalReferences = Optional.ofNullable(c.getExternalReferences())
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
+
+        return Optional.ofNullable(c.getExternalReferences())
+                .stream()
+                .flatMap(Collection::stream)
                 .filter(ref -> ref.getType().equals(type))
                 .filter(ref -> Objects.equals(ref.getComment(), comment))
                 .toList();
-
-        return filteredExternalReferences;
     }
 
     public static void addExternalReference(Component c, ExternalReference.Type type, String url, String comment) {
@@ -615,9 +610,9 @@ public class SbomUtils {
                 externalRefs.addAll(c.getExternalReferences());
             }
 
-            ExternalReference reference = Optional.ofNullable(externalRefs)
-                    .map(Collection::stream)
-                    .orElseGet(Stream::empty)
+            ExternalReference reference = Optional.of(externalRefs)
+                    .stream()
+                    .flatMap(Collection::stream)
                     .filter(ref -> ref.getType().equals(type))
                     .filter(ref -> Objects.equals(ref.getComment(), comment))
                     .findFirst()
@@ -675,7 +670,7 @@ public class SbomUtils {
     public static void setSupplier(Component c) {
         OrganizationalEntity org = new OrganizationalEntity();
         org.setName(Constants.SUPPLIER_NAME);
-        org.setUrls(Arrays.asList(Constants.SUPPLIER_URL));
+        org.setUrls(List.of(Constants.SUPPLIER_URL));
         c.setSupplier(org);
     }
 
@@ -716,7 +711,7 @@ public class SbomUtils {
      *
      * @param bom The CycloneDX {@link Bom} to convert
      * @return {@link String} representation of the {@link Bom}.
-     * @throws GeneratorException
+     * @throws GeneratorException if an error occurs during the conversion
      */
     public static String toJson(Bom bom) throws GeneratorException {
         BomJsonGenerator generator = BomGeneratorFactory.createJson(SbomUtils.schemaVersion(), bom);
@@ -980,7 +975,7 @@ public class SbomUtils {
     /**
      * Creates a purl of OCI type for the image
      *
-     * @param imageName the image fullname
+     * @param imageFullname the image fullname
      */
     public static String createContainerImageOCIPurl(String imageFullname) {
         if (imageFullname == null || imageFullname.isEmpty()) {
@@ -988,7 +983,7 @@ public class SbomUtils {
         }
 
         String[] imageTokens = imageFullname.split("@");
-        if (imageTokens == null || imageTokens.length != 2) {
+        if (imageTokens.length != 2) {
             throw new IllegalArgumentException("Image full name has wrong format");
         }
         return createContainerImageOCIPurl(imageTokens[0], imageTokens[1]);
@@ -1118,7 +1113,7 @@ public class SbomUtils {
      * Returns a TreeSet containing the component PURL and any PURL found among the evidence identities'
      * concludedValues.
      *
-     * @param component
+     * @param component the component
      * @return The TreeSet containing all the found PURLs
      */
     public static Set<String> getAllPurlsOfComponent(Component component) {
@@ -1127,7 +1122,7 @@ public class SbomUtils {
             return Collections.emptySet();
         }
 
-        TreeSet<String> allPurls = new TreeSet<>();
+        SortedSet<String> allPurls = new TreeSet<>();
         allPurls.add(component.getPurl());
 
         if (component.getEvidence() == null || component.getEvidence().getIdentities() == null

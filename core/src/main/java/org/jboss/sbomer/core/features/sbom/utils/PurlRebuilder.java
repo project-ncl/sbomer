@@ -110,13 +110,13 @@ public class PurlRebuilder {
      * Given a component, tries to create a valid purl using the Syft information (if available) and the component
      * properties
      *
-     * @param component
+     * @param component the component
      * @return a valid rebuilt purl
      */
     public static String rebuildPurlFromSyftComponent(Component component) throws MalformedPackageURLException {
 
         Optional<Property> syftPackageType = SbomUtils.findPropertyWithNameInComponent("syft:package:type", component);
-        if (!syftPackageType.isPresent()) {
+        if (syftPackageType.isEmpty()) {
             return null;
         }
 

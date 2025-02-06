@@ -34,7 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Implementation of the {@link SbomGenerator} which uses the Domino tool to generate SBOMs for Maven project.
  *
- * @see https://github.com/quarkusio/quarkus-platform-bom-generator/tree/main/domino
+ * @see <a href=
+ *      "https://github.com/quarkusio/quarkus-platform-bom-generator/tree/main/domino">https://github.com/quarkusio/quarkus-platform-bom-generator/tree/main/domino</a>
  * @author Marek Goldmann
  */
 @Slf4j
@@ -54,7 +55,7 @@ public class MavenDominoGenerator implements SbomGenerator {
      */
     String dominoVersion;
     /**
-     * Path to the Maven {@code settings.xml} file. Relative to {@link #workDir}.
+     * Path to the Maven {@code settings.xml} file. Relative to {@code workDir}.
      */
     Path settingsXmlPath;
     /**

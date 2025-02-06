@@ -87,7 +87,7 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
                     }
                 }
                 return builder.equal(path, argument);
-            } else if (argument == null) {
+            } else {
                 return builder.isNull(path);
             }
         } else if (operator.equals(AbstractCriteriaAwareRepository.IS_LIKE)) {
@@ -99,7 +99,7 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
                 }
                 return builder
                         .like(builder.lower(path), preprocessLikeOperatorArgument(strArg.toLowerCase()), ESCAPE_CHAR);
-            } else if (argument == null) {
+            } else {
                 return builder.isNull(path);
             }
         }

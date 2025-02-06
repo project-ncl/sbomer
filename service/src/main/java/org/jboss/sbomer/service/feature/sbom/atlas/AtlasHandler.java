@@ -33,16 +33,15 @@ import jakarta.inject.Inject;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+@Setter
 @ApplicationScoped
 @Slf4j
 public class AtlasHandler {
     @Inject
     @RestClient
-    @Setter
     AtlasBuildClient atlasBuildClient;
 
     @Inject
-    @Setter
     FeatureFlags featureFlags;
 
     public Bom retrieveBuildManifest(String purl) {

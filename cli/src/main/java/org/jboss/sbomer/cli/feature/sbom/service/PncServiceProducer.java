@@ -26,12 +26,12 @@ import jakarta.enterprise.inject.Produces;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+@Getter
 @ApplicationScoped
 @Slf4j
 public class PncServiceProducer {
 
     @ConfigProperty(name = "sbomer.pnc.host")
-    @Getter
     String apiUrl;
 
     @Produces

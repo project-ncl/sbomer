@@ -60,7 +60,6 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.Build;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease.ErrataProductVersion;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
@@ -749,10 +748,16 @@ public class AdvisoryService {
                     summary.append("\n\tProduct Version: ").append(productVersionEntry.getName());
                     for (Build build : productVersionEntry.getBuilds()) {
 
-                        summary.append("\n\t\t").append(build.getBuildItems().values().stream().map(buildItem -> {
-                            return "ID: " + buildItem.getId() + ", NVR: " + buildItem.getNvr() + ", Variant: "
-                                    + buildItem.getVariantArch().keySet();
-                        }).collect(Collectors.joining("\n\t\t")));
+                        summary.append("\n\t\t")
+                                .append(
+                                        build.getBuildItems()
+                                                .values()
+                                                .stream()
+                                                .map(
+                                                        buildItem -> "ID: " + buildItem.getId() + ", NVR: "
+                                                                + buildItem.getNvr() + ", Variant: "
+                                                                + buildItem.getVariantArch().keySet())
+                                                .collect(Collectors.joining("\n\t\t")));
                     }
                 }
             }

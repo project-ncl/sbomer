@@ -20,7 +20,6 @@ package org.jboss.sbomer.cli.feature.sbom.command.catalog;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
@@ -52,7 +51,7 @@ public abstract class AbstractCatalogCommand implements Callable<Integer> {
             addContext();
 
             List<Path> sbomPaths = FileUtils.findManifests(parent.getPath());
-            List<Bom> boms = sbomPaths.stream().map(SbomUtils::fromPath).collect(Collectors.toList());
+            List<Bom> boms = sbomPaths.stream().map(SbomUtils::fromPath).toList();
 
             log.info("Starting {} cataloguer", getCataloguerType());
 

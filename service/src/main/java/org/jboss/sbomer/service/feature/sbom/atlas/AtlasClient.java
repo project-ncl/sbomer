@@ -58,22 +58,14 @@ public interface AtlasClient {
     static RuntimeException toException(Response response) {
         String message = response.readEntity(String.class);
 
-        switch (response.getStatus()) {
-            case 400:
-                return new ClientException("Bad request", List.of(message));
-            case 401:
-                return new UnauthorizedException(
-                        "Caller is unauthorized to access resource; {}",
-                        message,
-                        List.of(message));
-            case 403:
-                return new ForbiddenException("Caller is forbidden to access resource; {}", message, List.of(message));
-            case 404:
-                return new NotFoundException("Requested resource was not found; {}", message, List.of(message));
-            default:
-                break;
-        }
+        return switch (response.getStatus()) {
+            case 400 -> new ClientException("Bad request", List.of(message));
+            case 401 ->
+                new UnauthorizedException("Caller is unauthorized to access resource; {}", message, List.of(message));
+            case 403 -> new ForbiddenException("Caller is forbidden to access resource; {}", message, List.of(message));
+            case 404 -> new NotFoundException("Requested resource was not found; {}", message, List.of(message));
+            default -> null;
+        };
 
-        return null;
     }
 }

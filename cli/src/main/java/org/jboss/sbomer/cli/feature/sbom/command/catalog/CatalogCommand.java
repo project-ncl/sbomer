@@ -26,6 +26,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
+@Getter
 @Command(
         mixinStandardHelpOptions = true,
         name = "catalog",
@@ -34,7 +35,6 @@ import picocli.CommandLine.ScopeType;
         subcommandsRepeatable = true)
 public class CatalogCommand {
 
-    @Getter
     @Option(
             names = { "-p", "--path" },
             required = true,
@@ -44,7 +44,6 @@ public class CatalogCommand {
             scope = ScopeType.INHERIT)
     Path path;
 
-    @Getter
     @Option(
             names = { "-in", "--image-name" },
             required = true,
@@ -53,7 +52,6 @@ public class CatalogCommand {
             scope = ScopeType.INHERIT)
     String imageName;
 
-    @Getter
     @Option(
             names = { "-id", "--image-digest" },
             required = true,
@@ -62,7 +60,6 @@ public class CatalogCommand {
             scope = ScopeType.INHERIT)
     String imageDigest;
 
-    @Getter
     @Option(
             names = { "-o", "--output" },
             defaultValue = "bom.json",

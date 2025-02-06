@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.cli;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -36,7 +35,7 @@ public class ExceptionHandler implements IExecutionExceptionHandler {
         CLI cli = (CLI) cmd.getCommandSpec().root().userObject();
 
         cmd.getErr().println();
-        cmd.getErr().println(cmd.getColorScheme().errorText("🛑 Ooops, an error occurred!"));
+        cmd.getErr().println(cmd.getColorScheme().errorText("🛑 Oops, an error occurred!"));
         cmd.getErr().println();
 
         if (ex.getMessage() != null) {

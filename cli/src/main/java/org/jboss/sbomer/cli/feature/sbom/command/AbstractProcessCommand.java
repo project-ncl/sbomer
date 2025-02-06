@@ -37,7 +37,7 @@ public abstract class AbstractProcessCommand implements Callable<Integer> {
     protected PncService pncService;
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         try {
             // Make sure there is no context.
             MDCUtils.removeContext();
@@ -67,7 +67,7 @@ public abstract class AbstractProcessCommand implements Callable<Integer> {
     protected abstract ProcessorType getImplementationType();
 
     /**
-     * Optionally adds a MDC context. The {@link MDCUtils} class can be used for this purpose.
+     * Optionally adds an MDC context. The {@link MDCUtils} class can be used for this purpose.
      */
     protected void addContext() {
 
@@ -76,15 +76,15 @@ public abstract class AbstractProcessCommand implements Callable<Integer> {
     /**
      * Processor implementation.
      *
-     * @param bom Processed manifest.
-     * @return
+     * @param bom the manifest to process
+     * @return the processed manifest
      */
     protected abstract Bom doProcess(Bom bom);
 
     /**
      * Path to the CycloneDX manifest that should be processed.
      *
-     * @return
+     * @return the path to the manifest
      */
     protected abstract Path manifestPath();
 }

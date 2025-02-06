@@ -26,6 +26,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
+@Getter
 @Command(
         mixinStandardHelpOptions = true,
         name = "process",
@@ -35,7 +36,6 @@ import picocli.CommandLine.ScopeType;
         subcommandsRepeatable = true)
 public class StandaloneProcessCommand {
 
-    @Getter
     @Option(
             names = { "-p", "--path" },
             description = "Path to generated manifest file in CycloneDX JSON format",

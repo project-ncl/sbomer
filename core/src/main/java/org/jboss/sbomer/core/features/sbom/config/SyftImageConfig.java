@@ -84,7 +84,7 @@ public class SyftImageConfig extends Config {
         DefaultProcessorConfig defaultProcessorConfig = new DefaultProcessorConfig();
 
         // If the default processor is not there, add it.
-        // This ensures that even after we initialize the object, for examle after deserialziation,
+        // This ensures that even after we initialize the object, for example after deserialization,
         // we will have the default processor added, so that the correct command can be instantiated.
         if (!processors.contains(defaultProcessorConfig)) {
             processors.add(0, defaultProcessorConfig);

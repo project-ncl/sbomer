@@ -72,7 +72,7 @@ public class S3ClientFacade {
     }
 
     /**
-     * Event listener for the {@link FeatureFlags.TOGGLE_S3_STORAGE} toggle. In case it is enabled, the S3 client is
+     * Event listener for the {@link FeatureFlags#TOGGLE_S3_STORAGE} toggle. In case it is enabled, the S3 client is
      * instantiated. When the toggle is disabled, client is closed.
      *
      * @param flag

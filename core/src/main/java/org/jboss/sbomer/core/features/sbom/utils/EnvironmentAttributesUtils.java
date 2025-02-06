@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class EnvironmentAttributesUtils {
 
     private EnvironmentAttributesUtils() {
-        // This is a utlity class
+        // This is a utility class
     }
 
     private static final String MAVEN_ATTRIBUTE_KEY = "MAVEN";
@@ -149,7 +149,7 @@ public class EnvironmentAttributesUtils {
     public static Map<String, String> getNvmCompliantAttributes(Map<String, String> environmentAttributes) {
         Map<String, String> nvmAttributes = new HashMap<>();
 
-        // Find NodeJs
+        // Find Node.js
         Optional<String> nodeJSVersion = getNodeJsNvmCompliantVersion(environmentAttributes);
         nodeJSVersion.ifPresent(s -> nvmAttributes.put(NODEJS_NVM_KEY, s.trim()));
 

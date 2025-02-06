@@ -35,7 +35,7 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
     AdjustCommand parent;
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         try {
             // Make sure there is no context.
             MDCUtils.removeContext();
@@ -60,7 +60,7 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
     }
 
     /**
-     * Optionally adds a MDC context. The {@link MDCUtils} class can be used for this purpose.
+     * Optionally adds an MDC context. The {@link MDCUtils} class can be used for this purpose.
      */
     protected void addContext() {
 

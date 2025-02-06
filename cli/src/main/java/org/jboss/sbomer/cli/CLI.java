@@ -59,7 +59,7 @@ public class CLI implements QuarkusApplication {
 
     @Override
     @ActivateRequestContext
-    public int run(String... args) throws Exception {
+    public int run(String... args) {
         CommandLine commandLine = new CommandLine(this, factory).setExecutionExceptionHandler(new ExceptionHandler())
                 .setExecutionStrategy(new RunOnlyCallable())
                 .setCommandName("sbomerctl");

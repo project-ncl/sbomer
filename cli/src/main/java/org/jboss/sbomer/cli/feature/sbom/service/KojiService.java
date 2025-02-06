@@ -29,6 +29,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
+import lombok.Getter;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.build.finder.core.BuildConfig;
@@ -65,6 +66,7 @@ public class KojiService {
     @Inject
     ManagedExecutor executor;
 
+    @Getter
     @Inject
     BuildConfig config;
 
@@ -143,7 +145,7 @@ public class KojiService {
                 .stream()
                 .filter(entry -> entry.getKey().getBuildSystem().equals(BuildSystem.koji))
                 .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
         log.info("Finished analysis for '{}'", url.toExternalForm());
 
@@ -157,6 +159,7 @@ public class KojiService {
         while (!finderTask.isDone() && (retry * 500L) < MAX_BREW_WAIT_5_MIN) {
             try {
                 retry++;
+                // FIXME: Call to 'Thread.sleep()' in a loop, probably busy-waiting
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 log.warn("Sleeping while awaiting results was interrupted", e);
@@ -167,10 +170,6 @@ public class KojiService {
             return finderTask.get();
         }
         return Collections.emptyList();
-    }
-
-    public BuildConfig getConfig() {
-        return config;
     }
 
     public KojiBuild findBuild(Artifact artifact) {

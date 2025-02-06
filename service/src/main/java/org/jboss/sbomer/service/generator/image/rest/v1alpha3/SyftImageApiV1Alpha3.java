@@ -84,7 +84,7 @@ public class SyftImageApiV1Alpha3 {
     public Response generateFromContainerImage(
             @PathParam("name") String imageName,
             SyftImageConfig config,
-            @Context ContainerRequestContext requestContext) throws Exception {
+            @Context ContainerRequestContext requestContext) {
 
         if (config == null) {
             config = new SyftImageConfig();

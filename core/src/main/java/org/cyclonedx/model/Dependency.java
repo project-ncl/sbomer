@@ -40,6 +40,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -47,6 +50,8 @@ import java.util.Objects;
 /*
  * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
  */
+@Setter
+@Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL) // We want to include empty List<Dependency>, so DO NOT use Include.NON_EMPTY
 public class Dependency extends BomReference {
@@ -68,14 +73,6 @@ public class Dependency extends BomReference {
     public Dependency() {
     }
 
-    public List<Dependency> getDependencies() {
-        return dependencies;
-    }
-
-    public void setDependencies(final List<Dependency> dependencies) {
-        this.dependencies = dependencies;
-    }
-
     public void addDependency(final Dependency dependency) {
         if (dependencies == null) {
             dependencies = new ArrayList<>();
@@ -84,14 +81,6 @@ public class Dependency extends BomReference {
         if (!found) {
             dependencies.add(dependency);
         }
-    }
-
-    public List<Dependency> getProvides() {
-        return provides;
-    }
-
-    public void setProvides(final List<Dependency> provides) {
-        this.provides = provides;
     }
 
     public void addProvides(final Dependency dependency) {

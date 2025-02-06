@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
@@ -64,6 +65,8 @@ public class SyftImageCatalogCommand extends AbstractCatalogCommand {
 
         Variants indexVariants = new Variants();
         Bom indexBom = SbomUtils.createBom();
+        // FIXME: This method can return null
+        Objects.requireNonNull(indexBom);
         String indexPurl = SbomUtils.createContainerImageOCIPurl(imageName, imageDigest);
         String indexName = boms.get(0).getComponents().get(0).getName();
         String indexBaseBomPrefix = getBaseBomRefPrefix(boms.get(0).getComponents().get(0));

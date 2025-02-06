@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.core.features.sbom.enums;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 import org.jboss.sbomer.core.features.sbom.config.BrewRPMConfig;
 import org.jboss.sbomer.core.features.sbom.config.Config;
@@ -28,6 +28,7 @@ import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 
 import lombok.Getter;
 
+@Getter
 public enum GenerationRequestType {
     BUILD(PncBuildConfig.class, "config.json"),
     OPERATION(OperationConfig.class, "operation_config.json"),
@@ -35,10 +36,8 @@ public enum GenerationRequestType {
     ANALYSIS(DeliverableAnalysisConfig.class, "deliverable_analysis_config.json"),
     BREW_RPM(BrewRPMConfig.class, "brew_rpm_config.json");
 
-    @Getter
     final Class<? extends Config> implementation;
 
-    @Getter
     final String schema;
 
     GenerationRequestType(Class<? extends Config> implementation, String schema) {
@@ -51,8 +50,7 @@ public enum GenerationRequestType {
     }
 
     public static String schemaFile(Class<? extends Config> clazz) {
-        GenerationRequestType type = List.of(GenerationRequestType.values())
-                .stream()
+        GenerationRequestType type = Stream.of(GenerationRequestType.values())
                 .filter(t -> t.getImplementation().equals(clazz))
                 .findFirst()
                 .orElse(null);

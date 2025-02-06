@@ -81,37 +81,32 @@ import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+@Setter
 @ApplicationScoped
 @Slf4j
 public class ReleaseStandardAdvisoryEventsListener {
 
-    // Set the long transaction imeout to 10 mins
+    // Set the long transaction timeout to 10 minutes
     private static final int INCREASED_TIMEOUT_SEC = 600;
 
     @Inject
     @RestClient
-    @Setter
     ErrataClient errataClient;
 
     @Inject
     @RestClient
-    @Setter
     PyxisClient pyxisClient;
 
     @Inject
-    @Setter
     SbomService sbomService;
 
     @Inject
-    @Setter
     StatsService statsService;
 
     @Inject
-    @Setter
     SbomGenerationRequestRepository generationRequestRepository;
 
     @Inject
-    @Setter
     RequestEventRepository requestEventRepository;
 
     private static final String NVR_STANDARD_SEPARATOR = "-";
@@ -129,6 +124,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
 
             String toolVersion = statsService.getStats().getVersion();
+            // FIXME: 'Optional.get()' without 'isPresent()' check
             Component.Type productType = AdvisoryEventUtils
                     .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
 
@@ -175,7 +171,7 @@ public class ReleaseStandardAdvisoryEventsListener {
             }
         } catch (Exception e) {
             log.error(
-                    "An error occured during the creation of release manifests for event '{}'",
+                    "An error occurred during the creation of release manifests for event '{}'",
                     requestEvent.getId(),
                     e);
             markRequestFailed(requestEvent, event.getReleaseGenerations().values());
@@ -187,7 +183,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
     @Transactional(value = TxType.REQUIRES_NEW)
     protected void markRequestFailed(RequestEvent requestEvent, Collection<SbomGenerationRequest> releaseGenerations) {
-        String reason = "An error occured during the creation of the release manifest";
+        String reason = "An error occurred during the creation of the release manifest";
         log.error(reason);
 
         requestEvent = requestEventRepository.findById(requestEvent.getId());
@@ -225,7 +221,7 @@ public class ReleaseStandardAdvisoryEventsListener {
             Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs = new HashMap<>();
 
             for (BuildItem buildItem : buildItems) {
-
+                // FIXME: 'Optional.get()' without 'isPresent()' check
                 Component nvrRootComponent = createRootComponentForRPMBuildItem(
                         buildItem,
                         nvrToBuildGeneration.get(buildItem.getNvr()),
@@ -250,7 +246,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     productVersionBom,
                     advisoryManifestsRecord,
                     generationToCDNs);
-
+            // FIXME: 'Optional.get()' without 'isPresent()' check
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
                     sbom,
@@ -319,7 +315,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     productVersionBom,
                     advisoryManifestsRecord,
                     generationToRepositories);
-
+            // FIXME: 'Optional.get()' without 'isPresent()' check
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
                     sbom,
@@ -338,6 +334,9 @@ public class ReleaseStandardAdvisoryEventsListener {
 
         // Create the release manifest for this ProductVersion
         Bom productVersionBom = SbomUtils.createBom();
+        // FIXME: This method can return null
+        Objects.requireNonNull(productVersionBom);
+        // FIXME: 'Optional.get()' without 'isPresent()' check
         Metadata productVersionMetadata = createMetadata(
                 productVersion.getDescription(),
                 productVersion.getName(),
@@ -604,9 +603,9 @@ public class ReleaseStandardAdvisoryEventsListener {
                 Collection<V1Beta1RequestManifestRecord> buildManifests = advisoryManifestsRecord.manifests()
                         .stream()
                         .filter(manifest -> manifest.generation().id().equals(generationId))
-                        .collect(Collectors.toList());
+                        .toList();
                 Map<String, String> originalToRebuiltPurl = new HashMap<>();
-                buildManifests.stream().forEach(manifestRecord -> {
+                buildManifests.forEach(manifestRecord -> {
                     String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo);
                     originalToRebuiltPurl.put(manifestRecord.rootPurl(), rebuiltPurl);
                     log.debug("Regenerated rootPurl '{}' to '{}'", manifestRecord.rootPurl(), rebuiltPurl);
@@ -630,7 +629,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                                         .getComponent()
                                         .getDescription()
                                         .contains(buildManifest.getRootPurl())) {
-
+                            // FIXME: Result of String.replace() is ignored
                             manifestBom.getMetadata()
                                     .getComponent()
                                     .getDescription()
@@ -703,7 +702,7 @@ public class ReleaseStandardAdvisoryEventsListener {
     @Retry(maxRetries = 10)
     protected Map<ProductVersionEntry, List<BuildItem>> getAdvisoryBuildDetails(String advisoryId) {
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(advisoryId);
-        Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = erratumBuildList.getProductVersions()
+        return erratumBuildList.getProductVersions()
                 .values()
                 .stream()
                 .collect(
@@ -713,7 +712,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
                                         .collect(Collectors.toList())));
-        return advisoryBuildDetails;
     }
 
     @Retry(maxRetries = 10)
@@ -797,6 +795,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
         ObjectNode releaseMetadata = ObjectMapperProvider.json().createObjectNode();
         releaseMetadata.put(REQUEST_ID, requestEventId);
+        // FIXME: 'Optional.get()' without 'isPresent()' check
         releaseMetadata.put(ERRATA, erratum.getDetails().get().getFulladvisory());
         releaseMetadata.put(ERRATA_ID, erratum.getDetails().get().getId());
         if (erratum.getDetails().get().getActualShipDate() != null) {
@@ -914,6 +913,8 @@ public class ReleaseStandardAdvisoryEventsListener {
                     if (nvr != null) {
                         processedGenerationsIds.add(manifest.generation().id());
                     }
+                    // FIXME: nvr can be null here. It's filtered out later, but there may be a better way to handle
+                    // this
                     return Map.entry(nvr, manifest.generation());
                 })
                 .filter(entry -> entry.getKey() != null) // Filter out entries where NVR is null

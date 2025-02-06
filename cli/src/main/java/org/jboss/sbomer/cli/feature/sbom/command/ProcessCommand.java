@@ -21,6 +21,7 @@ import lombok.Getter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
+@Getter
 @Command(
         mixinStandardHelpOptions = true,
         name = "process",
@@ -30,7 +31,6 @@ import picocli.CommandLine.ParentCommand;
         subcommandsRepeatable = true)
 public class ProcessCommand {
 
-    @Getter
     @ParentCommand
     AbstractGenerateCommand parent;
 

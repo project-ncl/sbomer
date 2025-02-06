@@ -47,7 +47,7 @@ public class ProcessRunner {
     /**
      * Perform validation of the Maven project directory located at a given path.
      *
-     * @param workDir
+     * @param workDir the path to the Maven project directory
      */
     private static void validateWorkDir(Path workDir) {
         log.debug("Validating working directory: '{}'...", workDir);
@@ -139,7 +139,7 @@ public class ProcessRunner {
             }
         } catch (IOException e) {
             log.error(
-                    "An error ocurred while procesing the output of the command. This is not fatal and will be ignored.",
+                    "An error occurred while procesing the output of the command. This is not fatal and will be ignored.",
                     e);
         }
 

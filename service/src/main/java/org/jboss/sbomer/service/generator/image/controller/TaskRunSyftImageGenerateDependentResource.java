@@ -85,7 +85,7 @@ public class TaskRunSyftImageGenerateDependentResource
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
-        Duration timeout = null;
+        Duration timeout;
 
         try {
             timeout = Duration.parse("6h");
@@ -93,11 +93,12 @@ public class TaskRunSyftImageGenerateDependentResource
             throw new ApplicationException("Cannot set timeout", e);
         }
 
-        String rpmsParam = Objects
-                .requireNonNullElse(generationRequest.getConfig(SyftImageConfig.class).isIncludeRpms(), false) ? "true"
-                        : "false";
+        String rpmsParam = Boolean.toString(generationRequest.getConfig(SyftImageConfig.class).isIncludeRpms());
 
-        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
+        // TODO: Disabled for now
+        // TektonResourceUtils.adjustComputeResources(taskRun);
+
+        return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())
                 .withLabels(labels)
                 .withName(generationRequest.dependentResourceName(SbomGenerationPhase.GENERATE))
@@ -137,10 +138,5 @@ public class TaskRunSyftImageGenerateDependentResource
                                 .build())
                 .endSpec()
                 .build();
-
-        // TODO: Disabled for now
-        // TektonResourceUtils.adjustComputeResources(taskRun);
-
-        return taskRun;
     }
 }

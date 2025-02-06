@@ -42,7 +42,7 @@ public class PurlSanitizer {
             throw new IllegalArgumentException("PURL cannot be null or empty");
         }
 
-        log.debug("Sanitizig purl {}...", purl);
+        log.debug("Sanitizing purl {}...", purl);
 
         // Attempt to parse the PURL using PackageURL
         try {
@@ -61,7 +61,6 @@ public class PurlSanitizer {
             String qualifiersPart = purlParts.length > 1 ? purlParts[1] : null;
 
             // Extract scheme
-            String scheme = "pkg";
             if (mainPart.startsWith("pkg:")) {
                 mainPart = mainPart.substring(4);
             }
@@ -72,9 +71,9 @@ public class PurlSanitizer {
             String subpath = mainPartSplit.length > 1 ? mainPartSplit[1] : null;
 
             // Extract type, namespace, name, version
-            String type = null;
+            String type;
             String namespace = null;
-            String name = null;
+            String name;
             String version = null;
 
             int firstSlash = mainPart.indexOf('/');
@@ -128,13 +127,7 @@ public class PurlSanitizer {
     }
 
     public static String sanitizeNamespace(String namespace) {
-        if (namespace == null)
-            return null;
-        String[] segments = namespace.split("/");
-        for (int i = 0; i < segments.length; i++) {
-            segments[i] = segments[i].replaceAll(NAME_VERSION_QKEY_QVALUE, "-");
-        }
-        return String.join("/", segments);
+        return sanitizeSubpath(namespace);
     }
 
     public static String sanitizeName(String name) {

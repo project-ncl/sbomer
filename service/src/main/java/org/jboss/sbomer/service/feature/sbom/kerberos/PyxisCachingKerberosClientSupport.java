@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.kerberos;
 
 import static javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag.REQUIRED;
 
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -137,7 +136,7 @@ public class PyxisCachingKerberosClientSupport {
 
             return getServiceTicket(userPrincipalSubject, completeUserPrincipalName);
         } catch (LoginException ex) {
-            log.debug("Login exception: %s", ex.getMessage());
+            log.debug("Login exception: {}", ex.getMessage());
             throw new RuntimeException(ex);
         }
     }
@@ -146,27 +145,24 @@ public class PyxisCachingKerberosClientSupport {
         log.debug("Getting a new service ticket for user principal subject ...");
 
         try {
-            return Subject.doAs(userPrincipalSubject, new PrivilegedExceptionAction<>() {
-                @Override
-                public String run() throws Exception {
-                    /*
-                     * The getNegotiateToken method calls context.initSecContext, which uses the stored KerberosTicket
-                     * to create a token suitable for the Kerberos or SPNEGO negotiation protocol. The initSecContext
-                     * does not necessarily contact the Kerberos server; it simply builds the token based on the cached
-                     * ticket. context.initSecContext will reach out to the Kerberos server only if the ticket is
-                     * missing or if a renewal is required. This means we don't need any further caching here.
-                     */
-                    GSSContext context = createServiceContext();
-                    return getNegotiateToken(context, new byte[0]);
-                }
+            return Subject.doAs(userPrincipalSubject, (PrivilegedExceptionAction<String>) () -> {
+                /*
+                 * The getNegotiateToken method calls context.initSecContext, which uses the stored KerberosTicket to
+                 * create a token suitable for the Kerberos or SPNEGO negotiation protocol. The initSecContext does not
+                 * necessarily contact the Kerberos server; it simply builds the token based on the cached ticket.
+                 * context.initSecContext will reach out to the Kerberos server only if the ticket is missing or if a
+                 * renewal is required. This means we don't need any further caching here.
+                 */
+                GSSContext context = createServiceContext();
+                return getNegotiateToken(context, new byte[0]);
             });
         } catch (PrivilegedActionException ex) {
             Throwable ex2 = ex.getCause() != null ? ex.getCause() : ex;
-            log.debug("PrivilegedAction failure: %s", ex2.getMessage());
+            log.debug("PrivilegedAction failure: {}", ex2.getMessage());
             throw new RuntimeException(ex);
         } catch (Throwable ex) {
             Throwable ex2 = ex.getCause() != null ? ex.getCause() : ex;
-            log.debug("Authentication failure: %s", ex2.getMessage());
+            log.debug("Authentication failure: {}", ex2.getMessage());
             throw new RuntimeException(ex2);
         }
     }
@@ -288,7 +284,7 @@ public class PyxisCachingKerberosClientSupport {
         }
 
         @Override
-        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+        public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
             for (Callback current : callbacks) {
                 if (current instanceof NameCallback ncb) {
                     ncb.setName(username);

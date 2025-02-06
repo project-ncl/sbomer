@@ -123,7 +123,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     }
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         // Make sure there is no context
         MDCUtils.removeContext();
         MDCUtils.addBuildContext(parent.getBuildId());
@@ -313,12 +313,13 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
         }
 
         log.info("Cloning the repository to {}...", path);
-        try (Git git = Git.cloneRepository()
+        try (Git ignored = Git.cloneRepository()
                 .setDirectory(path.toFile())
                 .setURI(url)
                 .setBranch(tag)
                 .setDepth(1)
                 .call()) {
+            // Do nothing, just clone the repository
         } catch (InvalidRemoteException e) {
             throw new ApplicationException(
                     "Unknown error occurred while preparing to clone the '{}'  repository",
@@ -333,14 +334,14 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
 
         // Please note that this ignores the block size of a particular storage,
         // and because of this, the number can be different compared to when
-        // an utility like `du` is being used to determine the size.
+        // a utility like `du` is being used to determine the size.
         log.info("Directory size: {} MB", String.format("%.02f", (float) dirSize(path) / 1024));
     }
 
     /**
      * Calculates directory size for a given path.
      *
-     * @param path
+     * @param path the path to the directory
      * @return Size in kB.
      */
     protected long dirSize(Path path) {

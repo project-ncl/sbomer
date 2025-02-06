@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
@@ -55,6 +56,7 @@ public class ErrataNotesSchemaValidator implements Validator<Errata> {
 
         try (InputStream is = SchemaValidator.class.getClassLoader()
                 .getResourceAsStream("schemas/appsvc-metadata.schema.json")) {
+            Objects.requireNonNull(is);
             schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);

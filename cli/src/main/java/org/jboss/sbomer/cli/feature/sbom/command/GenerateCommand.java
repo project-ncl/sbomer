@@ -24,6 +24,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
+@Getter
 @Command(
         mixinStandardHelpOptions = true,
         name = "generate",
@@ -33,18 +34,15 @@ import picocli.CommandLine.ScopeType;
                 GradleCycloneDxGenerateCommand.class, NodejsCycloneDxGenerateCommand.class })
 public class GenerateCommand {
 
-    @Getter
     @Option(names = { "-b", "--build-id" }, description = "Build identifier to generate the SBOM for", required = true)
     String buildId;
 
-    @Getter
     @Option(
             names = { "-f", "--force" },
             description = "If the workdir directory should be cleaned up in case it already exists. Default: ${DEFAULT-VALUE}",
             scope = ScopeType.INHERIT)
     boolean force = false;
 
-    @Getter
     @Option(
             names = { "--workdir" },
             defaultValue = "workdir",
@@ -54,7 +52,6 @@ public class GenerateCommand {
             scope = ScopeType.INHERIT)
     Path workdir;
 
-    @Getter
     @Option(
             names = { "-o", "--output" },
             defaultValue = "bom.json",

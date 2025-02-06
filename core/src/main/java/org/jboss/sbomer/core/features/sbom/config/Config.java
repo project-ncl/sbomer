@@ -64,7 +64,7 @@ public abstract class Config {
     /**
      * Checks whether current object is an empty one.
      *
-     * @return
+     * @return {@code true} if the object is empty, {@code false} otherwise.
      */
     @JsonIgnore
     public abstract boolean isEmpty();
@@ -88,7 +88,7 @@ public abstract class Config {
      * </p>
      *
      * <p>
-     * By default it returns only {@code default} which represents the default processors that is used in every
+     * By default, it returns only {@code default} which represents the default processors that is used in every
      * manifest.
      * </p>
      *
@@ -193,7 +193,7 @@ public abstract class Config {
             if (itide.getTypeId() == null) {
                 throw new ApplicationException("Missing type at path {}", path, itide);
             } else {
-                // Nested "type" identifier is wtong
+                // Nested "type" identifier is wrong
                 throw new ApplicationException("Invalid type '{}' found at path {}", itide.getTypeId(), path, itide);
             }
 
@@ -210,13 +210,11 @@ public abstract class Config {
     private static String readablePropertyPath(List<Reference> references) {
         return String.format(
                 "$.%s",
-                String.join(
-                        ".",
-                        references.stream()
-                                .map(
-                                        r -> r.getIndex() < 0 ? String.format("%s", r.getFieldName())
-                                                : String.format("[%s]", r.getIndex()))
-                                .collect(Collectors.toList())));
+                references.stream()
+                        .map(
+                                r -> r.getIndex() < 0 ? String.format("%s", r.getFieldName())
+                                        : String.format("[%s]", r.getIndex()))
+                        .collect(Collectors.joining(".")));
 
     }
 

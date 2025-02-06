@@ -85,7 +85,7 @@ public class GenerateCommand implements Callable<Integer> {
      *         generation process did not finish successfully
      */
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
 
         if (configPath == null) {
             log.info("Configuration path is null, cannot do any generation.");

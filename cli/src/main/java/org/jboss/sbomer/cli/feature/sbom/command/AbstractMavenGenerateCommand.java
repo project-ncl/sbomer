@@ -23,9 +23,9 @@ import lombok.Getter;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
+@Getter
 public abstract class AbstractMavenGenerateCommand extends AbstractGenerateCommand {
 
-    @Getter
     @Option(
             names = { "-s", "--settings" },
             description = "Path to Maven settings.xml file that should be used for this run instead of the default one",

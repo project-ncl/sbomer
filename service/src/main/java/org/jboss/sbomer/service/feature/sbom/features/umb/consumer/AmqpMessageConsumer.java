@@ -64,7 +64,7 @@ import jakarta.transaction.Transactional.TxType;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * An UMB message consumer that utilizes the SmallRye Reactive messaging support with the AMQ connector.
+ * A UMB message consumer that utilizes the SmallRye Reactive messaging support with the AMQ connector.
  *
  * @author Marek Goldmann
  */

@@ -91,7 +91,7 @@ public class GradleCycloneDxGenerateCommand extends AbstractGradleGenerateComman
     }
 
     private void configureProcessEnvironmentVariable(String buildCmdOptions, Map<String, String> environment) {
-        // If there is an hint about the major Gradle version required, use it.
+        // If there is a hint about the major Gradle version required, use it.
         Optional<Integer> gradleMajorVersion = extractGradleMajorVersion(buildCmdOptions);
         if (gradleMajorVersion.isEmpty() || gradleMajorVersion.get() >= 5) {
             environment.put(GRADLE_PLUGIN_VERSION_ENV_VARIABLE, toolVersion());

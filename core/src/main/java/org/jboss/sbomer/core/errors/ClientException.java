@@ -23,21 +23,22 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.ToString;
 
+@Getter
 @ToString
 public class ClientException extends ApplicationException {
-    final int defaultCode = 400;
-    @Getter
-    List<String> errors;
+    private static final int DEFAULT_CODE = 400;
 
-    @Getter
+    private final List<String> errors;
+
     final String errorId;
 
     public int getCode() {
-        return defaultCode;
+        return DEFAULT_CODE;
     }
 
     public ClientException(String message, Object... params) {
         super(message, params);
+        this.errors = null;
         this.errorId = UUID.randomUUID().toString();
     }
 

@@ -128,7 +128,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                 config);
 
         // Get some metadata about the operation
-        String productName = "";
+        String productName;
         String productMilestone = "";
         DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(config.getOperationId());
         if (operation.getProductMilestone() != null) {
@@ -254,8 +254,9 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         }
 
         // Find the parent to set the correct hierarchy, default to the main root dependency
-        for (String key : pathToDependencies.keySet()) {
-            Dependency dependency = pathToDependencies.get(key);
+        for (Map.Entry<String, Dependency> entry : pathToDependencies.entrySet()) {
+            String key = entry.getKey();
+            Dependency dependency = entry.getValue();
             Optional<Dependency> maybeParent = findClosestParent(pathToDependencies, key);
             Dependency parent = maybeParent.orElse(mainDependency);
             parent.addDependency(dependency);
@@ -314,6 +315,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         }
     }
 
+    // FIXME: 'Optional<String>' used as type for parameter 'sha256'
     private String createGenericPurl(String filename, Optional<String> sha256) {
         try {
             PackageURLBuilder purlBuilder = PackageURLBuilder.aPackageURL()

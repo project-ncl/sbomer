@@ -48,8 +48,8 @@ public interface SBOMerClient {
     /**
      * Retrieves SBOM based on the ID.
      *
-     * @param id
-     * @return {@link Sbom}
+     * @param id the identifier of the SBOM
+     * @return the {@link Sbom SBOM}
      */
     @GET
     @Path("/manifests/{id}")
@@ -58,8 +58,8 @@ public interface SBOMerClient {
     /**
      * Retrieves SBOM Generation Request based on the ID.
      *
-     * @param id
-     * @return {@link SbomGenerationRequest}
+     * @param id the identifier of the SBOM Generation Request
+     * @return {@link SbomGenerationRequest SBOM Generation Request}
      */
     @GET
     @Path("/generations/{id}")
@@ -70,9 +70,9 @@ public interface SBOMerClient {
     /**
      * Search the base SBOM based via RSQL search and pagination.
      *
-     * @param paginationParams
-     * @param rsqlQuery
-     * @return {@link Response}
+     * @param paginationParams the pagination parameters
+     * @param rsqlQuery the RSQL query
+     * @return {@link Response res}
      */
     @GET
     @Path("/manifests")
@@ -85,9 +85,9 @@ public interface SBOMerClient {
     /**
      * Search the generation requests via RSQL search and pagination.
      *
-     * @param paginationParams
-     * @param rsqlQuery
-     * @return {@link Response}
+     * @param paginationParams the pagination parameters
+     * @param rsqlQuery the RSQL query
+     * @return {@link Response response}
      */
     @GET
     @Path("/generations")

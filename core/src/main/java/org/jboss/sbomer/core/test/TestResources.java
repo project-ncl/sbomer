@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class TestResources {
 
     private TestResources() {
-        // This is a utlity class and should not be instantiated
+        // This is a utility class and should not be instantiated
     }
 
     /**

@@ -42,8 +42,7 @@ public class Labels {
 
     public static Map<String, String> defaultLabelsToMap(GenerationRequestType sbomGenerationType) {
 
-        Map<String, String> labels = Arrays.asList(LABEL_SELECTOR.split(","))
-                .stream()
+        Map<String, String> labels = Arrays.stream(LABEL_SELECTOR.split(","))
                 .map(l -> l.split("="))
                 .collect(Collectors.toMap(splitLabel -> splitLabel[0], splitLabel -> splitLabel[1]));
 

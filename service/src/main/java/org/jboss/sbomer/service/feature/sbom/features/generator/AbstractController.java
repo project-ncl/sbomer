@@ -149,8 +149,8 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * Additionally updates the database entity with the current state of the {@link GenerationRequest}.
      * </p>
      *
-     * @param generationRequest
-     * @param bom
+     * @param generationRequest the generation request
+     * @param boms the BOMs to store
      * @return
      */
     @Transactional
@@ -248,7 +248,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
             Context<GenerationRequest> context) throws Exception {
         MDCUtils.removeContext();
 
-        // No status set set, it should be "NEW", let's do it.
+        // No status is set, it should be "NEW", let's do it.
         // "NEW" starts everything.
         if (Objects.isNull(generationRequest.getStatus())) {
             return updateRequest(generationRequest, SbomGenerationStatus.NEW, null, null);
@@ -302,7 +302,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     /**
      * <p>
      * In case the dependent resource is prepared, the {@link SbomGenerationStatus#NEW} status is transitioned into
-     * {@link SbomGenerationStatus#GENERATING}. In all other cases, the resourse stays in the
+     * {@link SbomGenerationStatus#GENERATING}. In all other cases, the resource stays in the
      * {@link SbomGenerationStatus#NEW} status.
      * </p>
      */

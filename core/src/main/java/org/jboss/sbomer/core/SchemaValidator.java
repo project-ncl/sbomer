@@ -20,7 +20,6 @@ package org.jboss.sbomer.core;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.json.schema.Draft;
@@ -37,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SchemaValidator {
 
     private SchemaValidator() {
-        // This is a utlity class and should not be instantiated
+        // This is a utility class and should not be instantiated
     }
 
     @Data
@@ -52,8 +51,8 @@ public class SchemaValidator {
                     .withIsValid(outputUnit.getValid())
                     .withErrors(
                             Optional.ofNullable(outputUnit.getErrors())
-                                    .map(Collection::stream)
-                                    .orElseGet(Stream::empty)
+                                    .stream()
+                                    .flatMap(Collection::stream)
                                     .map(unit -> unit.getInstanceLocation() + ": " + unit.getError())
                                     .toList())
                     .build();
@@ -63,7 +62,7 @@ public class SchemaValidator {
     /**
      * A method to validate the content of the message body according to the defined JSON Schema.
      *
-     * @return
+     * @return the result of the validation
      */
     public static ValidationResult validate(String schema, String body) {
         log.debug("Validating: {}", body);

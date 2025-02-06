@@ -140,7 +140,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
     }
 
     public RequestEvent updateRequestConfig(RequestEvent requestEvent, RequestConfig config) {
-        requestEvent = RequestEvent.findById(requestEvent.getId());
+        requestEvent = RequestEvent.findById(requestEvent.getId()); // NOSONAR
         requestEvent.setRequestConfig(config);
         return requestEvent.save();
     }
@@ -150,7 +150,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
             RequestEventStatus status,
             Map<String, String> extra,
             String reason) {
-        requestEvent = RequestEvent.findById(requestEvent.getId());
+        requestEvent = RequestEvent.findById(requestEvent.getId()); // NOSONAR
         extra.forEach(((ObjectNode) requestEvent.getEvent())::put);
 
         if (status != null) {
@@ -295,18 +295,19 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
     }
 
     public List<V1BaseBeta1RequestRecord> searchRequestRecords(QueryParameters parameters) {
-        return searchProjected(V1BaseBeta1RequestRecord.class, parameters, (query, builder, root) -> {
-            return query.select(
-                    builder.construct(
-                            V1BaseBeta1RequestRecord.class,
-                            root.get("id"),
-                            root.get("receivalTime"),
-                            root.get("eventType"),
-                            root.get("eventStatus"),
-                            root.get("reason"),
-                            root.get("requestConfig"),
-                            root.get("event")));
-        });
+        return searchProjected(
+                V1BaseBeta1RequestRecord.class,
+                parameters,
+                (query, builder, root) -> query.select(
+                        builder.construct(
+                                V1BaseBeta1RequestRecord.class,
+                                root.get("id"),
+                                root.get("receivalTime"),
+                                root.get("eventType"),
+                                root.get("eventStatus"),
+                                root.get("reason"),
+                                root.get("requestConfig"),
+                                root.get("event"))));
     }
 
     private static final String RELEASE_METADATA_ERRATA_ID = "release.errata_id";

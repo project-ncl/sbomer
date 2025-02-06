@@ -410,7 +410,7 @@ public class SbomService {
             throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
         }
 
-        RequestEvent dbRequestEvent = RequestEvent.findById(requestEvent.getId());
+        RequestEvent dbRequestEvent = RequestEvent.findById(requestEvent.getId()); // NOSONAR
         if (dbRequestEvent == null) {
             dbRequestEvent = requestEvent.save();
         }
@@ -567,7 +567,7 @@ public class SbomService {
         // Filter the results and remove the current (IN_PROGRESS) requestId
         List<V1Beta1RequestRecord> allAdvisoryRequestRecordsFiltered = allAdvisoryRequestRecords.stream()
                 .filter(record -> !record.id().equals(ignoreRequestId))
-                .collect(Collectors.toList());
+                .toList();
         log.debug("Filtering found records to ignore current IN_PROGRESS event {}", ignoreRequestId);
 
         // Check whether the last one was completed successfully
