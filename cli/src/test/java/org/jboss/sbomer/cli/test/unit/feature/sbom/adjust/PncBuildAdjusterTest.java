@@ -42,6 +42,7 @@ class PncBuildAdjusterTest {
     @Test
     void parseBrewRpmsBom() throws IOException {
         Bom bom = SbomUtils.fromPath(Paths.get("src", "test", "resources", "boms/brew_rpm.json"));
+        assertNotNull(bom);
         assertEquals(1, bom.getDependencies().size());
         assertEquals(8, bom.getDependencies().get(0).getProvides().size());
 

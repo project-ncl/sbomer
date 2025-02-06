@@ -17,11 +17,8 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.Map;
 
-import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.AmqpMessageConsumer;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;

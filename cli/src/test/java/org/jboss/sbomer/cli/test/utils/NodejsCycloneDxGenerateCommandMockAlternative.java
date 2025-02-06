@@ -3,6 +3,7 @@ package org.jboss.sbomer.cli.test.utils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import jakarta.enterprise.inject.Alternative;
 
@@ -31,7 +32,9 @@ public class NodejsCycloneDxGenerateCommandMockAlternative extends NodejsCyclone
     protected Path doGenerate(String buildCmdOptions) {
 
         try {
-            Files.copy(getClass().getClassLoader().getResourceAsStream("boms/plain.json"), getParent().getOutput());
+            Files.copy(
+                    Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("boms/plain.json")),
+                    getParent().getOutput());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

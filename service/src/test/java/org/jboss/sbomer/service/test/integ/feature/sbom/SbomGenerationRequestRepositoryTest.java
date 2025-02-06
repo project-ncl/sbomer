@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -20,7 +20,6 @@ package org.jboss.sbomer.service.test.integ.feature.sbom;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -141,7 +140,7 @@ class SbomGenerationRequestRepositoryTest {
                 .build();
     }
 
-    private Sbom createSBOM() throws IOException {
+    private Sbom createSBOM() {
         Bom bom = SbomUtils.fromPath(sbomPath("complete_sbom.json"));
         Config runtimeConfig = createRuntimeConfig(BUILD_ID);
 
@@ -162,7 +161,7 @@ class SbomGenerationRequestRepositoryTest {
         return sbom;
     }
 
-    private Sbom createOperationSBOM() throws IOException {
+    private Sbom createOperationSBOM() {
         Bom bom = SbomUtils.fromPath(sbomPath("complete_sbom.json"));
         OperationConfig runtimeConfig = createRuntimeOperationConfig(OPERATION_ID);
 
@@ -184,7 +183,7 @@ class SbomGenerationRequestRepositoryTest {
     }
 
     @PostConstruct
-    void init() throws Exception {
+    void init() {
         Sbom sbom = createSBOM();
         Sbom operationSbom = createOperationSBOM();
         sbomRepository.saveSbom(sbom);
@@ -258,7 +257,7 @@ class SbomGenerationRequestRepositoryTest {
     }
 
     @Test
-    void testDeleteSbomGenerationRequest() throws Exception {
+    void testDeleteSbomGenerationRequest() {
         Config runtimeConfig = createRuntimeConfig(BUILD_ID_2_DELETE);
 
         SbomGenerationRequest generationRequest = SbomGenerationRequest.builder()

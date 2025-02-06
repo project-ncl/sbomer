@@ -47,9 +47,7 @@ class ConfigSchemaValidatorTest {
 
         @Test
         void shouldGracefullyFailOnNullConfig() {
-            ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-                validator.validate(null);
-            });
+            ApplicationException ex = assertThrows(ApplicationException.class, () -> validator.validate(null));
 
             assertEquals("No configuration provided", ex.getMessage());
         }
@@ -76,8 +74,9 @@ class ConfigSchemaValidatorTest {
         }
 
         /**
-         * With the feautre to generate minifests for all builds (https://issues.redhat.com/browse/SBOMER-14) the Red
-         * Hat Product processor has been made optional.
+         * With the feature to generate minifests for all builds
+         * (<a href="https://issues.redhat.com/browse/SBOMER-14">...</a>) the Red Hat Product processor has been made
+         * optional.
          */
         @Test
         void shouldNotOnMissingRedHatProductProcessor() {
@@ -170,9 +169,7 @@ class ConfigSchemaValidatorTest {
 
         @Test
         void shouldGracefullyFailOnNullConfig() {
-            ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-                validator.validate(null);
-            });
+            ApplicationException ex = assertThrows(ApplicationException.class, () -> validator.validate(null));
 
             assertEquals("No configuration provided", ex.getMessage());
         }
@@ -238,9 +235,7 @@ class ConfigSchemaValidatorTest {
 
         @Test
         void shouldGracefullyFailOnNullConfig() {
-            ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-                validator.validate(null);
-            });
+            ApplicationException ex = assertThrows(ApplicationException.class, () -> validator.validate(null));
 
             assertEquals("No configuration provided", ex.getMessage());
         }

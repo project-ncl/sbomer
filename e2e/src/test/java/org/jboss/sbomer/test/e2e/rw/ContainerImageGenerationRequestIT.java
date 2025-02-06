@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,9 +54,10 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
         return Paths.get("src", "test", "resources", "requests", fileName);
     }
 
-    private static final String MANDREL_IMAGE = "registry.redhat.io/quarkus/mandrel-for-jdk-21-rhel8@sha256:a406de0fd344785fb39eba81cbef01cf7fb3e2be43d0e671a8587d1abe1418b4";
+    // private static final String MANDREL_IMAGE =
+    // "registry.redhat.io/quarkus/mandrel-for-jdk-21-rhel8@sha256:a406de0fd344785fb39eba81cbef01cf7fb3e2be43d0e671a8587d1abe1418b4";
 
-    static Stream<JsonObject> requestBodys() throws IOException, URISyntaxException {
+    static Stream<JsonObject> requestBodys() throws IOException {
         String requestBodys = Files.readString(sbomPath("skinny-manifest-images.json"));
         JsonReader jsonReader = Json.createReader(new StringReader(requestBodys));
         JsonArray requestBodyJO = jsonReader.readArray();
@@ -66,7 +66,7 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
     }
 
     @Test
-    void testMultiArchImage() throws IOException, URISyntaxException {
+    void testMultiArchImage() throws IOException {
         String requestBody = Files.readString(sbomPath("mandrel-image.json"));
         List<String> generationIds = requestGeneration(requestBody);
 

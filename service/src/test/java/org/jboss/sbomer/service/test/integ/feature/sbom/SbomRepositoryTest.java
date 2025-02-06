@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -45,8 +45,6 @@ import org.jboss.sbomer.service.test.utils.QuarkusTransactionalTest;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.quarkus.logging.Log;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
@@ -75,7 +73,7 @@ class SbomRepositoryTest {
     }
 
     @Test
-    void testValidBom() throws JsonProcessingException {
+    void testValidBom() {
         String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
@@ -100,7 +98,7 @@ class SbomRepositoryTest {
     }
 
     @Test
-    void testValidConfiguration() throws JsonProcessingException {
+    void testValidConfiguration() {
         String rsqlQuery = "identifier=eq=ARYT3LBXDVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 
@@ -165,7 +163,7 @@ class SbomRepositoryTest {
     }
 
     @Test
-    void testValidOperationBom() throws JsonProcessingException {
+    void testValidOperationBom() {
         String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(1).rsqlQuery(rsqlQuery).build()).get(0);
         Bom bom = SbomUtils.fromJsonNode(sbom.getSbom());
@@ -191,7 +189,7 @@ class SbomRepositoryTest {
     }
 
     @Test
-    void testValidOperationConfiguration() throws JsonProcessingException {
+    void testValidOperationConfiguration() {
         String rsqlQuery = "identifier=eq=OPBGCD23DVYAC";
         Sbom sbom = sbomRepository.search(QueryParameters.builder().pageSize(10).rsqlQuery(rsqlQuery).build()).get(0);
 

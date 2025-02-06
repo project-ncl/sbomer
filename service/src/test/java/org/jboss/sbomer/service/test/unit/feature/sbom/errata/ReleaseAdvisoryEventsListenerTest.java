@@ -704,6 +704,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
         Map<String, SbomGenerationRequest> generationsMap = new HashMap<>();
+        assertTrue(errata.getDetails().isPresent());
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                 .withId(RandomStringIdGenerator.generate())
                 .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + productVersionText)
@@ -756,6 +757,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
         Map<String, SbomGenerationRequest> generationsMap = new HashMap<>();
+        assertTrue(errata.getDetails().isPresent());
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                 .withId(RandomStringIdGenerator.generate())
                 .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + productVersionText)
@@ -831,6 +833,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
         buildDetails.keySet().forEach(pv -> {
             String generationId = RandomStringIdGenerator.generate();
+            assertTrue(errata.getDetails().isPresent());
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                     .withId(generationId)
                     .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + pv.getName())
@@ -974,6 +977,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
         buildDetails.keySet().forEach(pv -> {
             String generationId = RandomStringIdGenerator.generate();
+            assertTrue(errata.getDetails().isPresent());
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                     .withId(generationId)
                     .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + pv.getName())
@@ -1060,6 +1064,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
         buildDetails.keySet().forEach(pv -> {
             String generationId = RandomStringIdGenerator.generate();
+            assertTrue(errata.getDetails().isPresent());
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
                     .withId(generationId)
                     .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + pv.getName())
@@ -1073,6 +1078,7 @@ class ReleaseAdvisoryEventsListenerTest {
             pvToGenerations.put(pv.getName(), sbomGenerationRequest);
         });
         when(errataClient.getVariant("7ComputeNode-7.2.Z")).thenReturn(variant);
+        assertTrue(errata.getDetails().isPresent());
         when(errataClient.getBuildsList(String.valueOf(errata.getDetails().get().getId())))
                 .thenReturn(erratumBuildList);
         when(errataClient.getErratum(String.valueOf(errata.getDetails().get().getId()))).thenReturn(errata);
@@ -1109,14 +1115,13 @@ class ReleaseAdvisoryEventsListenerTest {
             String shortProductName) throws IOException {
         Collection<ErrataCDNRepo> cdnRepos = parseResource(fileName, new TypeReference<>() {
         });
-        List<ErrataCDNRepoNormalized> cdnReposNormalized = cdnRepos.stream()
+        return cdnRepos.stream()
                 .filter(
                         cdn -> cdn.getType().equals("cdn_repos")
                                 && !cdn.getAttributes().getContentType().equalsIgnoreCase("docker"))
                 .map(cdn -> new ErrataCDNRepoNormalized(cdn, variantName, !"rhel".equalsIgnoreCase(shortProductName)))
                 .distinct()
                 .collect(Collectors.toList());
-        return cdnReposNormalized;
     }
 
     private PyxisRepositoryDetails loadPyxisRepositoryDetails(String fileName) throws IOException {

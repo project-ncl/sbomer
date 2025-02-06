@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -18,14 +18,13 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-import java.io.IOException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -59,16 +58,16 @@ class SBOMServiceTest {
     private static final String INITIAL_BUILD_ID = "ARYT3LBXDVYAC";
 
     @Test
-    void testGetBaseSbom() throws IOException {
+    void testGetBaseSbom() {
         log.info("testGetBaseSbom ...");
         String rsqlQuery = "identifier=eq=" + INITIAL_BUILD_ID;
         Collection<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(0, 1, rsqlQuery, null)
                 .getContent();
-        assertTrue(!sboms.isEmpty());
+        assertFalse(sboms.isEmpty());
     }
 
     @Test
-    void testListBaseSboms() throws IOException {
+    void testListBaseSboms() {
         log.info("testListBaseSboms ...");
 
         Sbom dummySbom = new Sbom();
@@ -81,12 +80,10 @@ class SBOMServiceTest {
         assertEquals(50, page.getPageSize());
         assertTrue(page.getTotalHits() > 0);
         assertEquals(1, page.getTotalPages());
-        assertTrue(!page.getContent().isEmpty());
+        assertFalse(page.getContent().isEmpty());
 
         BaseSbomRecord foundSbom = null;
-        Iterator<BaseSbomRecord> contentIterator = page.getContent().iterator();
-        while (contentIterator.hasNext()) {
-            BaseSbomRecord sbom = contentIterator.next();
+        for (BaseSbomRecord sbom : page.getContent()) {
             if (sbom.identifier().equals(INITIAL_BUILD_ID)) {
                 foundSbom = sbom;
                 break;

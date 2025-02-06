@@ -1,6 +1,7 @@
 package org.jboss.sbomer.core.test.unit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,27 +41,25 @@ class ConfigTest {
 
     @Test
     void shouldHandleEmptyObject() {
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            Config.fromString("{}");
-        });
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> Config.fromString("{}"));
 
         assertEquals("No configuration type provided", ex.getMessage());
     }
 
     @Test
     void shouldHandleInvalidContent() {
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            Config.fromString("{\"type\": \"syft-image\", \"wrong\": []}");
-        });
+        ApplicationException ex = assertThrows(
+                ApplicationException.class,
+                () -> Config.fromString("{\"type\": \"syft-image\", \"wrong\": []}"));
 
         assertEquals("Unknown property 'wrong' at path $.wrong", ex.getMessage());
     }
 
     @Test
     void shouldHandleInvalidType() {
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            Config.fromString("{\"type\": \"invalid\"}");
-        });
+        ApplicationException ex = assertThrows(
+                ApplicationException.class,
+                () -> Config.fromString("{\"type\": \"invalid\"}"));
 
         assertEquals("Invalid configuration type provided: invalid", ex.getMessage());
     }
@@ -91,7 +90,7 @@ class ConfigTest {
         @Test
         void shouldReturnDefault() {
             DeliverableAnalysisConfig config = Config.newInstance(DeliverableAnalysisConfig.class);
-
+            assertNotNull(config);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
             assertNull(config.getDeliverableUrls());
             assertNull(config.getErrata());
@@ -105,7 +104,7 @@ class ConfigTest {
         @Test
         void shouldReturnDefault() {
             OperationConfig config = Config.newInstance(OperationConfig.class);
-
+            assertNotNull(config);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
             assertNull(config.getDeliverableUrls());
             assertNull(config.getOperationId());
@@ -119,7 +118,7 @@ class ConfigTest {
         @Test
         void shouldReturnDefault() {
             PncBuildConfig config = Config.newInstance(PncBuildConfig.class);
-
+            assertNotNull(config);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
             assertNull(config.getBuildId());
             assertNull(config.getEnvironment());
@@ -133,7 +132,7 @@ class ConfigTest {
         @Test
         void shouldReturnNewInstance() {
             SyftImageConfig config = Config.newInstance(SyftImageConfig.class);
-
+            assertNotNull(config);
             assertEquals("sbomer.jboss.org/v1alpha1", config.getApiVersion());
             assertTrue(config.getPaths().isEmpty());
             assertTrue(config.isIncludeRpms());

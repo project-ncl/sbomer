@@ -11,7 +11,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
@@ -123,6 +122,7 @@ class ErrataMessageHelperTestCase {
     void testErrataErratumDTO() throws IOException {
         String erratumJsonString = TestResources.asString("errata/api/erratum.json");
         Errata erratum = ObjectMapperProvider.json().readValue(erratumJsonString, Errata.class);
+        assertTrue(erratum.getDetails().isPresent());
         Errata.Details details = erratum.getDetails().get();
         assertEquals(139230L, details.getId());
         assertEquals("RHBA-2041:7158-01", details.getFulladvisory());
@@ -222,7 +222,7 @@ class ErrataMessageHelperTestCase {
                         .values()
                         .stream()
                         .map(ProductVersionEntry::getName)
-                        .collect(Collectors.toList())
+                        .toList()
                         .containsAll(
                                 List.of(
                                         "RHEL-8.6.0.Z.EUS",

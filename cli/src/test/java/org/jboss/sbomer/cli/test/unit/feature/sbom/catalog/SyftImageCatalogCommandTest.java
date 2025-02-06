@@ -1,6 +1,7 @@
 package org.jboss.sbomer.cli.test.unit.feature.sbom.catalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,6 +37,10 @@ class SyftImageCatalogCommandTest {
         Bom arm64 = SbomUtils.fromString(TestResources.asString("boms/catalog/arm64.json"));
         Bom ppc64le = SbomUtils.fromString(TestResources.asString("boms/catalog/ppc64le.json"));
         Bom s390x = SbomUtils.fromString(TestResources.asString("boms/catalog/s390x.json"));
+        assertNotNull(amd64);
+        assertNotNull(arm64);
+        assertNotNull(ppc64le);
+        assertNotNull(s390x);
         List<Bom> boms = List.of(amd64, arm64, ppc64le, s390x);
 
         String imageName = "rh-osbs/ubi9-ubi-micro";

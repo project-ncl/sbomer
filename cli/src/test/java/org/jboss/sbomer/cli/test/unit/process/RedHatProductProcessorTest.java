@@ -1,6 +1,9 @@
 package org.jboss.sbomer.cli.test.unit.process;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Optional;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
@@ -26,15 +29,18 @@ class RedHatProductProcessorTest {
         processor.process(bom);
 
         assertEquals(3, component.getProperties().size());
-        assertEquals(
-                "pName",
-                SbomUtils.findPropertyWithNameInComponent("errata-tool-product-name", component).get().getValue());
-        assertEquals(
-                "pVersion",
-                SbomUtils.findPropertyWithNameInComponent("errata-tool-product-version", component).get().getValue());
-        assertEquals(
-                "pVariant",
-                SbomUtils.findPropertyWithNameInComponent("errata-tool-product-variant", component).get().getValue());
+        Optional<Property> errataToolProductName = SbomUtils
+                .findPropertyWithNameInComponent("errata-tool-product-name", component);
+        assertTrue(errataToolProductName.isPresent());
+        assertEquals("pName", errataToolProductName.get().getValue());
+        Optional<Property> errataToolProductVersion = SbomUtils
+                .findPropertyWithNameInComponent("errata-tool-product-version", component);
+        assertTrue(errataToolProductVersion.isPresent());
+        assertEquals("pVersion", errataToolProductVersion.get().getValue());
+        Optional<Property> errataToolProductVariant = SbomUtils
+                .findPropertyWithNameInComponent("errata-tool-product-variant", component);
+        assertTrue(errataToolProductVariant.isPresent());
+        assertEquals("pVariant", errataToolProductVariant.get().getValue());
     }
 
     @Test
@@ -56,14 +62,17 @@ class RedHatProductProcessorTest {
         processor.process(bom);
 
         assertEquals(3, component.getProperties().size());
-        assertEquals(
-                "original-value",
-                SbomUtils.findPropertyWithNameInComponent("errata-tool-product-name", component).get().getValue());
-        assertEquals(
-                "pVersion",
-                SbomUtils.findPropertyWithNameInComponent("errata-tool-product-version", component).get().getValue());
-        assertEquals(
-                "pVariant",
-                SbomUtils.findPropertyWithNameInComponent("errata-tool-product-variant", component).get().getValue());
+        Optional<Property> errataToolProductName = SbomUtils
+                .findPropertyWithNameInComponent("errata-tool-product-name", component);
+        assertTrue(errataToolProductName.isPresent());
+        assertEquals("original-value", errataToolProductName.get().getValue());
+        Optional<Property> errataToolProductVersion = SbomUtils
+                .findPropertyWithNameInComponent("errata-tool-product-version", component);
+        assertTrue(errataToolProductVersion.isPresent());
+        assertEquals("pVersion", errataToolProductVersion.get().getValue());
+        Optional<Property> errataToolProductVariant = SbomUtils
+                .findPropertyWithNameInComponent("errata-tool-product-variant", component);
+        assertTrue(errataToolProductVariant.isPresent());
+        assertEquals("pVariant", errataToolProductVariant.get().getValue());
     }
 }

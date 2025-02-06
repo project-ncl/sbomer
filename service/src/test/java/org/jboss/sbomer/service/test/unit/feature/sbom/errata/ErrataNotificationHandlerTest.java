@@ -190,7 +190,7 @@ class ErrataNotificationHandlerTest {
     }
 
     @Test
-    void testHandleTextOnlyErrataWithManifestWithQEStatus() throws KojiClientException, IOException {
+    void testHandleTextOnlyErrataWithManifestWithQEStatus() throws IOException {
         String textOnlyErrataJsonString = TestResources.asString("errata/api/erratum_textonly_QE_manifest.json");
         String releaseJsonString = TestResources.asString("errata/api/erratum_textonly_QE_release.json");
         String errataBuildsJsonString = TestResources.asString("errata/api/erratum_textonly_QE_build_list.json");
@@ -220,7 +220,7 @@ class ErrataNotificationHandlerTest {
         // The notes are valid
         ValidationResult result = notesSchemaValidator.validate(errata);
         assertTrue(result.isValid());
-
+        assertTrue(errata.getNotesMapping().isPresent());
         JsonNode notes = errata.getNotesMapping().get();
         assertNotNull(notes.get("manifest"));
 
@@ -242,7 +242,7 @@ class ErrataNotificationHandlerTest {
     }
 
     @Test
-    void testHandleTextOnlyErrataWithDeliverablesWithQEStatus() throws KojiClientException, IOException {
+    void testHandleTextOnlyErrataWithDeliverablesWithQEStatus() throws IOException {
         String textOnlyErrataJsonString = TestResources.asString("errata/api/erratum_textonly_QE_deliverables.json");
         String releaseJsonString = TestResources.asString("errata/api/erratum_textonly_QE_release.json");
         String errataBuildsJsonString = TestResources.asString("errata/api/erratum_textonly_QE_build_list.json");
@@ -278,7 +278,7 @@ class ErrataNotificationHandlerTest {
         // The notes are valid
         ValidationResult result = notesSchemaValidator.validate(errata);
         assertTrue(result.isValid());
-
+        assertTrue(errata.getNotesMapping().isPresent());
         JsonNode notes = errata.getNotesMapping().get();
         assertNull(notes.get("manifest"));
         assertNotNull(notes.get("deliverables"));

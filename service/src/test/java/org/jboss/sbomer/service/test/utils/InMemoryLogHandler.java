@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 
+@Getter
 public class InMemoryLogHandler extends Handler {
-    @Getter
     final List<LogRecord> records = new ArrayList<>();
 
     @Override

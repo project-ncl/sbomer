@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -32,7 +32,7 @@ class CliIT {
     @Test
     @DisplayName("Should run the command without any options and print help")
     @Launch(exitCode = 2)
-    void shouldPrintUsageOnWrongCommand(LaunchResult result) throws Exception {
+    void shouldPrintUsageOnWrongCommand(LaunchResult result) {
         assertThat(result.getErrorOutput(), containsString("Usage: sbomerctl [-hvV] [COMMAND]"));
         assertThat(result.getErrorOutput(), containsString("  sbom, s  SBOM generation"));
     }

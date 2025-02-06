@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -18,6 +18,7 @@
 package org.jboss.sbomer.cli.test.unit.generate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +28,6 @@ import java.util.List;
 import org.jboss.sbomer.cli.feature.sbom.generate.MavenDominoGenerator;
 import org.jboss.sbomer.cli.feature.sbom.generate.ProcessRunner;
 import org.jboss.sbomer.core.errors.ValidationException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
@@ -42,7 +42,7 @@ class MavenDominoGeneratorTest {
 
     @Test
     void testFailedWhenNoDominoDirProvided(@TempDir Path projectDir) {
-        ValidationException thrown = Assertions.assertThrows(
+        ValidationException thrown = assertThrows(
                 ValidationException.class,
                 () -> MavenDominoGenerator.builder().withDominoDir(null).build().run(projectDir));
 
@@ -53,7 +53,7 @@ class MavenDominoGeneratorTest {
 
     @Test
     void testFailedWhenDominoDirDoesntExist(@TempDir Path projectDir) {
-        ValidationException thrown = Assertions.assertThrows(
+        ValidationException thrown = assertThrows(
                 ValidationException.class,
                 () -> MavenDominoGenerator.builder().withDominoDir(Path.of("some/dir")).build().run(projectDir));
 
@@ -64,7 +64,7 @@ class MavenDominoGeneratorTest {
 
     @Test
     void testFailedWhenDominoDoesntExistForDefaultVersion(@TempDir Path projectDir, @TempDir Path wrongDir) {
-        ValidationException thrown = Assertions.assertThrows(
+        ValidationException thrown = assertThrows(
                 ValidationException.class,
                 () -> MavenDominoGenerator.builder().withDominoDir(wrongDir).build().run(projectDir));
 
@@ -77,7 +77,7 @@ class MavenDominoGeneratorTest {
 
     @Test
     void testFailedWhenDominoDirDoesntExistWithCustomVersion(@TempDir Path projectDir, @TempDir Path dominoDir) {
-        ValidationException thrown = Assertions.assertThrows(
+        ValidationException thrown = assertThrows(
                 ValidationException.class,
                 () -> MavenDominoGenerator.builder()
                         .withDominoDir(dominoDir)

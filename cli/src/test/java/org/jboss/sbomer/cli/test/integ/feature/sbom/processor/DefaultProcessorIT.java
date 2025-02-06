@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.net.MalformedURLException;
 import java.util.List;
 
 import org.cyclonedx.model.Bom;
@@ -22,8 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -38,12 +35,12 @@ class DefaultProcessorIT {
     PncService pncService;
 
     @BeforeEach
-    void init() throws MalformedURLException {
+    void init() {
         this.defaultProcessor = new DefaultProcessor(pncService, Mockito.mock(KojiService.class));
     }
 
     @Test
-    void testProcessing() throws JsonProcessingException {
+    void testProcessing() {
         // Prepare BOM!
         Bom bom = new Bom();
 
