@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useGenerationRequests } from './useGenerationRequests';
@@ -78,7 +78,9 @@ export const GenerationRequestTable = () => {
               onAuxClick={() => openInNewTab('/generations/' + generation.id)}
             >
               <Td dataLabel={columnNames.id}>
-                <pre>{generation.id}</pre>
+                <Link to={'/generations/' + generation.id}>
+                  <pre>{generation.id}</pre>
+                </Link>
               </Td>
               <Td dataLabel={columnNames.status}>
                 <Tooltip

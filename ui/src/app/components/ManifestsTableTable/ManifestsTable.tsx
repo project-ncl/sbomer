@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useManifests } from './useSboms';
@@ -78,7 +78,9 @@ export const ManifestsTable = () => {
               onAuxClick={() => openInNewTab('/manifests/' + manifest.id)}
             >
               <Td dataLabel={columnNames.id}>
-                <pre>{manifest.id}</pre>
+                <Link to={'/manifests/' + manifest.id}>
+                  <pre>{manifest.id}</pre>
+                </Link>
               </Td>
               <Td dataLabel={columnNames.type}>
                 <Label style={{ cursor: 'pointer' }} color="purple">
