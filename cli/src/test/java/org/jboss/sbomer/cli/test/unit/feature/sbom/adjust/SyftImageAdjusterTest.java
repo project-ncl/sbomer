@@ -2,6 +2,7 @@ package org.jboss.sbomer.cli.test.unit.feature.sbom.adjust;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -169,6 +170,7 @@ class SyftImageAdjusterTest {
 
         this.bom = SbomUtils.fromString(TestResources.asString("boms/shaded.json"));
 
+        assertNotNull(bom);
         assertEquals(459, bom.getComponents().size());
         assertEquals(294, bom.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
@@ -282,7 +284,7 @@ class SyftImageAdjusterTest {
                 .stream()
                 .filter(property -> "sbomer:image:labels:vendor".equals(property.getName()))
                 .findFirst();
-        assertTrue(bogusVendor.isPresent());
+        assertTrue(goodVendor.isPresent());
         assertEquals("Red Hat", goodVendor.get().getValue());
 
         Optional<Component> goodComponent = adjusted.getComponents()
@@ -308,6 +310,7 @@ class SyftImageAdjusterTest {
             new PackageURL(bogusPurl);
             fail("Should fail the parsing to PURL of " + bogusPurl);
         } catch (MalformedPackageURLException e) {
+            // Expected
         }
 
         String sanitizedPurl = PurlSanitizer.sanitizePurl(bogusPurl);

@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.test.integ.rest;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
@@ -532,10 +533,10 @@ class RestResourceTest {
     /**
      * Tests UMB notification resend.
      *
-     * See {@link UmbConfigProducer} above.
+     * @see UmbConfigProducer above.
      *
-     * @param apiVersion
-     * @throws IOException
+     * @param apiVersion the API version
+     * @throws IOException if an error occurs
      */
     @ParameterizedTest
     @EnumSource(TestableApiVersion.class)
@@ -553,6 +554,7 @@ class RestResourceTest {
 
         Sbom sbom = new Sbom();
         sbom.setIdentifier("BIDBID");
+        assertNotNull(bom);
         sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
         sbom.setId("416640206274228333");
         sbom.setSbom(SbomUtils.toJsonNode(bom));

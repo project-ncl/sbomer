@@ -147,6 +147,7 @@ class DefaultProcessorTest {
 
         // With
         Bom bom = SbomUtils.fromString(TestResources.asString("boms/pnc-build.json"));
+        assertNotNull(bom);
         Optional<Component> missingComponent = getComponent(bom, "pkg:npm/once@1.4.0");
         Optional<Dependency> missingDependency = getDependency("pkg:npm/once@1.4.0", bom.getDependencies());
 
@@ -244,6 +245,7 @@ class DefaultProcessorTest {
 
         DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
 
+        assertNotNull(bom);
         assertEquals(459, bom.getComponents().size());
         assertEquals(459, bom.getDependencies().size());
 

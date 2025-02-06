@@ -61,12 +61,12 @@ class StageGenerationRequestIT extends E2EStageBase {
 
         log.info("Maven build finished, waiting for UMB message");
 
-        publishedUmbMessage(generationId, message -> {
-            message.body("headers.generation_request_id", CoreMatchers.is(generationId))
-                    .body("headers.pnc_build_id", CoreMatchers.is(MAVEN_BUILD_ID))
-                    .body("msg.build.id", CoreMatchers.is(MAVEN_BUILD_ID))
-                    .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId));
-        });
+        publishedUmbMessage(
+                generationId,
+                message -> message.body("headers.generation_request_id", CoreMatchers.is(generationId))
+                        .body("headers.pnc_build_id", CoreMatchers.is(MAVEN_BUILD_ID))
+                        .body("msg.build.id", CoreMatchers.is(MAVEN_BUILD_ID))
+                        .body("msg.sbom.generationRequest.id", CoreMatchers.is(generationId)));
 
         log.info("Maven build passed");
     }

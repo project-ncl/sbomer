@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -110,7 +110,7 @@ class S3FeatureTest {
         Path generationDir = tempDir.resolve("sbom-request-123");
 
         // Create the directory
-        generationDir.toFile().mkdirs();
+        Files.createDirectory(generationDir);
 
         // Place a file inside the dir
         Path file = generationDir.resolve("bom.json");
@@ -118,7 +118,7 @@ class S3FeatureTest {
 
         // Add some logs
         Path logsDir = generationDir.resolve("logs");
-        logsDir.toFile().mkdirs();
+        Files.createDirectory(logsDir);
 
         Path logFile = logsDir.resolve("init.log");
         Files.write(logFile, "Some log".getBytes());
@@ -154,7 +154,7 @@ class S3FeatureTest {
     }
 
     @Test
-    void testNotFoundS2LogBecuaseGenerationDoesNotExist() {
+    void testNotFoundS2LogBecauseGenerationDoesNotExist() {
         when(featureFlags.s3Storage()).thenReturn(true);
 
         RestAssured.given()

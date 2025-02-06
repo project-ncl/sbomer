@@ -29,7 +29,7 @@ class TaskRunSyftImageGenerateDependentResourceTest {
         }
 
         public TaskRunSyftImageGenerateDependentResourceAlt(Class<TaskRun> resourceType) {
-            super(TaskRun.class);
+            super(resourceType);
         }
 
         @Override
@@ -57,9 +57,7 @@ class TaskRunSyftImageGenerateDependentResourceTest {
         assertEquals(Duration.parse("6h"), desired.getSpec().getTimeout());
         assertEquals(4, desired.getSpec().getParams().size());
 
-        Param param = null;
-
-        param = desired.getSpec().getParams().get(0);
+        Param param = desired.getSpec().getParams().get(0);
         assertEquals("image", param.getName());
         assertEquals("image-name", param.getValue().getStringVal());
 

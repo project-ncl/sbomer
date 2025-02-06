@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -69,7 +69,7 @@ class InitializationPhaseGenerationRequestReconcilerTest {
     @Inject
     BuildController controller;
 
-    private GenerationRequest dummyInitializationRequest(SbomGenerationStatus status) throws IOException {
+    private GenerationRequest dummyInitializationRequest(SbomGenerationStatus status) {
         return new GenerationRequestBuilder(GenerationRequestType.BUILD).withIdentifier("AABBCC")
                 .withStatus(status)
                 .build();
@@ -101,7 +101,7 @@ class InitializationPhaseGenerationRequestReconcilerTest {
                                 .build());
     }
 
-    private void setTaskRunExitCode(TaskRun taskRun, int exitCode) throws IOException {
+    private void setTaskRunExitCode(TaskRun taskRun, int exitCode) {
         taskRun.getStatus()
                 .getSteps()
                 .add(
@@ -124,7 +124,8 @@ class InitializationPhaseGenerationRequestReconcilerTest {
         GenerationRequest request = dummyInitializationRequest(null);
 
         // We have to do this here, because by default when we create the object programmatically, we set it to NEW
-        // always. But in case someone would create such object in Kubernetes, we would not have control over it hence
+        // always. But in case someone would create such an object in Kubernetes, we would not have control over it,
+        // hence
         // we need to force the empty status.
         request.getData().put(GenerationRequest.KEY_STATUS, null);
         request.getMetadata().getLabels().remove(Labels.LABEL_STATUS);
@@ -204,7 +205,7 @@ class InitializationPhaseGenerationRequestReconcilerTest {
         assertTrue(updateControl.isUpdateResource());
         assertEquals(SbomGenerationStatus.INITIALIZED, updateControl.getResource().getStatus());
 
-        // For in-progress generation we don't set reason nor result
+        // For in-progress generation, we don't set reason nor result
         assertNull(updateControl.getResource().getReason());
         assertNull(updateControl.getResource().getResult());
         assertEquals("INITIALIZED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));

@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -35,7 +35,8 @@ public class AmqpMessageHelper {
      *
      * @param payload The body to send
      * @param headers Headers to attach to the message
-     * @see https://github.com/smallrye/smallrye-reactive-messaging/issues/2407
+     * @see <a href=
+     *      "https://github.com/smallrye/smallrye-reactive-messaging/issues/2407">https://github.com/smallrye/smallrye-reactive-messaging/issues/2407</a>
      * @return {@link Message} containing {@code payload} and {@code headers}
      */
     public static Message<String> toMessage(String payload, JsonObject headers) {

@@ -24,7 +24,6 @@ import org.hamcrest.Matchers;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -59,7 +58,6 @@ class ErrorResourcesTest {
     }
 
     @Test
-    @ValueSource(strings = { "v1alpha3", "v1beta1" })
     void testHandlingNotFoundSbom() {
         RestAssured.given()
                 .when()

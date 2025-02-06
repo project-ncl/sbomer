@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -206,7 +206,7 @@ class MavenCommandLineParserTest {
     }
 
     @Test
-    void tackleAlternativePomFileTest() throws IOException, IllegalArgumentException {
+    void tackleAlternativePomFileTest() throws IllegalArgumentException {
         String script = "mvn deploy -f productized/logic/pom.xml";
 
         MavenCommandLineParser lineParser = MavenCommandLineParser.build().launder(script);

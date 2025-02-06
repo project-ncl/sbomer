@@ -146,10 +146,10 @@ class SyftImageControllerTest {
                 boms.get(1).getMetadata().getComponent().getPurl());
     }
 
-    private void withController(Path tmpDir, BiConsumer<Path, SyftImageControllerAlt> consumer) {
+    private void withController(Path tmpDir, BiConsumer<Path, SyftImageControllerAlt> consumer) throws IOException {
 
         Path requestDir = tmpDir.resolve("sbom-request-" + GENERATION_REQUEST.getId().toLowerCase());
-        requestDir.toFile().mkdirs();
+        Files.createDirectory(requestDir);
 
         GenerationRequestControllerConfig controllerConfig = Mockito.mock(GenerationRequestControllerConfig.class);
         when(controllerConfig.sbomDir()).thenReturn(tmpDir.toString());
@@ -168,7 +168,7 @@ class SyftImageControllerTest {
     }
 
     @Test
-    void shouldReconcileNoManifestsFound(@TempDir Path tmpDir) {
+    void shouldReconcileNoManifestsFound(@TempDir Path tmpDir) throws IOException {
         withController(tmpDir, (requestDir, ctrl) -> {
             UpdateControl<GenerationRequest> updateControl = ctrl.reconcileGenerating(
                     GENERATION_REQUEST,
@@ -184,7 +184,7 @@ class SyftImageControllerTest {
     }
 
     @Test
-    void shouldReconcileOneManifest(@TempDir Path tmpDir) {
+    void shouldReconcileOneManifest(@TempDir Path tmpDir) throws IOException {
         withController(tmpDir, (requestDir, ctrl) -> {
             Path manifest1 = requestDir.resolve("bom.json");
 

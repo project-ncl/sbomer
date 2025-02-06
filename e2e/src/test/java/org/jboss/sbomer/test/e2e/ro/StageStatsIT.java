@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.test.e2e.ro;
 
-import java.io.IOException;
-
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.sbomer.test.e2e.E2EStageBase;

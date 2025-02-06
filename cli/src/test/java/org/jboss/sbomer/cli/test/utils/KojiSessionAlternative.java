@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.jboss.pnc.build.finder.koji.ClientSession;
 
-import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveQuery;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveType;

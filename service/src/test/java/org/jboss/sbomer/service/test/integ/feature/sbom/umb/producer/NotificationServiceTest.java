@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -19,12 +19,12 @@ package org.jboss.sbomer.service.test.integ.feature.sbom.umb.producer;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -78,6 +78,7 @@ class NotificationServiceTest {
 
         Sbom sbom = new Sbom();
         sbom.setIdentifier("OPID");
+        assertNotNull(bom);
         sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
         sbom.setId("416640206274228333");
         sbom.setSbom(SbomUtils.toJsonNode(bom));
@@ -97,6 +98,7 @@ class NotificationServiceTest {
 
         Sbom sbom = new Sbom();
         sbom.setIdentifier("BIDBID");
+        assertNotNull(bom);
         sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
         sbom.setId("416640206274228333");
         sbom.setSbom(SbomUtils.toJsonNode(bom));
@@ -116,6 +118,7 @@ class NotificationServiceTest {
 
         Sbom sbom = new Sbom();
         sbom.setIdentifier("SBOMIDRPM");
+        assertNotNull(bom);
         sbom.setRootPurl(bom.getMetadata().getComponent().getPurl());
         sbom.setId("416640206274228333");
         sbom.setSbom(SbomUtils.toJsonNode(bom));
@@ -199,7 +202,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    void shouldGracefullySkipNotifyForMinimalBrewRpm() throws IOException {
+    void shouldGracefullySkipNotifyForMinimalBrewRpm() {
         Sbom sbom = createMinimalRpmManifest();
         notificationService.notifyCompleted(List.of(sbom));
         verify(amqpMessageProducer, times(0)).notify(any(GenerationFinishedMessageBody.class));

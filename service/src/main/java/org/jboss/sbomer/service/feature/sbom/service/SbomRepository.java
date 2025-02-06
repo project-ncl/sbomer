@@ -65,8 +65,8 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
     /**
      * Returns list of manifests which are the output of the {@link GenerationRequest} with the provided identifier.
      *
-     * @param generationRequestId
-     * @return
+     * @param generationRequestId the generation request identifier
+     * @return the list of manifests
      */
     public List<Sbom> findSbomsByGenerationRequest(String generationRequestId) {
         return find("generationRequest.id = ?1", generationRequestId).list();
@@ -79,7 +79,7 @@ public class SbomRepository extends CriteriaAwareRepository<Sbom> {
     }
 
     /**
-     * Stores in database all provided {@link Sbom}s.
+     * Stores in all provided {@link Sbom}s in the database.
      *
      * @param sboms Manifests to store
      * @return Stored manifests

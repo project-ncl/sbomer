@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -167,7 +167,7 @@ class SBOMResourceRSQTest {
     }
 
     @Test
-    void testRSQLSearchPagination() throws Exception {
+    void testRSQLSearchPagination() {
         // One page, one result
         int pageIndex = 0;
         int pageSizeLarge = 50;
@@ -268,7 +268,7 @@ class SBOMResourceRSQTest {
     }
 
     @Test
-    void testRSQLSearchV1Alpha3() throws Exception {
+    void testRSQLSearchV1Alpha3() {
         int pageIndex = 0;
         int pageSize = 50;
 
@@ -405,7 +405,7 @@ class SBOMResourceRSQTest {
     }
 
     @Test
-    void testRSQLSearchNotNullValues() throws Exception {
+    void testRSQLSearchNotNullValues() {
         int pageIndex = 0;
         int pageSize = 50;
         Page<BaseSbomRecord> pagedSboms = initializeTwoResultsRecordPaginated(pageIndex, pageSize);
@@ -432,7 +432,7 @@ class SBOMResourceRSQTest {
     }
 
     @Test
-    void testRSQLSearchNullValues() throws Exception {
+    void testRSQLSearchNullValues() {
         int pageIndex = 0;
         int pageSize = 50;
         Page<BaseSbomRecord> pagedSboms = initializeTwoResultsRecordPaginated(pageIndex, pageSize);
@@ -477,7 +477,7 @@ class SBOMResourceRSQTest {
     }
 
     @Test
-    void testRSQLSearchAndLogicalNode() throws Exception {
+    void testRSQLSearchAndLogicalNode() {
 
         int pageIndex = 0;
         int pageSize = 50;
@@ -556,7 +556,7 @@ class SBOMResourceRSQTest {
     }
 
     @Test
-    void testRSQLSearchAndLogicalNodeWithSorting() throws Exception {
+    void testRSQLSearchAndLogicalNodeWithSorting() {
 
         int pageIndex = 0;
         int pageSize = 20;
@@ -612,7 +612,7 @@ class SBOMResourceRSQTest {
     }
 
     @Test
-    void testRSQLSearchAndLogicalNodeWithLike() throws Exception {
+    void testRSQLSearchAndLogicalNodeWithLike() {
 
         int pageIndex = 0;
         int pageSize = 50;
@@ -697,13 +697,13 @@ class SBOMResourceRSQTest {
                 .body("content.identifier", CoreMatchers.hasItem("AWI7P3EJ23NPM"));
     }
 
-    private Page<BaseSbomRecord> initializeOneResultRecordPaginated(int pageIndex, int pageSize) throws Exception {
+    private Page<BaseSbomRecord> initializeOneResultRecordPaginated(int pageIndex, int pageSize) {
         int totalHits = 1;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
         return new Page<>(pageIndex, pageSize, totalPages, totalHits, List.of(createFirstBaseSbomRecord()));
     }
 
-    private Page<BaseSbomRecord> initializeTwoResultsRecordPaginated(int pageIndex, int pageSize) throws Exception {
+    private Page<BaseSbomRecord> initializeTwoResultsRecordPaginated(int pageIndex, int pageSize) {
         int totalHits = 2;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
         return new Page<>(
@@ -714,7 +714,7 @@ class SBOMResourceRSQTest {
                 Arrays.asList(createFirstBaseSbomRecord(), createSecondBaseSbomRecord()));
     }
 
-    private Page<BaseSbomRecord> initializeTwoResultsPaginatedInverted(int pageIndex, int pageSize) throws Exception {
+    private Page<BaseSbomRecord> initializeTwoResultsPaginatedInverted(int pageIndex, int pageSize) {
         int totalHits = 2;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
         return new Page<>(
@@ -725,15 +725,10 @@ class SBOMResourceRSQTest {
                 Arrays.asList(createSecondBaseSbomRecord(), createFirstBaseSbomRecord()));
     }
 
-    private Page<BaseSbomRecord> initializeOneNPMResultRecordPaginated(int pageIndex, int pageSize) throws Exception {
+    private Page<BaseSbomRecord> initializeOneNPMResultRecordPaginated(int pageIndex, int pageSize) {
         int totalHits = 1;
         int totalPages = (int) Math.ceil((double) totalHits / (double) pageSize);
-        return new Page<BaseSbomRecord>(
-                pageIndex,
-                pageSize,
-                totalPages,
-                totalHits,
-                Arrays.asList(createFirstBaseNPMSbomRecord()));
+        return new Page<>(pageIndex, pageSize, totalPages, totalHits, List.of(createFirstBaseNPMSbomRecord()));
     }
 
     private Sbom createFirstSbom() throws Exception {
@@ -758,8 +753,8 @@ class SBOMResourceRSQTest {
         return sbom;
     }
 
-    private BaseSbomRecord createFirstBaseSbomRecord() throws Exception {
-        BaseSbomRecord sbom = new BaseSbomRecord(
+    private BaseSbomRecord createFirstBaseSbomRecord() {
+        return new BaseSbomRecord(
                 "12345",
                 "AWI7P3EJ23YAA",
                 "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
@@ -771,12 +766,10 @@ class SBOMResourceRSQTest {
                 null,
                 GenerationRequestType.BUILD,
                 Instant.now().minus(Duration.ofDays(1)));
-
-        return sbom;
     }
 
-    private BaseSbomRecord createSecondBaseSbomRecord() throws Exception {
-        BaseSbomRecord sbom = new BaseSbomRecord(
+    private BaseSbomRecord createSecondBaseSbomRecord() {
+        return new BaseSbomRecord(
                 "54321",
                 "AWI7P3EJ23YAB",
                 "pkg:maven/org.apache.logging.log4j/log4j@2.119.0.redhat-00002?type=pom",
@@ -788,12 +781,10 @@ class SBOMResourceRSQTest {
                 null,
                 GenerationRequestType.BUILD,
                 Instant.now());
-
-        return sbom;
     }
 
-    private BaseSbomRecord createFirstBaseNPMSbomRecord() throws Exception {
-        BaseSbomRecord sbom = new BaseSbomRecord(
+    private BaseSbomRecord createFirstBaseNPMSbomRecord() {
+        return new BaseSbomRecord(
                 "12345NPM",
                 "AWI7P3EJ23NPM",
                 "pkg:npm/validate-npm-package-name@5.0.1?package-id=386465f2859b2926",
@@ -805,8 +796,6 @@ class SBOMResourceRSQTest {
                 null,
                 GenerationRequestType.BUILD,
                 Instant.now().minus(Duration.ofDays(1)));
-
-        return sbom;
     }
 
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -17,9 +17,9 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.k8s.reconciler;
 
-import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -90,7 +90,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
                 .withEnvConfig(TestResources.asString("configs/env-config.yaml"))
                 .build();
 
-        // For test we need to set a stable name
+        // For test, we need to set a stable name
         generationRequest.getMetadata().setName("test-generation-request");
 
         return generationRequest;
@@ -113,7 +113,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
                 .build();
     }
 
-    private void setTaskRunExitCode(TaskRun taskRun, int exitCode) throws IOException {
+    private void setTaskRunExitCode(TaskRun taskRun, int exitCode) {
         taskRun.getStatus()
                 .getSteps()
                 .add(
@@ -196,7 +196,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
     /**
      * This tests a case where just one TaskRun failed. We don't update anything at this point.
      *
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     @Test
     void testOneFailedTaskRun() throws Exception {
@@ -221,7 +221,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
     /**
      * This tests a case where just one TaskRun succeeded. We don't update anything at this point.
      *
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     @Test
     void testOneSucceededTaskRun() throws Exception {
@@ -246,7 +246,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
     /**
      * This tests a case where the failed TaskRun does not have the exit code set at all.
      *
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     @Test
     void testAllFailedTaskRun() throws Exception {
@@ -273,7 +273,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
     /**
      * This tests a case where the TaskRun failed because of product configuration-related issues.
      *
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     @Test
     void testFailedProductConfigTaskRun() throws Exception {
@@ -299,7 +299,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
     /**
      * This tests a case where the TaskRun failed because of misconfigured product index.
      *
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     @Test
     void testFailedInvalidIndexTaskRun() throws Exception {
@@ -325,7 +325,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
     /**
      * This tests a case where the TaskRun failed because the generator failed.
      *
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     @Test
     void testFailedWhileGeneratingSbomTaskRun() throws Exception {
@@ -351,7 +351,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
     /**
      * This tests a case where the TaskRun failed because of a general error.
      *
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     @Test
     void testFailedGeneralErrorTaskRun() throws Exception {
@@ -450,7 +450,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
                 .reconcile(request, mockContext(Collections.emptySet()));
 
         assertTrue(updateControl.isNoUpdate());
-        // there is no proper way to reset the last request at the beginning of the method
+        // there is no proper way to reset the last request at the beginning of the method,
         // so let's just compare it's the same as before and no requests have been executed.
         assertSame(lastRequestPriorToExecution, mockServer.getLastRequest());
         assertTrue(Files.exists(tempDir));

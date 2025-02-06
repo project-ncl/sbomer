@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -54,9 +54,9 @@ class S3StorageHandlerTest {
         when(featureFlags.s3Storage()).thenReturn(true);
         when(controllerConfig.sbomDir()).thenReturn("/tmp/blah");
 
-        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
-            storageHandler.storeFiles(mock(GenerationRequest.class));
-        });
+        ApplicationException ex = assertThrows(
+                ApplicationException.class,
+                () -> storageHandler.storeFiles(mock(GenerationRequest.class)));
 
         assertEquals(
                 "S3 client cannot be instantiated, following env variables are missing: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_REGION, BUCKET_NAME]",

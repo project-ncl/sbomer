@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -59,7 +59,7 @@ class RedHatProductProcessCommandIT {
         assertEquals(ProcessorType.REDHAT_PRODUCT, command.getImplementationType());
     }
 
-    // TODO: This deosn't make sense after refactoring, but maybe it could be a base for some other test, leaving for
+    // TODO: This doesn't make sense after refactoring, but maybe it could be a base for some other test, leaving for
     // now
     // @Test
     // void shouldStopProcessingIfTheBuildIsNotFound() throws Exception {
