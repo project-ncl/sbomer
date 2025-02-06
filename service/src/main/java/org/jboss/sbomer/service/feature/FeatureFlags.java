@@ -226,21 +226,17 @@ public class FeatureFlags implements UnleashSubscriber {
      * Returns {@code true} if we should send a UMB message for a successfully generated manifest where the generation
      * request source is of a given type.
      *
-     * @return {@code true} if the message should be send, {@code false} otherwise
+     * @return {@code true} if the message should be sent, {@code false} otherwise
      */
     public boolean shouldNotify(GenerationRequestType type) {
-        switch (type) {
-            case BUILD:
-                return unleash.isEnabled(TOGGLE_NOTIFY_BUILD, false);
-            case CONTAINERIMAGE:
-                return unleash.isEnabled(TOGGLE_NOTIFY_CONTAINERIMAGE, notifyContainerImage);
-            case OPERATION:
-                return unleash.isEnabled(TOGGLE_NOTIFY_OPERATION, false);
-            case ANALYSIS:
-                return unleash.isEnabled(TOGGLE_NOTIFY_ANALYSIS, false);
-        }
+        return switch (type) {
+            case BUILD -> unleash.isEnabled(TOGGLE_NOTIFY_BUILD, false);
+            case CONTAINERIMAGE -> unleash.isEnabled(TOGGLE_NOTIFY_CONTAINERIMAGE, notifyContainerImage);
+            case OPERATION -> unleash.isEnabled(TOGGLE_NOTIFY_OPERATION, false);
+            case ANALYSIS -> unleash.isEnabled(TOGGLE_NOTIFY_ANALYSIS, false);
+            default -> false;
+        };
 
-        return false;
     }
 
     private void updateToggles(final FeatureToggleResponse toggleResponse) {
@@ -262,6 +258,7 @@ public class FeatureFlags implements UnleashSubscriber {
                 TOGGLE_TEXTONLY_ERRATA_RELEASE_MANIFEST_GENERATION)) {
             FeatureToggle toggle = toggleResponse.getToggleCollection().getToggle(toggleName);
 
+            // FIXME: toggle != null is always 'true'
             if (toggle != null) {
                 Boolean previousValue = toggleValues.put(toggleName, toggle.isEnabled());
 
@@ -288,15 +285,12 @@ public class FeatureFlags implements UnleashSubscriber {
     @Override
     public void togglesFetched(FeatureToggleResponse toggleResponse) {
         switch (toggleResponse.getStatus()) {
-            case CHANGED:
-                log.debug("Feature flags change detected, procesing...");
+            case CHANGED -> {
+                log.debug("Feature flags change detected, processing...");
                 updateToggles(toggleResponse);
-                break;
-            case NOT_CHANGED:
-                log.trace("No changes detected to feature flags");
-                break;
-            default:
-                break;
+            }
+            case NOT_CHANGED -> log.trace("No changes detected to feature flags");
+            default -> log.warn("Unknown status: {}", toggleResponse.getStatus());
         }
     }
 }

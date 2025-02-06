@@ -215,7 +215,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * </p>
      *
      * <p>
-     * At the same time it cleans up the main compontn available in the {@link Metadata#getComponent()}.
+     * At the same time it cleans up the main component available in the {@link Metadata#getComponent()}.
      * </p>
      *
      * @param bom
@@ -293,11 +293,11 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      *
      * <p>
      * Adjusts any values in the main component as well as for each component found in the component list (recursively).
-     * See {@link SyftImageAdjuster#adjustPublisher(List)}.
+     * See {@link SyftImageAdjuster#adjustPublisher(Bom)}.
      * </p>
      *
      * @param bom The manifest to adjust the properties of.
-     * @see SyftImageAdjuster#adjustPublisher(List)
+     * @see SyftImageAdjuster#adjustPublisher(Bom)
      */
     private void adjustPublisher(Bom bom) {
         log.info("Adjusting manifest publisher...");
@@ -331,12 +331,12 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * Based on the metadata we got the output of Skopeo ({@code skopeo.json} file), adjust main component's purl and
      * name.
      *
-     * @param component
+     * @param bom
      * @param workDir
      */
     private void adjustNameAndPurl(Bom bom, Path workDir) {
-        String tag = null;
-        ContainerImageInspectOutput inspectData = null;
+        String tag;
+        ContainerImageInspectOutput inspectData;
         final Component mainComponent = bom.getMetadata().getComponent();
 
         try {
@@ -378,6 +378,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
             }
         }
 
+        // FIXME: This can be null here
         String[] nameParts = name.split(("/"));
 
         TreeMap<String, String> qualifiers = new TreeMap<>();
@@ -493,12 +494,12 @@ public class SyftImageAdjuster extends AbstractAdjuster {
             boolean supportedProp = ALLOWED_PROPERTY_PREFIXES.stream()
                     .anyMatch(prefix -> prop.getName().startsWith(prefix));
 
-            if (!supportedProp) {
-                // log.debug(
-                // "Property '{}' with value '{}' is not on the supported properties list, removing...",
-                // prop.getName(),
-                // prop.getValue());
-            }
+            // if (!supportedProp) {
+            // log.debug(
+            // "Property '{}' with value '{}' is not on the supported properties list, removing...",
+            // prop.getName(),
+            // prop.getValue());
+            // }
 
             return !supportedProp;
         });
@@ -580,16 +581,15 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // If we removed any qualifiers, we need to rebuild the purl
         if (qualifiers.entrySet().removeIf(q -> !q.getKey().equals("arch") && !q.getKey().equals("epoch"))) {
-            String updatedPurl = new PackageURL(
+
+            // log.debug("Updating purl to: '{}'", updatedPurl);
+            return new PackageURL(
                     packageURL.getType(),
                     packageURL.getNamespace(),
                     packageURL.getName(),
                     packageURL.getVersion(),
                     qualifiers,
                     packageURL.getSubpath()).canonicalize();
-
-            // log.debug("Updating purl to: '{}'", updatedPurl);
-            return updatedPurl;
         }
         return packageURL.toString();
     }

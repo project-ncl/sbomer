@@ -71,9 +71,9 @@ public class CustomPredicateBuilder<T> {
 
         switch (logical.getOperator()) {
             case AND:
-                return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+                return builder.and(predicates.toArray(new Predicate[0]));
             case OR:
-                return builder.or(predicates.toArray(new Predicate[predicates.size()]));
+                return builder.or(predicates.toArray(new Predicate[0]));
         }
 
         throw new IllegalArgumentException("Unknown operator: " + logical.getOperator());

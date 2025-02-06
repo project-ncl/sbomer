@@ -17,12 +17,14 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
+import lombok.Getter;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 
 import io.fabric8.kubernetes.api.model.ConfigMapFluent;
 
+@Getter
 @SuppressWarnings(value = "unchecked")
 public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> extends ConfigMapFluent<A> {
 
@@ -40,17 +42,9 @@ public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> exten
         return (A) this;
     }
 
-    public GenerationRequestType getType() {
-        return type;
-    }
-
     public A withIdentifier(String identifier) {
         this.identifier = identifier;
         return (A) this;
-    }
-
-    public String getIdentifier() {
-        return identifier;
     }
 
     public A withId(String id) {
@@ -58,17 +52,9 @@ public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> exten
         return (A) this;
     }
 
-    public String getId() {
-        return id;
-    }
-
     public A withStatus(SbomGenerationStatus status) {
         this.status = status;
         return (A) this;
-    }
-
-    public SbomGenerationStatus getStatus() {
-        return status;
     }
 
     public A withReason(String reason) {
@@ -76,17 +62,9 @@ public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> exten
         return (A) this;
     }
 
-    public String getReason() {
-        return reason;
-    }
-
     public A withEnvConfig(String envConfig) {
         this.envConfig = envConfig;
         return (A) this;
-    }
-
-    public String getEnvConfig() {
-        return envConfig;
     }
 
     public A withConfig(String config) {
@@ -104,16 +82,9 @@ public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> exten
         return (A) this;
     }
 
-    public String getConfig() {
-        return config;
-    }
-
     public A withResult(GenerationResult result) {
         this.result = result;
         return (A) this;
     }
 
-    public GenerationResult getResult() {
-        return result;
-    }
 }

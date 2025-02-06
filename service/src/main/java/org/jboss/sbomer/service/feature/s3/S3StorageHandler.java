@@ -158,7 +158,7 @@ public class S3StorageHandler {
 
         if (!generationRequest.getStatus().isFinal()) {
             throw new ServiceUnavailableException(
-                    "Log files cannot be returned, because the GenerationRequest '{}' did not finsh yet",
+                    "Log files cannot be returned, because the GenerationRequest '{}' did not finish yet",
                     generationRequestId);
         }
 
@@ -172,7 +172,7 @@ public class S3StorageHandler {
      * @return
      */
     public String getLog(String generationRequestId, String path) {
-        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId);
+        SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId); // NOSONAR
 
         if (generationRequest == null) {
             throw new NotFoundException("GenerationRequest with id '{}' could not be found", generationRequestId);
@@ -180,7 +180,7 @@ public class S3StorageHandler {
 
         if (!generationRequest.getStatus().isFinal()) {
             throw new ServiceUnavailableException(
-                    "Log files cannot be returned, because the GenerationRequest '{}' did not finsh yet",
+                    "Log files cannot be returned, because the GenerationRequest '{}' did not finish yet",
                     generationRequestId);
         }
 

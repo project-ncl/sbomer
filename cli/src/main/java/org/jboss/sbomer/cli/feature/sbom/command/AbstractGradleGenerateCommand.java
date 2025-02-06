@@ -23,9 +23,9 @@ import lombok.Getter;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
+@Getter
 public abstract class AbstractGradleGenerateCommand extends AbstractGenerateCommand {
 
-    @Getter
     @Option(
             names = { "--init-script" },
             description = "Path to Gradle init script file that should be used for this run instead of the default one",

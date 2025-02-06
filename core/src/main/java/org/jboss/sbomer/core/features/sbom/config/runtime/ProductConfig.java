@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -55,8 +54,8 @@ public class ProductConfig {
     @JsonIgnore
     public boolean hasDefaultProcessor() {
         return Optional.ofNullable(processors)
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
+                .stream()
+                .flatMap(Collection::stream)
                 .anyMatch(DefaultProcessorConfig.class::isInstance);
     }
 

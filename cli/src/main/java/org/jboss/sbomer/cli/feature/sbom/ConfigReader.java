@@ -63,11 +63,11 @@ public class ConfigReader {
     final ObjectMapper jsonObjectMapper = ObjectMapperProvider.json();
 
     /**
-     * Retreives the content of the SBOMer config file from a Gerrit server.
+     * Retrieves the content of the SBOMer config file from a Gerrit server.
      *
-     * @param scmUrl
-     * @param scmTag
-     * @return
+     * @param scmUrl the SCM URL
+     * @param scmTag the SCM tag
+     * @return the base64 decoded content of the config file
      */
     private byte[] getGerritConfigContent(String scmUrl, String scmTag) {
         log.debug("Using Gerrit config provider");
@@ -104,11 +104,11 @@ public class ConfigReader {
     }
 
     /**
-     * Retreives the content of the SBOMer config file from a GitLab server.
+     * Retrieves the content of the SBOMer config file from a GitLab server.
      *
-     * @param scmUrl
-     * @param scmTag
-     * @return
+     * @param scmUrl the SCM URL
+     * @param scmTag the SCM tag
+     * @return the content of the SBOMer config file
      */
     private byte[] getGitLabConfigContent(String scmUrl, String scmTag) {
         log.debug("Using GitLab config provider");

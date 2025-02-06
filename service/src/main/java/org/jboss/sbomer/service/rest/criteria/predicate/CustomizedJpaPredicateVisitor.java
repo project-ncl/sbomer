@@ -30,9 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CustomizedJpaPredicateVisitor<T> extends AbstractJpaVisitor<Predicate, T> {
-    private From root;
+    private From<?, ?> root;
 
-    public CustomizedJpaPredicateVisitor<T> withRoot(From root) {
+    public CustomizedJpaPredicateVisitor<T> withRoot(From<?, ?> root) {
         this.root = root;
         return this;
     }

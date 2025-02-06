@@ -107,7 +107,7 @@ public class StatsService {
                     .build();
         }
 
-        Stats stats = Stats.builder()
+        return Stats.builder()
                 .withVersion(
                         ConfigProvider.getConfig()
                                 .getOptionalValue("quarkus.application.version", String.class)
@@ -135,7 +135,5 @@ public class StatsService {
                                                 .orElse("dev"))
                                 .build())
                 .build();
-
-        return stats;
     }
 }

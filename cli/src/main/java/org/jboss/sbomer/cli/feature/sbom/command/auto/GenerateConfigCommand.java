@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.ProductVersionRef;
@@ -194,7 +193,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
         if (configs.isEmpty()) {
             log.debug(
                     "No configuration found for product versions: {}",
-                    productVersions.stream().map(ProductVersionRef::getId).collect(Collectors.toList()));
+                    productVersions.stream().map(ProductVersionRef::getId).toList());
             return null;
         }
 
@@ -269,16 +268,12 @@ public class GenerateConfigCommand implements Callable<Integer> {
             return null;
         }
 
-        switch (buildType) {
-            case GRADLE:
-                return GeneratorType.GRADLE_CYCLONEDX;
-            case MVN:
-                return GeneratorType.MAVEN_CYCLONEDX;
-            case NPM:
-                return GeneratorType.NODEJS_CYCLONEDX;
-            default:
-                return null;
-        }
+        return switch (buildType) {
+            case GRADLE -> GeneratorType.GRADLE_CYCLONEDX;
+            case MVN -> GeneratorType.MAVEN_CYCLONEDX;
+            case NPM -> GeneratorType.NODEJS_CYCLONEDX;
+            default -> null;
+        };
     }
 
     /**

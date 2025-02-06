@@ -24,7 +24,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -60,14 +59,14 @@ public class BuildFinderConfigProvider {
             "so",
             "war",
             "xml");
-    private static final List<String> DEFAULT_ARCHIVE_TYPES = Collections
-            .unmodifiableList(List.of("jar", "xml", "pom", "so", "dll", "dylib"));
-    private static final List<Pattern> DEFAULT_EXCLUDES = Collections
-            .unmodifiableList(List.of(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$"))); // NOSONAR This is OK
-    private static final Set<ChecksumType> DEFAULT_CHECKSUM_TYPES = Collections
-            .unmodifiableSet(Set.of(ChecksumType.sha1, ChecksumType.sha256, ChecksumType.md5));
-    private static final List<BuildSystem> DEFAULT_BUILD_SYSTEMS = Collections
-            .unmodifiableList(List.of(BuildSystem.koji));
+    private static final List<String> DEFAULT_ARCHIVE_TYPES = List.of("jar", "xml", "pom", "so", "dll", "dylib");
+    private static final List<Pattern> DEFAULT_EXCLUDES = List.of(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$")); // NOSONAR
+                                                                                                                      // This
+                                                                                                                      // is
+                                                                                                                      // OK
+    private static final Set<ChecksumType> DEFAULT_CHECKSUM_TYPES = Set
+            .of(ChecksumType.sha1, ChecksumType.sha256, ChecksumType.md5);
+    private static final List<BuildSystem> DEFAULT_BUILD_SYSTEMS = List.of(BuildSystem.koji);
     private static final Integer DEFAULT_KOJI_MULTICALL_SIZE = 4;
     private static final Integer DEFAULT_KOJI_NUM_THREADS = 4;
 
@@ -120,9 +119,9 @@ public class BuildFinderConfigProvider {
     }
 
     /**
-     * Ensures that the content of temporary directory is removed after we shutdown the application.
+     * Ensures that the content of temporary directory is removed after we shut down the application.
      *
-     * @param event
+     * @param event the shutdown event
      */
     void cleanup(@Observes ShutdownEvent event) {
         FileUtils.rmdir(Path.of(config.getOutputDirectory()));
@@ -133,8 +132,7 @@ public class BuildFinderConfigProvider {
      * application.properties.
      *
      * @param config config file to potentially override its kojiHubUrl
-     *
-     * @throws IOException if we can't parse the value as an URL
+     * @throws IOException if we can't parse the value as a URL
      */
     private void setKojiHubURL(BuildConfig config) throws IOException {
         // Fetch the KojiHubURL from the configuration
@@ -165,7 +163,7 @@ public class BuildFinderConfigProvider {
      *
      * @param config config file to potentially override its kojiWebUrl
      *
-     * @throws IOException if we can't parse the value as an URL
+     * @throws IOException if we can't parse the value as a URL
      */
     private void setKojiWebURL(BuildConfig config) throws IOException {
         // Retrieve the KojiWebURL from the configuration or construct it based on KojiHubURL if necessary

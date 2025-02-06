@@ -152,7 +152,7 @@ public abstract class AbstractCriteriaAwareRepository<T> implements PanacheRepos
         Node sortRootNode = sortParser.parse(compliantSort);
         Collection<Order> orders = sortVisitor.accept(sortRootNode, entityManagerAdapter);
 
-        return query.orderBy(orders.toArray(new Order[orders.size()]));
+        return query.orderBy(orders.toArray(new Order[0]));
     }
 
 }

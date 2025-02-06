@@ -37,7 +37,7 @@ public class FileUtils {
     public static final String MANIFEST_FILENAME = "bom.json";
 
     private FileUtils() {
-        // this is a utlity class
+        // this is a utility class
     }
 
     public static void rmdir(Path dir) {

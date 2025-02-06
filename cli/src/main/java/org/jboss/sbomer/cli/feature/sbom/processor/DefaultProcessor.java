@@ -33,6 +33,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.updatePurl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.github.packageurl.MalformedPackageURLException;
@@ -74,7 +75,7 @@ public class DefaultProcessor implements Processor {
     /**
      * Performs processing for a given {@link Component}.
      *
-     * @param component
+     * @param component the component to process
      */
     protected void processComponent(Bom bom, Component component) {
         log.debug("Processing '{}'...", component.getPurl());
@@ -197,6 +198,7 @@ public class DefaultProcessor implements Processor {
         }
     }
 
+    // FIXME: 'Optional<String>' used as type for parameter 'sha256'
     private boolean hasAnyHash(Optional<String> sha256, Optional<String> sha1, Optional<String> md5) {
         return (sha256.orElse(null) != null || sha1.orElse(null) != null || md5.orElse(null) != null);
     }
@@ -228,35 +230,25 @@ public class DefaultProcessor implements Processor {
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             Component component = bom.getMetadata().getComponent();
 
-            switch (component.getType()) {
-                case CONTAINER:
-                    // no-op
-                    // For container images there is nothing to do for the metadata component,
-                    // all modifications are done in the main component.
-                    break;
-
-                default:
-                    processComponent(bom, component);
-                    break;
+            // For container images there is nothing to do for the metadata component,
+            // all modifications are done in the main component.
+            if (Objects.requireNonNull(component.getType()) != Component.Type.CONTAINER) {
+                processComponent(bom, component);
             }
         }
 
         if (bom.getComponents() != null) {
             for (Component c : bom.getComponents()) {
 
-                switch (c.getType()) {
-                    case CONTAINER:
-                        processContainerImageComponent(c);
-                        break;
-
-                    default:
-                        PackageURL purl = getPackageURL(c);
-                        if ("rpm".equals(purl.getType())) {
-                            processRpmComponent(c, purl);
-                        } else {
-                            processComponent(bom, c);
-                        }
-                        break;
+                if (Objects.requireNonNull(c.getType()) == Component.Type.CONTAINER) {
+                    processContainerImageComponent(c);
+                } else {
+                    PackageURL purl = getPackageURL(c);
+                    if ("rpm".equals(purl.getType())) {
+                        processRpmComponent(c, purl);
+                    } else {
+                        processComponent(bom, c);
+                    }
                 }
             }
         }

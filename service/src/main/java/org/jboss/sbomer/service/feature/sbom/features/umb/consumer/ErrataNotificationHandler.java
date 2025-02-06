@@ -44,20 +44,18 @@ import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+@Setter
 @ApplicationScoped
 @Slf4j
 public class ErrataNotificationHandler {
 
     @Inject
-    @Setter
     AdvisoryService advisoryService;
 
     @Inject
-    @Setter
     FeatureFlags featureFlags;
 
     @Inject
-    @Setter
     RequestEventRepository requestEventRepository;
 
     public void handle(RequestEvent requestEvent) throws IOException {

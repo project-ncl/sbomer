@@ -21,6 +21,7 @@ import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractC
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -314,7 +315,7 @@ public class BuildController extends AbstractController {
         // Get list of failed TaskRuns
         List<TaskRun> failedTaskRuns = generateTaskRuns.stream()
                 .filter(tr -> !isSuccessful(tr))
-                .sorted((tr1, tr2) -> tr1.getMetadata().getName().compareTo(tr2.getMetadata().getName()))
+                .sorted(Comparator.comparing(tr -> tr.getMetadata().getName()))
                 .toList();
 
         List<Sbom> sboms = null;

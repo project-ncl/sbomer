@@ -153,7 +153,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
         // If the request is null (e.g. sync called from the controllers) do not override it
         if (request != null) {
-            RequestEvent dbRequestEvent = RequestEvent.findById(request.getId());
+            RequestEvent dbRequestEvent = RequestEvent.findById(request.getId()); // NOSONAR
             if (dbRequestEvent == null) {
                 dbRequestEvent = request.save();
             }
@@ -182,9 +182,9 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         }
 
         Object[] results = countSbomGenerationRequestsOf(sbomGenerationRequest.getRequest());
-        Long generationsInProgress = results[0] == null ? 0L : ((Number) results[0]).longValue();
-        Long generationsFailed = results[1] == null ? 0L : ((Number) results[1]).longValue();
-        Long generationsTotal = results[2] == null ? 0L : ((Number) results[2]).longValue();
+        long generationsInProgress = results[0] == null ? 0L : ((Number) results[0]).longValue();
+        long generationsFailed = results[1] == null ? 0L : ((Number) results[1]).longValue();
+        long generationsTotal = results[2] == null ? 0L : ((Number) results[2]).longValue();
 
         // If this is not a final status update, mark the request as in progress
         if (!sbomGenerationRequest.getStatus().isFinal()) {
@@ -209,9 +209,9 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
         if (generationsFailed > 0 || SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus())) {
             // There are no more generations in progress and some failed
-            Long failed = generationsFailed
+            long failed = generationsFailed
                     + (SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus()) ? 1L : 0L);
-            failed = (failed > generationsTotal) ? generationsTotal : failed;
+            failed = Math.min(failed, generationsTotal);
             sbomGenerationRequest.getRequest().setReason(failed + "/" + generationsTotal + " failed");
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.FAILED);
 

@@ -148,7 +148,7 @@ public class SyftImageController extends AbstractController {
 
         log.debug("Reading manifests from '{}'...", generationDir.toAbsolutePath());
 
-        List<Path> manifestPaths = null;
+        List<Path> manifestPaths;
 
         try {
             manifestPaths = FileUtils.findManifests(generationDir);
@@ -172,7 +172,7 @@ public class SyftImageController extends AbstractController {
                     "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.");
         }
 
-        List<Bom> boms = null;
+        List<Bom> boms;
 
         try {
             boms = readManifests(manifestPaths);
@@ -186,7 +186,7 @@ public class SyftImageController extends AbstractController {
                     "Generation succeded, but reading generated manifests failed was not successful. See logs for more information.");
         }
 
-        List<Sbom> sboms = null;
+        List<Sbom> sboms;
 
         try {
             sboms = storeBoms(generationRequest, boms);

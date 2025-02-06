@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import lombok.Getter;
 
+@Getter
 public enum GenerationResult {
     SUCCESS(0),
     ERR_GENERAL(1),
@@ -33,7 +34,6 @@ public enum GenerationResult {
     ERR_SYSTEM(99),
     ERR_MULTI(100);
 
-    @Getter
     final int code;
 
     GenerationResult(int code) {

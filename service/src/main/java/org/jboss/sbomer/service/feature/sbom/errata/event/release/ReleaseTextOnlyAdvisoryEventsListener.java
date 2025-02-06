@@ -67,32 +67,28 @@ import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+@Setter
 @ApplicationScoped
 @Slf4j
 public class ReleaseTextOnlyAdvisoryEventsListener {
 
-    // Set the long transaction imeout to 10 mins
+    // Set the long transaction timeout to 10 minutes
     private static final int INCREASED_TIMEOUT_SEC = 600;
 
     @Inject
     @RestClient
-    @Setter
     ErrataClient errataClient;
 
     @Inject
-    @Setter
     SbomService sbomService;
 
     @Inject
-    @Setter
     StatsService statsService;
 
     @Inject
-    @Setter
     SbomGenerationRequestRepository generationRequestRepository;
 
     @Inject
-    @Setter
     RequestEventRepository requestEventRepository;
 
     public void onReleaseAdvisoryEvent(@ObservesAsync TextOnlyAdvisoryReleaseEvent event) {
@@ -103,11 +99,12 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
             ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
             Errata erratum = errataClient.getErratum(config.getAdvisoryId());
             String toolVersion = statsService.getStats().getVersion();
+            // FIXME: 'Optional.get()' without 'isPresent()' check
             Component.Type productType = AdvisoryEventUtils
                     .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
-
+            // FIXME:'Optional.get()' without 'isPresent()' check
             JsonNode notes = erratum.getNotesMapping().get();
-            List<String> manifestsPurls = null;
+            List<String> manifestsPurls;
 
             if (notes.has("manifest")) {
                 log.debug(
@@ -115,7 +112,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
                         erratum.getDetails().get().getFulladvisory(),
                         erratum.getDetails().get().getId());
 
-                // If the notes contains a "manifest" field, search the successful generations for all the purls listed
+                // If the notes contain a "manifest" field, search the successful generations for all the purls listed
                 // (there are no generations associated to the requestevent because no generations were triggered)
                 manifestsPurls = AdvisoryEventUtils.extractPurlUrisFromManifestNode(notes);
             } else {
@@ -124,7 +121,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
                         erratum.getDetails().get().getFulladvisory(),
                         erratum.getDetails().get().getId());
 
-                // If the notes contains a "deliverables" field, search the latest successful generations triggered by
+                // If the notes contain a "deliverables" field, search the latest successful generations triggered by
                 // the request event
                 V1Beta1RequestRecord advisoryManifestsRecord = sbomService
                         .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
@@ -197,7 +194,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
             Map<String, SbomGenerationRequest> releaseGenerations,
             String toolVersion,
             Component.Type productType) {
-
+        // FIXME: 'Optional.get()' without 'isPresent()' check
         String productName = erratum.getDetails().get().getProduct().getName();
         String productVersion = erratum.getContent().getContent().getProductVersionText();
 
@@ -243,13 +240,15 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
     }
 
     private Bom createProductVersionBom(Component.Type productType, Errata erratum, String toolVersion) {
-
+        // FIXME: 'Optional.get()' without 'isPresent()' check
         String productName = erratum.getDetails().get().getProduct().getName();
         String productVersion = erratum.getContent().getContent().getProductVersionText();
         String cpe = erratum.getContent().getContent().getTextOnlyCpe();
 
         // Create the release manifest for this ProductVersion
         Bom bom = SbomUtils.createBom();
+        // FIXME: This method can return null
+        Objects.requireNonNull(bom);
         Metadata metadata = createMetadata(
                 productName,
                 productVersion,
@@ -268,9 +267,9 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
     protected Component createRootComponentForSbom(Sbom sbom) {
 
         Bom manifestBom = SbomUtils.fromJsonNode(sbom.getSbom());
-        Component manifestMainComponent = null;
+        Component manifestMainComponent;
         Component metadataComponent = manifestBom.getMetadata().getComponent();
-        // If the are no components or the manifest is a ZIP manifest, get the main component from the metadata
+        // If there are no components or the manifest is a ZIP manifest, get the main component from the metadata
         if (manifestBom.getComponents() == null || manifestBom.getComponents().isEmpty()
                 || SbomUtils.hasProperty(metadataComponent, "deliverable-url")) {
             manifestMainComponent = metadataComponent;
@@ -402,6 +401,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
 
         ObjectNode releaseMetadata = ObjectMapperProvider.json().createObjectNode();
         releaseMetadata.put(REQUEST_ID, requestEventId);
+        // FIXME: 'Optional.get()' without 'isPresent()' check
         releaseMetadata.put(ERRATA, erratum.getDetails().get().getFulladvisory());
         releaseMetadata.put(ERRATA_ID, erratum.getDetails().get().getId());
         if (erratum.getDetails().get().getActualShipDate() != null) {

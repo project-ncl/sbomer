@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
@@ -108,8 +107,7 @@ public class PncService {
     /**
      * Setup basic configuration to be able to talk to PNC.
      *
-     *
-     * @return
+     * @return the configuration
      */
     public Configuration getConfiguration() {
 
@@ -330,7 +328,7 @@ public class PncService {
         // It looks that there are no group configs, nothing to do then!
         if (groupConfigs == null || groupConfigs.isEmpty()) {
             log.warn(
-                    "BuildConfig does not have any Group COnfiguration, unable to proceed without product version, interrupting processing");
+                    "BuildConfig does not have any Group Configuration, unable to proceed without product version, interrupting processing");
             return Collections.emptyList();
         }
 
@@ -355,6 +353,7 @@ public class PncService {
         return productVersions;
     }
 
+    // FIXME: 'Optional<String>' used as a type parameter
     public Artifact getArtifact(String purl, Optional<String> sha256, Optional<String> sha1, Optional<String> md5) {
         if (purl == null && sha256.orElse(null) == null && sha1.orElse(null) == null && md5.orElse(null) == null) {
             log.debug("No meaningful values provided for searching an artifact, returning nothing");
@@ -380,13 +379,6 @@ public class PncService {
         sha1.ifPresent(s -> query.add("sha1==" + s));
 
         md5.ifPresent(s -> query.add("md5==" + s));
-
-        // If query was not provided and no hashes are provided either
-        if (query.isEmpty()) {
-            log.debug("No query provided and not hashes available either, impossible to query for artifact");
-
-            return null;
-        }
 
         String rsql = String.join(",", query);
 
@@ -420,13 +412,14 @@ public class PncService {
         }
         // If no artifact has a build, return the newest one
         log.debug("Found {} results, returning newest one", remoteArtifacts.size());
+        // FIXME: 'Optional.get()' without 'isPresent()' check
         return allArtifacts.stream().skip(allArtifacts.size() - 1L).findFirst().get();
     }
 
     /**
      * Fetch all the {@link AnalyzedArtifact} which have been analyzed in a {@link DeliverableAnalyzerReport} .
      *
-     * @param reportId
+     * @param reportId the report identifier
      * @return The {@link AnalyzedArtifact}s
      */
     public List<AnalyzedArtifact> getAllAnalyzedArtifacts(String reportId) {
@@ -435,7 +428,7 @@ public class PncService {
         try {
             RemoteCollection<AnalyzedArtifact> analyzedArtifact = deliverableAnalyzerReportClient
                     .getAnalyzedArtifacts(reportId);
-            return analyzedArtifact.getAll().stream().collect(Collectors.toList());
+            return new ArrayList<>(analyzedArtifact.getAll());
         } catch (RemoteResourceNotFoundException ex) {
             throw new ApplicationException(
                     "Analyzed Artifacts for the DeliverableAnalyzerReport '{}' were not found in PNC",

@@ -65,7 +65,7 @@ public abstract class AbstractGenerateOperationCommand implements Callable<Integ
     protected abstract GeneratorType generatorType();
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         // Make sure there is no context
         MDCUtils.removeContext();
 

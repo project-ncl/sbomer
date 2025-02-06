@@ -114,23 +114,15 @@ public interface ErrataClient {
     static RuntimeException toException(Response response) {
         String message = response.readEntity(String.class);
 
-        switch (response.getStatus()) {
-            case 400:
-                return new ClientException("Bad request", List.of(message));
-            case 401:
-                return new UnauthorizedException(
-                        "Caller is unauthorized to access resource; {}",
-                        message,
-                        List.of(message));
-            case 403:
-                return new ForbiddenException("Caller is forbidden to access resource; {}", message, List.of(message));
-            case 404:
-                return new NotFoundException("Requested resource was not found; {}", message, List.of(message));
-            default:
-                break;
-        }
+        return switch (response.getStatus()) {
+            case 400 -> new ClientException("Bad request", List.of(message));
+            case 401 ->
+                new UnauthorizedException("Caller is unauthorized to access resource; {}", message, List.of(message));
+            case 403 -> new ForbiddenException("Caller is forbidden to access resource; {}", message, List.of(message));
+            case 404 -> new NotFoundException("Requested resource was not found; {}", message, List.of(message));
+            default -> null;
+        };
 
-        return null;
     }
 
     default Collection<ErrataVariant.VariantData> getVariantOfProductAndProductVersion(
@@ -155,8 +147,7 @@ public interface ErrataClient {
             Set<String> variantNames,
             String shortProductName) {
         Map<String, Collection<ErrataCDNRepoNormalized>> variantToCDNs = new HashMap<>();
-        variantNames.stream()
-                .forEach(variant -> variantToCDNs.put(variant, getCDNReposOfVariant(variant, shortProductName)));
+        variantNames.forEach(variant -> variantToCDNs.put(variant, getCDNReposOfVariant(variant, shortProductName)));
         return variantToCDNs;
     }
 
@@ -183,8 +174,8 @@ public interface ErrataClient {
         ErrataQueryParameters parameters = ErrataQueryParameters.builder().withFilters(filters).build();
 
         Collection<T> entities = new ArrayList<>();
-        int currentPage = 1;
-        int totalPages = 1;
+        int currentPage;
+        int totalPages;
 
         do {
             ErrataPage<T> response = getPageFunction.apply(parameters);

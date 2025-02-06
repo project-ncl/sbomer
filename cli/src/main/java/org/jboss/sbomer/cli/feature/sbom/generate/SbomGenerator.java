@@ -28,7 +28,7 @@ public interface SbomGenerator {
     /**
      * Generates the SBOM for a project located at the given {@link Path}.
      *
-     * @param dir The directory containing the source code to generate the SBOM for.
+     * @param workDir The directory containing the source code to generate the SBOM for.
      * @return The {@link Path} to the generated SBOM.
      */
     Path run(Path workDir, String... generatorArgs);

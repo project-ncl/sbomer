@@ -34,7 +34,7 @@ public class WebApplicationExceptionMapper extends AbstractExceptionMapper<WebAp
 
     @Override
     Response hook(ResponseBuilder responseBuilder, WebApplicationException ex) {
-        log.warn("Web application error occured, unable to process request", ex);
+        log.warn("Web application error occurred, unable to process request", ex);
         return responseBuilder.build();
     }
 

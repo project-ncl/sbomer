@@ -34,15 +34,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
 
-    List<String> errors = Collections.emptyList();
-
     @Override
     public boolean isValid(JsonNode value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;
         }
 
-        List<ParseException> exceptions = Collections.emptyList();
+        List<ParseException> exceptions;
 
         try {
             exceptions = new JsonParser().validate(

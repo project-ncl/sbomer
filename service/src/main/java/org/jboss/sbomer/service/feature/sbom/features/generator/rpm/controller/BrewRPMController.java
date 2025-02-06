@@ -48,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- * Reconciler working on the {@link GenerationRequest} entity and the {@link GenerationRequestType#RPM} type.
+ * Reconciler working on the {@link GenerationRequest} entity and the {@link GenerationRequestType#BREW_RPM} type.
  * </p>
  *
  * <p>
@@ -81,10 +81,9 @@ public class BrewRPMController extends AbstractController {
             Object... params) {
 
         if (generationRequest.getStatus() != null) {
-            String label = switch (generationRequest.getStatus()) {
-                case GENERATING -> SbomGenerationPhase.GENERATE.name().toLowerCase();
-                default -> null;
-            };
+            String label = generationRequest.getStatus() == SbomGenerationStatus.GENERATING
+                    ? SbomGenerationPhase.GENERATE.name().toLowerCase()
+                    : null;
 
             if (label != null) {
                 generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
@@ -146,7 +145,7 @@ public class BrewRPMController extends AbstractController {
 
         log.debug("Reading manifests from '{}'...", generationDir.toAbsolutePath());
 
-        List<Path> manifestPaths = null;
+        List<Path> manifestPaths;
 
         try {
             manifestPaths = FileUtils.findManifests(generationDir);
@@ -170,7 +169,7 @@ public class BrewRPMController extends AbstractController {
                     "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.");
         }
 
-        List<Bom> boms = null;
+        List<Bom> boms;
 
         try {
             boms = readManifests(manifestPaths);
@@ -184,7 +183,7 @@ public class BrewRPMController extends AbstractController {
                     "Generation succeded, but reading generated manifests failed was not successful. See logs for more information.");
         }
 
-        List<Sbom> sboms = null;
+        List<Sbom> sboms;
 
         try {
             sboms = storeBoms(generationRequest, boms);

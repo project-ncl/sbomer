@@ -78,7 +78,7 @@ public class SBOMResource {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateFromAdvisory(
             @PathParam("advisoryId") String advisoryId,
-            @Context ContainerRequestContext requestContext) throws Exception {
+            @Context ContainerRequestContext requestContext) {
 
         // Create the Request to be associated with this REST API call event
         RequestEvent request = RestUtils.createRequestFromRestEvent(

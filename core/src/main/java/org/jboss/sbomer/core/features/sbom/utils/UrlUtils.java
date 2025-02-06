@@ -47,9 +47,9 @@ public class UrlUtils {
      * contain any qualifier which needs to be removed, the original purl is returned, otherwise a new purl is built and
      * returned.
      *
-     * @param purl
-     * @param allowList
-     * @return
+     * @param purl the purl from which the qualifiers should be removed
+     * @param allowList the list of qualifiers which should be removed from the purl
+     * @return the purl with the qualifiers removed
      */
     public static String removeAllowedQualifiersFromPurl(String purl, List<String> allowList) {
         try {

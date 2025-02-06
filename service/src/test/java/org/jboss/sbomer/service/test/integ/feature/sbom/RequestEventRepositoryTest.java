@@ -53,7 +53,7 @@ class RequestEventRepositoryTest {
     @Test
     @Order(1)
     void testFindById() {
-        RequestEvent requestEvent = RequestEvent.findById("errata_139787");
+        RequestEvent requestEvent = RequestEvent.findById("errata_139787"); // NOSONAR
         assertEquals(RequestEventType.UMB, requestEvent.getEventType());
 
         RequestConfig config = requestEvent.getRequestConfig();

@@ -26,6 +26,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
+@Getter
 @Command(
         mixinStandardHelpOptions = true,
         name = "adjust",
@@ -34,7 +35,6 @@ import picocli.CommandLine.ScopeType;
         subcommandsRepeatable = true)
 public class AdjustCommand {
 
-    @Getter
     @Option(
             names = { "-p", "--path" },
             required = true,
@@ -44,7 +44,6 @@ public class AdjustCommand {
             scope = ScopeType.INHERIT)
     Path path;
 
-    @Getter
     @Option(
             names = { "-o", "--output" },
             defaultValue = "bom.json",

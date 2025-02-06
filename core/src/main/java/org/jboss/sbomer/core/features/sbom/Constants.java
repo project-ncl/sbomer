@@ -20,7 +20,7 @@ package org.jboss.sbomer.core.features.sbom;
 public class Constants {
 
     private Constants() {
-        // This is a utlity class
+        // This is a utility class
     }
 
     public static final String SBOMER_NAME = "SBOMer";

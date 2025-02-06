@@ -66,15 +66,15 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
 
     /**
      * <p>
-     * Override to privide any additional error messages that can be useful for the clinet to understand the problem.
+     * Override to provide any additional error messages that can be useful for the client to understand the problem.
      * See {@link ErrorResponse#getErrors()}.
      * </p>
      *
      * <p>
-     * By default empty list is returned.
+     * By default, an empty list is returned.
      * </p>
      *
-     * @return
+     * @return the list of custom error messages
      */
     List<String> customErrors() {
         return new ArrayList<>();
