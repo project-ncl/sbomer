@@ -13,7 +13,7 @@ import {
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useRequestEvents } from './useRequestEvents';
@@ -83,7 +83,9 @@ export const RequestEventTable = () => {
               onAuxClick={() => openInNewTab('/requestevents/' + requestEvent.id)}
             >
               <Td dataLabel={columnNames.id}>
-                <pre>{requestEvent.id}</pre>
+                <Link to={'/requestevents/' + requestEvent.id}>
+                  <pre>{requestEvent.id}</pre>
+                </Link>
               </Td>
               <Td dataLabel={columnNames.eventStatus}>
                 <Tooltip
