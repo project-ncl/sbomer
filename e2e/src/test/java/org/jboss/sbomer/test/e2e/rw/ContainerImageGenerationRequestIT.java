@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -27,8 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import jakarta.json.JsonValue;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -38,11 +38,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.restassured.response.Response;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
-import jakarta.json.JsonValue;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,19 +48,19 @@ import lombok.extern.slf4j.Slf4j;
 @Execution(ExecutionMode.CONCURRENT)
 class ContainerImageGenerationRequestIT extends E2EStageBase {
 
-    static Path sbomPath(String fileName) {
+    private static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "requests", fileName);
     }
 
     // private static final String MANDREL_IMAGE =
     // "registry.redhat.io/quarkus/mandrel-for-jdk-21-rhel8@sha256:a406de0fd344785fb39eba81cbef01cf7fb3e2be43d0e671a8587d1abe1418b4";
 
-    static Stream<JsonObject> requestBodys() throws IOException {
-        String requestBodys = Files.readString(sbomPath("skinny-manifest-images.json"));
-        JsonReader jsonReader = Json.createReader(new StringReader(requestBodys));
-        JsonArray requestBodyJO = jsonReader.readArray();
-        jsonReader.close();
-        return requestBodyJO.stream().map(jo -> jo.asJsonObject());
+    private static Stream<JsonObject> requestBodies() throws IOException {
+        String requestBodies = Files.readString(sbomPath("skinny-manifest-images.json"));
+        try (JsonReader jsonReader = Json.createReader(new StringReader(requestBodies))) {
+            JsonArray requestBodyJO = jsonReader.readArray();
+            return requestBodyJO.stream().map(JsonValue::asJsonObject);
+        }
     }
 
     @Test
@@ -105,7 +103,7 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
      * a gzipped tar that should never be pushed application/vnd.docker.plugin.v1+json
      */
     @ParameterizedTest
-    @MethodSource("requestBodys")
+    @MethodSource("requestBodies")
     void testSkinnyManifests(JsonObject requestBody) {
         List<String> generationIds = requestGeneration(requestBody.toString());
         assertEquals(1, generationIds.size());

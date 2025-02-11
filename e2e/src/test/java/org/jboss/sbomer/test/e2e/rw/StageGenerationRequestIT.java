@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -134,7 +134,7 @@ class StageGenerationRequestIT extends E2EStageBase {
 
         waitForGeneration(generationId);
 
-        // log.info("NodeJs NPM build finished, waiting for UMB message");
+        // log.info("Node.js NPM build finished, waiting for UMB message");
 
         // publishedUmbMessage(generationId, message -> {
         // message.body("headers.generation_request_id", CoreMatchers.is(generationId))

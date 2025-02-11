@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -123,7 +123,7 @@ public abstract class E2EBase {
 
         Awaitility.await().atMost(2, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS).until(() -> {
 
-            log.info("Finding last UMB message available for GenerationRquest: '{}'", generationRequestId);
+            log.info("Finding last UMB message available for GenerationRequest: '{}'", generationRequestId);
 
             Response response = RestAssured.given()
                     .baseUri(getDatagrepperBaseUri())
@@ -150,12 +150,12 @@ public abstract class E2EBase {
                     .findFirst();
 
             if (indexOpt.isEmpty()) {
-                log.debug("No UMB messages found for GenerationRquest '{}'", generationRequestId);
+                log.debug("No UMB messages found for GenerationRequest '{}'", generationRequestId);
                 return false;
             }
 
             log.info(
-                    "Message with ID '{}' found for GenerationRquest: '{}'!",
+                    "Message with ID '{}' found for GenerationRequest: '{}'!",
                     response.body().jsonPath().getString("msg_id"),
                     generationRequestId);
 
@@ -176,7 +176,7 @@ public abstract class E2EBase {
                 .when()
                 .get(String.format("/api/v1beta1/generations/%s", generationId));
 
-        log.info("Got: {}", response.body().asPrettyString());
+        log.info("Got generation: {}", response.body().asPrettyString());
 
         return response;
     }
@@ -190,7 +190,7 @@ public abstract class E2EBase {
                 .when()
                 .get(String.format("/api/v1beta1/manifests?query=generation.id==%s", generationId));
 
-        log.info("Got: {}", response.body().asPrettyString());
+        log.info("Got manifests for generation: {}", response.body().asPrettyString());
 
         return response;
     }
@@ -208,7 +208,7 @@ public abstract class E2EBase {
 
         response.then().statusCode(202);
 
-        log.info("Got: {}", response.body().asPrettyString());
+        log.info("Got request generation: {}", response.body().asPrettyString());
 
         return response.jsonPath().getList("id");
     }
