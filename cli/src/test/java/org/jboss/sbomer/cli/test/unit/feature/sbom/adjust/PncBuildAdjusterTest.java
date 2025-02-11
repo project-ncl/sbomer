@@ -14,22 +14,14 @@ import org.cyclonedx.model.Dependency;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.PncBuildAdjuster;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class PncBuildAdjusterTest {
-
-    final PncBuildAdjuster adjuster = new PncBuildAdjuster();
-
-    Bom bom = null;
-
-    @BeforeEach
-    void init() throws IOException {
-        this.bom = SbomUtils.fromString(TestResources.asString("boms/image.json"));
-    }
-
     @Test
-    void shouldAddSerialNumber() {
+    void shouldAddSerialNumber() throws IOException {
+        PncBuildAdjuster adjuster = new PncBuildAdjuster();
+        Bom bom = SbomUtils.fromString(TestResources.asString("boms/image.json"));
+        assertNotNull(bom);
         bom.setSerialNumber(null);
 
         Bom adjusted = adjuster.adjust(bom);
@@ -41,12 +33,12 @@ class PncBuildAdjusterTest {
 
     @Test
     void parseBrewRpmsBom() throws IOException {
-        Bom bom = SbomUtils.fromPath(Paths.get("src", "test", "resources", "boms/brew_rpm.json"));
-        assertNotNull(bom);
-        assertEquals(1, bom.getDependencies().size());
-        assertEquals(8, bom.getDependencies().get(0).getProvides().size());
+        Bom rpmBom = SbomUtils.fromPath(Paths.get("src", "test", "resources", "boms/brew_rpm.json"));
+        assertNotNull(rpmBom);
+        assertEquals(1, rpmBom.getDependencies().size());
+        assertEquals(8, rpmBom.getDependencies().get(0).getProvides().size());
 
-        Set<String> providedRefs = bom.getDependencies()
+        Set<String> providedRefs = rpmBom.getDependencies()
                 .stream()
                 .flatMap(dependency -> dependency.getProvides().stream())
                 .map(Dependency::getRef)
@@ -66,7 +58,6 @@ class PncBuildAdjusterTest {
         // Compare Sets
         assertEquals(providedRefs, expectedRefsSet);
 
-        SbomUtils.validate(SbomUtils.toJsonNode(bom));
-
+        SbomUtils.validate(SbomUtils.toJsonNode(rpmBom));
     }
 }

@@ -40,6 +40,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessRunner {
 
+    public static final String VALIDATION_FAILED_MESSAGE = "Command execution validation failed";
+
     private ProcessRunner() {
         throw new IllegalStateException("This is a utility class that should not be instantiated");
     }
@@ -54,20 +56,20 @@ public class ProcessRunner {
 
         if (workDir == null) {
             throw new ValidationException(
-                    "Command execution validation failed",
+                    VALIDATION_FAILED_MESSAGE,
                     Collections.singletonList("No working directory provided"));
         }
 
         if (!Files.exists(workDir)) {
             throw new ValidationException(
-                    "Command execution validation failed",
+                    VALIDATION_FAILED_MESSAGE,
                     Collections
                             .singletonList(String.format("Provided working directory '%s' does not exist", workDir)));
         }
 
         if (!Files.isDirectory(workDir)) {
             throw new ValidationException(
-                    "Command execution validation failed",
+                    VALIDATION_FAILED_MESSAGE,
                     Collections.singletonList(
                             String.format("Provided working directory '%s' is not a directory", workDir)));
         }
@@ -97,7 +99,7 @@ public class ProcessRunner {
     public static void run(Map<String, String> environment, Path workDir, String... command) {
         if (Objects.isNull(command) || command.length == 0) {
             throw new ValidationException(
-                    "Command execution validation failed",
+                    VALIDATION_FAILED_MESSAGE,
                     Collections.singletonList("No command to provided"));
         }
 
@@ -139,7 +141,7 @@ public class ProcessRunner {
             }
         } catch (IOException e) {
             log.error(
-                    "An error occurred while procesing the output of the command. This is not fatal and will be ignored.",
+                    "An error occurred while processing the output of the command. This is not fatal and will be ignored.",
                     e);
         }
 

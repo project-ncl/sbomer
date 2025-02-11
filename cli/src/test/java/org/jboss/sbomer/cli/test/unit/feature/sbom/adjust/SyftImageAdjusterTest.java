@@ -7,19 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
-import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
@@ -39,19 +35,19 @@ import com.github.packageurl.PackageURL;
 class SyftImageAdjusterTest {
 
     @TempDir
-    File tmpDir;
+    Path tmpDir;
 
     Bom bom = null;
 
     @BeforeEach
     void init() throws IOException {
-        Files.writeString(Path.of(tmpDir.getAbsolutePath(), "skopeo.json"), TestResources.asString("skopeo.json"));
+        Files.writeString(tmpDir.resolve("skopeo.json"), TestResources.asString("skopeo.json"));
         this.bom = SbomUtils.fromString(TestResources.asString("boms/image.json"));
     }
 
     @Test
     void removeAllRpms() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), null, false);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, false);
 
         assertEquals(192, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
@@ -69,7 +65,7 @@ class SyftImageAdjusterTest {
 
     @Test
     void removeAllRpmsLeavePrefix() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), List.of("/app"), false);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of("/app"), false);
 
         assertEquals(192, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
@@ -83,7 +79,7 @@ class SyftImageAdjusterTest {
 
     @Test
     void preserveRpms() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), null, true);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, true);
 
         assertEquals(192, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
@@ -97,7 +93,7 @@ class SyftImageAdjusterTest {
 
     @Test
     void preserveRpmsWithPrefix() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), List.of("/app"), true);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of("/app"), true);
 
         assertEquals(192, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
@@ -111,7 +107,7 @@ class SyftImageAdjusterTest {
 
     @Test
     void shouldLeaveOnlyArchAndEpochQualifiers() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), null, true);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, true);
 
         assertEquals(
                 "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64&upstream=bzip2-1.0.8-8.el9.src.rpm&distro=rhel-9.2",
@@ -147,7 +143,7 @@ class SyftImageAdjusterTest {
 
     @Test
     void shouldAdjustNameAndPurl() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath());
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir);
 
         assertEquals("registry.com/rh-osbs/amq-streams-console-ui-rhel9", bom.getMetadata().getComponent().getName());
         assertNull(bom.getMetadata().getComponent().getPurl());
@@ -164,7 +160,7 @@ class SyftImageAdjusterTest {
 
     @Test
     void generatedDependenciesShouldHaveProperDependsOn() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath());
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir);
 
         assertEquals(192, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
@@ -180,8 +176,8 @@ class SyftImageAdjusterTest {
     }
 
     @Test
-    void depdsShouldPointToComponents() throws Exception {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath());
+    void depsShouldPointToComponents() throws Exception {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir);
 
         this.bom = SbomUtils.fromString(TestResources.asString("boms/shaded.json"));
 
@@ -207,7 +203,7 @@ class SyftImageAdjusterTest {
     // https://issues.redhat.com/browse/SBOMER-197
     @Test
     void metadataComponentShouldBeBareRepresentationOfMainComponent() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), null, true);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, true);
 
         assertFalse(bom.getMetadata().getProperties().isEmpty());
 
@@ -226,7 +222,7 @@ class SyftImageAdjusterTest {
         // No properties
         assertNull(metadataComponent.getProperties());
 
-        // Main component is the first one
+        // The main component is the first one
         Component mainComponent = adjusted.getComponents().get(0);
 
         assertFalse(mainComponent.getProperties().isEmpty());
@@ -249,7 +245,7 @@ class SyftImageAdjusterTest {
 
     @Test
     void removeExternalReferencesWithBadURI() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath(), null, false);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, false);
         final String badUrl = "https://github.com:facebook/regenerator/tree/master/packages/regenerator-runtime";
 
         assertEquals(24, getExternalReferenceStream(bom).count());
@@ -265,7 +261,7 @@ class SyftImageAdjusterTest {
 
     @Test
     void shouldAdjustVendorAndPublisher() {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir.toPath());
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir);
 
         Optional<Property> bogusVendor = bom.getMetadata()
                 .getProperties()

@@ -1,8 +1,10 @@
 package org.jboss.sbomer.cli.test.utils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import jakarta.enterprise.inject.Alternative;
 
@@ -22,6 +24,8 @@ import picocli.CommandLine.Command;
         subcommands = { ProcessCommand.class })
 public class GradleCycloneDxGenerateCommandMockAlternative extends GradleCycloneDxGenerateCommand {
 
+    private static final String PLAIN_JSON = "boms/plain.json";
+
     @Override
     protected void doClone(String url, String tag, Path path, boolean force) {
         log.info("Would clone url: {}, with tag: {}, into: {}, force: {}", url, tag, path, force);
@@ -29,9 +33,9 @@ public class GradleCycloneDxGenerateCommandMockAlternative extends GradleCyclone
 
     @Override
     protected Path doGenerate(String buildCmdOptions) {
-
-        try {
-            Files.copy(getClass().getClassLoader().getResourceAsStream("boms/plain.json"), getParent().getOutput());
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(PLAIN_JSON)) {
+            Objects.requireNonNull(in, "Resource " + PLAIN_JSON + " not found");
+            Files.copy(in, getParent().getOutput());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

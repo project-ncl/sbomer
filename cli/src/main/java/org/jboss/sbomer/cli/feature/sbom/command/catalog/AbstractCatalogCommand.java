@@ -68,7 +68,7 @@ public abstract class AbstractCatalogCommand implements Callable<Integer> {
     }
 
     /**
-     * Optionally adds a MDC context. The {@link MDCUtils} class can be used for this purpose.
+     * Optionally adds an MDC context. The {@link MDCUtils} class can be used for this purpose.
      */
     protected void addContext() {
 

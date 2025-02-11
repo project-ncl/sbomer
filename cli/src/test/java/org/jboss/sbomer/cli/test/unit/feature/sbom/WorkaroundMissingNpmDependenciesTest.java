@@ -60,7 +60,7 @@ class WorkaroundMissingNpmDependenciesTest {
         when(pncServiceMock.getBuild(("FOOBAR012345"))).thenReturn(pncBuild);
         when(pncServiceMock.getNPMDependencies(("FOOBAR012345"))).thenReturn(artifacts);
 
-        // Prepare test component
+        // Prepare the test component
         Bom bom = Objects.requireNonNull(SbomUtils.createBom());
         Component component1 = SbomUtils.createComponent(
                 "foo.bar",
@@ -132,7 +132,7 @@ class WorkaroundMissingNpmDependenciesTest {
         when(pncServiceMock.getBuild(("FOOBAR012345"))).thenReturn(pncBuild);
         when(pncServiceMock.getNPMDependencies(("FOOBAR012345"))).thenReturn(artifacts);
 
-        // Prepare test component
+        // Prepare the test component
         Bom bom = Objects.requireNonNull(SbomUtils.createBom());
         Component component1 = SbomUtils.createComponent(
                 "foo.bar",
@@ -197,7 +197,7 @@ class WorkaroundMissingNpmDependenciesTest {
         when(pncServiceMock.getBuild(("FOOBAZ012345"))).thenReturn(pncBuild2);
         when(pncServiceMock.getNPMDependencies(("FOOBAZ012345"))).thenReturn(artifacts2);
 
-        // Prepare test component
+        // Prepare the test component
         Bom bom = Objects.requireNonNull(SbomUtils.createBom());
         Component component1 = SbomUtils.createComponent(
                 "foo.bar",

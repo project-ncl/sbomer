@@ -212,13 +212,14 @@ public class KojiService {
         List<KojiRpmInfo> rpm = kojiSession.getRPM(List.of(new KojiIdOrName(nvra)));
 
         if (rpm.isEmpty()) {
-            log.debug("No results found");
+            log.debug("RPM list for {} is empty", nvra);
             return null;
         }
         KojiRpmInfo rpmInfo = rpm.get(0);
+
         // It could happen that the returned RPM info is null.
         if (rpmInfo == null) {
-            log.debug("No results found");
+            log.debug("RPM info for {} is null", nvra);
             return null;
         }
 
@@ -264,7 +265,7 @@ public class KojiService {
         List<KojiBuildInfo> builds = kojiSession.getBuild(List.of(KojiIdOrName.getFor(nvr)));
 
         if (builds.isEmpty()) {
-            log.debug("No results found");
+            log.debug("Builds list for {} is empty", nvr);
             return null;
         }
 
@@ -273,7 +274,7 @@ public class KojiService {
 
             // It could happen that the returned build info is null.
             if (buildInfo == null) {
-                log.debug("No results found");
+                log.debug("Build info for {} is null", nvr);
                 return null;
             }
 
@@ -282,7 +283,7 @@ public class KojiService {
         }
 
         log.warn("Found more than one build for NVR '{}', this is unexpected, returning nothing!", nvr);
-        log.debug(builds.toString());
+        log.debug("{}", builds);
 
         return null;
     }

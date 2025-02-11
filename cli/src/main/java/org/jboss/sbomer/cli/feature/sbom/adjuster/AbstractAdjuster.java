@@ -62,11 +62,9 @@ public abstract class AbstractAdjuster implements Adjuster {
     /**
      * Adjusts the provided {@link Component} according to our standards.
      *
-     * @param component
+     * @param component the component
      */
-    protected void cleanupComponent(Component component) {
-        log.debug("No cleanup done for {}", this.getClass());
-    }
+    abstract void cleanupComponent(Component component);
 
     protected void cleanupExternalReferences(List<ExternalReference> externalReferences) {
         if (externalReferences != null) {

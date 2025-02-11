@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.cli.test.unit.generate;
 
+import static org.jboss.sbomer.cli.feature.sbom.generate.ProcessRunner.VALIDATION_FAILED_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ class ProcessRunnerTest {
         ValidationException thrown = Assertions
                 .assertThrows(ValidationException.class, () -> ProcessRunner.run(Path.of("some/dir")));
 
-        assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
+        assertEquals(VALIDATION_FAILED_MESSAGE, thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
         assertEquals("No command to provided", thrown.getErrors().get(0));
     }
@@ -48,7 +49,7 @@ class ProcessRunnerTest {
         ValidationException thrown = Assertions
                 .assertThrows(ValidationException.class, () -> ProcessRunner.run(null, "command"));
 
-        assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
+        assertEquals(VALIDATION_FAILED_MESSAGE, thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
         assertEquals("No working directory provided", thrown.getErrors().get(0));
     }
@@ -59,7 +60,7 @@ class ProcessRunnerTest {
                 ValidationException.class,
                 () -> ProcessRunner.run(Path.of("surely/doesnt/exist"), "command"));
 
-        assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
+        assertEquals(VALIDATION_FAILED_MESSAGE, thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
         assertEquals("Provided working directory 'surely/doesnt/exist' does not exist", thrown.getErrors().get(0));
     }
@@ -71,7 +72,7 @@ class ProcessRunnerTest {
         ValidationException thrown = Assertions
                 .assertThrows(ValidationException.class, () -> ProcessRunner.run(aFile, "command"));
 
-        assertEquals("Command execution validation failed", thrown.getLocalizedMessage());
+        assertEquals(VALIDATION_FAILED_MESSAGE, thrown.getLocalizedMessage());
         assertEquals(1, thrown.getErrors().size());
         assertEquals(
                 String.format("Provided working directory '%s' is not a directory", aFile),

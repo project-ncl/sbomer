@@ -213,7 +213,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
         WorkaroundMissingNpmDependencies workaround = new WorkaroundMissingNpmDependencies(pncService);
 
         for (AnalyzedArtifact artifact : artifactsToManifest) {
-            // Create the component if not already created (e.g. the same pom can be a plain .pom or embedded as
+            // Create the component if not already created (e.g., the same pom can be a plain .pom or embedded as
             // pom.xml)
             if (!purlToComponents.containsKey(artifact.getArtifact().getPurl())) {
                 // Create a component entry for the artifact
@@ -264,7 +264,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
 
         workaround.addMissingDependencies(bom);
 
-        // Adjust the bom if needed (e.g. add the serial number)
+        // Adjust the bom if needed (e.g., add the serial number)
         new PncOperationAdjuster().adjust(bom);
 
         Path sbomDirPath = Path.of(
@@ -331,7 +331,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
 
     private Optional<Dependency> findClosestParent(Map<String, Dependency> pathToDependencies, String path) {
         while (!path.isEmpty()) {
-            // Find parent if it exists
+            // Find the parent if it exists
             int lastIndex = path.lastIndexOf("!/");
             if (lastIndex != -1) {
                 path = path.substring(0, lastIndex);

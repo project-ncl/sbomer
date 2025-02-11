@@ -130,7 +130,8 @@ public class CLI implements QuarkusApplication {
 
         @Override
         public List<Object> handleParseResult(List<CommandLine> parsedCommands, PrintStream out, Help.Ansi ansi) {
-            if (CommandLine.printHelpIfRequested(parsedCommands, out, err(), ansi)) {
+            if (CommandLine.printHelpIfRequested(parsedCommands, out, err(), ansi)) { // NOSONAR: Method is deprecated,
+                                                                                      // but we need to use it
                 return returnResultOrExit(Collections.emptyList());
             }
 

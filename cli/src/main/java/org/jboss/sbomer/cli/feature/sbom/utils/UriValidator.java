@@ -25,6 +25,9 @@ import org.dmfs.rfc3986.uris.LazyUri;
  * Validates URI according to RFC 3986
  */
 public class UriValidator {
+    private UriValidator() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
 
     public static boolean isUriValid(String s) {
         Uri uri = new LazyUri(new Precoded(s));

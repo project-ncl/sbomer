@@ -77,7 +77,7 @@ public class DefaultProcessor implements Processor {
      *
      * @param component the component to process
      */
-    protected void processComponent(Bom bom, Component component) {
+    protected void processComponent(Component component) {
         log.debug("Processing '{}'...", component.getPurl());
 
         if (component.getPurl() == null) {
@@ -99,11 +99,12 @@ public class DefaultProcessor implements Processor {
             Optional<String> sha1 = getHash(component, Hash.Algorithm.SHA1);
             Optional<String> md5 = getHash(component, Hash.Algorithm.MD5);
 
-            // First try to look up the artifact with the purl given and with optional SHA256 hash to filter out results
+            // First, try to look up the artifact with the purl given and with optional SHA256 hash to filter out
+            // results
             // Even though we may have different hashes, we specifically specify only SHA256 here.
             Artifact artifact = pncService.getArtifact(component.getPurl(), sha256, Optional.empty(), Optional.empty());
 
-            // Artifact wasn't found, we will try lookup using different methods
+            // Artifact wasn't found, so we will try lookup using different methods
             if (artifact == null) {
                 log.debug(
                         "Artifact with purl '{}' wasn't found in PNC, using different methods to receive it",
@@ -169,7 +170,7 @@ public class DefaultProcessor implements Processor {
             // Add artifact metadata (PNC url)
             setArtifactMetadata(component, artifact, pncService.getApiUrl());
 
-            // Add build-related information, if we found a build in PNC
+            // Add build-related information if we found a build in PNC
             if (artifact.getBuild() != null) {
                 log.debug(
                         "Component '{}' was built in PNC, adding enrichment from PNC build '{}'",
@@ -230,10 +231,10 @@ public class DefaultProcessor implements Processor {
         if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
             Component component = bom.getMetadata().getComponent();
 
-            // For container images there is nothing to do for the metadata component,
-            // all modifications are done in the main component.
+            // For container images, there is nothing to do for the metadata component.
+            // All modifications are done in the main component.
             if (Objects.requireNonNull(component.getType()) != Component.Type.CONTAINER) {
-                processComponent(bom, component);
+                processComponent(component);
             }
         }
 
@@ -247,7 +248,7 @@ public class DefaultProcessor implements Processor {
                     if ("rpm".equals(purl.getType())) {
                         processRpmComponent(c, purl);
                     } else {
-                        processComponent(bom, c);
+                        processComponent(c);
                     }
                 }
             }
@@ -285,7 +286,7 @@ public class DefaultProcessor implements Processor {
         }
 
         if (buildInfo == null) {
-            log.warn("No Brew build information was retrieved, will not add any information");
+            log.warn("No Brew build information was retrieved, will not add any information to RPM component");
             return;
         }
 
@@ -331,7 +332,7 @@ public class DefaultProcessor implements Processor {
         }
 
         if (buildInfo == null) {
-            log.warn("No Brew build information was retrieved, will not add any information");
+            log.warn("No Brew build information was retrieved, will not add any information to image component");
             return;
         }
 

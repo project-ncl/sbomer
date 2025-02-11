@@ -260,7 +260,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
      * When a the {@param buildType} cannot be converted, {@code null} is returned.
      * </p>
      *
-     * @param buildType
+     * @param buildType the build type to convert
      * @return {@link GeneratorType}
      */
     private static GeneratorType buildTypeToGeneratoType(org.jboss.pnc.enums.BuildType buildType) {

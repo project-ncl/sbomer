@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementation of the {@link SbomGenerator} which uses the Domino tool to generate SBOMs for Maven project.
+ * Implementation of the {@link SbomGenerator} which uses the Domino tool to generate SBOMs for a Maven project.
  *
  * @see <a href=
  *      "https://github.com/quarkusio/quarkus-platform-bom-generator/tree/main/domino">https://github.com/quarkusio/quarkus-platform-bom-generator/tree/main/domino</a>

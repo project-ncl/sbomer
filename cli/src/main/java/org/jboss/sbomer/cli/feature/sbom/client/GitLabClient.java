@@ -28,7 +28,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 /**
- * Client used to interact with the SCM (GitLab) to fetch the config file for particular build.
+ * Client used to interact with the SCM (GitLab) to fetch the config file for a particular build.
  */
 @ApplicationScoped
 @RegisterRestClient(configKey = "gitlab")
@@ -39,7 +39,7 @@ public interface GitLabClient {
      * {@code ref}.
      *
      * @param project The project name in format: [namespace]/[repo]
-     * @param ref The reference, for example a tag: {@code 1.0.0.Final}
+     * @param ref The reference, for example, a tag: {@code 1.0.0.Final}
      * @param path The path to the file
      * @return Content of the file.
      */

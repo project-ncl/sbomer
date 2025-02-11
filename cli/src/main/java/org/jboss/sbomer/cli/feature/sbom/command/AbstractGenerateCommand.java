@@ -81,7 +81,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
 
     /**
      * <p>
-     * Implementation of the SBOM generation for project located in the {@code parent.getOutput()} directory.
+     * Implementation of the SBOM generation for the project located in the {@code parent.getOutput()} directory.
      * </p>
      *
      * @return a {@link Path} to the generated BOM file.
@@ -170,7 +170,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
                     .searchLastSuccessfulGeneration(build.getNoRebuildCause().getId());
             if (sbomRequest != null) {
                 try {
-                    // The workdir name has format "product-{index}". Extract the index
+                    // The workdir name has the format "product-{index}". Extract the index
                     String numericPart = parent.getWorkdir()
                             .toAbsolutePath()
                             .toString()
@@ -319,7 +319,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
                 .setBranch(tag)
                 .setDepth(1)
                 .call()) {
-            // Do nothing, just clone the repository
+            log.info("Successfully cloned the repository to {}", path);
         } catch (InvalidRemoteException e) {
             throw new ApplicationException(
                     "Unknown error occurred while preparing to clone the '{}'  repository",

@@ -46,16 +46,16 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMet
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
 
 /**
- * Class for working around problem with missing NPM dependencies in manifest. For every component that was produced by
- * a non-NPM PNC build, this class will look up that build's build time NPM dependencies. It will check if these
- * dependencies are already present in the manifest and if not, it will add them as new components.
+ * Class for working around problem with missing NPM dependencies in manifest. For every component produced by a non-NPM
+ * PNC build, this class will look up that build's build time NPM dependencies. It will check if these dependencies are
+ * already present in the manifest, and if not, it will add them as new components.
  */
 @Slf4j
 public class WorkaroundMissingNpmDependencies {
 
     private final PncService pncService;
 
-    // Map Build ID -> list of NPM dependencies of the build
+    // Map Build ID -> list of the build's NPM dependencies
     // We will add these dependencies as new components
     private final Map<String, List<Artifact>> buildsWithNpmDependencies = new HashMap<>();
     // Map Build ID -> components that were built by the build
@@ -74,11 +74,8 @@ public class WorkaroundMissingNpmDependencies {
             return;
         }
         String buildId = build.getId();
-        List<Artifact> npmDependencies = buildsWithNpmDependencies.get(buildId);
-        if (npmDependencies == null) {
-            npmDependencies = new ArrayList<>(pncService.getNPMDependencies(buildId));
-            buildsWithNpmDependencies.put(buildId, npmDependencies);
-        }
+        List<Artifact> npmDependencies = buildsWithNpmDependencies
+                .computeIfAbsent(buildId, k -> new ArrayList<>(pncService.getNPMDependencies(k)));
         if (npmDependencies.isEmpty()) {
             // No NPM dependencies to add
             return;

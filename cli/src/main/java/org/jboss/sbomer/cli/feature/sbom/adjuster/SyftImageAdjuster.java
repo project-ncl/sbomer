@@ -53,7 +53,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     /**
      * <p>
      * For non-RPM content, a list of paths within the container image for which when a component is found it will be
-     * retained in the generated manifest. In case the found component is not on a path in this list it will be removed
+     * retained in the generated manifest. In case the found component is not on a path in this list, it will be removed
      * from the manifest.
      * </p>
      * ffi
@@ -96,10 +96,11 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     }
 
     /**
-     * Checks whether given path is on or under paths specified by the {@link SyftImageAdjuster#paths} list.
+     * Checks whether the given path is on or under paths specified by the {@link SyftImageAdjuster#paths} list.
      *
-     * @param path
-     * @return
+     * @param path the path to check
+     * @return {@code true} if the path is on or under the paths specified by the {@link SyftImageAdjuster#paths} list,
+     *         {@code false} otherwise
      */
     private boolean isOnPath(String path) {
         // In case we haven't provided paths to filter, add all found artifacts.
@@ -129,7 +130,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         adjustComponents(bom);
 
-        // Populate dependencies section with components
+        // Populate the dependencies section with components
         adjustDependencies(bom);
 
         // Adjust the publisher name
@@ -139,9 +140,9 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     }
 
     /**
-     * If the bom components are null initialize an empty list
+     * If the bom components are null, initialize an empty list
      *
-     * @param bom
+     * @param bom the bom to adjust
      */
     private void adjustEmptyComponents(Bom bom) {
         if (bom.getComponents() == null) {
@@ -153,7 +154,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * Removes all components from the component tree that do not meet requirements: as defined by
      * {@link SyftImageAdjuster#includeRpms} and {@link SyftImageAdjuster#paths}.
      *
-     * @param components
+     * @param components the components to filter
      * @see SyftImageAdjuster#includeRpms
      * @see SyftImageAdjuster#paths
      */
@@ -218,7 +219,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * At the same time it cleans up the main component available in the {@link Metadata#getComponent()}.
      * </p>
      *
-     * @param bom
+     * @param bom the manifest to adjust
      */
     private void adjustComponents(Bom bom) {
         Component mainComponent = bom.getMetadata().getComponent();
@@ -258,7 +259,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         Component mainComponent = bom.getMetadata().getComponent();
 
-        // Initialize properties for main component, if not done so yet
+        // Initialize properties for the main component, if not done so yet
         if (mainComponent.getProperties() == null) {
             mainComponent.setProperties(new ArrayList<>());
         }
@@ -284,7 +285,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
     /**
      * <p>
-     * Adjust publisher name for Red Hat components.
+     * Adjusts the publisher name for Red Hat components.
      * </p>
      *
      * <p>
@@ -293,11 +294,9 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      *
      * <p>
      * Adjusts any values in the main component as well as for each component found in the component list (recursively).
-     * See {@link SyftImageAdjuster#adjustPublisher(Bom)}.
      * </p>
      *
      * @param bom The manifest to adjust the properties of.
-     * @see SyftImageAdjuster#adjustPublisher(Bom)
      */
     private void adjustPublisher(Bom bom) {
         log.info("Adjusting manifest publisher...");
@@ -331,8 +330,8 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * Based on the metadata we got the output of Skopeo ({@code skopeo.json} file), adjust main component's purl and
      * name.
      *
-     * @param bom
-     * @param workDir
+     * @param bom the manifest to adjust
+     * @param workDir the working directory where the {@code skopeo.json} file is located
      */
     private void adjustNameAndPurl(Bom bom, Path workDir) {
         String tag;
@@ -346,7 +345,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                             ContainerImageInspectOutput.class);
 
         } catch (IOException e) {
-            throw new ApplicationException("Could not read 'skopeo inpect' output", e);
+            throw new ApplicationException("Could not read 'skopeo inspect' output", e);
         }
 
         // 7.4.17
@@ -417,10 +416,10 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * </p>
      *
      * <p>
-     * Each component is added to the dependencies section as well with {@code dependsOn} being an emoty array.
+     * Each component is added to the dependencies section as well with {@code dependsOn} being an empty array.
      * </p>
      *
-     * @param bom
+     * @param bom the manifest to adjust the dependencies of
      */
     private void adjustDependencies(Bom bom) {
         List<Dependency> dependencies = new ArrayList<>();
@@ -477,7 +476,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * {@link SyftImageAdjuster#ALLOWED_PROPERTY_PREFIXES}.
      * </p>
      *
-     * @param properties
+     * @param properties the properties to adjust
      * @see SyftImageAdjuster#ALLOWED_PROPERTY_PREFIXES
      */
     private void adjustProperties(List<Property> properties) {
