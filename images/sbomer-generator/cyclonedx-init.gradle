@@ -20,12 +20,14 @@ allprojects {
     maven {
         url "http://${System.env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/central/"
         name "proxy-central"
+        allowInsecureProtocol = true
     }
     mavenCentral()
 
     maven {
         url "http://${System.env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/redhat-ga/"
         name "proxy-redhat-ga"
+        allowInsecureProtocol = true
     }
     maven {
         url "https://maven.repository.redhat.com/ga/"
@@ -35,6 +37,7 @@ allprojects {
     maven {
         url "http://${System.env.SBOMER_CACHE_SERVICE_HOST}:7070/maven/indy-static/"
         name "proxy-indy"
+        allowInsecureProtocol = true
     }
     maven {
         url "https://${System.env.SBOMER_INDY_HOST}/api/content/maven/group/static/"
