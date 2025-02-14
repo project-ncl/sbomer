@@ -28,8 +28,9 @@ public enum GeneratorType {
     @JsonProperty("maven-cyclonedx")
     MAVEN_CYCLONEDX, @JsonProperty("maven-domino")
     MAVEN_DOMINO, @JsonProperty("gradle-cyclonedx")
-    GRADLE_CYCLONEDX, @JsonProperty("nodejs-cyclonedx")
-    NODEJS_CYCLONEDX, @JsonProperty("cyclonedx-operation")
+    GRADLE_CYCLONEDX, @JsonProperty("npm-cyclonedx")
+    NPM_CYCLONEDX, @JsonProperty("yarn-cyclonedx")
+    YARN_CYCLONEDX, @JsonProperty("cyclonedx-operation")
     CYCLONEDX_OPERATION, @JsonProperty("image-syft")
     IMAGE_SYFT
 }
