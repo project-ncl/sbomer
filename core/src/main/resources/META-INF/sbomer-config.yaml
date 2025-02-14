@@ -28,7 +28,7 @@ sbomer:
         default-version: "2.9.0"
         default-args: "--batch-mode -DschemaVersion=1.6"
       gradle-cyclonedx:
-        default-version: "1.9.0"
+        default-version: "1.10.0"
         default-args: "-info"
       npm-cyclonedx:
         default-version: "2.0.0"

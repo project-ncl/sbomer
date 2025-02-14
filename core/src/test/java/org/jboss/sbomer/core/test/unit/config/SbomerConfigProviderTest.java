@@ -38,7 +38,7 @@ class SbomerConfigProviderTest {
 
         assertTrue(defaultGenerationConfig.isEnabled());
         assertEquals(GeneratorType.MAVEN_CYCLONEDX, defaultGenerationConfig.defaultGenerator());
-        assertEquals(5, defaultGenerationConfig.generators().size());
+        assertEquals(6, defaultGenerationConfig.generators().size());
         assertEquals(
                 "--batch-mode -DschemaVersion=1.6",
                 defaultGenerationConfig.generators().get(GeneratorType.MAVEN_CYCLONEDX).defaultArgs());

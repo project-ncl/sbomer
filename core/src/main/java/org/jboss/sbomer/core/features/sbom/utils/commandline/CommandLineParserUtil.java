@@ -61,6 +61,11 @@ public class CommandLineParserUtil {
             if (versionOverride.isPresent()) {
                 buildCmdOptions += " -Pversion=" + versionOverride.get();
             }
+        } else if (org.jboss.pnc.enums.BuildType.NPM.equals(build.getBuildConfigRevision().getBuildType())) {
+            Optional<String> versionOverride = getVersionFromBuildAttributes(build);
+            if (versionOverride.isPresent()) {
+                buildCmdOptions += "npm version " + versionOverride.get();
+            }
         }
         return buildCmdOptions;
     }
