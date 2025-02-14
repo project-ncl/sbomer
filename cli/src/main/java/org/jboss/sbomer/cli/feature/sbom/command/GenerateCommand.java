@@ -31,7 +31,8 @@ import picocli.CommandLine.ScopeType;
         aliases = { "g" },
         description = "SBOM generation",
         subcommands = { MavenCycloneDxGenerateCommand.class, MavenDominoGenerateCommand.class,
-                GradleCycloneDxGenerateCommand.class, NodejsCycloneDxGenerateCommand.class })
+                GradleCycloneDxGenerateCommand.class, NpmCycloneDxGenerateCommand.class,
+                YarnCycloneDxGenerateCommand.class })
 public class GenerateCommand {
 
     @Option(names = { "-b", "--build-id" }, description = "Build identifier to generate the SBOM for", required = true)
