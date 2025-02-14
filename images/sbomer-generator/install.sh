@@ -45,6 +45,8 @@ install_syft "${SYFT_VERSION}"
 install_java "${SBOMER_JDK_VERSION}"
 # Install nodejs -- it will be done only once
 install_nodejs "${NODEJS_VERSION}"
+# Install Yarn -- needs to be done after Node.js and NPM are installed
+install_yarn
 
 mkdir -p "${HOME}/.npm/_cacache"
 chown -R 65532:0 "${HOME}"

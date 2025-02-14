@@ -93,6 +93,10 @@ EOF
     echo ${1} >"$HOME/.nvmrc"
 }
 
+function install_yarn() {
+    npm install --global yarn
+}
+
 # Installs Domino.
 function install_domino() {
     echo "> Installing Domino CycloneDX SBOM generator version '${1}'"
@@ -105,7 +109,7 @@ function install_domino() {
     echo "Domino installed!"
 }
 
-function install_nodejs_cyclonedx() {
+function install_npm_cyclonedx() {
     echo "Installing @cyclonedx/cyclonedx-npm NPM package version '${1}'"
     npm install --global "@cyclonedx/cyclonedx-npm@${1}"
     echo "NPM package @cyclonedx/cyclonedx-npm installed!"
