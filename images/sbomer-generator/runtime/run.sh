@@ -93,10 +93,10 @@ case "$generator" in
 "maven-domino")
     install_domino "${version}"
     ;;
-"nodejs-cyclonedx")
-    install_nodejs_cyclonedx "${version}"
+"npm-cyclonedx")
+    install_npm_cyclonedx "${version}"
     ;;
-"gradle-cyclonedx" | "maven-cyclonedx")
+"gradle-cyclonedx" | "maven-cyclonedx" | "yarn-cyclonedx")
     echo "The ${generator} generator does not require installation"
     ;;
 *)
