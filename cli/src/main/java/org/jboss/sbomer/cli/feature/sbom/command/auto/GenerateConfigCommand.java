@@ -46,6 +46,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.EnvironmentAttributesUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.commandline.CommandLineInspectorUtil;
 import org.jboss.sbomer.core.pnc.PncService;
 
 import jakarta.inject.Inject;
@@ -263,7 +264,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
      * @param buildType the build type to convert
      * @return {@link GeneratorType}
      */
-    private static GeneratorType buildTypeToGeneratoType(org.jboss.pnc.enums.BuildType buildType) {
+    private static GeneratorType buildTypeToGeneratoType(org.jboss.pnc.enums.BuildType buildType, String buildScript) {
         if (buildType == null) {
             return null;
         }
@@ -271,7 +272,8 @@ public class GenerateConfigCommand implements Callable<Integer> {
         return switch (buildType) {
             case GRADLE -> GeneratorType.GRADLE_CYCLONEDX;
             case MVN -> GeneratorType.MAVEN_CYCLONEDX;
-            case NPM -> GeneratorType.NODEJS_CYCLONEDX;
+            case NPM -> CommandLineInspectorUtil.hasYarnEvidence(buildScript) ? GeneratorType.YARN_CYCLONEDX
+                    : GeneratorType.NPM_CYCLONEDX;
             default -> null;
         };
     }
@@ -289,8 +291,9 @@ public class GenerateConfigCommand implements Callable<Integer> {
      * @return {@link PncBuildConfig} with default values
      */
     private PncBuildConfig initializeDefaultConfig(Build build) {
-        GeneratorType generatorType = GenerateConfigCommand
-                .buildTypeToGeneratoType(build.getBuildConfigRevision().getBuildType());
+        GeneratorType generatorType = GenerateConfigCommand.buildTypeToGeneratoType(
+                build.getBuildConfigRevision().getBuildType(),
+                build.getBuildConfigRevision().getBuildScript());
 
         if (generatorType == null) {
             log.warn("Unsupported build type: '{}'", build.getBuildConfigRevision().getBuildType());

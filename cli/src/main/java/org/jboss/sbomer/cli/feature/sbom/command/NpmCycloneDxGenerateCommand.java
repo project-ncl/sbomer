@@ -31,11 +31,11 @@ import picocli.CommandLine.Command;
 @Slf4j
 @Command(
         mixinStandardHelpOptions = true,
-        name = "nodejs-cyclonedx",
-        aliases = { "nodejs-cyclonedx-plugin" },
+        name = "npm-cyclonedx",
+        aliases = { "npm-cyclonedx-plugin" },
         description = "SBOM generation for Node.js NPM projects using the CycloneDX Nodejs plugin",
         subcommands = { ProcessCommand.class })
-public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateCommand {
+public class NpmCycloneDxGenerateCommand extends AbstractNodejsGenerateCommand {
 
     private static final String BOM_FILE_NAME = "bom.json";
 
@@ -52,7 +52,7 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
         List<String> cmd = new ArrayList<>();
 
         cmd.add("cyclonedx-npm");
-        cmd.addAll(Arrays.asList("--output-format", "JSON", "--spec-version", "1.6", "--output-file", BOM_FILE_NAME));
+        cmd.addAll(Arrays.asList("--output-file", BOM_FILE_NAME));
 
         cmd.addAll(Arrays.asList(generatorArgs().split(" ")));
 
@@ -61,7 +61,7 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
 
     @Override
     protected GeneratorType generatorType() {
-        return GeneratorType.NODEJS_CYCLONEDX;
+        return GeneratorType.NPM_CYCLONEDX;
     }
 
 }

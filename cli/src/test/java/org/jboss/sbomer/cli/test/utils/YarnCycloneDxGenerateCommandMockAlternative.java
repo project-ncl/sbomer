@@ -7,8 +7,8 @@ import java.util.Objects;
 
 import jakarta.enterprise.inject.Alternative;
 
-import org.jboss.sbomer.cli.feature.sbom.command.NodejsCycloneDxGenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.ProcessCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.YarnCycloneDxGenerateCommand;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -17,11 +17,11 @@ import picocli.CommandLine.Command;
 @Slf4j
 @Command(
         mixinStandardHelpOptions = true,
-        name = "cyclonedx-npm",
-        aliases = { "cyclonedx-npm-plugin" },
-        description = "SBOM generation for Node.js NPM projects using the CycloneDX Nodejs plugin",
+        name = "yarn-cyclonedx",
+        aliases = { "yarn-cyclonedx-plugin" },
+        description = "SBOM generation for Node.js Yarn projects using the CycloneDX Nodejs plugin",
         subcommands = { ProcessCommand.class })
-public class NodejsCycloneDxGenerateCommandMockAlternative extends NodejsCycloneDxGenerateCommand {
+public class YarnCycloneDxGenerateCommandMockAlternative extends YarnCycloneDxGenerateCommand {
 
     @Override
     protected void doClone(String url, String tag, Path path, boolean force) {
