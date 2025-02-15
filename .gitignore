@@ -49,3 +49,5 @@ secret*.txt
 secret*.json
 
 .quarkus
+
+.sonarlint/
