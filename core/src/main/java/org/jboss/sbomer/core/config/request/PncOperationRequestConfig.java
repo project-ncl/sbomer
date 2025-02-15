@@ -38,14 +38,14 @@ import lombok.extern.slf4j.Slf4j;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(PncOperationRequestConfig.TYPE_NAME)
 public class PncOperationRequestConfig extends RequestConfig {
-
     public static final String TYPE_NAME = "pnc-operation";
+
     public static final String IDENTIFIER_KEY = "operationId";
 
-    {
-        this.type = TYPE_NAME;
+    private String operationId;
+
+    @Override
+    public String getType() {
+        return TYPE_NAME;
     }
-
-    String operationId;
-
 }

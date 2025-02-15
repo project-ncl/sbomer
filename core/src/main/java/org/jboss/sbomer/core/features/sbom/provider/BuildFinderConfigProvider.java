@@ -91,7 +91,8 @@ public class BuildFinderConfigProvider {
         // The checksum-only option specifies whether to skip the Koji build lookup stage and only checksum the files in
         // the input.
         config.setChecksumOnly(false);
-        // The checksum-type option specifies the checksum type to use for lookups. Note that at this time Koji can only
+        // The checksum-type option specifies the checksum type to use for lookups. Note that at this time, Koji can
+        // only
         // support a single checksum type in its database, md5, even though the Koji API currently provides additional
         // support for sha256 and sha512 checksum types.
         config.setChecksumTypes(DEFAULT_CHECKSUM_TYPES);
@@ -119,7 +120,7 @@ public class BuildFinderConfigProvider {
     }
 
     /**
-     * Ensures that the content of temporary directory is removed after we shut down the application.
+     * Ensures that the content of the temporary directory is removed after we shut down the application.
      *
      * @param event the shutdown event
      */
@@ -128,7 +129,7 @@ public class BuildFinderConfigProvider {
     }
 
     /**
-     * Override koji hub url in the config if 'sbomer.koji.hub.url' defined in a system property, env variable, or in
+     * Override koji hub url in the config if 'sbomer.koji.hub.url' is defined in a system property, env variable, or in
      * application.properties.
      *
      * @param config config file to potentially override its kojiHubUrl
@@ -158,7 +159,7 @@ public class BuildFinderConfigProvider {
     }
 
     /**
-     * Override koji web url in the config if 'sbomer.koji.web.url' defined in a system property, env variable, or in
+     * Override koji web url in the config if 'sbomer.koji.web.url' is defined in a system property, env variable, or in
      * application.properties. Otherwise, use kojiHubUrl to generate the kojiWebUrl.
      *
      * @param config config file to potentially override its kojiWebUrl

@@ -74,7 +74,7 @@ class ConfigSchemaValidatorTest {
         }
 
         /**
-         * With the feature to generate minifests for all builds
+         * With the feature to generate manifests for all builds
          * (<a href="https://issues.redhat.com/browse/SBOMER-14">...</a>) the Red Hat Product processor has been made
          * optional.
          */
@@ -163,6 +163,8 @@ class ConfigSchemaValidatorTest {
             ProductConfig productConfig = ProductConfig.builder()
                     .withGenerator(GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build())
                     .build();
+
+            productConfig.setProcessors(processors);
 
             return OperationConfig.builder().withOperationId("OPERATIONAABBCC").withProduct(productConfig).build();
         }

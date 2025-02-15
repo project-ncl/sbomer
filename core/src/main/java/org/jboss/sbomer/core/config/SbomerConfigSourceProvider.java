@@ -18,7 +18,6 @@
 package org.jboss.sbomer.core.config;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -27,8 +26,6 @@ import io.smallrye.config.source.yaml.YamlConfigSourceProvider;
 class SbomerConfigSourceProvider extends YamlConfigSourceProvider {
     @Override
     public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
-        final List<ConfigSource> sources = new ArrayList<>(
-                loadConfigSources("META-INF/sbomer-config.yaml", 110, classLoader));
-        return sources;
+        return new ArrayList<>(loadConfigSources("META-INF/sbomer-config.yaml", 110, classLoader));
     }
 }

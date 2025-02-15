@@ -87,17 +87,17 @@ public class MavenCommandLineParser {
     }
 
     private Options createOptions() {
-        Options options = new Options();
+        Options localOptions = new Options();
 
-        addIgnorableOptions(options);
-        addIneffectiveOptions(options);
-        addNoArgsOptions(options);
-        addSystemPropertyOptions(options);
-        addProfilesOptions(options);
-        addProjectsOptions(options);
-        addAlternativePomOption(options);
+        addIgnorableOptions(localOptions);
+        addIneffectiveOptions(localOptions);
+        addNoArgsOptions(localOptions);
+        addSystemPropertyOptions(localOptions);
+        addProfilesOptions(localOptions);
+        addProjectsOptions(localOptions);
+        addAlternativePomOption(localOptions);
 
-        return options;
+        return localOptions;
     }
 
     private void reset() {
@@ -194,7 +194,7 @@ public class MavenCommandLineParser {
         String projectList = String.join(",", projects);
         // Remove single and double quotes if the string starts and ends with them
         projectList = projectList.replaceAll("(^['\"])|(['\"]$)", "").trim();
-        // Finally remove all spaces inside the string
+        // Finally, remove all spaces inside the string
         projectList = projectList.replaceAll("\\s+", "");
 
         return " -" + PROJECTS_OPTION + " " + projectList;

@@ -55,14 +55,14 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class Config {
 
     /**
-     * The API version of the configuration file. In case of breaking changes this value will be used to detect the
+     * The API version of the configuration file. In case of breaking changes, this value will be used to detect the
      * correct (de)serializer.
      */
     @Builder.Default
     String apiVersion = "sbomer.jboss.org/v1alpha1";
 
     /**
-     * Checks whether current object is an empty one.
+     * Checks whether the current object is empty.
      *
      * @return {@code true} if the object is empty, {@code false} otherwise.
      */
@@ -84,7 +84,7 @@ public abstract class Config {
     /**
      * <p>
      * Returns a command that represents the parameters that should be passed to the process command. This basically
-     * translates all the configured processors and it's parameters into a string that can be executed via CLI.
+     * translates all the configured processors and its parameters into a string that can be executed via CLI.
      * </p>
      *
      * <p>

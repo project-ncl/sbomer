@@ -20,21 +20,17 @@ package org.jboss.sbomer.core.errors;
 import org.slf4j.helpers.MessageFormatter;
 
 public class ApplicationException extends RuntimeException {
-    private final Object[] params;
-
-    private String formattedMessage;
+    private final String message;
 
     public ApplicationException(String msg, Object... params) {
         super(msg, MessageFormatter.getThrowableCandidate(params));
-        this.params = params;
+        this.message = (params != null && params.length != 0)
+                ? MessageFormatter.arrayFormat(super.getMessage(), params).getMessage()
+                : super.getMessage();
     }
 
     @Override
-    public synchronized String getMessage() {
-        if (formattedMessage == null) {
-            formattedMessage = MessageFormatter.arrayFormat(super.getMessage(), params).getMessage();
-        }
-        return formattedMessage;
+    public String getMessage() {
+        return message;
     }
-
 }

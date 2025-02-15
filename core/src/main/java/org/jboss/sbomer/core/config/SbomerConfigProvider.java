@@ -31,10 +31,10 @@ import io.smallrye.config.SmallRyeConfigBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+@Getter
 @Slf4j
 public class SbomerConfigProvider {
 
-    @Getter
     final DefaultGenerationConfig defaultGenerationConfig;
 
     private static SbomerConfigProvider instance;
@@ -69,7 +69,7 @@ public class SbomerConfigProvider {
 
         config.getProducts().forEach(product -> {
             // Adjusting generator configuration. This is the only thing we can adjust,
-            // because processor configuration is specific to the build and product release.
+            // because the processor configuration is specific to the build and product release.
             adjustGenerator(product);
 
             if (!product.hasDefaultProcessor()) {
@@ -88,7 +88,7 @@ public class SbomerConfigProvider {
     public void adjust(OperationConfig config) {
         log.debug("Adjusting operation configuration...");
 
-        // If we have not specified any products (for example when provided an empty config)
+        // If we have not specified any products (for example, when provided an empty config)
         if (config.getProduct() == null) {
             config.setProduct(ProductConfig.builder().build());
         }
@@ -97,7 +97,9 @@ public class SbomerConfigProvider {
 
         // Generator configuration was not provided, will use defaults
         if (generatorConfig == null) {
-            log.debug("No generator provided, will use defaults: '{}'", GeneratorType.CYCLONEDX_OPERATION);
+            log.debug(
+                    "No generator provided for adjusting, will use defaults: '{}'",
+                    GeneratorType.CYCLONEDX_OPERATION);
             generatorConfig = GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build();
             config.getProduct().setGenerator(generatorConfig);
         }
@@ -113,7 +115,7 @@ public class SbomerConfigProvider {
 
         // Generator configuration was not provided, will use defaults
         if (generatorConfig == null) {
-            log.debug("No generator provided, will use defaults: '{}'", defaultGeneratorConfig);
+            log.debug("No generator provided for adjusting generator, will use defaults: '{}'", defaultGeneratorConfig);
             product.setGenerator(defaultGeneratorConfig);
         } else {
 

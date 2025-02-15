@@ -22,11 +22,14 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /*
- * Utility class which is needed to enhance H2 database to query JsonNode content.
+ * Utility class which is needed to enhance the H2 database to query JsonNode content.
  *
  * This class is mapped in service/src/main/resources/init.sql
  */
 public class JsonUtils {
+    private JsonUtils() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
 
     public static String jsonExtract(String json, String path) {
         try {

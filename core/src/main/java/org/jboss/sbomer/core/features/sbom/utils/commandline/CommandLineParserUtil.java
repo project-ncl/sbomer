@@ -54,7 +54,7 @@ public class CommandLineParserUtil {
             }
 
             buildCmdOptions += "gradle";
-            // Looks like we need to override the final version as it might not be picked up in the CycloneDX
+            // It looks like we need to override the final version as it might not be picked up in the CycloneDX
             // generation, which would be overridden by the gradle.properties. The BREW_BUILD_VERSION attribute contains
             // the version we need.
             Optional<String> versionOverride = getVersionFromBuildAttributes(build);

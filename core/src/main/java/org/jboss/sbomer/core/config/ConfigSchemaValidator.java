@@ -20,6 +20,7 @@ package org.jboss.sbomer.core.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
@@ -47,10 +48,12 @@ public class ConfigSchemaValidator implements Validator<Config> {
         }
 
         String schemaFile = GenerationRequestType.schemaFile(config.getClass());
+        String name = "schemas/" + schemaFile;
         String schema;
 
-        try (InputStream is = SchemaValidator.class.getClassLoader().getResourceAsStream("schemas/" + schemaFile)) {
-            schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        try (InputStream in = SchemaValidator.class.getClassLoader().getResourceAsStream(name)) {
+            Objects.requireNonNull(in, "Resource " + name + " not found");
+            schema = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);
         }

@@ -81,7 +81,7 @@ public class Constants {
     public static final String TEKTON_LABEL_VALUE_APP_PART_OF = "sbomer";
 
     /**
-     * The suffix which is used in a Task Run name to identify the number of retry attempt
+     * The suffix which is used in a Task Run name to identify the number of retry attempts
      */
     public static final String TEKTON_TASK_RUN_NAME_SUFFIX_RETRY_ATTEMPT = "retry";
 

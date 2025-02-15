@@ -43,8 +43,8 @@ public class UrlUtils {
     }
 
     /**
-     * Removes from the provided purl the qualifiers which are present (if any) in the allowList. If the purl does not
-     * contain any qualifier which needs to be removed, the original purl is returned, otherwise a new purl is built and
+     * Removes from the provided purl the qualifiers that are present (if any) in the allowList. If the purl does not
+     * contain any qualifier that needs to be removed, the original purl is returned, otherwise a new purl is built and
      * returned.
      *
      * @param purl the purl from which the qualifiers should be removed
@@ -65,7 +65,7 @@ public class UrlUtils {
                 return purl;
             }
 
-            // Qualifiers are not modifiable, we need to recreate the purl with new map of qualifiers
+            // Qualifiers are not modifiable, we need to recreate the purl with the new map of qualifiers
             TreeMap<String, String> modifiableQualifiers = new TreeMap<>(qualifiers);
             allowList.forEach(modifiableQualifiers.keySet()::remove);
 

@@ -891,8 +891,8 @@ public class ReleaseStandardAdvisoryEventsListener {
             // The NVR is not stored inside the generation, we need to get it from the manifest. Might be optimized in
             // the future.
             Sbom sbom = sbomService.get(manifestRecord.id());
-            String[] nvr = SbomUtils.computeNVRFromContainerManifest(sbom.getSbom());
-            if (nvr != null) {
+            List<String> nvr = SbomUtils.computeNVRFromContainerManifest(sbom.getSbom());
+            if (!nvr.isEmpty()) {
                 return String.join(NVR_STANDARD_SEPARATOR, nvr);
             }
         }

@@ -38,14 +38,14 @@ import lombok.extern.slf4j.Slf4j;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(ImageRequestConfig.TYPE_NAME)
 public class ImageRequestConfig extends RequestConfig {
-
     public static final String TYPE_NAME = "image";
+
     public static final String IDENTIFIER_KEY = "image";
 
-    {
-        this.type = TYPE_NAME;
+    private String image;
+
+    @Override
+    public String getType() {
+        return TYPE_NAME;
     }
-
-    String image;
-
 }

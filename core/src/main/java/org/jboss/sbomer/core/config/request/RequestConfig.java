@@ -47,13 +47,15 @@ import lombok.extern.slf4j.Slf4j;
 })
 public abstract class RequestConfig {
     /**
-     * The API version of the configuration file. In case of breaking changes this value will be used to detect the
+     * The API version of the configuration file. In case of breaking changes, this value will be used to detect the
      * correct (de)serializer.
      */
     @Builder.Default
     String apiVersion = "sbomer.jboss.org/v1alpha1";
 
     String type;
+
+    public abstract String getType();
 
     public String toJson() {
         try {
@@ -75,5 +77,4 @@ public abstract class RequestConfig {
             return null;
         }
     }
-
 }

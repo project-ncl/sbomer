@@ -106,6 +106,10 @@ public class PurlRebuilder {
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_WORDPRESSPLUGINPKG, "wordpress-plugin");
     }
 
+    private PurlRebuilder() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
+
     /**
      * Given a component, tries to create a valid purl using the Syft information (if available) and the component
      * properties

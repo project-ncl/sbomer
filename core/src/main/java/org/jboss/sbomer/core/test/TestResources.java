@@ -32,21 +32,21 @@ public class TestResources {
     }
 
     /**
-     * Reads test resource file and returns it as a String.
+     * Reads the test resource file and returns it as a String.
      */
     public static String asString(Path path) throws IOException {
         return Files.readString(path);
     }
 
     /**
-     * Reads test resource file and returns it as a String.
+     * Reads the test resource file and returns it as a String.
      */
     public static String asString(String path) throws IOException {
         return TestResources.asString(Paths.get("src", "test", "resources", path));
     }
 
     /**
-     * Reads test resource JSON file and returns it as a Map.
+     * Reads the test resource JSON file and returns it as a Map.
      */
     @SuppressWarnings("unchecked")
     public static Map<Object, Object> asMap(String path) throws IOException {
