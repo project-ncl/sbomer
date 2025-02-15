@@ -1,0 +1,7 @@
+{
+    "type": "org.jboss.sbomer.generation.request.zip.v1alpha1",
+    "metadata": {
+        "size": "xl"
+    },
+    "spec": { "url": "https://host.com/a/path/to/some.zip" }
+}

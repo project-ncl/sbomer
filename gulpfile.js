@@ -25,7 +25,7 @@ const { reload: livereload } =
 const { series, src, watch } = require("gulp");
 const yaml = require("js-yaml");
 
-const playbookFilename = "antora-playbook-dev.yml";
+const playbookFilename = "antora-playbook.yml";
 const playbook = yaml.load(fs.readFileSync(playbookFilename, "utf8"));
 const outputDir = (playbook.output || {}).dir || "./build/site";
 const serverConfig = {

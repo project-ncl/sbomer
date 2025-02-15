@@ -40,6 +40,9 @@
     <module>cli</module>
     <module>service</module>
     <module>e2e</module>
+    <module>eventing/core</module>
+    <module>eventing/orchestrator</module>
+    <module>eventing/handlers/umb</module>   
   </modules>
 
   <properties>
@@ -106,6 +109,11 @@
         <version>${version.quarkus-operator-sdk}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.36</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -234,7 +242,7 @@
         <version>4.6</version>
         <executions>
           <execution>
-            <phase>process-sources</phase>
+            <phase>test</phase>
             <goals>
               <goal>check</goal>
             </goals>

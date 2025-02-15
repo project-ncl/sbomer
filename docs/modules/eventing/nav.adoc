@@ -1,0 +1,7 @@
+* xref:index.adoc[Eventing]
+// This sections is WIP
+** xref:events/index.adoc[]
+*** xref:events/generation-request/index.adoc[]
+**** xref:events/generation-request/sizing.adoc[]
+** xref:umb.adoc[]
+

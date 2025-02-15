@@ -1,0 +1,23 @@
+= Generation Requests
+
+Cloud Events related to the manifest generation requests have following convention that
+are represented as the link:https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#type[Cloud Event type]:
+
+[source]
+----
+org.jboss.sbomer.generation.request.[TYPE].[VERSION]
+----
+
+Where:
+
+`org.jboss.sbomer.generation.request`:: A constant prefix which indicates that the Cloud Event is
+related to a Generation Request.
+`[TYPE]`:: Defines what is the request about, in other words: what content is subject for manifest generations. This influences which generator will be used to handle the request.
+Available types depend on the particular {project-name} deployment.
+`[VERSION]`:: The version of the Cloud Event. It controls the schema of the Cloud Event content
+as well and indirectly which generators will be able to process it.
++
+[NOTE]
+====
+You can read more about link:https://github.com/cloudevents/spec/blob/main/cloudevents/primer.md#versioning-of-cloudevents[Cloud Event versioning here].
+====

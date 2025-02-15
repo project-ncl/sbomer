@@ -36,6 +36,7 @@ ui:
     snapshot: true
 asciidoc:
   attributes:
+    project-name: SBOMer
     sbomer-url: https://sbomer.pnc.engineering.redhat.com
     sbomer-latest-api-version: v1beta1
     sbomer-conf-domino-version: 0.0
