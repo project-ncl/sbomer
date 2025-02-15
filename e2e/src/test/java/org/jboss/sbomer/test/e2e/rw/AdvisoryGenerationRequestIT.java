@@ -1,4 +1,4 @@
-/**
+/*
  * JBoss, Home of Professional Open Source.
  * Copyright 2023 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
@@ -20,7 +20,6 @@ package org.jboss.sbomer.test.e2e.rw;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,7 +46,7 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     private static final String ERRATA_QE_CONTAINER_IMAGE = "registry-proxy-stage.engineering.redhat.com/rh-osbs-stage/e2e-container-e2e-container-test-product@sha256:a7c041ff17c41f3f7b706159cc7e576f25b7012eae41898ee36074a0ff49e768";
 
     @Test
-    void testContainerGenerationOfQEAdvisory() throws IOException, URISyntaxException {
+    void testContainerGenerationOfQEAdvisory() throws IOException {
         String requestBody = Files.readString(sbomPath("advisory-88484.json"));
         List<String> generationIds = requestGeneration(requestBody);
         assertEquals(1, generationIds.size());
@@ -71,8 +70,8 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     // private static final String ERRATA_ID_QE_RPM = "89769"; // RHBA-2024:89769-01
     // private static final String ERRATA_RPM_NVR = "redhat-release-computenode-7.2-8.el7_2.1"; // id=561861
     @Test
-    @Disabled("Disabled until the rPM generator produces valid manifests")
-    void testRPMGenerationOfQEAdvisory() throws IOException, URISyntaxException {
+    @Disabled("Disabled until the RPM generator produces valid manifests")
+    void testRPMGenerationOfQEAdvisory() throws IOException {
         String requestBody = Files.readString(sbomPath("advisory-89769.json"));
         List<String> generationIds = requestGeneration(requestBody);
         assertEquals(1, generationIds.size());
@@ -85,7 +84,7 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
         final Response response = getManifestsForGeneration(generationId);
         assertEquals(1, response.body().jsonPath().getInt("totalHits"));
 
-        log.info("Advisory in QE status with Container generated!");
+        log.info("Advisory in QE status with RPM generated!");
     }
 
 }
