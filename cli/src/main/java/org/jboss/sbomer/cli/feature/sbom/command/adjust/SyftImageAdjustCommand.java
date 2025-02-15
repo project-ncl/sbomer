@@ -39,7 +39,7 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
     List<String> paths = new ArrayList<>();
 
     @Option(names = "--rpms", defaultValue = "false", negatable = true)
-    private boolean rpms;
+    boolean rpms;
 
     @Override
     protected String getAdjusterType() {

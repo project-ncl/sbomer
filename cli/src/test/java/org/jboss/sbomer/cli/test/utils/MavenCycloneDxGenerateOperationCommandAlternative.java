@@ -1,8 +1,10 @@
 package org.jboss.sbomer.cli.test.utils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import jakarta.enterprise.inject.Alternative;
 
@@ -17,11 +19,13 @@ import picocli.CommandLine.Command;
         description = "SBOM generation for deliverable Maven POMs using the CycloneDX Maven plugin")
 public class MavenCycloneDxGenerateOperationCommandAlternative extends CycloneDxGenerateOperationCommand {
 
+    private static final String OPERATION_JSON = "boms/operation.json";
+
     @Override
     protected Path doGenerate() {
-
-        try {
-            Files.copy(getClass().getClassLoader().getResourceAsStream("boms/operation.json"), getParent().getOutput());
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(OPERATION_JSON)) {
+            Objects.requireNonNull(in, "Resource " + OPERATION_JSON + " not found");
+            Files.copy(in, getParent().getOutput());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

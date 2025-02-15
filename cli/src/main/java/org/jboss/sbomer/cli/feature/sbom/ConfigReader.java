@@ -85,7 +85,7 @@ public class ConfigReader {
 
         String base64Config;
 
-        log.debug("Fetching file '{}' from the '{}' repository with tag '{}'", CONFIG_PATH, repository, scmTag);
+        log.debug("Fetching file '{}' from the '{}' GitHub repository with tag '{}'", CONFIG_PATH, repository, scmTag);
 
         try {
             base64Config = gitilesClient.fetchFile(repository, "refs/tags/" + scmTag, CONFIG_PATH);
@@ -114,7 +114,7 @@ public class ConfigReader {
         log.debug("Using GitLab config provider");
 
         // The group can be different from the standard "pnc-workspace"; the repository can have many nested names
-        // The regexp below will match e.g. both git@gitlab.cee.redhat.com:platform/build-and-release/requirements.git
+        // The regexp below will match, e.g., both git@gitlab.cee.redhat.com:platform/build-and-release/requirements.git
         // and https://gitlab.cee.redhat.com/platform/build-and-release/requirements.git
         Pattern pattern = Pattern.compile(getGitLabHost() + "[:/](.*)\\.git$");
         Matcher matcher = pattern.matcher(scmUrl);
@@ -126,7 +126,7 @@ public class ConfigReader {
         String project = matcher.group(1);
 
         log.debug("Found GitLab project: '{}'", project);
-        log.debug("Fetching file '{}' from the '{}' repository with tag '{}'", CONFIG_PATH, project, scmTag);
+        log.debug("Fetching file '{}' from the '{}' GitLab repository with tag '{}'", CONFIG_PATH, project, scmTag);
 
         try {
             return gitLabClient.fetchFile(project, scmTag, CONFIG_PATH).getBytes();

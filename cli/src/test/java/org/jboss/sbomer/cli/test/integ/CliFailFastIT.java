@@ -20,7 +20,7 @@ package org.jboss.sbomer.cli.test.integ;
 import java.nio.file.Path;
 import java.util.Set;
 
-import org.jboss.sbomer.cli.test.integ.CliFailFastIt.CustomPncServiceProfile;
+import org.jboss.sbomer.cli.test.integ.CliFailFastIT.CustomPncServiceProfile;
 import org.jboss.sbomer.cli.test.utils.FailedDefaultProcessCommand;
 import org.jboss.sbomer.cli.test.utils.MavenCycloneDxGenerateCommandMockAlternative;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
@@ -39,7 +39,7 @@ import io.quarkus.test.junit.main.QuarkusMainTest;
 @QuarkusMainTest
 @WithTestResource(PncWireMock.class)
 @TestProfile(CustomPncServiceProfile.class)
-class CliFailFastIt {
+class CliFailFastIT {
     public static class CustomPncServiceProfile implements QuarkusTestProfile {
         @Override
         public Set<Class<?>> getEnabledAlternatives() {

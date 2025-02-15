@@ -43,12 +43,12 @@ public class NodejsCycloneDxGenerateCommand extends AbstractNodejsGenerateComman
     protected Path doGenerate(String buildCmdOptions) {
         log.info("Starting SBOM generation using the CycloneDX NPM plugin...");
 
-        ProcessRunner.run(parent.getWorkdir(), command(buildCmdOptions));
+        ProcessRunner.run(parent.getWorkdir(), command());
 
         return Path.of(parent.getWorkdir().toAbsolutePath().toString(), BOM_FILE_NAME);
     }
 
-    private String[] command(String buildCmdOptions) {
+    private String[] command() {
         List<String> cmd = new ArrayList<>();
 
         cmd.add("cyclonedx-npm");

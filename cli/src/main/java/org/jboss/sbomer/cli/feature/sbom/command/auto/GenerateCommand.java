@@ -82,7 +82,7 @@ public class GenerateCommand implements Callable<Integer> {
      * @return {@code 0} in case the generation process finished successfully, {@code 1} in case a general error
      *         occurred that is not covered by more specific exit code, {@code 2} when a problem related to
      *         configuration file reading or parsing, {@code 3} when the index parameter is incorrect, {@code 4} when
-     *         generation process did not finish successfully
+     *         the generation process did not finish successfully
      */
     @Override
     public Integer call() {

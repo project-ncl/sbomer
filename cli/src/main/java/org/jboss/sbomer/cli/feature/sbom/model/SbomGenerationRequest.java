@@ -31,7 +31,8 @@ import lombok.extern.jackson.Jacksonized;
  * This is a just-enough representation of the {@link org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest}
  * class that is required for processing. This is used by the
  * {@link org.jboss.sbomer.cli.feature.sbom.client.SBOMerClient} REST client. As we are only interested in the
- * GenerationResult.SUCCESS and SbomGenerationStatus.FINISHED, there is no real point in mapping them here
+ * {@code GenerationResult.SUCCESS} and {@code SbomGenerationStatus.FINISHED}, there is no real point in mapping them
+ * here
  */
 @Data
 @Builder

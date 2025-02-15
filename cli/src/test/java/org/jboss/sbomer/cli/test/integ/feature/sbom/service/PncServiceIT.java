@@ -84,7 +84,7 @@ class PncServiceIT {
     }
 
     /**
-     * This tests a case where the productVersion in the build config is null. If this is the case we try to retrieve
+     * This tests a case where the productVersion in the build config is null. If this is the case, we try to retrieve
      * the productVersion from a groupConfig the build config is assigned to (if any).
      */
     @Test

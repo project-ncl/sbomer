@@ -27,7 +27,7 @@ import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 import io.smallrye.config.source.yaml.YamlConfigSourceLoader;
 
 /**
- * Adds support for configuration file stored in the user home directory under the {@code $HOME/.sbomer/config.yaml}.
+ * Adds support for a configuration file stored in the user home directory under the {@code $HOME/.sbomer/config.yaml}.
  * The configuration file extension could be {@code .yaml} or {@code .yml}.
  *
  */
