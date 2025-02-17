@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import com.github.packageurl.PackageURLBuilder;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
@@ -334,15 +335,12 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * @param workDir the working directory where the {@code skopeo.json} file is located
      */
     private void adjustNameAndPurl(Bom bom, Path workDir) {
-        String tag;
-        ContainerImageInspectOutput inspectData;
         final Component mainComponent = bom.getMetadata().getComponent();
+        ContainerImageInspectOutput inspectData;
 
         try {
             inspectData = ObjectMapperProvider.json()
-                    .readValue(
-                            Path.of(workDir.toAbsolutePath().toString(), "skopeo.json").toFile(),
-                            ContainerImageInspectOutput.class);
+                    .readValue(workDir.resolve("skopeo.json").toFile(), ContainerImageInspectOutput.class);
 
         } catch (IOException e) {
             throw new ApplicationException("Could not read 'skopeo inspect' output", e);
@@ -366,43 +364,25 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                     "The 'release' label was not found within the container image, cannot proceed");
         }
 
-        tag = versionOpt.get().getValue() + "-" + releaseOpt.get().getValue();
-
-        String name = inspectData.labels.get("name");
-        String[] componentNameParts = mainComponent.getName().split("/");
-
-        if (name == null) {
-            if (componentNameParts.length > 1) {
-                name = mainComponent.getName().substring(mainComponent.getName().indexOf("/"));
-            }
-        }
-
-        // FIXME: This can be null here
-        String[] nameParts = name.split(("/"));
-
-        TreeMap<String, String> qualifiers = new TreeMap<>();
-        qualifiers.put("os", inspectData.getOs());
-        qualifiers.put("arch", inspectData.getArchitecture());
-        qualifiers.put("tag", tag);
-
-        PackageURL purl;
+        String name = inspectData.labels
+                .getOrDefault("name", mainComponent.getName().substring(mainComponent.getName().indexOf("/") + 1));
+        mainComponent.setName(name);
 
         try {
-            purl = new PackageURL(
-                    "oci",
-                    null,
-                    nameParts[nameParts.length - 1],
-                    inspectData.getDigest(),
-                    qualifiers,
-                    null);
+            PackageURL purl = PackageURLBuilder.aPackageURL()
+                    .withType("oci")
+                    .withName(name.substring(name.lastIndexOf("/") + 1))
+                    .withVersion(inspectData.getDigest())
+                    .withQualifier("os", inspectData.getOs())
+                    .withQualifier("arch", inspectData.getArchitecture())
+                    .withQualifier("tag", versionOpt.get().getValue() + "-" + releaseOpt.get().getValue())
+                    .build();
+            log.debug("Generated purl: '{}'", purl);
+            mainComponent.setPurl(purl);
         } catch (MalformedPackageURLException e) {
             throw new ApplicationException("Cannot generate purl for container image", e);
         }
 
-        log.debug("Generated purl: '{}'", purl);
-
-        mainComponent.setPurl(purl);
-        mainComponent.setName(name);
     }
 
     /**
