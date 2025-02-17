@@ -291,9 +291,9 @@ public class CommentAdvisoryOnRelevantEventsListener {
             // The NVR is not stored inside the generation, we need to get it from the manifest. If it is null, it might
             // be a release manifest, we will return the identifier
             Sbom sbom = sbomService.get(manifestRecord.id());
-            String[] nvrArray = SbomUtils.computeNVRFromContainerManifest(sbom.getSbom());
-            if (nvrArray != null && nvrArray.length > 0) {
-                return String.join("-", nvrArray);
+            List<String> nvrList = SbomUtils.computeNVRFromContainerManifest(sbom.getSbom());
+            if (!nvrList.isEmpty()) {
+                return String.join("-", nvrList);
             }
             return manifestRecord.identifier() + ": ";
         }

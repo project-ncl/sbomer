@@ -18,15 +18,12 @@
 package org.jboss.sbomer.core.features.sbom.utils;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +77,9 @@ public class FileUtils {
             List<Path> manifestPaths = paths.filter(path -> MANIFEST_FILENAME.equals(path.getFileName().toString()))
                     .filter(Files::isRegularFile)
                     .sorted()
-                    .peek(path -> log.info("Found manifest at path '{}'", path.toAbsolutePath()))
+                    .peek(path -> log.info("Found manifest at path '{}'", path.toAbsolutePath())) // NOSONAR: peek() is
+                                                                                                  // used just for
+                                                                                                  // logging
                     .toList();
 
             log.info("Found {} generated manifests", manifestPaths.size());

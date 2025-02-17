@@ -40,15 +40,16 @@ import lombok.extern.slf4j.Slf4j;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(PncAnalysisRequestConfig.TYPE_NAME)
 public class PncAnalysisRequestConfig extends RequestConfig {
-
     public static final String TYPE_NAME = "pnc-analysis";
+
     public static final String IDENTIFIER_KEY = "milestoneId";
 
-    {
-        this.type = TYPE_NAME;
+    private String milestoneId;
+
+    private List<String> urls;
+
+    @Override
+    public String getType() {
+        return TYPE_NAME;
     }
-
-    String milestoneId;
-    List<String> urls;
-
 }

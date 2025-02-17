@@ -31,6 +31,10 @@ public class PurlSanitizer {
     private static final String NAME_VERSION_QKEY_QVALUE = "[^a-zA-Z0-9.+\\-_]";
     private static final String TYPE_INVALID_CHARS = "[^a-zA-Z0-9.+-]";
 
+    private PurlSanitizer() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
+
     /**
      * Sanitize a given PURL string by replacing invalid characters in each component.
      *
@@ -150,9 +154,13 @@ public class PurlSanitizer {
         return String.join("/", segments);
     }
 
-    public static TreeMap<String, String> sanitizeQualifiers(TreeMap<String, String> qualifiers) {
-        if (qualifiers == null)
-            return null;
+    public static TreeMap<String, String> sanitizeQualifiers(TreeMap<String, String> qualifiers) { // NOSONAR: This
+                                                                                                   // should be Map, but
+                                                                                                   // PackageURL
+                                                                                                   // requires TreeMap
+        if (qualifiers == null) {
+            return null; // NOSONAR: Should return an empty map, but PackageURL expects null
+        }
         TreeMap<String, String> sanitized = new TreeMap<>();
         for (Map.Entry<String, String> entry : qualifiers.entrySet()) {
             String key = entry.getKey().replaceAll(NAME_VERSION_QKEY_QVALUE, "");
@@ -163,8 +171,9 @@ public class PurlSanitizer {
     }
 
     private static TreeMap<String, String> parseQualifiers(String qualifiersPart) {
-        if (qualifiersPart == null || qualifiersPart.isEmpty())
-            return null;
+        if (qualifiersPart == null || qualifiersPart.isEmpty()) {
+            return null; // NOSONAR: Should return an empty map, but PackageURL expects null
+        }
         TreeMap<String, String> qualifiers = new TreeMap<>();
         String[] pairs = qualifiersPart.split("&");
         for (String pair : pairs) {

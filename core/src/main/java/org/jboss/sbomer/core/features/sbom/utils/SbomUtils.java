@@ -227,7 +227,8 @@ public class SbomUtils {
 
         // If the SCM repository is not internal and a commitID was computed, add the pedigree.
         if (!Strings.isEmpty(pncBuild.getScmRepository().getExternalUrl())
-                && pncBuild.getScmBuildConfigRevisionInternal() != null && !pncBuild.getScmBuildConfigRevisionInternal()
+                && pncBuild.getScmBuildConfigRevisionInternal() != null
+                && !Boolean.TRUE.equals(pncBuild.getScmBuildConfigRevisionInternal())
                 && pncBuild.getScmBuildConfigRevision() != null) {
 
             addPedigreeCommit(
@@ -382,8 +383,8 @@ public class SbomUtils {
                 schemaVersion());
     }
 
-    public static Tool createTool(String version) {
-        Tool tool = new Tool();
+    public static Tool createTool(String version) { // NOSONAR: Tool is deprecated, but this is for legacy support
+        Tool tool = new Tool(); // NOSONAR: Tool is deprecated, but this is for legacy support
         tool.setName(SBOMER_NAME);
         tool.setVendor(PUBLISHER);
         if (version != null) {
@@ -404,7 +405,7 @@ public class SbomUtils {
      * </p>
      *
      * <p>
-     * In some cases this will lead to duplicate components and dependencies. This process ensures that there are no
+     * In some cases, this will lead to duplicate components and dependencies. This process ensures that there are no
      * duplicates as well.
      * </p>
      *
@@ -448,18 +449,17 @@ public class SbomUtils {
     }
 
     /**
-     * Updates the bom-ref for the given component, and update the refs in the dependencies hierarchy, looking for
-     * nested dependencies and provides.
+     * Updates the bom-ref for the given component, and update the refs in the dependency hierarchy, looking for nested
+     * dependencies and provides.
      *
-     * @param component
-     * @param newRef
-     * @return
+     * @param component the component to update the bom-ref for
+     * @param newRef the new reference
      */
     public static void updateBomRef(Bom bom, Component component, String oldRef, String newRef) {
-        // Update the BOM reference of the component
+        // Update the BOM reference of the component.
         // There might be cases (mainly for components detected by Syft) where the same purl is duplicated across
-        // components (which have different bom-refs), so we need to check if there are not already dependencies having
-        // the bom-ref equals to the new purl before updating it, otherwise we would have bom validation errors.
+        // components (which have different bom-refs). So, we need to check if there are not already dependencies having
+        // the bom-ref equals to the new purl before updating it. Otherwise, we would have bom validation errors.
         if (oldRef.equals(component.getBomRef())
                 && !bom.getDependencies().stream().map(Dependency::getRef).toList().contains(newRef)) {
 
@@ -467,12 +467,12 @@ public class SbomUtils {
 
             // Recursively update the dependencies in the BOM
             if (bom.getDependencies() != null) {
-                Set<Dependency> updatedDependencies = new TreeSet<>();
+                List<Dependency> updatedDependencies = new ArrayList<>(bom.getDependencies().size());
                 for (Dependency dependency : bom.getDependencies()) {
                     updateDependencyRef(dependency, oldRef, newRef);
                     updatedDependencies.add(dependency);
                 }
-                bom.setDependencies(new ArrayList<>(updatedDependencies));
+                bom.setDependencies(updatedDependencies);
             }
         }
     }
@@ -518,11 +518,6 @@ public class SbomUtils {
 
     public static Dependency createDependency(String ref) {
         return new Dependency(ref);
-    }
-
-    public static boolean hasProperty(Component component, String property) {
-        return component.getProperties() != null
-                && component.getProperties().stream().anyMatch(c -> c.getName().equalsIgnoreCase(property));
     }
 
     public static boolean hasHash(Component component, Algorithm algorithm) {
@@ -624,6 +619,13 @@ public class SbomUtils {
         return bom.getComponents().stream().filter(c -> c.getPurl().equals(purl)).findFirst();
     }
 
+    public static boolean hasProperty(Component component, String property) {
+        return component.getProperties() != null
+                && component.getProperties().stream().anyMatch(c -> c.getName().equalsIgnoreCase(property));
+    }
+
+    // FIXME: hasProperty() uses equalsIgnoreCase(), but findPropertyWithNameInComponent() uses equals()
+    // TODO: Optimize so that addPropertyIfMissing() is not filtering twice by using, e.g., Optional.orElse()
     public static Optional<Property> findPropertyWithNameInComponent(String propertyName, Component component) {
         if (component == null) {
             return Optional.empty();
@@ -800,10 +802,10 @@ public class SbomUtils {
         }
     }
 
-    public static String[] computeNVRFromContainerManifest(JsonNode jsonNode) {
+    public static List<String> computeNVRFromContainerManifest(JsonNode jsonNode) {
         Bom bom = fromJsonNode(jsonNode);
         if (bom == null || bom.getComponents() == null || bom.getComponents().isEmpty()) {
-            return null;
+            return List.of();
         }
 
         Component mainComponent = bom.getComponents().get(0);
@@ -813,10 +815,10 @@ public class SbomUtils {
         Property r = findPropertyWithNameInComponent("sbomer:image:labels:release", mainComponent).orElse(null);
 
         if (n != null && v != null && r != null) {
-            return new String[] { n.getValue(), v.getValue(), r.getValue() };
+            return List.of(n.getValue(), v.getValue(), r.getValue());
         }
 
-        return null;
+        return List.of();
     }
 
     public static void setEvidenceIdentities(Component c, Set<String> concludedValues, Field field) {
@@ -1128,11 +1130,11 @@ public class SbomUtils {
     /**
      * Creates a new purl with the same name, namespace, subpath, type, version and qualifiers and add the specified
      * qualifier. If "redHatComponentsOnly" is true, add the qualifiers only if the component has a Red Hat version.
-     * Finally rebuilds the purl to make sure it is valid and qualifiers are properly sorted.
+     * Finally, rebuild the purl to make sure it is valid and qualifiers are properly sorted.
      *
      * @param component the input component which has the purl to modify
      * @param qualifiers the Map with the qualifiers key-value
-     * @param redHatComponentsOnly boolean, true if the qualifiers should be added only to components with Red Hat
+     * @param redHatComponentsOnly boolean, true if the qualifiers should be added only to components with the Red Hat
      *        version
      * @return The new validated purl as string.
      */

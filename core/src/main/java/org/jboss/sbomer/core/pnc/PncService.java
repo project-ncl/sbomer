@@ -412,8 +412,7 @@ public class PncService {
         }
         // If no artifact has a build, return the newest one
         log.debug("Found {} results, returning newest one", remoteArtifacts.size());
-        // FIXME: 'Optional.get()' without 'isPresent()' check
-        return allArtifacts.stream().skip(allArtifacts.size() - 1L).findFirst().get();
+        return allArtifacts.stream().skip(allArtifacts.size() - 1L).findFirst().orElse(null);
     }
 
     /**

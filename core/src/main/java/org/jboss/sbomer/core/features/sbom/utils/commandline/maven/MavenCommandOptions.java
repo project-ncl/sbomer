@@ -20,7 +20,11 @@ package org.jboss.sbomer.core.features.sbom.utils.commandline.maven;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import java.util.List;
+
 public class MavenCommandOptions {
+
+    private static final String COMPATIBILITY_DESC = "Ineffective, only kept for backward compatibility";
 
     private static final String ALSO_MAKE_OPTION = "am";
     private static final String ALSO_MAKE_DEPENDENTS_OPTION = "amd";
@@ -33,8 +37,12 @@ public class MavenCommandOptions {
     public static final String PROJECTS_OPTION = "pl";
     public static final String ALTERNATIVE_POM = "f";
 
-    public static final String[] NO_ARGS_OPTIONS = { ALSO_MAKE_OPTION, ALSO_MAKE_DEPENDENTS_OPTION,
-            STRICT_CHECKSUM_OPTION, LAX_CHECKSUM_OPTION, NON_RECURSIVE_OPTION };
+    public static final List<String> NO_ARGS_OPTIONS = List.of(
+            ALSO_MAKE_OPTION,
+            ALSO_MAKE_DEPENDENTS_OPTION,
+            STRICT_CHECKSUM_OPTION,
+            LAX_CHECKSUM_OPTION,
+            NON_RECURSIVE_OPTION);
 
     private MavenCommandOptions() {
         // This is a utility class
@@ -43,34 +51,18 @@ public class MavenCommandOptions {
     /**
      * Add ineffective maven command options kept for backward compatibility
      *
-     * @param options
-     * @return
+     * @param options the options to add the ineffective options to
+     * @return the options with the ineffective options added
      */
     public static Options addIneffectiveOptions(Options options) {
         options.addOption(
-                Option.builder("cpu")
-                        .longOpt("check-plugin-updates")
-                        .hasArg(false)
-                        .desc("Ineffective, only kept for backward compatibility")
-                        .build());
+                Option.builder("cpu").longOpt("check-plugin-updates").hasArg(false).desc(COMPATIBILITY_DESC).build());
         options.addOption(
-                Option.builder("npr")
-                        .longOpt("no-plugin-registry")
-                        .hasArg(false)
-                        .desc("Ineffective, only kept for backward compatibility")
-                        .build());
+                Option.builder("npr").longOpt("no-plugin-registry").hasArg(false).desc(COMPATIBILITY_DESC).build());
         options.addOption(
-                Option.builder("npu")
-                        .longOpt("no-plugin-updates")
-                        .hasArg(false)
-                        .desc("Ineffective, only kept for backward compatibility")
-                        .build());
+                Option.builder("npu").longOpt("no-plugin-updates").hasArg(false).desc(COMPATIBILITY_DESC).build());
         options.addOption(
-                Option.builder("up")
-                        .longOpt("update-plugins")
-                        .hasArg(false)
-                        .desc("Ineffective, only kept for backward compatibility")
-                        .build());
+                Option.builder("up").longOpt("update-plugins").hasArg(false).desc(COMPATIBILITY_DESC).build());
 
         return options;
     }
@@ -78,8 +70,8 @@ public class MavenCommandOptions {
     /**
      * Add maven command options which should be ignored but should be parsed
      *
-     * @param options
-     * @return
+     * @param options the options to add the ignorable options to
+     * @return the options with the ignorable options added
      */
     public static Options addIgnorableOptions(Options options) {
         options.addOption(
@@ -218,8 +210,8 @@ public class MavenCommandOptions {
     /**
      * Add maven command options which do not have any argument
      *
-     * @param options
-     * @return
+     * @param options the options to add the no-args options to
+     * @return the options with the no-args options added
      */
     public static Options addNoArgsOptions(Options options) {
         options.addOption(
@@ -259,8 +251,8 @@ public class MavenCommandOptions {
     /**
      * Add command line provided system properties
      *
-     * @param options
-     * @return
+     * @param options the options to add the system property options to
+     * @return the options with the system property options added
      */
     public static Options addSystemPropertyOptions(Options options) {
         options.addOption(
@@ -278,8 +270,8 @@ public class MavenCommandOptions {
     /**
      * Add maven command options to parse profiles
      *
-     * @param options
-     * @return
+     * @param options the options to add the profiles options to
+     * @return the options with the profiles options added
      */
     public static Options addProfilesOptions(Options options) {
         options.addOption(
@@ -296,8 +288,8 @@ public class MavenCommandOptions {
     /**
      * Add maven command options to parse projects
      *
-     * @param options
-     * @return
+     * @param options the options to add the projects options to
+     * @return the options with the projects options added
      */
     public static Options addProjectsOptions(Options options) {
         options.addOption(
@@ -315,8 +307,8 @@ public class MavenCommandOptions {
     /**
      * Add maven command options to parse pom alternative locations
      *
-     * @param options
-     * @return
+     * @param options the options to add the alternative pom options to
+     * @return the options with the alternative pom options added
      */
     public static Options addAlternativePomOption(Options options) {
         options.addOption(

@@ -394,7 +394,7 @@ class SbomUtilsTest {
         assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", bom.getComponents().get(1).getPurl());
         assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", bom.getComponents().get(2).getPurl());
 
-        // Main component's purl should be updated
+        // The main component's purl should be updated
         assertEquals(
                 "pkg:maven/main-product-updated/asm@9.1.0.redhat-00002?type=jar",
                 bom.getMetadata().getComponent().getPurl());

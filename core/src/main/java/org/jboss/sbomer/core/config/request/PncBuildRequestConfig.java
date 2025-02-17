@@ -38,13 +38,14 @@ import lombok.extern.slf4j.Slf4j;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(PncBuildRequestConfig.TYPE_NAME)
 public class PncBuildRequestConfig extends RequestConfig {
-
     public static final String TYPE_NAME = "pnc-build";
+
     public static final String IDENTIFIER_KEY = "buildId";
 
-    {
-        this.type = TYPE_NAME;
-    }
+    private String buildId;
 
-    String buildId;
+    @Override
+    public String getType() {
+        return TYPE_NAME;
+    }
 }

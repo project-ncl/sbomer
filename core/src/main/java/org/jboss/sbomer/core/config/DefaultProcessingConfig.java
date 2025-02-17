@@ -53,7 +53,7 @@ public interface DefaultProcessingConfig {
     /**
      * List of configured default processors.
      *
-     * @return
+     * @return the list of default processors
      */
     List<ProcessorConfig> defaultProcessors();
 
