@@ -5,7 +5,7 @@ its features.
 
 == Main Concepts
 
-Within SBOMer we can define a few concepts. It may be beneficioal to become familiar with them.
+Within SBOMer we can define a few concepts. It may be beneficial to become familiar with them.
 
 xref:generators/index.adoc[Generators]::
 Generators are responsible for base manifest generations. These are mostly external tools that
@@ -13,7 +13,7 @@ are abstracted within SBOMer. We can influence the generation process by supplyi
 generators.
 
 Adjusters::
-Adjusters are repsponsible for taking the output of generators and
+Adjusters are responsible for taking the output of generators and
 ensuring the format and the content of the manifest is consumable by SBOMer. Some features of adjusters
 are exposed via configuration, but in most cases this is a technical implementation on the
 SBOMer side. Not every generator needs an adjuster. In many cases the output of generator is taken as-is.
