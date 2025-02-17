@@ -27,7 +27,6 @@ import org.jboss.sbomer.cli.feature.sbom.generate.ProcessRunner;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
-import org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
