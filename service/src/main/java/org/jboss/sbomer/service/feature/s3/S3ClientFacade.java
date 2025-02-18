@@ -174,12 +174,12 @@ public class S3ClientFacade {
         }
     }
 
-    public void upload(String path, String key) {
+    public void upload(Path path, String key) {
         log.debug("Uploading '{}' file as '{}'...", path, key);
 
         try {
             PutObjectRequest request = PutObjectRequest.builder().key(key).bucket(bucketName()).build();
-            client.putObject(request, Path.of(path));
+            client.putObject(request, path);
         } catch (SdkException e) {
             throw new ApplicationException("An error occurred when uploading '{}' file to S3", path, e);
         }
