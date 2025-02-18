@@ -19,9 +19,12 @@
 package org.jboss.sbomer.service.feature.s3;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.NotFoundException;
@@ -58,10 +61,10 @@ public class S3StorageHandler {
      * @param rootDirectory
      * @return List of paths to all files.
      */
-    private List<String> getFilePaths(File rootDirectory) {
-        List<String> filePaths = new ArrayList<>();
+    private List<Path> getFilePaths(Path rootDirectory) {
+        List<Path> filePaths = new ArrayList<>();
 
-        if (rootDirectory.exists() && rootDirectory.isDirectory()) {
+        if (Files.isDirectory(rootDirectory)) {
             S3StorageHandler.getAllFileNamesRecursive(rootDirectory, filePaths);
         } else {
             log.error(
@@ -75,32 +78,30 @@ public class S3StorageHandler {
     /**
      * Populates the {@code filePaths} with absolute paths to files located under the {@code directory}.
      *
-     * @param directory
-     * @param filePaths
+     * @param directory the directory
+     * @param filePaths the list of file paths
      */
-    private static void getAllFileNamesRecursive(File directory, List<String> filePaths) {
-        log.debug("Handling '{}' directory...", directory.getAbsolutePath());
+    private static void getAllFileNamesRecursive(Path directory, List<Path> filePaths) {
+        log.debug("Handling '{}' directory...", directory.toAbsolutePath());
 
-        File[] files = directory.listFiles();
+        try (Stream<Path> stream = Files.list(directory)) {
+            stream.forEach(path -> {
+                Path fileName = path.getFileName();
 
-        if (files == null) {
-            log.debug("Provided directory is empty or unable to read files, ignoring");
-            return;
-        }
+                log.debug("Examining path '{}'...", fileName);
 
-        for (File file : files) {
-            log.debug("Examining path '{}'...", file.getName());
-
-            if (file.getName().startsWith(".")) {
-                log.debug("Skipping '{}', because it's a hidden file", file.getName());
-                continue;
-            }
-
-            if (file.isDirectory()) {
-                S3StorageHandler.getAllFileNamesRecursive(file, filePaths);
-            } else {
-                filePaths.add(file.getAbsolutePath());
-            }
+                if (fileName.startsWith(".")) {
+                    log.debug("Skipping '{}', because it's a hidden file", fileName);
+                } else {
+                    if (Files.isDirectory(path)) {
+                        S3StorageHandler.getAllFileNamesRecursive(path, filePaths);
+                    } else {
+                        filePaths.add(path.toAbsolutePath());
+                    }
+                }
+            });
+        } catch (IOException e) {
+            log.debug("Unable to read files in directory '" + directory + "', ignoring");
         }
     }
 
@@ -126,17 +127,17 @@ public class S3StorageHandler {
 
         log.info("Storing data in S3 for Generation request '{}'", generationRequest.getId());
 
-        File generationRootDir = Path.of(controllerConfig.sbomDir(), generationRequest.getMetadata().getName())
-                .toFile();
+        Path generationRootDir = Path.of(controllerConfig.sbomDir(), generationRequest.getMetadata().getName());
 
-        log.debug("Using '{}' directory to scan for files to be uploaded to S3", generationRootDir.getAbsolutePath());
+        log.debug("Using '{}' directory to scan for files to be uploaded to S3", generationRootDir.toAbsolutePath());
 
-        List<String> filePaths = getFilePaths(generationRootDir);
+        List<Path> filePaths = getFilePaths(generationRootDir);
 
         log.debug("Found {} files: {}", filePaths.size(), filePaths);
 
         filePaths.forEach(path -> {
-            String key = path.replaceFirst(generationRootDir.getAbsolutePath(), generationRequest.getId());
+            String key = String.join("/", generationRequest.getId(), generationRootDir.relativize(path).toString());
+
             if (!client.doesObjectExists(key)) {
                 client.upload(path, key);
             }

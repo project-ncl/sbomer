@@ -123,19 +123,19 @@ class S3FeatureTest {
         Path logFile = logsDir.resolve("init.log");
         Files.write(logFile, "Some log".getBytes());
 
-        // doNothing().when(clientFacade).upload(file.toFile().getAbsolutePath(),
+        // doNothing().when(clientFacade).upload(file.toAbsolutePath(),
         // "bucket-name/bucket-name/bom.json");
         when(clientFacade.doesObjectExists("AABBCC/bom.json")).thenReturn(false);
         when(clientFacade.doesObjectExists("AABBCC/logs/init.log")).thenReturn(true);
-        doNothing().when(clientFacade).upload(file.toFile().getAbsolutePath(), "AABBCC/bom.json");
-        doNothing().when(clientFacade).upload(logFile.toFile().getAbsolutePath(), "AABBCC/logs/init.log");
+        doNothing().when(clientFacade).upload(file.toAbsolutePath(), "AABBCC/bom.json");
+        doNothing().when(clientFacade).upload(logFile.toAbsolutePath(), "AABBCC/logs/init.log");
 
         storageHandler.storeFiles(generationRequest);
 
         verify(clientFacade, times(1)).doesObjectExists("AABBCC/bom.json");
-        verify(clientFacade, times(1)).upload(file.toFile().getAbsolutePath(), "AABBCC/bom.json");
+        verify(clientFacade, times(1)).upload(file.toAbsolutePath(), "AABBCC/bom.json");
         verify(clientFacade, times(1)).doesObjectExists("AABBCC/logs/init.log");
-        verify(clientFacade, times(0)).upload(logFile.toFile().getAbsolutePath(), "AABBCC/logs/init.log");
+        verify(clientFacade, times(0)).upload(logFile.toAbsolutePath(), "AABBCC/logs/init.log");
     }
 
     @Test
