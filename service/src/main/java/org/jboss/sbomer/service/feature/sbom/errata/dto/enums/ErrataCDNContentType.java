@@ -19,11 +19,11 @@ package org.jboss.sbomer.service.feature.sbom.errata.dto.enums;
 
 import lombok.Getter;
 
+@Getter
 public enum ErrataCDNContentType {
 
     BINARY("Binary"), DEBUGINFO("Debuginfo"), SOURCE("Source");
 
-    @Getter
     final String type;
 
     ErrataCDNContentType(String type) {

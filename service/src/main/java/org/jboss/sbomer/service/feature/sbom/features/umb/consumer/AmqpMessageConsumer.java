@@ -122,13 +122,13 @@ public class AmqpMessageConsumer {
 
         if (hasMessageId(event)) {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
-            // There is an issue in our queues and same messages are processed multiple times, we want to avoid
+            // There is an issue in our queues and same messages are processed multiple times which we want to avoid
             // generating manifests for the same event
             String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
             long alreadyGenerated = getAlreadyAckedUMBEventsFor(msgId);
             if (alreadyGenerated > 0) {
                 log.warn(
-                        "Message with id '{}' has been already received and processed {} times!! Will not process it again, skipping it",
+                        "Message with id '{}' has been already received and processed {} times for errata!! Will not process it again, skipping it",
                         msgId,
                         alreadyGenerated);
 
@@ -142,7 +142,7 @@ public class AmqpMessageConsumer {
             log.error("Unable to deserialize Errata message, this is unexpected", e);
             return nackAndSave(message, requestEvent, e);
         } catch (ApplicationException exc) {
-            log.error("Received error while handing request '{}': {}", requestEvent.getId(), exc.getMessage());
+            log.error("Received error while handing errata request '{}': {}", requestEvent.getId(), exc.getMessage());
             return nackAndSave(message, requestEvent, exc);
         } catch (RuntimeException exc) {
             log.error("Received error while handing request '{}'", requestEvent.getId(), exc);
@@ -177,7 +177,7 @@ public class AmqpMessageConsumer {
 
         if (hasMessageId(event)) {
             // Verify that there aren't already ACKED UMBMessages with the same msg id
-            // There is an issue in our queues and same messages are processed multiple times, we want to avoid
+            // There is an issue in our queues and same messages are processed multiple times which we want to avoid
             // generating manifests for the same event
             String msgId = event.get(EVENT_KEY_UMB_MSG_ID).asText();
             long alreadyGenerated = getAlreadyAckedUMBEventsFor(msgId);
@@ -222,7 +222,7 @@ public class AmqpMessageConsumer {
     private void identifyPncEvent(IncomingAmqpMetadata metadata, ObjectNode event) {
 
         JsonObject properties = metadata.getProperties();
-        log.debug("Message properties: {}", properties.toString());
+        log.debug("Message properties for PNC event: {}", properties.toString());
 
         if (Objects.equals(properties.getString("type"), "BuildStateChange")) {
             event.put(EVENT_KEY_UMB_MSG_TYPE, PncBuildRequestConfig.TYPE_NAME);

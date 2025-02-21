@@ -38,15 +38,15 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class CustomPredicateBuilder<T> {
+public class CustomPredicateBuilder {
 
     private CustomPredicateBuilder() {
-        // This is a utility class
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
     }
 
     public static <T> Predicate createPredicate(
             LogicalNode logical,
-            From root,
+            From<?, ?> root,
             Class<T> entity,
             EntityManagerAdapter ema,
             BuilderTools misc) {
@@ -69,14 +69,11 @@ public class CustomPredicateBuilder<T> {
             }
         }
 
-        switch (logical.getOperator()) {
-            case AND:
-                return builder.and(predicates.toArray(new Predicate[0]));
-            case OR:
-                return builder.or(predicates.toArray(new Predicate[0]));
-        }
+        return switch (logical.getOperator()) {
+            case AND -> builder.and(predicates.toArray(new Predicate[0]));
+            case OR -> builder.or(predicates.toArray(new Predicate[0]));
+        };
 
-        throw new IllegalArgumentException("Unknown operator: " + logical.getOperator());
     }
 
     /**
@@ -91,9 +88,9 @@ public class CustomPredicateBuilder<T> {
      */
     public static <T> Predicate createPredicate(
             ComparisonNode comparison,
-            From startRoot,
+            From<?, ?> startRoot,
             Class<T> entity,
-            EntityManagerAdapter ema,
+            EntityManagerAdapter entityManager,
             BuilderTools misc) {
 
         log.debug("Creating Predicate for comparison node: {}", comparison);
@@ -132,7 +129,8 @@ public class CustomPredicateBuilder<T> {
             comparison = comparison.withSelector(comparison.getSelector().replace("generation.", "generationRequest."));
         }
 
-        Path propertyPath = PredicateBuilder.findPropertyPath(comparison.getSelector(), startRoot, ema, misc);
+        Path<?> propertyPath = PredicateBuilder
+                .findPropertyPath(comparison.getSelector(), startRoot, entityManager, misc);
 
         if ((AbstractCriteriaAwareRepository.IS_NULL.equals(comparison.getOperator())
                 && Enum.class.isAssignableFrom(propertyPath.getJavaType())
@@ -146,11 +144,11 @@ public class CustomPredicateBuilder<T> {
                     comparison.getOperator().getSymbol());
 
             if (misc.getPredicateBuilder() != null) {
-                return misc.getPredicateBuilder().createPredicate(comparison, startRoot, entity, ema, misc);
+                return misc.getPredicateBuilder().createPredicate(comparison, startRoot, entity, entityManager, misc);
             }
         }
 
-        return PredicateBuilder.createPredicate(comparison, startRoot, entity, ema, misc);
+        return PredicateBuilder.createPredicate(comparison, startRoot, entity, entityManager, misc);
     }
 
 }

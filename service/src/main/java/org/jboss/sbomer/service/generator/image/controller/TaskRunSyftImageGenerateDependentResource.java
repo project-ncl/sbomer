@@ -70,7 +70,7 @@ public class TaskRunSyftImageGenerateDependentResource
     }
 
     public TaskRunSyftImageGenerateDependentResource(Class<TaskRun> resourceType) {
-        super(TaskRun.class);
+        super(resourceType);
     }
 
     @Override

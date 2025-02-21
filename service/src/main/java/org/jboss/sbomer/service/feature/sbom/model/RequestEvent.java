@@ -19,14 +19,16 @@ package org.jboss.sbomer.service.feature.sbom.model;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.config.request.RequestConfig;
-import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -45,16 +47,16 @@ import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @JsonInclude(Include.NON_NULL)
 @DynamicUpdate
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
 @ToString
 @Table(
@@ -72,7 +74,7 @@ public class RequestEvent extends PanacheEntityBase {
     public static final String IGNORED_DUPLICATED_REASON = "The message was already acknowledged";
     public static final String FAILED_GENERIC_REASON = "An error occurred while processing";
 
-    // The event keys for UMB event type
+    // The event keys for the UMB event type
     public static final String EVENT_KEY_UMB_CONSUMER = "consumer";
     public static final String EVENT_KEY_UMB_MSG_STATUS = "msg_status";
     public static final String EVENT_KEY_UMB_MSG = "msg";
@@ -113,7 +115,7 @@ public class RequestEvent extends PanacheEntityBase {
     private RequestEventStatus eventStatus;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "request_config", nullable = true)
+    @Column(name = "request_config")
     @ToString.Exclude
     @Schema(implementation = Map.class)
     private RequestConfig requestConfig;
@@ -124,7 +126,7 @@ public class RequestEvent extends PanacheEntityBase {
     @Schema(implementation = Map.class)
     private JsonNode event;
 
-    @Column(name = "reason", nullable = true, updatable = true)
+    @Column(name = "reason")
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
 
@@ -147,4 +149,35 @@ public class RequestEvent extends PanacheEntityBase {
         return this;
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null) {
+            return false;
+        }
+
+        Class<?> oEffectiveClass = (o instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = (this instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+
+        if (thisEffectiveClass != oEffectiveClass) {
+            return false;
+        }
+
+        RequestEvent requestEvent = (RequestEvent) o;
+        return Objects.equals(id, requestEvent.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return (this instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : getClass().hashCode();
+    }
 }

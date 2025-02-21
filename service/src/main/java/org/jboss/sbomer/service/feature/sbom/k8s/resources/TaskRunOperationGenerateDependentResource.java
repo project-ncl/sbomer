@@ -81,7 +81,7 @@ public class TaskRunOperationGenerateDependentResource extends KubernetesDepende
     }
 
     public TaskRunOperationGenerateDependentResource(Class<TaskRun> resourceType) {
-        super(TaskRun.class);
+        super(resourceType);
     }
 
     @Override
@@ -97,17 +97,13 @@ public class TaskRunOperationGenerateDependentResource extends KubernetesDepende
         Map<String, TaskRun> taskRuns = new HashMap<>(config.getDeliverableUrls().size());
 
         for (int i = 0; i < config.getDeliverableUrls().size(); i++) {
-            taskRuns.put(Integer.toString(i), desired(config, i, primary, context));
+            taskRuns.put(Integer.toString(i), desired(config, i, primary));
         }
 
         return taskRuns;
     }
 
-    private TaskRun desired(
-            OperationConfig config,
-            int index,
-            GenerationRequest generationRequest,
-            Context<GenerationRequest> context) {
+    private TaskRun desired(OperationConfig config, int index, GenerationRequest generationRequest) {
 
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}' GenerationRequest",
@@ -128,7 +124,7 @@ public class TaskRunOperationGenerateDependentResource extends KubernetesDepende
             throw new ApplicationException("Could not serialize runtime configuration into YAML", e);
         }
 
-        Duration timeout = null;
+        Duration timeout;
 
         try {
             timeout = Duration.parse("6h");

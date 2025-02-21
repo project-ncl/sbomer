@@ -32,7 +32,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.Duration;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
@@ -73,8 +72,6 @@ public class TaskRunGenerateBuildDependentResource extends KubernetesDependentRe
      */
     public static final String PARAM_COMMAND_INDEX_NAME = "index";
 
-    ObjectMapper objectMapper = ObjectMapperProvider.yaml();
-
     @ConfigProperty(name = "SBOMER_RELEASE", defaultValue = "sbomer")
     String release;
 
@@ -89,7 +86,7 @@ public class TaskRunGenerateBuildDependentResource extends KubernetesDependentRe
     }
 
     public TaskRunGenerateBuildDependentResource(Class<TaskRun> resourceType) {
-        super(TaskRun.class);
+        super(resourceType);
     }
 
     @Override
@@ -99,17 +96,13 @@ public class TaskRunGenerateBuildDependentResource extends KubernetesDependentRe
         Map<String, TaskRun> taskRuns = new HashMap<>(config.getProducts().size());
 
         for (int i = 0; i < config.getProducts().size(); i++) {
-            taskRuns.put(Integer.toString(i), desired(config, i, primary, context));
+            taskRuns.put(Integer.toString(i), desired(config, i, primary));
         }
 
         return taskRuns;
     }
 
-    private TaskRun desired(
-            PncBuildConfig config,
-            int index,
-            GenerationRequest generationRequest,
-            Context<GenerationRequest> context) {
+    private TaskRun desired(PncBuildConfig config, int index, GenerationRequest generationRequest) {
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}' GenerationRequest",
                 SbomGenerationPhase.GENERATE,
@@ -138,7 +131,7 @@ public class TaskRunGenerateBuildDependentResource extends KubernetesDependentRe
             throw new ApplicationException("Could not serialize environment configuration into JSON", e);
         }
 
-        Duration timeout = null;
+        Duration timeout;
 
         try {
             timeout = Duration.parse("6h");

@@ -119,7 +119,7 @@ public class ManifestsV1Beta1 {
     @Path("/{id}")
     @Operation(
             summary = "Get specific manifest",
-            description = "Get specific manifest for the provided identifier. Both; manifest identifer and purl's are supported.")
+            description = "Get specific manifest for the provided identifier. Both; manifest identifier and purl's are supported.")
     @Parameter(
             name = "id",
             description = "Manifest generation request identifier or purl",
@@ -197,7 +197,7 @@ public class ManifestsV1Beta1 {
                     "Manifest with could not be found for provided identifier: '" + identifier + "'");
         }
 
-        // TODO: We probably should ensure proper foormatting (ordering of keys)
+        // TODO: We probably should ensure proper formatting (ordering of keys)
         return sbom.getSbom();
     }
 
@@ -217,7 +217,7 @@ public class ManifestsV1Beta1 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response notify(@PathParam("id") String sbomId) throws Exception {
+    public Response notify(@PathParam("id") String sbomId) {
         if (featureFlags.isDryRun()) {
             log.warn("Skipping notification for manifest '{}' because of SBOMer running in dry-run mode", sbomId);
             return Response.status(Status.SERVICE_UNAVAILABLE).build();

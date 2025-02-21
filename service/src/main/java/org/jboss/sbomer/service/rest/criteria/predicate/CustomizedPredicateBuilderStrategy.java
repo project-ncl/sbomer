@@ -34,12 +34,10 @@ import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 
-import java.util.regex.Matcher;
-
 public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrategy {
 
     public static final char ESCAPE_CHAR = '\\';
-    public final static String WILDCARD_CHAR = "*";
+    public static final String WILDCARD_CHAR = "*";
 
     @Override
     public <T> Predicate createPredicate(
@@ -93,7 +91,6 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
         } else if (operator.equals(AbstractCriteriaAwareRepository.IS_LIKE)) {
             Object argument = cn.getArguments().get(0);
             if (argument instanceof String strArg) {
-
                 if (Enum.class.isAssignableFrom(path.getJavaType())) {
                     throw new IllegalArgumentException("Cannot use like predicate on Enum fields");
                 }
@@ -108,7 +105,6 @@ public class CustomizedPredicateBuilderStrategy implements PredicateBuilderStrat
     }
 
     private String preprocessLikeOperatorArgument(String argument) {
-        return argument.replaceAll("_", Matcher.quoteReplacement(ESCAPE_CHAR + "_"))
-                .replaceAll("\\" + WILDCARD_CHAR, "%");
+        return argument.replace("_", ESCAPE_CHAR + "_").replaceAll("\\" + WILDCARD_CHAR, "%");
     }
 }

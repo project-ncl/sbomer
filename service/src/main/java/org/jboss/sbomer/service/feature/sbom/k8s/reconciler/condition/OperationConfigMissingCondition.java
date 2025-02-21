@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OperationConfigMissingCondition implements Condition<TaskRun, GenerationRequest> {
 
-    final Boolean cleanup = ConfigProvider.getConfig()
+    final boolean cleanup = ConfigProvider.getConfig()
             .getValue("sbomer.controller.generation-request.cleanup", Boolean.class);
 
     @Override
@@ -64,10 +64,11 @@ public class OperationConfigMissingCondition implements Condition<TaskRun, Gener
         }
 
         // If the configuration is available (meaning that the initialization phase is finished) and the {@code cleanup}
-        // setting is set to false, reconcile. We won't reconcile multiple times at this point, the only thing we want
-        // to achieve is that the dependent resource (TaskRun) is retained.
+        // setting is set to false, reconcile.
+        // We won't reconcile multiple times at this point, so the only thing we want to achieve is that the dependent
+        // resource (TaskRun) is retained.
         // We should do this only in the case when there are already some secondary resources.
-        if (!cleanup && initTaskRunExist(context)) {
+        if (!cleanup && Boolean.TRUE.equals(initTaskRunExist(context))) {
             log.debug("OperationConfigMissingCondition is met: true");
             return true;
         }

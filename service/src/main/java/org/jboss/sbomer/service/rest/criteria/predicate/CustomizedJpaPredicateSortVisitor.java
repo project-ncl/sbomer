@@ -29,6 +29,7 @@ import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.OrNode;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Root;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,6 +37,12 @@ public class CustomizedJpaPredicateSortVisitor<T> {
 
     private Root<?> root;
     protected final Class<T> entityClass;
+    /**
+     * -- SETTER -- Set a predicate strategy.
+     *
+     * @param delegate PredicateBuilderStrategy.
+     */
+    @Setter
     protected BuilderTools builderTools = new SimpleBuilderTools();
 
     public CustomizedJpaPredicateSortVisitor(Class<T> type) {
@@ -59,7 +66,7 @@ public class CustomizedJpaPredicateSortVisitor<T> {
 
     public Collection<Order> visit(ComparisonNode node, EntityManagerAdapter ema) {
         log.trace("visit: ComparisonNode {}", node);
-        return CustomPredicateSortBuilder.createExpression(node, root, entityClass, ema, getBuilderTools());
+        return CustomPredicateSortBuilder.createExpression(node, root, ema, getBuilderTools());
     }
 
     public Collection<Order> accept(Node node, EntityManagerAdapter ema) {
@@ -82,15 +89,6 @@ public class CustomizedJpaPredicateSortVisitor<T> {
             this.builderTools = new SimpleBuilderTools();
         }
         return this.builderTools;
-    }
-
-    /**
-     * Set a predicate strategy.
-     *
-     * @param delegate PredicateBuilderStrategy.
-     */
-    public void setBuilderTools(BuilderTools delegate) {
-        this.builderTools = delegate;
     }
 
 }

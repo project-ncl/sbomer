@@ -20,7 +20,6 @@ package org.jboss.sbomer.service.feature.sbom.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
@@ -219,7 +218,7 @@ public class SbomService {
     @WithSpan
     public SbomGenerationRequest generateSyftImage(RequestEvent requestEvent, SyftImageConfig config) {
 
-        log.debug("Validating provided configuration...");
+        log.debug("Validating provided configuration for container image...");
         ValidationResult result = configSchemaValidator.validate(config);
 
         if (!result.isValid()) {
@@ -227,7 +226,7 @@ public class SbomService {
         }
 
         log.info("New generation request for container image '{}'", config.getImage());
-        log.debug("Creating GenerationRequest Kubernetes resource...");
+        log.debug("Creating GenerationRequest Kubernetes resource for container image...");
 
         GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.CONTAINERIMAGE)
                 .withIdentifier(config.getImage())
@@ -235,7 +234,7 @@ public class SbomService {
                 .withConfig(config)
                 .build();
 
-        log.debug("ConfigMap to create: '{}'", req);
+        log.debug("ConfigMap to create for container image: '{}'", req);
 
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
@@ -248,7 +247,7 @@ public class SbomService {
     public SbomGenerationRequest generateFromOperation(RequestEvent requestEvent, OperationConfig config) {
 
         log.info("New generation request for operationId '{}' ...", config.getOperationId());
-        log.debug("Creating GenerationRequest Kubernetes resource...");
+        log.debug("Creating GenerationRequest Kubernetes resource for operationId '{}'...", config.getOperationId());
 
         GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
                 .withIdentifier(config.getOperationId())
@@ -256,7 +255,7 @@ public class SbomService {
                 .build();
 
         if (config.getProduct() != null) {
-            log.debug("Received product configuration...");
+            log.debug("Received product configuration for operationId '{}'...", config.getOperationId());
             SbomerConfigProvider sbomerConfigProvider = SbomerConfigProvider.getInstance();
             sbomerConfigProvider.adjust(config);
 
@@ -277,7 +276,7 @@ public class SbomService {
             }
         }
 
-        log.debug("ConfigMap to create: '{}'", req);
+        log.debug("ConfigMap to create for operation: '{}'", req);
 
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
@@ -301,7 +300,7 @@ public class SbomService {
             MDCUtils.addBuildContext(pncRequestConfig.getBuildId());
 
             log.info("New generation request for build id '{}'", pncRequestConfig.getBuildId());
-            log.debug("Creating GenerationRequest Kubernetes resource...");
+            log.debug("Creating GenerationRequest Kubernetes resource for build id {}...", pncRequestConfig.getBuildId());
 
             GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
                     .withIdentifier(pncRequestConfig.getBuildId())
@@ -350,7 +349,7 @@ public class SbomService {
     @WithSpan
     @Transactional
     public SbomGenerationRequest generateNewOperation(RequestEvent requestEvent, DeliverableAnalysisConfig config) {
-        log.debug("Validating provided configuration...");
+        log.debug("Validating provided configuration for operation...");
 
         ValidationResult result = configSchemaValidator.validate(config);
 
@@ -476,9 +475,9 @@ public class SbomService {
     }
 
     /**
-     * Validates given {@link Sbom}.
+     * Validates given {@link Sbom SBOM}.
      *
-     * @param sbom
+     * @param sbom the SBOM to validate
      */
     private void validate(Sbom sbom) {
         log.debug("Performing validation of SBOM: {}", sbom);
@@ -566,7 +565,7 @@ public class SbomService {
 
         // Filter the results and remove the current (IN_PROGRESS) requestId
         List<V1Beta1RequestRecord> allAdvisoryRequestRecordsFiltered = allAdvisoryRequestRecords.stream()
-                .filter(record -> !record.id().equals(ignoreRequestId))
+                .filter(requestRecord -> !requestRecord.id().equals(ignoreRequestId))
                 .toList();
         log.debug("Filtering found records to ignore current IN_PROGRESS event {}", ignoreRequestId);
 

@@ -27,6 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class EventNotificationFiringUtil {
+    private EventNotificationFiringUtil() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
 
     public static void notifyRequestEventStatusUpdate(Object requestEventNotification) {
         RequestEventStatusUpdateEvent requestEvent = (RequestEventStatusUpdateEvent) requestEventNotification;
