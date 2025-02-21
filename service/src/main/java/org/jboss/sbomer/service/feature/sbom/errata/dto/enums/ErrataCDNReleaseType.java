@@ -19,11 +19,11 @@ package org.jboss.sbomer.service.feature.sbom.errata.dto.enums;
 
 import lombok.Getter;
 
+@Getter
 public enum ErrataCDNReleaseType {
 
     PRIMARY("Primary"), EUS("EUS"), FASTTRACK("FastTrack"), LONGLIFE("LongLife");
 
-    @Getter
     final String type;
 
     ErrataCDNReleaseType(String type) {

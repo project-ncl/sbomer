@@ -53,10 +53,11 @@ import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.PROTOCOL;
+
 @ApplicationScoped
 @Slf4j
 public class CommentAdvisoryOnRelevantEventsListener {
-
     @ConfigProperty(name = "SBOMER_ROUTE_HOST", defaultValue = "sbomer")
     String sbomerHost;
 
@@ -90,7 +91,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
 
         if (event.getRequestEventId() != null) {
             // Advisories which produced request events which handled the manifestation.
-            // Standard advisories and text-only advisories with "deliverables" notes content fall in this category.
+            // Standard advisories and text-only advisories with "deliverables" note content fall in this category.
             handleAutomatedManifestationAdvisory(event, config);
         } else {
             // Advisories whose manifestation was handled autonomously.
@@ -132,7 +133,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
                                 "\nFailed generations:\n"))
                 .append(generateRequestEventFinalSection(event.getRequestEventId()));
 
-        log.debug("Adding comment to advisoryId {} : '{}'", config.getAdvisoryId(), commentSb);
+        log.debug("Adding comment to automated advisory, id {}: '{}'", config.getAdvisoryId(), commentSb);
         doAddCommentToErratum(commentSb.toString(), config.getAdvisoryId());
     }
 
@@ -166,7 +167,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
                                 SbomGenerationStatus.FAILED,
                                 "\nFailed generations:\n"));
 
-        log.debug("Adding comment to advisoryId {} : '{}'", config.getAdvisoryId(), commentSb);
+        log.debug("Adding comment to manual advisory, id {}: '{}'", config.getAdvisoryId(), commentSb);
         doAddCommentToErratum(commentSb.toString(), config.getAdvisoryId());
     }
 
@@ -226,7 +227,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
                     String nvr = getGenerationNVRFromManifest(manifest);
                     generationsSection.append("\n")
                             .append(nvr)
-                            .append("https://")
+                            .append(PROTOCOL)
                             .append(sbomerHost)
                             .append("/generations/")
                             .append(manifest.generation().id());
@@ -257,7 +258,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
 
                 if (status.equals(generation.getStatus())) {
                     generationsSection.append("\n")
-                            .append("https://")
+                            .append(PROTOCOL)
                             .append(sbomerHost)
                             .append("/generations/")
                             .append(generation.getId());
@@ -274,7 +275,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
     }
 
     private String generateRequestEventFinalSection(String requestEventId) {
-        return "\n\nList of all manifests generated: " + "https://" + sbomerHost + "/requestevents/" + requestEventId
+        return "\n\nList of all manifests generated: " + PROTOCOL + sbomerHost + "/requestevents/" + requestEventId
                 + "\n";
     }
 

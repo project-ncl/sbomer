@@ -73,7 +73,7 @@ public class TaskRunBrewRPMGenerateDependentResource
     }
 
     public TaskRunBrewRPMGenerateDependentResource(Class<TaskRun> resourceType) {
-        super(TaskRun.class);
+        super(resourceType);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class TaskRunBrewRPMGenerateDependentResource
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
 
-        Duration timeout = null;
+        Duration timeout;
 
         try {
             timeout = Duration.parse("6h");

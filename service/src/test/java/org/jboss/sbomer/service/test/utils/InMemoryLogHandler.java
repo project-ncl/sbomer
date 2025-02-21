@@ -30,21 +30,22 @@ public class InMemoryLogHandler extends Handler {
     final List<LogRecord> records = new ArrayList<>();
 
     @Override
-    public void publish(LogRecord record) {
-        records.add(record);
+    public void publish(LogRecord logRecord) {
+        records.add(logRecord);
     }
 
     @Override
     public void flush() {
+
     }
 
     @Override
     public void close() throws SecurityException {
+
     }
 
     public List<String> getMessages() {
-        return records.stream().map(LogRecord::getMessage).collect(Collectors.toList());
-
+        return records.stream().map(LogRecord::getMessage).toList();
     }
 
     public boolean contains(String message) {

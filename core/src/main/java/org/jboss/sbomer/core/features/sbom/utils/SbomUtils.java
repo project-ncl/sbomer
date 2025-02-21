@@ -101,6 +101,7 @@ import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
 
 public class SbomUtils {
+    public static final String PROTOCOL = "https://";
 
     private SbomUtils() {
         // This is a utility class
@@ -205,7 +206,7 @@ public class SbomUtils {
         addExternalReference(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM,
-                "https://" + pncApiUrl + "/pnc-rest/v2/builds/" + pncBuild.getId(),
+                PROTOCOL + pncApiUrl + "/pnc-rest/v2/builds/" + pncBuild.getId(),
                 SBOM_RED_HAT_PNC_BUILD_ID);
 
         addExternalReference(
@@ -249,7 +250,7 @@ public class SbomUtils {
         addExternalReference(
                 component,
                 ExternalReference.Type.BUILD_SYSTEM,
-                "https://" + pncApiUrl + "/pnc-rest/v2/artifacts/" + artifact.getId(),
+                PROTOCOL + pncApiUrl + "/pnc-rest/v2/artifacts/" + artifact.getId(),
                 SBOM_RED_HAT_PNC_ARTIFACT_ID);
         return component;
     }
@@ -263,7 +264,7 @@ public class SbomUtils {
             addExternalReference(
                     component,
                     ExternalReference.Type.BUILD_SYSTEM,
-                    "https://" + pncApiUrl + "/pnc-rest/v2/operations/deliverable-analyzer/" + operation.getId(),
+                    PROTOCOL + pncApiUrl + "/pnc-rest/v2/operations/deliverable-analyzer/" + operation.getId(),
                     SBOM_RED_HAT_PNC_OPERATION_ID);
         }
 
@@ -705,7 +706,7 @@ public class SbomUtils {
                         "Found URL to be added as pedigree commit with the 'git@' protocol: '{}', trying to convert it into 'https://'",
                         url);
 
-                url = "https://" + matcher.group(1) + "/" + matcher.group(2);
+                url = PROTOCOL + matcher.group(1) + "/" + matcher.group(2);
 
                 log.debug("Converted into: '{}'", url);
 

@@ -272,7 +272,7 @@ class SbomGenerationRequestRepositoryTest {
         sbom.setId("13");
         sbom.setIdentifier(BUILD_ID_2_DELETE);
         sbom.setGenerationRequest(generationRequest);
-        sbom = sbomRepository.saveSbom(sbom);
+        sbomRepository.saveSbom(sbom);
 
         String rsqlQuery = "generationRequest.id=eq=" + REQUEST_ID_2_DELETE;
         List<Sbom> sbomsAfterInsert = sbomRepository
@@ -296,11 +296,11 @@ class SbomGenerationRequestRepositoryTest {
     @Test
     void testFindPendingOperationRequest() {
         long beforeInsertionSize = sbomGenerationRequestRepository.count();
-        String _id = "589A58D72C4D452";
-        String _identifier = "BAHVPNKYCYIAA";
+        String id = "589A58D72C4D452";
+        String identifier = "BAHVPNKYCYIAA";
         SbomGenerationRequest request = SbomGenerationRequest.builder()
-                .withId(_id)
-                .withIdentifier(_identifier)
+                .withId(id)
+                .withIdentifier(identifier)
                 .withCreationTime(Instant.now())
                 .withType(GenerationRequestType.OPERATION)
                 .withStatus(SbomGenerationStatus.NO_OP)
@@ -310,7 +310,7 @@ class SbomGenerationRequestRepositoryTest {
 
         assertEquals(beforeInsertionSize + 1, afterInsertionSize);
 
-        List<SbomGenerationRequest> pendingRequests = SbomGenerationRequest.findPendingRequests(_identifier);
+        List<SbomGenerationRequest> pendingRequests = SbomGenerationRequest.findPendingRequests(identifier);
         assertEquals(1, pendingRequests.size());
 
         GenerationRequest req = new GenerationRequestBuilder(pendingRequests.get(0).getType())
@@ -319,8 +319,8 @@ class SbomGenerationRequestRepositoryTest {
                 .withId(pendingRequests.get(0).getId())
                 .build();
 
-        assertEquals(_id, req.getId());
-        assertEquals(_identifier, req.getIdentifier());
+        assertEquals(id, req.getId());
+        assertEquals(identifier, req.getIdentifier());
 
     }
 }

@@ -55,7 +55,7 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
     }
 
     public TaskRunInitDependentResource(Class<TaskRun> resourceType) {
-        super(TaskRun.class);
+        super(resourceType);
     }
 
     /**

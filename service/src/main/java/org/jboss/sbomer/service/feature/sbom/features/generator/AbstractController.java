@@ -111,8 +111,8 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * Returns the {@link TaskRun} having the specified {@link SbomGenerationPhase} from the given {@link TaskRun}
      * {@link Set}.
      *
-     * @param taskRuns
-     * @param phase
+     * @param taskRuns the task runs
+     * @param phase the phase
      * @return The {@link TaskRun} or {@code null} if not found.
      */
     protected TaskRun findTaskRun(Set<TaskRun> taskRuns, SbomGenerationPhase phase) {
@@ -125,8 +125,8 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * Returns a set of {@link TaskRun}s having the specified {@link SbomGenerationPhase} from the given {@link TaskRun}
      * {@link Set}.
      *
-     * @param taskRuns
-     * @param phase
+     * @param taskRuns the task runs
+     * @param phase the phase
      * @return The {@link Set} containing {@link TaskRun} or empty set if not found.
      */
     protected Set<TaskRun> findTaskRuns(Set<TaskRun> taskRuns, SbomGenerationPhase phase) {
@@ -151,7 +151,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      *
      * @param generationRequest the generation request
      * @param boms the BOMs to store
-     * @return
+     * @return the list of stored {@link Sbom}s
      */
     @Transactional
     protected List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
@@ -211,7 +211,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     protected Boolean isSuccessful(TaskRun taskRun) {
         if (!isFinished(taskRun)) {
             log.trace("TaskRun '{}' still in progress", taskRun.getMetadata().getName());
-            return null;
+            return null; // FIXME: This is not really binary, but trinary state
         }
 
         if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
@@ -273,10 +273,10 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 action = reconcileGenerating(generationRequest, secondaryResources);
                 break;
             case FINISHED:
-                action = reconcileFinished(generationRequest, secondaryResources);
+                action = reconcileFinished(generationRequest);
                 break;
             case FAILED:
-                action = reconcileFailed(generationRequest, secondaryResources);
+                action = reconcileFailed(generationRequest);
                 break;
             default:
                 break;
@@ -321,17 +321,12 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     }
 
     /**
-     * <p>
      * Handling of failed generation.
-     * </p>
      *
-     * @param generationRequest
-     * @param secondaryResources
-     * @return
+     * @param generationRequest the generation request
+     * @return the update control for the generation request
      */
-    protected UpdateControl<GenerationRequest> reconcileFailed(
-            GenerationRequest generationRequest,
-            Set<TaskRun> secondaryResources) {
+    protected UpdateControl<GenerationRequest> reconcileFailed(GenerationRequest generationRequest) {
         log.debug("Reconcile FAILED for '{}'...", generationRequest.getName());
 
         s3LogHandler.storeFiles(generationRequest);
@@ -348,21 +343,17 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * Handles finished generation.
      * </p>
      *
-     * @param generationRequest
-     * @param secondaryResources
-     * @return
+     * @param generationRequest the generation request
+     * @return the update control for the generation request
      */
     @ActivateRequestContext
-    protected UpdateControl<GenerationRequest> reconcileFinished(
-            GenerationRequest generationRequest,
-            Set<TaskRun> secondaryResources) {
-
+    protected UpdateControl<GenerationRequest> reconcileFinished(GenerationRequest generationRequest) {
         log.debug("Reconcile FINISHED for '{}'...", generationRequest.getName());
 
         // Store files in S3
         try {
             s3LogHandler.storeFiles(generationRequest);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             // This is not fatal
             log.warn("Storing files in S3 failed", e);
         }
@@ -373,14 +364,14 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         return UpdateControl.noUpdate();
     }
 
-    protected void performPost(List<Sbom> sboms, GenerationRequest generationRequest) {
+    protected void performPost(List<Sbom> sboms) {
         CompletableFuture<Void> publishToUmb = CompletableFuture.runAsync(() -> {
             try {
                 notificationService.notifyCompleted(sboms);
             } catch (FeatureDisabledException e) {
                 log.warn(e.getMessage(), e);
             }
-        }).exceptionally((e) -> {
+        }).exceptionally(e -> {
             throw new ApplicationException("UMB notification failed: {}", e.getMessage(), e);
         });
 
@@ -390,7 +381,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
             } catch (FeatureDisabledException e) {
                 log.warn(e.getMessage(), e);
             }
-        }).exceptionally((e) -> {
+        }).exceptionally(e -> {
             throw new ApplicationException("Atlas upload failed: {}", e.getMessage(), e);
         });
 
@@ -410,9 +401,9 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * Handles updates to {@link GenerationRequest} being in progress.
      * </p>
      *
-     * @param generationRequest
-     * @param secondaryResources
-     * @return
+     * @param generationRequest the generation request
+     * @param secondaryResources the secondary resources
+     * @return the update control for the generation request
      */
     @Transactional
     protected abstract UpdateControl<GenerationRequest> reconcileGenerating(
@@ -422,7 +413,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     /**
      * Removes related to finished {@link GenerationRequest} and its instance as well.
      *
-     * @param generationRequest
+     * @param generationRequest the generation request
      */
     private void cleanupFinishedGenerationRequest(GenerationRequest generationRequest) {
         if (!controllerConfig.cleanup()) {

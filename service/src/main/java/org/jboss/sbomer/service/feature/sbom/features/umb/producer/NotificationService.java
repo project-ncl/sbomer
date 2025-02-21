@@ -116,7 +116,7 @@ public class NotificationService {
                         sbom.getId());
             }
 
-            /**
+            /*
              * https://issues.redhat.com/browse/SBOMER-19
              *
              * Skips sending UMB messages for manifests not related to a product build.
@@ -189,7 +189,7 @@ public class NotificationService {
 
         Build buildPayload = null;
         Operation operationPayload = null;
-        GenerationRequest generationRequest = null;
+        GenerationRequest generationRequest;
 
         switch (sbom.getGenerationRequest().getType()) {
             case CONTAINERIMAGE:
@@ -248,9 +248,9 @@ public class NotificationService {
         return GenerationFinishedMessageBody.builder()
                 .purl(sbom.getRootPurl())
                 .sbom(sbomPayload)
-                // Backwards compatibility, will be removed!
+                // Backwards compatibility will be removed!
                 .build(buildPayload)
-                // Backwards compatibility, will be removed!
+                // Backwards compatibility will be removed!
                 .operation(operationPayload)
                 .productConfig(productConfigPayload)
                 .build();

@@ -70,20 +70,28 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Slf4j
 public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent> {
+    private static final String BASE_COUNT_QUERY = "SELECT COUNT(*) FROM request";
+
+    private static final String BASE_SELECT_QUERY = "SELECT * FROM request";
+
+    private static final String WHERE = "WHERE";
+
+    private static final String AND = "AND";
+
+    private static final String EQUAL = "=";
+
+    private static final String NOT_EQUAL = "<>";
 
     public RequestEventRepository() {
         super(RequestEvent.class);
     }
 
-    private static final String BASE_COUNT_QUERY = "SELECT COUNT(*) FROM request";
-    private static final String BASE_SELECT_QUERY = "SELECT * FROM request";
-
     public long countUMBEventsWithStatusFrom(UMBMessageStatus status, UMBConsumer consumer) {
         StringBuilder query = initCountRequestQuery();
-        addCondition(query, "WHERE", REQUEST_EVENT_TYPE, "=");
-        addEventCondition(query, "AND", EVENT_KEY_UMB_CONSUMER, "=");
-        addEventCondition(query, "AND", EVENT_KEY_UMB_MSG_STATUS, "=");
-        addEventCondition(query, "AND", EVENT_KEY_UMB_MSG_TYPE, "<>");
+        addCondition(query, WHERE, REQUEST_EVENT_TYPE, EQUAL);
+        addEventCondition(query, AND, EVENT_KEY_UMB_CONSUMER, EQUAL);
+        addEventCondition(query, AND, EVENT_KEY_UMB_MSG_STATUS, EQUAL);
+        addEventCondition(query, AND, EVENT_KEY_UMB_MSG_TYPE, NOT_EQUAL);
 
         Map<String, Object> params = Map.of(
                 REQUEST_EVENT_TYPE,
@@ -100,8 +108,8 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
 
     public long countAllUMBEventsFrom(UMBConsumer consumer) {
         StringBuilder query = initCountRequestQuery();
-        addCondition(query, "WHERE", REQUEST_EVENT_TYPE, "=");
-        addEventCondition(query, "AND", EVENT_KEY_UMB_CONSUMER, "=");
+        addCondition(query, WHERE, REQUEST_EVENT_TYPE, EQUAL);
+        addEventCondition(query, AND, EVENT_KEY_UMB_CONSUMER, EQUAL);
 
         Map<String, Object> params = Map.of(REQUEST_EVENT_TYPE, UMB.name(), EVENT_KEY_UMB_CONSUMER, consumer.name());
 
@@ -110,9 +118,9 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
 
     public long countAlreadyAckedUMBEventsFor(String msgId) {
         StringBuilder query = initCountRequestQuery();
-        addCondition(query, "WHERE", REQUEST_EVENT_TYPE, "=");
-        addEventCondition(query, "AND", EVENT_KEY_UMB_MSG_STATUS, "=");
-        addEventCondition(query, "AND", EVENT_KEY_UMB_MSG_ID, "=");
+        addCondition(query, WHERE, REQUEST_EVENT_TYPE, EQUAL);
+        addEventCondition(query, AND, EVENT_KEY_UMB_MSG_STATUS, EQUAL);
+        addEventCondition(query, AND, EVENT_KEY_UMB_MSG_ID, EQUAL);
 
         Map<String, Object> params = Map
                 .of(REQUEST_EVENT_TYPE, UMB.name(), EVENT_KEY_UMB_MSG_STATUS, ACK.name(), EVENT_KEY_UMB_MSG_ID, msgId);
@@ -122,8 +130,8 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
 
     public long countEventsForTypeAndIdentifier(String typeValue, String identifierKey, String identifierValue) {
         StringBuilder query = initCountRequestQuery();
-        addConfigCondition(query, "WHERE", REQUEST_CONFIG_TYPE, "=");
-        addConfigCondition(query, "AND", identifierKey, "=");
+        addConfigCondition(query, WHERE, REQUEST_CONFIG_TYPE, EQUAL);
+        addConfigCondition(query, AND, identifierKey, EQUAL);
 
         Map<String, Object> params = Map.of(REQUEST_CONFIG_TYPE, typeValue, identifierKey, identifierValue);
 
@@ -276,10 +284,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
     }
 
     protected Instant convertFromTimestamp(Object rawTimeObject) {
-        if (rawTimeObject instanceof Timestamp) {
-            return ((Timestamp) rawTimeObject).toInstant();
-        }
-        return (Instant) rawTimeObject;
+        return rawTimeObject instanceof Timestamp timestamp ? timestamp.toInstant() : (Instant) rawTimeObject;
     }
 
     private String getValueOfField(Class<? extends RequestConfig> configClass, String fieldName) {
@@ -339,7 +344,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         if (filter == null || filter.isBlank()) {
             throw new ClientException("Filter cannot be null or empty.");
         }
-        String[] parameters = filter.split("=");
+        String[] parameters = filter.split(EQUAL);
         if (parameters.length != 2 || parameters[1] == null || parameters[1].isBlank()) {
             throw new ClientException("Invalid filter format. Expected 'key=value'.");
         }
@@ -394,18 +399,18 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         }
         if (RELEASE_METADATA_ERRATA_ID.equals(typeKey)) {
             sb.append("WHERE s.release_metadata is not null");
-            addReleaseMetadataCondition(sb, "AND", "s", "errata_id", "=");
+            addReleaseMetadataCondition(sb, AND, "s", "errata_id", EQUAL);
             return Map.of("errata_id", typeValue);
         }
         if (RELEASE_METADATA_ERRATA_FULLNAME.equals(typeKey)) {
             sb.append("WHERE s.release_metadata is not null");
-            addReleaseMetadataCondition(sb, "AND", "s", "errata_fullname", "=");
+            addReleaseMetadataCondition(sb, AND, "s", "errata_fullname", EQUAL);
             return Map.of("errata_fullname", typeValue);
         }
 
         String identifierKey = getValueOfField(TYPE_TO_CONFIG_CLASS.get(typeKey), "IDENTIFIER_KEY");
-        addConfigCondition(sb, "WHERE", REQUEST_CONFIG_TYPE, "=");
-        addConfigCondition(sb, "AND", identifierKey, "=");
+        addConfigCondition(sb, WHERE, REQUEST_CONFIG_TYPE, EQUAL);
+        addConfigCondition(sb, AND, identifierKey, EQUAL);
         return Map.of(REQUEST_CONFIG_TYPE, typeKey, identifierKey, typeValue);
     }
 
@@ -476,5 +481,4 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
                 .sorted((record1, record2) -> record2.receivalTime().compareTo(record1.receivalTime()))
                 .toList();
     }
-
 }

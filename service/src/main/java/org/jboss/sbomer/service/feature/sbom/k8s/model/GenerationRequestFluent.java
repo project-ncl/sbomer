@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -25,6 +26,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import io.fabric8.kubernetes.api.model.ConfigMapFluent;
 
 @Getter
+@EqualsAndHashCode(callSuper = true)
 @SuppressWarnings(value = "unchecked")
 public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> extends ConfigMapFluent<A> {
 

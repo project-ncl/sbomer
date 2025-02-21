@@ -118,6 +118,7 @@ class ErrataMessageHelperTestCase {
         assertEquals("8Base", variant.getData().getAttributes().getRelationships().getRhelVariant().getName());
     }
 
+    // TODO: Reduce number of assertions
     @Test
     void testErrataErratumDTO() throws IOException {
         String erratumJsonString = TestResources.asString("errata/api/erratum.json");

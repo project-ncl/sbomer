@@ -30,7 +30,7 @@ public class AmqpMessageHelper {
 
     /**
      * It looks that {@link InMemoryConnector} is not able to convert {@link OutgoingAmqpMetadata} from an outgoing
-     * message into {@link IncomingAmqpMetadata} for an incoming message, therefore we need to send messages with
+     * message into {@link IncomingAmqpMetadata} for an incoming message. Therefore, we need to send messages with
      * {@link IncomingAmqpMetadata}...
      *
      * @param payload The body to send

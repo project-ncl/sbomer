@@ -41,10 +41,10 @@ import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class CustomPredicateSortBuilder<T> {
+public class CustomPredicateSortBuilder {
 
     private CustomPredicateSortBuilder() {
-        // This is a utility class
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
     }
 
     public static <T> Collection<Order> createExpression(
@@ -65,7 +65,7 @@ public class CustomPredicateSortBuilder<T> {
             if (node instanceof LogicalNode ln) {
                 orders.addAll(createExpression(ln, root, entity, entityManager, misc));
             } else if (node instanceof ComparisonNode cn) {
-                orders.addAll(createExpression(cn, root, entity, entityManager, misc));
+                orders.addAll(createExpression(cn, root, entityManager, misc));
             } else {
                 throw new IllegalArgumentException("Unknown expression type: " + node.getClass());
             }
@@ -79,15 +79,13 @@ public class CustomPredicateSortBuilder<T> {
      *
      * @param comparison RSQL AST comparison node.
      * @param startRoot From that predicate expression paths depends on.
-     * @param entity The main entity of the query.
      * @param entityManager JPA EntityManager.
      * @param misc Facade with all necessary tools for predicate creation.
-     * @return Order a order representation of the Node.
+     * @return Order an order representation of the Node.
      */
     public static <T> Collection<Order> createExpression(
             ComparisonNode comparison,
             Root<?> startRoot,
-            Class<T> entity,
             EntityManagerAdapter entityManager,
             BuilderTools misc) {
 
@@ -113,7 +111,7 @@ public class CustomPredicateSortBuilder<T> {
         if (AbstractCriteriaAwareRepository.ASC.equals(comparison.getOperator())
                 || AbstractCriteriaAwareRepository.DESC.equals(comparison.getOperator())) {
 
-            return createOrder(comparison, startRoot, entity, entityManager, misc);
+            return createOrder(comparison, startRoot, entityManager, misc);
         }
 
         throw new IllegalArgumentException("Unknown comparison operator used for sorting " + comparison.getOperator());
@@ -122,7 +120,6 @@ public class CustomPredicateSortBuilder<T> {
     public static <T> Collection<Order> createOrder(
             Node node,
             Root<?> root,
-            Class<T> entity,
             EntityManagerAdapter ema,
             BuilderTools tools) throws IllegalArgumentException {
 

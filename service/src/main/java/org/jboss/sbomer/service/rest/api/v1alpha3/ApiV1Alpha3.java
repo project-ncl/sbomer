@@ -86,7 +86,7 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "v1alpha3", description = "(deprecated)")
 @PermitAll
 @Slf4j
-@Deprecated
+@Deprecated(since = "1.0.0", forRemoval = true)
 public class ApiV1Alpha3 {
     @Inject
     V1Alpha3Mapper mapper;
@@ -240,13 +240,11 @@ public class ApiV1Alpha3 {
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
-        Page<BaseSbomRecord> sboms = sbomService.searchSbomRecordsByQueryPaginated(
+        return sbomService.searchSbomRecordsByQueryPaginated(
                 paginationParams.getPageIndex(),
                 paginationParams.getPageSize(),
                 rsqlQuery,
                 sort);
-
-        return sboms;
     }
 
     @POST
@@ -398,7 +396,7 @@ public class ApiV1Alpha3 {
     public Response generateFromOperation(
             @PathParam("operationId") String operationId,
             OperationConfig config,
-            @Context ContainerRequestContext requestContext) throws Exception {
+            @Context ContainerRequestContext requestContext) {
 
         if (config == null) {
             config = new OperationConfig();
@@ -434,7 +432,7 @@ public class ApiV1Alpha3 {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response generateNewOperation(
             DeliverableAnalysisConfig config,
-            @Context ContainerRequestContext requestContext) throws Exception {
+            @Context ContainerRequestContext requestContext) {
 
         if (config == null) {
             config = new DeliverableAnalysisConfig();
@@ -499,7 +497,7 @@ public class ApiV1Alpha3 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response notify(@PathParam("id") String sbomId) throws Exception {
+    public Response notify(@PathParam("id") String sbomId) {
         if (featureFlags.isDryRun()) {
             log.warn("Skipping notification for SBOM '{}' because of SBOMer running in dry-run mode", sbomId);
             return Response.status(Status.SERVICE_UNAVAILABLE).build();

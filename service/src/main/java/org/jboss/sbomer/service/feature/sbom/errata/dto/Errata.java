@@ -139,16 +139,11 @@ public class Errata {
     private WrappedContent content;
 
     public Optional<Details> getDetails() {
-        switch (originalType) {
-            case RHSA:
-                return Optional.of(errata.rhsa);
-            case RHBA:
-                return Optional.of(errata.rhba);
-            case RHEA:
-                return Optional.of(errata.rhea);
-            default:
-                return Optional.empty();
-        }
+        return switch (originalType) {
+            case RHSA -> Optional.of(errata.rhsa);
+            case RHBA -> Optional.of(errata.rhba);
+            case RHEA -> Optional.of(errata.rhea);
+        };
     }
 
     public Optional<JsonNode> getNotesMapping() {

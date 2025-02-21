@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,17 +48,20 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AdvisoryEventUtils {
+    private AdvisoryEventUtils() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
 
     /*
-     * In case of mainline RHEL releases if the ProductVersion contains a major.minor, augment the CPE. e.g. in case of
-     * ProductVersion 'RHEL-9.4.0.Z.EUS', change
+     * In the case of mainline RHEL releases, if the ProductVersion contains a major.minor, augment the CPE, e.g., in
+     * the case of ProductVersion 'RHEL-9.4.0.Z.EUS', change
      *
      * cpe:/a:redhat:enterprise_linux:9::highavailability -> cpe:/a:redhat:enterprise_linux:9.4::highavailability
      * cpe:/a:redhat:enterprise_linux:9::server -> cpe:/a:redhat:enterprise_linux:9.4::server
      */
     /**
-     * In case of mainline RHEL releases if the ProductVersion contains a {major}.{minor} pattern, augment the original
-     * CPEs with the {minor} value, if not present already.
+     * In the case of mainline RHEL releases, if the ProductVersion contains a {major}.{minor} pattern, augment the
+     * original CPEs with the {minor} value, if not present already.
      *
      * @param productVersion {@link ProductVersionEntry} to analyze
      * @param originalCPEs the set of original CPEs to augment with more granular {minor} value
@@ -130,7 +134,7 @@ public class AdvisoryEventUtils {
      * Creates a set of purls from the given list of {@link RepositoryCoordinates} and with a specified version
      *
      * @param repositories the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
-     * @param version the version to setup on the purls
+     * @param version the version to set up on the purls
      * @param includeRepositoryQualifiers the flag which specifies whether the purls should contain the repository
      *        coordinates as qualifiers
      * @return The list of purls as strings.
@@ -139,19 +143,22 @@ public class AdvisoryEventUtils {
             List<RepositoryCoordinates> repositories,
             String version,
             boolean includeRepositoryQualifiers) {
-
-        return repositories.stream()
+        Set<String> set = repositories.stream()
                 .map(repository -> createPurl(repository, version, includeRepositoryQualifiers))
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(String::length).reversed()) // longest first
-                .collect(Collectors.toSet());
+                .sorted(
+                        Comparator.comparingInt(String::length)
+                                .reversed() // longest first
+                                .thenComparing(Comparator.naturalOrder()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return Collections.unmodifiableSet(set);
     }
 
     /**
      * Creates a purl from the given {@link RepositoryCoordinates} and with a specified version
      *
-     * @param repositories the {@link RepositoryCoordinates} which contains registry, repository and tag values
-     * @param version the version to setup on the purl
+     * @param repository the {@link RepositoryCoordinates} which contains registry, repository and tag values
+     * @param version the version to set up on the purl
      * @param includeRepositoryQualifiers the flag which specifies whether the purl should contain the repository
      *        coordinates as qualifiers
      * @return The purl as string.
@@ -180,7 +187,7 @@ public class AdvisoryEventUtils {
 
     /**
      * Creates a set of purls from the starting purl and the list of {@link ErrataCDNRepoNormalized} this build is
-     * publised to
+     * published to
      *
      * @param purl the purl to modify
      * @param cdns the list of {@link ErrataCDNRepoNormalized} which contain the CDN information
@@ -209,7 +216,7 @@ public class AdvisoryEventUtils {
                         .map(cdn -> rebuildPurl(purl, cdn))
                         .collect(Collectors.toSet());
             } else if (componentArch.equals("noarch")) {
-                // Select the "-rpms" CDN repositories (excluding -source-rpms and -debug-rpms) and include all the
+                // Select the "-rpms" CDN repositories (excluding "-source-rpms" and "-debug-rpms") and include all the
                 // archs provided
                 return cdns.stream()
                         .filter(
@@ -252,7 +259,7 @@ public class AdvisoryEventUtils {
     /**
      * Given an input purl, creates a new purl with the same name, namespace, subpath, type, version and qualifiers.
      * Additionally, add the new qualifier "repository_id" with the values provided in the
-     * {@link ErrataCDNRepoNormalized}. Finally rebuilds the purl to make sure it is valid and qualifiers are properly
+     * {@link ErrataCDNRepoNormalized}. Finally, rebuilds the purl to make sure it is valid and qualifiers are properly
      * sorted.
      *
      * @param originalPurl the input purl string
@@ -288,7 +295,7 @@ public class AdvisoryEventUtils {
     /**
      * Given an input purl, creates a new purl with the same name, namespace, subpath, type, version and qualifiers.
      * Additionally, add new qualifiers "tag" and "repository_url" with the values provided in the
-     * {@link RepositoryCoordinates}. Finally rebuilds the purl to make sure it is valid and qualifiers are properly
+     * {@link RepositoryCoordinates}. Finally, rebuilds the purl to make sure it is valid and qualifiers are properly
      * sorted.
      *
      * @param originalPurl the input purl string
@@ -325,11 +332,11 @@ public class AdvisoryEventUtils {
     /**
      * Given an input purl, creates a set of new purls with the same name, namespace, subpath, type, version and
      * qualifiers. Additionally, add new qualifiers "tag" and "repository_url" with the values provided in the
-     * {@link RepositoryCoordinates}. Finally rebuilds the purls to make sure they are valid and qualifiers are properly
-     * sorted.
+     * {@link RepositoryCoordinates}. Finally, rebuilds the purls to make sure they are valid and qualifiers are
+     * properly sorted.
      *
      * @param originalPurl the input purl string
-     * @param repository the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
+     * @param repositories the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
      * @return The new validated set of purls as string.
      */
     public static Set<String> rebuildPurls(String originalPurl, List<RepositoryCoordinates> repositories) {
@@ -338,9 +345,9 @@ public class AdvisoryEventUtils {
 
     /**
      * Given a list of {@link RepositoryCoordinates} find the preferred one (based on a score which gives the highest
-     * value to (repository fragment + tag) highest length).
+     * value to (repository fragment + tag) the highest length).
      *
-     * @param repository the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
+     * @param repositories the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
      * @return The preferred {@link RepositoryCoordinates}.
      */
     public static RepositoryCoordinates findPreferredRepo(List<RepositoryCoordinates> repositories) {
@@ -357,7 +364,7 @@ public class AdvisoryEventUtils {
      * @return The {minor} value found if any.
      */
     private static String captureMajorMinorVersion(ProductVersionEntry productVersion) {
-        Pattern pattern = Pattern.compile("(?:RHEL-)(\\d+\\.\\d+)");
+        Pattern pattern = Pattern.compile("RHEL-(\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(productVersion.getName());
         if (matcher.find()) {
             return matcher.group(1);

@@ -87,6 +87,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 class ErrataNotificationHandlerTest {
 
     static class ErrataNotificationHandlerAlt extends ErrataNotificationHandler {
+        @Override
         public void handle(RequestEvent requestEvent) throws IOException {
             super.handle(requestEvent);
         }

@@ -189,10 +189,10 @@ class ReleaseAdvisoryEventsListenerTest {
                     "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
                     "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94",
                     List.of(
-                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Fubi8%2Fruby-25&tag=1",
-                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Fubi8%2Fruby-25&tag=1-260.1733408998",
                             "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Frhel8%2Fruby-25&tag=1-260.1733408998",
-                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Frhel8%2Fruby-25&tag=1"),
+                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Fubi8%2Fruby-25&tag=1-260.1733408998",
+                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Frhel8%2Fruby-25&tag=1",
+                            "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94?repository_url=registry.access.redhat.com%2Fubi8%2Fruby-25&tag=1"),
                     Field.PURL);
 
             validateDependencies(
@@ -246,8 +246,8 @@ class ReleaseAdvisoryEventsListenerTest {
                         "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
                         "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4",
                         List.of(
-                                "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-gcp-filestore-csi-driver-operator-bundle&tag=v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8",
                                 "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-gcp-filestore-csi-driver-operator-bundle&tag=v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8-2",
+                                "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-gcp-filestore-csi-driver-operator-bundle&tag=v4.15.0.202412041605.p0.ga923e95.assembly.stream.el8",
                                 "pkg:oci/ose-gcp-filestore-csi-driver-operator-bundle@sha256%3A201088e8a5c8a59bac4f8bc796542fb76b162e68e5af521f8dd56d05446f52f4?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-gcp-filestore-csi-driver-operator-bundle&tag=v4.15"),
                         Field.PURL);
 
@@ -283,8 +283,8 @@ class ReleaseAdvisoryEventsListenerTest {
                         "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d",
                         List.of(
                                 "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-clusterresourceoverride-operator-bundle&tag=v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9-1",
-                                "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-clusterresourceoverride-operator-bundle&tag=v4.15",
-                                "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-clusterresourceoverride-operator-bundle&tag=v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9"),
+                                "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-clusterresourceoverride-operator-bundle&tag=v4.15.0.202412021736.p0.g40c168c.assembly.stream.el9",
+                                "pkg:oci/ose-clusterresourceoverride-operator-bundle@sha256%3Ad37ea60be41f378e0d3b9c0936d8c3fb0e218e00b8cdc3c073a3e35d494f3e8d?repository_url=registry.access.redhat.com%2Fopenshift4%2Fose-clusterresourceoverride-operator-bundle&tag=v4.15"),
                         Field.PURL);
 
                 validateDependencies(
@@ -312,12 +312,7 @@ class ReleaseAdvisoryEventsListenerTest {
                     .build();
 
             // Add more information for this release so to find manifests more easily
-            ObjectNode metadataNode = collectReleaseInfo(
-                    requestEvent.getId(),
-                    erratum,
-                    productVersion,
-                    toolVersion,
-                    bom);
+            ObjectNode metadataNode = collectReleaseInfo(requestEvent.getId(), erratum, productVersion, bom);
             sbom.setReleaseMetadata(metadataNode);
 
             assertEquals(
@@ -446,12 +441,7 @@ class ReleaseAdvisoryEventsListenerTest {
                     .build();
 
             // Add more information for this release so to find manifests more easily
-            ObjectNode metadataNode = collectReleaseInfo(
-                    requestEvent.getId(),
-                    erratum,
-                    productVersion,
-                    toolVersion,
-                    bom);
+            ObjectNode metadataNode = collectReleaseInfo(requestEvent.getId(), erratum, productVersion, bom);
             sbom.setReleaseMetadata(metadataNode);
 
             assertEquals(
@@ -543,7 +533,6 @@ class ReleaseAdvisoryEventsListenerTest {
                     erratum,
                     productName,
                     productVersion,
-                    toolVersion,
                     bom);
             sbom.setReleaseMetadata(metadataNode);
 
@@ -655,7 +644,6 @@ class ReleaseAdvisoryEventsListenerTest {
                     erratum,
                     productName,
                     productVersion,
-                    toolVersion,
                     bom);
             sbom.setReleaseMetadata(metadataNode);
 
@@ -825,7 +813,7 @@ class ReleaseAdvisoryEventsListenerTest {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -969,7 +957,7 @@ class ReleaseAdvisoryEventsListenerTest {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -1056,7 +1044,7 @@ class ReleaseAdvisoryEventsListenerTest {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -1121,7 +1109,7 @@ class ReleaseAdvisoryEventsListenerTest {
                                 && !cdn.getAttributes().getContentType().equalsIgnoreCase("docker"))
                 .map(cdn -> new ErrataCDNRepoNormalized(cdn, variantName, !"rhel".equalsIgnoreCase(shortProductName)))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private PyxisRepositoryDetails loadPyxisRepositoryDetails(String fileName) throws IOException {

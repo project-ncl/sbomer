@@ -19,15 +19,18 @@ package org.jboss.sbomer.service.feature.sbom.pyxis.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PyxisRepository {
 
-    private String _id;
+    @JsonProperty("_id")
+    private String id;
     private String registry;
     private String repository;
-    private boolean requires_terms;
+    @JsonProperty("requires_terms")
+    private boolean requiresTerms;
 
 }

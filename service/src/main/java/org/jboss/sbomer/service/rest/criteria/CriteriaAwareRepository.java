@@ -37,27 +37,15 @@ public class CriteriaAwareRepository<T extends PanacheEntityBase> extends Abstra
     public List<T> search(
             QueryParameters parameters,
             TriFunction<CriteriaQuery<T>, CriteriaBuilder, Root<T>, CriteriaQuery<T>> consumer) {
-
         CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(entityType);
 
-        return handleQuery(entityType, criteriaQuery, parameters, consumer);
+        return handleQuery(criteriaQuery, parameters, consumer);
     }
 
     protected <X> List<X> handleQuery(
-            Class<X> targetType,
             CriteriaQuery<X> criteriaQuery,
             QueryParameters parameters,
             TriFunction<CriteriaQuery<X>, CriteriaBuilder, Root<T>, CriteriaQuery<X>> consumer) {
-        return handleQuery(targetType, criteriaQuery, parameters, consumer, false);
-    }
-
-    protected <X> List<X> handleQuery(
-            Class<X> targetType,
-            CriteriaQuery<X> criteriaQuery,
-            QueryParameters parameters,
-            TriFunction<CriteriaQuery<X>, CriteriaBuilder, Root<T>, CriteriaQuery<X>> consumer,
-            boolean count) {
-
         Root<T> root = criteriaQuery.from(entityType);
 
         if (consumer != null) {
@@ -90,6 +78,6 @@ public class CriteriaAwareRepository<T extends PanacheEntityBase> extends Abstra
 
         CriteriaQuery<Z> criteriaQuery = criteriaBuilder.createQuery(recordType);
 
-        return handleQuery(recordType, criteriaQuery, parameters, consumer);
+        return handleQuery(criteriaQuery, parameters, consumer);
     }
 }
