@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  *
  * <p>
- * Following labels are expect to be present on the {@link ConfigMap} resource in order for it to be used as
+ * Following labels are expected to be present on the {@link ConfigMap} resource in order for it to be used as
  * {@link GenerationRequest}.
  * <ul>
  * <li>{@code app.kubernetes.io/part-of=sbomer}</li>
@@ -54,7 +54,7 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  *
  * <p>
- * Additionally following labels can be added:
+ * Additionally, the following labels can be added:
  *
  * <ul>
  * <li>{@code sbomer.jboss.org/sbom-build-id} -- the identifier of the build for which the generation is triggered</li>
@@ -135,8 +135,11 @@ public class GenerationRequest extends ConfigMap {
         return Config.fromString(configData);
     }
 
+    /**
+     * @deprecated Use {@link #getConfig()} instead.
+     */
     @JsonIgnore
-    @Deprecated
+    @Deprecated(since = "1.0.0", forRemoval = true)
     public <T extends Config> T getConfig(Class<T> clazz) {
         return getConfig(clazz, false);
     }

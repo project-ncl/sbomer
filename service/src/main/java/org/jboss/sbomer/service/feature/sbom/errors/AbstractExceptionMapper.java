@@ -56,11 +56,11 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
         return UUID.randomUUID().toString();
     }
 
-    Status getStatus(T ex) {
+    Status getStatus(T ex) { // NOSONAR: This is an abstract class, the implementation may use ex
         return Status.INTERNAL_SERVER_ERROR;
     }
 
-    String errorMessage(T ex) {
+    String errorMessage(T ex) { // NOSONAR: This is an abstract class, the implementation may use ex
         return "An error occurred while processing your request, please contact administrator providing the 'errorId'";
     }
 
@@ -82,7 +82,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
 
     /**
      * <p>
-     * A hook that is executed before the response is returned. It can be used for example to help audit things (log
+     * A hook that is executed before the response is returned. It can be used, for example, to help audit things (log
      * messages).
      * </p>
      *

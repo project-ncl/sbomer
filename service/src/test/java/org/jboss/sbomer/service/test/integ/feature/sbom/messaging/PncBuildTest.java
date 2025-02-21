@@ -112,7 +112,7 @@ class PncBuildTest {
                     .findFirst();
 
             if (request.isPresent()) {
-                log.info("Generation request was found!");
+                log.info("Generation request for PNC Build was found!");
                 return true;
             }
 
@@ -121,7 +121,7 @@ class PncBuildTest {
 
         verify(handler, times(1)).handle(requestEventArgumentCaptor.capture());
 
-        // Verify request event type
+        // Verify the request event type
         List<RequestEvent> requestEvents = requestEventArgumentCaptor.getAllValues();
         assertEquals(1, requestEvents.size());
         RequestEvent requestEvent = requestEvents.get(0);
@@ -168,7 +168,7 @@ class PncBuildTest {
                     .findFirst();
 
             if (request.isPresent()) {
-                log.info("Generation request was found!");
+                log.info("Generation request for Del Analysis Operation was found!");
                 return true;
             }
 
@@ -177,7 +177,7 @@ class PncBuildTest {
 
         verify(handler, times(1)).handle(requestEventArgumentCaptor.capture());
 
-        // Verify request event type
+        // Verify the request event type
         List<RequestEvent> requestEvents = requestEventArgumentCaptor.getAllValues();
         assertEquals(1, requestEvents.size());
         RequestEvent requestEvent = requestEvents.get(0);

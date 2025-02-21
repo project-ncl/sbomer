@@ -19,11 +19,13 @@ package org.jboss.sbomer.service.feature.sbom.model;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
@@ -49,7 +51,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -58,7 +59,6 @@ import lombok.ToString;
 @DynamicUpdate
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @ToString
 @Table(
@@ -90,7 +90,7 @@ public class Sbom extends PanacheEntityBase {
     @CycloneDxBom
     @ToString.Exclude
     @Schema(implementation = Map.class) // Workaround for swagger limitation of not being able to digest through a very
-                                        // big schema which is the case if we would use the Bom.class
+                                        // big schema which is the case if we use the Bom.class
     private JsonNode sbom;
 
     @Column(name = "config_index")
@@ -107,7 +107,7 @@ public class Sbom extends PanacheEntityBase {
     private String statusMessage;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "release_metadata", nullable = true)
+    @Column(name = "release_metadata")
     @ToString.Exclude
     @Schema(implementation = Map.class)
     private JsonNode releaseMetadata;
@@ -137,4 +137,35 @@ public class Sbom extends PanacheEntityBase {
         setupRootPurl();
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null) {
+            return false;
+        }
+
+        Class<?> oEffectiveClass = (o instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = (this instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+
+        if (thisEffectiveClass != oEffectiveClass) {
+            return false;
+        }
+
+        Sbom sbom1 = (Sbom) o;
+        return Objects.equals(id, sbom1.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return (this instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : getClass().hashCode();
+    }
 }

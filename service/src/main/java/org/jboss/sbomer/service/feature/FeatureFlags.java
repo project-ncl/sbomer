@@ -172,9 +172,9 @@ public class FeatureFlags implements UnleashSubscriber {
     }
 
     /**
-     * Returns {@code true} if the manifest generation of text only Errata is enabled.
+     * Returns {@code true} if the manifest generation of text-only Errata is enabled.
      *
-     * @return {@code true} if the manifest generation of text only Errata is enabled, {@code false} otherwise
+     * @return {@code true} if the manifest generation of text-only Errata is enabled, {@code false} otherwise
      */
     public boolean textOnlyErrataManifestGenerationEnabled() {
         return unleash.isEnabled(TOGGLE_TEXTONLY_ERRATA_MANIFEST_GENERATION, textonlyErrataGeneration);
@@ -214,9 +214,9 @@ public class FeatureFlags implements UnleashSubscriber {
     }
 
     /**
-     * Returns {@code true} if the release manifest generation of text only Errata is enabled.
+     * Returns {@code true} if the release manifest generation of text-only Errata is enabled.
      *
-     * @return {@code true} if the release manifest generation of text only Errata is enabled, {@code false} otherwise
+     * @return {@code true} if the release manifest generation of text-only Errata is enabled, {@code false} otherwise
      */
     public boolean textOnlyErrataReleaseManifestGenerationEnabled() {
         return unleash.isEnabled(TOGGLE_TEXTONLY_ERRATA_RELEASE_MANIFEST_GENERATION, textonlyErrataReleaseGeneration);
@@ -257,18 +257,11 @@ public class FeatureFlags implements UnleashSubscriber {
                 TOGGLE_STANDARD_ERRATA_IMAGE_RELEASE_MANIFEST_GENERATION,
                 TOGGLE_TEXTONLY_ERRATA_RELEASE_MANIFEST_GENERATION)) {
             FeatureToggle toggle = toggleResponse.getToggleCollection().getToggle(toggleName);
+            Boolean previousValue = toggleValues.put(toggleName, toggle.isEnabled());
 
-            // FIXME: toggle != null is always 'true'
-            if (toggle != null) {
-                Boolean previousValue = toggleValues.put(toggleName, toggle.isEnabled());
-
-                if (previousValue == null || previousValue != toggle.isEnabled()) {
-                    log.info("Feature toggle {} was just {}", toggleName, toggle.isEnabled() ? "enabled" : "disabled");
-                    bus.publish(EVENT_NAME, Map.of(toggleName, toggle.isEnabled()));
-                }
-            } else {
-                log.debug("Feature toggle {} was disabled", toggleName);
-                toggleValues.remove(toggleName);
+            if (previousValue == null || previousValue != toggle.isEnabled()) {
+                log.info("Feature toggle {} was just {}", toggleName, toggle.isEnabled() ? "enabled" : "disabled");
+                bus.publish(EVENT_NAME, Map.of(toggleName, toggle.isEnabled()));
             }
         }
 
@@ -280,7 +273,7 @@ public class FeatureFlags implements UnleashSubscriber {
     }
 
     /**
-     * A callback which will be called when feature flags will be retreieved.
+     * A callback which will be called when feature flags are retrieved.
      */
     @Override
     public void togglesFetched(FeatureToggleResponse toggleResponse) {

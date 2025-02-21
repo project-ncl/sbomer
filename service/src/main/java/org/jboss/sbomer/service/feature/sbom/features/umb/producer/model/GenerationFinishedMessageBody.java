@@ -47,7 +47,7 @@ public class GenerationFinishedMessageBody {
     String purl;
 
     /**
-     * Product information. for which the main component is
+     * Product information corresponding to the main component
      */
     ProductConfig productConfig;
 
@@ -61,6 +61,7 @@ public class GenerationFinishedMessageBody {
      *
      * @deprecated Should be used via sbom.generationRequest.build
      */
+    @Deprecated(since = "1.0.0", forRemoval = true)
     Build build;
 
     /**
@@ -68,6 +69,7 @@ public class GenerationFinishedMessageBody {
      *
      * @deprecated Should be used via sbom.generationRequest.operation
      */
+    @Deprecated(since = "1.0.0", forRemoval = true)
     Operation operation;
 
     /**

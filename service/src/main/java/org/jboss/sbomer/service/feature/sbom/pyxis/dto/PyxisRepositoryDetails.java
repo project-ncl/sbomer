@@ -26,7 +26,6 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PyxisRepositoryDetails {
-
     private List<DataSection> data;
 
     @Data
@@ -38,8 +37,11 @@ public class PyxisRepositoryDetails {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Repository {
         private boolean published;
+
         private String registry;
+
         private String repository;
+
         private List<Tag> tags;
 
         @JsonIgnoreProperties(ignoreUnknown = true)

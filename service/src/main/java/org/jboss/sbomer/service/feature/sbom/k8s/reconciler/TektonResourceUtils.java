@@ -99,10 +99,10 @@ public class TektonResourceUtils {
     /**
      * Fetches configured compute resource values for a given generator.
      *
-     * @param generatorType
-     * @param type
-     * @param target
-     * @return
+     * @param generatorType the generator type
+     * @param type the resource type
+     * @param target the res
+     * @return the resource value
      */
     private static String getResources(GenerationRequestType generatorType, ResourceType type, ResourceTarget target) {
         Optional<String> value = ConfigProvider.getConfig()
@@ -115,6 +115,5 @@ public class TektonResourceUtils {
                         String.class);
 
         return value.orElse(null);
-
     }
 }

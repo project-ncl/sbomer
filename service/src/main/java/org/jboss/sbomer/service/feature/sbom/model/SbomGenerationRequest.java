@@ -22,10 +22,12 @@ import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificati
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -56,16 +58,16 @@ import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @JsonInclude(Include.NON_NULL)
 @DynamicUpdate
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
 @ToString
 @Table(
@@ -95,7 +97,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @Enumerated(EnumType.STRING)
     GenerationRequestType type;
 
-    @Column(name = "result", nullable = true, updatable = true)
+    @Column(name = "result")
     @Enumerated(EnumType.STRING)
     GenerationResult result;
 
@@ -108,7 +110,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @Schema(implementation = Map.class)
     private Config config;
 
-    @Column(name = "reason", nullable = true, updatable = true)
+    @Column(name = "reason")
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
 
@@ -120,8 +122,8 @@ public class SbomGenerationRequest extends PanacheEntityBase {
      * Method to sync the {@link GenerationRequest} Kubernetes resource with the {@link SbomGenerationRequest} entity in
      * the database, with a provided request event.
      *
-     * @param generationRequest
-     * @param request
+     * @param generationRequest the generation request to sync
+     * @param request the request event to sync with
      * @return Updated {@link SbomGenerationRequest} entity
      */
     @Transactional
@@ -142,7 +144,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                     .build();
         }
 
-        // Finally sync the SbomGenerationRequest entity with the GenerationRequest.
+        // Finally, sync the SbomGenerationRequest entity with the GenerationRequest.
         sbomGenerationRequest.setStatus(generationRequest.getStatus());
         // And reason
         sbomGenerationRequest.setReason(generationRequest.getReason());
@@ -151,7 +153,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         // And config
         sbomGenerationRequest.setConfig(generationRequest.getConfig());
 
-        // If the request is null (e.g. sync called from the controllers) do not override it
+        // If the request is null (e.g., sync called from the controllers) do not override it
         if (request != null) {
             RequestEvent dbRequestEvent = RequestEvent.findById(request.getId()); // NOSONAR
             if (dbRequestEvent == null) {
@@ -160,7 +162,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
             sbomGenerationRequest.setRequest(dbRequestEvent);
         }
 
-        // Update the status of the request of this generation
+        // Update the status of the request for this generation
         updateRequestEventStatus(sbomGenerationRequest);
 
         // Store it in the database
@@ -252,7 +254,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
      * Method to sync the {@link GenerationRequest} Kubernetes resource with the {@link SbomGenerationRequest} entity in
      * the database.
      *
-     * @param generationRequest
+     * @param generationRequest the generation request to sync
      * @return Updated {@link SbomGenerationRequest} entity
      */
     @Transactional
@@ -274,4 +276,35 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         creationTime = Instant.now();
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null) {
+            return false;
+        }
+
+        Class<?> oEffectiveClass = (o instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = (this instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+
+        if (thisEffectiveClass != oEffectiveClass) {
+            return false;
+        }
+
+        SbomGenerationRequest generationRequest = (SbomGenerationRequest) o;
+        return Objects.equals(id, generationRequest.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return (this instanceof HibernateProxy proxy)
+                ? proxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : getClass().hashCode();
+    }
 }

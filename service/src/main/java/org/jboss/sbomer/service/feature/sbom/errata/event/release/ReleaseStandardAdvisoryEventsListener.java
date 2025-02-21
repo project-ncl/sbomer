@@ -128,7 +128,7 @@ public class ReleaseStandardAdvisoryEventsListener {
             Component.Type productType = AdvisoryEventUtils
                     .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
 
-            // Associate each ProductVersion to its list of CPEs
+            // Associate each ProductVersion with its list of CPEs
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs = mapProductVersionToCPEs(advisoryBuildDetails);
 
             // Associate each build (NVR) in an advisory to its build manifest generation
@@ -248,7 +248,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     generationToCDNs);
             // FIXME: 'Optional.get()' without 'isPresent()' check
             log.info(
-                    "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
+                    "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}' for RPM builds",
                     sbom,
                     releaseGeneration.getId(),
                     productVersion.getName(),
@@ -317,7 +317,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     generationToRepositories);
             // FIXME: 'Optional.get()' without 'isPresent()' check
             log.info(
-                    "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
+                    "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}' for Docker builds",
                     sbom,
                     releaseGeneration.getId(),
                     productVersion.getName(),
@@ -360,7 +360,7 @@ public class ReleaseStandardAdvisoryEventsListener {
             Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs) {
 
         // From the generation triggered from this build (NVR), find the single manifest created and get the manifest
-        // content, we need to copy the main component
+        // content that we need to copy the main component
         V1Beta1RequestManifestRecord manifestRecord = advisoryManifestsRecord.manifests()
                 .stream()
                 .filter(manifest -> manifest.generation().id().equals(generation.id()))
@@ -382,7 +382,7 @@ public class ReleaseStandardAdvisoryEventsListener {
         Set<String> evidencePurls = AdvisoryEventUtils
                 .createPurls(manifestMainComponent.getPurl(), allCDNs, manifestArches);
 
-        // Finally create the root component for this build (NVR) from the manifest
+        // Finally, create the root component for this build (NVR) from the manifest
         Component nvrRootComponent = SbomUtils.createComponent(
                 null,
                 manifestMainComponent.getName(),
@@ -406,8 +406,8 @@ public class ReleaseStandardAdvisoryEventsListener {
             V1Beta1RequestRecord advisoryManifestsRecord,
             Map<String, List<RepositoryCoordinates>> generationToRepositories) {
 
-        // From the generation triggered from this build (NVR), find the image index manifest and get the manifest
-        // content, we need to copy the main component
+        // From the generation triggered from this build (NVR), find the image-index manifest and get the manifest
+        // content that we need to copy the main component
         V1Beta1RequestManifestRecord imageIndexManifest = findImageIndexManifest(advisoryManifestsRecord, generation);
         Sbom imageIndexSbom = sbomService.get(imageIndexManifest.id());
         Component imageIndexMainComponent = SbomUtils.fromJsonNode(imageIndexSbom.getSbom()).getComponents().get(0);
@@ -422,7 +422,7 @@ public class ReleaseStandardAdvisoryEventsListener {
         Set<String> evidencePurls = AdvisoryEventUtils
                 .createPurls(repositories, imageIndexMainComponent.getVersion(), true);
 
-        // Finally create the root component for this build (NVR) from the image index manifest
+        // Finally, create the root component for this build (NVR) from the image index manifest
         Component nvrRootComponent = SbomUtils.createComponent(
                 null,
                 imageIndexMainComponent.getName(),
@@ -473,18 +473,17 @@ public class ReleaseStandardAdvisoryEventsListener {
                     requestEvent.getId(),
                     erratum,
                     productVersion,
-                    toolVersion,
                     productVersionBom);
             sbom.setReleaseMetadata(metadataNode);
             sbom = sbomService.save(sbom);
 
-            // 2 - For every generation, find all the existing manifests and update the with release repo
+            // 2 - For every generation, find all the existing manifests and update them with release repo
             // data
-            log.debug("Processing {} generations...", generationToCDNs.size());
-            for (String generationId : generationToCDNs.keySet()) {
-
+            log.debug("Processing {} generations for RPMs...", generationToCDNs.size());
+            for (Map.Entry<String, List<ErrataCDNRepoNormalized>> entry : generationToCDNs.entrySet()) {
+                String generationId = entry.getKey();
                 // 2.1 Get all the CDNs associated with this request
-                Collection<ErrataCDNRepoNormalized> generationCDNs = generationToCDNs.get(generationId);
+                List<ErrataCDNRepoNormalized> generationCDNs = entry.getValue();
 
                 // 2.2 - For every manifest previously generated from this generation
                 Collection<V1Beta1RequestManifestRecord> buildManifests = advisoryManifestsRecord.manifests()
@@ -527,7 +526,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                             requestEvent.getId(),
                             erratum,
                             productVersion,
-                            toolVersion,
                             manifestBom);
                     buildManifest.setReleaseMetadata(buildManifestMetadataNode);
                 }
@@ -551,6 +549,7 @@ public class ReleaseStandardAdvisoryEventsListener {
         }
     }
 
+    // TODO: Refactor
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     protected Sbom saveReleaseManifestForDockerGeneration(
@@ -584,22 +583,21 @@ public class ReleaseStandardAdvisoryEventsListener {
                     requestEvent.getId(),
                     erratum,
                     productVersion,
-                    toolVersion,
                     productVersionBom);
             sbom.setReleaseMetadata(metadataNode);
             sbom = sbomService.save(sbom);
 
-            // 2 - For every generation, find all the existing manifests and update the with release repo
+            // 2 - For every generation, find all the existing manifests and update them with release repo
             // data
-            log.debug("Processing {} generations...", generationToRepositories.size());
-            for (String generationId : generationToRepositories.keySet()) {
-
+            log.debug("Processing {} generations for Docker...", generationToRepositories.size());
+            for (Map.Entry<String, List<RepositoryCoordinates>> entry : generationToRepositories.entrySet()) {
+                String generationId = entry.getKey();
                 // 2.1 - Select the repository with longest repoFragment + tag
-                List<RepositoryCoordinates> repositories = generationToRepositories.get(generationId);
+                List<RepositoryCoordinates> repositories = entry.getValue();
                 RepositoryCoordinates preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
 
-                // 2.2 - Regenerate the manifest purls using the preferredRepo and keep track of the updates, we need
-                // them to update the index manifest variants
+                // 2.2 - Regenerate the manifest purls using the preferredRepo and keep track of the updates.
+                // We need them to update the index manifest variants
                 Collection<V1Beta1RequestManifestRecord> buildManifests = advisoryManifestsRecord.manifests()
                         .stream()
                         .filter(manifest -> manifest.generation().id().equals(generationId))
@@ -629,11 +627,13 @@ public class ReleaseStandardAdvisoryEventsListener {
                                         .getComponent()
                                         .getDescription()
                                         .contains(buildManifest.getRootPurl())) {
-                            // FIXME: Result of String.replace() is ignored
                             manifestBom.getMetadata()
                                     .getComponent()
-                                    .getDescription()
-                                    .replace(buildManifest.getRootPurl(), rebuiltPurl);
+                                    .setDescription(
+                                            manifestBom.getMetadata()
+                                                    .getComponent()
+                                                    .getDescription()
+                                                    .replace(buildManifest.getRootPurl(), rebuiltPurl));
                         }
                     }
                     if (manifestBom.getComponents() != null && !manifestBom.getComponents().isEmpty()) {
@@ -675,7 +675,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                             requestEvent.getId(),
                             erratum,
                             productVersion,
-                            toolVersion,
                             manifestBom);
                     buildManifest.setReleaseMetadata(buildManifestMetadataNode);
                 }
@@ -711,7 +710,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
     }
 
     @Retry(maxRetries = 10)
@@ -756,7 +755,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                                                 repository.getRepository(),
                                                 tag.getName())))
                 .filter(repoCoordinate -> repoCoordinate.getRepositoryFragment() != null)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Retry(maxRetries = 10)
@@ -765,7 +764,7 @@ public class ReleaseStandardAdvisoryEventsListener {
         buildItem.getVariantArch()
                 .keySet()
                 .forEach(variant -> allCDNs.addAll(errataClient.getCDNReposOfVariant(variant, productShortName)));
-        return allCDNs.stream().distinct().collect(Collectors.toList());
+        return allCDNs.stream().distinct().toList();
     }
 
     /*
@@ -790,9 +789,7 @@ public class ReleaseStandardAdvisoryEventsListener {
             String requestEventId,
             Errata erratum,
             ProductVersionEntry versionEntry,
-            String toolVersion,
             Bom manifest) {
-
         ObjectNode releaseMetadata = ObjectMapperProvider.json().createObjectNode();
         releaseMetadata.put(REQUEST_ID, requestEventId);
         // FIXME: 'Optional.get()' without 'isPresent()' check
@@ -921,7 +918,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    // Helper method to get the all the architectures in the manifest
+    // Helper method to get all the architectures in the manifest
     private Set<String> getAllArchitectures(Bom bom) {
         Set<String> manifestArches = new HashSet<>();
         for (Component component : bom.getComponents()) {

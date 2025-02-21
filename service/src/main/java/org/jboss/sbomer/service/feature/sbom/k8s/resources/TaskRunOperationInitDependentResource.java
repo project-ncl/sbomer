@@ -56,7 +56,7 @@ public class TaskRunOperationInitDependentResource
     }
 
     public TaskRunOperationInitDependentResource(Class<TaskRun> resourceType) {
-        super(TaskRun.class);
+        super(resourceType);
     }
 
     /**
