@@ -25,16 +25,18 @@ export function useManifests(initialPage: number, intialPageSize: number) {
   const [total, setTotal] = useState(0);
   const [pageIndex, setPageIndex] = useState(initialPage || 0);
   const [pageSize, setPageSize] = useState(intialPageSize || 10);
+  const [queryType, setQueryType] = useState('');
+  const [query, setQuery] = useState('')
 
   const getManifests = useCallback(
-    async ({ pageSize, pageIndex }: { pageSize: number; pageIndex: number }) => {
+    async ({ pageSize, pageIndex, queryType: queryType, query }: { pageSize: number; pageIndex: number, queryType: string, query: string }) => {
       try {
-        return await sbomerApi.getManifests({ pageSize, pageIndex });
+        return await sbomerApi.getManifests({ pageSize, pageIndex}, queryType, query);
       } catch (e) {
         return Promise.reject(e);
       }
     },
-    [pageIndex, pageSize],
+    [pageIndex, pageSize, queryType, query],
   );
 
   const { loading, value, error, retry } = useAsyncRetry(
@@ -42,11 +44,13 @@ export function useManifests(initialPage: number, intialPageSize: number) {
       getManifests({
         pageSize: pageSize,
         pageIndex: pageIndex,
+        queryType: queryType,
+        query: query
       }).then((data) => {
         setTotal(data.total);
         return data.data;
       }),
-    [pageIndex, pageSize],
+    [pageIndex, pageSize, queryType, query],
   );
 
   return [
@@ -61,6 +65,8 @@ export function useManifests(initialPage: number, intialPageSize: number) {
     {
       setPageIndex,
       setPageSize,
+      setQueryType,
+      setQuery,
       retry,
     },
   ] as const;

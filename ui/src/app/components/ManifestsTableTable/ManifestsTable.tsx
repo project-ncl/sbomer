@@ -6,7 +6,18 @@ import {
   Skeleton,
   Timestamp,
   TimestampTooltipVariant,
+  ToolbarItem,
   Tooltip,
+  Toolbar,
+  Select,
+  SearchInput,
+  SelectOption,
+  ToolbarContent,
+  SelectList,
+  MenuToggleElement,
+  MenuToggle,
+  SelectGroup,
+  Button
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
@@ -25,14 +36,28 @@ const columnNames = {
 };
 
 export const ManifestsTable = () => {
+
   const navigate = useNavigate();
   const paramPage = useSearchParam('page') || 1;
   const paramPageSize = useSearchParam('pageSize') || 10;
 
-  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useManifests(
+
+
+  const [searchBarValue, setSearchBarValue] = React.useState<string>('');
+  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(false);
+
+  const [selectIsOpen, setSelectIsOpen] = React.useState(false);
+  const [selectedQueryType, setSelectedQueryType] = React.useState<string>('No filter');
+
+
+  const [isButtonVisible, setButtonVisible] = React.useState<boolean>(false);
+
+  // getting the data and applying the filters sent to the backend here
+  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize, setQueryType, setQuery }] = useManifests(
     +paramPage - 1,
     +paramPageSize,
   );
+
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPageIndex(newPage - 1);
@@ -57,8 +82,97 @@ export const ManifestsTable = () => {
     return null;
   }
 
+
+  const onToggleClick = () => {
+    setSelectIsOpen(!selectIsOpen);
+  };
+
+  const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
+    setSelectedQueryType(value as string);
+    setSelectIsOpen(false);
+    switch (value) {
+      case 'No filter':
+        setSearchBarVisible(false);
+        setQueryType('');
+        setQuery('');
+        setButtonVisible(false)
+        break;
+      default:
+        setSearchBarVisible(true);
+        setButtonVisible(true);
+    }
+
+  };
+
+  const onSearchCall = () => {
+    setQueryType(selectedQueryType)
+    setQuery(searchBarValue)
+    setPageIndex(0);
+  }
+
+  const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
+    <MenuToggle
+      ref={toggleRef}
+      onClick={onToggleClick}
+      isExpanded={selectIsOpen}
+      style={
+        {
+          width: '200px'
+        } as React.CSSProperties
+      }
+    >
+      {selectedQueryType}
+    </MenuToggle>
+  );
+
+  const select = <Select
+    id="single-select"
+    isOpen={selectIsOpen}
+    selected={selectedQueryType}
+    onSelect={onSelect}
+    onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
+    toggle={toggle}
+    shouldFocusToggleOnSelect
+  >
+    <SelectList>
+      <SelectGroup>
+        <SelectOption value='No filter'>No filter</SelectOption>
+      </SelectGroup>
+      <SelectGroup>
+        <SelectOption value='Purl'>Purl</SelectOption>
+      </SelectGroup>
+    </SelectList>
+  </Select>
+
+
+  const searchBar = <SearchInput
+    placeholder="Enter selected id"
+    value={searchBarValue}
+    onChange={(_event, value) => setSearchBarValue(value)}
+    onClear={() => setSearchBarValue('')}
+    isAdvancedSearchOpen={!searchBarVisible}
+  />
+
+  const searchButton = <Button
+    variant='primary'
+    onClick={() => onSearchCall()}>Search</Button>
+
+
   return (
     <>
+      <Toolbar>
+        <ToolbarContent>
+          <ToolbarItem>
+            {select}
+          </ToolbarItem>
+          <ToolbarItem>
+            {searchBarVisible && searchBar}
+          </ToolbarItem>
+          <ToolbarItem>
+            {isButtonVisible && searchButton}
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
       <Table aria-label="Manifests table" variant="compact">
         <Caption>Latest manifests</Caption>
         <Thead>

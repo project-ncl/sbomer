@@ -17,7 +17,7 @@
 ///
 
 import axios, { Axios, AxiosError } from 'axios';
-import { SbomerApi, SbomerGeneration, SbomerManifest, SbomerStats, SbomerRequest, SbomerRequestManifest } from '../types';
+import { SbomerApi, SbomerGeneration, SbomerManifest, SbomerRequest, SbomerRequestManifest, SbomerStats } from '../types';
 
 type Options = {
   baseUrl: string;
@@ -67,9 +67,20 @@ export class DefaultSbomerApi implements SbomerApi {
     );
   }
 
-  async getManifests(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerManifest[]; total: number }> {
+  async getManifests(pagination: { pageSize: number; pageIndex: number ;},  queryOption: string, query: string): Promise<{ data: SbomerManifest[]; total: number }> {
+    let queryPrefix = ''
+    switch(queryOption){
+      case 'Purl':
+        queryPrefix = 'rootPurl'
+        break;
+      default:
+        queryPrefix = ''
+    }
+
+    const queryFullString = queryPrefix == '' ? '' : `${queryPrefix}=eq='${query}'`
+
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/manifests?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta1/manifests?query=${encodeURIComponent(queryFullString)}&pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
