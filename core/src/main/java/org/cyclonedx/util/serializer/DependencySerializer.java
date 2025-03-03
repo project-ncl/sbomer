@@ -58,7 +58,7 @@ import org.cyclonedx.model.DependencyList;
  * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
  */
 public class DependencySerializer extends StdSerializer<DependencyList> implements ContextualSerializer {
-    private final String REF = "ref";
+    private static final String REF = "ref";
 
     private boolean useNamespace;
 
@@ -90,8 +90,8 @@ public class DependencySerializer extends StdSerializer<DependencyList> implemen
             final JsonGenerator generator,
             final SerializerProvider provider) throws IOException {
         try {
-            if ((generator instanceof ToXmlGenerator)) {
-                writeXMLDependenciesWithGenerator((ToXmlGenerator) generator, dependencies);
+            if (generator instanceof ToXmlGenerator toxmlgenerator) {
+                writeXMLDependenciesWithGenerator(toxmlgenerator, dependencies);
             } else {
                 writeJSONDependenciesWithGenerator(generator, dependencies);
             }

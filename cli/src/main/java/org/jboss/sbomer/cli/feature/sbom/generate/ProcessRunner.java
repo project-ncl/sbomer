@@ -113,7 +113,6 @@ public class ProcessRunner {
         // do not distinguish between these two streams in launched commands.
         // We will log both to stdout.
         pb.redirectErrorStream(true);
-
         pb.command(command);
         log.info("Command to run: '{}'", pb.command().stream().map(Object::toString).collect(Collectors.joining(" ")));
 

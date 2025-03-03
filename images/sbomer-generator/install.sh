@@ -23,6 +23,7 @@ set -o pipefail
 SBOMER_JDK_VERSION="17.0.12-tem"
 NODEJS_VERSION="lts/iron"
 SYFT_VERSION="1.16.0"
+SBT_VERSION="1.10.7"
 
 # SBOMer functions
 source "${HOME}/func.sh"
@@ -47,6 +48,8 @@ install_java "${SBOMER_JDK_VERSION}"
 install_nodejs "${NODEJS_VERSION}"
 # Install Yarn -- needs to be done after Node.js and NPM are installed
 install_yarn
+# Install SBT
+install_sbt "${SBT_VERSION}"
 
 mkdir -p "${HOME}/.npm/_cacache"
 chown -R 65532:0 "${HOME}"

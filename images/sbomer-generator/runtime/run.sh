@@ -96,7 +96,7 @@ case "$generator" in
 "npm-cyclonedx")
     install_npm_cyclonedx "${version}"
     ;;
-"gradle-cyclonedx" | "maven-cyclonedx" | "yarn-cyclonedx")
+"gradle-cyclonedx" | "maven-cyclonedx" | "yarn-cyclonedx" | "sbt-cyclonedx")
     echo "The ${generator} generator does not require installation"
     ;;
 *)
