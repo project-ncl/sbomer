@@ -381,6 +381,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     private boolean isValidBuildType(Build build) {
         return org.jboss.pnc.enums.BuildType.MVN.equals(build.getBuildConfigRevision().getBuildType())
                 || org.jboss.pnc.enums.BuildType.GRADLE.equals(build.getBuildConfigRevision().getBuildType())
-                || org.jboss.pnc.enums.BuildType.NPM.equals(build.getBuildConfigRevision().getBuildType());
+                || org.jboss.pnc.enums.BuildType.NPM.equals(build.getBuildConfigRevision().getBuildType())
+                || org.jboss.pnc.enums.BuildType.SBT.equals(build.getBuildConfigRevision().getBuildType());
     }
 }

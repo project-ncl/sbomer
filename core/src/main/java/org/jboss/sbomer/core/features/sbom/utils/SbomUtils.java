@@ -477,7 +477,7 @@ public class SbomUtils {
         }
     }
 
-    private static void updateDependencyRef(Dependency dependency, String oldRef, String newRef) {
+    public static void updateDependencyRef(Dependency dependency, String oldRef, String newRef) {
         // If the current dependency has the oldRef, replace it with newRef
         if (dependency.getRef().equals(oldRef)) {
             Dependency updatedDependency = new Dependency(newRef);
@@ -501,6 +501,28 @@ public class SbomUtils {
                 updateDependencyRef(subProvide, oldRef, newRef);
             }
         }
+    }
+
+    public static Dependency updateDependencyRef(Dependency dependency, String newRef) {
+        // If the current dependency has the oldRef, replace it with newRef
+        Dependency updatedDependency = new Dependency(newRef);
+        updatedDependency.setDependencies(dependency.getDependencies());
+        updatedDependency.setProvides(dependency.getProvides());
+
+        // Recursively update sub-dependencies
+        if (updatedDependency.getDependencies() != null) {
+            for (Dependency subDependency : updatedDependency.getDependencies()) {
+                updateDependencyRef(subDependency, newRef);
+            }
+        }
+
+        // Recursively update provided dependencies
+        if (updatedDependency.getProvides() != null) {
+            for (Dependency subProvide : updatedDependency.getProvides()) {
+                updateDependencyRef(subProvide, newRef);
+            }
+        }
+        return updatedDependency;
     }
 
     public static ToolInformation createToolInformation(String version) {
