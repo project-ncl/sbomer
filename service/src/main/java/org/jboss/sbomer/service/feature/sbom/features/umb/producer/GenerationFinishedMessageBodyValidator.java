@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.producer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
@@ -31,10 +32,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class GenerationFinishedMessageBodyValidator implements Validator<GenerationFinishedMessageBody> {
-
-    public GenerationFinishedMessageBodyValidator() {
-    }
-
     @Override
     public ValidationResult validate(GenerationFinishedMessageBody messageBody) {
         if (messageBody == null) {
@@ -44,12 +41,11 @@ public class GenerationFinishedMessageBodyValidator implements Validator<Generat
         String schema;
 
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("schemas/message-success-schema.json")) {
-            schema = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            schema = new String(Objects.requireNonNull(is).readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ApplicationException("Could not read the configuration file schema", e);
         }
 
         return SchemaValidator.validate(schema, messageBody.toJson());
     }
-
 }

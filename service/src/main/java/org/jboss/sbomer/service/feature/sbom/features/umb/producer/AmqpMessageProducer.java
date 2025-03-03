@@ -80,7 +80,7 @@ public class AmqpMessageProducer {
             return;
         }
 
-        String data = null;
+        String data;
 
         try {
             data = ObjectMapperProvider.json().writeValueAsString(msg);

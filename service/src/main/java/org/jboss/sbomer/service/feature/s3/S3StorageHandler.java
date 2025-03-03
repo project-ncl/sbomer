@@ -58,7 +58,7 @@ public class S3StorageHandler {
     /**
      * Returns all paths to files found under a given {@code rootDirectory}.
      *
-     * @param rootDirectory
+     * @param rootDirectory the root directory to scan for files
      * @return List of paths to all files.
      */
     private List<Path> getFilePaths(Path rootDirectory) {
@@ -147,8 +147,8 @@ public class S3StorageHandler {
     /**
      * Returns list of paths within the S3 bucket to log files for a given {@link GenerationRequest} identifier.
      *
-     * @param generationRequestId
-     * @return
+     * @param generationRequestId the generation request identifier
+     * @return the list of log file names
      */
     public List<String> listLogFilesInBucket(String generationRequestId) {
         SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId); // NOSONAR
@@ -167,10 +167,10 @@ public class S3StorageHandler {
     }
 
     /**
-     * Get log file for a given {@link GenerationRequest} and the requested path.
+     * Gets the log file for a given {@link GenerationRequest} and the requested path.
      *
-     * @param generationRequestId
-     * @return
+     * @param generationRequestId the generation request identifier
+     * @return the log file content
      */
     public String getLog(String generationRequestId, String path) {
         SbomGenerationRequest generationRequest = SbomGenerationRequest.findById(generationRequestId); // NOSONAR

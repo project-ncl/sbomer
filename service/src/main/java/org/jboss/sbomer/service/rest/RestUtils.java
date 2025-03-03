@@ -56,8 +56,8 @@ public class RestUtils {
     /**
      * Converts Hibernate Validator violations in a readable list of messages.
      *
-     * @param violations
-     * @return
+     * @param violations the constraint violations
+     * @return the list of error messages
      */
     public static List<String> constraintViolationsToMessages(Set<? extends ConstraintViolation<?>> violations) {
         List<String> errors = new ArrayList<>();
@@ -70,7 +70,7 @@ public class RestUtils {
                 errors.add(cv.getPropertyPath().toString() + ": " + cv.getMessage());
                 return;
             }
-            // Dynamic payload contains list of error messages
+            // Dynamic payload contains the list of error messages
             errors.addAll(payload.stream().map(error -> cv.getMessage() + ": " + error).toList());
         });
 
@@ -80,15 +80,15 @@ public class RestUtils {
     /**
      * Converts CycloneDX validation exceptions in a readable list of messages.
      *
-     * @param violations
-     * @return
+     * @param violations the constraint violations
+     * @return the list of error messages
      */
     public static List<String> parseExceptionsToMessages(List<ParserException> violations) {
         return violations.stream().map(cv -> "bom" + cv.getMessage().substring(1)).toList();
     }
 
     /**
-     * Gets the user principal (if available) from the SecurityContex of a ContainerRequestContext.
+     * Gets the user principal (if available) from the SecurityContext of a ContainerRequestContext.
      *
      * @param context the container request context
      * @return user principal name

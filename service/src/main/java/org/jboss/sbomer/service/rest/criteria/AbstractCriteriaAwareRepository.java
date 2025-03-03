@@ -52,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public abstract class AbstractCriteriaAwareRepository<T> implements PanacheRepositoryBase<T, String> {
 
-    private final static Pattern likePattern = Pattern.compile("(%[a-zA-Z0-9\\s]+%)");
+    private static final Pattern likePattern = Pattern.compile("(%[a-zA-Z0-9\\s]+%)");
 
     protected static final RSQLParser predicateParser;
     protected static final RSQLParser sortParser;
@@ -87,7 +87,7 @@ public abstract class AbstractCriteriaAwareRepository<T> implements PanacheRepos
      * Reads the total number of entities that satisfy the RSQL query.
      *
      * @param rsqlQuery RSQL query to be taken into account.
-     * @return
+     * @return the total number of entities that satisfy the RSQL query
      */
     public Long countByRsqlQuery(String rsqlQuery) {
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -98,7 +98,7 @@ public abstract class AbstractCriteriaAwareRepository<T> implements PanacheRepos
         return getEntityManager().createQuery(criteriaQuery).getSingleResult();
     }
 
-    public AbstractCriteriaAwareRepository(Class<T> entityType) {
+    protected AbstractCriteriaAwareRepository(Class<T> entityType) {
         this.entityType = entityType;
     }
 
@@ -126,7 +126,7 @@ public abstract class AbstractCriteriaAwareRepository<T> implements PanacheRepos
 
         log.debug("Applying provided RSQL query to enhance search: '{}'", rsqlQuery);
 
-        // Create custom implementation of RSQLVisitor which converts nodes to predicates using
+        // Create custom implementation of RSQLVisitor, which converts nodes to predicates using
         // CustomizedPredicateBuilder or CustomizedPredicateBuilderStrategy for custom operators
         RSQLVisitor<Predicate, EntityManagerAdapter> visitor = new CustomizedJpaPredicateVisitor<X>().withRoot(root)
                 .withPredicateBuilderStrategy(new CustomizedPredicateBuilderStrategy());

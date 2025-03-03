@@ -210,12 +210,13 @@ public class PncNotificationHandler {
 
         log.debug("Found {} pending requests for operation '{}'", pendingRequests.size(), messageBody.getOperationId());
 
-        // Operation failed. Not good, propagate then the failure to our records as well.
+        // The operation failed. Not good, propagate then the failure to our records as well.
         if (!isSuccessfullAnalysis(messageBody)) {
             log.warn("Deliverable analyzer operation '{}' failed in PNC", messageBody.getOperationId());
 
-            // We have some pending request for given operation. At this point there is no GenerationRequest created.
-            // We need to update the pending request's status to failed.
+            // We have some pending request for given operation.
+            // At this point, there is no GenerationRequest created.
+            // We need to update the pending request's status to SbomGenerationStatus.FAILED.
             if (!pendingRequests.isEmpty()) {
                 String lastId = pendingRequests.get(0).getId();
 
@@ -240,7 +241,7 @@ public class PncNotificationHandler {
 
         SbomGenerationRequest pendingRequest = null;
 
-        // If there are no pending generation requests create a new ConfigMap
+        // If there are no pending generation requests, create a new ConfigMap
         if (!pendingRequests.isEmpty()) {
             // Get the oldest pending generation request and create a new ConfigMap with the existing id
             pendingRequest = pendingRequests.get(0);
@@ -300,7 +301,7 @@ public class PncNotificationHandler {
             PncDelAnalysisNotificationMessageBody messageBody,
             SbomGenerationRequest pendingRequest) {
 
-        GenerationRequest generationRequest = null;
+        GenerationRequest generationRequest;
         if (pendingRequest == null) {
             log.info(
                     "No pending requests found for operation {}, creating a new one from the UMB message body!",

@@ -128,16 +128,27 @@ public class AdvisoryService {
 
         // Fetching Erratum
         Errata erratum = errataClient.getErratum(advisoryRequestConfig.getAdvisoryId());
-        if (erratum == null || erratum.getDetails().isEmpty()) {
+
+        if (erratum == null) {
             throw new ClientException(
-                    "Could not retrieve the errata advisory with provided id {}",
+                    "Could not retrieve the errata advisory with provided id {} because erratum was null",
                     advisoryRequestConfig.getAdvisoryId());
         }
+
+        Optional<Details> optDetails = erratum.getDetails();
+
+        if (optDetails.isEmpty()) {
+            throw new ClientException(
+                    "Could not retrieve the errata advisory with provided id {} because details were null",
+                    advisoryRequestConfig.getAdvisoryId());
+        }
+
+        Details details = optDetails.get();
 
         // Will be removed, leave now for debugging
         printAllErratumData(erratum);
 
-        if (!erratum.getDetails().get().getTextonly()) {
+        if (!Boolean.TRUE.equals(details.getTextonly())) {
             return handleStandardAdvisory(requestEvent, erratum);
         } else {
             return handleTextOnlyAdvisory(requestEvent, erratum);
@@ -154,8 +165,8 @@ public class AdvisoryService {
     }
 
     /*
-     * Event will be marked as failed. Mostly useful for REST events (the AmqpMessageConsumer will catch the exception
-     * and reupdate this request as FAILED)
+     * The event will be marked as failed. This is mostly useful for REST events (the AmqpMessageConsumer will catch the
+     * exception and reupdate this request as FAILED)
      */
     protected Collection<SbomGenerationRequest> doFailRequest(RequestEvent requestEvent, String reason)
             throws ApplicationException {
@@ -169,6 +180,7 @@ public class AdvisoryService {
         requestEventRepository.updateRequestEvent(requestEvent, status, Map.of(), reason);
     }
 
+    // FIXME: 'Optional.get()' without 'isPresent()' check
     private Collection<SbomGenerationRequest> handleTextOnlyAdvisory(RequestEvent requestEvent, Errata erratum) {
 
         if (!featureFlags.textOnlyErrataManifestGenerationEnabled()) {
@@ -198,7 +210,7 @@ public class AdvisoryService {
 
         JsonNode notes = maybeNotes.get();
 
-        // The SBOMs are manually provided inside the notes field "manifest" as a list of purls
+        // The SBOMs are manually provided inside the "notes" field "manifest" as a list of purls
         if (notes.has("manifest")) {
 
             log.debug(
@@ -253,7 +265,7 @@ public class AdvisoryService {
                                 .build());
             }
 
-            // There is nothing to do for SBOMer, beside adding comments to the Errata
+            // There is nothing to do for SBOMer besides adding comments to the Errata
             updateRequest(requestEvent, RequestEventStatus.SUCCESS, null);
 
             return Collections.emptyList();
@@ -266,7 +278,9 @@ public class AdvisoryService {
                     erratum.getDetails().get().getId());
 
             // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
-            // manifests. Otherwise SBOMer will default to the creation of build manifests. Will change in future!
+            // manifests.
+            // Otherwise, SBOMer will default to the creation of build manifests.
+            // This will change in the future!
             V1Beta1RequestRecord successfulRequestRecord = null;
             if (ErrataStatus.SHIPPED_LIVE.equals(erratum.getDetails().get().getStatus())) {
 
@@ -338,7 +352,7 @@ public class AdvisoryService {
                     if (requestConfig != null) {
                         requestConfigsWithinNotes.add(requestConfig);
                     } else {
-                        // While it is fine to ignore empty notes, an invalid json notes field should trigger an error
+                        // While it is fine to ignore empty notes, an invalid JSON notes field should trigger an error
                         String reason = String.format(
                                 "Unsupported deliverable type '%s' in Text-Only Errata Advisory '%s' (%s)",
                                 type,
@@ -367,7 +381,7 @@ public class AdvisoryService {
                 erratum.getDetails().get().getStatus());
 
         Details details = erratum.getDetails().get();
-        if (details.getContentTypes().isEmpty() || details.getContentTypes().size() > 1) {
+        if (details.getContentTypes().size() != 1) {
 
             String reason = String.format(
                     "The standard errata advisory has zero or multiple content-types (%s)",
@@ -391,10 +405,12 @@ public class AdvisoryService {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
 
         // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
-        // manifests. Otherwise SBOMer will default to the creation of build manifests. Will change in future!
+        // manifests.
+        // Otherwise, SBOMer will default to the creation of build manifests.
+        // This will change in the future!
         V1Beta1RequestRecord successfulRequestRecord = null;
         if (ErrataStatus.SHIPPED_LIVE.equals(details.getStatus())) {
             log.debug(
@@ -471,16 +487,15 @@ public class AdvisoryService {
      */
     private RequestConfig createRequestConfig(String type, JsonNode deliverableEntry) {
         try {
-            switch (type) {
-                case PncBuildRequestConfig.TYPE_NAME:
-                    return ObjectMapperProvider.json().treeToValue(deliverableEntry, PncBuildRequestConfig.class);
-                case PncOperationRequestConfig.TYPE_NAME:
-                    return ObjectMapperProvider.json().treeToValue(deliverableEntry, PncOperationRequestConfig.class);
-                case PncAnalysisRequestConfig.TYPE_NAME:
-                    return ObjectMapperProvider.json().treeToValue(deliverableEntry, PncAnalysisRequestConfig.class);
-                default:
-                    return null;
-            }
+            return switch (type) {
+                case PncBuildRequestConfig.TYPE_NAME ->
+                    ObjectMapperProvider.json().treeToValue(deliverableEntry, PncBuildRequestConfig.class);
+                case PncOperationRequestConfig.TYPE_NAME ->
+                    ObjectMapperProvider.json().treeToValue(deliverableEntry, PncOperationRequestConfig.class);
+                case PncAnalysisRequestConfig.TYPE_NAME ->
+                    ObjectMapperProvider.json().treeToValue(deliverableEntry, PncAnalysisRequestConfig.class);
+                default -> null;
+            };
         } catch (JsonProcessingException | IllegalArgumentException e) {
             log.error("Failed to deserialize deliverable of type '{}': {}", type, e.getMessage());
             return null;
@@ -501,13 +516,9 @@ public class AdvisoryService {
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<>();
 
         // Collect all the docker build ids so we can query Koji in one go
-        List<Long> buildIds = buildDetails.values()
-                .stream()
-                .flatMap(List::stream)
-                .map(BuildItem::getId)
-                .collect(Collectors.toList());
+        List<Long> buildIds = buildDetails.values().stream().flatMap(List::stream).map(BuildItem::getId).toList();
 
-        Map<Long, String> imageNamesFromBuilds = null;
+        Map<Long, String> imageNamesFromBuilds;
 
         // Try to get the image names from builds, with retries handled in getImageNamesFromBuilds()
         try {
@@ -673,9 +684,7 @@ public class AdvisoryService {
         Map<Long, String> buildsToImageName = new HashMap<>();
 
         try {
-            List<KojiIdOrName> kojiIdOrNames = buildIds.stream()
-                    .map(id -> KojiIdOrName.getFor(id.toString()))
-                    .collect(Collectors.toList());
+            List<KojiIdOrName> kojiIdOrNames = buildIds.stream().map(id -> KojiIdOrName.getFor(id.toString())).toList();
 
             List<KojiBuildInfo> buildInfos = getKojiSession().getBuild(kojiIdOrNames);
             for (KojiBuildInfo kojiBuildInfo : buildInfos) {
@@ -742,23 +751,22 @@ public class AdvisoryService {
                 .append(")");
         summary.append("\nRelease: ").append(erratumRelease.getData().getAttributes().getName());
         summary.append("\n\nBuilds: ");
-        if (erratumBuildList != null) {
-            if (erratumBuildList.getProductVersions() != null && !erratumBuildList.getProductVersions().isEmpty()) {
-                for (ProductVersionEntry productVersionEntry : erratumBuildList.getProductVersions().values()) {
-                    summary.append("\n\tProduct Version: ").append(productVersionEntry.getName());
-                    for (Build build : productVersionEntry.getBuilds()) {
+        if (erratumBuildList != null && erratumBuildList.getProductVersions() != null
+                && !erratumBuildList.getProductVersions().isEmpty()) {
+            for (ProductVersionEntry productVersionEntry : erratumBuildList.getProductVersions().values()) {
+                summary.append("\n\tProduct Version: ").append(productVersionEntry.getName());
+                for (Build build : productVersionEntry.getBuilds()) {
 
-                        summary.append("\n\t\t")
-                                .append(
-                                        build.getBuildItems()
-                                                .values()
-                                                .stream()
-                                                .map(
-                                                        buildItem -> "ID: " + buildItem.getId() + ", NVR: "
-                                                                + buildItem.getNvr() + ", Variant: "
-                                                                + buildItem.getVariantArch().keySet())
-                                                .collect(Collectors.joining("\n\t\t")));
-                    }
+                    summary.append("\n\t\t")
+                            .append(
+                                    build.getBuildItems()
+                                            .values()
+                                            .stream()
+                                            .map(
+                                                    buildItem -> "ID: " + buildItem.getId() + ", NVR: "
+                                                            + buildItem.getNvr() + ", Variant: "
+                                                            + buildItem.getVariantArch().keySet())
+                                            .collect(Collectors.joining("\n\t\t")));
                 }
             }
         }
@@ -772,7 +780,7 @@ public class AdvisoryService {
         }
 
         summary.append("\n**********************************\n");
-        System.out.println(summary);
+        System.out.println(summary); // NOSONAR: We want to use 'System.out' here
     }
 
 }

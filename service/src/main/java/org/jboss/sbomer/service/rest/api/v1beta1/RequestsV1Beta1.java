@@ -155,13 +155,11 @@ public class RequestsV1Beta1 {
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("receivalTime=desc=") @QueryParam("sort") String sort) {
 
-        Page<V1BaseBeta1RequestRecord> requests = sbomService.searchRequestRecordsByQueryPaginated(
+        return sbomService.searchRequestRecordsByQueryPaginated(
                 paginationParams.getPageIndex(),
                 paginationParams.getPageSize(),
                 rsqlQuery,
                 sort);
-
-        return requests;
     }
 
 }

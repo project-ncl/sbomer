@@ -35,8 +35,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ErrataMessageHelper {
+    private ErrataMessageHelper() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
 
-    static final ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+    private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule())
             .registerModule(new SimpleModule().addDeserializer(Instant.class, new CustomInstantDeserializer()))
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
@@ -50,11 +53,11 @@ public class ErrataMessageHelper {
     }
 
     public static ErrataStatusChangeMessageBody fromStatusChangeMessage(String json) throws JsonProcessingException {
-        return jsonObjectMapper.readValue(json, ErrataStatusChangeMessageBody.class);
+        return JSON_OBJECT_MAPPER.readValue(json, ErrataStatusChangeMessageBody.class);
     }
 
     public static ErrataStatusChangeMessageBody fromStatusChangeMessage(JsonNode jsonNode) throws IOException {
-        return jsonObjectMapper.readValue(
+        return JSON_OBJECT_MAPPER.readValue(
                 jsonNode.isTextual() ? jsonNode.textValue().getBytes() : jsonNode.toString().getBytes(),
                 ErrataStatusChangeMessageBody.class);
     }

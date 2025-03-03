@@ -73,9 +73,9 @@ public class S3ClientFacade {
 
     /**
      * Event listener for the {@link FeatureFlags#TOGGLE_S3_STORAGE} toggle. In case it is enabled, the S3 client is
-     * instantiated. When the toggle is disabled, client is closed.
+     * instantiated. When the toggle is disabled, the client is closed.
      *
-     * @param flag
+     * @param flag the flags
      */
     @ConsumeEvent(FeatureFlags.EVENT_NAME)
     void featureFlag(Map<String, Boolean> flag) {
@@ -93,7 +93,7 @@ public class S3ClientFacade {
 
             ensureClient();
         } else {
-            // And it was disabled, close the client, if there is one.
+            // And it was disabled, close the client if there is one.
             if (client != null) {
                 log.debug("Disabling S3 storage handler");
                 client.close();
@@ -108,7 +108,7 @@ public class S3ClientFacade {
      */
     public void ensureClient() {
         if (client != null) {
-            // In case the client it available, will assume it's valid.
+            // In case the client is available, will assume it's valid.
             return;
         }
 
@@ -116,6 +116,7 @@ public class S3ClientFacade {
 
         log.debug("Instantiating new S3 client");
 
+        // TODO: Set the credentials explicitly on this builder
         client = S3Client.builder().region(Region.of(bucketRegion())).build();
 
         log.info("S3 client instantiated");
@@ -188,8 +189,8 @@ public class S3ClientFacade {
     /**
      * Returns list of paths within the S3 bucket to log files for a given {@link GenerationRequest} identifier.
      *
-     * @param generationRequestId
-     * @return
+     * @param generationRequestId the generation request identifier
+     * @return the list of paths
      */
     public List<String> logFileNames(String generationRequestId) {
         ListObjectsV2Request req = ListObjectsV2Request.builder()
@@ -215,8 +216,8 @@ public class S3ClientFacade {
     /**
      * Returns list of paths within the S3 bucket to log files for a given {@link GenerationRequest} identifier.
      *
-     * @param generationRequestId
-     * @return
+     * @param generationRequestId the generation request identifier
+     * @return the path
      */
     public String log(String generationRequestId, String path) {
 

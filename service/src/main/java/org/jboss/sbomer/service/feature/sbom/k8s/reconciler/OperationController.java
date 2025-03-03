@@ -184,14 +184,14 @@ public class OperationController extends AbstractController {
             return UpdateControl.noUpdate();
         }
 
-        if (isSuccessful(initTaskRun)) {
+        if (Boolean.TRUE.equals(isSuccessful(initTaskRun))) {
             setOperationConfig(generationRequest, initTaskRun);
             return updateRequest(generationRequest, SbomGenerationStatus.INITIALIZED, null, null);
         }
 
         StringBuilder sb = new StringBuilder("Configuration initialization failed. ");
 
-        GenerationResult result = GenerationResult.ERR_SYSTEM;
+        GenerationResult result;
 
         if (initTaskRun.getStatus() != null && initTaskRun.getStatus().getSteps() != null
                 && !initTaskRun.getStatus().getSteps().isEmpty()
@@ -232,6 +232,7 @@ public class OperationController extends AbstractController {
                 sb.append("Unknown exit code received. ");
             }
         } else {
+            result = GenerationResult.ERR_SYSTEM;
             sb.append("System failure. ");
         }
 
@@ -243,12 +244,12 @@ public class OperationController extends AbstractController {
     }
 
     /**
-     * Possible next statuses: {@link SbomGenerationStatus#PREPARING}
+     * Possible next statuses: {@link SbomGenerationStatus#GENERATING}
      *
-     * @param secondaryResources
-     * @param generationRequest
+     * @param secondaryResources the secondary resources
+     * @param generationRequest the generation request
      *
-     * @return
+     * @return the update control for the generation request
      */
     private UpdateControl<GenerationRequest> reconcileOperationInitialized(
             GenerationRequest generationRequest,
@@ -289,11 +290,12 @@ public class OperationController extends AbstractController {
     /**
      * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#FINISHED}
      *
-     * @param secondaryResources
-     * @param generationRequest
+     * @param secondaryResources the secondary resources
+     * @param generationRequest the generation request
      *
      * @return {@link UpdateControl} according to the target state of processing
      */
+    // TODO: Refactor
     protected UpdateControl<GenerationRequest> reconcileGenerating(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
@@ -365,7 +367,7 @@ public class OperationController extends AbstractController {
             List<Sbom> sboms = storeOperationSboms(generationRequest);
 
             try {
-                performPost(sboms, generationRequest);
+                performPost(sboms);
             } catch (ApplicationException e) {
                 return updateRequest(
                         generationRequest,
@@ -507,10 +509,10 @@ public class OperationController extends AbstractController {
                 action = reconcileGenerating(generationRequest, secondaryResources);
                 break;
             case FINISHED:
-                action = reconcileFinished(generationRequest, secondaryResources);
+                action = reconcileFinished(generationRequest);
                 break;
             case FAILED:
-                action = reconcileFailed(generationRequest, secondaryResources);
+                action = reconcileFailed(generationRequest);
                 break;
             default:
         }

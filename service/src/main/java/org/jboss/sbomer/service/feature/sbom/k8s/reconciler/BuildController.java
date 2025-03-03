@@ -72,7 +72,7 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  *
  * <p>
- * This reconciler acts only on resources marked with following labels (all of them must exist on the resource):
+ * This reconciler acts only on resources marked with the following labels (all of them must exist on the resource):
  *
  * <ul>
  * <li>{@code app.kubernetes.io/part-of=sbomer}</li>
@@ -97,13 +97,6 @@ import lombok.extern.slf4j.Slf4j;
                         useEventSourceWithName = EVENT_SOURCE_NAME) })
 @Slf4j
 public class BuildController extends AbstractController {
-
-    List<TaskRunGenerateBuildDependentResource> generations = new ArrayList<>();
-
-    public BuildController() {
-
-    }
-
     final ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     @Override
@@ -135,10 +128,10 @@ public class BuildController extends AbstractController {
     /**
      * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#INITIALIZED}
      *
-     * @param secondaryResources
-     * @param generationRequest
+     * @param secondaryResources the secondary resources
+     * @param generationRequest the generation request
      *
-     * @return
+     * @return the update control for this generation request
      */
     private UpdateControl<GenerationRequest> reconcileInitializing(
             GenerationRequest generationRequest,
@@ -164,14 +157,14 @@ public class BuildController extends AbstractController {
             return UpdateControl.noUpdate();
         }
 
-        if (isSuccessful(initTaskRun)) {
+        if (Boolean.TRUE.equals(isSuccessful(initTaskRun))) {
             setConfig(generationRequest, initTaskRun);
             return updateRequest(generationRequest, SbomGenerationStatus.INITIALIZED, null, null);
         }
 
         StringBuilder sb = new StringBuilder("Configuration initialization failed. ");
 
-        GenerationResult result = GenerationResult.ERR_SYSTEM;
+        GenerationResult result;
 
         if (initTaskRun.getStatus() != null && initTaskRun.getStatus().getSteps() != null
                 && !initTaskRun.getStatus().getSteps().isEmpty()
@@ -212,6 +205,7 @@ public class BuildController extends AbstractController {
                 sb.append("Unknown exit code received. ");
             }
         } else {
+            result = GenerationResult.ERR_SYSTEM;
             sb.append("System failure. ");
         }
 
@@ -225,10 +219,10 @@ public class BuildController extends AbstractController {
     /**
      * Possible next statuses: {@link SbomGenerationStatus#GENERATING}
      *
-     * @param secondaryResources
-     * @param generationRequest
+     * @param secondaryResources the secondary resources
+     * @param generationRequest the generation request
      *
-     * @return
+     * @return the update control for this generation request
      */
     private UpdateControl<GenerationRequest> reconcileInitialized(
             GenerationRequest generationRequest,
@@ -257,6 +251,7 @@ public class BuildController extends AbstractController {
         return updateRequest(generationRequest, SbomGenerationStatus.GENERATING, null, null);
     }
 
+    // TODO: Refactor
     @Override
     protected UpdateControl<GenerationRequest> reconcileGenerating(
             GenerationRequest generationRequest,
@@ -280,8 +275,9 @@ public class BuildController extends AbstractController {
 
         Set<TaskRun> generateTaskRuns = findTaskRuns(secondaryResources, SbomGenerationPhase.GENERATE);
 
-        // This should not happen, because if we updated already the status to SbomGenerationStatus.GENERATING, then
-        // there was a TaskRun already. But it could be deleted manually(?). In such case we set the status to FAILED.
+        // This should not happen, because if we already updated the status to 'SbomGenerationStatus.GENERATING', then
+        // there was a TaskRun already.
+        // But it could be deleted manually(?), so in such a case, we set the status to 'FAILED'.
         if (generateTaskRuns.isEmpty()) {
             log.error(
                     "Marking GenerationRequest '{}' as failed: no generation TaskRuns were found, but at least one was expected.",
@@ -302,7 +298,7 @@ public class BuildController extends AbstractController {
         // Check for still running tasks
         List<TaskRun> stillRunning = generateTaskRuns.stream().filter(tr -> !isFinished(tr)).toList();
 
-        // If there are tasks that hasn't finished yet, we need to wait.
+        // If there are tasks that haven't finished yet, we need to wait.
         if (!stillRunning.isEmpty()) {
             log.debug(
                     "Skipping update of GenerationRequest '{}', because {} TaskRuns are still running: {}",
@@ -336,7 +332,7 @@ public class BuildController extends AbstractController {
             }
 
             try {
-                performPost(sboms, generationRequest);
+                performPost(sboms);
             } catch (ApplicationException e) {
                 return updateRequest(
                         generationRequest,
@@ -357,7 +353,8 @@ public class BuildController extends AbstractController {
         StringBuilder sb = new StringBuilder("Generation request failed. ");
         GenerationResult result = GenerationResult.ERR_SYSTEM;
 
-        // If number of failed generations is the same as number of products it means that all generations failed
+        // If the number of failed generations is the same as the number of products, it means that all generations
+        // failed
         if (failedTaskRuns.size() == generateTaskRuns.size()) {
             sb.append("All tasks failed. ");
         } else {
@@ -419,7 +416,7 @@ public class BuildController extends AbstractController {
 
         }
 
-        // When we have more than one task failed, we need set the result to be a multi-failure
+        // When we have more than one task that has failed, we need to set the result to be a multi-failure
         if (failedTaskRuns.size() > 1) {
             result = GenerationResult.ERR_MULTI;
         }
@@ -451,10 +448,11 @@ public class BuildController extends AbstractController {
      * For the {@link SbomGenerationStatus#NEW} state we don't need to do anything, just wait.
      * </p>
      *
-     * @param generationRequest
-     * @param secondaryResources
+     * @param generationRequest the generation request
+     * @param secondaryResources the secondary resources
      * @return Action to take on the {@link GenerationRequest} resource.
      */
+    @Override
     protected UpdateControl<GenerationRequest> reconcileNew(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
@@ -477,7 +475,7 @@ public class BuildController extends AbstractController {
 
         MDCUtils.removeContext();
 
-        // No status set set, it should be "NEW", let's do it.
+        // No status is set, it should be "NEW", let's do it.
         // "NEW" starts everything.
         if (Objects.isNull(generationRequest.getStatus())) {
             return updateRequest(generationRequest, SbomGenerationStatus.NEW, null, null);
@@ -513,10 +511,10 @@ public class BuildController extends AbstractController {
                 action = reconcileGenerating(generationRequest, secondaryResources);
                 break;
             case FINISHED:
-                action = reconcileFinished(generationRequest, secondaryResources);
+                action = reconcileFinished(generationRequest);
                 break;
             case FAILED:
-                action = reconcileFailed(generationRequest, secondaryResources);
+                action = reconcileFailed(generationRequest);
                 break;
             default:
                 break;

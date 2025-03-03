@@ -44,7 +44,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Use {@code /api/v1beta1}.
+ * @deprecated use {@code /api/v1beta1}.
  */
 @Path("/api/v1alpha3")
 @Produces(MediaType.APPLICATION_JSON)
@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 @PermitAll
 @Slf4j
 @Tag(name = "v1alpha3")
-@Deprecated
+@Deprecated(since = "1.0.0", forRemoval = true)
 public class S3ApiV1Alpha3 {
     @Inject
     FeatureFlags featureFlags;
@@ -63,7 +63,7 @@ public class S3ApiV1Alpha3 {
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
-    @Operation(summary = "List all log file paths for a given GenerationRequest", description = "")
+    @Operation(summary = "List all log file paths for a given GenerationRequest")
     @Path("/sboms/requests/{id}/logs")
     @APIResponse(
             responseCode = "200",
@@ -81,7 +81,7 @@ public class S3ApiV1Alpha3 {
             responseCode = "503",
             description = "Content cannot be returned at this time",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    public Response getLog(@PathParam("id") String generationRequestId) throws Exception {
+    public Response getLog(@PathParam("id") String generationRequestId) {
         if (!featureFlags.s3Storage()) {
             throw new ServiceUnavailableException("S3 feature is disabled currently, try again later");
         }
@@ -96,7 +96,7 @@ public class S3ApiV1Alpha3 {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
-    @Operation(summary = "Fetch generation log on a specified path", description = "")
+    @Operation(summary = "Fetch generation log on a specified path")
     @Path("/sboms/requests/{id}/logs/{path}")
     @APIResponse(
             responseCode = "200",
@@ -106,8 +106,7 @@ public class S3ApiV1Alpha3 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response getLog(@PathParam("id") String generationRequestId, @PathParam("path") String path)
-            throws Exception {
+    public Response getLog(@PathParam("id") String generationRequestId, @PathParam("path") String path) {
         if (!featureFlags.s3Storage()) {
             throw new ServiceUnavailableException("S3 feature is disabled currently, try again later");
         }

@@ -48,13 +48,16 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+/**
+ * @deprecated use {@code /api/v1beta1}.
+ */
 @Path("/api/v1alpha3/generator/syft")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 @PermitAll
 @Tag(name = "v1alpha3")
-@Deprecated
+@Deprecated(since = "1.0.0", forRemoval = true)
 public class SyftImageApiV1Alpha3 {
     @Inject
     V1Alpha3Mapper mapper;
@@ -67,7 +70,7 @@ public class SyftImageApiV1Alpha3 {
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
-    @Operation(summary = "", description = "")
+    @Operation()
     @Path("/image/{name}")
     @APIResponse(
             responseCode = "202",

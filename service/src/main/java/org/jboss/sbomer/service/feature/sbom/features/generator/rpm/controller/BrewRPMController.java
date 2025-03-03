@@ -52,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  *
  * <p>
- * This reconciler acts only on resources marked with following labels (all of them must exist on the resource):
+ * This reconciler acts only on resources marked with the following labels (all of them must exist on the resource):
  *
  * <ul>
  * <li>{@code app.kubernetes.io/part-of=sbomer}</li>
@@ -101,9 +101,9 @@ public class BrewRPMController extends AbstractController {
      * Handles updates to {@link GenerationRequest} being in progress.
      * </p>
      *
-     * @param generationRequest
-     * @param secondaryResources
-     * @return
+     * @param generationRequest the generation request
+     * @param secondaryResources the secondary resources
+     * @return the update control for the generation request
      */
     @Override
     protected UpdateControl<GenerationRequest> reconcileGenerating(
@@ -124,13 +124,13 @@ public class BrewRPMController extends AbstractController {
                     "Generation failed. Unable to find related TaskRun. See logs for more information.");
         }
 
-        // In case the TaskRun hasn't finished yet, wait for next update.
+        // In case the TaskRun hasn't finished yet, wait for the next update.
         if (!isFinished(generateTaskRun)) {
             return UpdateControl.noUpdate();
         }
 
-        // In case the Task Run is not successfull, fail thge generation
-        if (!isSuccessful(generateTaskRun)) {
+        // In case the Task Run is not successful, fail the generation
+        if (!Boolean.TRUE.equals(isSuccessful(generateTaskRun))) {
             log.error("Generation failed, the TaskRun returned failure");
 
             return updateRequest(
@@ -150,13 +150,13 @@ public class BrewRPMController extends AbstractController {
         try {
             manifestPaths = FileUtils.findManifests(generationDir);
         } catch (IOException e) {
-            log.error("Unexpected IO exception ocurred while trying to find generated manifests", e);
+            log.error("Unexpected IO exception occurred while trying to find generated manifests", e);
 
             return updateRequest(
                     generationRequest,
                     SbomGenerationStatus.FAILED,
                     GenerationResult.ERR_SYSTEM,
-                    "Generation succeded, but reading generated SBOMs failed due IO exception. See logs for more information.");
+                    "Generation succeeded, but reading generated SBOMs failed due IO exception. See logs for more information.");
         }
 
         if (manifestPaths.isEmpty()) {
@@ -180,7 +180,7 @@ public class BrewRPMController extends AbstractController {
                     generationRequest,
                     SbomGenerationStatus.FAILED,
                     GenerationResult.ERR_SYSTEM,
-                    "Generation succeded, but reading generated manifests failed was not successful. See logs for more information.");
+                    "Generation succeeded, but reading generated manifests failed was not successful. See logs for more information.");
         }
 
         List<Sbom> sboms;
@@ -200,7 +200,7 @@ public class BrewRPMController extends AbstractController {
         }
 
         try {
-            performPost(sboms, generationRequest);
+            performPost(sboms);
         } catch (ApplicationException e) {
             return updateRequest(
                     generationRequest,

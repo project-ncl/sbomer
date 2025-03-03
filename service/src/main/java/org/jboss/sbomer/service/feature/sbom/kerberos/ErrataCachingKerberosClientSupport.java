@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.kerberos;
 
 import static javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag.REQUIRED;
 
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,6 +83,7 @@ public class ErrataCachingKerberosClientSupport {
     @Inject
     ErrataTicketCache ticketCache;
 
+    // FIXME: 'Optional.get()' without 'isPresent()' check
     @Inject
     public ErrataCachingKerberosClientSupport(
             Instance<KerberosCallbackHandler> callbackHandler,
@@ -100,25 +100,25 @@ public class ErrataCachingKerberosClientSupport {
         if (userPrincipalSubjectFactory.isResolvable() && userPrincipalSubjectFactory.isAmbiguous()) {
             throw new IllegalStateException("Multiple " + UserPrincipalSubjectFactory.class + " beans registered");
         }
-        String realKeytabPath = null;
+        String keytabPath = null;
         if (kerberosConfig.keytabPath().isPresent()) {
             URL keytabUrl = Thread.currentThread()
                     .getContextClassLoader()
                     .getResource(kerberosConfig.keytabPath().get());
             if (keytabUrl != null) {
-                realKeytabPath = keytabUrl.toString();
+                keytabPath = keytabUrl.toString();
             } else {
                 Path filePath = Paths.get(kerberosConfig.keytabPath().get());
                 if (Files.exists(filePath)) {
-                    realKeytabPath = filePath.toAbsolutePath().toString();
+                    keytabPath = filePath.toAbsolutePath().toString();
                 }
             }
-            if (realKeytabPath == null) {
+            if (keytabPath == null) {
                 throw new ConfigurationException(
                         "Keytab file is not available at " + kerberosConfig.keytabPath().get());
             }
         }
-        this.realKeytabPath = realKeytabPath;
+        this.realKeytabPath = keytabPath;
     }
 
     public String getServiceTicket() {
@@ -126,6 +126,7 @@ public class ErrataCachingKerberosClientSupport {
         return getServiceTicket(getCompleteUserPrincipalName());
     }
 
+    // TODO: Exception
     public String getServiceTicket(String completeUserPrincipalName) {
         log.debug("Getting a new service ticket for user principal name '{}'...", completeUserPrincipalName);
         try {
@@ -135,14 +136,15 @@ public class ErrataCachingKerberosClientSupport {
                 throw new RuntimeException();
             }
 
-            return getServiceTicket(userPrincipalSubject, completeUserPrincipalName);
+            return getServiceTicket(userPrincipalSubject);
         } catch (LoginException ex) {
             log.debug("Login exception: {}", ex.getMessage());
             throw new RuntimeException(ex);
         }
     }
 
-    public String getServiceTicket(Subject userPrincipalSubject, String completeUserPrincipalName) {
+    // TODO: Exception
+    public String getServiceTicket(Subject userPrincipalSubject) {
         log.debug("Getting a new service ticket for user principal subject ...");
 
         try {
@@ -161,7 +163,7 @@ public class ErrataCachingKerberosClientSupport {
             Throwable ex2 = ex.getCause() != null ? ex.getCause() : ex;
             log.debug("PrivilegedAction failure: {}", ex2.getMessage());
             throw new RuntimeException(ex);
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             Throwable ex2 = ex.getCause() != null ? ex.getCause() : ex;
             log.debug("Authentication failure: {}", ex2.getMessage());
             throw new RuntimeException(ex2);
@@ -228,6 +230,7 @@ public class ErrataCachingKerberosClientSupport {
         return Base64.getEncoder().encodeToString(token);
     }
 
+    // FIXME: 'Optional.get()' without 'isPresent()' check
     protected CallbackHandler getCallback(String completeUserPrincipalName) {
         if (callbackHandler.isResolvable()) {
             return callbackHandler.get();

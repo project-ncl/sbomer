@@ -42,7 +42,7 @@ class TektonResourceUtilsTest {
         assertEquals(Quantity.parse("800m"), computeResources.getRequests().get("cpu"));
         assertEquals(Quantity.parse("1000m"), computeResources.getLimits().get("cpu"));
 
-        // Memoery
+        // Memory
         assertEquals(Quantity.parse("1200Mi"), computeResources.getRequests().get("memory"));
         assertEquals(Quantity.parse("1400Mi"), computeResources.getLimits().get("memory"));
     }
