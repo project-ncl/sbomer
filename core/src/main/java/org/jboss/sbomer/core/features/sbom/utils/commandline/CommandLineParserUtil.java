@@ -66,15 +66,29 @@ public class CommandLineParserUtil {
             if (versionOverride.isPresent()) {
                 buildCmdOptions += "npm version " + versionOverride.get();
             }
+        } else if (org.jboss.pnc.enums.BuildType.SBT.equals(build.getBuildConfigRevision().getBuildType())) {
+            Optional<String> versionOverride = getVersionFromBuildAttributes(build);
+            Optional<String> nameOverride = getNameFromBuildAttributes(build);
+            if (versionOverride.isPresent()) {
+                buildCmdOptions += "set version := \"" + versionOverride.get() + "\"";
+            }
+            if (nameOverride.isPresent()) {
+                buildCmdOptions += "; set name := \"" + nameOverride.get()
+                        .replace(".", Constants.SBT_COMPONENT_DOT_SEPARATOR)
+                        .replace(":", Constants.SBT_COMPONENT_COORDINATES_SEPARATOR) + "\"; ";
+            }
         }
         return buildCmdOptions;
     }
 
     private static Optional<String> getVersionFromBuildAttributes(Build build) {
-        Map<String, String> attributes = build.getAttributes();
-        return attributes != null && !attributes.isEmpty()
-                && attributes.containsKey(Constants.BUILD_ATTRIBUTES_BREW_BUILD_VERSION)
-                        ? Optional.of(attributes.get(Constants.BUILD_ATTRIBUTES_BREW_BUILD_VERSION))
-                        : Optional.empty();
+        return Optional.ofNullable(build.getAttributes())
+                .map(attrs -> attrs.get(Constants.BUILD_ATTRIBUTES_BREW_BUILD_VERSION));
     }
+
+    private static Optional<String> getNameFromBuildAttributes(Build build) {
+        return Optional.ofNullable(build.getAttributes())
+                .map(attrs -> attrs.get(Constants.BUILD_ATTRIBUTES_BREW_BUILD_NAME));
+    }
+
 }

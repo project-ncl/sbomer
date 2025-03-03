@@ -97,6 +97,11 @@ function install_yarn() {
     npm install --global yarn
 }
 
+function install_sbt() {
+    local version=${1}
+    sdk install sbt "${version}"
+}
+
 # Installs Domino.
 function install_domino() {
     echo "> Installing Domino CycloneDX SBOM generator version '${1}'"

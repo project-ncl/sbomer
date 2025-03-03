@@ -81,6 +81,8 @@
                   "gradle-cyclonedx",
                   "npm-cyclonedx",
                   "yarn-cyclonedx",
+                  "nodejs-cyclonedx",
+                  "sbt-cyclonedx",
                   "cyclonedx-operation"
                 ]
               },
