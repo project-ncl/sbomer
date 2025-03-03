@@ -303,8 +303,6 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
     @Override
     public final int hashCode() {
-        return (this instanceof HibernateProxy proxy)
-                ? proxy.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : getClass().hashCode();
+        return Objects.hash(id);
     }
 }
