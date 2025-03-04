@@ -17,24 +17,36 @@
 ///
 
 import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
+import { RequestsQueryType, SbomerRequest } from '@app/types';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 
 export function useRequestEvents(initialPage: number, intialPageSize: number) {
   const sbomerApi = DefaultSbomerApi.getInstance();
   const [total, setTotal] = useState(0);
-  const [pageIndex, setPageIndex] = useState(initialPage || 0);
+  const [pageIndex, setPageIndex] = useState(initialPage || 1);
   const [pageSize, setPageSize] = useState(intialPageSize || 10);
+  const [queryType, setQueryType] = useState(RequestsQueryType.NoFilter);
+  const [query, setQuery] = useState('');
 
   const getRequestEvents = useCallback(
-    async ({ pageSize, pageIndex }: { pageSize: number; pageIndex: number }) => {
+    async ({
+      pageSize,
+      pageIndex,
+    }: {
+      pageSize: number;
+      pageIndex: number;
+      queryType: RequestsQueryType;
+      query: string;
+    }) => {
       try {
-        return await sbomerApi.getRequestEvents({ pageSize, pageIndex });
+        const response = await sbomerApi.getRequestEvents({ pageSize, pageIndex }, queryType, query);
+        return response;
       } catch (e) {
         return Promise.reject(e);
       }
     },
-    [pageIndex, pageSize],
+    [pageIndex, pageSize, queryType, query],
   );
 
   const { loading, value, error, retry } = useAsyncRetry(
@@ -42,11 +54,13 @@ export function useRequestEvents(initialPage: number, intialPageSize: number) {
       getRequestEvents({
         pageSize: pageSize,
         pageIndex: pageIndex,
+        queryType: queryType,
+        query: query,
       }).then((data) => {
         setTotal(data.total);
         return data.data;
       }),
-    [pageIndex, pageSize],
+    [pageIndex, pageSize, queryType, query],
   );
 
   return [
@@ -61,6 +75,8 @@ export function useRequestEvents(initialPage: number, intialPageSize: number) {
     {
       setPageIndex,
       setPageSize,
+      setQueryType,
+      setQuery,
       retry,
     },
   ] as const;
