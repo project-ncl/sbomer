@@ -26,7 +26,7 @@ import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useManifests } from './useSboms';
 import { openInNewTab } from '@app/utils/openInNewTab';
-import { QueryType } from '@app/types';
+import { ManifestsQueryType } from '@app/types';
 
 const columnNames = {
   id: 'ID',
@@ -48,7 +48,7 @@ export const ManifestsTable = () => {
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(false);
 
   const [selectIsOpen, setSelectIsOpen] = React.useState(false);
-  const [selectedQueryType, setSelectedQueryType] = React.useState<QueryType>(QueryType.NoFilter);
+  const [selectedQueryType, setSelectedQueryType] = React.useState<ManifestsQueryType>(ManifestsQueryType.NoFilter);
 
 
   const [isButtonVisible, setButtonVisible] = React.useState<boolean>(false);
@@ -89,12 +89,12 @@ export const ManifestsTable = () => {
   };
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setSelectedQueryType(value as QueryType);
+    setSelectedQueryType(value as ManifestsQueryType);
     setSelectIsOpen(false);
     switch (value) {
-      case QueryType.NoFilter:
+      case ManifestsQueryType.NoFilter:
         setSearchBarVisible(false);
-        setQueryType(QueryType.NoFilter);
+        setQueryType(ManifestsQueryType.NoFilter);
         setQuery('');
         setButtonVisible(false);
         break;
@@ -137,10 +137,10 @@ export const ManifestsTable = () => {
   >
     <SelectList>
       <SelectGroup>
-        <SelectOption value={QueryType.NoFilter}>{QueryType.NoFilter}</SelectOption>
+        <SelectOption value={ManifestsQueryType.NoFilter}>{ManifestsQueryType.NoFilter}</SelectOption>
       </SelectGroup>
       <SelectGroup>
-        <SelectOption value={QueryType.Purl}>{QueryType.Purl}</SelectOption>
+        <SelectOption value={ManifestsQueryType.Purl}>{ManifestsQueryType.Purl}</SelectOption>
       </SelectGroup>
     </SelectList>
   </Select>
