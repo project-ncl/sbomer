@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.processor;
 
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_COMPONENT;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VERSION;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
@@ -305,11 +308,11 @@ public class DefaultProcessor implements Processor {
     private void processContainerImageComponent(Component component) {
         // Try to find required properties
         Optional<Property> componentOpt = SbomUtils
-                .findPropertyWithNameInComponent("sbomer:image:labels:com.redhat.component", component);
+                .findPropertyWithNameInComponent(CONTAINER_PROPERTY_IMAGE_LABEL_COMPONENT, component);
         Optional<Property> versionOpt = SbomUtils
-                .findPropertyWithNameInComponent("sbomer:image:labels:version", component);
+                .findPropertyWithNameInComponent(CONTAINER_PROPERTY_IMAGE_LABEL_VERSION, component);
         Optional<Property> releaseOpt = SbomUtils
-                .findPropertyWithNameInComponent("sbomer:image:labels:release", component);
+                .findPropertyWithNameInComponent(CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE, component);
 
         if (componentOpt.isEmpty() || versionOpt.isEmpty() || releaseOpt.isEmpty()) {
             log.warn(

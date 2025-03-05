@@ -705,6 +705,19 @@ public class SbomUtils {
         component.setProperties(properties);
     }
 
+    public static void addProperty(Metadata metadata, String key, String value) {
+        log.debug("addProperty {}: {}", key, value);
+        List<Property> properties = new ArrayList<>();
+        if (metadata.getProperties() != null) {
+            properties.addAll(metadata.getProperties());
+        }
+        Property property = new Property();
+        property.setName(key);
+        property.setValue(value != null ? value : "");
+        properties.add(property);
+        metadata.setProperties(properties);
+    }
+
     /**
      * <p>
      * Adds a property of a given name in case it's not already there.
@@ -715,16 +728,37 @@ public class SbomUtils {
      * @param value The value of the property.
      */
     public static void addPropertyIfMissing(Component component, String property, String value) {
-        if (!hasProperty(component, property)) {
+        if (component == null) {
+            return;
+        }
+        Optional<Property> p = findPropertyWithName(property, component.getProperties());
+        if (p.isEmpty()) {
             log.info("Adding {} property with value: {}", property, value);
             addProperty(component, property, value);
         } else {
-            // FIXME: 'Optional.get()' without 'isPresent()' check
-            log.debug(
-                    "Property {} already exist, value: {}",
-                    property,
-                    findPropertyWithNameInComponent(property, component).get().getValue()); // NOSONAR It's checked
-                                                                                            // above
+            log.debug("Property {} already exist, value: {}", property, p.get().getValue());
+        }
+    }
+
+    /**
+     * <p>
+     * Adds a property of a given name in case it's not already there.
+     * </p>
+     *
+     * @param metadata The {@link Metadata} to add the property to.
+     * @param property The name of the property.
+     * @param value The value of the property.
+     */
+    public static void addPropertyIfMissing(Metadata metadata, String property, String value) {
+        if (metadata == null) {
+            return;
+        }
+        Optional<Property> p = findPropertyWithName(property, metadata.getProperties());
+        if (p.isEmpty()) {
+            log.info("Adding {} property with value: {}", property, value);
+            addProperty(metadata, property, value);
+        } else {
+            log.debug("Property {} already exist, value: {}", property, p.get().getValue());
         }
     }
 
@@ -747,18 +781,20 @@ public class SbomUtils {
                 && component.getProperties().stream().anyMatch(c -> c.getName().equalsIgnoreCase(property));
     }
 
-    // FIXME: hasProperty() uses equalsIgnoreCase(), but findPropertyWithNameInComponent() uses equals()
-    // TODO: Optimize so that addPropertyIfMissing() is not filtering twice by using, e.g., Optional.orElse()
     public static Optional<Property> findPropertyWithNameInComponent(String propertyName, Component component) {
         if (component == null) {
             return Optional.empty();
         }
 
-        if (component.getProperties() == null || component.getProperties().isEmpty()) {
+        return findPropertyWithName(propertyName, component.getProperties());
+    }
+
+    public static Optional<Property> findPropertyWithName(String propertyName, List<Property> properties) {
+        if (properties == null || properties.isEmpty()) {
             return Optional.empty();
         }
 
-        return component.getProperties().stream().filter(c -> c.getName().equals(propertyName)).findFirst();
+        return properties.stream().filter(p -> p.getName().equalsIgnoreCase(propertyName)).findFirst();
     }
 
     public static boolean hasExternalReference(Component c, ExternalReference.Type type) {
@@ -932,12 +968,13 @@ public class SbomUtils {
         if (bom == null || bom.getComponents() == null || bom.getComponents().isEmpty()) {
             return List.of();
         }
-
         Component mainComponent = bom.getComponents().get(0);
-        Property n = findPropertyWithNameInComponent("sbomer:image:labels:com.redhat.component", mainComponent)
+        Property n = findPropertyWithNameInComponent(Constants.CONTAINER_PROPERTY_IMAGE_LABEL_COMPONENT, mainComponent)
                 .orElse(null);
-        Property v = findPropertyWithNameInComponent("sbomer:image:labels:version", mainComponent).orElse(null);
-        Property r = findPropertyWithNameInComponent("sbomer:image:labels:release", mainComponent).orElse(null);
+        Property v = findPropertyWithNameInComponent(Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VERSION, mainComponent)
+                .orElse(null);
+        Property r = findPropertyWithNameInComponent(Constants.CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE, mainComponent)
+                .orElse(null);
 
         if (n != null && v != null && r != null) {
             return List.of(n.getValue(), v.getValue(), r.getValue());
