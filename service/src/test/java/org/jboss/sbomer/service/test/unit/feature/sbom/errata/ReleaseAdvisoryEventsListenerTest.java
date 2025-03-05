@@ -33,11 +33,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.Property;
 import org.cyclonedx.model.component.evidence.Identity;
 import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
@@ -154,6 +156,13 @@ class ReleaseAdvisoryEventsListenerTest {
         }
     }
 
+    private static void validateProperty(List<Property> properties, String pName, String pValue) {
+        Optional<Property> advisoryIdProperty = SbomUtils
+                .findPropertyWithName(Constants.CONTAINER_PROPERTY_ADVISORY_ID, properties);
+        assertTrue(advisoryIdProperty.isPresent());
+        assertEquals(pValue, advisoryIdProperty.get().getValue());
+    }
+
     static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
@@ -202,6 +211,10 @@ class ReleaseAdvisoryEventsListenerTest {
                     List.of(
                             "pkg:oci/ruby-25@sha256%3Ab1f140e930baffe400e412fbf04d57624a18593e77fcc5cfa1b2462a3f85fc94"));
 
+            validateProperty(
+                    bom.getMetadata().getProperties(),
+                    Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                    String.valueOf(erratum.getDetails().get().getId()));
             printRawBom(bom);
             return null;
         }
@@ -387,6 +400,10 @@ class ReleaseAdvisoryEventsListenerTest {
                 JsonNode node = arrayNode.get(i);
                 assertEquals(node.asText(), allPurls.get(i));
             }
+            validateProperty(
+                    bom.getMetadata().getProperties(),
+                    Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                    String.valueOf(erratum.getDetails().get().getId()));
             return sbom;
         }
     }
@@ -477,6 +494,10 @@ class ReleaseAdvisoryEventsListenerTest {
                 JsonNode node = arrayNode.get(i);
                 assertEquals(node.asText(), allPurls.get(i));
             }
+            validateProperty(
+                    bom.getMetadata().getProperties(),
+                    Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                    String.valueOf(erratum.getDetails().get().getId()));
             return sbom;
         }
     }
@@ -527,6 +548,10 @@ class ReleaseAdvisoryEventsListenerTest {
                     1,
                     "Red Hat build of Quarkus 2.13.9.SP2",
                     List.of("pkg:maven/com.redhat.quarkus.platform/quarkus-bom@2.13.9.SP2-redhat-00003?type=pom"));
+            validateProperty(
+                    bom.getMetadata().getProperties(),
+                    Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                    String.valueOf(erratum.getDetails().get().getId()));
 
             printRawBom(bom);
 
@@ -599,6 +624,10 @@ class ReleaseAdvisoryEventsListenerTest {
             // Verify that all the sboms are represented inside the release manifest
             assertEquals(2, sboms.size());
             assertEquals(2, bom.getComponents().size());
+            validateProperty(
+                    bom.getMetadata().getProperties(),
+                    Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                    String.valueOf(erratum.getDetails().get().getId()));
 
             Bom buildManifestBom = SbomUtils.fromJsonNode(sboms.get(0).getSbom());
             String buildExpectedPurl = SbomUtils.addQualifiersToPurlOfComponent(
@@ -673,7 +702,6 @@ class ReleaseAdvisoryEventsListenerTest {
                     metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_VERSION).asText());
 
             ArrayNode arrayNode = (ArrayNode) metadataNode.get(ReleaseStandardAdvisoryEventsListener.PURL_LIST);
-            System.out.println("***********arrayNode: " + arrayNode);
             List<String> allPurls = List.of(
                     "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1",
                     "pkg:generic/jboss-unified-push-1.0.0.Beta1-maven-repository.zip?checksum=sha256%3A1c2a89f755d5fdddef08c9f6f3b89e1e15cfa6d316055327bfe3f806acdbfca1&repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F",
@@ -684,6 +712,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 JsonNode node = arrayNode.get(i);
                 assertEquals(node.asText(), allPurls.get(i));
             }
+            printRawBom(bom);
             return sbom;
         }
     }
@@ -825,7 +854,7 @@ class ReleaseAdvisoryEventsListenerTest {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -969,7 +998,7 @@ class ReleaseAdvisoryEventsListenerTest {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -1056,7 +1085,7 @@ class ReleaseAdvisoryEventsListenerTest {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
 
         V1Beta1RequestRecord latestAdvisoryRequestManifest = allAdvisoryRequestRecords.get(0);
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -1121,7 +1150,7 @@ class ReleaseAdvisoryEventsListenerTest {
                                 && !cdn.getAttributes().getContentType().equalsIgnoreCase("docker"))
                 .map(cdn -> new ErrataCDNRepoNormalized(cdn, variantName, !"rhel".equalsIgnoreCase(shortProductName)))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private PyxisRepositoryDetails loadPyxisRepositoryDetails(String fileName) throws IOException {

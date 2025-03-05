@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingSerialNumber;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -42,6 +45,7 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
@@ -234,7 +238,13 @@ public class ReleaseStandardAdvisoryEventsListener {
                 productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
             }
 
-            SbomUtils.addMissingSerialNumber(productVersionBom);
+            // Add the AdvisoryId property
+            addPropertyIfMissing(
+                    productVersionBom.getMetadata(),
+                    Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                    String.valueOf(erratum.getDetails().get().getId()));
+
+            addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
             Sbom sbom = saveReleaseManifestForRPMGeneration(
@@ -303,7 +313,13 @@ public class ReleaseStandardAdvisoryEventsListener {
                 productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
             }
 
-            SbomUtils.addMissingSerialNumber(productVersionBom);
+            // Add the AdvisoryId property
+            addPropertyIfMissing(
+                    productVersionBom.getMetadata(),
+                    Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                    String.valueOf(erratum.getDetails().get().getId()));
+
+            addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
             Sbom sbom = saveReleaseManifestForDockerGeneration(
@@ -503,6 +519,12 @@ public class ReleaseStandardAdvisoryEventsListener {
                     Sbom buildManifest = sbomService.get(buildManifestRecord.id());
                     Bom manifestBom = SbomUtils.fromJsonNode(buildManifest.getSbom());
 
+                    // Add the AdvisoryId property
+                    addPropertyIfMissing(
+                            manifestBom.getMetadata(),
+                            Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                            String.valueOf(erratum.getDetails().get().getId()));
+
                     // For each component, I need to find the matching CDNs repo, selecting the longest one to update
                     // the purl.
                     // And getting them all to create the evidence
@@ -622,18 +644,19 @@ public class ReleaseStandardAdvisoryEventsListener {
                     buildManifest.setRootPurl(rebuiltPurl);
                     log.debug("Updated manifest '{}' to rootPurl '{}'", buildManifestRecord.id(), rebuiltPurl);
 
+                    addPropertyIfMissing(
+                            manifestBom.getMetadata(),
+                            Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                            String.valueOf(erratum.getDetails().get().getId()));
+
                     if (manifestBom.getMetadata() != null && manifestBom.getMetadata().getComponent() != null) {
+
                         manifestBom.getMetadata().getComponent().setPurl(rebuiltPurl);
-                        if (manifestBom.getMetadata().getComponent().getDescription() != null
-                                && manifestBom.getMetadata()
-                                        .getComponent()
-                                        .getDescription()
-                                        .contains(buildManifest.getRootPurl())) {
-                            // FIXME: Result of String.replace() is ignored
+                        String desc = manifestBom.getMetadata().getComponent().getDescription();
+                        if (desc != null && desc.contains(buildManifest.getRootPurl())) {
                             manifestBom.getMetadata()
                                     .getComponent()
-                                    .getDescription()
-                                    .replace(buildManifest.getRootPurl(), rebuiltPurl);
+                                    .setDescription(desc.replace(buildManifest.getRootPurl(), rebuiltPurl));
                         }
                     }
                     if (manifestBom.getComponents() != null && !manifestBom.getComponents().isEmpty()) {
@@ -711,7 +734,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
     }
 
     @Retry(maxRetries = 10)
@@ -756,7 +779,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                                                 repository.getRepository(),
                                                 tag.getName())))
                 .filter(repoCoordinate -> repoCoordinate.getRepositoryFragment() != null)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Retry(maxRetries = 10)
@@ -765,7 +788,7 @@ public class ReleaseStandardAdvisoryEventsListener {
         buildItem.getVariantArch()
                 .keySet()
                 .forEach(variant -> allCDNs.addAll(errataClient.getCDNReposOfVariant(variant, productShortName)));
-        return allCDNs.stream().distinct().collect(Collectors.toList());
+        return allCDNs.stream().distinct().toList();
     }
 
     /*

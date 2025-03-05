@@ -22,6 +22,7 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.PurlSanitizer;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -294,7 +295,7 @@ class SyftImageAdjusterTest {
                 .get(0)
                 .getProperties()
                 .stream()
-                .filter(property -> "sbomer:image:labels:vendor".equals(property.getName()))
+                .filter(property -> Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VENDOR.equals(property.getName()))
                 .findFirst();
         assertTrue(goodVendor.isPresent());
         assertEquals("Red Hat", goodVendor.get().getValue());
