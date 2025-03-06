@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.generator;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,7 +37,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -43,12 +47,14 @@ import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
@@ -157,6 +163,19 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     protected List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
         // First, update the status of the GenerationRequest entity.
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
+        // Verify if the request event for this generation is associated with an Errata advisory
+        RequestEvent event = sbomGenerationRequest.getRequest();
+        if (event != null && event.getRequestConfig() != null
+                && event.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
+            ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) event.getRequestConfig();
+            boms.forEach(bom -> {
+                // Add the AdvisoryId property
+                addPropertyIfMissing(
+                        bom.getMetadata(),
+                        Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                        config.getAdvisoryId());
+            });
+        }
 
         log.info("There are {} manifests to be stored for the {} request...", boms.size(), generationRequest.getId());
 

@@ -391,7 +391,7 @@ public class AdvisoryService {
                                 productVersionEntry -> productVersionEntry.getBuilds()
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
-                                        .collect(Collectors.toList())));
+                                        .toList()));
 
         // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
         // manifests. Otherwise SBOMer will default to the creation of build manifests. Will change in future!
@@ -501,11 +501,7 @@ public class AdvisoryService {
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<>();
 
         // Collect all the docker build ids so we can query Koji in one go
-        List<Long> buildIds = buildDetails.values()
-                .stream()
-                .flatMap(List::stream)
-                .map(BuildItem::getId)
-                .collect(Collectors.toList());
+        List<Long> buildIds = buildDetails.values().stream().flatMap(List::stream).map(BuildItem::getId).toList();
 
         Map<Long, String> imageNamesFromBuilds = null;
 
@@ -673,9 +669,7 @@ public class AdvisoryService {
         Map<Long, String> buildsToImageName = new HashMap<>();
 
         try {
-            List<KojiIdOrName> kojiIdOrNames = buildIds.stream()
-                    .map(id -> KojiIdOrName.getFor(id.toString()))
-                    .collect(Collectors.toList());
+            List<KojiIdOrName> kojiIdOrNames = buildIds.stream().map(id -> KojiIdOrName.getFor(id.toString())).toList();
 
             List<KojiBuildInfo> buildInfos = getKojiSession().getBuild(kojiIdOrNames);
             for (KojiBuildInfo kojiBuildInfo : buildInfos) {

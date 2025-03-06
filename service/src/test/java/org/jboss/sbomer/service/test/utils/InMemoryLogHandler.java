@@ -43,7 +43,7 @@ public class InMemoryLogHandler extends Handler {
     }
 
     public List<String> getMessages() {
-        return records.stream().map(LogRecord::getMessage).collect(Collectors.toList());
+        return records.stream().map(LogRecord::getMessage).toList();
 
     }
 

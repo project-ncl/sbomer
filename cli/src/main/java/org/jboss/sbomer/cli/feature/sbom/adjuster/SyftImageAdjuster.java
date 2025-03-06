@@ -17,6 +17,18 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_MANTAINER;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VENDOR;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VERSION;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_LOCATION_PATH_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.REDHAT_PROPERTY_NAMESPACE_PREFIX;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -80,11 +92,11 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * @see SyftImageAdjuster#adjustProperties(List)
      */
     private static final List<String> ALLOWED_PROPERTY_PREFIXES = List.of(
-            "sbomer:package:language",
-            "sbomer:package:type",
-            "sbomer:location:0:path",
-            "sbomer:metadata:virtualPath",
-            "sbomer:image:labels");
+            CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX,
+            CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX,
+            CONTAINER_PROPERTY_LOCATION_PATH_PREFIX,
+            CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX,
+            CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX);
 
     public SyftImageAdjuster(Path workDir) {
         this.workDir = workDir;
@@ -348,7 +360,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // 7.4.17
         Optional<Property> versionOpt = SbomUtils
-                .findPropertyWithNameInComponent("sbomer:image:labels:version", mainComponent);
+                .findPropertyWithNameInComponent(CONTAINER_PROPERTY_IMAGE_LABEL_VERSION, mainComponent);
 
         if (versionOpt.isEmpty()) {
             throw new ApplicationException(
@@ -357,7 +369,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // 5.1717585311
         Optional<Property> releaseOpt = SbomUtils
-                .findPropertyWithNameInComponent("sbomer:image:labels:release", mainComponent);
+                .findPropertyWithNameInComponent(CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE, mainComponent);
 
         if (releaseOpt.isEmpty()) {
             throw new ApplicationException(
@@ -466,7 +478,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // Adjust property names
         properties.forEach(p -> {
-            String newName = p.getName().replace("syft:", "sbomer:");
+            String newName = p.getName().replace("syft:", CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX);
 
             // log.debug("Adjusting property name from '{}' to '{}'", p.getName(), newName);
 
@@ -490,8 +502,8 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         properties.stream()
                 .filter(
-                        property -> "sbomer:image:labels:vendor".equals(property.getName())
-                                || "sbomer:image:labels:maintainer".equals(property.getName()))
+                        property -> (CONTAINER_PROPERTY_IMAGE_LABEL_VENDOR).equals(property.getName())
+                                || (CONTAINER_PROPERTY_IMAGE_LABEL_MANTAINER).equals(property.getName()))
                 .forEach(property -> {
                     if ("Red Hat, Inc.".equals(property.getValue())) {
                         property.setValue(Constants.SUPPLIER_NAME);
@@ -509,7 +521,8 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         if (component.getProperties() != null) {
             // Adjust purl for Java components
-            Property propType = SbomUtils.findPropertyWithNameInComponent("sbomer:package:type", component)
+            Property propType = SbomUtils
+                    .findPropertyWithNameInComponent(CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX, component)
                     .orElse(null);
 
             if (component.getPurl() != null && propType != null) {

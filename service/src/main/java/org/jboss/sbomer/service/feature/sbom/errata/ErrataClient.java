@@ -140,7 +140,7 @@ public interface ErrataClient {
                 .filter(
                         variant -> productVersionId
                                 .equals(variant.getAttributes().getRelationships().getProductVersion().getId()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     default Map<String, Collection<ErrataCDNRepoNormalized>> getCDNReposOfVariant(
@@ -163,7 +163,7 @@ public interface ErrataClient {
                                 && !cdn.getAttributes().getContentType().equalsIgnoreCase("docker"))
                 .map(cdn -> new ErrataCDNRepoNormalized(cdn, variantName, !"rhel".equalsIgnoreCase(shortProductName)))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Default method for handling pagination logic with a generic type `T` and a function `getPageFunction`
