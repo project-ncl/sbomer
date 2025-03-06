@@ -18,6 +18,7 @@
 
 --------------------------------------------------------------------------
 -- Add the new advisory_id information inside the metadata -> properties 
+-- Rename some properties with new "redhat:" prefix
 --------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_sbom_metadata_with_errata_id()
 RETURNS VOID AS $$
@@ -28,6 +29,25 @@ BEGIN
         SELECT release_metadata ->> 'errata_id' AS errata_id, id  
         FROM sbom 
         WHERE release_metadata IS NOT NULL
+    LOOP
+        UPDATE sbom
+        SET sbom = jsonb_set(
+            sbom,
+            '{metadata, properties}',
+            jsonb_build_array(jsonb_build_object('name', 'redhat:advisory_id', 'value', rec.errata_id)),
+            true
+        )
+        WHERE sbom->'metadata' IS NOT NULL 
+        AND id = rec.id;
+    END LOOP;
+
+    FOR rec IN
+        SELECT r.request_config ->>'advisoryId' AS errata_id, s.id 
+        FROM sbom s, sbom_generation_request sr, request r 
+        WHERE s.generationrequest_id = sr.id 
+        AND sr.request_id = r.id 
+        AND r.request_config::text LIKE '%"type": "errata-advisory"%' 
+        AND s.sbom::text NOT LIKE '%"name": "redhat:advisory_id"%'
     LOOP
         UPDATE sbom
         SET sbom = jsonb_set(

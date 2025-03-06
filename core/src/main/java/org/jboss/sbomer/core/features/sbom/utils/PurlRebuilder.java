@@ -28,6 +28,7 @@ import java.util.Optional;
 
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Property;
+import org.jboss.sbomer.core.features.sbom.Constants;
 
 @Slf4j
 public class PurlRebuilder {
@@ -119,12 +120,18 @@ public class PurlRebuilder {
      */
     public static String rebuildPurlFromSyftComponent(Component component) throws MalformedPackageURLException {
 
-        Optional<Property> syftPackageType = SbomUtils.findPropertyWithNameInComponent("syft:package:type", component);
-        if (syftPackageType.isEmpty()) {
+        Property syftPackageType = SbomUtils.findPropertyWithNameInComponent("syft:package:type", component)
+                .or(
+                        () -> SbomUtils.findPropertyWithNameInComponent(
+                                Constants.CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX,
+                                component))
+                .orElse(null);
+
+        if (syftPackageType == null) {
             return null;
         }
 
-        String type = SYFT_PACKAGE_2_PURL_TYPE_MAP.get(syftPackageType.get().getValue());
+        String type = SYFT_PACKAGE_2_PURL_TYPE_MAP.get(syftPackageType.getValue());
         if (type == null) {
             return null;
         }

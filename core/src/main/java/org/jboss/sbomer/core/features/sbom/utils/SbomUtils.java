@@ -95,6 +95,7 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -419,9 +420,20 @@ public class SbomUtils {
 
         for (Map.Entry<String, List<LicenseInfo>> entry : entries) {
             String spdxLicenseId = entry.getKey();
-            List<LicenseInfo> licenseInfos = entry.getValue().stream().sorted(Comparator.comparing(LicenseInfo::getSpdxLicenseId)).toList();
+            List<LicenseInfo> licenseInfos = entry.getValue()
+                    .stream()
+                    .sorted(Comparator.comparing(LicenseInfo::getSpdxLicenseId))
+                    .toList();
             addLicenseEvidence(component, licenseInfos);
-            licenseInfos.stream().map(licenseInfo -> getNormalizedUrl(licenseInfo.getUrl())).forEach(optionalURI -> optionalURI.ifPresent(uri -> addExternalReference(component, ExternalReference.Type.LICENSE, uri.toASCIIString(), spdxLicenseId)));
+            licenseInfos.stream()
+                    .map(licenseInfo -> getNormalizedUrl(licenseInfo.getUrl()))
+                    .forEach(
+                            optionalURI -> optionalURI.ifPresent(
+                                    uri -> addExternalReference(
+                                            component,
+                                            ExternalReference.Type.LICENSE,
+                                            uri.toASCIIString(),
+                                            spdxLicenseId)));
         }
         return component;
     }
