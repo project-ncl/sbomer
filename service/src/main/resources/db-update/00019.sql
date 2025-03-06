@@ -44,5 +44,15 @@ $$ LANGUAGE plpgsql;
 
 BEGIN;
     SELECT update_sbom_metadata_with_errata_id();
+
+    UPDATE sbom
+    SET sbom = REGEXP_REPLACE(sbom::text, '"name":\s*"deliverable-url"', '"name": "redhat:deliverable-url"', 'g')::jsonb
+    WHERE sbom::text LIKE '%"name": "deliverable-url"%';
+
+    UPDATE sbom
+    SET sbom = REGEXP_REPLACE(sbom::text, '"name":\s*"deliverable-checksum"', '"name": "redhat:deliverable-checksum"', 'g')::jsonb
+    WHERE sbom::text LIKE '%"name": "deliverable-checksum"%';
+
+
     INSERT INTO db_version(version, creation_time) VALUES ('00019', now());
 COMMIT;
