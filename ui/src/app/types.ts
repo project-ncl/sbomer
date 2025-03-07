@@ -120,7 +120,6 @@ export class SbomerRequest {
     // Parse `request_config` if it exists
     if (payload.requestConfig) {
       try {
-        
         this.requestConfig = JSON.stringify(payload.requestConfig);
         var rConfig = JSON.parse(this.requestConfig); // Convert to JSON object
         this.requestConfigTypeName = rConfig.type;
@@ -161,7 +160,6 @@ export class SbomerRequest {
 }
 
 export class SbomerRequestManifest {
-
   public reqId: string;
   public reqReceivalTime: Date;
   public reqEventType: string;
@@ -184,7 +182,6 @@ export class SbomerRequestManifest {
     // Parse `request_config` if it exists
     if (payload.requestConfig) {
       try {
-
         this.reqConfig = JSON.stringify(payload.requestConfig);
         var rConfig = JSON.parse(this.reqConfig); // Convert to JSON object
         this.reqConfigTypeName = rConfig.type;
@@ -233,6 +230,11 @@ export type GenerateParams = {
   config: string;
 };
 
+export enum QueryType {
+  NoFilter = 'No filter',
+  Purl = 'Purl',
+}
+
 export type SbomerApi = {
   getBaseUrl(): string;
   stats(): Promise<SbomerStats>;
@@ -243,7 +245,11 @@ export type SbomerApi = {
     pageIndex: number;
   }): Promise<{ data: SbomerGeneration[]; total: number }>;
 
-  getManifests(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerManifest[]; total: number }>;
+  getManifests(
+    pagination: { pageSize: number; pageIndex: number },
+    queryType: QueryType,
+    query: string,
+  ): Promise<{ data: SbomerManifest[]; total: number }>;
   getManifestsForGeneration(generationId: string): Promise<{ data: SbomerManifest[]; total: number }>;
 
   getGeneration(id: string): Promise<SbomerGeneration>;
@@ -258,5 +264,4 @@ export type SbomerApi = {
   getRequestEvent(id: string): Promise<SbomerRequestManifest>;
 
   getRequestEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }>;
-
 };

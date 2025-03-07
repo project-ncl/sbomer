@@ -17,7 +17,15 @@
 ///
 
 import axios, { Axios, AxiosError } from 'axios';
-import { SbomerApi, SbomerGeneration, SbomerManifest, SbomerStats, SbomerRequest, SbomerRequestManifest } from '../types';
+import {
+  QueryType,
+  SbomerApi,
+  SbomerGeneration,
+  SbomerManifest,
+  SbomerRequest,
+  SbomerRequestManifest,
+  SbomerStats,
+} from '../types';
 
 type Options = {
   baseUrl: string;
@@ -67,9 +75,26 @@ export class DefaultSbomerApi implements SbomerApi {
     );
   }
 
-  async getManifests(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerManifest[]; total: number }> {
+  async getManifests(
+    pagination: { pageSize: number; pageIndex: number },
+    queryOption: QueryType,
+    query: string,
+  ): Promise<{ data: SbomerManifest[]; total: number }> {
+    let queryPrefix = '';
+    switch (queryOption) {
+      case QueryType.Purl:
+        queryPrefix = 'rootPurl';
+        break;
+      default:
+        queryPrefix = '';
+    }
+
+    const isQueryPrefixEmpty = queryPrefix == '';
+    const queryStringValue = isQueryPrefixEmpty ? '' : `${queryPrefix}=eq='${query}'`;
+    const queryFullString = `${isQueryPrefixEmpty ? '' : 'query='}${encodeURIComponent(queryStringValue)}${isQueryPrefixEmpty ? '' : '&'}`;
+
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/manifests?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta1/manifests?${queryFullString}'pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -182,11 +207,9 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async getGeneration(id: string): Promise<SbomerGeneration> {
-    const request = await this.client
-      .get<SbomerGeneration>(`/api/v1beta1/generations/${id}`)
-      .then((response) => {
-        return response.data as SbomerGeneration;
-      });
+    const request = await this.client.get<SbomerGeneration>(`/api/v1beta1/generations/${id}`).then((response) => {
+      return response.data as SbomerGeneration;
+    });
 
     return request;
   }
@@ -221,11 +244,9 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async getRequestEvent(id: string): Promise<SbomerRequestManifest> {
-    const request = await this.client
-      .get<SbomerRequestManifest>(`/api/v1beta1/requests/id=${id}`)
-      .then((response) => {
-        return new SbomerRequestManifest(response.data[0]);
-      });
+    const request = await this.client.get<SbomerRequestManifest>(`/api/v1beta1/requests/id=${id}`).then((response) => {
+      return new SbomerRequestManifest(response.data[0]);
+    });
 
     return request;
   }
@@ -274,5 +295,4 @@ export class DefaultSbomerApi implements SbomerApi {
 
     return { data: requests, total: totalHits };
   }
-
 }
