@@ -10,6 +10,17 @@ import {
   ExpandableSection,
   CodeBlock,
   CodeBlockCode,
+  ToolbarContent,
+  ToolbarItem,
+  Toolbar,
+  Select,
+  SelectList,
+  SelectOption,
+  SelectGroup,
+  MenuToggle,
+  MenuToggleElement,
+  SearchInput,
+  Button,
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
@@ -18,6 +29,7 @@ import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useRequestEvents } from './useRequestEvents';
 import { openInNewTab } from '@app/utils/openInNewTab';
+import { RequestsQueryType } from '@app/types';
 
 const columnNames = {
   id: 'ID',
@@ -33,7 +45,15 @@ export const RequestEventTable = () => {
   const paramPage = useSearchParam('page') || 1;
   const paramPageSize = useSearchParam('pageSize') || 10;
 
-  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useRequestEvents(
+  const [searchBarValue, setSearchBarValue] = React.useState<string>('');
+  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(false);
+
+  const [selectIsOpen, setSelectIsOpen] = React.useState(false);
+  const [selectedQueryType, setSelectedQueryType] = React.useState<string>(RequestsQueryType.NoFilter);
+
+  const [isButtonVisible, setButtonVisible] = React.useState<boolean>(false);
+
+  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize, setQueryType, setQuery }] = useRequestEvents(
     +paramPage - 1,
     +paramPageSize,
   );
@@ -61,8 +81,103 @@ export const RequestEventTable = () => {
     return null;
   }
 
+  const onToggleClick = () => {
+    setSelectIsOpen(!selectIsOpen);
+  };
+
+  const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
+    setSelectedQueryType(value as RequestsQueryType);
+    setSelectIsOpen(false);
+    switch (value) {
+      case RequestsQueryType.NoFilter:
+        setSearchBarVisible(false);
+        setQueryType(RequestsQueryType.NoFilter);
+        setQuery('');
+        setButtonVisible(false)
+        break;
+      default:
+        setSearchBarVisible(true);
+        setButtonVisible(true);
+    }
+  };
+
+  const onSearchCall = () => {
+    setQueryType(selectedQueryType as RequestsQueryType)
+    setQuery(searchBarValue)
+    setPageIndex(0)
+  }
+
+
+  const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
+    <MenuToggle
+      ref={toggleRef}
+      onClick={onToggleClick}
+      isExpanded={selectIsOpen}
+      style={
+        {
+          width: '300px'
+        } as React.CSSProperties
+      }
+    >
+      {selectedQueryType}
+    </MenuToggle>
+  );
+
+
+  const select = <Select
+    id="single-select"
+    isOpen={selectIsOpen}
+    selected={selectedQueryType}
+    onSelect={onSelect}
+    onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
+    toggle={toggle}
+    shouldFocusToggleOnSelect
+  >
+    <SelectList>
+      <SelectGroup>
+        <SelectOption value={RequestsQueryType.NoFilter}>{RequestsQueryType.NoFilter}</SelectOption>
+      </SelectGroup>
+      <SelectGroup>
+        <SelectOption value={RequestsQueryType.PNCBuild}>{RequestsQueryType.PNCBuild}</SelectOption>
+        <SelectOption value={RequestsQueryType.ContainerImage}>{RequestsQueryType.ContainerImage}</SelectOption>
+        <SelectOption value={RequestsQueryType.ErrataAdvisory}>{RequestsQueryType.ErrataAdvisory}</SelectOption>
+        <SelectOption value={RequestsQueryType.RequestEvent}>{RequestsQueryType.RequestEvent}</SelectOption>
+        <SelectOption value={RequestsQueryType.PNCAnalysis}>{RequestsQueryType.PNCAnalysis}</SelectOption>
+        <SelectOption value={RequestsQueryType.PNCOperation}>{RequestsQueryType.PNCOperation}</SelectOption>
+        <SelectOption value={RequestsQueryType.ErrataReleaseID}>{RequestsQueryType.ErrataReleaseID}</SelectOption>
+        <SelectOption value={RequestsQueryType.ErrataReleaseFullname}>{RequestsQueryType.ErrataReleaseFullname}</SelectOption>
+      </SelectGroup>
+    </SelectList>
+  </Select>
+
+  const searchBar = <SearchInput
+    placeholder="Enter selected id"
+    value={searchBarValue}
+    onChange={(_event, value) => setSearchBarValue(value)}
+    onClear={() => setSearchBarValue('')}
+    isAdvancedSearchOpen={!searchBarVisible}
+  />
+
+  const searchButton = <Button
+    variant='primary'
+    onClick={() => onSearchCall()}>Search</Button>
+
+
   return (
     <>
+      <Toolbar>
+        <ToolbarContent>
+          <ToolbarItem>
+            {select}
+          </ToolbarItem>
+          <ToolbarItem>
+            {searchBarVisible && searchBar}
+          </ToolbarItem>
+          <ToolbarItem>
+            {isButtonVisible && searchButton}
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
       <Table aria-label="Request events table" variant="compact">
         <Caption>Latest request events</Caption>
         <Thead>
