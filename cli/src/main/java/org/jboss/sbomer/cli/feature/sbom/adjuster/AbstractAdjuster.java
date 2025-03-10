@@ -55,6 +55,10 @@ public abstract class AbstractAdjuster implements Adjuster {
         }
     }
 
+    protected void addMissingMetadataSupplier(Bom bom) {
+        SbomUtils.addMissingMetadataSupplier(bom);
+    }
+
     protected static void addMissingSerialNumber(Bom bom) {
         SbomUtils.addMissingSerialNumber(bom);
     }

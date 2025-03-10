@@ -22,6 +22,7 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.PurlSanitizer;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -304,6 +305,14 @@ class SyftImageAdjusterTest {
                 .filter(component -> "Red Hat, Inc.".equals(component.getPublisher()))
                 .findFirst();
         assertFalse(goodComponent.isPresent());
+    }
+
+    @Test
+    void shouldAdjustMetadataSupplier() {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir);
+        Bom adjusted = adjuster.adjust(bom);
+        assertNotNull(adjusted.getMetadata().getSupplier());
+        assertEquals(Constants.SUPPLIER_NAME, adjusted.getMetadata().getSupplier().getName());
     }
 
     private Stream<ExternalReference> getExternalReferenceStream(Bom bom) {

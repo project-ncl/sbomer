@@ -234,6 +234,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                 productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
             }
 
+            SbomUtils.addMissingMetadataSupplier(productVersionBom);
             SbomUtils.addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
@@ -303,6 +304,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                 productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
             }
 
+            SbomUtils.addMissingMetadataSupplier(productVersionBom);
             SbomUtils.addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
@@ -501,6 +503,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
                     Sbom buildManifest = sbomService.get(buildManifestRecord.id());
                     Bom manifestBom = SbomUtils.fromJsonNode(buildManifest.getSbom());
+                    SbomUtils.addMissingMetadataSupplier(manifestBom);
 
                     // For each component, I need to find the matching CDNs repo, selecting the longest one to update
                     // the purl.
@@ -614,6 +617,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
                     Sbom buildManifest = sbomService.get(buildManifestRecord.id());
                     Bom manifestBom = SbomUtils.fromJsonNode(buildManifest.getSbom());
+                    SbomUtils.addMissingMetadataSupplier(manifestBom);
 
                     // 2.4 Update rootPurl, metadata.component.purl, bom.component[0].purl with the rebuiltPurl
                     String rebuiltPurl = originalToRebuiltPurl.get(buildManifest.getRootPurl());

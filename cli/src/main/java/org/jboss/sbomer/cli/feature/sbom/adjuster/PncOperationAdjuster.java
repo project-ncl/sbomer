@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PncOperationAdjuster extends AbstractAdjuster {
     @Override
     public Bom adjust(Bom bom) {
+        addMissingMetadataSupplier(bom);
         addMissingSerialNumber(bom);
 
         // Remove the dependencies which depends on the same parent bom-ref (SBOMER-245)

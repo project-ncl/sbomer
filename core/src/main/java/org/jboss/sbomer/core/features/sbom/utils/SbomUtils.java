@@ -1068,6 +1068,26 @@ public class SbomUtils {
         }
     }
 
+    public static void addMissingMetadataSupplier(Bom bom) {
+        if (bom == null) {
+            return;
+        }
+        addMissingMetadataSupplier(bom.getMetadata());
+    }
+
+    private static void addMissingMetadataSupplier(Metadata metadata) {
+        if (metadata == null) {
+            return;
+        }
+
+        if (metadata.getSupplier() == null) {
+            OrganizationalEntity org = new OrganizationalEntity();
+            org.setName(Constants.SUPPLIER_NAME);
+            org.setUrls(List.of(Constants.SUPPLIER_URL));
+            metadata.setSupplier(org);
+        }
+    }
+
     /**
      *
      * @param component the component whose purl needs to be analyzed

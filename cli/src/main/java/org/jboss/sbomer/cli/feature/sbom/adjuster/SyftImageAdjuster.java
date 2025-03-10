@@ -136,7 +136,8 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // Adjust the publisher name
         adjustPublisher(bom);
-
+        // Adjust the metadata supplier
+        addMissingMetadataSupplier(bom);
         return bom;
     }
 
