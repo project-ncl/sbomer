@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PncBuildAdjuster extends AbstractAdjuster {
     @Override
     public Bom adjust(Bom bom) {
+        addMissingMetadataSupplier(bom);
         addMissingSerialNumber(bom);
         cleanupComponents(bom);
 

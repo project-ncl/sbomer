@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Dependency;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.PncBuildAdjuster;
+import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,8 @@ class PncBuildAdjusterTest {
         Bom adjusted = adjuster.adjust(bom);
 
         assertNotNull(adjusted.getSerialNumber());
+        assertNotNull(adjusted.getMetadata().getSupplier());
+        assertEquals(Constants.SUPPLIER_NAME, adjusted.getMetadata().getSupplier().getName());
         assertTrue(adjusted.getSerialNumber().startsWith("urn:uuid:"));
         assertEquals(45, adjusted.getSerialNumber().length());
     }

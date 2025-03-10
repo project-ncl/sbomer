@@ -207,6 +207,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
             productVersionBom.getDependencies().get(0).addProvides(new Dependency(sbomRootComponent.getPurl()));
         }
 
+        SbomUtils.addMissingMetadataSupplier(productVersionBom);
         SbomUtils.addMissingSerialNumber(productVersionBom);
 
         SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
@@ -339,6 +340,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
 
                 Sbom buildManifest = sbomService.get(sbom.getId());
                 Bom manifestBom = SbomUtils.fromJsonNode(buildManifest.getSbom());
+                SbomUtils.addMissingMetadataSupplier(manifestBom);
 
                 Component metadataComponent = manifestBom.getMetadata() != null
                         ? manifestBom.getMetadata().getComponent()
