@@ -28,75 +28,75 @@
         "version": "sha256:2c9e70f4174747c6b53d253e879177c52731cc4bdc5fe9c6a2555412d849a952",
         "properties": [
           {
-            "name": "sbomer:image:labels:architecture",
+            "name": "redhat:sbomer:image:labels:architecture",
             "value": "s390x"
           },
           {
-            "name": "sbomer:image:labels:build-date",
+            "name": "redhat:sbomer:image:labels:build-date",
             "value": "2024-05-23T13:47:39"
           },
           {
-            "name": "sbomer:image:labels:com.redhat.component",
+            "name": "redhat:sbomer:image:labels:com.redhat.component",
             "value": "ubi9-micro-container"
           },
           {
-            "name": "sbomer:image:labels:com.redhat.license_terms",
+            "name": "redhat:sbomer:image:labels:com.redhat.license_terms",
             "value": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI"
           },
           {
-            "name": "sbomer:image:labels:description",
+            "name": "redhat:sbomer:image:labels:description",
             "value": "Very small image which doesn't install the package manager."
           },
           {
-            "name": "sbomer:image:labels:distribution-scope",
+            "name": "redhat:sbomer:image:labels:distribution-scope",
             "value": "public"
           },
           {
-            "name": "sbomer:image:labels:io.buildah.version",
+            "name": "redhat:sbomer:image:labels:io.buildah.version",
             "value": "1.29.0"
           },
           {
-            "name": "sbomer:image:labels:io.k8s.description",
+            "name": "redhat:sbomer:image:labels:io.k8s.description",
             "value": "Very small image which doesn't install the package manager."
           },
           {
-            "name": "sbomer:image:labels:io.k8s.display-name",
+            "name": "redhat:sbomer:image:labels:io.k8s.display-name",
             "value": "Ubi9-micro"
           },
           {
-            "name": "sbomer:image:labels:maintainer",
+            "name": "redhat:sbomer:image:labels:maintainer",
             "value": "Red Hat"
           },
           {
-            "name": "sbomer:image:labels:name",
+            "name": "redhat:sbomer:image:labels:name",
             "value": "ubi9/ubi-micro"
           },
           {
-            "name": "sbomer:image:labels:release",
+            "name": "redhat:sbomer:image:labels:release",
             "value": "6.1716471860"
           },
           {
-            "name": "sbomer:image:labels:summary",
+            "name": "redhat:sbomer:image:labels:summary",
             "value": "ubi9 micro image"
           },
           {
-            "name": "sbomer:image:labels:url",
+            "name": "redhat:sbomer:image:labels:url",
             "value": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi9/ubi-micro/images/9.4-6.1716471860"
           },
           {
-            "name": "sbomer:image:labels:vcs-ref",
+            "name": "redhat:sbomer:image:labels:vcs-ref",
             "value": "433dec61d526247ac9533c1d9b97e98a1127c782"
           },
           {
-            "name": "sbomer:image:labels:vcs-type",
+            "name": "redhat:sbomer:image:labels:vcs-type",
             "value": "git"
           },
           {
-            "name": "sbomer:image:labels:vendor",
+            "name": "redhat:sbomer:image:labels:vendor",
             "value": "Red Hat"
           },
           {
-            "name": "sbomer:image:labels:version",
+            "name": "redhat:sbomer:image:labels:version",
             "value": "9.4"
           }
         ]

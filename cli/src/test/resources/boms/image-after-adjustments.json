@@ -20,83 +20,83 @@
             "purl": "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
             "properties": [
                 {
-                    "name": "sbomer:image:labels:architecture",
+                    "name": "redhat:sbomer:image:labels:architecture",
                     "value": "x86_64"
                 },
                 {
-                    "name": "sbomer:image:labels:build-date",
+                    "name": "redhat:sbomer:image:labels:build-date",
                     "value": "2024-06-13T16:02:24"
                 },
                 {
-                    "name": "sbomer:image:labels:com.redhat.component",
+                    "name": "redhat:sbomer:image:labels:com.redhat.component",
                     "value": "amqstreams-console-ui-container"
                 },
                 {
-                    "name": "sbomer:image:labels:com.redhat.license_terms",
+                    "name": "redhat:sbomer:image:labels:com.redhat.license_terms",
                     "value": "https://www.redhat.com/agreements"
                 },
                 {
-                    "name": "sbomer:image:labels:description",
+                    "name": "redhat:sbomer:image:labels:description",
                     "value": "AMQ Streams Console UI"
                 },
                 {
-                    "name": "sbomer:image:labels:distribution-scope",
+                    "name": "redhat:sbomer:image:labels:distribution-scope",
                     "value": "public"
                 },
                 {
-                    "name": "sbomer:image:labels:io.buildah.version",
+                    "name": "redhat:sbomer:image:labels:io.buildah.version",
                     "value": "1.29.0"
                 },
                 {
-                    "name": "sbomer:image:labels:io.k8s.description",
+                    "name": "redhat:sbomer:image:labels:io.k8s.description",
                     "value": "AMQ Streams Console UI"
                 },
                 {
-                    "name": "sbomer:image:labels:io.k8s.display-name",
+                    "name": "redhat:sbomer:image:labels:io.k8s.display-name",
                     "value": "AMQ Streams Console UI"
                 },
                 {
-                    "name": "sbomer:image:labels:io.openshift.tags",
+                    "name": "redhat:sbomer:image:labels:io.openshift.tags",
                     "value": "messaging,amq,jboss"
                 },
                 {
-                    "name": "sbomer:image:labels:licenses",
+                    "name": "redhat:sbomer:image:labels:licenses",
                     "value": "/root/licenses"
                 },
                 {
-                    "name": "sbomer:image:labels:maintainer",
+                    "name": "redhat:sbomer:image:labels:maintainer",
                     "value": "AMQ Streams Engineering <amq-streams-dev@redhat.com>"
                 },
                 {
-                    "name": "sbomer:image:labels:name",
+                    "name": "redhat:sbomer:image:labels:name",
                     "value": "amq-streams/console-ui-rhel9"
                 },
                 {
-                    "name": "sbomer:image:labels:release",
+                    "name": "redhat:sbomer:image:labels:release",
                     "value": "8.1718294415"
                 },
                 {
-                    "name": "sbomer:image:labels:summary",
+                    "name": "redhat:sbomer:image:labels:summary",
                     "value": "AMQ Streams Console UI"
                 },
                 {
-                    "name": "sbomer:image:labels:url",
+                    "name": "redhat:sbomer:image:labels:url",
                     "value": "https://access.redhat.com/containers/#/registry.access.redhat.com/amq-streams/console-ui-rhel9/images/2.7.0-8.1718294415"
                 },
                 {
-                    "name": "sbomer:image:labels:vcs-ref",
+                    "name": "redhat:sbomer:image:labels:vcs-ref",
                     "value": "857cfa99af870e97d4e50ba06b66173f83153694"
                 },
                 {
-                    "name": "sbomer:image:labels:vcs-type",
+                    "name": "redhat:sbomer:image:labels:vcs-type",
                     "value": "git"
                 },
                 {
-                    "name": "sbomer:image:labels:vendor",
+                    "name": "redhat:sbomer:image:labels:vendor",
                     "value": "Red Hat, Inc."
                 },
                 {
-                    "name": "sbomer:image:labels:version",
+                    "name": "redhat:sbomer:image:labels:version",
                     "value": "2.7.0"
                 }
             ]
@@ -116,15 +116,15 @@
             "purl": "pkg:npm/%40edge-runtime/cookies@4.1.1",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/next/dist/compiled/@edge-runtime/cookies/package.json"
                 }
             ]
@@ -144,15 +144,15 @@
             "purl": "pkg:npm/%40edge-runtime/ponyfill@2.4.2",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/next/dist/compiled/@edge-runtime/ponyfill/package.json"
                 }
             ]
@@ -172,15 +172,15 @@
             "purl": "pkg:npm/%40edge-runtime/primitives@4.1.0",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/next/dist/compiled/@edge-runtime/primitives/package.json"
                 }
             ]
@@ -208,15 +208,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/@next/env/package.json"
                 }
             ]
@@ -248,15 +248,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/@swc/helpers/package.json"
                 }
             ]
@@ -277,11 +277,11 @@
             "purl": "pkg:rpm/redhat/alternatives@1.20-2.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -302,11 +302,11 @@
             "purl": "pkg:rpm/redhat/audit-libs@3.0.7-103.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -327,11 +327,11 @@
             "purl": "pkg:rpm/redhat/basesystem@11-13.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -352,11 +352,11 @@
             "purl": "pkg:rpm/redhat/bash@5.1.8-6.el9_1?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -384,15 +384,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/busboy/package.json"
                 }
             ]
@@ -413,11 +413,11 @@
             "purl": "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -438,11 +438,11 @@
             "purl": "pkg:rpm/redhat/ca-certificates@2023.2.60_v7.0.306-90.1.el9_2?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -464,15 +464,15 @@
             "purl": "pkg:npm/caniuse-lite@1.0.30001587",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/caniuse-lite/package.json"
                 }
             ]
@@ -493,11 +493,11 @@
             "purl": "pkg:rpm/redhat/checkpolicy@3.5-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -524,15 +524,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/client-only/package.json"
                 }
             ]
@@ -553,11 +553,11 @@
             "purl": "pkg:rpm/redhat/coreutils-single@8.32-34.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -578,11 +578,11 @@
             "purl": "pkg:rpm/redhat/cracklib@2.9.6-27.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -603,11 +603,11 @@
             "purl": "pkg:rpm/redhat/cracklib-dicts@2.9.6-27.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -628,11 +628,11 @@
             "purl": "pkg:rpm/redhat/crypto-policies@20221215-1.git9a18988.el9_2.2?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -653,11 +653,11 @@
             "purl": "pkg:rpm/redhat/curl-minimal@7.76.1-23.el9_2.6?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -678,11 +678,11 @@
             "purl": "pkg:rpm/redhat/cyrus-sasl-lib@2.1.27-21.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -703,11 +703,11 @@
             "purl": "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -728,11 +728,11 @@
             "purl": "pkg:rpm/redhat/dbus-broker@28-7.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -753,11 +753,11 @@
             "purl": "pkg:rpm/redhat/dbus-common@1.12.20-7.el9_2.1?arch=noarch&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -778,11 +778,11 @@
             "purl": "pkg:rpm/redhat/dbus-libs@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -803,11 +803,11 @@
             "purl": "pkg:rpm/redhat/dejavu-sans-fonts@2.37-18.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -828,11 +828,11 @@
             "purl": "pkg:rpm/redhat/diffutils@3.7-12.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -853,15 +853,15 @@
             "purl": "pkg:pypi/distro@1.5.0",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib/python3.9/site-packages/distro-1.5.0-py3.9.egg-info/PKG-INFO"
                 }
             ]
@@ -882,11 +882,11 @@
             "purl": "pkg:rpm/redhat/dnf@4.14.0-5.el9_2?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -907,11 +907,11 @@
             "purl": "pkg:rpm/redhat/dnf-data@4.14.0-5.el9_2?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -932,11 +932,11 @@
             "purl": "pkg:rpm/redhat/elfutils-default-yama-scope@0.188-3.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -957,11 +957,11 @@
             "purl": "pkg:rpm/redhat/elfutils-libelf@0.188-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -982,11 +982,11 @@
             "purl": "pkg:rpm/redhat/elfutils-libs@0.188-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1007,11 +1007,11 @@
             "purl": "pkg:rpm/redhat/expat@2.5.0-1.el9_2.1?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1032,11 +1032,11 @@
             "purl": "pkg:rpm/redhat/file-libs@5.39-12.1.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1057,11 +1057,11 @@
             "purl": "pkg:rpm/redhat/filesystem@3.16-2.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1082,11 +1082,11 @@
             "purl": "pkg:rpm/redhat/findutils@4.8.0-5.el9?arch=x86_64&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1107,11 +1107,11 @@
             "purl": "pkg:rpm/redhat/fonts-filesystem@2.0.5-7.el9.1?arch=noarch&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1132,11 +1132,11 @@
             "purl": "pkg:rpm/redhat/gawk@5.1.0-6.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1157,11 +1157,11 @@
             "purl": "pkg:rpm/redhat/gdbm-libs@1.19-4.el9?arch=x86_64&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1182,11 +1182,11 @@
             "purl": "pkg:rpm/redhat/glib2@2.68.4-6.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1207,11 +1207,11 @@
             "purl": "pkg:rpm/redhat/glibc@2.34-60.el9_2.14?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1232,11 +1232,11 @@
             "purl": "pkg:rpm/redhat/glibc-common@2.34-60.el9_2.14?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1257,11 +1257,11 @@
             "purl": "pkg:rpm/redhat/glibc-minimal-langpack@2.34-60.el9_2.14?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1282,11 +1282,11 @@
             "purl": "pkg:rpm/redhat/gmp@6.2.0-10.el9?arch=x86_64&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1307,11 +1307,11 @@
             "purl": "pkg:rpm/redhat/gnupg2@2.3.3-2.el9_0?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1332,11 +1332,11 @@
             "purl": "pkg:rpm/redhat/gnutls@3.7.6-21.el9_2.3?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1357,11 +1357,11 @@
             "purl": "pkg:rpm/redhat/gobject-introspection@1.68.0-11.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1382,15 +1382,15 @@
             "purl": "pkg:pypi/gpg@1.15.1",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib64/python3.9/site-packages/gpg-1.15.1-py3.9.egg-info"
                 }
             ]
@@ -1410,11 +1410,11 @@
             "purl": "pkg:rpm/redhat/gpg-pubkey@5a6340b3-6229229e",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1434,11 +1434,11 @@
             "purl": "pkg:rpm/redhat/gpg-pubkey@fd431d51-4ae0493b",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1459,11 +1459,11 @@
             "purl": "pkg:rpm/redhat/gpgme@1.15.1-6.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1490,15 +1490,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/graceful-fs/package.json"
                 }
             ]
@@ -1519,11 +1519,11 @@
             "purl": "pkg:rpm/redhat/grep@3.6-5.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1544,11 +1544,11 @@
             "purl": "pkg:rpm/redhat/gzip@1.12-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1569,11 +1569,11 @@
             "purl": "pkg:rpm/redhat/ima-evm-utils@1.4-4.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1594,11 +1594,11 @@
             "purl": "pkg:rpm/redhat/json-c@0.14-11.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1619,11 +1619,11 @@
             "purl": "pkg:rpm/redhat/json-glib@1.6.6-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1644,11 +1644,11 @@
             "purl": "pkg:rpm/redhat/keyutils-libs@1.6.3-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1669,11 +1669,11 @@
             "purl": "pkg:rpm/redhat/kmod-libs@28-7.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1694,11 +1694,11 @@
             "purl": "pkg:rpm/redhat/krb5-libs@1.20.1-9.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1719,11 +1719,11 @@
             "purl": "pkg:rpm/redhat/langpacks-core-en@3.0-16.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1744,11 +1744,11 @@
             "purl": "pkg:rpm/redhat/langpacks-core-font-en@3.0-16.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1769,11 +1769,11 @@
             "purl": "pkg:rpm/redhat/langpacks-en@3.0-16.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1794,11 +1794,11 @@
             "purl": "pkg:rpm/redhat/libacl@2.3.1-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1819,11 +1819,11 @@
             "purl": "pkg:rpm/redhat/libarchive@3.5.3-4.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1844,11 +1844,11 @@
             "purl": "pkg:rpm/redhat/libassuan@2.5.5-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1869,11 +1869,11 @@
             "purl": "pkg:rpm/redhat/libattr@2.5.1-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1894,11 +1894,11 @@
             "purl": "pkg:rpm/redhat/libblkid@2.37.4-11.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1919,11 +1919,11 @@
             "purl": "pkg:rpm/redhat/libbrotli@1.0.9-6.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1944,11 +1944,11 @@
             "purl": "pkg:rpm/redhat/libcap@2.48-9.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1969,11 +1969,11 @@
             "purl": "pkg:rpm/redhat/libcap-ng@0.8.2-7.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -1994,11 +1994,11 @@
             "purl": "pkg:rpm/redhat/libcom_err@1.46.5-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2019,15 +2019,15 @@
             "purl": "pkg:pypi/libcomps@0.1.18",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib64/python3.9/site-packages/libcomps-0.1.18-py3.9.egg-info/PKG-INFO"
                 }
             ]
@@ -2048,11 +2048,11 @@
             "purl": "pkg:rpm/redhat/libcomps@0.1.18-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2073,11 +2073,11 @@
             "purl": "pkg:rpm/redhat/libcurl-minimal@7.76.1-23.el9_2.6?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2098,11 +2098,11 @@
             "purl": "pkg:rpm/redhat/libdb@5.3.28-53.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2123,11 +2123,11 @@
             "purl": "pkg:rpm/redhat/libdnf@0.69.0-3.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2148,11 +2148,11 @@
             "purl": "pkg:rpm/redhat/libdnf-plugin-subscription-manager@1.29.33.2-1.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2173,11 +2173,11 @@
             "purl": "pkg:rpm/redhat/libeconf@0.4.1-3.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2198,11 +2198,11 @@
             "purl": "pkg:rpm/redhat/libevent@2.1.12-6.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2223,11 +2223,11 @@
             "purl": "pkg:rpm/redhat/libfdisk@2.37.4-11.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2248,11 +2248,11 @@
             "purl": "pkg:rpm/redhat/libffi@3.4.2-7.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2273,11 +2273,11 @@
             "purl": "pkg:rpm/redhat/libgcc@11.3.1-4.3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2298,11 +2298,11 @@
             "purl": "pkg:rpm/redhat/libgcrypt@1.10.0-10.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2323,11 +2323,11 @@
             "purl": "pkg:rpm/redhat/libgomp@11.3.1-4.3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2348,11 +2348,11 @@
             "purl": "pkg:rpm/redhat/libgpg-error@1.42-5.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2373,11 +2373,11 @@
             "purl": "pkg:rpm/redhat/libidn2@2.3.0-7.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2398,11 +2398,11 @@
             "purl": "pkg:rpm/redhat/libksba@1.5.1-6.el9_1?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2423,11 +2423,11 @@
             "purl": "pkg:rpm/redhat/libmodulemd@2.13.0-2.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2448,11 +2448,11 @@
             "purl": "pkg:rpm/redhat/libmount@2.37.4-11.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2473,11 +2473,11 @@
             "purl": "pkg:rpm/redhat/libnghttp2@1.43.0-5.el9_2.3?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2498,11 +2498,11 @@
             "purl": "pkg:rpm/redhat/libpwquality@1.4.4-8.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2523,11 +2523,11 @@
             "purl": "pkg:rpm/redhat/librepo@1.14.5-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2548,11 +2548,11 @@
             "purl": "pkg:rpm/redhat/libreport-filesystem@2.15.2-6.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2573,11 +2573,11 @@
             "purl": "pkg:rpm/redhat/librhsm@0.0.3-7.el9_2.1?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2598,11 +2598,11 @@
             "purl": "pkg:rpm/redhat/libseccomp@2.5.2-2.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2623,11 +2623,11 @@
             "purl": "pkg:rpm/redhat/libselinux@3.5-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2648,11 +2648,11 @@
             "purl": "pkg:rpm/redhat/libselinux-utils@3.5-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2673,11 +2673,11 @@
             "purl": "pkg:rpm/redhat/libsepol@3.5-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2698,11 +2698,11 @@
             "purl": "pkg:rpm/redhat/libsigsegv@2.13-4.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2723,11 +2723,11 @@
             "purl": "pkg:rpm/redhat/libsmartcols@2.37.4-11.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2748,11 +2748,11 @@
             "purl": "pkg:rpm/redhat/libsolv@0.7.22-4.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2773,11 +2773,11 @@
             "purl": "pkg:rpm/redhat/libstdc%2B%2B@11.3.1-4.3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2798,11 +2798,11 @@
             "purl": "pkg:rpm/redhat/libtasn1@4.16.0-8.el9_1?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2823,11 +2823,11 @@
             "purl": "pkg:rpm/redhat/libunistring@0.9.10-15.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2848,11 +2848,11 @@
             "purl": "pkg:rpm/redhat/libutempter@1.2.1-6.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2873,11 +2873,11 @@
             "purl": "pkg:rpm/redhat/libuuid@2.37.4-11.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2898,11 +2898,11 @@
             "purl": "pkg:rpm/redhat/libverto@0.3.2-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2923,11 +2923,11 @@
             "purl": "pkg:rpm/redhat/libxcrypt@4.4.18-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2948,11 +2948,11 @@
             "purl": "pkg:rpm/redhat/libxml2@2.9.13-3.el9_2.3?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2973,11 +2973,11 @@
             "purl": "pkg:rpm/redhat/libyaml@0.2.5-7.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -2998,11 +2998,11 @@
             "purl": "pkg:rpm/redhat/libzstd@1.5.1-2.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3023,11 +3023,11 @@
             "purl": "pkg:rpm/redhat/lua-libs@5.4.4-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3048,11 +3048,11 @@
             "purl": "pkg:rpm/redhat/lz4-libs@1.9.3-5.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3073,11 +3073,11 @@
             "purl": "pkg:rpm/redhat/mpfr@4.1.0-7.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3099,15 +3099,15 @@
             "purl": "pkg:npm/nanoid@3.3.7",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/nanoid/package.json"
                 }
             ]
@@ -3128,11 +3128,11 @@
             "purl": "pkg:rpm/redhat/ncurses-base@6.2-8.20210508.el9_2.1?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3153,11 +3153,11 @@
             "purl": "pkg:rpm/redhat/ncurses-libs@6.2-8.20210508.el9_2.1?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3178,11 +3178,11 @@
             "purl": "pkg:rpm/redhat/nettle@3.8-3.el9_0?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3209,15 +3209,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/next/package.json"
                 }
             ]
@@ -3238,11 +3238,11 @@
             "purl": "pkg:rpm/redhat/nodejs@18.20.2-2.module%2Bel9.2.0%2B21812%2Bf1e61652?arch=x86_64&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3263,11 +3263,11 @@
             "purl": "pkg:rpm/redhat/npth@1.6-8.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3288,11 +3288,11 @@
             "purl": "pkg:rpm/redhat/openldap@2.6.2-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3313,11 +3313,11 @@
             "purl": "pkg:rpm/redhat/openldap-compat@2.6.2-3.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3338,11 +3338,11 @@
             "purl": "pkg:rpm/redhat/openssl@3.0.7-18.el9_2?arch=x86_64&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3363,11 +3363,11 @@
             "purl": "pkg:rpm/redhat/openssl-libs@3.0.7-18.el9_2?arch=x86_64&epoch=1",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3388,11 +3388,11 @@
             "purl": "pkg:rpm/redhat/p11-kit@0.24.1-2.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3413,11 +3413,11 @@
             "purl": "pkg:rpm/redhat/p11-kit-trust@0.24.1-2.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3438,11 +3438,11 @@
             "purl": "pkg:rpm/redhat/pam@1.5.1-15.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3463,11 +3463,11 @@
             "purl": "pkg:rpm/redhat/pcre@8.44-3.el9.3?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3488,11 +3488,11 @@
             "purl": "pkg:rpm/redhat/pcre2@10.40-2.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3513,11 +3513,11 @@
             "purl": "pkg:rpm/redhat/pcre2-syntax@10.40-2.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3539,15 +3539,15 @@
             "purl": "pkg:npm/picocolors@1.0.0",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/picocolors/package.json"
                 }
             ]
@@ -3568,11 +3568,11 @@
             "purl": "pkg:rpm/redhat/popt@1.18-8.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3600,15 +3600,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/next/node_modules/postcss/package.json"
                 }
             ]
@@ -3629,15 +3629,15 @@
             "purl": "pkg:pypi/pyinotify@0.9.6",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib/python3.9/site-packages/pyinotify-0.9.6-py3.9.egg-info/PKG-INFO"
                 }
             ]
@@ -3658,11 +3658,11 @@
             "purl": "pkg:rpm/redhat/python3@3.9.16-1.el9_2.3?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3683,11 +3683,11 @@
             "purl": "pkg:rpm/redhat/python3-audit@3.0.7-103.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3708,11 +3708,11 @@
             "purl": "pkg:rpm/redhat/python3-distro@1.5.0-7.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3733,11 +3733,11 @@
             "purl": "pkg:rpm/redhat/python3-dnf@4.14.0-5.el9_2?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3758,11 +3758,11 @@
             "purl": "pkg:rpm/redhat/python3-gpg@1.15.1-6.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3783,11 +3783,11 @@
             "purl": "pkg:rpm/redhat/python3-hawkey@0.69.0-3.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3808,11 +3808,11 @@
             "purl": "pkg:rpm/redhat/python3-inotify@0.9.6-25.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3833,11 +3833,11 @@
             "purl": "pkg:rpm/redhat/python3-libcomps@0.1.18-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3858,11 +3858,11 @@
             "purl": "pkg:rpm/redhat/python3-libdnf@0.69.0-3.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3883,11 +3883,11 @@
             "purl": "pkg:rpm/redhat/python3-libs@3.9.16-1.el9_2.3?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3908,11 +3908,11 @@
             "purl": "pkg:rpm/redhat/python3-libselinux@3.5-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3933,11 +3933,11 @@
             "purl": "pkg:rpm/redhat/python3-pip-wheel@21.2.3-6.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3958,11 +3958,11 @@
             "purl": "pkg:rpm/redhat/python3-rpm@4.16.1.3-24.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -3983,11 +3983,11 @@
             "purl": "pkg:rpm/redhat/python3-setools@4.4.1-1.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4008,11 +4008,11 @@
             "purl": "pkg:rpm/redhat/python3-setuptools@53.0.0-12.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4033,11 +4033,11 @@
             "purl": "pkg:rpm/redhat/python3-setuptools-wheel@53.0.0-12.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4058,11 +4058,11 @@
             "purl": "pkg:rpm/redhat/python3-systemd@234-18.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4093,15 +4093,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/react/package.json"
                 }
             ]
@@ -4132,15 +4132,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/react-dom/package.json"
                 }
             ]
@@ -4171,15 +4171,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/next/dist/compiled/react-is/package.json"
                 }
             ]
@@ -4210,15 +4210,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/next/dist/compiled/react-refresh/package.json"
                 }
             ]
@@ -4239,11 +4239,11 @@
             "purl": "pkg:rpm/redhat/readline@8.1-4.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4264,11 +4264,11 @@
             "purl": "pkg:rpm/redhat/redhat-release@9.2-0.15.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4296,15 +4296,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/next/dist/compiled/regenerator-runtime/package.json"
                 }
             ]
@@ -4325,11 +4325,11 @@
             "purl": "pkg:rpm/redhat/rootfiles@8.1-31.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4350,15 +4350,15 @@
             "purl": "pkg:pypi/rpm@4.16.1.3",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib64/python3.9/site-packages/rpm-4.16.1.3-py3.9.egg-info"
                 }
             ]
@@ -4379,11 +4379,11 @@
             "purl": "pkg:rpm/redhat/rpm@4.16.1.3-24.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4404,11 +4404,11 @@
             "purl": "pkg:rpm/redhat/rpm-build-libs@4.16.1.3-24.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4429,11 +4429,11 @@
             "purl": "pkg:rpm/redhat/rpm-libs@4.16.1.3-24.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4454,11 +4454,11 @@
             "purl": "pkg:rpm/redhat/rpm-sign-libs@4.16.1.3-24.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4489,15 +4489,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/scheduler/package.json"
                 }
             ]
@@ -4518,11 +4518,11 @@
             "purl": "pkg:rpm/redhat/sed@4.8-9.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4543,15 +4543,15 @@
             "purl": "pkg:pypi/selinux@3.5",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib64/python3.9/site-packages/selinux-3.5-py3.9.egg-info/PKG-INFO"
                 }
             ]
@@ -4572,15 +4572,15 @@
             "purl": "pkg:pypi/setools@4.4.1",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib64/python3.9/site-packages/setools-4.4.1-py3.9.egg-info/PKG-INFO"
                 }
             ]
@@ -4601,11 +4601,11 @@
             "purl": "pkg:rpm/redhat/setup@2.13.7-9.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4626,15 +4626,15 @@
             "purl": "pkg:pypi/setuptools@53.0.0",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib/python3.9/site-packages/setuptools-53.0.0.dist-info/METADATA"
                 }
             ]
@@ -4662,15 +4662,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/source-map-js/package.json"
                 }
             ]
@@ -4691,11 +4691,11 @@
             "purl": "pkg:rpm/redhat/sqlite-libs@3.34.1-6.el9_2.1?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4723,15 +4723,15 @@
             ],
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/streamsearch/package.json"
                 }
             ]
@@ -4744,15 +4744,15 @@
             "purl": "pkg:npm/strimzi-ui@0.1.0",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/package.json"
                 }
             ]
@@ -4773,15 +4773,15 @@
             "purl": "pkg:npm/styled-jsx@5.1.1",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "javascript"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "npm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/app/node_modules/styled-jsx/package.json"
                 }
             ]
@@ -4802,11 +4802,11 @@
             "purl": "pkg:rpm/redhat/systemd@252-14.el9_2.7?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4827,11 +4827,11 @@
             "purl": "pkg:rpm/redhat/systemd-libs@252-14.el9_2.7?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4852,11 +4852,11 @@
             "purl": "pkg:rpm/redhat/systemd-pam@252-14.el9_2.7?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4877,15 +4877,15 @@
             "purl": "pkg:pypi/systemd-python@234",
             "properties": [
                 {
-                    "name": "sbomer:package:language",
+                    "name": "redhat:sbomer:package:language",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "python"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/usr/lib64/python3.9/site-packages/systemd_python-234-py3.9.egg-info"
                 }
             ]
@@ -4906,11 +4906,11 @@
             "purl": "pkg:rpm/redhat/systemd-rpm-macros@252-14.el9_2.7?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4931,11 +4931,11 @@
             "purl": "pkg:rpm/redhat/tar@1.34-6.el9_1?arch=x86_64&epoch=2",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4956,11 +4956,11 @@
             "purl": "pkg:rpm/redhat/tpm2-tss@3.0.3-8.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -4981,11 +4981,11 @@
             "purl": "pkg:rpm/redhat/tzdata@2024a-1.el9?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -5006,11 +5006,11 @@
             "purl": "pkg:rpm/redhat/util-linux@2.37.4-11.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -5031,11 +5031,11 @@
             "purl": "pkg:rpm/redhat/util-linux-core@2.37.4-11.el9_2?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -5056,11 +5056,11 @@
             "purl": "pkg:rpm/redhat/xz-libs@5.2.5-8.el9_0?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -5081,11 +5081,11 @@
             "purl": "pkg:rpm/redhat/yum@4.14.0-5.el9_2?arch=noarch",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
@@ -5106,11 +5106,11 @@
             "purl": "pkg:rpm/redhat/zlib@1.2.11-39.el9?arch=x86_64",
             "properties": [
                 {
-                    "name": "sbomer:package:type",
+                    "name": "redhat:sbomer:package:type",
                     "value": "rpm"
                 },
                 {
-                    "name": "sbomer:location:0:path",
+                    "name": "redhat:sbomer:location:0:path",
                     "value": "/var/lib/rpm/rpmdb.sqlite"
                 }
             ]
