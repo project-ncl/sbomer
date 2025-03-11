@@ -30,8 +30,8 @@ public class Constants {
 
     // Introduced as part of SBOMER-236
     public static final String REDHAT_PROPERTY_NAMESPACE_PREFIX = "redhat:";
-    public static final String CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX = // REDHAT_PROPERTY_NAMESPACE_PREFIX +
-            "sbomer:";
+    public static final String CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX = REDHAT_PROPERTY_NAMESPACE_PREFIX
+            + "sbomer:";
     public static final String CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
             + "package:language";
     public static final String CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX

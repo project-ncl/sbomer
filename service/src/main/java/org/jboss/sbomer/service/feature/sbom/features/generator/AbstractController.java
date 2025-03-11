@@ -163,11 +163,12 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     protected List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
         // First, update the status of the GenerationRequest entity.
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
+
         // Verify if the request event for this generation is associated with an Errata advisory
         RequestEvent event = sbomGenerationRequest.getRequest();
         if (event != null && event.getRequestConfig() != null
-                && event.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
-            ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) event.getRequestConfig();
+                && event.getRequestConfig() instanceof ErrataAdvisoryRequestConfig config) {
+
             boms.forEach(bom -> {
                 // Add the AdvisoryId property
                 addPropertyIfMissing(

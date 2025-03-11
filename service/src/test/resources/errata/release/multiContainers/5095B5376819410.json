@@ -48,127 +48,127 @@
         "publisher": "Red Hat",
         "properties": [
           {
-            "name": "sbomer:image:labels:architecture",
+            "name": "redhat:sbomer:image:labels:architecture",
             "value": "x86_64"
           },
           {
-            "name": "sbomer:image:labels:build-date",
+            "name": "redhat:sbomer:image:labels:build-date",
             "value": "2024-12-05T14:04:54"
           },
           {
-            "name": "sbomer:image:labels:com.redhat.component",
+            "name": "redhat:sbomer:image:labels:com.redhat.component",
             "value": "ose-kubernetes-nmstate-operator-bundle-container"
           },
           {
-            "name": "sbomer:image:labels:com.redhat.delivery.operator.bundle",
+            "name": "redhat:sbomer:image:labels:com.redhat.delivery.operator.bundle",
             "value": "true"
           },
           {
-            "name": "sbomer:image:labels:com.redhat.license_terms",
+            "name": "redhat:sbomer:image:labels:com.redhat.license_terms",
             "value": "https://www.redhat.com/agreements"
           },
           {
-            "name": "sbomer:image:labels:com.redhat.openshift.versions",
+            "name": "redhat:sbomer:image:labels:com.redhat.openshift.versions",
             "value": "=v4.15"
           },
           {
-            "name": "sbomer:image:labels:description",
+            "name": "redhat:sbomer:image:labels:description",
             "value": "Operator for Node network configuration through Kubernetes API"
           },
           {
-            "name": "sbomer:image:labels:distribution-scope",
+            "name": "redhat:sbomer:image:labels:distribution-scope",
             "value": "public"
           },
           {
-            "name": "sbomer:image:labels:io.buildah.version",
+            "name": "redhat:sbomer:image:labels:io.buildah.version",
             "value": "1.33.8"
           },
           {
-            "name": "sbomer:image:labels:io.k8s.description",
+            "name": "redhat:sbomer:image:labels:io.k8s.description",
             "value": "Operator for Node network configuration through Kubernetes API"
           },
           {
-            "name": "sbomer:image:labels:io.k8s.display-name",
+            "name": "redhat:sbomer:image:labels:io.k8s.display-name",
             "value": "kubernetes-nmstate-operator"
           },
           {
-            "name": "sbomer:image:labels:io.openshift.build.commit.id",
+            "name": "redhat:sbomer:image:labels:io.openshift.build.commit.id",
             "value": "0d290b42d3ac5a5c60474df5f8284df38aad08b6"
           },
           {
-            "name": "sbomer:image:labels:io.openshift.build.commit.url",
+            "name": "redhat:sbomer:image:labels:io.openshift.build.commit.url",
             "value": "https://github.com/openshift/kubernetes-nmstate/commit/0d290b42d3ac5a5c60474df5f8284df38aad08b6"
           },
           {
-            "name": "sbomer:image:labels:io.openshift.build.source-location",
+            "name": "redhat:sbomer:image:labels:io.openshift.build.source-location",
             "value": "https://github.com/openshift/kubernetes-nmstate"
           },
           {
-            "name": "sbomer:image:labels:io.openshift.maintainer.component",
+            "name": "redhat:sbomer:image:labels:io.openshift.maintainer.component",
             "value": "Networking / kubernetes-nmstate-operator"
           },
           {
-            "name": "sbomer:image:labels:io.openshift.maintainer.project",
+            "name": "redhat:sbomer:image:labels:io.openshift.maintainer.project",
             "value": "OCPBUGS"
           },
           {
-            "name": "sbomer:image:labels:io.openshift.tags",
+            "name": "redhat:sbomer:image:labels:io.openshift.tags",
             "value": "openshift,kubernetes-nmstate-operator"
           },
           {
-            "name": "sbomer:image:labels:maintainer",
+            "name": "redhat:sbomer:image:labels:maintainer",
             "value": "Yossi Boaron <yboaron@redhat.com>"
           },
           {
-            "name": "sbomer:image:labels:name",
+            "name": "redhat:sbomer:image:labels:name",
             "value": "openshift/ose-openshift-kubernetes-nmstate-operator-bundle"
           },
           {
-            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.channel.default.v1",
+            "name": "redhat:sbomer:image:labels:operators.operatorframework.io.bundle.channel.default.v1",
             "value": "stable"
           },
           {
-            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.channels.v1",
+            "name": "redhat:sbomer:image:labels:operators.operatorframework.io.bundle.channels.v1",
             "value": "stable"
           },
           {
-            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.manifests.v1",
+            "name": "redhat:sbomer:image:labels:operators.operatorframework.io.bundle.manifests.v1",
             "value": "manifests/"
           },
           {
-            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.mediatype.v1",
+            "name": "redhat:sbomer:image:labels:operators.operatorframework.io.bundle.mediatype.v1",
             "value": "registry+v1"
           },
           {
-            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.metadata.v1",
+            "name": "redhat:sbomer:image:labels:operators.operatorframework.io.bundle.metadata.v1",
             "value": "metadata/"
           },
           {
-            "name": "sbomer:image:labels:operators.operatorframework.io.bundle.package.v1",
+            "name": "redhat:sbomer:image:labels:operators.operatorframework.io.bundle.package.v1",
             "value": "kubernetes-nmstate-operator"
           },
           {
-            "name": "sbomer:image:labels:release",
+            "name": "redhat:sbomer:image:labels:release",
             "value": "2"
           },
           {
-            "name": "sbomer:image:labels:url",
+            "name": "redhat:sbomer:image:labels:url",
             "value": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift/ose-openshift-kubernetes-nmstate-operator-bundle/images/v4.15.0.202412041605.p0.g0d290b4.assembly.stream.el9-2"
           },
           {
-            "name": "sbomer:image:labels:vcs-ref",
+            "name": "redhat:sbomer:image:labels:vcs-ref",
             "value": "81c2aa7cf46425ce5f4ab536b80ada9f60d6ef64"
           },
           {
-            "name": "sbomer:image:labels:vcs-type",
+            "name": "redhat:sbomer:image:labels:vcs-type",
             "value": "git"
           },
           {
-            "name": "sbomer:image:labels:vendor",
+            "name": "redhat:sbomer:image:labels:vendor",
             "value": "Red Hat"
           },
           {
-            "name": "sbomer:image:labels:version",
+            "name": "redhat:sbomer:image:labels:version",
             "value": "v4.15.0.202412041605.p0.g0d290b4.assembly.stream.el9"
           }
         ],
