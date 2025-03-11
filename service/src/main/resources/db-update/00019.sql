@@ -73,6 +73,30 @@ BEGIN;
     SET sbom = REGEXP_REPLACE(sbom::text, '"name":\s*"deliverable-checksum"', '"name": "redhat:deliverable-checksum"', 'g')::jsonb
     WHERE sbom::text LIKE '%"name": "deliverable-checksum"%';
 
+    UPDATE sbom
+    SET sbom = REGEXP_REPLACE(sbom::text, '"name":\s*"sbomer:package:type"', '"name": "redhat:sbomer:package:type"', 'g')::jsonb
+    WHERE sbom::text LIKE '%"name": "sbomer:package:type"%';
+
+    UPDATE sbom
+    SET sbom = REGEXP_REPLACE(sbom::text, '"name":\s*"sbomer:package:language"', '"name": "redhat:sbomer:package:language"', 'g')::jsonb
+    WHERE sbom::text LIKE '%"name": "sbomer:package:language"%';
+
+    UPDATE sbom
+    SET sbom = REGEXP_REPLACE(sbom::text, '"name":\s*"sbomer:location:0:path"', '"name": "redhat:sbomer:location:0:path"', 'g')::jsonb
+    WHERE sbom::text LIKE '%"name": "sbomer:location:0:path"%';
+
+    UPDATE sbom
+    SET sbom = REGEXP_REPLACE(sbom::text, '"name":\s*"sbomer:metadata:virtualPath"', '"name": "redhat:sbomer:metadata:virtualPath"', 'g')::jsonb
+    WHERE sbom::text LIKE '%"name": "sbomer:metadata:virtualPath"%';
+
+    UPDATE sbom
+    SET sbom = REGEXP_REPLACE(
+            sbom::text,
+            '"name":\s*"sbomer:image:labels:([^"]*)"',
+            '"name": "redhat:sbomer:image:labels:\1"',
+            'g'
+        )::jsonb
+    WHERE sbom::text LIKE '%"name": "sbomer:image:labels:%"%';
 
     INSERT INTO db_version(version, creation_time) VALUES ('00019', now());
 COMMIT;
