@@ -96,7 +96,7 @@ export const ManifestsTable = () => {
         setSearchBarVisible(false);
         setQueryType(QueryType.NoFilter);
         setQuery('');
-        setButtonVisible(false)
+        setButtonVisible(false);
         break;
       default:
         setSearchBarVisible(true);
@@ -106,8 +106,8 @@ export const ManifestsTable = () => {
   };
 
   const onSearchCall = () => {
-    setQueryType(selectedQueryType)
-    setQuery(searchBarValue)
+    setQueryType(selectedQueryType);
+    setQuery(searchBarValue);
     setPageIndex(0);
   }
 
