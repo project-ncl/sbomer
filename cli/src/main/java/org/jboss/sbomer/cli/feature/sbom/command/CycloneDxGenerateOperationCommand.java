@@ -217,7 +217,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             // pom.xml)
             if (!purlToComponents.containsKey(artifact.getArtifact().getPurl())) {
                 // Create a component entry for the artifact
-                Component component = createComponent(artifact.getArtifact(), Scope.REQUIRED, Type.LIBRARY);
+                Component component = createComponent(artifact, Scope.REQUIRED, Type.LIBRARY);
                 setArtifactMetadata(component, artifact.getArtifact(), pncService.getApiUrl());
                 setPncBuildMetadata(component, artifact.getArtifact().getBuild(), pncService.getApiUrl());
 
