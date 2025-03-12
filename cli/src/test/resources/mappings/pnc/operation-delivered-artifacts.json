@@ -51,12 +51,21 @@
             "my-7.11.5.CR3-maven-repository.zip!/my-7.11.5.GA-maven-repository/org/jboss/jboss-parent/19.0.0.redhat-1/jboss-parent-19.0.0.redhat-1.pom"
           ],
           "archiveUnmatchedFilenames": [
-            
+
           ],
           "distribution": {
             "distributionUrl": "https://download.com/my-7.11.5.CR3-maven-repository.zip",
             "creationTime": "2024-01-08T18:14:17.877+00:00"
-          }
+          },
+          "licenses": [
+            {
+              "distribution": "repo",
+              "name": "Public Domain",
+              "url": "http://repository.jboss.org/licenses/cc0-1.0.txt",
+              "spdxLicenseId": "CC0-1.0",
+              "source": "POM"
+            }
+          ]
         }
       ]
     },

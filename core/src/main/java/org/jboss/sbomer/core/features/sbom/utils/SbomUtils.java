@@ -18,6 +18,7 @@
 package org.jboss.sbomer.core.features.sbom.utils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.jboss.sbomer.core.features.sbom.Constants.MRRC_URL;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
@@ -31,14 +32,19 @@ import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRON
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_ARTIFACT_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SUPPLIER_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.SUPPLIER_URL;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -80,12 +86,15 @@ import org.cyclonedx.model.Property;
 import org.cyclonedx.model.Tool;
 import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.parsers.JsonParser;
+import org.jboss.pnc.api.deliverablesanalyzer.dto.LicenseInfo;
+import org.jboss.pnc.api.enums.LicenseSource;
+import org.jboss.pnc.build.finder.core.SpdxLicenseUtils;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
+import org.jboss.pnc.dto.response.AnalyzedArtifact;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
-import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -325,8 +334,99 @@ public class SbomUtils {
                                 }));
     }
 
-    public static Component createComponent(Artifact artifact, Scope scope, Type type) {
+    public static Optional<URI> getNormalizedUrl(String url) {
+        if (Strings.isEmpty(url)) {
+            return Optional.empty();
+        }
 
+        try {
+            return Optional.of(new URI(url).normalize());
+        } catch (URISyntaxException e) {
+            log.error("Failed to normalize URL '{}': {}", url, e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    public static String licenseSourceToDescription(LicenseSource source) {
+        return switch (source) {
+            case UNKNOWN -> "unknown";
+            case POM -> ".pom file of artifact";
+            case POM_XML -> "pom.xml file inside artifact";
+            case BUNDLE_LICENSE -> "Bundle-License header inside MANIFEST.MF of artifact";
+            case TEXT -> "license text file inside artifact";
+        };
+    }
+
+    private static void addLicenseEvidence(Component component, List<LicenseInfo> licenseInfos) {
+        if (licenseInfos.isEmpty()) {
+            return;
+        }
+
+        Evidence evidence = new Evidence();
+        LicenseChoice licenseChoice = new LicenseChoice();
+        licenseChoice.setLicenses(licenseInfos.stream().map(licenseInfo -> {
+            License license = new License();
+            license.setId(licenseInfo.getSpdxLicenseId());
+            license.setAcknowledgement("declared");
+            List<Property> properties = new ArrayList<>();
+            Property sourceProperty = new Property();
+            sourceProperty.setName("source");
+            sourceProperty.setValue(licenseInfo.getSource().toString());
+            properties.add(sourceProperty);
+            Property sourceDescriptionProperty = new Property();
+            sourceDescriptionProperty.setName("source-description");
+            sourceDescriptionProperty.setValue(licenseSourceToDescription(licenseInfo.getSource()));
+            properties.add(sourceDescriptionProperty);
+            String url = licenseInfo.getUrl();
+            Optional<URI> optionalURI = getNormalizedUrl(url);
+
+            if (optionalURI.isPresent()) {
+                URI uri = optionalURI.get();
+                String normalizedUri = uri.toASCIIString();
+
+                if (uri.isAbsolute()) {
+                    license.setUrl(normalizedUri);
+                } else {
+                    Property relativeUrlProperty = new Property();
+                    relativeUrlProperty.setName("relative-url");
+                    relativeUrlProperty.setValue(normalizedUri);
+                    properties.add(relativeUrlProperty);
+                }
+            }
+
+            license.setProperties(properties);
+            return license;
+        }).toList());
+        evidence.setLicenses(licenseChoice);
+        component.setEvidence(evidence);
+    }
+
+    public static Component createComponent(AnalyzedArtifact analyzedArtifact, Scope scope, Type type) {
+        Component component = createComponent(analyzedArtifact.getArtifact(), scope, type);
+        Map<String, List<LicenseInfo>> uniqueLicensesMap = analyzedArtifact.getLicenses()
+                .stream()
+                .filter(licenseInfo -> !SpdxLicenseUtils.isUnknownLicenseId(licenseInfo.getSpdxLicenseId()))
+                .collect(Collectors.groupingBy(LicenseInfo::getSpdxLicenseId));
+        LicenseChoice licenseChoice = new LicenseChoice();
+        licenseChoice.setLicenses(uniqueLicensesMap.keySet().stream().map(spdxLicenseId -> {
+            License license = new License();
+            license.setId(spdxLicenseId);
+            license.setAcknowledgement("concluded");
+            return license;
+        }).toList());
+        component.setLicenses(licenseChoice);
+        Set<Map.Entry<String, List<LicenseInfo>>> entries = uniqueLicensesMap.entrySet();
+
+        for (Map.Entry<String, List<LicenseInfo>> entry : entries) {
+            String spdxLicenseId = entry.getKey();
+            List<LicenseInfo> licenseInfos = entry.getValue().stream().sorted(Comparator.comparing(LicenseInfo::getSpdxLicenseId)).toList();
+            addLicenseEvidence(component, licenseInfos);
+            licenseInfos.stream().map(licenseInfo -> getNormalizedUrl(licenseInfo.getUrl())).forEach(optionalURI -> optionalURI.ifPresent(uri -> addExternalReference(component, ExternalReference.Type.LICENSE, uri.toASCIIString(), spdxLicenseId)));
+        }
+        return component;
+    }
+
+    public static Component createComponent(Artifact artifact, Scope scope, Type type) {
         Component component = new Component();
         setCoordinates(component, artifact);
         component.setScope(scope);
@@ -567,7 +667,7 @@ public class SbomUtils {
     }
 
     public static void addHashIfMissing(Component component, String hash, String algorithmSpec) {
-        addHashIfMissing(component, hash, Hash.Algorithm.fromSpec(algorithmSpec));
+        addHashIfMissing(component, hash, Algorithm.fromSpec(algorithmSpec));
     }
 
     public static void addProperty(Component component, String key, String value) {
@@ -669,31 +769,33 @@ public class SbomUtils {
     }
 
     public static void addExternalReference(Component c, ExternalReference.Type type, String url, String comment) {
-        if (!Strings.isEmpty(url)) {
-            List<ExternalReference> externalRefs = new ArrayList<>();
-            if (c.getExternalReferences() != null) {
-                externalRefs.addAll(c.getExternalReferences());
-            }
-
-            ExternalReference reference = Optional.of(externalRefs)
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .filter(ref -> ref.getType().equals(type))
-                    .filter(ref -> Objects.equals(ref.getComment(), comment))
-                    .findFirst()
-                    .orElse(null);
-
-            if (reference == null) {
-                reference = new ExternalReference();
-                reference.setType(type);
-                externalRefs.add(reference);
-            }
-
-            reference.setUrl(url);
-            reference.setComment(comment);
-
-            c.setExternalReferences(externalRefs);
+        if (Strings.isEmpty(url)) {
+            return;
         }
+
+        List<ExternalReference> externalRefs = new ArrayList<>();
+        if (c.getExternalReferences() != null) {
+            externalRefs.addAll(c.getExternalReferences());
+        }
+
+        ExternalReference reference = Optional.of(externalRefs)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(ref -> ref.getType().equals(type))
+                .filter(ref -> Objects.equals(ref.getComment(), comment))
+                .findFirst()
+                .orElse(null);
+
+        if (reference == null) {
+            reference = new ExternalReference();
+            reference.setType(type);
+            externalRefs.add(reference);
+        }
+
+        reference.setUrl(url);
+        reference.setComment(comment);
+
+        c.setExternalReferences(externalRefs);
     }
 
     public static void addPedigreeCommit(Component c, String url, String uid) {
@@ -729,13 +831,13 @@ public class SbomUtils {
     }
 
     public static void setPublisher(Component c) {
-        c.setPublisher(Constants.PUBLISHER);
+        c.setPublisher(PUBLISHER);
     }
 
     public static void setSupplier(Component c) {
         OrganizationalEntity org = new OrganizationalEntity();
-        org.setName(Constants.SUPPLIER_NAME);
-        org.setUrls(List.of(Constants.SUPPLIER_URL));
+        org.setName(SUPPLIER_NAME);
+        org.setUrls(List.of(SUPPLIER_URL));
         c.setSupplier(org);
     }
 
@@ -756,7 +858,7 @@ public class SbomUtils {
             dist.setType(ExternalReference.Type.DISTRIBUTION);
             externalRefs.add(dist);
         }
-        dist.setUrl(Constants.MRRC_URL);
+        dist.setUrl(MRRC_URL);
         c.setExternalReferences(externalRefs);
     }
 
@@ -997,9 +1099,9 @@ public class SbomUtils {
      */
     public static void removeErrataProperties(Bom bom) {
         if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-            removeProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME);
-            removeProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VERSION);
-            removeProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT);
+            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME);
+            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION);
+            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT);
         }
     }
 
@@ -1082,8 +1184,8 @@ public class SbomUtils {
 
         if (metadata.getSupplier() == null) {
             OrganizationalEntity org = new OrganizationalEntity();
-            org.setName(Constants.SUPPLIER_NAME);
-            org.setUrls(List.of(Constants.SUPPLIER_URL));
+            org.setName(SUPPLIER_NAME);
+            org.setUrls(List.of(SUPPLIER_URL));
             metadata.setSupplier(org);
         }
     }
