@@ -94,7 +94,7 @@ export class DefaultSbomerApi implements SbomerApi {
     const queryFullString = `${isQueryPrefixEmpty ? '' : 'query='}${encodeURIComponent(queryStringValue)}${isQueryPrefixEmpty ? '' : '&'}`;
 
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/manifests?${queryFullString}'pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta1/manifests?${queryFullString}pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
