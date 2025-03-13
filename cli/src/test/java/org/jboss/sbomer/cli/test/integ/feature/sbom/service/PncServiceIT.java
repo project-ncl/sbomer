@@ -26,7 +26,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import org.cyclonedx.exception.GeneratorException;
+import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Evidence;
+import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.License;
+import org.cyclonedx.model.LicenseChoice;
+import org.cyclonedx.model.Property;
+import org.jboss.pnc.api.deliverablesanalyzer.dto.LicenseInfo;
+import org.jboss.pnc.api.enums.LicenseSource;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
@@ -34,6 +45,7 @@ import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.pnc.PncService;
 import org.junit.jupiter.api.Test;
 
@@ -142,10 +154,65 @@ class PncServiceIT {
     }
 
     @Test
-    void testFetchOperationResults() {
+    void testFetchOperationResults() throws GeneratorException {
         log.info("testFetchOperationResults ...");
         List<AnalyzedArtifact> artifacts = service.getAllAnalyzedArtifacts("A5RPHL7Y3AIAA");
         assertNotNull(artifacts);
         assertEquals(1, artifacts.size());
+        log.info("Checking licenses...");
+        verifyLicenses(artifacts);
+    }
+
+    private static void verifyLicenses(List<AnalyzedArtifact> artifacts) throws GeneratorException {
+        AnalyzedArtifact analyzedArtifact = artifacts.get(0);
+        Set<LicenseInfo> licenseInfos = analyzedArtifact.getLicenses();
+        assertEquals(1, licenseInfos.size());
+        LicenseInfo licenseInfo = licenseInfos.iterator().next();
+        String expectedName = "Public Domain";
+        String expectedSpdxLicenseId = "CC0-1.0";
+        String expectedUrl = "http://repository.jboss.org/licenses/cc0-1.0.txt";
+        String expectedRepo = "repo";
+        LicenseSource expectedSource = LicenseSource.POM;
+        assertEquals(expectedName, licenseInfo.getName());
+        assertEquals(expectedSpdxLicenseId, licenseInfo.getSpdxLicenseId());
+        assertEquals(expectedUrl, licenseInfo.getUrl());
+        assertEquals(expectedRepo, licenseInfo.getDistribution());
+        assertEquals(expectedSource, licenseInfo.getSource());
+        assertNull(licenseInfo.getComments());
+        Component component = SbomUtils.createComponent(analyzedArtifact, Component.Scope.REQUIRED, Component.Type.FILE);
+        LicenseChoice licenseChoice = component.getLicenses();
+        List<License> licences = licenseChoice.getLicenses();
+        assertEquals(1, licences.size());
+        License license = licences.get(0);
+        assertEquals(expectedSpdxLicenseId, license.getId());
+        assertNull(license.getUrl());
+        List<ExternalReference> externalReferences = component.getExternalReferences();
+        assertEquals(2, externalReferences.size());
+        ExternalReference externalReference = externalReferences.get(1);
+        assertEquals(ExternalReference.Type.LICENSE, externalReference.getType());
+        assertEquals(expectedUrl, externalReference.getUrl());
+        assertEquals(expectedSpdxLicenseId, externalReference.getComment());
+        Evidence evidence = component.getEvidence();
+        assertNotNull(evidence);
+        LicenseChoice evidenceLicenseChoice = evidence.getLicenses();
+        assertNotNull(evidenceLicenseChoice);
+        List<License> evidenceLicenses = evidenceLicenseChoice.getLicenses();
+        assertEquals(1, evidenceLicenses.size());
+        License evidenceLicense = evidenceLicenses.get(0);
+        assertEquals(expectedSpdxLicenseId, evidenceLicense.getId());
+        assertEquals(expectedUrl,  evidenceLicense.getUrl());
+        List<Property> evidenceProperties = evidenceLicense.getProperties();
+        assertEquals(2, evidenceProperties.size());
+        Property sourceProperty = evidenceProperties.get(0);
+        assertEquals("source", sourceProperty.getName());
+        assertEquals(expectedSource.toString(), sourceProperty.getValue());
+        Property sourceDescriptionProperty = evidenceProperties.get(1);
+        assertEquals("source-description", sourceDescriptionProperty.getName());
+        assertEquals(".pom file of artifact", sourceDescriptionProperty.getValue());
+        Bom bom = SbomUtils.createBom();
+        assertNotNull(bom);
+        bom.addComponent(component);
+        String json = SbomUtils.toJson(bom);
+        log.info("{}{}", System.lineSeparator(), json);
     }
 }
