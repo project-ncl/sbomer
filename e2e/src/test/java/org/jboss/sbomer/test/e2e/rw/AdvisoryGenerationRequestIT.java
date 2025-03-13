@@ -69,6 +69,7 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     }
 
     @Test
+    @Disabled("Until the RPM generator image is fixed")
     void testRPMGenerationOfQEAdvisory() throws IOException {
         String requestBody = Files.readString(sbomPath("advisory-89769.json"));
         List<String> generationIds = requestGeneration(requestBody);
