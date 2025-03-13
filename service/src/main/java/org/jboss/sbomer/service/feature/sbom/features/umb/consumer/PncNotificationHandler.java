@@ -367,7 +367,8 @@ public class PncNotificationHandler {
                         || BuildStatus.NO_REBUILD_REQUIRED.equals(msgBody.getBuild().getStatus()))
                 && (BuildType.MVN.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())
                         || BuildType.GRADLE.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())
-                        || BuildType.NPM.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType()));
+                        || BuildType.NPM.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType())
+                        || BuildType.SBT.equals(msgBody.getBuild().getBuildConfigRevision().getBuildType()));
     }
 
     private boolean isFinishedAnalysis(PncDelAnalysisNotificationMessageBody msgBody) {

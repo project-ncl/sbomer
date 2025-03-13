@@ -54,15 +54,4 @@ class BaseGenerateCommandIT {
                                 "Build 'IN_PROGRESS' is not valid! Build cannot be temporary and progress needs to be 'FINISHED' with status 'SUCCESS' or 'NO_REBUILD_REQUIRED'. Currently: temporary: false, progress: 'IN_PROGRESS', status: 'BUILDING'"));
     }
 
-    @Test
-    @DisplayName("Should fail in case the PNC build type is not supported")
-    void shouldFailForInvalidBuildType(QuarkusMainLauncher launcher) {
-        LaunchResult result = launcher
-                .launch("-v", "sbom", "generate", "--build-id", "UNSUPPORTED_BUILD_TYPE", "maven-cyclonedx");
-        assertEquals(32, result.exitCode());
-        assertTrue(
-                result.getErrorOutput()
-                        .contains("The generation of SBOMs for the build type 'SBT' is not yet implemented"));
-    }
-
 }

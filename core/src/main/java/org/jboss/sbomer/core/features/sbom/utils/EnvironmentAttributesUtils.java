@@ -29,11 +29,13 @@ public class EnvironmentAttributesUtils {
         // This is a utility class
     }
 
+    private static final String SBT_ATTRIBUTE_KEY = "SBT";
     private static final String MAVEN_ATTRIBUTE_KEY = "MAVEN";
     private static final String GRADLE_ATTRIBUTE_KEY = "GRADLE";
     private static final String JDK_ATTRIBUTE_KEY = "JDK";
     private static final String NODEJS_ATTRIBUTE_KEY = "NODEJS";
 
+    private static final String SBT_SDKMAN_KEY = "sbt";
     private static final String MAVEN_SDKMAN_KEY = "maven";
     private static final String GRADLE_SDKMAN_KEY = "gradle";
     private static final String SDK_SDKMAN_KEY = "java";
@@ -62,6 +64,9 @@ public class EnvironmentAttributesUtils {
         Optional<String> javaVersion = getJavaSDKManCompliantVersion(environmentAttributes);
         javaVersion.ifPresent(s -> sdkManAttributes.put(SDK_SDKMAN_KEY, s.trim()));
 
+        // Find SBT
+        Optional<String> sbtVersion = getSbtSDKManCompliantVersion(environmentAttributes);
+        sbtVersion.ifPresent(s -> sdkManAttributes.put(SBT_SDKMAN_KEY, s.trim()));
         return sdkManAttributes;
     }
 
@@ -131,6 +136,18 @@ public class EnvironmentAttributesUtils {
         return environmentAttributes.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().equalsIgnoreCase(NODEJS_ATTRIBUTE_KEY))
+                .map(Map.Entry::getValue)
+                .findFirst();
+    }
+
+    public static Optional<String> getSbtSDKManCompliantVersion(Map<String, String> environmentAttributes) {
+        if (environmentAttributes == null || environmentAttributes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return environmentAttributes.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(SBT_ATTRIBUTE_KEY))
                 .map(Map.Entry::getValue)
                 .findFirst();
     }
