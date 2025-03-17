@@ -22,11 +22,11 @@ import {
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useManifests } from './useSboms';
 import { openInNewTab } from '@app/utils/openInNewTab';
 import { ManifestsQueryType } from '@app/types';
+import { useManifestsFilters } from './useManifestsFilters';
 
 const columnNames = {
   id: 'ID',
@@ -39,36 +39,25 @@ const columnNames = {
 export const ManifestsTable = () => {
 
   const navigate = useNavigate();
-  const paramPage = useSearchParam('page') || 1;
-  const paramPageSize = useSearchParam('pageSize') || 10;
 
+  const { queryType, queryValue, pageIndex, pageSize, setFilters } = useManifestsFilters();
 
-
-  const [searchBarValue, setSearchBarValue] = React.useState<string>('');
-  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(false);
+  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
+  const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
 
   const [selectIsOpen, setSelectIsOpen] = React.useState(false);
-  const [selectedQueryType, setSelectedQueryType] = React.useState<ManifestsQueryType>(ManifestsQueryType.NoFilter);
 
-
-  const [isButtonVisible, setButtonVisible] = React.useState<boolean>(false);
+  const [isButtonVisible, setButtonVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
 
   // getting the data and applying the filters sent to the backend here
-  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize, setQueryType, setQuery }] = useManifests(
-    +paramPage - 1,
-    +paramPageSize,
-  );
-
+  const [{ value, loading, total, error }] = useManifests();
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
-    setPageIndex(newPage - 1);
-    navigate({ search: `?page=${newPage}&pageSize=${pageSize}` });
+    setFilters(queryType, queryValue, newPage, pageSize)
   };
 
   const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
-    setPageSize(newPerPage);
-    setPageIndex(0);
-    navigate({ search: `?page=1&pageSize=${newPerPage}` });
+    setFilters(queryType, queryValue, pageIndex, newPerPage)
   };
 
   if (error) {
@@ -89,14 +78,14 @@ export const ManifestsTable = () => {
   };
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setSelectedQueryType(value as ManifestsQueryType);
+    setFilters(value as ManifestsQueryType, queryValue, pageIndex, pageSize)
     setSelectIsOpen(false);
     switch (value) {
       case ManifestsQueryType.NoFilter:
         setSearchBarVisible(false);
-        setQueryType(ManifestsQueryType.NoFilter);
-        setQuery('');
         setButtonVisible(false);
+        setSearchBarValue('')
+        setFilters(ManifestsQueryType.NoFilter, '', pageIndex, pageSize)
         break;
       default:
         setSearchBarVisible(true);
@@ -106,9 +95,7 @@ export const ManifestsTable = () => {
   };
 
   const onSearchCall = () => {
-    setQueryType(selectedQueryType);
-    setQuery(searchBarValue);
-    setPageIndex(0);
+    setFilters(queryType, searchBarValue, pageIndex, pageSize)
   }
 
   const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
@@ -122,14 +109,14 @@ export const ManifestsTable = () => {
         } as React.CSSProperties
       }
     >
-      {selectedQueryType}
+      {queryType}
     </MenuToggle>
   );
 
   const select = <Select
     id="single-select"
     isOpen={selectIsOpen}
-    selected={selectedQueryType}
+    selected={queryType as ManifestsQueryType}
     onSelect={onSelect}
     onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
     toggle={toggle}
@@ -146,11 +133,15 @@ export const ManifestsTable = () => {
   </Select>
 
 
+  const onChange = (value: string) => {
+    setSearchBarValue(value)
+  };
+
   const searchBar = <SearchInput
     placeholder="Enter selected id"
     value={searchBarValue}
-    onChange={(_event, value) => setSearchBarValue(value)}
-    onClear={() => setSearchBarValue('')}
+    onChange={(_event, value) => onChange(value)}
+    onClear={() => onChange('')}
     isAdvancedSearchOpen={!searchBarVisible}
   />
 
@@ -230,7 +221,7 @@ export const ManifestsTable = () => {
         itemCount={total}
         widgetId="manifests-table-pagination"
         perPage={pageSize}
-        page={pageIndex + 1}
+        page={pageIndex}
         variant={PaginationVariant.bottom}
         onSetPage={onSetPage}
         onPerPageSelect={onPerPageSelect}

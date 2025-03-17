@@ -20,64 +20,58 @@ import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
 import { ManifestsQueryType } from '@app/types';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
+import { useManifestsFilters } from './useManifestsFilters';
 
-export function useManifests(initialPage: number, intialPageSize: number) {
+export function useManifests() {
   const sbomerApi = DefaultSbomerApi.getInstance();
   const [total, setTotal] = useState(0);
-  const [pageIndex, setPageIndex] = useState(initialPage || 0);
-  const [pageSize, setPageSize] = useState(intialPageSize || 10);
-  const [queryType, setQueryType] = useState(ManifestsQueryType.NoFilter);
-  const [query, setQuery] = useState('');
+
+  const { queryType, queryValue, pageIndex, pageSize } = useManifestsFilters();
 
   const getManifests = useCallback(
     async ({
       pageSize,
       pageIndex,
       queryType: queryType,
-      query,
+      queryValue,
     }: {
       pageSize: number;
       pageIndex: number;
       queryType: ManifestsQueryType;
-      query: string;
+      queryValue: string;
     }) => {
       try {
-        return await sbomerApi.getManifests({ pageSize, pageIndex }, queryType, query);
+        const pageIndexOffsetted = pageIndex - 1;
+        return await sbomerApi.getManifests({ pageSize, pageIndex: pageIndexOffsetted }, queryType, queryValue);
       } catch (e) {
         return Promise.reject(e);
       }
     },
-    [pageIndex, pageSize, queryType, query],
+    [pageIndex, pageSize, queryType, queryValue],
   );
 
   const { loading, value, error, retry } = useAsyncRetry(
     () =>
       getManifests({
-        pageSize: pageSize,
-        pageIndex: pageIndex,
+        pageSize: +pageSize,
+        pageIndex: +pageIndex,
         queryType: queryType,
-        query: query,
+        queryValue: queryValue,
       }).then((data) => {
         setTotal(data.total);
         return data.data;
       }),
-    [pageIndex, pageSize, queryType, query],
+    [pageIndex, pageSize, queryType, queryValue],
   );
 
   return [
     {
-      pageIndex,
-      pageSize,
       total,
       value,
       loading,
       error,
     },
     {
-      setPageIndex,
-      setPageSize,
-      setQueryType,
-      setQuery,
       retry,
     },
   ] as const;
