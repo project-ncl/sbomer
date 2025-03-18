@@ -230,9 +230,21 @@ export type GenerateParams = {
   config: string;
 };
 
-export enum QueryType {
+export enum ManifestsQueryType {
   NoFilter = 'No filter',
   Purl = 'Purl',
+}
+
+export enum RequestsQueryType {
+  NoFilter = 'No filter',
+  PNCBuild = 'PNC Build',
+  ContainerImage = 'Container Image',
+  ErrataAdvisory = 'Errata Advisory',
+  RequestEvent = 'Request Event',
+  PNCAnalysis = 'PNC Analysis',
+  PNCOperation = 'PNC Operation',
+  ErrataReleaseID = 'Errata Release Id',
+  ErrataReleaseFullname = 'Errata Release Fullname',
 }
 
 export type SbomerApi = {
@@ -247,7 +259,7 @@ export type SbomerApi = {
 
   getManifests(
     pagination: { pageSize: number; pageIndex: number },
-    queryType: QueryType,
+    queryType: ManifestsQueryType,
     query: string,
   ): Promise<{ data: SbomerManifest[]; total: number }>;
   getManifestsForGeneration(generationId: string): Promise<{ data: SbomerManifest[]; total: number }>;
@@ -256,10 +268,14 @@ export type SbomerApi = {
 
   getManifest(id: string): Promise<SbomerManifest>;
 
-  getRequestEvents(pagination: {
-    pageSize: number;
-    pageIndex: number;
-  }): Promise<{ data: SbomerRequest[]; total: number }>;
+  getRequestEvents(
+    pagination: {
+      pageSize: number;
+      pageIndex: number;
+    },
+    queryType: RequestsQueryType,
+    query: string,
+  ): Promise<{ data: SbomerRequest[]; total: number }>;
 
   getRequestEvent(id: string): Promise<SbomerRequestManifest>;
 

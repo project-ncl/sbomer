@@ -18,7 +18,8 @@
 
 import axios, { Axios, AxiosError } from 'axios';
 import {
-  QueryType,
+  ManifestsQueryType,
+  RequestsQueryType,
   SbomerApi,
   SbomerGeneration,
   SbomerManifest,
@@ -77,12 +78,12 @@ export class DefaultSbomerApi implements SbomerApi {
 
   async getManifests(
     pagination: { pageSize: number; pageIndex: number },
-    queryOption: QueryType,
+    queryOption: ManifestsQueryType,
     query: string,
   ): Promise<{ data: SbomerManifest[]; total: number }> {
     let queryPrefix = '';
     switch (queryOption) {
-      case QueryType.Purl:
+      case ManifestsQueryType.Purl:
         queryPrefix = 'rootPurl';
         break;
       default:
@@ -214,12 +215,48 @@ export class DefaultSbomerApi implements SbomerApi {
     return request;
   }
 
-  async getRequestEvents(pagination: {
-    pageSize: number;
-    pageIndex: number;
-  }): Promise<{ data: SbomerRequest[]; total: number }> {
+  async getRequestEvents(
+    pagination: {
+      pageSize: number;
+      pageIndex: number;
+    },
+    queryType: string,
+    query: string,
+  ): Promise<{ data: SbomerRequest[]; total: number }> {
+    let queryPrefix = '';
+    switch (queryType) {
+      case RequestsQueryType.PNCBuild:
+        queryPrefix = 'pnc-build';
+        break;
+      case RequestsQueryType.ContainerImage:
+        queryPrefix = 'image';
+        break;
+      case RequestsQueryType.ErrataAdvisory:
+        queryPrefix = 'errata-advisory';
+        break;
+      case RequestsQueryType.RequestEvent:
+        queryPrefix = 'id';
+        break;
+      case RequestsQueryType.PNCAnalysis:
+        queryPrefix = 'pnc-analysis';
+        break;
+      case RequestsQueryType.PNCOperation:
+        queryPrefix = 'pnc-operation';
+        break;
+      case RequestsQueryType.ErrataReleaseID:
+        queryPrefix = 'release.errata_id';
+        break;
+      case RequestsQueryType.ErrataReleaseFullname:
+        queryPrefix = 'release.errata_fullname';
+        break;
+      default:
+        queryPrefix = '';
+    }
+
+    const queryFullString = queryPrefix == '' ? '' : `${queryPrefix}=${query}`;
+
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/requests?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta1/requests/${encodeURIComponent(queryFullString)}?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -235,12 +272,18 @@ export class DefaultSbomerApi implements SbomerApi {
     const requests: SbomerRequest[] = [];
 
     if (data.content) {
+      // basic response without any filters applied
       data.content.forEach((request: any) => {
         requests.push(new SbomerRequest(request));
       });
+      return { data: requests, total: data.totalHits };
     }
 
-    return { data: requests, total: data.totalHits };
+    // filtered response has different format than normal
+    data.forEach((request: any) => {
+      requests.push(new SbomerRequest(request));
+    });
+    return { data: requests, total: requests.length || 0 };
   }
 
   async getRequestEvent(id: string): Promise<SbomerRequestManifest> {

@@ -17,7 +17,7 @@
 ///
 
 import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
-import { QueryType } from '@app/types';
+import { ManifestsQueryType } from '@app/types';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 
@@ -26,7 +26,7 @@ export function useManifests(initialPage: number, intialPageSize: number) {
   const [total, setTotal] = useState(0);
   const [pageIndex, setPageIndex] = useState(initialPage || 0);
   const [pageSize, setPageSize] = useState(intialPageSize || 10);
-  const [queryType, setQueryType] = useState(QueryType.NoFilter);
+  const [queryType, setQueryType] = useState(ManifestsQueryType.NoFilter);
   const [query, setQuery] = useState('');
 
   const getManifests = useCallback(
@@ -38,7 +38,7 @@ export function useManifests(initialPage: number, intialPageSize: number) {
     }: {
       pageSize: number;
       pageIndex: number;
-      queryType: QueryType;
+      queryType: ManifestsQueryType;
       query: string;
     }) => {
       try {
