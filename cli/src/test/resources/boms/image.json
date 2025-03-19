@@ -20,7 +20,7 @@
       "bom-ref": "3893910a10b83660",
       "type": "container",
       "name": "registry.com/rh-osbs/amq-streams-console-ui-rhel9",
-      "version": "2.7.0-8.1718294415"
+      "version": "sha256:a43c117701dd6d012bb9da8974d2d332f70a688944ed19280a020d5357f8b22e"
     },
     "properties": [
       { "name": "syft:image:labels:architecture", "value": "x86_64" },

@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingContainerHash;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -138,6 +140,9 @@ public class SyftImageAdjuster extends AbstractAdjuster {
         adjustPublisher(bom);
         // Adjust the metadata supplier
         addMissingMetadataSupplier(bom);
+
+        // Add container image hashes to "hashes" object (SBOMER-354)
+        addMissingContainerHash(bom);
         return bom;
     }
 

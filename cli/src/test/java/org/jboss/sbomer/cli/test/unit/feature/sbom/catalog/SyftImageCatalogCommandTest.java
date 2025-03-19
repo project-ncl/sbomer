@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Hash;
 import org.jboss.sbomer.cli.feature.sbom.command.catalog.SyftImageCatalogCommand;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
@@ -91,6 +92,14 @@ class SyftImageCatalogCommandTest {
                 "pkg:oci/ubi-micro@sha256%3A2c9e70f4174747c6b53d253e879177c52731cc4bdc5fe9c6a2555412d849a952?arch=s390x&os=linux&tag=9.4-6.1716471860");
 
         assertEquals(expectedVariantsPurls, variantsPurls);
+        assertEquals(
+                "sha256:1c8483e0fda0e990175eb9855a5f15e0910d2038dd397d9e2b357630f0321e6d",
+                imageIndex.getComponents().get(0).getVersion());
+        assertNotNull(imageIndex.getComponents().get(0).getHashes());
+        assertEquals(1, imageIndex.getComponents().get(0).getHashes().size());
+        Hash hash = imageIndex.getComponents().get(0).getHashes().get(0);
+        assertEquals(Hash.Algorithm.SHA_256.getSpec(), hash.getAlgorithm());
+        assertEquals("1c8483e0fda0e990175eb9855a5f15e0910d2038dd397d9e2b357630f0321e6d", hash.getValue());
 
         System.out.println("\n" + SbomUtils.toJson(imageIndex));
     }

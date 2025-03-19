@@ -20,6 +20,7 @@ import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 import org.jboss.sbomer.core.features.sbom.Constants;
@@ -313,6 +314,20 @@ class SyftImageAdjusterTest {
         Bom adjusted = adjuster.adjust(bom);
         assertNotNull(adjusted.getMetadata().getSupplier());
         assertEquals(Constants.SUPPLIER_NAME, adjusted.getMetadata().getSupplier().getName());
+    }
+
+    @Test
+    void shouldAddContainerHash() {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir);
+        assertNotNull(bom.getComponents());
+        assertTrue(bom.getComponents().size() > 0);
+        assertNull(bom.getComponents().get(0).getHashes());
+        Bom adjusted = adjuster.adjust(bom);
+        assertNotNull(adjusted.getComponents().get(0).getHashes());
+        assertEquals(1, adjusted.getComponents().get(0).getHashes().size());
+        Hash hash = adjusted.getComponents().get(0).getHashes().get(0);
+        assertEquals(Hash.Algorithm.SHA_256.getSpec(), hash.getAlgorithm());
+        assertEquals("a43c117701dd6d012bb9da8974d2d332f70a688944ed19280a020d5357f8b22e", hash.getValue());
     }
 
     private Stream<ExternalReference> getExternalReferenceStream(Bom bom) {
