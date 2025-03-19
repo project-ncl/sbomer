@@ -17,14 +17,16 @@
 ///
 
 import { RequestsQueryType } from '@app/types';
+import { isRequestsQueryType } from '@app/utils/Utils';
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 export function useRequestEventsFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const queryType = (searchParams.get('queryType') as RequestsQueryType) || RequestsQueryType.NoFilter;
-  const queryValue = searchParams.get('queryValue') as string;
+  const queryTypeValue = searchParams.get('queryType') as RequestsQueryType;
+  const queryType = isRequestsQueryType(queryTypeValue) ? queryTypeValue : RequestsQueryType.NoFilter;
+  const queryValue = isRequestsQueryType(queryTypeValue) ? (searchParams.get('queryValue') as string) : '';
   const pageIndex = +(searchParams.get('page') || 1);
   const pageSize = +(searchParams.get('pageSize') || 10);
 

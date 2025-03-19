@@ -17,6 +17,7 @@
 ///
 
 import { ManifestsQueryType } from '@app/types';
+import { isManifestsQueryType } from '@app/utils/Utils';
 
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -24,8 +25,9 @@ import { useSearchParams } from 'react-router-dom';
 export function useManifestsFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const queryType = (searchParams.get('queryType') as ManifestsQueryType) || ManifestsQueryType.NoFilter;
-  const queryValue = searchParams.get('queryValue') as string;
+  const queryTypeValue = searchParams.get('queryType') as ManifestsQueryType;
+  const queryType = isManifestsQueryType(queryTypeValue) ? queryTypeValue : ManifestsQueryType.NoFilter;
+  const queryValue = isManifestsQueryType(queryTypeValue) ? (searchParams.get('queryValue') as string) : '';
   const pageIndex = +(searchParams.get('page') || 1);
   const pageSize = +(searchParams.get('pageSize') || 10);
 
