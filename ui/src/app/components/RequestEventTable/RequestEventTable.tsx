@@ -7,9 +7,6 @@ import {
   Timestamp,
   TimestampTooltipVariant,
   Tooltip,
-  ExpandableSection,
-  CodeBlock,
-  CodeBlockCode,
   ToolbarContent,
   ToolbarItem,
   Toolbar,
@@ -25,11 +22,11 @@ import {
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useRequestEvents } from './useRequestEvents';
 import { openInNewTab } from '@app/utils/openInNewTab';
 import { RequestsQueryType } from '@app/types';
+import { useRequestEventsFilters } from './useRequestEventsFilters';
 
 const columnNames = {
   id: 'ID',
@@ -42,31 +39,24 @@ const columnNames = {
 
 export const RequestEventTable = () => {
   const navigate = useNavigate();
-  const paramPage = useSearchParam('page') || 1;
-  const paramPageSize = useSearchParam('pageSize') || 10;
 
-  const [searchBarValue, setSearchBarValue] = React.useState<string>('');
-  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(false);
+  const { queryType, queryValue, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
+
+  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
+  const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
 
   const [selectIsOpen, setSelectIsOpen] = React.useState(false);
-  const [selectedQueryType, setSelectedQueryType] = React.useState<string>(RequestsQueryType.NoFilter);
 
-  const [isButtonVisible, setButtonVisible] = React.useState<boolean>(false);
+  const [isButtonVisible, setButtonVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
 
-  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize, setQueryType, setQuery }] = useRequestEvents(
-    +paramPage - 1,
-    +paramPageSize,
-  );
+  const [{ value, loading, total, error },] = useRequestEvents();
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
-    setPageIndex(newPage - 1);
-    navigate({ search: `?page=${newPage}&pageSize=${pageSize}` });
+    setFilters(queryType, queryValue, newPage, pageSize)
   };
 
   const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
-    setPageSize(newPerPage);
-    setPageIndex(0);
-    navigate({ search: `?page=1&pageSize=${newPerPage}` });
+    setFilters(queryType, queryValue, pageIndex, newPerPage)
   };
 
   if (error) {
@@ -86,14 +76,14 @@ export const RequestEventTable = () => {
   };
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setSelectedQueryType(value as RequestsQueryType);
+    setFilters(value as RequestsQueryType, queryValue, pageIndex, pageSize)
     setSelectIsOpen(false);
     switch (value) {
       case RequestsQueryType.NoFilter:
         setSearchBarVisible(false);
-        setQueryType(RequestsQueryType.NoFilter);
-        setQuery('');
         setButtonVisible(false)
+        setSearchBarValue('')
+        setFilters(RequestsQueryType.NoFilter, '', pageIndex, pageSize)
         break;
       default:
         setSearchBarVisible(true);
@@ -102,9 +92,7 @@ export const RequestEventTable = () => {
   };
 
   const onSearchCall = () => {
-    setQueryType(selectedQueryType as RequestsQueryType)
-    setQuery(searchBarValue)
-    setPageIndex(0)
+    setFilters(queryType, searchBarValue, pageIndex, pageSize)
   }
 
 
@@ -119,7 +107,7 @@ export const RequestEventTable = () => {
         } as React.CSSProperties
       }
     >
-      {selectedQueryType}
+      {queryType}
     </MenuToggle>
   );
 
@@ -127,7 +115,7 @@ export const RequestEventTable = () => {
   const select = <Select
     id="single-select"
     isOpen={selectIsOpen}
-    selected={selectedQueryType}
+    selected={queryType as RequestsQueryType}
     onSelect={onSelect}
     onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
     toggle={toggle}
@@ -248,7 +236,7 @@ export const RequestEventTable = () => {
         itemCount={total}
         widgetId="request-table-pagination"
         perPage={pageSize}
-        page={pageIndex + 1}
+        page={pageIndex}
         variant={PaginationVariant.bottom}
         onSetPage={onSetPage}
         onPerPageSelect={onPerPageSelect}
