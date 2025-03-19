@@ -1068,6 +1068,39 @@ public class SbomUtils {
         }
     }
 
+    public static void addMissingContainerHash(Bom bom) {
+        if (bom.getComponents() == null || bom.getComponents().isEmpty()) {
+            return;
+        }
+
+        Component mainComponent = bom.getComponents().get(0);
+        if (mainComponent.getType() != Component.Type.CONTAINER) {
+            return;
+        }
+
+        String[] versionTokens = mainComponent.getVersion().split(":");
+        if (versionTokens.length < 2) {
+            return;
+        }
+        Map<String, Hash.Algorithm> hashMap = Map.of(
+                "md5",
+                Hash.Algorithm.MD5,
+                "sha1",
+                Hash.Algorithm.SHA1,
+                "sha256",
+                Hash.Algorithm.SHA_256,
+                "sha384",
+                Hash.Algorithm.SHA_384,
+                "sha512",
+                Hash.Algorithm.SHA_512);
+
+        hashMap.forEach((prefix, algorithm) -> {
+            if (versionTokens[0].equalsIgnoreCase(prefix)) {
+                addHashIfMissing(mainComponent, versionTokens[1], algorithm);
+            }
+        });
+    }
+
     public static void addMissingMetadataSupplier(Bom bom) {
         if (bom == null) {
             return;

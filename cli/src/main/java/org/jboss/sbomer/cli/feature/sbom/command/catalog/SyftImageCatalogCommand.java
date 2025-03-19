@@ -97,6 +97,7 @@ public class SyftImageCatalogCommand extends AbstractCatalogCommand {
         SbomUtils.setSupplier(mainComponent);
         SbomUtils.addMissingMetadataSupplier(indexBom);
         SbomUtils.addMissingSerialNumber(indexBom);
+        SbomUtils.addMissingContainerHash(indexBom);
 
         return indexBom;
     }
