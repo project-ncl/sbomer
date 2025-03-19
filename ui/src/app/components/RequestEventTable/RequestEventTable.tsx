@@ -144,6 +144,12 @@ export const RequestEventTable = () => {
     onChange={(_event, value) => setSearchBarValue(value)}
     onClear={() => setSearchBarValue('')}
     isAdvancedSearchOpen={!searchBarVisible}
+    onKeyDown={(event: React.KeyboardEvent) => {
+      if (event.key == 'Enter') {
+        onSearchCall();
+      }
+    }
+    }
   />
 
   const searchButton = <Button

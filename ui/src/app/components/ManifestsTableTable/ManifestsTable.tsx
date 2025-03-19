@@ -143,6 +143,12 @@ export const ManifestsTable = () => {
     onChange={(_event, value) => onChange(value)}
     onClear={() => onChange('')}
     isAdvancedSearchOpen={!searchBarVisible}
+    onKeyDown={(event: React.KeyboardEvent) => {
+      if (event.key == 'Enter') {
+        onSearchCall();
+      }
+    }
+    }
   />
 
   const searchButton = <Button
