@@ -16,28 +16,27 @@
 /// limitations under the License.
 ///
 
-import { ManifestsQueryType } from '@app/types';
-import { isManifestsQueryType } from '@app/utils/Utils';
-
+import { RequestsQueryType } from '@app/types';
+import { isRequestsQueryType } from '@app/utils/Utils';
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-export function useManifestsFilters() {
+export function useRequestEventsFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const queryTypeValue = searchParams.get('queryType') as ManifestsQueryType;
-  const queryType = isManifestsQueryType(queryTypeValue) ? queryTypeValue : ManifestsQueryType.NoFilter;
-  const queryValue = isManifestsQueryType(queryTypeValue) ? (searchParams.get('queryValue') as string) : '';
+  const queryTypeValue = searchParams.get('queryType') as RequestsQueryType;
+  const queryType = isRequestsQueryType(queryTypeValue) ? queryTypeValue : RequestsQueryType.NoFilter;
+  const queryValue = isRequestsQueryType(queryTypeValue) ? (searchParams.get('queryValue') as string) : '';
   const pageIndex = +(searchParams.get('page') || 1);
   const pageSize = +(searchParams.get('pageSize') || 10);
 
   const setFilters = useCallback(
-    (queryType: ManifestsQueryType, queryValue: string, pageIndex: number, pageSize: number) => {
+    (queryType: RequestsQueryType, queryValue: string, pageIndex: number, pageSize: number) => {
       setSearchParams((params) => {
         if (queryType) {
           params.set('queryType', queryType);
         } else {
-          params.set('queryType', ManifestsQueryType.NoFilter);
+          params.set('queryType', RequestsQueryType.NoFilter);
         }
         if (queryValue) {
           params.set('queryValue', queryValue);

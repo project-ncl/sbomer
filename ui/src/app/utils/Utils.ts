@@ -16,7 +16,7 @@
 /// limitations under the License.
 ///
 
-import { SbomerGeneration, SbomerRequest } from '@app/types';
+import { ManifestsQueryType, RequestsQueryType, SbomerGeneration, SbomerRequest } from '@app/types';
 import { Label } from '@patternfly/react-core';
 
 const GenerationRequestTypes = new Map<string, { description?: string }>([
@@ -156,4 +156,11 @@ export function isInProgress(request: SbomerGeneration): boolean {
 
 export function isSuccess(request: SbomerGeneration): boolean {
   return request.result == 'SUCCESS' ? true : false;
+}
+
+export function isManifestsQueryType(value: string): value is ManifestsQueryType {
+  return Object.values<string>(ManifestsQueryType).includes(value);
+}
+export function isRequestsQueryType(value: string): value is RequestsQueryType {
+  return Object.values<string>(RequestsQueryType).includes(value);
 }
