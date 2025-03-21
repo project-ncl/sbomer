@@ -22,14 +22,8 @@ import java.time.Instant;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 
-public record BaseSbomRecord(
-        String id,
-        String identifier,
-        String rootPurl,
-        Instant creationTime,
-        Integer configIndex,
-        String statusMessage,
-        BaseSbomGenerationRequestRecord generationRequest) {
+public record BaseSbomRecord(String id, String identifier, String rootPurl, Instant creationTime, Integer configIndex,
+        String statusMessage, BaseSbomGenerationRequestRecord generationRequest) {
 
     public BaseSbomRecord(
             String id,

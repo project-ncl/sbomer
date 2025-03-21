@@ -26,14 +26,8 @@ import org.jboss.sbomer.core.features.sbom.config.Config;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Schema(name = "V1Alpha3SbomRecord")
-public record SbomRecord(
-        String id,
-        String identifier,
-        String rootPurl,
-        Instant creationTime,
-        @Schema(implementation = Map.class) JsonNode sbom,
-        Integer configIndex,
-        String statusMessage,
+public record SbomRecord(String id, String identifier, String rootPurl, Instant creationTime,
+        @Schema(implementation = Map.class) JsonNode sbom, Integer configIndex, String statusMessage,
         SbomGenerationRequestRecord generationRequest) {
 
     public SbomRecord(

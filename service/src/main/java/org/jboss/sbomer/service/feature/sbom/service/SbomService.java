@@ -300,7 +300,9 @@ public class SbomService {
             MDCUtils.addBuildContext(pncRequestConfig.getBuildId());
 
             log.info("New generation request for build id '{}'", pncRequestConfig.getBuildId());
-            log.debug("Creating GenerationRequest Kubernetes resource for build id {}...", pncRequestConfig.getBuildId());
+            log.debug(
+                    "Creating GenerationRequest Kubernetes resource for build id {}...",
+                    pncRequestConfig.getBuildId());
 
             GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
                     .withIdentifier(pncRequestConfig.getBuildId())

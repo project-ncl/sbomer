@@ -24,10 +24,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 
-public record V1Beta1BaseGenerationRecord(
-        String id,
-        String identifier,
-        @Schema(implementation = Map.class) Config config,
-        GenerationRequestType type,
-        Instant creationTime) {
+public record V1Beta1BaseGenerationRecord(String id, String identifier,
+        @Schema(implementation = Map.class) Config config, GenerationRequestType type, Instant creationTime) {
 }

@@ -419,9 +419,20 @@ public class SbomUtils {
 
         for (Map.Entry<String, List<LicenseInfo>> entry : entries) {
             String spdxLicenseId = entry.getKey();
-            List<LicenseInfo> licenseInfos = entry.getValue().stream().sorted(Comparator.comparing(LicenseInfo::getSpdxLicenseId)).toList();
+            List<LicenseInfo> licenseInfos = entry.getValue()
+                    .stream()
+                    .sorted(Comparator.comparing(LicenseInfo::getSpdxLicenseId))
+                    .toList();
             addLicenseEvidence(component, licenseInfos);
-            licenseInfos.stream().map(licenseInfo -> getNormalizedUrl(licenseInfo.getUrl())).forEach(optionalURI -> optionalURI.ifPresent(uri -> addExternalReference(component, ExternalReference.Type.LICENSE, uri.toASCIIString(), spdxLicenseId)));
+            licenseInfos.stream()
+                    .map(licenseInfo -> getNormalizedUrl(licenseInfo.getUrl()))
+                    .forEach(
+                            optionalURI -> optionalURI.ifPresent(
+                                    uri -> addExternalReference(
+                                            component,
+                                            ExternalReference.Type.LICENSE,
+                                            uri.toASCIIString(),
+                                            spdxLicenseId)));
         }
         return component;
     }

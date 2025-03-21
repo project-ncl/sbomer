@@ -19,13 +19,7 @@ package org.jboss.sbomer.core.dto.v1beta1;
 
 import java.time.Instant;
 
-public record V1Beta1RequestManifestRecord(
-        String id,
-        String identifier,
-        String rootPurl,
-        Instant creationTime,
-        Integer configIndex,
-        String statusMessage,
-        V1Beta1GenerationRecord generation) {
+public record V1Beta1RequestManifestRecord(String id, String identifier, String rootPurl, Instant creationTime,
+        Integer configIndex, String statusMessage, V1Beta1GenerationRecord generation) {
 
 }
