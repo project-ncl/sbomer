@@ -23,13 +23,7 @@ import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 
-public record SbomGenerationRequestRecord(
-        String id,
-        String identifier,
-        @Schema(implementation = Map.class) Config config,
-        String type,
-        Instant creationTime,
-        String status,
-        String result,
-        String reason) {
+public record SbomGenerationRequestRecord(String id, String identifier,
+        @Schema(implementation = Map.class) Config config, String type, Instant creationTime, String status,
+        String result, String reason) {
 }
