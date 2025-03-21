@@ -85,8 +85,9 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
             List<Path> paths = findManifests(parent.getWorkdir());
 
             if (paths.size() == 0) {
-                throw new ApplicationException("Unable to find the generated SBOM under the '{}' directory",
-                    parent.getWorkdir().toAbsolutePath());
+                throw new ApplicationException(
+                        "Unable to find the generated SBOM under the '{}' directory",
+                        parent.getWorkdir().toAbsolutePath());
             }
 
             // The build command contains the final name and version assigned to the build
@@ -116,39 +117,49 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
         if (componentFullName == null || componentVersion == null) {
             // If there are no name and version set, find the closest manifest to the root of the project
             return paths.stream()
-                .min((p1, p2) -> Integer.compare(
-                    parent.getWorkdir().relativize(p1).getNameCount(),
-                    parent.getWorkdir().relativize(p2).getNameCount()
-                )).orElse(paths.get(0));
+                    .min(
+                            (p1, p2) -> Integer.compare(
+                                    parent.getWorkdir().relativize(p1).getNameCount(),
+                                    parent.getWorkdir().relativize(p2).getNameCount()))
+                    .orElse(paths.get(0));
         }
 
         // The name and version are set and the SBT has generated a manifest with a corresponding name
         String rootManifestName = String.format("%s-%s.bom.json", componentFullName, componentVersion);
         log.info("Looking for root manifest with name: {}", rootManifestName);
-        return paths.stream().filter(path -> path.getFileName().toString().equals(rootManifestName)).findFirst().orElse(paths.get(0));
+        return paths.stream()
+                .filter(path -> path.getFileName().toString().equals(rootManifestName))
+                .findFirst()
+                .orElse(paths.get(0));
     }
 
     private void mergeRootWithAllManifests(Path rootManifestPath, List<Path> manifestsPaths) {
         Bom rootBom = SbomUtils.fromPath(rootManifestPath);
 
-        Set<String> existingDependencyRefs = rootBom.getDependencies().stream().map(Dependency::getRef).collect(Collectors.toSet());
+        Set<String> existingDependencyRefs = rootBom.getDependencies()
+                .stream()
+                .map(Dependency::getRef)
+                .collect(Collectors.toSet());
 
-        Set<String> existingComponentsPurls = Stream.ofNullable(rootBom.getComponents()).flatMap(Collection::stream).map(Component::getPurl).collect(Collectors.toSet());
+        Set<String> existingComponentsPurls = Stream.ofNullable(rootBom.getComponents())
+                .flatMap(Collection::stream)
+                .map(Component::getPurl)
+                .collect(Collectors.toSet());
 
         manifestsPaths.stream()
-            .filter(path -> !path.equals(rootManifestPath))
-            .map(SbomUtils::fromPath)
-            .forEach(componentBom -> {
-                Stream.ofNullable(componentBom.getComponents())
-                    .flatMap(Collection::stream)
-                    .filter(comp -> existingComponentsPurls.add(comp.getPurl()))
-                    .forEach(rootBom::addComponent);
+                .filter(path -> !path.equals(rootManifestPath))
+                .map(SbomUtils::fromPath)
+                .forEach(componentBom -> {
+                    Stream.ofNullable(componentBom.getComponents())
+                            .flatMap(Collection::stream)
+                            .filter(comp -> existingComponentsPurls.add(comp.getPurl()))
+                            .forEach(rootBom::addComponent);
 
-                Stream.ofNullable(componentBom.getDependencies())
-                    .flatMap(Collection::stream)
-                    .filter(dep -> existingDependencyRefs.add(dep.getRef()))
-                    .forEach(rootBom.getDependencies()::add);
-            });
+                    Stream.ofNullable(componentBom.getDependencies())
+                            .flatMap(Collection::stream)
+                            .filter(dep -> existingDependencyRefs.add(dep.getRef()))
+                            .forEach(rootBom.getDependencies()::add);
+                });
 
         // Write the manifest back to file
         SbomUtils.toPath(rootBom, rootManifestPath);
@@ -195,9 +206,20 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
                 String[] componentGA = componentFullName.split(Constants.SBT_COMPONENT_COORDINATES_SEPARATOR);
                 String componentGroup = componentGA[0].replace(Constants.SBT_COMPONENT_DOT_SEPARATOR, ".");
                 String componentName = componentGA[1];
-                String purl = String.format("pkg:%s/%s/%s@%s", StandardTypes.MAVEN, componentGroup, componentName, componentVersion);
+                String purl = String.format(
+                        "pkg:%s/%s/%s@%s",
+                        StandardTypes.MAVEN,
+                        componentGroup,
+                        componentName,
+                        componentVersion);
 
-                Component metadataComponent = SbomUtils.createComponent(componentGroup, componentName, componentVersion, null, purl, Component.Type.LIBRARY);
+                Component metadataComponent = SbomUtils.createComponent(
+                        componentGroup,
+                        componentName,
+                        componentVersion,
+                        null,
+                        purl,
+                        Component.Type.LIBRARY);
                 SbomUtils.setPublisher(metadataComponent);
                 SbomUtils.setSupplier(metadataComponent);
 
@@ -207,8 +229,14 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
 
                 metadata.setComponent(metadataComponent);
 
-                // The SBT Plugin creates the main bom-ref from the component group, name and version, but not quite, so we need a regExp
-                String bomRefRegExp = String.format(BOM_REF_REGEXP_TEMPLATE, StandardTypes.MAVEN, componentGroup.replace(".", "\\."), componentFullName, componentVersion);
+                // The SBT Plugin creates the main bom-ref from the component group, name and version, but not quite, so
+                // we need a regExp
+                String bomRefRegExp = String.format(
+                        BOM_REF_REGEXP_TEMPLATE,
+                        StandardTypes.MAVEN,
+                        componentGroup.replace(".", "\\."),
+                        componentFullName,
+                        componentVersion);
                 updateMatchingBomRefs(rootBom, bomRefRegExp, purl);
             }
         } else {
@@ -224,43 +252,52 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
 
     private void addMissingQualifiersAndHashes(Bom rootBom) {
         // The SBT plugin does not put the jar qualifier in purls, let's add it
-        String newPurl = SbomUtils.addQualifiersToPurlOfComponent(rootBom.getMetadata().getComponent(), Map.of("type", "jar"), false);
+        String newPurl = SbomUtils
+                .addQualifiersToPurlOfComponent(rootBom.getMetadata().getComponent(), Map.of("type", "jar"), false);
         rootBom.getMetadata().getComponent().setPurl(newPurl);
-        Stream.ofNullable(rootBom.getComponents())
-                    .flatMap(Collection::stream)
-                    .forEach(c -> {
-                        String updatedPurl = SbomUtils.addQualifiersToPurlOfComponent(c, Map.of("type", "jar"), false);
-                        c.setPurl(updatedPurl);
-                    });
+        Stream.ofNullable(rootBom.getComponents()).flatMap(Collection::stream).forEach(c -> {
+            String updatedPurl = SbomUtils.addQualifiersToPurlOfComponent(c, Map.of("type", "jar"), false);
+            c.setPurl(updatedPurl);
+        });
 
         // Let's verify all the components have hashes added
-        if (rootBom.getMetadata().getComponent().getHashes() == null || rootBom.getMetadata().getComponent().getHashes().isEmpty()) {
-            Artifact artifact = pncService.getArtifact(rootBom.getMetadata().getComponent().getPurl(), Optional.empty(), Optional.empty(), Optional.empty());
+        if (rootBom.getMetadata().getComponent().getHashes() == null
+                || rootBom.getMetadata().getComponent().getHashes().isEmpty()) {
+            Artifact artifact = pncService.getArtifact(
+                    rootBom.getMetadata().getComponent().getPurl(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty());
             if (artifact != null) {
                 // Make sure the component has hashes
                 SbomUtils.addHashIfMissing(rootBom.getMetadata().getComponent(), artifact.getMd5(), Hash.Algorithm.MD5);
-                SbomUtils.addHashIfMissing(rootBom.getMetadata().getComponent(), artifact.getSha1(), Hash.Algorithm.SHA1);
-                SbomUtils.addHashIfMissing(rootBom.getMetadata().getComponent(), artifact.getSha256(), Hash.Algorithm.SHA_256);
+                SbomUtils.addHashIfMissing(
+                        rootBom.getMetadata().getComponent(),
+                        artifact.getSha1(),
+                        Hash.Algorithm.SHA1);
+                SbomUtils.addHashIfMissing(
+                        rootBom.getMetadata().getComponent(),
+                        artifact.getSha256(),
+                        Hash.Algorithm.SHA_256);
             }
         }
-        Stream.ofNullable(rootBom.getComponents())
-                    .flatMap(Collection::stream)
-                    .forEach(c -> {
-                        if (c.getHashes() == null || c.getHashes().isEmpty()) {
-                            Artifact artifact = pncService.getArtifact(c.getPurl(), Optional.empty(), Optional.empty(), Optional.empty());
-                            if (artifact != null) {
-                                // Make sure the component has hashes
-                                SbomUtils.addHashIfMissing(c, artifact.getMd5(), Hash.Algorithm.MD5);
-                                SbomUtils.addHashIfMissing(c, artifact.getSha1(), Hash.Algorithm.SHA1);
-                                SbomUtils.addHashIfMissing(c, artifact.getSha256(), Hash.Algorithm.SHA_256);
-                            }
-                        }
-                    });    }
-
+        Stream.ofNullable(rootBom.getComponents()).flatMap(Collection::stream).forEach(c -> {
+            if (c.getHashes() == null || c.getHashes().isEmpty()) {
+                Artifact artifact = pncService
+                        .getArtifact(c.getPurl(), Optional.empty(), Optional.empty(), Optional.empty());
+                if (artifact != null) {
+                    // Make sure the component has hashes
+                    SbomUtils.addHashIfMissing(c, artifact.getMd5(), Hash.Algorithm.MD5);
+                    SbomUtils.addHashIfMissing(c, artifact.getSha1(), Hash.Algorithm.SHA1);
+                    SbomUtils.addHashIfMissing(c, artifact.getSha256(), Hash.Algorithm.SHA_256);
+                }
+            }
+        });
+    }
 
     /**
-     * Traverses through the directory tree and finds all manifests (files that ends with {@code bom.json}) and returns all found
-     * files as a {@link List} of {@link Path}s.
+     * Traverses through the directory tree and finds all manifests (files that ends with {@code bom.json}) and returns
+     * all found files as a {@link List} of {@link Path}s.
      *
      * @param directory The top-level directory where search for manifests should be started.
      * @return List of {@link Path}s to found manifests.

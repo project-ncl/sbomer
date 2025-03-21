@@ -179,7 +179,8 @@ class PncServiceIT {
         assertEquals(expectedRepo, licenseInfo.getDistribution());
         assertEquals(expectedSource, licenseInfo.getSource());
         assertNull(licenseInfo.getComments());
-        Component component = SbomUtils.createComponent(analyzedArtifact, Component.Scope.REQUIRED, Component.Type.FILE);
+        Component component = SbomUtils
+                .createComponent(analyzedArtifact, Component.Scope.REQUIRED, Component.Type.FILE);
         LicenseChoice licenseChoice = component.getLicenses();
         List<License> licences = licenseChoice.getLicenses();
         assertEquals(1, licences.size());
@@ -200,7 +201,7 @@ class PncServiceIT {
         assertEquals(1, evidenceLicenses.size());
         License evidenceLicense = evidenceLicenses.get(0);
         assertEquals(expectedSpdxLicenseId, evidenceLicense.getId());
-        assertEquals(expectedUrl,  evidenceLicense.getUrl());
+        assertEquals(expectedUrl, evidenceLicense.getUrl());
         List<Property> evidenceProperties = evidenceLicense.getProperties();
         assertEquals(2, evidenceProperties.size());
         Property sourceProperty = evidenceProperties.get(0);
