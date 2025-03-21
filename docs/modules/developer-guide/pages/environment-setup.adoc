@@ -61,6 +61,27 @@ And SDKMAN! will switch to the correct JDK when entering the project directory.
 See [filename]`.sdkmanrc` file in the project root directory.
 ====
 
+=== Node.js
+
+To be able to build our UI you need to install Node.js. The easiest option is to use
+link:https://github.com/nvm-sh/nvm[Node Version Manager (nvm)].
+
+Install it according to the instructions for your operating system. Once available
+you can use it to install the `lts/jod` release, like this:
+
+
+[source,console]
+----
+nvm install lts/jod
+---
+
+When you launch a new console you may need to select the Node.js version to use:
+
+[source,console]
+----
+nvm use lts/jod
+---
+
 === Minikube
 
 Minikube will provide our local Kubernetes cluster where SBOMer will be performing the work.
