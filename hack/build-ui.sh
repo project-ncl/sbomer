@@ -20,16 +20,11 @@
 
 set -e
 
-# This file builds all container images using Podman.
-
 SCRIPT_DIR=$(dirname "$0")
-
-"$SCRIPT_DIR/run-maven.sh" package -DskipTests
-"$SCRIPT_DIR/build-ui.sh"
 
 set -x
 
-BUILDER=podman "$SCRIPT_DIR/internal/build-image.sh" "sbomer-service"
-BUILDER=podman "$SCRIPT_DIR/internal/build-image.sh" "sbomer-generator"
-BUILDER=podman "$SCRIPT_DIR/internal/build-image.sh" "sbomer-ui"
+pushd "${SCRIPT_DIR}/../ui" > /dev/null
+npm run build "$@"
+popd > /dev/null
 
