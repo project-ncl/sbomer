@@ -16,6 +16,7 @@
     "vulnerabilityAlerts": {
         "labels": ["security"]
     },
+    "prConcurrentLimit": 20,
     "packageRules": [
         {
             "description": "lockFileMaintenance",
