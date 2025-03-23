@@ -1,0 +1,109 @@
+
+= Task Sizing
+
+[NOTE]
+.About terminology
+====
+For purpose of this document we will refer to the _Generation Request Cloud Event_ as a _Task_.
+These two terms will be used interchangeably.
+====
+
+Every generation request is subject to resource constraints. Different types of generators
+will require different resource configurations. Even more, within a single type of generator --
+resources required to successfully finish the generation will vary. The reason for it is that
+in many cases resources are heavily dependent on the *type and size of the payload itself*.
+
+To cover this particular case the _sizing_ of generation requests was introduced.
+
+When a generation request Cloud Event is created it, a particular _size_
+*is assigned to the request*. By convention we suggest to use the *t-shirt sizing*:
+
+`small`:: Good for low resource intensive tasks or small payloads.
+`medium`:: The _default_ size, being a good compromise between low and high resource intensive tasks.
+`large`:: Reserved for tasks that require more resources to finish.
+`xlarge`:: Very heavy tasks that require a lot of resources.
+
+[CAUTION]
+.Size names are just a convention
+====
+Above size names and descriptions *are just a convention*. Different generators may use different
+approaches, introduce other sizes and have different descriptions that fit better its specific usage.
+
+For information what exact sizes are used by particular generators please
+xref:generation/generators/index.adoc[refer to the documentation].
+====
+
+== Determining correct task size
+
+Important question is: how do we understand what is the correct task size?
+It is a very good question, but the answer is in most cases not that satisfying: *it's a guess*.
+
+What we need to do is to ensure that we have the appropriate context available to make an educated guess.
+But even then -- we will not be able to take all the variables into account and at the end the
+task execution will be the real test for our assumptions.
+
+Something to keep in mind is that the size assigned to a task *will almost always be incorrect*. It will
+be too big meaning that we will waste resources or it will be too small and thus it will slow down
+the execution or in certain cases even fail it!
+
+This is why we need to constantly monitor task execution and adjust our assumptions.
+
+== Assigning sizes to tasks
+
+Sizes are encoded using the `size` key within the Cloud Event body in the `metadata` section (`$.metadata.size`).
+
+[NOTE]
+.Default size
+====
+If the `$.metadata.size` key is missing, the *default size* will be used. For information what is the
+default size for a particular generator, please xref:generation/generators/index.adoc[refer to the documentation].
+====
+
+.Task size setting
+====
+[source,json]
+.event.json
+----
+{
+    "type": "org.jboss.sbomer.generation.request.zip.v1alpha1",
+    "metadata": {
+        "size": "xlarge"
+    },
+    "spec": { "url": "https://host.com/a/path/to/heavy.zip" }
+}
+----
+
+Here you can see an example where the `org.jboss.sbomer.generation.request.zip.v1alpha1` Cloud Event requests
+`xlarge` type of resources.
+
+This means that it is probably a pretty heavy task. Maybe the `heavy.zip` is indeed heavy,
+contains many files and requires substantial computing resources so that it can be processed.
+====
+
+In the next section we will explain what are the options to adjust the size of the generation request event.
+
+== How to control task size
+
+Now that we know what sizing means and how to apply it we will try to answer the question how to
+control which task will be assigned to which size.
+
+The first thing to understand is that *setting the size of the task is should be treated as an exception*.
+In most cases default values set for a particular generator will work just fine out of the box.
+We should adjust sizing only in cases where default resources:
+
+[loweralpha]
+. are *too high* -- we want to lower the resource consumption in our deployment, or
+. are *too low* -- our generations fail to execute or take too long to finish.
+
+[TIP]
+.Periodically review default settings
+====
+It is a good idea to review the default resource configurations from time to time to
+make them more suited for the types of requests in the particular {project-name} deployment.
+
+It may happen that default settings may be set too high (or too low).
+In such case the advice is to adjust this setting for the particular generator which will
+limit the number of exceptions we need to manually adjust resources for.
+====
+
+

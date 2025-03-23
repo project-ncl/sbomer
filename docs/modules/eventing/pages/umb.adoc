@@ -1,0 +1,79 @@
+= Universal Message Bus (UMB)
+
+SBOMer utilizes Universal Message Bus (UMB) in two ways:
+
+* Messages are produced when manifests are generated,
+* Messages are consumed from external services to trigger manifest generation.
+
+== Produced Messages
+
+=== Generation Finished
+
+SBOMer will send messages about finished generations to UMB only if all conditions below are met:
+
+1. A manifest generation was successfull, and
+2. A product information is attached to the manifest.
+
+The second condition means that the xref:processors/redhat-product.adoc[Red Hat product]
+processor was run. Adding this processor is optional. To enable it you need to provide explicitly
+xref:processors/redhat-product.adoc[required configuration] at the generation request time.
+
+NOTE: Majority of generated manifests do not have Red Hat product configuration provided which means
+that no UMB messages will be produced for these manifests, even though these were generated successfully.
+
+All messages are sent to the `/topic/VirtualTopic.eng.pnc.sbom.spike.complete` topic. You can see produced
+message by visiting the link:https://datagrepper.engineering.redhat.com/raw?delta=2592000&topic=/topic/VirtualTopic.eng.pnc.sbom.spike.complete[Datagrepper page].
+
+[WARNING]
+====
+By default Datagrepper shows messages sent in the last days. If you want to see more, you need to provide
+the `delta` parameter (or `start` and `stop` parameters). See link:https://datagrepper.engineering.redhat.com/reference[documentation].
+
+For example link:https://datagrepper.engineering.redhat.com/raw?delta=2592000&topic=/topic/VirtualTopic.eng.pnc.sbom.spike.complete[this link]
+gives you list of all messages sent in the *last 30 days*.
+====
+
+==== Message Schema
+
+Depending on the type of the build the content of the message varies. Current schema definitions
+(in link:https://json-schema.org/[JSON Schema] format) can be
+link:https://github.com/project-ncl/sbomer/tree/main/service/src/main/resources/schemas[found here].
+
+==== Resending Generation Finished Messages
+
+Sometimes it may be handy to have an option to resend the notification to UMB about a particular
+manifest. For this purpose we do expose an endpoint in the xref:api/index.adoc[SBOMer API].
+
+Assuming you have the manifest identifier, you can use curl to request notification resend:
+
+[source,console,subs="attributes+"]
+----
+$ curl -v -X POST {sbomer-url}/api/{sbomer-latest-api-version}/sboms/[SBOM_ID]/notify
+----
+
+== Consumed Messages
+
+Currently SBOMer consumes messages sent by the PNC build system. We are accepting messages
+for two events:
+
+1. A PNC build event.
+2. Deliverables Analyser finished event.
+
+
+=== PNC Build Events
+
+SBOMer accepts all PNC build state change events. After receiving these, SBOMer filters them out
+and finally only *successfully finished persistent builds* are handled. Such events result in
+creating a manifest generation request within SBOMer.
+
+=== Deliverable Analyser Events
+
+Similarly to PNC builds we are handling Deliverable Analyser notifications. We filter such events to capture
+only finished messages. Such events can result in one of following options:
+
+1. Manifest generation request creation, or
+2. Manifest generation request update.
+
+A new generation request creation takes place in case there is no generation request associated with the
+operation identifier received. In case there is such a generation request -- its status will be updated.
+
