@@ -27,6 +27,7 @@ import { useManifests } from './useSboms';
 import { openInNewTab } from '@app/utils/openInNewTab';
 import { ManifestsQueryType } from '@app/types';
 import { useManifestsFilters } from './useManifestsFilters';
+import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
 
 const columnNames = {
   id: 'ID',
@@ -45,7 +46,8 @@ export const ManifestsTable = () => {
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
 
-  const [selectIsOpen, setSelectIsOpen] = React.useState(false);
+  const [selectIsOpen, setSelectIsOpen] = React.useState<boolean>(false);
+  const [selectValue, setSelectValue] = React.useState<ManifestsQueryType>(queryType)
 
   const [isButtonVisible, setButtonVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
 
@@ -78,7 +80,7 @@ export const ManifestsTable = () => {
   };
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setFilters(value as ManifestsQueryType, queryValue, pageIndex, pageSize)
+    setSelectValue(value as ManifestsQueryType)
     setSelectIsOpen(false);
     switch (value) {
       case ManifestsQueryType.NoFilter:
@@ -95,7 +97,7 @@ export const ManifestsTable = () => {
   };
 
   const onSearchCall = () => {
-    setFilters(queryType, searchBarValue, pageIndex, pageSize)
+    setFilters(selectValue, searchBarValue, pageIndex, pageSize)
   }
 
   const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
@@ -109,14 +111,14 @@ export const ManifestsTable = () => {
         } as React.CSSProperties
       }
     >
-      {queryType}
+      {selectValue}
     </MenuToggle>
   );
 
   const select = <Select
     id="single-select"
     isOpen={selectIsOpen}
-    selected={queryType as ManifestsQueryType}
+    selected={selectValue as ManifestsQueryType}
     onSelect={onSelect}
     onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
     toggle={toggle}
@@ -156,6 +158,71 @@ export const ManifestsTable = () => {
     onClick={() => onSearchCall()}>Search</Button>
 
 
+  const table = <>
+    <Table aria-label="Manifests table" variant="compact">
+      <Caption>Latest manifests</Caption>
+      <Thead>
+        <Tr>
+          <Th>{columnNames.id}</Th>
+          <Th>{columnNames.type}</Th>
+          <Th>{columnNames.identifier}</Th>
+          <Th>{columnNames.creationTime}</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {value.map((manifest) => (
+          <Tr
+            key={manifest.id}
+            isClickable
+            onRowClick={() => navigate(`/manifests/${manifest.id}`)}
+            onAuxClick={() => openInNewTab(`/manifests/${manifest.id}`)}
+          >
+            <Td dataLabel={columnNames.id}>
+              <Link to={`/manifests/${manifest.id}`}>
+                <pre>{manifest.id}</pre>
+              </Link>
+            </Td>
+            <Td dataLabel={columnNames.type}>
+              <Label style={{ cursor: 'pointer' }} color="purple">
+                {typeToDescription(manifest.generation)}
+              </Label>
+            </Td>
+            <Td dataLabel={columnNames.identifier}>
+              <Tooltip
+                isContentLeftAligned={true}
+                content={
+                  <div>
+                    <div>
+                      <strong>Purl</strong>
+                    </div>
+                    <div>{manifest.rootPurl}</div>
+                  </div>
+                }
+              >
+                <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.identifier}</span>
+              </Tooltip>
+            </Td>
+            <Td dataLabel={columnNames.creationTime}>
+              <Timestamp date={manifest.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                {timestampToHumanReadable(Date.now() - manifest.creationTime.getTime(), false, 'ago')}
+              </Timestamp>
+            </Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
+    <Pagination
+      itemCount={total}
+      widgetId="manifests-table-pagination"
+      perPage={pageSize}
+      page={pageIndex}
+      variant={PaginationVariant.bottom}
+      onSetPage={onSetPage}
+      onPerPageSelect={onPerPageSelect}
+    />
+  </>
+  const noResults = <NoResultsSection />
+
   return (
     <>
       <Toolbar>
@@ -171,67 +238,7 @@ export const ManifestsTable = () => {
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
-      <Table aria-label="Manifests table" variant="compact">
-        <Caption>Latest manifests</Caption>
-        <Thead>
-          <Tr>
-            <Th>{columnNames.id}</Th>
-            <Th>{columnNames.type}</Th>
-            <Th>{columnNames.identifier}</Th>
-            <Th>{columnNames.creationTime}</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {value.map((manifest) => (
-            <Tr
-              key={manifest.id}
-              isClickable
-              onRowClick={() => navigate(`/manifests/${manifest.id}`)}
-              onAuxClick={() => openInNewTab(`/manifests/${manifest.id}`)}
-            >
-              <Td dataLabel={columnNames.id}>
-                <Link to={`/manifests/${manifest.id}`}>
-                  <pre>{manifest.id}</pre>
-                </Link>
-              </Td>
-              <Td dataLabel={columnNames.type}>
-                <Label style={{ cursor: 'pointer' }} color="purple">
-                  {typeToDescription(manifest.generation)}
-                </Label>
-              </Td>
-              <Td dataLabel={columnNames.identifier}>
-                <Tooltip
-                  isContentLeftAligned={true}
-                  content={
-                    <div>
-                      <div>
-                        <strong>Purl</strong>
-                      </div>
-                      <div>{manifest.rootPurl}</div>
-                    </div>
-                  }
-                >
-                  <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.identifier}</span>
-                </Tooltip>
-              </Td>
-              <Td dataLabel={columnNames.creationTime}>
-                <Timestamp date={manifest.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - manifest.creationTime.getTime(), false, 'ago')}
-                </Timestamp>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-      <Pagination
-        itemCount={total}
-        widgetId="manifests-table-pagination"
-        perPage={pageSize}
-        page={pageIndex}
-        variant={PaginationVariant.bottom}
-        onSetPage={onSetPage}
-        onPerPageSelect={onPerPageSelect}
-      />
+      {total == 0 && noResults || table}
     </>
   );
 };
