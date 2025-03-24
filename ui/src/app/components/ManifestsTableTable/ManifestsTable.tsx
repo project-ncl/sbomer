@@ -46,7 +46,8 @@ export const ManifestsTable = () => {
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
 
-  const [selectIsOpen, setSelectIsOpen] = React.useState(false);
+  const [selectIsOpen, setSelectIsOpen] = React.useState<boolean>(false);
+  const [selectValue, setSelectValue] = React.useState<ManifestsQueryType>(queryType)
 
   const [isButtonVisible, setButtonVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
 
@@ -79,7 +80,7 @@ export const ManifestsTable = () => {
   };
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setFilters(value as ManifestsQueryType, queryValue, pageIndex, pageSize)
+    setSelectValue(value as ManifestsQueryType)
     setSelectIsOpen(false);
     switch (value) {
       case ManifestsQueryType.NoFilter:
@@ -96,7 +97,7 @@ export const ManifestsTable = () => {
   };
 
   const onSearchCall = () => {
-    setFilters(queryType, searchBarValue, pageIndex, pageSize)
+    setFilters(selectValue, searchBarValue, pageIndex, pageSize)
   }
 
   const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
@@ -110,14 +111,14 @@ export const ManifestsTable = () => {
         } as React.CSSProperties
       }
     >
-      {queryType}
+      {selectValue}
     </MenuToggle>
   );
 
   const select = <Select
     id="single-select"
     isOpen={selectIsOpen}
-    selected={queryType as ManifestsQueryType}
+    selected={selectValue as ManifestsQueryType}
     onSelect={onSelect}
     onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
     toggle={toggle}

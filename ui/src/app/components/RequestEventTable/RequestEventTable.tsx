@@ -46,7 +46,8 @@ export const RequestEventTable = () => {
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
 
-  const [selectIsOpen, setSelectIsOpen] = React.useState(false);
+  const [selectIsOpen, setSelectIsOpen] = React.useState<boolean>(false);
+  const [selectValue, setSelectValue] = React.useState<RequestsQueryType>(queryType);
 
   const [isButtonVisible, setButtonVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
 
@@ -77,7 +78,7 @@ export const RequestEventTable = () => {
   };
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setFilters(value as RequestsQueryType, queryValue, pageIndex, pageSize)
+    setSelectValue(value as RequestsQueryType)
     setSelectIsOpen(false);
     switch (value) {
       case RequestsQueryType.NoFilter:
@@ -93,7 +94,7 @@ export const RequestEventTable = () => {
   };
 
   const onSearchCall = () => {
-    setFilters(queryType, searchBarValue, pageIndex, pageSize)
+    setFilters(selectValue, searchBarValue, pageIndex, pageSize)
   }
 
 
@@ -108,7 +109,7 @@ export const RequestEventTable = () => {
         } as React.CSSProperties
       }
     >
-      {queryType}
+      {selectValue}
     </MenuToggle>
   );
 
@@ -116,7 +117,7 @@ export const RequestEventTable = () => {
   const select = <Select
     id="single-select"
     isOpen={selectIsOpen}
-    selected={queryType as RequestsQueryType}
+    selected={selectValue as RequestsQueryType}
     onSelect={onSelect}
     onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
     toggle={toggle}
