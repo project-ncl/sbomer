@@ -249,7 +249,8 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
               <PanelMainBody>
                 <Title headingLevel="h2">Logs</Title>
                 <br />
-                <Logs request={request} />
+                {request.status == "GENERATING" ? <Alert variant="warning" title='Logs are unavailable while generation has status: "In progress"'>
+                </Alert> : <Logs request={request} />}
               </PanelMainBody>
             </PanelMain>
           </Panel>
