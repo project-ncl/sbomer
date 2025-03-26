@@ -28,8 +28,39 @@ public class Constants {
     public static final String SBOMER_GIT_URL = "git@github.com:project-ncl/sbomer.git";
     public static final String SBOMER_WEBSITE = "https://github.com/project-ncl/sbomer";
 
-    public static final String SBOM_RED_HAT_DELIVERABLE_URL = "deliverable-url";
-    public static final String SBOM_RED_HAT_DELIVERABLE_CHECKSUM = "deliverable-checksum";
+    // Introduced as part of SBOMER-236
+    public static final String REDHAT_PROPERTY_NAMESPACE_PREFIX = "redhat:";
+    public static final String CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX = // REDHAT_PROPERTY_NAMESPACE_PREFIX +
+            "sbomer:";
+    public static final String CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
+            + "package:language";
+    public static final String CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
+            + "package:type";
+    public static final String CONTAINER_PROPERTY_LOCATION_PATH_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
+            + "location:0:path";
+    public static final String CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
+            + "metadata:virtualPath";
+    public static final String CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
+            + "image:labels";
+    public static final String CONTAINER_PROPERTY_IMAGE_LABEL_VERSION = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
+            + ":version";
+    public static final String CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
+            + ":release";
+    public static final String CONTAINER_PROPERTY_IMAGE_LABEL_VENDOR = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
+            + ":vendor";
+    public static final String CONTAINER_PROPERTY_IMAGE_LABEL_MANTAINER = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
+            + ":maintainer";
+    public static final String CONTAINER_PROPERTY_IMAGE_LABEL_NAME = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX + ":name";
+    public static final String CONTAINER_PROPERTY_IMAGE_LABEL_COMPONENT = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
+            + ":com.redhat.component";
+    public static final String CONTAINER_PROPERTY_IMAGE_LABEL_ARCHITECTURE = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
+            + ":architecture";
+    public static final String CONTAINER_PROPERTY_ADVISORY_ID = REDHAT_PROPERTY_NAMESPACE_PREFIX + "advisory_id";
+
+    public static final String SBOM_RED_HAT_DELIVERABLE_URL = REDHAT_PROPERTY_NAMESPACE_PREFIX + "deliverable-url";
+    public static final String SBOM_RED_HAT_DELIVERABLE_CHECKSUM = REDHAT_PROPERTY_NAMESPACE_PREFIX
+            + "deliverable-checksum";
+
     public static final String SBOM_RED_HAT_PNC_OPERATION_ID = "pnc-operation-id";
     public static final String SBOM_RED_HAT_PNC_BUILD_ID = "pnc-build-id";
     public static final String SBOM_RED_HAT_PNC_ARTIFACT_ID = "pnc-artifact-id";

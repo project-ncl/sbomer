@@ -296,7 +296,7 @@ class SyftImageAdjusterTest {
                 .get(0)
                 .getProperties()
                 .stream()
-                .filter(property -> "sbomer:image:labels:vendor".equals(property.getName()))
+                .filter(property -> Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VENDOR.equals(property.getName()))
                 .findFirst();
         assertTrue(goodVendor.isPresent());
         assertEquals("Red Hat", goodVendor.get().getValue());

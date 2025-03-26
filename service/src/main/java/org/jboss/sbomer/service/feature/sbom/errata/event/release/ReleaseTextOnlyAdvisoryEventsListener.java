@@ -17,6 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingMetadataSupplier;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingSerialNumber;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -207,8 +211,14 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
             productVersionBom.getDependencies().get(0).addProvides(new Dependency(sbomRootComponent.getPurl()));
         }
 
-        SbomUtils.addMissingMetadataSupplier(productVersionBom);
-        SbomUtils.addMissingSerialNumber(productVersionBom);
+        // Add the AdvisoryId property
+        addPropertyIfMissing(
+                productVersionBom.getMetadata(),
+                Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                String.valueOf(erratum.getDetails().get().getId()));
+
+        addMissingMetadataSupplier(productVersionBom);
+        addMissingSerialNumber(productVersionBom);
 
         SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
         Sbom sbom = saveReleaseManifestForTextOnlyAdvisories(
@@ -340,6 +350,12 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
                 Sbom buildManifest = sbomService.get(sbom.getId());
                 Bom manifestBom = SbomUtils.fromJsonNode(buildManifest.getSbom());
                 SbomUtils.addMissingMetadataSupplier(manifestBom);
+
+                // Add the AdvisoryId property
+                addPropertyIfMissing(
+                        manifestBom.getMetadata(),
+                        Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                        String.valueOf(erratum.getDetails().get().getId()));
 
                 Component metadataComponent = manifestBom.getMetadata() != null
                         ? manifestBom.getMetadata().getComponent()
