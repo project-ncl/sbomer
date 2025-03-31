@@ -27,6 +27,7 @@ import { useRequestEvents } from './useRequestEvents';
 import { openInNewTab } from '@app/utils/openInNewTab';
 import { RequestsQueryType } from '@app/types';
 import { useRequestEventsFilters } from './useRequestEventsFilters';
+import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
 
 const columnNames = {
   id: 'ID',
@@ -45,7 +46,8 @@ export const RequestEventTable = () => {
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
 
-  const [selectIsOpen, setSelectIsOpen] = React.useState(false);
+  const [selectIsOpen, setSelectIsOpen] = React.useState<boolean>(false);
+  const [selectValue, setSelectValue] = React.useState<RequestsQueryType>(queryType);
 
   const [isButtonVisible, setButtonVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
 
@@ -76,7 +78,7 @@ export const RequestEventTable = () => {
   };
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setFilters(value as RequestsQueryType, queryValue, pageIndex, pageSize)
+    setSelectValue(value as RequestsQueryType)
     setSelectIsOpen(false);
     switch (value) {
       case RequestsQueryType.NoFilter:
@@ -92,7 +94,7 @@ export const RequestEventTable = () => {
   };
 
   const onSearchCall = () => {
-    setFilters(queryType, searchBarValue, pageIndex, pageSize)
+    setFilters(selectValue, searchBarValue, pageIndex, pageSize)
   }
 
 
@@ -107,7 +109,7 @@ export const RequestEventTable = () => {
         } as React.CSSProperties
       }
     >
-      {queryType}
+      {selectValue}
     </MenuToggle>
   );
 
@@ -115,7 +117,7 @@ export const RequestEventTable = () => {
   const select = <Select
     id="single-select"
     isOpen={selectIsOpen}
-    selected={queryType as RequestsQueryType}
+    selected={selectValue as RequestsQueryType}
     onSelect={onSelect}
     onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
     toggle={toggle}
@@ -156,6 +158,84 @@ export const RequestEventTable = () => {
     variant='primary'
     onClick={() => onSearchCall()}>Search</Button>
 
+  const table = <>
+    <Table aria-label="Request events table" variant="compact">
+      <Caption>Latest request events</Caption>
+      <Thead>
+        <Tr>
+          <Th>{columnNames.id}</Th>
+          <Th>{columnNames.eventStatus}</Th>
+          <Th>{columnNames.eventType}</Th>
+          <Th>{columnNames.requestConfig}</Th>
+          <Th>{columnNames.receivalTime}</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {value.map((requestEvent) => (
+          <Tr
+            key={requestEvent.id}
+            isClickable
+            onRowClick={() => navigate(`/requestevents/${requestEvent.id}`)}
+            onAuxClick={() => openInNewTab(`/requestevents/${requestEvent.id}`)}
+          >
+            <Td dataLabel={columnNames.id}>
+              <Link to={`/requestevents/${requestEvent.id}`}>
+                <pre>{requestEvent.id}</pre>
+              </Link>
+            </Td>
+            <Td dataLabel={columnNames.eventStatus}>
+              <Tooltip
+                isContentLeftAligned={true}
+                content={
+                  <div>
+                    <div>
+                      <strong>{requestEvent.eventStatus}</strong>
+                    </div>
+                    <div>{requestEvent.reason}</div>
+                  </div>
+                }
+              >
+                <Label style={{ cursor: 'pointer' }} color={requestEventStatusToColor(requestEvent.eventStatus)}>
+                  {requestEventStatusToDescription(requestEvent.eventStatus)}
+                </Label>
+
+                {/* <span className="pf-v5-c-timestamp pf-m-help-text">{requestEvent.eventStatus}</span> */}
+              </Tooltip>
+            </Td>
+            <Td dataLabel={columnNames.eventType}>
+              <Label style={{ cursor: 'pointer' }} color="yellow">
+                {requestEvent.eventType}
+              </Label>
+            </Td>
+            <Td dataLabel={columnNames.requestConfig}>
+              {requestEvent.requestConfigTypeName ? (
+                <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
+                  <span className="pf-v5-c-timestamp pf-m-help-text">
+                    {requestEvent.requestConfigTypeName}={requestEvent.requestConfigTypeValue}
+                  </span>
+                </Tooltip>
+              ) : null}
+            </Td>
+            <Td dataLabel={columnNames.receivalTime}>
+              <Timestamp date={requestEvent.receivalTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                {timestampToHumanReadable(Date.now() - requestEvent.receivalTime.getTime(), false, 'ago')}
+              </Timestamp>
+            </Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
+    <Pagination
+      itemCount={total}
+      widgetId="request-table-pagination"
+      perPage={pageSize}
+      page={pageIndex}
+      variant={PaginationVariant.bottom}
+      onSetPage={onSetPage}
+      onPerPageSelect={onPerPageSelect}
+    />
+  </>
+  const noResults = <NoResultsSection />
 
   return (
     <>
@@ -172,81 +252,7 @@ export const RequestEventTable = () => {
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
-      <Table aria-label="Request events table" variant="compact">
-        <Caption>Latest request events</Caption>
-        <Thead>
-          <Tr>
-            <Th>{columnNames.id}</Th>
-            <Th>{columnNames.eventStatus}</Th>
-            <Th>{columnNames.eventType}</Th>
-            <Th>{columnNames.requestConfig}</Th>
-            <Th>{columnNames.receivalTime}</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {value.map((requestEvent) => (
-            <Tr
-              key={requestEvent.id}
-              isClickable
-              onRowClick={() => navigate(`/requestevents/${requestEvent.id}`)}
-              onAuxClick={() => openInNewTab(`/requestevents/${requestEvent.id}`)}
-            >
-              <Td dataLabel={columnNames.id}>
-                <Link to={`/requestevents/${requestEvent.id}`}>
-                  <pre>{requestEvent.id}</pre>
-                </Link>
-              </Td>
-              <Td dataLabel={columnNames.eventStatus}>
-                <Tooltip
-                  isContentLeftAligned={true}
-                  content={
-                    <div>
-                      <div>
-                        <strong>{requestEvent.eventStatus}</strong>
-                      </div>
-                      <div>{requestEvent.reason}</div>
-                    </div>
-                  }
-                >
-                  <Label style={{ cursor: 'pointer' }} color={requestEventStatusToColor(requestEvent.eventStatus)}>
-                    {requestEventStatusToDescription(requestEvent.eventStatus)}
-                  </Label>
-
-                  {/* <span className="pf-v5-c-timestamp pf-m-help-text">{requestEvent.eventStatus}</span> */}
-                </Tooltip>
-              </Td>
-              <Td dataLabel={columnNames.eventType}>
-                <Label style={{ cursor: 'pointer' }} color="yellow">
-                  {requestEvent.eventType}
-                </Label>
-              </Td>
-              <Td dataLabel={columnNames.requestConfig}>
-                {requestEvent.requestConfigTypeName ? (
-                  <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
-                    <span className="pf-v5-c-timestamp pf-m-help-text">
-                      {requestEvent.requestConfigTypeName}={requestEvent.requestConfigTypeValue}
-                    </span>
-                  </Tooltip>
-                ) : null}
-              </Td>
-              <Td dataLabel={columnNames.receivalTime}>
-                <Timestamp date={requestEvent.receivalTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - requestEvent.receivalTime.getTime(), false, 'ago')}
-                </Timestamp>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-      <Pagination
-        itemCount={total}
-        widgetId="request-table-pagination"
-        perPage={pageSize}
-        page={pageIndex}
-        variant={PaginationVariant.bottom}
-        onSetPage={onSetPage}
-        onPerPageSelect={onPerPageSelect}
-      />
+      {total == 0 && noResults || table}
     </>
   );
 };
