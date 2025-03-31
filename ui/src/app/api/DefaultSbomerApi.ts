@@ -91,7 +91,7 @@ export class DefaultSbomerApi implements SbomerApi {
     }
 
     const isQueryPrefixEmpty = queryPrefix == '';
-    const queryStringValue = isQueryPrefixEmpty ? '' : `${queryPrefix}=eq='${query}'`;
+    const queryStringValue = isQueryPrefixEmpty ? '' : `${queryPrefix}=like='%${query}%'`;
     const queryFullString = `${isQueryPrefixEmpty ? '' : 'query='}${encodeURIComponent(queryStringValue)}${isQueryPrefixEmpty ? '' : '&'}`;
 
     const response = await fetch(
