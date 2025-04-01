@@ -18,6 +18,7 @@ import {
   MenuToggleElement,
   SearchInput,
   Button,
+  Spinner,
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
@@ -61,17 +62,6 @@ export const RequestEventTable = () => {
     setFilters(queryType, queryValue, pageIndex, newPerPage)
   };
 
-  if (error) {
-    return <ErrorSection />;
-  }
-
-  if (loading) {
-    return <Skeleton screenreaderText="Loading data..." />;
-  }
-
-  if (!value) {
-    return null;
-  }
 
   const onToggleClick = () => {
     setSelectIsOpen(!selectIsOpen);
@@ -171,7 +161,7 @@ export const RequestEventTable = () => {
         </Tr>
       </Thead>
       <Tbody>
-        {value.map((requestEvent) => (
+        {value && value.map((requestEvent) => (
           <Tr
             key={requestEvent.id}
             isClickable
@@ -236,23 +226,34 @@ export const RequestEventTable = () => {
     />
   </>
   const noResults = <NoResultsSection />
+  const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
+  const errorSection = <ErrorSection />
+
+  const filtersBar = <>
+    <Toolbar>
+      <ToolbarContent>
+        <ToolbarItem>
+          {select}
+        </ToolbarItem>
+        <ToolbarItem>
+          {searchBarVisible && searchBar}
+        </ToolbarItem>
+        <ToolbarItem>
+          {isButtonVisible && searchButton}
+        </ToolbarItem>
+      </ToolbarContent>
+    </Toolbar>
+  </>
+
+  const tableArea =
+    error ? errorSection :
+      loading ? loadingSkeleton :
+        total === 0 ? noResults : table;
 
   return (
     <>
-      <Toolbar>
-        <ToolbarContent>
-          <ToolbarItem>
-            {select}
-          </ToolbarItem>
-          <ToolbarItem>
-            {searchBarVisible && searchBar}
-          </ToolbarItem>
-          <ToolbarItem>
-            {isButtonVisible && searchButton}
-          </ToolbarItem>
-        </ToolbarContent>
-      </Toolbar>
-      {total == 0 && noResults || table}
+      {filtersBar}
+      {tableArea}
     </>
   );
 };
