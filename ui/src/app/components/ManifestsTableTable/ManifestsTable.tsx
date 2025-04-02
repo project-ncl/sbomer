@@ -62,19 +62,6 @@ export const ManifestsTable = () => {
     setFilters(queryType, queryValue, pageIndex, newPerPage)
   };
 
-  if (error) {
-    return <ErrorSection />;
-  }
-
-  if (loading) {
-    return <Skeleton screenreaderText="Loading data..." />;
-  }
-
-  if (!value) {
-    return null;
-  }
-
-
   const onToggleClick = () => {
     setSelectIsOpen(!selectIsOpen);
   };
@@ -170,7 +157,7 @@ export const ManifestsTable = () => {
         </Tr>
       </Thead>
       <Tbody>
-        {value.map((manifest) => (
+        {value && value.map((manifest) => (
           <Tr
             key={manifest.id}
             isClickable
@@ -222,23 +209,35 @@ export const ManifestsTable = () => {
     />
   </>
   const noResults = <NoResultsSection />
+  const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
+  const errorSection = <ErrorSection />
 
-  return (
-    <>
-      <Toolbar>
-        <ToolbarContent>
-          <ToolbarItem>
-            {select}
-          </ToolbarItem>
-          <ToolbarItem>
-            {searchBarVisible && searchBar}
-          </ToolbarItem>
-          <ToolbarItem>
-            {isButtonVisible && searchButton}
-          </ToolbarItem>
-        </ToolbarContent>
-      </Toolbar>
-      {total == 0 && noResults || table}
-    </>
-  );
+  const filtersBar = <>
+    <Toolbar>
+      <ToolbarContent>
+        <ToolbarItem>
+          {select}
+        </ToolbarItem>
+        <ToolbarItem>
+          {searchBarVisible && searchBar}
+        </ToolbarItem>
+        <ToolbarItem>
+          {isButtonVisible && searchButton}
+        </ToolbarItem>
+      </ToolbarContent>
+    </Toolbar>
+  </>
+
+  const tableArea =
+    error ? errorSection :
+      loading ? loadingSkeleton :
+        total === 0 ? noResults : table;
+
+
+  return <>
+    {filtersBar}
+    {tableArea}
+  </>
+
+
 };
