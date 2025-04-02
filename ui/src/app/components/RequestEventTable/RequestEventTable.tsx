@@ -94,7 +94,7 @@ export const RequestEventTable = () => {
   };
 
   const onSearchCall = () => {
-    setFilters(selectValue, searchBarValue, pageIndex, pageSize)
+    setFilters(selectValue, searchBarValue, 1, pageSize)
   }
 
 

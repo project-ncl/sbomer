@@ -97,7 +97,7 @@ export const ManifestsTable = () => {
   };
 
   const onSearchCall = () => {
-    setFilters(selectValue, searchBarValue, pageIndex, pageSize)
+    setFilters(selectValue, searchBarValue, 1, pageSize)
   }
 
   const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (

@@ -90,9 +90,9 @@ export class DefaultSbomerApi implements SbomerApi {
         queryPrefix = '';
     }
 
-    const isQueryPrefixEmpty = queryPrefix == '';
-    const queryStringValue = isQueryPrefixEmpty ? '' : `${queryPrefix}=like='%${query}%'`;
-    const queryFullString = `${isQueryPrefixEmpty ? '' : 'query='}${encodeURIComponent(queryStringValue)}${isQueryPrefixEmpty ? '' : '&'}`;
+    const isQueryInputInvalid = !queryPrefix || !query ;
+    const queryStringValue = isQueryInputInvalid ? '' : `${queryPrefix}=like='%${query}%'`;
+    const queryFullString = `${isQueryInputInvalid ? '' : 'query='}${encodeURIComponent(queryStringValue)}${isQueryInputInvalid ? '' : '&'}`;
 
     const response = await fetch(
       `${this.baseUrl}/api/v1beta1/manifests?${queryFullString}pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
