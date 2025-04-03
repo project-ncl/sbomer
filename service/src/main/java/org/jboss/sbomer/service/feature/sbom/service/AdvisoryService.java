@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -610,6 +611,7 @@ public class AdvisoryService {
 
         log.debug("Creating build manifests for RPM builds: {}", buildDetails);
 
+        Set<String> processedNvrs = new HashSet<>();
         Collection<SbomGenerationRequest> sbomRequests = new ArrayList<>();
 
         buildDetails.forEach((pVersion, items) -> {
@@ -624,14 +626,17 @@ public class AdvisoryService {
                 return;
             }
 
-            Long pVersionId = findErrataProductVersionIdByName(product, pVersion.getName());
-
             items.forEach(item -> {
+                if (!processedNvrs.add(item.getNvr())) {
+                    log.debug(
+                            "Skipping duplicate NVR: '{}' because already being built for another Product Version",
+                            item.getNvr());
+                    return; // Already processed
+                }
+
                 BrewRPMConfig config = BrewRPMConfig.builder()
                         .withAdvisoryId(details.getId())
                         .withAdvisory(details.getFulladvisory())
-                        .withProductVersionId(pVersionId)
-                        .withProductVersion(pVersion.getName())
                         .withBrewBuildId(item.getId())
                         .withBrewBuildNVR(item.getNvr())
                         .build();
