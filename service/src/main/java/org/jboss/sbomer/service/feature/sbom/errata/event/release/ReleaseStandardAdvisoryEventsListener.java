@@ -828,6 +828,8 @@ public class ReleaseStandardAdvisoryEventsListener {
         log.debug("Calculated evidence purls: {}", evidencePurls);
         String preferredRebuiltPurl = evidencePurls.stream().max(Comparator.comparingInt(String::length)).orElse(null);
         log.debug("Preferred rebuilt purl: {}", preferredRebuiltPurl);
+        // The preferredRebuiltPurl is null if the component.getPurl() is not valid
+        // or it does not contain any "arch" qualifier
         if (preferredRebuiltPurl != null) {
             component.setPurl(preferredRebuiltPurl);
             SbomUtils.setEvidenceIdentities(component, evidencePurls, Field.PURL);
