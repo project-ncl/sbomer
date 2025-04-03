@@ -510,8 +510,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                         .filter(manifest -> manifest.generation().id().equals(generationId))
                         .toList();
 
-                Map<String, String> originalToRebuiltPurl = new HashMap<>();
-
                 for (V1Beta1RequestManifestRecord buildManifestRecord : buildManifests) {
                     log.debug(
                             "Updating build manifest '{}' for release event {}...",
@@ -538,10 +536,10 @@ public class ReleaseStandardAdvisoryEventsListener {
                             ? manifestBom.getMetadata().getComponent()
                             : null;
                     if (metadataComponent != null) {
-                        adjustComponent(metadataComponent, generationCDNs, manifestArches, originalToRebuiltPurl);
+                        adjustComponent(metadataComponent, generationCDNs, manifestArches);
                     }
                     for (Component component : manifestBom.getComponents()) {
-                        adjustComponent(component, generationCDNs, manifestArches, originalToRebuiltPurl);
+                        adjustComponent(component, generationCDNs, manifestArches);
                     }
 
                     // 2.7 - Update the original Sbom
@@ -846,17 +844,16 @@ public class ReleaseStandardAdvisoryEventsListener {
     private void adjustComponent(
             Component component,
             Collection<ErrataCDNRepoNormalized> generationCDNs,
-            Set<String> manifestArches,
-            Map<String, String> originalToRebuiltPurl) {
+            Set<String> manifestArches) {
 
         Set<String> evidencePurls = AdvisoryEventUtils.createPurls(component.getPurl(), generationCDNs, manifestArches);
         log.debug("Calculated evidence purls: {}", evidencePurls);
         String preferredRebuiltPurl = evidencePurls.stream().max(Comparator.comparingInt(String::length)).orElse(null);
         log.debug("Preferred rebuilt purl: {}", preferredRebuiltPurl);
-        originalToRebuiltPurl.put(component.getPurl(), preferredRebuiltPurl);
-
-        component.setPurl(preferredRebuiltPurl);
-        SbomUtils.setEvidenceIdentities(component, evidencePurls, Field.PURL);
+        if (preferredRebuiltPurl != null) {
+            component.setPurl(preferredRebuiltPurl);
+            SbomUtils.setEvidenceIdentities(component, evidencePurls, Field.PURL);
+        }
     }
 
     private V1Beta1RequestManifestRecord findImageIndexManifest(
