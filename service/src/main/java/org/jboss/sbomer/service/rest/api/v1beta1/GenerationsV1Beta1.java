@@ -141,7 +141,7 @@ public class GenerationsV1Beta1 {
                             @ExampleObject(
                                     name = "Errata Tool advisory",
                                     description = "Requests manifest generation for the 12345 advisory",
-                                    value = "{\"type\": \"advisory\", \"advisoryId\": 12345}"),
+                                    value = "{\"type\": \"errata-advisory\", \"advisoryId\": 12345}"),
                             @ExampleObject(
                                     name = "Container image",
                                     description = "Requests manifest generation for a container image with iodentifier: registry.access.redhat.com/ubi9/ubi-micro:9.4",
