@@ -28,12 +28,7 @@ import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Schema(name = "V1BaseBeta1RequestRecord")
-public record V1BaseBeta1RequestRecord (
-    String id,
-    Instant receivalTime,
-    RequestEventType eventType,
-    RequestEventStatus eventStatus,
-    String reason,
-    @Schema(implementation = Map.class) RequestConfig requestConfig,
-    @Schema(implementation = Map.class) JsonNode event) {
+public record V1BaseBeta1RequestRecord(String id, Instant receivalTime, RequestEventType eventType,
+        RequestEventStatus eventStatus, String reason, @Schema(implementation = Map.class) RequestConfig requestConfig,
+        @Schema(implementation = Map.class) JsonNode event) {
 }

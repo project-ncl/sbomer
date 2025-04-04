@@ -214,7 +214,7 @@
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
-        <version>2.25.0</version>
+        <version>2.26.0</version>
         <executions>
           <execution>
             <id>java-format</id>
@@ -249,6 +249,7 @@
               <header>${maven.multiModuleProjectDirectory}/.license-header.txt</header>
               <excludes>
                 <exclude>manifest*.yaml</exclude>
+                <exclude>ui/dist/**</exclude>
                 <exclude>.ci/**</exclude>
                 <exclude>.gitlab-ci.yml</exclude>
                 <exclude>.github/**</exclude>

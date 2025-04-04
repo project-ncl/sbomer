@@ -20,19 +20,11 @@ package org.jboss.sbomer.core.dto.v1beta1;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(name = "V1Beta1StatsRecord")
-public record V1Beta1StatsRecord(
-        V1Beta1StatsMessagingRecord messaging,
-        V1Beta1StatsResourceRecord resources,
-        V1Beta1StatsDeploymentRecord deployment,
-        long uptimeMillis,
-        String uptime,
-        String version,
-        String release,
-        String appEnv,
-        String hostname) {
+public record V1Beta1StatsRecord(V1Beta1StatsMessagingRecord messaging, V1Beta1StatsResourceRecord resources,
+        V1Beta1StatsDeploymentRecord deployment, long uptimeMillis, String uptime, String version, String release,
+        String appEnv, String hostname) {
 
-    public record V1Beta1StatsResourceRecord(
-            V1Beta1StatsResourceManifestsRecord manifests,
+    public record V1Beta1StatsResourceRecord(V1Beta1StatsResourceManifestsRecord manifests,
             V1Beta1StatsResourceGenerationsRecord generations) {
     }
 
@@ -45,10 +37,8 @@ public record V1Beta1StatsRecord(
     public record V1Beta1StatsDeploymentRecord(String type, String target, String zone) {
     }
 
-    public record V1Beta1StatsMessagingRecord(
-            V1Beta1StatsMessagingPncConsumerRecord pncConsumer,
-            V1Beta1StatsMessagingErrataConsumerRecord errataConsumer,
-            V1Beta1StatsMessagingProducerRecord producer) {
+    public record V1Beta1StatsMessagingRecord(V1Beta1StatsMessagingPncConsumerRecord pncConsumer,
+            V1Beta1StatsMessagingErrataConsumerRecord errataConsumer, V1Beta1StatsMessagingProducerRecord producer) {
     }
 
     public record V1Beta1StatsMessagingPncConsumerRecord(long received, long processed, long skipped) {
