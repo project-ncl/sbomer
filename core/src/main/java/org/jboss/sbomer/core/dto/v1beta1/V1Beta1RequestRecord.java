@@ -18,7 +18,9 @@
 package org.jboss.sbomer.core.dto.v1beta1;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -32,4 +34,31 @@ import com.fasterxml.jackson.databind.JsonNode;
 public record V1Beta1RequestRecord(String id, Instant receivalTime, RequestEventType eventType,
         RequestEventStatus eventStatus, String reason, @Schema(implementation = Map.class) RequestConfig requestConfig,
         @Schema(implementation = Map.class) JsonNode event, Collection<V1Beta1RequestManifestRecord> manifests) {
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("V1Beta1RequestRecord[");
+        List<String> parts = new ArrayList<>();
+
+        if (id != null)
+            parts.add("id=" + id);
+        if (receivalTime != null)
+            parts.add("receivalTime=" + receivalTime);
+        if (eventType != null)
+            parts.add("eventType=" + eventType);
+        if (eventStatus != null)
+            parts.add("eventStatus=" + eventStatus);
+        if (reason != null)
+            parts.add("reason=" + reason);
+        if (requestConfig != null)
+            parts.add("requestConfig=" + requestConfig);
+        if (event != null)
+            parts.add("event=" + event);
+        if (manifests != null && !manifests.isEmpty())
+            parts.add("manifests=" + manifests);
+
+        sb.append(String.join(", ", parts));
+        sb.append("]");
+        return sb.toString();
+    }
 }

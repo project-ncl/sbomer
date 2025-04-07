@@ -34,11 +34,13 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.ImageRequestConfig;
 import org.jboss.sbomer.core.config.request.PncAnalysisRequestConfig;
@@ -340,7 +342,10 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
             PncBuildRequestConfig.TYPE_NAME,
             PncBuildRequestConfig.class);
 
-    public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter) {
+    private static final String FIND_GENERATION_REQUEST_MANIFESTS_NATIVE_QUERY = "SELECT re.id AS request_id, re.receival_time AS receival_time, re.event_type AS event_type, re.event_status AS event_status, re.reason AS reason, re.request_config AS request_config, re.event AS event, s.id AS sbom_id, s.identifier AS sbom_identifier, s.root_purl AS sbom_root_purl, s.creation_time AS sbom_creation_time, s.config_index AS sbom_config_index, s.status_msg AS sbom_status_msg, sgr.id AS generation_request_id, sgr.identifier AS generation_request_identifier, sgr.config AS generation_request_config, sgr.type AS generation_request_type, sgr.creation_time AS generation_request_creation_time, sgr.status AS generation_request_status, sgr.result AS generation_request_result, sgr.reason AS generation_request_reason FROM request re LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id LEFT JOIN sbom s ON sgr.id = s.generationrequest_id";
+    private static final String FIND_GENERATION_REQUEST_MANIFESTS_NATIVE_MINIMIZED_QUERY = "SELECT re.id AS request_id, re.receival_time AS receival_time, re.event_status AS event_status, s.id AS sbom_id, s.root_purl AS sbom_root_purl, sgr.id AS generation_request_id, sgr.identifier AS generation_request_identifier, sgr.config AS generation_request_config, sgr.type AS generation_request_type FROM request re LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id LEFT JOIN sbom s ON sgr.id = s.generationrequest_id";
+
+    public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter, boolean minimized) {
         if (filter == null || filter.isBlank()) {
             throw new ClientException("Filter cannot be null or empty.");
         }
@@ -358,38 +363,16 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         log.debug("Natively searching records for type '{}' and value '{}'", typeKey, typeValue);
 
         // Build the native SQL query
-        StringBuilder sb = new StringBuilder().append("SELECT ")
-                .append("re.id AS request_id, ")
-                .append("re.receival_time AS receival_time, ")
-                .append("re.event_type AS event_type, ")
-                .append("re.event_status AS event_status, ")
-                .append("re.reason AS reason, ")
-                .append("re.request_config AS request_config, ")
-                .append("re.event AS event, ")
-                .append("s.id AS sbom_id, ")
-                .append("s.identifier AS sbom_identifier, ")
-                .append("s.root_purl AS sbom_root_purl, ")
-                .append("s.creation_time AS sbom_creation_time, ")
-                .append("s.config_index AS sbom_config_index, ")
-                .append("s.status_msg AS sbom_status_msg, ")
-                .append("sgr.id AS generation_request_id, ")
-                .append("sgr.identifier AS generation_request_identifier, ")
-                .append("sgr.config AS generation_request_config, ")
-                .append("sgr.type AS generation_request_type, ")
-                .append("sgr.creation_time AS generation_request_creation_time, ")
-                .append("sgr.status AS generation_request_status, ")
-                .append("sgr.result AS generation_request_result, ")
-                .append("sgr.reason AS generation_request_reason ")
-                .append("FROM request re ")
-                .append("LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id ")
-                .append("LEFT JOIN sbom s ON sgr.id = s.generationrequest_id ");
+        StringBuilder sb = new StringBuilder().append(
+                minimized ? FIND_GENERATION_REQUEST_MANIFESTS_NATIVE_MINIMIZED_QUERY
+                        : FIND_GENERATION_REQUEST_MANIFESTS_NATIVE_QUERY);
 
         Map<String, Object> params = filterAndBuildQueryParams(sb, typeKey, typeValue);
         Query query = getEntityManager().createNativeQuery(sb.toString());
         params.forEach(query::setParameter);
 
         // Execute the query and fetch results
-        return aggregateResults(query.getResultList());
+        return aggregateResults(query.getResultList(), minimized);
     }
 
     private Map<String, Object> filterAndBuildQueryParams(StringBuilder sb, String typeKey, String typeValue) {
@@ -414,71 +397,94 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         return Map.of(REQUEST_CONFIG_TYPE, typeKey, identifierKey, typeValue);
     }
 
-    private List<V1Beta1RequestRecord> aggregateResults(List<Object[]> results) {
-
+    private List<V1Beta1RequestRecord> aggregateResults(List<Object[]> results, boolean minimized) {
         // Aggregate results into a Map for grouping by RequestEvent
         Map<String, V1Beta1RequestRecord> aggregatedResults = new LinkedHashMap<>();
 
         results.forEach(row -> {
-            String requestId = (String) row[0];
-            Instant receivalTime = convertFromTimestamp(row[1]);
-            RequestEventType eventType = RequestEventType.valueOf((String) row[2]);
-            RequestEventStatus eventStatus = RequestEventStatus.valueOf((String) row[3]);
-            String reason = (String) row[4];
-            RequestConfig requestConfig = RequestConfig.fromString((String) row[5], RequestConfig.class);
-            JsonNode event = SbomUtils.toJsonNode((String) row[6]);
-            String sbomId = (String) row[7];
-
-            if (sbomId != null) {
-                V1Beta1RequestManifestRecord manifest = new V1Beta1RequestManifestRecord(
-                        sbomId,
-                        (String) row[8],
-                        (String) row[9],
-                        convertFromTimestamp(row[10]),
-                        (Integer) row[11],
-                        (String) row[12],
-                        new V1Beta1GenerationRecord(
-                                (String) row[13],
-                                (String) row[14],
-                                Config.fromString((String) row[15]),
-                                (String) row[16],
-                                convertFromTimestamp(row[17]),
-                                (String) row[18],
-                                (String) row[19],
-                                (String) row[20]));
-
-                aggregatedResults
-                        .computeIfAbsent(
-                                requestId,
-                                id -> new V1Beta1RequestRecord(
-                                        id,
-                                        receivalTime,
-                                        eventType,
-                                        eventStatus,
-                                        reason,
-                                        requestConfig,
-                                        event,
-                                        new ArrayList<>()))
-                        .manifests()
-                        .add(manifest);
+            if (minimized) {
+                handleMinimizedRow(row, aggregatedResults);
             } else {
-                aggregatedResults.computeIfAbsent(
-                        requestId,
-                        id -> new V1Beta1RequestRecord(
-                                id,
-                                receivalTime,
-                                eventType,
-                                eventStatus,
-                                reason,
-                                requestConfig,
-                                event,
-                                new ArrayList<>()));
+                handleFullRow(row, aggregatedResults);
             }
         });
 
         return aggregatedResults.values()
                 .stream()
-                .sorted((record1, record2) -> record2.receivalTime().compareTo(record1.receivalTime()))
+                .sorted(Comparator.comparing(V1Beta1RequestRecord::receivalTime).reversed())
                 .toList();
     }
+
+    private void handleFullRow(Object[] row, Map<String, V1Beta1RequestRecord> aggregatedResults) {
+        String sbomId = (String) row[7];
+
+        V1Beta1RequestRecord requestRecord = aggregatedResults.computeIfAbsent(
+                (String) row[0],
+                id -> new V1Beta1RequestRecord(
+                        id,
+                        convertFromTimestamp(row[1]),
+                        RequestEventType.valueOf((String) row[2]),
+                        RequestEventStatus.valueOf((String) row[3]),
+                        (String) row[4],
+                        RequestConfig.fromString((String) row[5], RequestConfig.class),
+                        SbomUtils.toJsonNode((String) row[6]),
+                        new ArrayList<>()));
+
+        if (sbomId != null) {
+            V1Beta1RequestManifestRecord manifest = new V1Beta1RequestManifestRecord(
+                    sbomId,
+                    (String) row[8],
+                    (String) row[9],
+                    convertFromTimestamp(row[10]),
+                    (Integer) row[11],
+                    (String) row[12],
+                    new V1Beta1GenerationRecord(
+                            (String) row[13],
+                            (String) row[14],
+                            Config.fromString((String) row[15]),
+                            (String) row[16],
+                            convertFromTimestamp(row[17]),
+                            (String) row[18],
+                            (String) row[19],
+                            (String) row[20]));
+            requestRecord.manifests().add(manifest);
+        }
+    }
+
+    private void handleMinimizedRow(Object[] row, Map<String, V1Beta1RequestRecord> aggregatedResults) {
+        String sbomId = (String) row[3];
+
+        V1Beta1RequestRecord requestRecord = aggregatedResults.computeIfAbsent(
+                (String) row[0],
+                id -> new V1Beta1RequestRecord(
+                        id,
+                        convertFromTimestamp(row[1]),
+                        null,
+                        RequestEventStatus.valueOf((String) row[2]),
+                        null,
+                        null,
+                        null,
+                        new ArrayList<>()));
+
+        if (sbomId != null) {
+            V1Beta1RequestManifestRecord manifest = new V1Beta1RequestManifestRecord(
+                    sbomId,
+                    null,
+                    (String) row[4],
+                    null,
+                    null,
+                    null,
+                    new V1Beta1GenerationRecord(
+                            (String) row[5],
+                            (String) row[6],
+                            Config.fromString((String) row[7]),
+                            (String) row[8],
+                            null,
+                            null,
+                            null,
+                            null));
+            requestRecord.manifests().add(manifest);
+        }
+    }
+
 }

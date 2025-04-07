@@ -128,7 +128,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
                 // If the notes contain a "deliverables" field, search the latest successful generations triggered by
                 // the request event
                 V1Beta1RequestRecord advisoryManifestsRecord = sbomService
-                        .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
+                        .searchLastSuccessfulAdvisoryBuildRequestRecord(requestEvent.getId(), config.getAdvisoryId());
                 manifestsPurls = advisoryManifestsRecord.manifests()
                         .stream()
                         .map(V1Beta1RequestManifestRecord::rootPurl)

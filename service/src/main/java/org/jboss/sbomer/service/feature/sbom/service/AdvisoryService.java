@@ -292,7 +292,7 @@ public class AdvisoryService {
                 log.debug(
                         "Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}",
                         erratum.getDetails().get().getId());
-                successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryRequestRecord(
+                successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryBuildRequestRecord(
                         requestEvent.getId(),
                         String.valueOf(erratum.getDetails().get().getId()));
             }
@@ -417,7 +417,7 @@ public class AdvisoryService {
             log.debug(
                     "Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}",
                     erratum.getDetails().get().getId());
-            successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryRequestRecord(
+            successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryBuildRequestRecord(
                     requestEvent.getId(),
                     String.valueOf(erratum.getDetails().get().getId()));
         }
