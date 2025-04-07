@@ -62,8 +62,6 @@ export const GenerationRequestTable = () => {
           <Tr
             key={generation.id}
             isClickable
-            onRowClick={() => navigate(`/generations/${generation.id}`)}
-            onAuxClick={() => openInNewTab(`/generations/${generation.id}`)}
           >
             <Td dataLabel={columnNames.id}>
               <Link to={`/generations/${generation.id}`}>
