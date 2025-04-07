@@ -226,17 +226,22 @@ public class ReleaseStandardAdvisoryEventsListener {
             Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs = new HashMap<>();
 
             for (BuildItem buildItem : buildItems) {
-                // FIXME: 'Optional.get()' without 'isPresent()' check
-                Component nvrRootComponent = createRootComponentForRPMBuildItem(
-                        buildItem,
-                        nvrToBuildGeneration.get(buildItem.getNvr()),
-                        advisoryManifestsRecord,
-                        erratum.getDetails().get().getProduct().getShortName(),
-                        generationToCDNs);
+                V1Beta1GenerationRecord buildGeneration = nvrToBuildGeneration.get(buildItem.getNvr());
+                if (buildGeneration != null) {
+                    // It could happen that not all the builds attached to the advisory have a generation done in SBOMer
+                    // (the builds which SBOMer is not able to manifest)
+                    // FIXME: 'Optional.get()' without 'isPresent()' check
+                    Component nvrRootComponent = createRootComponentForRPMBuildItem(
+                            buildItem,
+                            buildGeneration,
+                            advisoryManifestsRecord,
+                            erratum.getDetails().get().getProduct().getShortName(),
+                            generationToCDNs);
 
-                // Add the component to the release manifest components and add the purl to the "provides" list
-                productVersionBom.addComponent(nvrRootComponent);
-                productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
+                    // Add the component to the release manifest components and add the purl to the "provides" list
+                    productVersionBom.addComponent(nvrRootComponent);
+                    productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
+                }
             }
 
             // Add the AdvisoryId property
@@ -304,15 +309,20 @@ public class ReleaseStandardAdvisoryEventsListener {
             Map<String, List<RepositoryCoordinates>> generationToRepositories = new HashMap<>();
 
             for (BuildItem buildItem : buildItems) {
-                Component nvrRootComponent = createRootComponentForDockerBuildItem(
-                        buildItem.getNvr(),
-                        nvrToBuildGeneration.get(buildItem.getNvr()),
-                        advisoryManifestsRecord,
-                        generationToRepositories);
+                V1Beta1GenerationRecord buildGeneration = nvrToBuildGeneration.get(buildItem.getNvr());
+                if (buildGeneration != null) {
+                    // It could happen that not all the builds attached to the advisory have a generation done in SBOMer
+                    // (the builds which SBOMer is not able to manifest like build#3572808)
+                    Component nvrRootComponent = createRootComponentForDockerBuildItem(
+                            buildItem.getNvr(),
+                            buildGeneration,
+                            advisoryManifestsRecord,
+                            generationToRepositories);
 
-                // Add the component to the release manifest components and add the purl to the "provides" list
-                productVersionBom.addComponent(nvrRootComponent);
-                productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
+                    // Add the component to the release manifest components and add the purl to the "provides" list
+                    productVersionBom.addComponent(nvrRootComponent);
+                    productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
+                }
             }
 
             // Add the AdvisoryId property
