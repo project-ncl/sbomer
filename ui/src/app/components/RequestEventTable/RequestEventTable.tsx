@@ -19,6 +19,7 @@ import {
   SearchInput,
   Button,
   Spinner,
+  ClipboardCopy,
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
@@ -35,7 +36,8 @@ const columnNames = {
   receivalTime: 'Received',
   eventType: 'Source',
   eventStatus: 'Request Status',
-  requestConfig: 'Request Config',
+  requestTypeName: 'Request Type Name',
+  requestTypeIdentifier: 'Request Type Identifier',
   event: 'Event',
 };
 
@@ -156,7 +158,8 @@ export const RequestEventTable = () => {
           <Th>{columnNames.id}</Th>
           <Th>{columnNames.eventStatus}</Th>
           <Th>{columnNames.eventType}</Th>
-          <Th>{columnNames.requestConfig}</Th>
+          <Th>{columnNames.requestTypeName}</Th>
+          <Th>{columnNames.requestTypeIdentifier}</Th>
           <Th>{columnNames.receivalTime}</Th>
         </Tr>
       </Thead>
@@ -195,11 +198,22 @@ export const RequestEventTable = () => {
                 {requestEvent.eventType}
               </Label>
             </Td>
-            <Td dataLabel={columnNames.requestConfig}>
+            <Td dataLabel={columnNames.requestTypeName}>
               {requestEvent.requestConfigTypeName ? (
                 <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
                   <span className="pf-v5-c-timestamp pf-m-help-text">
-                    {requestEvent.requestConfigTypeName}={requestEvent.requestConfigTypeValue}
+                    {requestEvent.requestConfigTypeName}
+                  </span>
+                </Tooltip>
+              ) : null}
+            </Td>
+            <Td dataLabel={columnNames.requestTypeIdentifier}>
+              {requestEvent.requestConfigTypeValue ? (
+                <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
+                  <span className="pf-v5-c-timestamp pf-m-help-text">
+                    <ClipboardCopy variant='inline-compact' position='right'>
+                      {requestEvent.requestConfigTypeValue}
+                    </ClipboardCopy>
                   </span>
                 </Tooltip>
               ) : null}
