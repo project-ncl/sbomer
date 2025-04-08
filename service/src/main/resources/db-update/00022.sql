@@ -155,7 +155,7 @@ $$ LANGUAGE plpgsql;
 
 
 -- Call the function to start updating all the manifests. Keep calling until there are no more manifests to update!
-CALL update_variant_hashes_from_version();
+SELECT update_variant_hashes_from_version();
 
 BEGIN;
     INSERT INTO db_version(version, creation_time) VALUES ('00022', now());
