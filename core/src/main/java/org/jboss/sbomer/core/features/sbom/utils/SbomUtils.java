@@ -1246,12 +1246,15 @@ public class SbomUtils {
             return;
         }
 
-        Component mainComponent = bom.getComponents().get(0);
-        if (mainComponent.getType() != Component.Type.CONTAINER) {
+        addMissingContainerHash(bom.getComponents().get(0));
+    }
+
+    public static void addMissingContainerHash(Component component) {
+        if (component.getType() != Component.Type.CONTAINER) {
             return;
         }
 
-        String[] versionTokens = mainComponent.getVersion().split(":");
+        String[] versionTokens = component.getVersion().split(":");
         if (versionTokens.length < 2) {
             return;
         }
@@ -1269,7 +1272,7 @@ public class SbomUtils {
 
         hashMap.forEach((prefix, algorithm) -> {
             if (versionTokens[0].equalsIgnoreCase(prefix)) {
-                addHashIfMissing(mainComponent, versionTokens[1], algorithm);
+                addHashIfMissing(component, versionTokens[1], algorithm);
             }
         });
     }
