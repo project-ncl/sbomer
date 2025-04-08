@@ -43,13 +43,11 @@ import jakarta.ws.rs.core.Response;
 @ClientHeaderParam(name = "User-Agent", value = "SBOMer")
 @RegisterRestClient(configKey = "mequal")
 @Path("/v1")
-// @RegisterProvider() We probably need a provider to handle mTLS?
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public interface MequalClient {
 
     @POST
-    // @Blocking
     @Path("/query")
     @Consumes(MediaType.APPLICATION_JSON)
     MequalQueryResponse getQuery(@QueryParam("pretty") boolean pretty, QueryPayload qr);
