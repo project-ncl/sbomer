@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
-public class MequalClientMock implements QuarkusTestResourceLifecycleManager {
+public class MequalClientWireMock implements QuarkusTestResourceLifecycleManager {
 
     private WireMockServer wireMockServer;
 

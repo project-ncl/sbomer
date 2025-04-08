@@ -40,7 +40,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.test.integ.feature.s3.S3FeatureTest.S3ClientConfig;
-import org.jboss.sbomer.service.test.integ.feature.sbom.MequalClientMock;
+import org.jboss.sbomer.service.test.integ.feature.sbom.MequalClientWireMock;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ import io.restassured.http.ContentType;
 
 @QuarkusTest
 @TestProfile(S3ClientConfig.class)
-@WithTestResource(MequalClientMock.class)
+@WithTestResource(MequalClientWireMock.class)
 class S3FeatureTest {
 
     @Inject

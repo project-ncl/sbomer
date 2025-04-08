@@ -38,6 +38,9 @@ quarkus:
       url: "https://dummy"
     "pyxis":
       url: "https://dummy"
+    "mequal":
+      url: "https://dummy"
+      defaultQuery: "data.mequal.main;data.prodsec.main"
 
   operator-sdk:
     start-operator: false
@@ -72,7 +75,7 @@ sbomer:
     #  url:
 
   purl-qualifiers-allow-list:
-    - repository_url
+  - repository_url
 
   features:
     umb:
@@ -80,8 +83,8 @@ sbomer:
       producer:
         enabled: false
     kerberos:
-        enabled: false
-        errata:
-          service-principal-name: errata-service-principal
-        pyxis:
-          service-principal-name: pyxis-service-principal
+      enabled: false
+      errata:
+        service-principal-name: errata-service-principal
+      pyxis:
+        service-principal-name: pyxis-service-principal
