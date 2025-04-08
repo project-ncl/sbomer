@@ -40,6 +40,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.test.integ.feature.s3.S3FeatureTest.S3ClientConfig;
+import org.jboss.sbomer.service.test.integ.feature.sbom.MequalClientMock;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ import org.junit.jupiter.api.io.TempDir;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.quarkus.panache.mock.PanacheMock;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
@@ -58,6 +60,7 @@ import io.restassured.http.ContentType;
 
 @QuarkusTest
 @TestProfile(S3ClientConfig.class)
+@WithTestResource(MequalClientMock.class)
 class S3FeatureTest {
 
     @Inject
@@ -214,5 +217,53 @@ class S3FeatureTest {
                 .statusCode(200)
                 .contentType(ContentType.TEXT)
                 .body(Matchers.equalTo("This is a log content"));
+    }
+
+    @Test
+    void testMequalPolicyImplicitUpload(@TempDir Path tempDir) throws IOException {
+        when(featureFlags.s3Storage()).thenReturn(true);
+        when(featureFlags.mequalEnabled()).thenReturn(true);
+        when(controllerConfig.sbomDir()).thenReturn(tempDir.toAbsolutePath().toString());
+
+        ObjectMeta meta = mock(ObjectMeta.class);
+        when(meta.getName()).thenReturn("sbom-request-123");
+
+        GenerationRequest generationRequest = mock(GenerationRequest.class);
+        when(generationRequest.getMetadata()).thenReturn(meta);
+        when(generationRequest.getId()).thenReturn("AABBCC");
+
+        Path generationDir = tempDir.resolve("sbom-request-123");
+
+        // Create the directory
+        Files.createDirectory(generationDir);
+
+        // Place a file inside the dir
+        Path file = generationDir.resolve("bom.json");
+        Files.write(file, "{}".getBytes());
+
+        // Add some logs
+        Path logsDir = generationDir.resolve("logs");
+        Files.createDirectory(logsDir);
+
+        Path logFile = logsDir.resolve("init.log");
+        Files.write(logFile, "Some log".getBytes());
+
+        // doNothing().when(clientFacade).upload(file.toAbsolutePath(),
+        // "bucket-name/bucket-name/bom.json");
+        when(clientFacade.doesObjectExists("AABBCC/bom.json")).thenReturn(false);
+        when(clientFacade.doesObjectExists("AABBCC/logs/init.log")).thenReturn(true);
+        when(clientFacade.doesObjectExists("AABBCC/mequal.json")).thenReturn(false);
+        doNothing().when(clientFacade).upload(file.toAbsolutePath(), "AABBCC/bom.json");
+        doNothing().when(clientFacade).upload(logFile.toAbsolutePath(), "AABBCC/logs/init.log");
+        doNothing().when(clientFacade).upload(file.toAbsolutePath(), "AABBCC/mequal.json");
+
+        storageHandler.storeFiles(generationRequest);
+
+        verify(clientFacade, times(1)).doesObjectExists("AABBCC/bom.json");
+        verify(clientFacade, times(1)).upload(file.toAbsolutePath(), "AABBCC/bom.json");
+        verify(clientFacade, times(1)).doesObjectExists("AABBCC/logs/init.log");
+        verify(clientFacade, times(0)).upload(logFile.toAbsolutePath(), "AABBCC/logs/init.log");
+        verify(clientFacade, times(1)).doesObjectExists("AABBCC/mequal.json");
+        verify(clientFacade, times(0)).upload(file.toAbsolutePath(), "AABBCC/mequal.json");
     }
 }

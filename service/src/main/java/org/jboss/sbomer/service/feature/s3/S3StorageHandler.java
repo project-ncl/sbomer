@@ -26,12 +26,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.ServiceUnavailableException;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.meqaul.MequalClient;
+import org.jboss.sbomer.service.feature.sbom.meqaul.QueryPayloadHelper;
+import org.jboss.sbomer.service.feature.sbom.meqaul.QueryResponseHelper;
+import org.jboss.sbomer.service.feature.sbom.meqaul.dto.MequalQueryResponse;
+import org.jboss.sbomer.service.feature.sbom.meqaul.dto.QueryPayload;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 
@@ -54,6 +60,9 @@ public class S3StorageHandler {
 
     @Inject
     SbomService sbomService;
+
+    @RestClient
+    MequalClient mequalClient;
 
     /**
      * Returns all paths to files found under a given {@code rootDirectory}.
@@ -132,6 +141,24 @@ public class S3StorageHandler {
         log.debug("Using '{}' directory to scan for files to be uploaded to S3", generationRootDir.toAbsolutePath());
 
         List<Path> filePaths = getFilePaths(generationRootDir);
+
+        if (featureFlags.mequalEnabled()) {
+            QueryPayload qp;
+            try {
+                Path bomPath = filePaths.stream()
+                        .filter(fp -> fp.getFileName().endsWith("bom.json"))
+                        .findFirst()
+                        .orElse(null);
+                MequalQueryResponse r = mequalClient
+                        .getQuery(false, QueryPayloadHelper.fromBomFilePath(bomPath.toString()));
+                filePaths.add(QueryResponseHelper.toPath(r, bomPath));
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            // Drop the reponse into the generation dir
+        }
 
         log.debug("Found {} files: {}", filePaths.size(), filePaths);
 
