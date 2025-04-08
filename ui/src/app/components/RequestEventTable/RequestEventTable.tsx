@@ -168,6 +168,7 @@ export const RequestEventTable = () => {
           <Tr
             key={requestEvent.id}
             isClickable
+            style={{ cursor: 'auto' }}
           >
             <Td dataLabel={columnNames.id}>
               <Link to={`/requestevents/${requestEvent.id}`}>
@@ -186,7 +187,7 @@ export const RequestEventTable = () => {
                   </div>
                 }
               >
-                <Label style={{ cursor: 'pointer' }} color={requestEventStatusToColor(requestEvent.eventStatus)}>
+                <Label color={requestEventStatusToColor(requestEvent.eventStatus)}>
                   {requestEventStatusToDescription(requestEvent.eventStatus)}
                 </Label>
 
@@ -194,7 +195,7 @@ export const RequestEventTable = () => {
               </Tooltip>
             </Td>
             <Td dataLabel={columnNames.eventType}>
-              <Label style={{ cursor: 'pointer' }} color="yellow">
+              <Label color="yellow">
                 {requestEvent.eventType}
               </Label>
             </Td>
