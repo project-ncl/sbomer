@@ -17,5 +17,9 @@
 //*** xref:api/rsql.adoc[]
 ** xref:api/index.adoc[]
 *** xref:api/examples.adoc[]
-
 ** xref:umb.adoc[]
+// This sections is WIP
+** xref:events/index.adoc[]
+*** xref:events/generation-request/index.adoc[]
+**** xref:events/generation-request/sizing.adoc[]
+
