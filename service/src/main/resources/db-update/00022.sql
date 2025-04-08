@@ -93,8 +93,13 @@ BEGIN
 
     SELECT COUNT(*) INTO total_to_update
     FROM sbom
-    WHERE sbom->'metadata'->'component'->>'description' LIKE 'Image index manifest%';
-    
+    WHERE sbom->'metadata'->'component'->>'description' LIKE 'Image index manifest%'
+      AND EXISTS (
+        SELECT 1 FROM jsonb_array_elements(sbom #> '{components,0,pedigree,variants}') v
+        WHERE v->>'version' LIKE 'sha256:%'
+          AND (v->'hashes' IS NULL OR jsonb_array_length(v->'hashes') = 0)
+      );
+
     -- Log total SBOMs to update
     RAISE NOTICE 'Total SBOMs to update: %', total_to_update;
 
@@ -102,6 +107,11 @@ BEGIN
         SELECT id, sbom
         FROM sbom
         WHERE sbom->'metadata'->'component'->>'description' LIKE 'Image index manifest%'
+          AND EXISTS (
+            SELECT 1 FROM jsonb_array_elements(sbom #> '{components,0,pedigree,variants}') v
+            WHERE v->>'version' LIKE 'sha256:%'
+              AND (v->'hashes' IS NULL OR jsonb_array_length(v->'hashes') = 0)
+          )
         LIMIT 5000
     LOOP
         new_variants := '[]'::jsonb;
