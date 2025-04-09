@@ -62,6 +62,7 @@ export const GenerationRequestTable = () => {
           <Tr
             key={generation.id}
             isClickable
+            style={{ cursor: 'auto' }}
           >
             <Td dataLabel={columnNames.id}>
               <Link to={`/generations/${generation.id}`}>
@@ -80,7 +81,7 @@ export const GenerationRequestTable = () => {
                   </div>
                 }
               >
-                <Label style={{ cursor: 'pointer' }} color={statusToColor(generation)}>
+                <Label color={statusToColor(generation)}>
                   {statusToDescription(generation)}
                 </Label>
 
@@ -89,7 +90,7 @@ export const GenerationRequestTable = () => {
             </Td>
             <Td dataLabel={columnNames.type}>
               <Tooltip isContentLeftAligned={true} content={<code>{generation.identifier}</code>}>
-                <Label style={{ cursor: 'pointer' }} color="purple">
+                <Label color="purple">
                   {typeToDescription(generation)}
                 </Label>
               </Tooltip>

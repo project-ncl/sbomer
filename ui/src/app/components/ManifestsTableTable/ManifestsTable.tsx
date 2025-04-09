@@ -161,6 +161,7 @@ export const ManifestsTable = () => {
           <Tr
             key={manifest.id}
             isClickable
+            style={{ cursor: 'auto' }}
           >
             <Td dataLabel={columnNames.id}>
               <Link to={`/manifests/${manifest.id}`}>
@@ -168,7 +169,7 @@ export const ManifestsTable = () => {
               </Link>
             </Td>
             <Td dataLabel={columnNames.type}>
-              <Label style={{ cursor: 'pointer' }} color="purple">
+              <Label color="purple">
                 {typeToDescription(manifest.generation)}
               </Label>
             </Td>
