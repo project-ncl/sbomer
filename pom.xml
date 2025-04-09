@@ -271,6 +271,10 @@
                 <exclude>mvnw**</exclude>
                 <exclude>**/secret*.txt</exclude>
                 <exclude>**/src/test/**</exclude>
+                <exclude>commitlint.config.mjs</exclude>
+                <exclude>certs/**</exclude>
+                <exclude>images/**</exclude>
+                <exclude>ui/**</exclude>
               </excludes>
             </licenseSet>
           </licenseSets>
