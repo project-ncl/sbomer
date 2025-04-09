@@ -17,10 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
-import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.QE;
-import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.SHIPPED_LIVE;
-
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import java.io.IOException;
 import java.util.Map;
@@ -37,12 +37,12 @@ import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.QE;
+import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.SHIPPED_LIVE;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
 
 @Setter
 @ApplicationScoped

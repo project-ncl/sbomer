@@ -1,11 +1,11 @@
 package org.jboss.sbomer.cli.test.utils;
 
+import jakarta.enterprise.inject.Alternative;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-
-import jakarta.enterprise.inject.Alternative;
 
 import org.jboss.sbomer.cli.feature.sbom.command.ProcessCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.SbtCycloneDxGenerateCommand;

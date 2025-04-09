@@ -17,17 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.kerberos;
 
-import static javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag.REQUIRED;
-
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -40,10 +32,15 @@ import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSException;
@@ -56,6 +53,9 @@ import io.quarkiverse.kerberos.client.KerberosCallbackHandler;
 import io.quarkiverse.kerberos.client.KerberosClientConfig;
 import io.quarkiverse.kerberos.client.UserPrincipalSubjectFactory;
 import io.quarkus.runtime.configuration.ConfigurationException;
+import lombok.extern.slf4j.Slf4j;
+
+import static javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag.REQUIRED;
 
 @ApplicationScoped
 @Slf4j

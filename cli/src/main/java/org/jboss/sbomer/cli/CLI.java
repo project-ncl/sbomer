@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.cli;
 
+import jakarta.enterprise.context.control.ActivateRequestContext;
+import jakarta.inject.Inject;
+
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,9 +27,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.jboss.sbomer.cli.errors.SbomerExitCodeExceptionMapper;
-
-import jakarta.enterprise.context.control.ActivateRequestContext;
-import jakarta.inject.Inject;
 
 import io.quarkus.arc.All;
 import io.quarkus.runtime.QuarkusApplication;

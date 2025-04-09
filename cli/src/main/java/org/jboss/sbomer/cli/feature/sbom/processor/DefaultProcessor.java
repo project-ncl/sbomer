@@ -17,6 +17,33 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.processor;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
+import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Hash;
+import org.cyclonedx.model.Property;
+import org.jboss.pnc.build.finder.koji.KojiBuild;
+import org.jboss.pnc.dto.Artifact;
+import org.jboss.sbomer.cli.feature.sbom.adjuster.PncBuildAdjuster;
+import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
+import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.pnc.PncService;
+
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
+
+import lombok.extern.slf4j.Slf4j;
+
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_COMPONENT;
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE;
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VERSION;
@@ -33,33 +60,6 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMet
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPublisher;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setSupplier;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.updatePurl;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import com.github.packageurl.MalformedPackageURLException;
-import com.github.packageurl.PackageURL;
-import org.cyclonedx.model.Bom;
-import org.cyclonedx.model.Component;
-import org.cyclonedx.model.ExternalReference;
-import org.cyclonedx.model.Hash;
-import org.cyclonedx.model.Property;
-import org.jboss.pnc.build.finder.koji.KojiBuild;
-import org.jboss.pnc.dto.Artifact;
-import org.jboss.sbomer.cli.feature.sbom.adjuster.PncBuildAdjuster;
-import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
-import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
-import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.core.pnc.PncService;
-
-import com.redhat.red.build.koji.KojiClientException;
-import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DefaultProcessor implements Processor {

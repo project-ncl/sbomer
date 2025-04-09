@@ -17,13 +17,12 @@
  */
 package org.jboss.sbomer.core.features.sbom.rest;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 import java.util.Collection;
 import java.util.Collections;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 /**
  * Collection REST response.
