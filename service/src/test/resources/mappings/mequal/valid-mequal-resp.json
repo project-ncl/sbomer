@@ -1,0 +1,42 @@
+{
+    "request": {
+      "method": "POST",
+      "urlPath": "/v1/query",
+      "headers" : {
+        "Accept": {
+            "contains":"application/json"
+        }
+      },
+      "queryParameters":{
+        "pretty":{
+            "matches":".*"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "jsonBody": {
+       "result": [
+    {
+      "r": {
+        "mequal_L0_violations": [
+          {
+            "code": "mequal.leveling.L0.LPOL1.sbom_is_spdx_or_cdx",
+            "effective_on": "2022-01-01T00:00:00Z",
+            "msg": "Input is neither a CycloneDX SBOM nor a SPDX SBOM",
+            "policy_id": "LPOL1",
+            "policy_level": "L0"
+          }
+        ],
+        "mequal_L1_violations": [],
+        "sbom_level": "L0"
+      }
+    }
+  ]
+    },
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    }
+  }
+  
