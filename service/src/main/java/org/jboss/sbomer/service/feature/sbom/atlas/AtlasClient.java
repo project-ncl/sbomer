@@ -18,8 +18,8 @@
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
 import java.util.List;
+import java.util.Map;
 
-import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
@@ -30,8 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
@@ -42,16 +41,16 @@ import jakarta.ws.rs.core.Response;
  * A client for the Atlas (instance of the Trusted Profile Analyzer).
  */
 
-@Path("/api/v1/sbom")
+@Path("/api/v2/sbom")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public interface AtlasClient {
 
-    @GET
-    Bom get(@QueryParam("id") String purl);
-
-    @PUT
-    void upload(@QueryParam("id") String purl, JsonNode bom);
+    @POST
+    void upload(
+            @QueryParam("labels") Map<String, String> labels,
+            @QueryParam("location") String location,
+            JsonNode bom);
 
     @ClientExceptionMapper
     @Blocking
