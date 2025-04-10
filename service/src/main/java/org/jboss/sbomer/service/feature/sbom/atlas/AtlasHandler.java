@@ -18,9 +18,10 @@
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.cyclonedx.model.Bom;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
@@ -37,16 +38,16 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Slf4j
 public class AtlasHandler {
+
+    @ConfigProperty(name = "SBOMER_ROUTE_HOST", defaultValue = "sbomer")
+    String sbomerHost;
+
     @Inject
     @RestClient
     AtlasBuildClient atlasBuildClient;
 
     @Inject
     FeatureFlags featureFlags;
-
-    public Bom retrieveBuildManifest(String purl) {
-        return atlasBuildClient.get(purl);
-    }
 
     public void publishBuildManifests(List<Sbom> sboms) {
         if (sboms == null) {
@@ -80,7 +81,7 @@ public class AtlasHandler {
 
         try {
             // Store it!
-            atlasBuildClient.upload(sbom.getRootPurl(), sbom.getSbom());
+            atlasBuildClient.upload(Map.of(), "https://" + sbomerHost, sbom.getSbom()); // TODO: Do we need labels?
         } catch (ClientException e) {
             throw new ApplicationException(
                     "Unable to store '{}' manifest in Atlas, purl: '{}': {}",
