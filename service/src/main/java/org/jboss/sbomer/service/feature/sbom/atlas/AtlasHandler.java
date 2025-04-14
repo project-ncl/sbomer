@@ -78,7 +78,7 @@ public class AtlasHandler {
 
         AtlasClient atlasClient = isRelease ? atlasReleaseClient : atlasBuildClient;
         String atlasInstanceName = isRelease ? "release" : "build";
-            log.info("Uploading {} {} manifests...", sboms.size(), atlasInstanceName);
+        log.info("Uploading {} {} manifests...", sboms.size(), atlasInstanceName);
 
         for (Sbom sbom : sboms) {
             uploadManifest(sbom, atlasClient);

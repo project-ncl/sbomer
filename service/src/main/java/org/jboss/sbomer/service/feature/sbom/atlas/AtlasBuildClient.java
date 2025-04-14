@@ -21,7 +21,10 @@ import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import io.quarkus.oidc.client.filter.OidcClientFilter;
+import io.quarkus.rest.client.reactive.ClientExceptionMapper;
+import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Client for the Atlas instance storing build manifests.
@@ -31,5 +34,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 @ClientHeaderParam(name = "User-Agent", value = "SBOMer")
 public interface AtlasBuildClient extends AtlasClient {
+
+    @ClientExceptionMapper
+    @Blocking
+    static RuntimeException toException(Response response) {
+        return AtlasClientExceptionMapper.toException(response);
+    }
 
 }

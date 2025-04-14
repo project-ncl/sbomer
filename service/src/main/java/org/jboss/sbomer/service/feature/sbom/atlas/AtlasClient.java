@@ -17,25 +17,16 @@
  */
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
-import java.util.List;
 import java.util.Map;
-
-import org.jboss.sbomer.core.errors.ClientException;
-import org.jboss.sbomer.core.errors.ForbiddenException;
-import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.core.errors.UnauthorizedException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.quarkus.rest.client.reactive.ClientExceptionMapper;
-import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 /**
  * A client for the Atlas (instance of the Trusted Profile Analyzer).
@@ -49,19 +40,4 @@ public interface AtlasClient {
     @POST
     void upload(@QueryParam("labels") Map<String, String> labels, JsonNode bom);
 
-    @ClientExceptionMapper
-    @Blocking
-    static RuntimeException toException(Response response) {
-        String message = response.readEntity(String.class);
-
-        return switch (response.getStatus()) {
-            case 400 -> new ClientException("Bad request", List.of(message));
-            case 401 ->
-                new UnauthorizedException("Caller is unauthorized to access resource; {}", message, List.of(message));
-            case 403 -> new ForbiddenException("Caller is forbidden to access resource; {}", message, List.of(message));
-            case 404 -> new NotFoundException("Requested resource was not found; {}", message, List.of(message));
-            default -> null;
-        };
-
-    }
 }
