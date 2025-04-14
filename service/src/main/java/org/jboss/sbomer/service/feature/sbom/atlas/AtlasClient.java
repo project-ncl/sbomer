@@ -47,10 +47,7 @@ import jakarta.ws.rs.core.Response;
 public interface AtlasClient {
 
     @POST
-    void upload(
-            @QueryParam("labels") Map<String, String> labels,
-            @QueryParam("location") String location,
-            JsonNode bom);
+    void upload(@QueryParam("labels") Map<String, String> labels, JsonNode bom);
 
     @ClientExceptionMapper
     @Blocking
