@@ -17,7 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.generator;
 
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
+import jakarta.enterprise.context.control.ActivateRequestContext;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +49,6 @@ import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -71,11 +72,10 @@ import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
-import jakarta.enterprise.context.control.ActivateRequestContext;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
 
 @Slf4j
 public abstract class AbstractController implements Reconciler<GenerationRequest>,

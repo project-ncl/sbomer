@@ -17,8 +17,15 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.processor;
 
-import com.github.packageurl.PackageURL;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.BomReference;
 import org.cyclonedx.model.Component;
@@ -29,14 +36,9 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.BuildType;
 import org.jboss.sbomer.core.pnc.PncService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.github.packageurl.PackageURL;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;

@@ -17,8 +17,7 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.k8s.reconciler;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import jakarta.inject.Inject;
 
 import java.net.URL;
 import java.util.List;
@@ -36,7 +35,10 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.javaoperatorsdk.operator.Operator;
 import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @Disabled("This doesn't work, because we are not starting Tekton properly, we need to think about different ways of running integration tests")

@@ -17,10 +17,10 @@
  */
 package org.jboss.sbomer.core.features.sbom.validation;
 
-import java.io.IOException;
-
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
+import java.io.IOException;
 
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 

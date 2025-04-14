@@ -19,8 +19,8 @@ package org.jboss.sbomer.cli.feature.sbom.command;
 
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateConfigCommand;
-import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateOperationConfigCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateOperationCommand;
+import org.jboss.sbomer.cli.feature.sbom.command.auto.GenerateOperationConfigCommand;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;

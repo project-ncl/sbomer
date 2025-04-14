@@ -17,19 +17,6 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingContainerHash;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_MANTAINER;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VENDOR;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VERSION;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_LOCATION_PATH_PREFIX;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX;
-import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX;
-import static org.jboss.sbomer.core.features.sbom.Constants.REDHAT_PROPERTY_NAMESPACE_PREFIX;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -37,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import com.github.packageurl.PackageURLBuilder;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
@@ -53,8 +39,21 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
+import com.github.packageurl.PackageURLBuilder;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_MANTAINER;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VENDOR;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_IMAGE_LABEL_VERSION;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_LOCATION_PATH_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingContainerHash;
 
 /**
  * Implementation of the {@link Adjuster} for the {@link GeneratorType#IMAGE_SYFT} type.

@@ -17,24 +17,6 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.jboss.sbomer.core.features.sbom.Constants.MRRC_URL;
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
-import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
-import static org.jboss.sbomer.core.features.sbom.Constants.PUBLISHER;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_GIT_URL;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_LICENSE_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_NAME;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_WEBSITE;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_ARTIFACT_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
-import static org.jboss.sbomer.core.features.sbom.Constants.SUPPLIER_NAME;
-import static org.jboss.sbomer.core.features.sbom.Constants.SUPPLIER_URL;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -75,8 +57,6 @@ import org.cyclonedx.model.Evidence;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
-import org.cyclonedx.model.component.evidence.Identity;
-import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.cyclonedx.model.License;
 import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.model.Metadata;
@@ -84,6 +64,8 @@ import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.cyclonedx.model.Tool;
+import org.cyclonedx.model.component.evidence.Identity;
+import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.api.deliverablesanalyzer.dto.LicenseInfo;
@@ -109,6 +91,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import static org.jboss.sbomer.core.features.sbom.Constants.MRRC_URL;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
+import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
+import static org.jboss.sbomer.core.features.sbom.Constants.PUBLISHER;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_GIT_URL;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_LICENSE_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOMER_WEBSITE;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_BREW_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_ENVIRONMENT_IMAGE;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_ARTIFACT_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_OPERATION_ID;
+import static org.jboss.sbomer.core.features.sbom.Constants.SUPPLIER_NAME;
+import static org.jboss.sbomer.core.features.sbom.Constants.SUPPLIER_URL;
 
 public class SbomUtils {
     public static final String PROTOCOL = "https://";

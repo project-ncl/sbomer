@@ -17,20 +17,20 @@
  */
 package org.jboss.sbomer.core.features.sbom.validation;
 
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
 
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.schemaVersion;
 
 public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
 
