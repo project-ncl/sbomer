@@ -75,7 +75,7 @@
     "@melloware/react-logviewer": "^6.0.0",
     "@patternfly/react-core": "6.2.0",
     "@patternfly/react-icons": "6.2.0",
-    "@patternfly/react-log-viewer": "6.0.0",
+    "@patternfly/react-log-viewer": "6.2.0",
     "@patternfly/react-styles": "6.0.0",
     "@patternfly/react-table": "6.0.0",
     "@unleash/proxy-client-react": "^4.2.4",
