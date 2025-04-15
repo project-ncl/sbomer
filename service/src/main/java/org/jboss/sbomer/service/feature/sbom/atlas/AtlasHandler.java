@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,6 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AtlasHandler {
 
+    public static final Map<String, String> LABELS = Map.of("type", "cyclonedx");
+
     @Inject
     @RestClient
     AtlasBuildClient atlasBuildClient;
@@ -54,8 +55,8 @@ public class AtlasHandler {
         publishManifests(sboms, false);
     }
 
-    public void publishReleaseManifest(Sbom sbom) {
-        publishManifests(Collections.singletonList(sbom), true);
+    public void publishReleaseManifests(List<Sbom> sboms) {
+        publishManifests(sboms, true);
     }
 
     private void publishManifests(List<Sbom> sboms, boolean isRelease) {
@@ -87,12 +88,12 @@ public class AtlasHandler {
         log.info("Upload complete!");
     }
 
-    private void uploadManifest(Sbom sbom, AtlasClient atlasClient) {
+    protected void uploadManifest(Sbom sbom, AtlasClient atlasClient) {
         log.info("Uploading manifest '{}' (purl: '{}')...", sbom.getId(), sbom.getRootPurl());
 
         try {
             // Store it!
-            atlasClient.upload(Map.of("type", "cyclonedx"), sbom.getSbom());
+            atlasClient.upload(LABELS, sbom.getSbom());
         } catch (ClientException e) {
             throw new ApplicationException(
                     "Unable to store '{}' manifest in Atlas, purl: '{}': {}",

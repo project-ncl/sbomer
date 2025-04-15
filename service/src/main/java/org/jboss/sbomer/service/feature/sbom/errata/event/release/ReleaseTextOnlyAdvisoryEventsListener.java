@@ -187,7 +187,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
                 productVersion,
                 erratum.getDetails().get().getFulladvisory());
 
-        performPost(sbom);
+        performPost(List.of(sbom));
     }
 
     // FIXME: 'Optional.get()' without 'isPresent()' check

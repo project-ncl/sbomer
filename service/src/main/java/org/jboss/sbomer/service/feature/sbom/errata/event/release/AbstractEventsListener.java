@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.cyclonedx.model.Component;
@@ -131,9 +132,9 @@ public class AbstractEventsListener {
         return metadata;
     }
 
-    protected void performPost(Sbom sbom) {
+    protected void performPost(List<Sbom> sboms) {
         try {
-            atlasHandler.publishReleaseManifest(sbom);
+            atlasHandler.publishReleaseManifests(sboms);
         } catch (FeatureDisabledException e) {
             log.warn(e.getMessage(), e);
         } catch (Exception e) {

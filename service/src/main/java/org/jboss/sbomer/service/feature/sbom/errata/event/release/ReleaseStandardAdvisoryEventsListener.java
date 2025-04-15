@@ -172,6 +172,8 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
 
+        List<Sbom> sboms = new ArrayList<>();
+
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
             // Create the release manifest for this ProductVersion
@@ -230,8 +232,10 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
 
-            performPost(sbom);
+            sboms.add(sbom);
         });
+
+        performPost(sboms);
     }
 
     protected void releaseManifestsForDockerBuilds(
@@ -244,6 +248,8 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Component.Type productType,
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
+
+        List<Sbom> sboms = new ArrayList<>();
 
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
@@ -302,8 +308,10 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
 
-            performPost(sbom);
+            sboms.add(sbom);
         });
+
+        performPost(sboms);
     }
 
     private Bom createProductVersionBom(
