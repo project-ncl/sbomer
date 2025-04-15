@@ -1,6 +1,6 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:recommended", ":automergeDigest"],
+    "extends": ["config:recommended", ":automergePatch", ":automergeDigest"],
     "username": "renovate-release",
     "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
     "onboarding": false,
@@ -17,7 +17,6 @@
         "labels": ["security"]
     },
     "prConcurrentLimit": 20,
-    "separateMinorPatch": true,
     "packageRules": [
         {
             "description": "lockFileMaintenance",
@@ -43,9 +42,7 @@
             "enabled": false
         },
         {
-            "extends": ["monorepo:aws-java-sdk-v2", "monorepo:typescript-eslint", "monorepo:mapstruct", "monorepo:commitlint", "group:postcss"],
-            "matchUpdateTypes": ["patch"],
-            "automerge": true
+            "extends": ["monorepo:aws-java-sdk-v2", "monorepo:typescript-eslint", "monorepo:mapstruct", "monorepo:commitlint", "group:postcss"]
         }
     ],
     "platformAutomerge": true
