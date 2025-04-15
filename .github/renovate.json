@@ -17,6 +17,7 @@
         "labels": ["security"]
     },
     "prConcurrentLimit": 20,
+    "separateMinorPatch": true,
     "packageRules": [
         {
             "description": "lockFileMaintenance",
