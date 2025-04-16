@@ -72,6 +72,8 @@ quarkus:
       artifact-id: jackson-jakarta-rs-yaml-provider
 
   rest-client:
+    connect-timeout: 15000
+    read-timeout: 90000
     "atlas-build":
       url: "https://${sbomer.atlas.build.host}"
     "atlas-release":
