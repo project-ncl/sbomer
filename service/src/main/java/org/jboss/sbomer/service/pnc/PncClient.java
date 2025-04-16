@@ -21,6 +21,7 @@ import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
+import org.jboss.sbomer.service.rest.faulttolerance.WithRetry;
 
 import io.quarkus.oidc.client.filter.OidcClientFilter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -39,6 +40,7 @@ import jakarta.ws.rs.core.MediaType;
 @OidcClientFilter
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@WithRetry
 public interface PncClient {
 
     @POST

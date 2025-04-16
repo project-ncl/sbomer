@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
@@ -171,7 +170,6 @@ public class CommentAdvisoryOnRelevantEventsListener {
         doAddCommentToErratum(commentSb.toString(), config.getAdvisoryId());
     }
 
-    @Retry(maxRetries = 10)
     public void doAddCommentToErratum(String comment, String advisoryId) {
         try {
             String jsonPayload = ObjectMapperProvider.json()

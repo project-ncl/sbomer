@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
@@ -42,6 +41,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
 import org.jboss.sbomer.service.feature.sbom.kerberos.ErrataKrb5ClientRequestFilter;
+import org.jboss.sbomer.service.rest.faulttolerance.WithRetry;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.reactive.messaging.annotations.Blocking;
@@ -67,6 +67,7 @@ import jakarta.ws.rs.core.Response;
 @RegisterProvider(ErrataKrb5ClientRequestFilter.class)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@WithRetry
 public interface ErrataClient {
 
     // Retrieve the advisory data, the id could be advisory id or advisory name.
