@@ -732,7 +732,6 @@ public class ReleaseStandardAdvisoryEventsListener {
         }
     }
 
-    @Retry(maxRetries = 10)
     protected Map<ProductVersionEntry, List<BuildItem>> getAdvisoryBuildDetails(String advisoryId) {
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(advisoryId);
         return erratumBuildList.getProductVersions()
@@ -747,7 +746,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                                         .toList()));
     }
 
-    @Retry(maxRetries = 10)
     protected Map<ProductVersionEntry, Set<String>> mapProductVersionToCPEs(
             Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails) {
 
@@ -769,7 +767,6 @@ public class ReleaseStandardAdvisoryEventsListener {
         return productVersionToCPEs;
     }
 
-    @Retry(maxRetries = 10)
     protected List<RepositoryCoordinates> getRepositoriesDetails(String nvr) {
         log.debug("Getting repositories details from Pyxis for NVR '{}'", nvr);
         PyxisRepositoryDetails repositoriesDetails = pyxisClient
@@ -792,7 +789,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                 .toList();
     }
 
-    @Retry(maxRetries = 10)
     protected List<ErrataCDNRepoNormalized> getCDNDetails(BuildItem buildItem, String productShortName) {
         List<ErrataCDNRepoNormalized> allCDNs = new ArrayList<>();
         buildItem.getVariantArch()
@@ -805,7 +801,6 @@ public class ReleaseStandardAdvisoryEventsListener {
      * Not used at the moment. Useful to understand if a repository has requires_terms = false meaning the repo is also
      * accessible without authentication
      */
-    @Retry(maxRetries = 10)
     protected PyxisRepository getRepository(String registry, String repository) {
         return pyxisClient.getRepository(registry, repository, PyxisClient.REPOSITORIES_REGISTRY_INCLUDES);
     }

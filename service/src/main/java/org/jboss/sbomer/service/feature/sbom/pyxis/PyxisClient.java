@@ -29,6 +29,7 @@ import org.jboss.sbomer.core.errors.UnauthorizedException;
 import org.jboss.sbomer.service.feature.sbom.kerberos.PyxisKrb5ClientRequestFilter;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
+import org.jboss.sbomer.service.rest.faulttolerance.WithRetry;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.reactive.messaging.annotations.Blocking;
@@ -52,6 +53,7 @@ import jakarta.ws.rs.core.Response;
 @RegisterProvider(PyxisKrb5ClientRequestFilter.class)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@WithRetry
 public interface PyxisClient {
 
     List<String> REPOSITORIES_DETAILS_INCLUDES = List.of(
