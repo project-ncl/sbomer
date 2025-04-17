@@ -18,8 +18,34 @@
 package org.jboss.sbomer.core.dto.v1beta1;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public record V1Beta1RequestManifestRecord(String id, String identifier, String rootPurl, Instant creationTime,
         Integer configIndex, String statusMessage, V1Beta1GenerationRecord generation) {
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("V1Beta1RequestManifestRecord[");
+        List<String> parts = new ArrayList<>();
+
+        if (id != null)
+            parts.add("id=" + id);
+        if (identifier != null)
+            parts.add("identifier=" + identifier);
+        if (rootPurl != null)
+            parts.add("rootPurl=" + rootPurl);
+        if (creationTime != null)
+            parts.add("creationTime=" + creationTime);
+        if (configIndex != null)
+            parts.add("configIndex=" + configIndex);
+        if (statusMessage != null)
+            parts.add("statusMessage=" + statusMessage);
+        if (generation != null)
+            parts.add("generation=" + generation);
+
+        sb.append(String.join(", ", parts));
+        sb.append("]");
+        return sb.toString();
+    }
 }

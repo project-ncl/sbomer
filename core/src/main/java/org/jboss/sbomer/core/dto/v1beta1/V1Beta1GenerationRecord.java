@@ -18,6 +18,8 @@
 package org.jboss.sbomer.core.dto.v1beta1;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -25,4 +27,33 @@ import org.jboss.sbomer.core.features.sbom.config.Config;
 
 public record V1Beta1GenerationRecord(String id, String identifier, @Schema(implementation = Map.class) Config config,
         String type, Instant creationTime, String status, String result, String reason) {
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("V1Beta1GenerationRecord[");
+        List<String> parts = new ArrayList<>();
+
+        if (id != null)
+            parts.add("id=" + id);
+        if (identifier != null)
+            parts.add("identifier=" + identifier);
+        if (config != null)
+            parts.add("config=" + config);
+        if (creationTime != null)
+            parts.add("creationTime=" + creationTime);
+        if (type != null)
+            parts.add("type=" + type);
+        if (creationTime != null)
+            parts.add("creationTime=" + creationTime);
+        if (status != null)
+            parts.add("status=" + status);
+        if (result != null)
+            parts.add("result=" + result);
+        if (reason != null)
+            parts.add("reason=" + reason);
+
+        sb.append(String.join(", ", parts));
+        sb.append("]");
+        return sb.toString();
+    }
 }

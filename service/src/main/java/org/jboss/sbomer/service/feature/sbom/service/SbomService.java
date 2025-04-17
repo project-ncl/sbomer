@@ -192,8 +192,15 @@ public class SbomService {
     }
 
     @WithSpan
+    @Transactional
     public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter) {
-        return requestEventRepository.searchAggregatedResultsNatively(filter);
+        return requestEventRepository.searchAggregatedResultsNatively(filter, true);
+    }
+
+    @WithSpan
+    @Transactional
+    public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter, boolean minimized) {
+        return requestEventRepository.searchAggregatedResultsNatively(filter, minimized);
     }
 
     /**
@@ -555,10 +562,72 @@ public class SbomService {
     }
 
     @Transactional
+    public V1Beta1RequestRecord searchLastSuccessfulAdvisoryBuildRequestRecord(
+            String ignoreRequestId,
+            String advisoryId) {
+
+        // Get all the request events generations for this advisory
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecords = searchAggregatedResultsNatively(
+                ErrataAdvisoryRequestConfig.TYPE_NAME + "=" + advisoryId,
+                true);
+
+        if (allAdvisoryRequestRecords == null || allAdvisoryRequestRecords.isEmpty()) {
+            log.debug("No records found for advisory {}", advisoryId);
+            return null;
+        }
+
+        // Filter the results and remove the current (IN_PROGRESS) requestId
+        log.debug("Filtering found records to ignore current IN_PROGRESS event {} ...", ignoreRequestId);
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecordsFiltered = allAdvisoryRequestRecords.stream()
+                .filter(requestRecord -> !requestRecord.id().equals(ignoreRequestId))
+                .toList();
+
+        if (allAdvisoryRequestRecordsFiltered.isEmpty()) {
+            log.debug("No successful records found for advisory {}", advisoryId);
+            return null;
+        }
+
+        // Here am interested in the last successful record related to _build_ manifests generation.
+        // This to avoid the scenario where:
+        // 1 - _build_ manifests generation succeeds
+        // 2 - _release_ manifests generation fails
+        // 3 - a new _release_ manifest generation request is received but it re-starts the _build_ manifest
+        // generation because the last identified record (from 2) is a failure
+        //
+        // If a _release_ manifest generation request is received,
+        // SBOMer needs to find the last _build_ manifest generation record
+        log.debug(
+                "Filtering records to retrieve only the _build_ manifests records (ignoring _release_ manifests records)...");
+        // The generations of _build_ manifests have config != null
+        List<V1Beta1RequestRecord> advisoryBuildRequestRecords = allAdvisoryRequestRecordsFiltered.stream()
+                .filter(
+                        record -> record.manifests()
+                                .stream()
+                                .noneMatch(
+                                        manifest -> manifest.generation() != null
+                                                && manifest.generation().config() == null))
+                .toList();
+
+        // Check whether the last one was completed successfully
+        if (!RequestEventStatus.SUCCESS.equals(advisoryBuildRequestRecords.get(0).eventStatus())) {
+            log.debug("No successful records found for advisory {}", advisoryId);
+            return null;
+        }
+
+        // Get the latest request and verify there are manifests
+        V1Beta1RequestRecord latestAdvisoryRequestManifest = advisoryBuildRequestRecords.get(0);
+        if (latestAdvisoryRequestManifest.manifests() == null || latestAdvisoryRequestManifest.manifests().isEmpty()) {
+            return null;
+        }
+        return latestAdvisoryRequestManifest;
+    }
+
+    @Transactional
     public V1Beta1RequestRecord searchLastSuccessfulAdvisoryRequestRecord(String ignoreRequestId, String advisoryId) {
         // Get all the request events generations for this advisory
         List<V1Beta1RequestRecord> allAdvisoryRequestRecords = searchAggregatedResultsNatively(
-                ErrataAdvisoryRequestConfig.TYPE_NAME + "=" + advisoryId);
+                ErrataAdvisoryRequestConfig.TYPE_NAME + "=" + advisoryId,
+                true);
 
         if (allAdvisoryRequestRecords == null || allAdvisoryRequestRecords.isEmpty()) {
             log.debug("No records found for advisory {}", advisoryId);
