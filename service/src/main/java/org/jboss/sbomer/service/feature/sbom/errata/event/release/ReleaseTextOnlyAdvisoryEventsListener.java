@@ -56,6 +56,7 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.stats.StatsService;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -63,6 +64,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.narayana.jta.QuarkusTransaction;
+import io.smallrye.faulttolerance.api.BeforeRetry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
@@ -306,6 +308,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
 
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
+    @BeforeRetry(RetryLogger.class)
     protected Sbom saveReleaseManifestForTextOnlyAdvisories(
             RequestEvent requestEvent,
             Errata erratum,

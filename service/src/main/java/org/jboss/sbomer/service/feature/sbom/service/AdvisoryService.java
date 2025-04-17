@@ -73,6 +73,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -81,6 +82,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.smallrye.faulttolerance.api.BeforeRetry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -676,6 +678,7 @@ public class AdvisoryService {
     }
 
     @Retry(maxRetries = 10, retryOn = KojiClientException.class)
+    @BeforeRetry(RetryLogger.class)
     protected KojiClientSession getKojiSession() throws KojiClientException {
         if (kojiSession == null) {
             kojiSession = kojiProvider.createSession();
@@ -685,6 +688,7 @@ public class AdvisoryService {
 
     // This method will be retried up to 10 times if a KojiClientException is thrown
     @Retry(maxRetries = 10, retryOn = KojiClientException.class)
+    @BeforeRetry(RetryLogger.class)
     protected Map<Long, String> getImageNamesFromBuilds(List<Long> buildIds) throws KojiClientException {
         Map<Long, String> buildsToImageName = new HashMap<>();
 
