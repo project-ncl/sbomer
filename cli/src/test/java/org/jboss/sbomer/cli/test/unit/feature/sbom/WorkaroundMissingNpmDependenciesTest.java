@@ -33,10 +33,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -254,6 +256,38 @@ class WorkaroundMissingNpmDependenciesTest {
 
         assertTrue(getDependency("pkg:npm/twice@1.4.0", bom.getDependencies()).isPresent());
         assertTrue(getDependency("pkg:npm/twice@1.4.0", dependency2.getDependencies()).isPresent());
+    }
+
+    @Test
+    void testMissingComponentsAndNoNPMDependenciesInMainComponent() throws IOException {
+        // Mock PNC service
+        PncService pncServiceMock = Mockito.mock(PncService.class);
+        Build pncBuild = OBJECT_MAPPER.readValue(TestResources.asString("pnc/mavenBuild.json"), Build.class);
+        List<Artifact> artifacts = new ArrayList<>();
+        when(pncServiceMock.getBuild(("FOOBAR012345"))).thenReturn(pncBuild);
+        when(pncServiceMock.getNPMDependencies(("FOOBAR012345"))).thenReturn(artifacts);
+
+        // Prepare the test component
+        Bom bom = Objects.requireNonNull(SbomUtils.createBom());
+        Component mainComponent = SbomUtils.createComponent(
+                "foo.bar",
+                "baz",
+                "1.0.0.redhat-00001",
+                "Test project",
+                "pkg:maven/foo.bar/baz@1.0.0.redhat-00001?type=jar",
+                Component.Type.LIBRARY);
+        bom.setMetadata(SbomUtils.createDefaultSbomerMetadata(mainComponent, "1.0.0.redhat-00001"));
+        SbomUtils.setPncBuildMetadata(mainComponent, pncBuild, "pnc.example.com");
+
+        // Check assertions before test
+        assertNull(bom.getComponents());
+
+        // Run test
+        WorkaroundMissingNpmDependencies workaround = new WorkaroundMissingNpmDependencies(pncServiceMock);
+        workaround.analyzeComponentsBuild(mainComponent);
+
+        // Check no exception is thrown
+        assertDoesNotThrow(() -> workaround.addMissingDependencies(bom));
     }
 
     private static Optional<Dependency> getDependency(String ref, List<Dependency> dependencies) {
