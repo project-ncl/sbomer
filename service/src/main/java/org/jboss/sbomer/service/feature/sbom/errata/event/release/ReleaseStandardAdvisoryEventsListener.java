@@ -80,7 +80,6 @@ import com.github.packageurl.PackageURL;
 
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.smallrye.faulttolerance.api.BeforeRetry;
-import io.smallrye.faulttolerance.api.ExponentialBackoff;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
@@ -967,7 +966,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     }
                 }
             } catch (MalformedPackageURLException e) {
-                log.error("Unable to parse the purl {}", component.getPurl(), e);
+                log.debug("Unable to parse the purl '{}' of component with name '{}' ({})", component.getPurl(), component.getName(), e.getMessage());
             }
         }
         return manifestArches;
