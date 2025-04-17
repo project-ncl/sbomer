@@ -17,20 +17,16 @@
  */
 package org.jboss.sbomer.service.rest.faulttolerance;
 
-import jakarta.interceptor.InterceptorBinding;
-import java.lang.annotation.*;
+import java.time.temporal.ChronoUnit;
 
-@Inherited
-@InterceptorBinding
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE })
-public @interface WithRetry {
+public class Costants {
 
-    int maxRetries() default 30;
+    public static final int PNC_CLIENT_MAX_RETRIES = 10;
+    public static final int ERRATA_CLIENT_MAX_RETRIES = 15;
+    public static final int PYXIS_CLIENT_MAX_RETRIES = 15;
 
-    long delay() default 1000; // in milliseconds
+    public static final long PNC_CLIENT_DELAY = 1;
+    public static final long ERRATA_CLIENT_DELAY = 1;
+    public static final long PYXIS_CLIENT_DELAY = 1;
 
-    long maxDelay() default 60000;
-
-    boolean exponential() default true;
 }

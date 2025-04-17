@@ -70,6 +70,7 @@ import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.stats.StatsService;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -78,6 +79,8 @@ import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 
 import io.quarkus.narayana.jta.QuarkusTransaction;
+import io.smallrye.faulttolerance.api.BeforeRetry;
+import io.smallrye.faulttolerance.api.ExponentialBackoff;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
@@ -471,6 +474,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
+    @BeforeRetry(RetryLogger.class)
     protected Sbom saveReleaseManifestForRPMGeneration(
             RequestEvent requestEvent,
             Errata erratum,
@@ -586,6 +590,7 @@ public class ReleaseStandardAdvisoryEventsListener {
     // TODO: Refactor
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
+    @BeforeRetry(RetryLogger.class)
     protected Sbom saveReleaseManifestForDockerGeneration(
             RequestEvent requestEvent,
             Errata erratum,
