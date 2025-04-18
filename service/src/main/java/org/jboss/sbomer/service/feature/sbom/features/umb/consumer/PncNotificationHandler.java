@@ -96,6 +96,13 @@ public class PncNotificationHandler {
     PncClient pncClient;
 
     @Transactional
+    public void handle(String requestEventId) throws JsonProcessingException {
+
+        RequestEvent requestEvent = requestEventRepository.findById(requestEventId);
+        handle(requestEvent);
+    }
+
+    @Transactional
     public void handle(RequestEvent requestEvent) throws JsonProcessingException {
 
         JsonNode msgNode = requestEvent.getEvent().get(EVENT_KEY_UMB_MSG);
