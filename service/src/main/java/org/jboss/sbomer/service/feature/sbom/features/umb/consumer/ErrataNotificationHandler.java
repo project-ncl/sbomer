@@ -58,6 +58,12 @@ public class ErrataNotificationHandler {
     @Inject
     RequestEventRepository requestEventRepository;
 
+    public void handle(String requestEventId) throws IOException {
+
+        RequestEvent requestEvent = requestEventRepository.findById(requestEventId);
+        handle(requestEvent);
+    }
+
     public void handle(RequestEvent requestEvent) throws IOException {
 
         if (!featureFlags.errataIntegrationEnabled()) {
