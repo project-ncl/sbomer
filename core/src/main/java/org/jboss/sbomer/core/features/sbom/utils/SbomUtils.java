@@ -778,7 +778,7 @@ public class SbomUtils {
         if (component.getProperties() != null) {
             Optional<Property> property = component.getProperties()
                     .stream()
-                    .filter(p -> p.getName().equalsIgnoreCase(name))
+                    .filter(p -> p.getName().equals(name))
                     .findFirst();
             property.ifPresent(value -> component.getProperties().remove(value));
         }
@@ -790,7 +790,7 @@ public class SbomUtils {
 
     public static boolean hasProperty(Component component, String property) {
         return component.getProperties() != null
-                && component.getProperties().stream().anyMatch(c -> c.getName().equalsIgnoreCase(property));
+                && component.getProperties().stream().anyMatch(c -> c.getName().equals(property));
     }
 
     public static Optional<Property> findPropertyWithNameInComponent(String propertyName, Component component) {
@@ -806,7 +806,7 @@ public class SbomUtils {
             return Optional.empty();
         }
 
-        return properties.stream().filter(p -> p.getName().equalsIgnoreCase(propertyName)).findFirst();
+        return properties.stream().filter(p -> p.getName().equals(propertyName)).findFirst();
     }
 
     public static boolean hasExternalReference(Component c, ExternalReference.Type type) {

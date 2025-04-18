@@ -966,7 +966,11 @@ public class ReleaseStandardAdvisoryEventsListener {
                     }
                 }
             } catch (MalformedPackageURLException e) {
-                log.debug("Unable to parse the purl '{}' of component with name '{}' ({})", component.getPurl(), component.getName(), e.getMessage());
+                log.debug(
+                        "Unable to parse the purl '{}' of component with name '{}' ({})",
+                        component.getPurl(),
+                        component.getName(),
+                        e.getMessage());
             }
         }
         return manifestArches;
