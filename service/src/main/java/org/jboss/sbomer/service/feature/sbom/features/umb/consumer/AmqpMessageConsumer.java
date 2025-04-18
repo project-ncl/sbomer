@@ -26,7 +26,6 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_TOPIC;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
@@ -38,7 +37,6 @@ import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
-import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
@@ -50,7 +48,6 @@ import org.jboss.sbomer.service.feature.sbom.errata.event.umb.PncBuildUmbStatusC
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.arc.Unremovable;
@@ -237,16 +234,6 @@ public class AmqpMessageConsumer {
         return event.put(EVENT_KEY_UMB_MSG_CREATION_TIME, Instant.ofEpochMilli(metadata.getCreationTime()).toString())
                 .put(EVENT_KEY_UMB_MSG_ID, metadata.getId())
                 .put(EVENT_KEY_UMB_TOPIC, metadata.getAddress());
-    }
-
-    @Transactional(value = TxType.REQUIRES_NEW)
-    protected CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
-        requestEventRepository.updateRequestEvent(
-                requestEvent,
-                RequestEventStatus.FAILED,
-                Map.of(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString()),
-                RequestEvent.FAILED_GENERIC_REASON);
-        return message.nack(e);
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
