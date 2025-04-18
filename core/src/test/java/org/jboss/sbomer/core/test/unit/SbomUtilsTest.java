@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
@@ -38,6 +39,7 @@ import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
 import org.cyclonedx.model.Metadata;
+import org.cyclonedx.model.Property;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
@@ -177,6 +179,22 @@ class SbomUtilsTest {
         void shouldNotFailOnNullPropertiesFindProperty() {
             Component component = new Component();
             assertEquals(Optional.empty(), SbomUtils.findPropertyWithNameInComponent("blah", component));
+        }
+
+        @Test
+        void shouldNotFindUnmatchedCaseOfPropertyName() {
+            Component component = new Component();
+            SbomUtils.addProperty(component, "sbomer:image:labels:RELEASE", "main");
+            SbomUtils.addProperty(component, "sbomer:image:labels:release", "855");
+            assertEquals(2, component.getProperties().size());
+            Property uppercase = SbomUtils.findPropertyWithNameInComponent("sbomer:image:labels:RELEASE", component)
+                    .orElse(null);
+            Property lowercase = SbomUtils.findPropertyWithNameInComponent("sbomer:image:labels:release", component)
+                    .orElse(null);
+            assertNotNull(uppercase);
+            assertNotNull(lowercase);
+            assertEquals("main", uppercase.getValue());
+            assertEquals("855", lowercase.getValue());
         }
 
         @Test
