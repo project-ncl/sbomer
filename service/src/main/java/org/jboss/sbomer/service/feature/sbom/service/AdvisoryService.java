@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -415,6 +416,12 @@ public class AdvisoryService {
                                         .stream()
                                         .flatMap(build -> build.getBuildItems().values().stream())
                                         .toList()));
+
+        // The are cases where an advisory might have no builds, let's ignore them to avoid a pending request
+        if (buildDetails.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum() == 0) {
+            String reason = String.format("The standard errata advisory has no retrievable builds attached, skipping!");
+            doIgnoreRequest(requestEvent, reason);
+        }
 
         // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
         // manifests.
