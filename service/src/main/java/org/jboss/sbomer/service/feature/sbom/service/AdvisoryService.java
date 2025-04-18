@@ -29,8 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.koji.KojiClientSession;
@@ -123,6 +126,9 @@ public class AdvisoryService {
 
     @Inject
     ErrataNotesSchemaValidator notesSchemaValidator;
+
+    @Inject
+    ManagedExecutor managedExecutor;
 
     public Collection<SbomGenerationRequest> generateFromAdvisory(RequestEvent requestEvent) {
 
@@ -686,42 +692,86 @@ public class AdvisoryService {
         return kojiSession;
     }
 
+    private static final int BATCH_SIZE = 50;
+
     // This method will be retried up to 10 times if a KojiClientException is thrown
     @Retry(maxRetries = 10, retryOn = KojiClientException.class)
     @BeforeRetry(RetryLogger.class)
     protected Map<Long, String> getImageNamesFromBuilds(List<Long> buildIds) throws KojiClientException {
-        Map<Long, String> buildsToImageName = new HashMap<>();
+        List<CompletableFuture<Map<Long, String>>> futures = new ArrayList<>();
 
-        try {
-            List<KojiIdOrName> kojiIdOrNames = buildIds.stream().map(id -> KojiIdOrName.getFor(id.toString())).toList();
-
-            List<KojiBuildInfo> buildInfos = getKojiSession().getBuild(kojiIdOrNames);
-            for (KojiBuildInfo kojiBuildInfo : buildInfos) {
-                String imageName = Optional.ofNullable(kojiBuildInfo.getExtra())
-                        .map(extra -> (Map<String, Object>) extra.get("image"))
-                        .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
-                        .map(indexMap -> (List<String>) indexMap.get("pull"))
-                        .flatMap(
-                                list -> !list.isEmpty()
-                                        ? list.stream().filter(item -> item.contains("sha256")).findFirst()
-                                        : Optional.empty())
-                        .or(
-                                () -> Optional.ofNullable(kojiBuildInfo.getExtra())
-                                        .map(extra -> (Map<String, Object>) extra.get("image"))
-                                        .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
-                                        .map(indexMap -> (List<String>) indexMap.get("pull"))
-                                        .flatMap(
-                                                list -> !list.isEmpty() ? list.stream().findFirst() : Optional.empty()))
-                        .orElse(null);
-                buildsToImageName.put((long) kojiBuildInfo.getId(), imageName);
-            }
-        } catch (KojiClientException e) {
-            log.error("Unable to fetch containers information for buildIDs: {}", buildIds, e);
-            // Explicitly throw the exception again so that retry can happen
-            kojiSession = null;
-            throw e;
+        for (int i = 0; i < buildIds.size(); i += BATCH_SIZE) {
+            List<Long> batch = buildIds.subList(i, Math.min(i + BATCH_SIZE, buildIds.size()));
+            futures.add(CompletableFuture.supplyAsync(() -> fetchImageNames(batch), managedExecutor));
         }
-        return buildsToImageName;
+
+        Map<Long, String> merged = new HashMap<>();
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            for (CompletableFuture<Map<Long, String>> future : futures) {
+                merged.putAll(future.get());
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            // Explicitly throw the exception again so that retry can happen
+            log.error("Error while fetching image names for builds: {}", buildIds, e);
+            kojiSession = null;
+            throw new KojiClientException("Batch processing failed", e);
+        }
+
+        return merged;
+    }
+
+    protected Map<Long, String> fetchImageNames(List<Long> buildIds) {
+        try {
+            Map<Long, String> buildsToImageName = new HashMap<>();
+            List<KojiIdOrName> ids = buildIds.stream().map(id -> new KojiIdOrName(id.intValue())).toList();
+
+            List<KojiBuildInfo> buildInfos = getKojiSession().getBuild(ids);
+
+            for (KojiBuildInfo info : buildInfos) {
+                Map<String, Object> extra = info.getExtra();
+                if (extra == null) {
+                    continue;
+                }
+
+                Object imageObj = extra.get("image");
+                if (!(imageObj instanceof Map)) {
+                    continue;
+                }
+
+                Map<String, Object> imageMap = (Map<String, Object>) imageObj;
+                Object indexObj = imageMap.get("index");
+                if (!(indexObj instanceof Map)) {
+                    continue;
+                }
+
+                Map<String, Object> indexMap = (Map<String, Object>) indexObj;
+                Object pullsObj = indexMap.get("pull");
+                if (!(pullsObj instanceof List)) {
+                    continue;
+                }
+
+                List<?> pulls = (List<?>) pullsObj;
+                if (pulls.isEmpty()) {
+                    continue;
+                }
+
+                String imageName = pulls.stream()
+                        .filter(item -> item instanceof String && ((String) item).contains("sha256"))
+                        .map(Object::toString)
+                        .findFirst()
+                        .orElse(pulls.get(0).toString());
+
+                buildsToImageName.put((long) info.getId(), imageName);
+            }
+
+            return buildsToImageName;
+        } catch (KojiClientException e) {
+            log.error("Unable to fetch containers information for buildIDs (batch): {}", buildIds, e);
+            kojiSession = null;
+            throw new RuntimeException(e);
+        }
     }
 
     private void printAllErratumData(Errata erratum) {
