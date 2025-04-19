@@ -667,27 +667,12 @@ public class AdvisoryService {
                 log.debug("ConfigMap to create: '{}'", req);
 
                 SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
-                kubernetesClient.configMaps().resource(req).create();
 
                 sbomRequests.add(sbomGenerationRequest);
             });
         });
 
         return sbomRequests;
-    }
-
-    private Long findErrataProductVersionIdByName(ErrataProduct product, String pVersionName) {
-        if (product != null && product.getData() != null && product.getData().getRelationships() != null) {
-            return product.getData()
-                    .getRelationships()
-                    .getProductVersions()
-                    .stream()
-                    .filter(version -> version.getName().equals(pVersionName))
-                    .map(ErrataProduct.ErrataProductVersion::getId)
-                    .findFirst()
-                    .orElse(null);
-        }
-        return null;
     }
 
     @Retry(maxRetries = 10, retryOn = KojiClientException.class)

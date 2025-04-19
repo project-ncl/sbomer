@@ -453,7 +453,7 @@ public class BuildController extends AbstractController {
      * @return Action to take on the {@link GenerationRequest} resource.
      */
     @Override
-    protected UpdateControl<GenerationRequest> reconcileNew(
+    protected UpdateControl<GenerationRequest> reconcileScheduled(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
@@ -500,6 +500,9 @@ public class BuildController extends AbstractController {
         switch (generationRequest.getStatus()) {
             case NEW:
                 action = reconcileNew(generationRequest, secondaryResources);
+                break;
+            case SCHEDULED:
+                action = reconcileScheduled(generationRequest, secondaryResources);
                 break;
             case INITIALIZING:
                 action = reconcileInitializing(generationRequest, secondaryResources);
