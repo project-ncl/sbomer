@@ -47,7 +47,6 @@ import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -289,6 +288,9 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
             case NEW:
                 action = reconcileNew(generationRequest, secondaryResources);
                 break;
+            case SCHEDULED:
+                action = reconcileScheduled(generationRequest, secondaryResources);
+                break;
             case GENERATING:
                 action = reconcileGenerating(generationRequest, secondaryResources);
                 break;
@@ -321,15 +323,29 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
     /**
      * <p>
-     * In case the dependent resource is prepared, the {@link SbomGenerationStatus#NEW} status is transitioned into
-     * {@link SbomGenerationStatus#GENERATING}. In all other cases, the resource stays in the
-     * {@link SbomGenerationStatus#NEW} status.
+     * Simply change the status of all resurces with {@link SbomGenerationStatus#NEW} status to
+     * {@link SbomGenerationStatus#SCHEDULED}. This is done for backwards-compatibility.
      * </p>
      */
     protected UpdateControl<GenerationRequest> reconcileNew(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
         log.debug("Reconcile NEW for '{}'...", generationRequest.getName());
+
+        return updateRequest(generationRequest, SbomGenerationStatus.SCHEDULED, null, null);
+    }
+
+    /**
+     * <p>
+     * In case the dependent resource is prepared, the {@link SbomGenerationStatus#NEW} status is transitioned into
+     * {@link SbomGenerationStatus#GENERATING}. In all other cases, the resource stays in the
+     * {@link SbomGenerationStatus#NEW} status.
+     * </p>
+     */
+    protected UpdateControl<GenerationRequest> reconcileScheduled(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+        log.debug("Reconcile SCHEDULED for '{}'...", generationRequest.getName());
 
         TaskRun generateTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.GENERATE);
 

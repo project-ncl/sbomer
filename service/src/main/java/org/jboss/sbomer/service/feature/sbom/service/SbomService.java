@@ -238,8 +238,6 @@ public class SbomService {
 
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
-        kubernetesClient.configMaps().resource(req).create();
-
         return sbomGenerationRequest;
     }
 
@@ -279,8 +277,6 @@ public class SbomService {
         log.debug("ConfigMap to create for operation: '{}'", req);
 
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
-
-        kubernetesClient.configMaps().resource(req).create();
 
         log.debug(
                 "ZipGenerationRequest Kubernetes resource '{}' created for operation '{}'",
@@ -334,8 +330,6 @@ public class SbomService {
             }
 
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
-
-            kubernetesClient.configMaps().resource(req).create();
 
             log.debug(
                     "GenerationRequest Kubernetes resource '{}' created for build '{}'",
