@@ -221,3 +221,22 @@ sbomer:
           limits:
             cpu: "1000m"
             memory: "1400Mi"
+
+  service:
+    generation-scheduler:
+      # Defines how many requests can be handled concurrently within the namespace
+      # If the capacity is lower than what we have in the DB -- the ones in DB will wait
+      max-concurrent-generations: 20
+
+      # Maximum number of generations that will fetched from the database to be scheduled within the namespace.
+      sync-batch: 10
+
+      # The interval on which the scheduler will run.
+      sync-interval: 15s
+
+  leader:
+    # Duration in seconds that non-leaders will wait before trying to acquire leadership if no renewal occurs.
+    lease-duration: 30
+
+    # The interval on which the lease will be checked
+    check-interval: 10s
