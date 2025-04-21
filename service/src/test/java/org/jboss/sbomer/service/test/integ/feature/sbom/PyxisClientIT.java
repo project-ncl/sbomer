@@ -22,7 +22,6 @@ import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.test.PyxisWireMock;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -241,18 +240,18 @@ public class PyxisClientIT {
 
     List<Long> requestDeltas(List<ServeEvent> serveEvents) {
         Iterator it = serveEvents.iterator();
-        List<Long> ret = new ArrayList();
+        List<Long> deltas = new ArrayList();
 
         while (it.hasNext()) {
             ServeEvent s1 = (ServeEvent) it.next();
             ServeEvent s2 = it.hasNext() ? (ServeEvent) it.next() : s1;
             delta(s2.getRequest().getLoggedDate(), s1.getRequest().getLoggedDate(), ChronoUnit.MILLIS);
-            ret.add(delta(s1.getRequest().getLoggedDate(), s2.getRequest().getLoggedDate(), ChronoUnit.MILLIS));
+            deltas.add(delta(s1.getRequest().getLoggedDate(), s2.getRequest().getLoggedDate(), ChronoUnit.MILLIS));
         }
-        return ret;
+        return deltas;
     }
 
-    long delta(Date e, Date o, ChronoUnit unit) {
+    static long delta(Date e, Date o, ChronoUnit unit) {
         return unit.between(e.toInstant(), o.toInstant());
     }
 
