@@ -29,4 +29,16 @@ public class Constants {
     public static final long PYXIS_CLIENT_DELAY = 1;
     public static final long ATLAS_CLIENT_DELAY = 1;
 
+    /*
+     * In some circumstances Pyxis returns a 200 code but an empty RepositoryDescription, this means it may not yet be
+     * published, this can take a long time (hours and days). The below settings apply to this scenario, as we are using
+     * the fibonaci backoff we can work out the backoff intervals from intial delay and max retries, initially we will
+     * aim for 2 days (48hrs) max backoff.
+     *
+     * Intial Delay = 60 minutes Max retries = 18 (2584 minutes - 1 day 19hrs 4minutes)
+     *
+     */
+    // public static final ChronoUnit PYXIS_UNPUBLISHED_UNIT = ChronoUnit.MINUTES;
+    public static final int PYXIS_UNPUBLISHED_INITIAL_DELAY = 8;
+    public static final int PYXIS_UNPUBLISHED_MAX_RETRIES = 18;
 }

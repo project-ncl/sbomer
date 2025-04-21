@@ -68,7 +68,8 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient;
+import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisService;
+import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
@@ -97,7 +98,7 @@ class ReleaseAdvisoryEventsListenerTest {
     ReleaseTextOnlyAdvisoryEventsListenerManifests listenerTextOnlyManifests;
     ReleaseTextOnlyAdvisoryEventsListenerDeliverables listenerTextOnlyDeliverables;
     final ErrataClient errataClient = mock(ErrataClient.class);
-    final PyxisClient pyxisClient = mock(PyxisClient.class);
+    final PyxisValidatingClient pyxisClient = mock(PyxisValidatingClient.class);
     final StatsService statsService = mock(StatsService.class);
     final SbomService sbomService = mock(SbomService.class);
     final SbomGenerationRequestRepository generationRequestRepository = mock(SbomGenerationRequestRepository.class);
