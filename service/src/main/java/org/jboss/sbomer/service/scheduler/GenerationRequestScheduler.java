@@ -42,17 +42,25 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GenerationRequestScheduler {
 
-    @Inject
     SbomGenerationRequestRepository requestRepository;
 
-    @Inject
     KubernetesClient kubernetesClient;
 
-    @Inject
     GenerationSchedulerConfig generationSchedulerConfig;
 
-    @Inject
     LeaderManager leaderManager;
+
+    @Inject
+    public GenerationRequestScheduler(
+            SbomGenerationRequestRepository requestRepository,
+            KubernetesClient kubernetesClient,
+            GenerationSchedulerConfig generationSchedulerConfig,
+            LeaderManager leaderManager) {
+        this.requestRepository = requestRepository;
+        this.kubernetesClient = kubernetesClient;
+        this.generationSchedulerConfig = generationSchedulerConfig;
+        this.leaderManager = leaderManager;
+    }
 
     /**
      * <p>
@@ -79,7 +87,7 @@ public class GenerationRequestScheduler {
             delayUnit = TimeUnit.MINUTES,
             concurrentExecution = ConcurrentExecution.SKIP)
     @Transactional(value = TxType.REQUIRES_NEW)
-    void scheduleGenerations() {
+    public void scheduleGenerations() {
         if (!leaderManager.isLeader()) {
             log.info("Current instance is not the leader, skipping scheduling of generations in this instance");
             return;
