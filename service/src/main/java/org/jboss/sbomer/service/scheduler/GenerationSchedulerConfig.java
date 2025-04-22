@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.service.scheduler;
+package org.jboss.sbomer.service.scheduler;
 
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
