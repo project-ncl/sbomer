@@ -33,7 +33,6 @@ import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.Scheduled.ConcurrentExecution;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 import lombok.extern.slf4j.Slf4j;
@@ -114,11 +113,14 @@ public class GenerationRequestScheduler {
 
         log.debug("There is space in the cluster to process new generations, fetching them now...");
 
-        List<SbomGenerationRequest> oldestResultsBatch = requestRepository
-                .find("status = ?1 ORDER BY creationTime ASC", SbomGenerationStatus.NEW)
-                .withLock(LockModeType.PESSIMISTIC_WRITE)
-                .page(0, generationSchedulerConfig.syncBatch())
-                .list();
+        List<SbomGenerationRequest> oldestResultsBatch = requestRepository.getEntityManager()
+                .createNativeQuery(
+                        String.format(
+                                "SELECT * FROM sbom_generation_request WHERE status = '%s' ORDER BY creation_time ASC FOR UPDATE SKIP LOCKED LIMIT %s",
+                                SbomGenerationStatus.NEW,
+                                generationSchedulerConfig.syncBatch()),
+                        SbomGenerationRequest.class)
+                .getResultList();
 
         log.debug("Got {} generations to be scheduled...", oldestResultsBatch.size());
 

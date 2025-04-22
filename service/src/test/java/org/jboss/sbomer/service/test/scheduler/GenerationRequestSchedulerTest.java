@@ -36,8 +36,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
-import jakarta.persistence.LockModeType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 public class GenerationRequestSchedulerTest {
     KubernetesClient kubernetesClient;
@@ -94,7 +94,7 @@ public class GenerationRequestSchedulerTest {
                         .withLabelSelector(
                                 eq(
                                         "sbomer.jboss.org/type=generation-request,sbomer.jboss.org/status notin (FAILED, FINISHED)")))
-                                                .thenReturn(watchList);
+                .thenReturn(watchList);
 
         // 10 already in progress
         when(watchList.list().getItems().size()).thenReturn(10);
@@ -127,23 +127,26 @@ public class GenerationRequestSchedulerTest {
                 configMaps.withLabelSelector(
                         eq(
                                 "sbomer.jboss.org/type=generation-request,sbomer.jboss.org/status notin (FAILED, FINISHED)")))
-                                        .thenReturn(watchList);
+                .thenReturn(watchList);
 
         // 1 already in progress
         when(watchList.list().getItems().size()).thenReturn(1);
 
-        PanacheQuery<SbomGenerationRequest> panacheQuery = mock(PanacheQuery.class, RETURNS_DEEP_STUBS);
+        EntityManager em = mock(EntityManager.class);
+        when(requestRepository.getEntityManager()).thenReturn(em);
 
-        when(requestRepository.find(eq("status = ?1 ORDER BY creationTime ASC"), eq(SbomGenerationStatus.NEW)))
-                .thenReturn(panacheQuery);
+        Query query = mock(Query.class);
+        when(query.getResultList()).thenReturn(Collections.emptyList());
 
-        // Nothing in the DB to sync
-        when(panacheQuery.withLock(eq(LockModeType.PESSIMISTIC_WRITE)).page(eq(0), eq(5)).list())
-                .thenReturn(Collections.emptyList());
+        when(
+                em.createNativeQuery(
+                        "SELECT * FROM sbom_generation_request WHERE status = 'NEW' ORDER BY creation_time ASC FOR UPDATE SKIP LOCKED LIMIT 5",
+                        SbomGenerationRequest.class))
+                .thenReturn(query);
 
         scheduler.scheduleGenerations();
 
-        verify(requestRepository, times(1)).find(anyString(), any(SbomGenerationStatus.class));
+        verify(em, times(1)).createNativeQuery(anyString(), any(Class.class));
         verify(configMaps, never()).resource(any());
     }
 
@@ -163,18 +166,22 @@ public class GenerationRequestSchedulerTest {
         when(
                 configMaps.withLabelSelector(
                         "sbomer.jboss.org/type=generation-request,sbomer.jboss.org/status notin (FAILED, FINISHED)"))
-                                .thenReturn(watchList);
-
-        PanacheQuery<SbomGenerationRequest> panacheQuery = mock(PanacheQuery.class, RETURNS_DEEP_STUBS);
-
-        when(requestRepository.find(eq("status = ?1 ORDER BY creationTime ASC"), eq(SbomGenerationStatus.NEW)))
-                .thenReturn(panacheQuery);
+                .thenReturn(watchList);
 
         SbomGenerationRequest req1 = new SbomGenerationRequest();
         SbomGenerationRequest req2 = new SbomGenerationRequest();
 
-        when(panacheQuery.withLock(eq(LockModeType.PESSIMISTIC_WRITE)).page(eq(0), eq(5)).list())
-                .thenReturn(List.of(req1, req2));
+        EntityManager em = mock(EntityManager.class);
+        when(requestRepository.getEntityManager()).thenReturn(em);
+
+        Query query = mock(Query.class);
+        when(query.getResultList()).thenReturn(List.of(req1, req2));
+
+        when(
+                em.createNativeQuery(
+                        "SELECT * FROM sbom_generation_request WHERE status = 'NEW' ORDER BY creation_time ASC FOR UPDATE SKIP LOCKED LIMIT 5",
+                        SbomGenerationRequest.class))
+                .thenReturn(query);
 
         doNothing().when(scheduler).schedule(any());
 
@@ -183,7 +190,7 @@ public class GenerationRequestSchedulerTest {
         assertEquals(SbomGenerationStatus.SCHEDULED, req1.getStatus());
         assertEquals(SbomGenerationStatus.SCHEDULED, req2.getStatus());
 
-        verify(requestRepository, times(1)).find(anyString(), any(SbomGenerationStatus.class));
+        verify(em, times(1)).createNativeQuery(anyString(), any(Class.class));
     }
 
     @SuppressWarnings("unchecked")
