@@ -144,8 +144,22 @@ class InitializationPhaseGenerationRequestReconcilerTest {
     }
 
     @Test
-    void testNewWithoutDependentResources() throws Exception {
+    void testNeDependentResources() throws Exception {
         GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.NEW);
+
+        UpdateControl<GenerationRequest> updateControl = controller
+                .reconcile(request, mockContext(Collections.emptySet()));
+
+        assertTrue(updateControl.isUpdateResource());
+        assertEquals(SbomGenerationStatus.SCHEDULED, updateControl.getResource().getStatus());
+        assertNull(updateControl.getResource().getReason());
+        assertNull(updateControl.getResource().getResult());
+        assertEquals("SCHEDULED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+    }
+
+    @Test
+    void testScheduledWithoutDependentResources() throws Exception {
+        GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.SCHEDULED);
 
         UpdateControl<GenerationRequest> updateControl = controller
                 .reconcile(request, mockContext(Collections.emptySet()));
@@ -156,7 +170,7 @@ class InitializationPhaseGenerationRequestReconcilerTest {
     }
 
     @Test
-    void testNewWithDependentResources() throws Exception {
+    void testScheduledWithDependentResources() throws Exception {
         GenerationRequest request = dummyInitializationRequest(SbomGenerationStatus.NEW);
 
         TaskRun taskRun = dummyTaskRun();
@@ -167,10 +181,10 @@ class InitializationPhaseGenerationRequestReconcilerTest {
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(Set.of(taskRun)));
 
         assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.INITIALIZING, updateControl.getResource().getStatus());
+        assertEquals(SbomGenerationStatus.SCHEDULED, updateControl.getResource().getStatus());
         assertNull(updateControl.getResource().getReason());
         assertNull(updateControl.getResource().getResult());
-        assertEquals("INITIALIZING", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+        assertEquals("SCHEDULED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
     }
 
     @Test

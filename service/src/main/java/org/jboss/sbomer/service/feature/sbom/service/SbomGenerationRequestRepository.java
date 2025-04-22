@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
+import java.util.List;
+
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -57,5 +59,10 @@ public class SbomGenerationRequestRepository extends CriteriaAwareRepository<Sbo
     public SbomGenerationRequest save(SbomGenerationRequest generationRequest) {
         persistAndFlush(generationRequest);
         return generationRequest;
+    }
+
+    @Transactional
+    public List<SbomGenerationRequest> listByIdentifier(String identifier) {
+        return find("identifier = ?1", identifier).list();
     }
 }

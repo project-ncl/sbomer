@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
@@ -43,7 +42,6 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncNotificati
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncBuildNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.PncDelAnalysisNotificationMessageBody;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessageProducer;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
@@ -56,7 +54,6 @@ import org.mockito.ArgumentCaptor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -105,13 +102,9 @@ class PncBuildTest {
         ArgumentCaptor<RequestEvent> requestEventArgumentCaptor = ArgumentCaptor.forClass(RequestEvent.class);
 
         Awaitility.await().atMost(30, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
-            List<ConfigMap> configMaps = kubernetesClient.configMaps().list().getItems();
+            List<SbomGenerationRequest> requests = sbomGenerationRequestRepository.listByIdentifier("AX5TJMYHQAIAE");
 
-            Optional<ConfigMap> request = configMaps.stream()
-                    .filter(cm -> cm.getData().get(GenerationRequest.KEY_IDENTIFIER).equals("AX5TJMYHQAIAE"))
-                    .findFirst();
-
-            if (request.isPresent()) {
+            if (requests.size() == 1) {
                 log.info("Generation request for PNC Build was found!");
                 return true;
             }
@@ -161,14 +154,10 @@ class PncBuildTest {
         ArgumentCaptor<RequestEvent> requestEventArgumentCaptor = ArgumentCaptor.forClass(RequestEvent.class);
 
         Awaitility.await().atMost(30, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
-            List<ConfigMap> configMaps = kubernetesClient.configMaps().list().getItems();
+            List<SbomGenerationRequest> requests = sbomGenerationRequestRepository.listByIdentifier("A6DFVW2SACIAA");
 
-            Optional<ConfigMap> request = configMaps.stream()
-                    .filter(cm -> cm.getData().get(GenerationRequest.KEY_IDENTIFIER).equals("A6DFVW2SACIAA"))
-                    .findFirst();
-
-            if (request.isPresent()) {
-                log.info("Generation request for Del Analysis Operation was found!");
+            if (requests.size() == 1) {
+                log.info("Generation request for PNC Build was found!");
                 return true;
             }
 
