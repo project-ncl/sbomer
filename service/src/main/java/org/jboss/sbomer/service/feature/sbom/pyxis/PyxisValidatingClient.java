@@ -45,9 +45,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import jakarta.inject.Inject;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Costants.PYXIS_UNPUBLISHED_MAX_RETRIES;
-import static org.jboss.sbomer.service.rest.faulttolerance.Costants.PYXIS_UNPUBLISHED_INITIAL_DELAY;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_RETRIES;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_INITIAL_DELAY;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DELAY;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DURATION;
 
 @ApplicationScoped
 public class PyxisValidatingClient {
@@ -60,15 +61,11 @@ public class PyxisValidatingClient {
 
     @Retry(
             maxRetries = PYXIS_UNPUBLISHED_MAX_RETRIES,
-            durationUnit = ChronoUnit.MINUTES,
             delay = PYXIS_UNPUBLISHED_INITIAL_DELAY,
-            delayUnit = ChronoUnit.MINUTES,
-            maxDuration = (PYXIS_UNPUBLISHED_INITIAL_DELAY * (PYXIS_UNPUBLISHED_MAX_RETRIES + 1)),
+            maxDuration = PYXIS_UNPUBLISHED_MAX_DURATION,
             retryOn = ConstraintViolationException.class)
     @BeforeRetry(RetryLogger.class)
-    @FibonacciBackoff(
-            maxDelay = (PYXIS_UNPUBLISHED_INITIAL_DELAY * PYXIS_UNPUBLISHED_MAX_RETRIES),
-            maxDelayUnit = ChronoUnit.MINUTES)
+    @FibonacciBackoff(maxDelay = PYXIS_UNPUBLISHED_MAX_DELAY)
     public PyxisRepositoryDetails getRepositoriesDetails(
             @PathParam("nvr") String nvr,
             @QueryParam("include") List<String> includes) {
@@ -83,15 +80,11 @@ public class PyxisValidatingClient {
 
     @Retry(
             maxRetries = PYXIS_UNPUBLISHED_MAX_RETRIES,
-            durationUnit = ChronoUnit.MINUTES,
             delay = PYXIS_UNPUBLISHED_INITIAL_DELAY,
-            delayUnit = ChronoUnit.MINUTES,
-            maxDuration = (PYXIS_UNPUBLISHED_INITIAL_DELAY * (PYXIS_UNPUBLISHED_MAX_RETRIES + 1)),
+            maxDuration = PYXIS_UNPUBLISHED_MAX_DURATION,
             retryOn = ConstraintViolationException.class)
     @BeforeRetry(RetryLogger.class)
-    @FibonacciBackoff(
-            maxDelay = (PYXIS_UNPUBLISHED_INITIAL_DELAY * PYXIS_UNPUBLISHED_MAX_RETRIES),
-            maxDelayUnit = ChronoUnit.MINUTES)
+    @FibonacciBackoff(maxDelay = PYXIS_UNPUBLISHED_MAX_DELAY)
     public PyxisRepository getRepository(
             @PathParam("registry") String registry,
             @PathParam("repository") String repository,

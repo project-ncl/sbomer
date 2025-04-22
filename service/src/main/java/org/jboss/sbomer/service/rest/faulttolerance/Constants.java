@@ -37,8 +37,16 @@ public class Constants {
      *
      * Intial Delay = 60 minutes Max retries = 18 (2584 minutes - 1 day 19hrs 4minutes)
      *
+     * Setting the ChronoUnit via constants is a bit over involved so please also refer to the location of the
+     * annotation service/src/main/java/org/jboss/sbomer/service/feature/sbom/pyxis/PyxisValidatingClient.java, the
+     * default is millis which is reflected in the below calcs but its possible to use more appropriate sized durations
+     * with ChronoUnit.MINUTES for delayUnits
      */
-    // public static final ChronoUnit PYXIS_UNPUBLISHED_UNIT = ChronoUnit.MINUTES;
-    public static final int PYXIS_UNPUBLISHED_INITIAL_DELAY = 8;
+
+    public static final long PYXIS_UNPUBLISHED_INITIAL_DELAY = 60 * 60 * 1000;
     public static final int PYXIS_UNPUBLISHED_MAX_RETRIES = 18;
+    public static final long PYXIS_UNPUBLISHED_MAX_DURATION = (PYXIS_UNPUBLISHED_INITIAL_DELAY
+            * (PYXIS_UNPUBLISHED_MAX_RETRIES + 1));
+    public static final long PYXIS_UNPUBLISHED_MAX_DELAY = (PYXIS_UNPUBLISHED_INITIAL_DELAY
+            * PYXIS_UNPUBLISHED_MAX_RETRIES);
 }
