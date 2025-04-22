@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.service.leader;
+package org.jboss.sbomer.service.leader;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -38,27 +38,31 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Slf4j
 public class LeaderManager {
-    @Inject
-    LeaseConfig leaseConfig;
+
+    private LeaseConfig leaseConfig;
+    private KubernetesClient kubernetesClient;
 
     @ConfigProperty(name = "SBOMER_RELEASE", defaultValue = "sbomer")
-    String release;
+    String release = "sbomer";
 
     @ConfigProperty(name = "HOSTNAME", defaultValue = "sbomer")
-    String hostname;
-
-    @Inject
-    KubernetesClient kubernetesClient;
+    String hostname = "sbomer";
 
     @Getter
     boolean isLeader = false;
+
+    @Inject
+    public LeaderManager(LeaseConfig leaseConfig, KubernetesClient kubernetesClient) {
+        this.leaseConfig = leaseConfig;
+        this.kubernetesClient = kubernetesClient;
+    }
 
     @Scheduled(
             every = "${sbomer.service.leader.check-interval:10s}",
             delay = 30,
             delayUnit = TimeUnit.SECONDS,
             concurrentExecution = ConcurrentExecution.SKIP)
-    void lease() {
+    public void lease() {
         String leaseName = release + "-generation-scheduler";
 
         log.info("Reading '{}' lease information...", leaseName);
