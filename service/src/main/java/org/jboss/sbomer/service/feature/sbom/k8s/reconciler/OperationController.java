@@ -124,6 +124,18 @@ public class OperationController extends AbstractController {
     }
 
     /**
+     * All new operations go to the next state: SCHEDULED.
+     */
+    private UpdateControl<GenerationRequest> reconcileOperationNew(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+
+        log.debug("ReconcileOperationNew ...");
+
+        return updateRequest(generationRequest, SbomGenerationStatus.SCHEDULED, null, null);
+    }
+
+    /**
      * <p>
      * Possible next statuses: {@link SbomGenerationStatus#FAILED}, {@link SbomGenerationStatus#INITIALIZING} or
      * {@link SbomGenerationStatus#INITIALIZED} if it was really fast :)
@@ -137,11 +149,11 @@ public class OperationController extends AbstractController {
      * @param secondaryResources
      * @return Action to take on the {@link GenerationRequest} resource.
      */
-    private UpdateControl<GenerationRequest> reconcileOperationNew(
+    private UpdateControl<GenerationRequest> reconcileOperationScheduled(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
-        log.debug("ReconcileOperationNew ...");
+        log.debug("ReconcileOperationScheduled ...");
 
         TaskRun initTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.OPERATIONINIT);
 
@@ -498,6 +510,9 @@ public class OperationController extends AbstractController {
         switch (generationRequest.getStatus()) {
             case NEW:
                 action = reconcileOperationNew(generationRequest, secondaryResources);
+                break;
+            case SCHEDULED:
+                action = reconcileOperationScheduled(generationRequest, secondaryResources);
                 break;
             case INITIALIZING:
                 action = reconcileOperationInitializing(generationRequest, secondaryResources);
