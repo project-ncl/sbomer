@@ -24,6 +24,6 @@ if [ "${SCRIPT_DEBUG}" = "true" ] ; then
     echo "Script debugging is enabled"
 fi
 
-export JAVA_TOOL_OPTIONS="-XX:InitialRAMPercentage=20.0 -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError -XX:NativeMemoryTracking=summary"
+export JAVA_TOOL_OPTIONS="-XX:InitialRAMPercentage=20.0 -XX:MaxRAMPercentage=60.0 -XX:+ExitOnOutOfMemoryError -XX:NativeMemoryTracking=summary -XX:CompressedClassSpaceSize=64m -XX:+UseCompressedClassPointers -XX:MaxMetaspaceSize=256m -XX:MetaspaceSize=32m"
 
 exec /usr/local/s2i/run
