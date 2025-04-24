@@ -28,7 +28,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
 
     - name: Check User Permission
-      if: steps.checkAccess.outputs.require-result == 'false'
+      if: steps.checkAccess.outputs.require-result == 'false' && inputs.triggering-actor != 'renovate[bot]'
       shell: bash
       run: |
         echo "${{ inputs.triggering-actor }} does not have permissions on this repo."
