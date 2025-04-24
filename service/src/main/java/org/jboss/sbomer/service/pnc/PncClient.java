@@ -38,8 +38,8 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Costants.PNC_CLIENT_MAX_RETRIES;
-import static org.jboss.sbomer.service.rest.faulttolerance.Costants.PNC_CLIENT_DELAY;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PNC_CLIENT_MAX_RETRIES;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PNC_CLIENT_DELAY;
 
 @ApplicationScoped
 @ClientHeaderParam(name = "User-Agent", value = "SBOMer")
