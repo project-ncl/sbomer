@@ -193,7 +193,10 @@ public class AdvisoryService {
     // FIXME: 'Optional.get()' without 'isPresent()' check
     private Collection<SbomGenerationRequest> handleTextOnlyAdvisory(RequestEvent requestEvent, Errata erratum) {
 
-        if (!featureFlags.textOnlyErrataManifestGenerationEnabled()) {
+        // Check release flag for simplicity too, because release logic is below this condition and is toggled
+        // separately
+        if (!featureFlags.textOnlyErrataManifestGenerationEnabled()
+                && !featureFlags.textOnlyErrataReleaseManifestGenerationEnabled()) {
             return doIgnoreRequest(requestEvent, "Text-Only Errata manifest generation is disabled");
         }
 

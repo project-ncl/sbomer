@@ -134,9 +134,9 @@ public class FeatureFlags implements UnleashSubscriber {
     }
 
     /**
-     * Returns {@code true} if storing logs in S3 bucket is enabled.
+     * Returns {@code true} if publishing SBOMs to Atlas is enabled.
      *
-     * @return {@code true} if s3 support for logs is enabled, {@code false} otherwise
+     * @return {@code true} if publishing SBOMs to Atlas is enabled, {@code false} otherwise
      */
     public boolean atlasPublish() {
         return unleash.isEnabled(TOGGLE_ATLAS_PUBLISH, publishToAtlas);

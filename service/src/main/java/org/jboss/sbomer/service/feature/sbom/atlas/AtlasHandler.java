@@ -18,9 +18,9 @@
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
@@ -37,18 +37,29 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Slf4j
 public class AtlasHandler {
+
+    public static final Map<String, String> LABELS = Map.of("type", "cyclonedx");
+
     @Inject
     @RestClient
     AtlasBuildClient atlasBuildClient;
 
     @Inject
+    @RestClient
+    AtlasReleaseClient atlasReleaseClient;
+
+    @Inject
     FeatureFlags featureFlags;
 
-    public Bom retrieveBuildManifest(String purl) {
-        return atlasBuildClient.get(purl);
+    public void publishBuildManifests(List<Sbom> sboms) {
+        publishManifests(sboms, false);
     }
 
-    public void publishBuildManifests(List<Sbom> sboms) {
+    public void publishReleaseManifests(List<Sbom> sboms) {
+        publishManifests(sboms, true);
+    }
+
+    private void publishManifests(List<Sbom> sboms, boolean isRelease) {
         if (sboms == null) {
             log.warn(
                     "Manifest list is not provided, this is unexpected, Atlas will not be populated with manifest, but continuing");
@@ -66,21 +77,23 @@ public class AtlasHandler {
                     sboms.stream().map(Sbom::getId).collect(Collectors.joining(", ")));
         }
 
-        log.info("Uploading {} manifests...", sboms.size());
+        AtlasClient atlasClient = isRelease ? atlasReleaseClient : atlasBuildClient;
+        String atlasInstanceName = isRelease ? "release" : "build";
+        log.info("Uploading {} {} manifests...", sboms.size(), atlasInstanceName);
 
         for (Sbom sbom : sboms) {
-            uploadBuildManifest(sbom);
+            uploadManifest(sbom, atlasClient);
         }
 
         log.info("Upload complete!");
     }
 
-    protected void uploadBuildManifest(Sbom sbom) {
+    protected void uploadManifest(Sbom sbom, AtlasClient atlasClient) {
         log.info("Uploading manifest '{}' (purl: '{}')...", sbom.getId(), sbom.getRootPurl());
 
         try {
             // Store it!
-            atlasBuildClient.upload(sbom.getRootPurl(), sbom.getSbom());
+            atlasClient.upload(LABELS, sbom.getSbom());
         } catch (ClientException e) {
             throw new ApplicationException(
                     "Unable to store '{}' manifest in Atlas, purl: '{}': {}",
