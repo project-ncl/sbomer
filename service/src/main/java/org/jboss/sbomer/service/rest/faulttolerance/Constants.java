@@ -17,16 +17,16 @@
  */
 package org.jboss.sbomer.service.rest.faulttolerance;
 
-import java.time.temporal.ChronoUnit;
-
-public class Costants {
+public class Constants {
 
     public static final int PNC_CLIENT_MAX_RETRIES = 10;
     public static final int ERRATA_CLIENT_MAX_RETRIES = 15;
     public static final int PYXIS_CLIENT_MAX_RETRIES = 15;
+    public static final int ATLAS_CLIENT_MAX_RETRIES = 15;
 
     public static final long PNC_CLIENT_DELAY = 1;
     public static final long ERRATA_CLIENT_DELAY = 1;
     public static final long PYXIS_CLIENT_DELAY = 1;
+    public static final long ATLAS_CLIENT_DELAY = 1;
 
 }

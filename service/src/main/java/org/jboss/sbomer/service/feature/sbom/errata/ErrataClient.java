@@ -61,8 +61,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Costants.ERRATA_CLIENT_MAX_RETRIES;
-import static org.jboss.sbomer.service.rest.faulttolerance.Costants.ERRATA_CLIENT_DELAY;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ERRATA_CLIENT_MAX_RETRIES;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ERRATA_CLIENT_DELAY;
 
 /**
  * A client for Errata
