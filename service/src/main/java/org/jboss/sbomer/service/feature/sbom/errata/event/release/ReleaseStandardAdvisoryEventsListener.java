@@ -83,9 +83,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListener {
 
     @Inject
-    @RestClient
     @Setter
-    PyxisClient pyxisClient;
+    PyxisValidatingClient pyxisClient;
 
     private static final String NVR_STANDARD_SEPARATOR = "-";
 
