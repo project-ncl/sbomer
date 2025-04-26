@@ -13,15 +13,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.validation.ValidationException;
 
-import org.eclipse.microprofile.faulttolerance.Retry;
 import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.test.PyxisWireMock;
-
 import org.junit.jupiter.api.Test;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -32,25 +31,51 @@ import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 
 import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-
+import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.security.TestSecurity;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 
 @QuarkusTest
-// @TestProfile(TestUmbProfile.class)
 @WithTestResource(PyxisWireMock.class)
+@TestProfile(PyxisClientIT.class)
 @Slf4j
-
-public class PyxisClientIT {
+public class PyxisClientIT extends TestUmbProfile {
     @Inject
     Validator validator;
 
     @Inject
     PyxisValidatingClient pc;
 
+    @Override
+    public Map<String, String> getConfigOverrides() {
+      /*
+          The original annotation is 
+          @Retry(
+            maxRetries = PYXIS_UNPUBLISHED_MAX_RETRIES, (18)
+            delay = PYXIS_UNPUBLISHED_INITIAL_DELAY, (3600000)
+            maxDuration = PYXIS_UNPUBLISHED_MAX_DURATION, (68400000)
+            retryOn = ConstraintViolationException.class)
+          @BeforeRetry(RetryLogger.class)
+          @FibonacciBackoff(maxDelay = PYXIS_UNPUBLISHED_MAX_DELAY) (68400000)
+          */
+        return Map.of(
+                "Retry/maxRetries","9",
+                "Retry/delay","30",
+                "Retry/maxDuration","6840",
+                "Retry/maxDelay", "4000",
+                "Retry/delayUnit", "millis",
+                "FibonacciBackoff/maxDelay","6830",
+                "ExponentialBackoff/maxDelay", "4000",
+                "Retry/maxDelayUnit", "millis",
+                "Retry/maxDurationUnit", "millis",
+                "Timeout/unit", "millis"
+                );
+    }
+    
     static final String INVALID_PAYLOAD = "{\"data\":[]}";
     static final String EXAMPLE_RETURN = """
                                                                                               {
@@ -232,7 +257,7 @@ public class PyxisClientIT {
         List<ServeEvent> se = PyxisWireMock.wireMockServer.getAllServeEvents();
         requestDeltas(se).forEach(rd -> log.info(rd.toString()));
         PyxisWireMock.wireMockServer.verify(
-                7,
+                10,
                 getRequestedFor(
                         urlPathMatching(
                                 "/v1/images/nvr/jboss-eap-74-openjdk17-builder-openshift-rhel8-container-7.4.20-UNRELEASED")));
@@ -351,7 +376,7 @@ public class PyxisClientIT {
         this.ex(nvr, qp);
     }
 
-    @Retry(delay = 4, delayUnit = ChronoUnit.SECONDS, maxRetries = 1)
+    
     void ex(String nvr, List<String> qp) {
         PyxisRepositoryDetails prd = pc.getRepositoriesDetails(nvr, qp);
         Set<ConstraintViolation<PyxisRepositoryDetails>> cvs = validator.validate(prd);
