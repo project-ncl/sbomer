@@ -48,15 +48,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
-import io.fabric8.knative.internal.pkg.apis.ConditionBuilder;
+import io.fabric8.knative.pkg.apis.ConditionBuilder;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminatedBuilder;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
-import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamValue;
-import io.fabric8.tekton.pipeline.v1beta1.StepStateBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunStatusBuilder;
+import io.fabric8.mockwebserver.http.RecordedRequest;
+import io.fabric8.tekton.v1beta1.ParamBuilder;
+import io.fabric8.tekton.v1beta1.ParamValue;
+import io.fabric8.tekton.v1beta1.StepStateBuilder;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.v1beta1.TaskRunStatusBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.quarkus.test.InjectMock;
@@ -64,7 +65,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.kubernetes.client.KubernetesTestServer;
 import jakarta.inject.Inject;
-import okhttp3.mockwebserver.RecordedRequest;
 
 /**
  * Class responsible for testing reconciliation workflow for the generation phase.
@@ -144,12 +144,12 @@ class GenerationPhaseGenerationRequestReconcilerTest {
         UpdateControl<GenerationRequest> updateControl = controller
                 .reconcile(request, mockContext(Collections.emptySet()));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
         assertEquals(
                 "Generation failed. Expected one or more running TaskRun related to generation. None found. See logs for more information.",
-                updateControl.getResource().getReason());
-        assertEquals(GenerationResult.ERR_SYSTEM, updateControl.getResource().getResult());
+                updateControl.getResource().get().getReason());
+        assertEquals(GenerationResult.ERR_SYSTEM, updateControl.getResource().get().getResult());
     }
 
     @Test
@@ -262,12 +262,12 @@ class GenerationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
         assertEquals(
                 "Generation request failed. All tasks failed. Product with index '0' (TaskRun 'generation-task-run-0') failed: system failure. Product with index '1' (TaskRun 'generation-task-run-1') failed: system failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: system failure. Product with index '3' (TaskRun 'generation-task-run-3') failed: system failure. Product with index '4' (TaskRun 'generation-task-run-4') failed: system failure. See logs for more information.",
-                updateControl.getResource().getReason());
-        assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().getResult());
+                updateControl.getResource().get().getReason());
+        assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().get().getResult());
     }
 
     /**
@@ -288,12 +288,12 @@ class GenerationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
         assertEquals(
                 "Generation request failed. All tasks failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. See logs for more information.",
-                updateControl.getResource().getReason());
-        assertEquals(GenerationResult.ERR_CONFIG_INVALID, updateControl.getResource().getResult());
+                updateControl.getResource().get().getReason());
+        assertEquals(GenerationResult.ERR_CONFIG_INVALID, updateControl.getResource().get().getResult());
     }
 
     /**
@@ -314,12 +314,12 @@ class GenerationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
         assertEquals(
                 "Generation request failed. All tasks failed. Product with index '123' (TaskRun 'generation-task-run-123') failed: invalid product index: 123 (should be between 1 and 2). See logs for more information.",
-                updateControl.getResource().getReason());
-        assertEquals(GenerationResult.ERR_INDEX_INVALID, updateControl.getResource().getResult());
+                updateControl.getResource().get().getReason());
+        assertEquals(GenerationResult.ERR_INDEX_INVALID, updateControl.getResource().get().getResult());
     }
 
     /**
@@ -340,12 +340,12 @@ class GenerationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
         assertEquals(
                 "Generation request failed. All tasks failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: an error occurred while generating the SBOM. See logs for more information.",
-                updateControl.getResource().getReason());
-        assertEquals(GenerationResult.ERR_GENERATION, updateControl.getResource().getResult());
+                updateControl.getResource().get().getReason());
+        assertEquals(GenerationResult.ERR_GENERATION, updateControl.getResource().get().getResult());
     }
 
     /**
@@ -366,12 +366,12 @@ class GenerationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
         assertEquals(
                 "Generation request failed. All tasks failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: general error occurred. See logs for more information.",
-                updateControl.getResource().getReason());
-        assertEquals(GenerationResult.ERR_GENERAL, updateControl.getResource().getResult());
+                updateControl.getResource().get().getReason());
+        assertEquals(GenerationResult.ERR_GENERAL, updateControl.getResource().get().getResult());
     }
 
     @Test
@@ -393,12 +393,12 @@ class GenerationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(secondaryTaskRuns));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
         assertEquals(
                 "Generation request failed. All tasks failed. Product with index '1' (TaskRun 'generation-task-run-1') failed: product configuration failure. Product with index '2' (TaskRun 'generation-task-run-2') failed: invalid product index: 2 (should be between 1 and 2). See logs for more information.",
-                updateControl.getResource().getReason());
-        assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().getResult());
+                updateControl.getResource().get().getReason());
+        assertEquals(GenerationResult.ERR_MULTI, updateControl.getResource().get().getResult());
     }
 
     @Test

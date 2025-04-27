@@ -127,6 +127,7 @@ public class GenerationRequestScheduler {
 
         log.debug("There is space in the cluster to process new generations, fetching them now...");
 
+        @SuppressWarnings("unchecked")
         List<SbomGenerationRequest> oldestResultsBatch = requestRepository.getEntityManager()
                 .createNativeQuery(
                         String.format(
@@ -181,8 +182,9 @@ public class GenerationRequestScheduler {
                 MDC.get(MDC_TRACE_STATE_KEY),
                 Span.current().getSpanContext(),
                 Map.of(MDC_IDENTIFIER_KEY, sbomGenerationRequest.getIdentifier()));
-        Span span = spanBuilder.startSpan();
 
+        Span span = spanBuilder.startSpan();
+        
         log.debug(
                 "Started a new span context with traceId: {}, spanId: {}, traceFlags: {}",
                 span.getSpanContext().getTraceId(),
@@ -216,6 +218,5 @@ public class GenerationRequestScheduler {
         } finally {
             span.end(); // closing the scope does not end the span, this has to be done manually
         }
-
     }
 }

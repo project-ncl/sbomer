@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
-import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -53,13 +51,14 @@ import org.slf4j.helpers.MessageFormatter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.tekton.pipeline.v1beta1.Param;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunResult;
-import io.javaoperatorsdk.operator.api.reconciler.Constants;
+import io.fabric8.tekton.v1beta1.Param;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunResult;
+import io.javaoperatorsdk.operator.api.config.informer.Informer;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.javaoperatorsdk.operator.api.reconciler.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -82,20 +81,27 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @ControllerConfiguration(
-        labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=operation",
-        namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
+        informer = @Informer(
+                labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/managed-by=sbomer,app.kubernetes.io/component=generator,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=operation"))
+@Workflow(
         dependents = {
                 @Dependent(
+                        useEventSourceWithName = "tekton-generation-request-operation",
                         type = TaskRunOperationInitDependentResource.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME,
                         reconcilePrecondition = OperationConfigMissingCondition.class),
                 @Dependent(
+                        useEventSourceWithName = "tekton-generation-request-operation",
                         type = TaskRunOperationGenerateDependentResource.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME,
                         reconcilePrecondition = OperationConfigAvailableCondition.class) })
 @Slf4j
 public class OperationController extends AbstractController {
+
     final ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+
+    @Override
+    protected GenerationRequestType generationRequestType() {
+        return GenerationRequestType.OPERATION;
+    }
 
     @Override
     protected UpdateControl<GenerationRequest> updateRequest(
@@ -120,7 +126,7 @@ public class OperationController extends AbstractController {
         generationRequest.setStatus(status);
         generationRequest.setResult(result);
         generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-        return UpdateControl.updateResource(generationRequest);
+        return UpdateControl.patchResource(generationRequest);
     }
 
     /**
@@ -551,7 +557,7 @@ public class OperationController extends AbstractController {
         }
 
         // In case resource gets an update, update th DB entity as well
-        if (action.isUpdateResource()) {
+        if (action.isPatchResource()) {
             SbomGenerationRequest.sync(generationRequest);
         }
 

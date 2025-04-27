@@ -19,8 +19,8 @@ import org.mockito.Mockito;
 
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 
 class TektonResourceUtilsTest {
 
@@ -28,7 +28,7 @@ class TektonResourceUtilsTest {
     void shouldHandleContainerImageResources() {
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withName("taskrun-name")
-                .withLabels(Map.of(Labels.LABEL_TYPE, GenerationRequestType.CONTAINERIMAGE.toName()))
+                .withLabels(Map.of(Labels.LABEL_GENERATION_REQUEST_TYPE, GenerationRequestType.CONTAINERIMAGE.toName()))
                 .endMetadata()
                 .withNewSpec()
                 .endSpec()
@@ -71,7 +71,7 @@ class TektonResourceUtilsTest {
 
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withName("taskrun-name")
-                .withLabels(Map.of(Labels.LABEL_TYPE, GenerationRequestType.CONTAINERIMAGE.toName()))
+                .withLabels(Map.of(Labels.LABEL_GENERATION_REQUEST_TYPE, GenerationRequestType.CONTAINERIMAGE.toName()))
                 .endMetadata()
                 .withNewSpec()
                 .endSpec()
@@ -119,7 +119,7 @@ class TektonResourceUtilsTest {
 
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withName("taskrun-name")
-                .withLabels(Map.of(Labels.LABEL_TYPE, GenerationRequestType.CONTAINERIMAGE.toName()))
+                .withLabels(Map.of(Labels.LABEL_GENERATION_REQUEST_TYPE, GenerationRequestType.CONTAINERIMAGE.toName()))
                 .endMetadata()
                 .withNewSpec()
                 .endSpec()

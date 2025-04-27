@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +39,7 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -59,13 +59,12 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.javaoperatorsdk.operator.api.config.informer.InformerEventSourceConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.EventSourceContext;
-import io.javaoperatorsdk.operator.api.reconciler.EventSourceInitializer;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
@@ -77,10 +76,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractController implements Reconciler<GenerationRequest>,
-        EventSourceInitializer<GenerationRequest>, Cleaner<GenerationRequest> {
-
-    public static final String EVENT_SOURCE_NAME = "GenerationRequestEventSource";
+public abstract class AbstractController implements Reconciler<GenerationRequest>, Cleaner<GenerationRequest> {
 
     @Inject
     @Setter
@@ -103,6 +99,39 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     @Inject
     @Setter
     AtlasHandler atlasHandler;
+
+    protected abstract GenerationRequestType generationRequestType();
+
+    private String labelSelector() {
+        return Labels.defaultLabelsToMap(generationRequestType())
+                .entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(","));
+    }
+
+    @Override
+    public List<EventSource<?, GenerationRequest>> prepareEventSources(EventSourceContext<GenerationRequest> context) {
+        String eventSourceName = "tekton-generation-request-" + generationRequestType().toName();
+
+        log.info(
+                "Preparing event source '{}' to handle generation requests with type '{}'...",
+                eventSourceName,
+                generationRequestType());
+
+        InformerEventSource<TaskRun, GenerationRequest> ies = new InformerEventSource<>(
+                InformerEventSourceConfiguration.from(TaskRun.class, GenerationRequest.class)
+                        .withName(eventSourceName)
+                        .withLabelSelector(labelSelector())
+                        .withNamespacesInheritedFromController()
+                        .withFollowControllerNamespacesChanges(true)
+                        .build(),
+                context);
+
+        log.info("Event source '{}' prepared", eventSourceName);
+
+        return List.of(ies);
+    }
 
     // TODO: Refactor this to have it's implementation shared
     protected abstract UpdateControl<GenerationRequest> updateRequest(
@@ -249,17 +278,6 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     }
 
     @Override
-    public Map<String, EventSource> prepareEventSources(EventSourceContext<GenerationRequest> context) {
-        InformerEventSource<TaskRun, GenerationRequest> ies = new InformerEventSource<>(
-                InformerConfiguration.from(TaskRun.class, context)
-                        .withNamespacesInheritedFromController(context)
-                        .build(),
-                context);
-
-        return Map.of(EVENT_SOURCE_NAME, ies);
-    }
-
-    @Override
     public DeleteControl cleanup(GenerationRequest resource, Context<GenerationRequest> context) {
         MDCUtils.removeOtelContext();
         MDCUtils.addIdentifierContext(resource.getIdentifier());
@@ -323,7 +341,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         }
 
         // In case resource gets an update, update th DB entity as well
-        if (action.isUpdateResource()) {
+        if (action.isPatchResource()) {
             SbomGenerationRequest.sync(generationRequest);
         }
 
