@@ -119,7 +119,7 @@ quarkus:
       # Disable JSON logging for console by default
       json:
         ~: false
-      format: "%d{HH:mm:ss,SSS} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId}, sampled=%X{sampled} [%c{3.}] (%t) %s%e mdc:[%X]%n"
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
     file:
       level: DEBUG
       # Disable file logging

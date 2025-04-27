@@ -54,6 +54,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildIte
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
@@ -63,6 +64,7 @@ import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -88,77 +90,90 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
 
     private static final String NVR_STANDARD_SEPARATOR = "-";
 
-    public void onReleaseAdvisoryEvent(@ObservesAsync StandardAdvisoryReleaseEvent event) {
-        log.debug("Event received for standard advisory release ...");
-
-        RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
-        try {
-            ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
-            Errata erratum = errataClient.getErratum(config.getAdvisoryId());
-            Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
-                    config.getAdvisoryId());
-            V1Beta1RequestRecord advisoryManifestsRecord = sbomService
-                    .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
-
-            String toolVersion = statsService.getStats().getVersion();
-            // FIXME: 'Optional.get()' without 'isPresent()' check
-            Component.Type productType = AdvisoryEventUtils
-                    .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
-
-            // Associate each ProductVersion with its list of CPEs
-            Map<ProductVersionEntry, Set<String>> productVersionToCPEs = mapProductVersionToCPEs(advisoryBuildDetails);
-
-            // Associate each build (NVR) in an advisory to its build manifest generation
-            Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration = mapNVRToBuildGeneration(
-                    advisoryManifestsRecord);
-
-            if (erratum.getDetails().get().getContentTypes().contains("docker")) {
-
-                log.debug(
-                        "Creating release manifests for Docker builds of advisory: '{}'[{}]",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
-                releaseManifestsForDockerBuilds(
-                        requestEvent,
-                        erratum,
-                        advisoryBuildDetails,
-                        advisoryManifestsRecord,
-                        event.getReleaseGenerations(),
-                        toolVersion,
-                        productType,
-                        productVersionToCPEs,
-                        nvrToBuildGeneration);
-            } else {
-
-                log.debug(
-                        "Creating release manifests for RPM builds of advisory: '{}'[{}]",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
-
-                releaseManifestsForRPMBuilds(
-                        requestEvent,
-                        erratum,
-                        advisoryBuildDetails,
-                        advisoryManifestsRecord,
-                        event.getReleaseGenerations(),
-                        toolVersion,
-                        productType,
-                        productVersionToCPEs,
-                        nvrToBuildGeneration);
-            }
-        } catch (Exception e) {
-            log.error(
-                    "An error occurred during the creation of release manifests for event '{}'",
-                    requestEvent.getId(),
-                    e);
-            markRequestFailed(
-                    requestEvent,
-                    event.getReleaseGenerations().values(),
-                    "An error occurred during the creation of the release manifest");
+    public void onReleaseAdvisoryEvent(@ObservesAsync MdcEventWrapper<StandardAdvisoryReleaseEvent> wrapper) {
+        Map<String, String> mdcContext = wrapper.getMdcContext();
+        if (mdcContext != null) {
+            MDC.setContextMap(mdcContext);
+        } else {
+            MDC.clear();
         }
 
-        // Let's trigger the update of statuses and advisory comments
-        doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+        StandardAdvisoryReleaseEvent event = wrapper.getPayload();
+        log.debug("Event received for standard advisory release ...");
+
+        try {
+            RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
+            try {
+                ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+                Errata erratum = errataClient.getErratum(config.getAdvisoryId());
+                Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
+                        config.getAdvisoryId());
+                V1Beta1RequestRecord advisoryManifestsRecord = sbomService
+                        .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
+
+                String toolVersion = statsService.getStats().getVersion();
+                // FIXME: 'Optional.get()' without 'isPresent()' check
+                Component.Type productType = AdvisoryEventUtils
+                        .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
+
+                // Associate each ProductVersion with its list of CPEs
+                Map<ProductVersionEntry, Set<String>> productVersionToCPEs = mapProductVersionToCPEs(
+                        advisoryBuildDetails);
+
+                // Associate each build (NVR) in an advisory to its build manifest generation
+                Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration = mapNVRToBuildGeneration(
+                        advisoryManifestsRecord);
+
+                if (erratum.getDetails().get().getContentTypes().contains("docker")) {
+
+                    log.debug(
+                            "Creating release manifests for Docker builds of advisory: '{}'[{}]",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
+                    releaseManifestsForDockerBuilds(
+                            requestEvent,
+                            erratum,
+                            advisoryBuildDetails,
+                            advisoryManifestsRecord,
+                            event.getReleaseGenerations(),
+                            toolVersion,
+                            productType,
+                            productVersionToCPEs,
+                            nvrToBuildGeneration);
+                } else {
+
+                    log.debug(
+                            "Creating release manifests for RPM builds of advisory: '{}'[{}]",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
+
+                    releaseManifestsForRPMBuilds(
+                            requestEvent,
+                            erratum,
+                            advisoryBuildDetails,
+                            advisoryManifestsRecord,
+                            event.getReleaseGenerations(),
+                            toolVersion,
+                            productType,
+                            productVersionToCPEs,
+                            nvrToBuildGeneration);
+                }
+            } catch (Exception e) {
+                log.error(
+                        "An error occurred during the creation of release manifests for event '{}'",
+                        requestEvent.getId(),
+                        e);
+                markRequestFailed(
+                        requestEvent,
+                        event.getReleaseGenerations().values(),
+                        "An error occurred during the creation of the release manifest");
+            }
+
+            // Let's trigger the update of statuses and advisory comments
+            doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+        } finally {
+            MDC.clear();
+        }
     }
 
     protected void releaseManifestsForRPMBuilds(

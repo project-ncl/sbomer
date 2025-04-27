@@ -60,6 +60,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.TextOnlyAdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseStandardAdvisoryEventsListener;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseTextOnlyAdvisoryEventsListener;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -76,6 +77,7 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestReposi
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.stats.StatsService;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -751,7 +753,11 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerTextOnlyManifests.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper<TextOnlyAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<TextOnlyAdvisoryReleaseEvent>(
+                event,
+                MDC.getCopyOfContextMap());
+
+        listenerTextOnlyManifests.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
@@ -810,7 +816,11 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerTextOnlyDeliverables.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper<TextOnlyAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<TextOnlyAdvisoryReleaseEvent>(
+                event,
+                MDC.getCopyOfContextMap());
+
+        listenerTextOnlyDeliverables.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
@@ -894,7 +904,11 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerSingleContainer.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper<StandardAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<StandardAdvisoryReleaseEvent>(
+                event,
+                MDC.getCopyOfContextMap());
+
+        listenerSingleContainer.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
@@ -1041,7 +1055,10 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerMultiContainers.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper<StandardAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<StandardAdvisoryReleaseEvent>(
+                event,
+                MDC.getCopyOfContextMap());
+        listenerMultiContainers.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
@@ -1127,7 +1144,10 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerSingleRpm.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper<StandardAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<StandardAdvisoryReleaseEvent>(
+                event,
+                MDC.getCopyOfContextMap());
+        listenerSingleRpm.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));

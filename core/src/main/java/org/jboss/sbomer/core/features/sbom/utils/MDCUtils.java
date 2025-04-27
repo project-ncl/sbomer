@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
+import java.util.Map;
+
+import org.jboss.pnc.api.constants.MDCHeaderKeys;
 import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.pnc.common.Strings;
 import org.slf4j.MDC;
@@ -52,6 +55,20 @@ public class MDCUtils {
         }
     }
 
+    public static void addOtelContext(Map<String, String> otelContextMap) {
+        if (otelContextMap == null || otelContextMap.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) otelContextMap).entrySet()) {
+            final Object key = entry.getKey();
+            final Object value = entry.getValue();
+            if (key != null && value != null) {
+                MDC.put(key.toString(), value.toString());
+            }
+        }
+    }
+
     public static void removeProcessContext() {
         MDC.remove(MDCKeys.PROCESS_CONTEXT_KEY);
     }
@@ -60,8 +77,16 @@ public class MDCUtils {
         MDC.remove(MDCKeys.BUILD_ID_KEY);
     }
 
+    public static void removeOtelContext() {
+        MDC.remove(MDCKeys.TRACE_ID_KEY);
+        MDC.remove(MDCKeys.SPAN_ID_KEY);
+        MDC.remove(MDCHeaderKeys.TRACEPARENT.getMdcKey());
+    }
+
     public static void removeContext() {
         removeProcessContext();
         removeBuildContext();
+        removeOtelContext();
     }
+
 }

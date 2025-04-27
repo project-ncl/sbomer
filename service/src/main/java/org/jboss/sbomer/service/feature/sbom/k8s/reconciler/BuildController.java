@@ -474,6 +474,8 @@ public class BuildController extends AbstractController {
             Context<GenerationRequest> context) throws Exception {
 
         MDCUtils.removeContext();
+        MDCUtils.addBuildContext(generationRequest.getIdentifier());
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
 
         // No status is set, it should be "NEW", let's do it.
         // "NEW" starts everything.
@@ -494,8 +496,6 @@ public class BuildController extends AbstractController {
                 "Handling update for GenerationRequest '{}', current status: '{}'",
                 generationRequest.getMetadata().getName(),
                 generationRequest.getStatus());
-
-        MDCUtils.addBuildContext(generationRequest.getIdentifier());
 
         switch (generationRequest.getStatus()) {
             case NEW:
@@ -548,6 +548,10 @@ public class BuildController extends AbstractController {
     }
 
     protected List<Sbom> storeSboms(GenerationRequest generationRequest) {
+        MDCUtils.removeOtelContext();
+        MDCUtils.addBuildContext(generationRequest.getIdentifier());
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
+
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
 
         log.info(

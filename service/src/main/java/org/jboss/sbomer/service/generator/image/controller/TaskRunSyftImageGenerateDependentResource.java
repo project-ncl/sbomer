@@ -26,6 +26,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.SyftImageConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.GenerateResourceDiscriminator;
@@ -76,6 +77,9 @@ public class TaskRunSyftImageGenerateDependentResource
     @Override
     protected TaskRun desired(GenerationRequest generationRequest, Context<GenerationRequest> context) {
 
+        MDCUtils.removeOtelContext();
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
+
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}' GenerationRequest",
                 SbomGenerationPhase.GENERATE,
@@ -84,6 +88,9 @@ public class TaskRunSyftImageGenerateDependentResource
 
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
+        labels.put(Labels.LABEL_OTEL_TRACE_ID, generationRequest.getTraceId());
+        labels.put(Labels.LABEL_OTEL_SPAN_ID, generationRequest.getSpanId());
+        labels.put(Labels.LABEL_OTEL_TRACEPARENT, generationRequest.getTraceParent());
 
         Duration timeout;
 

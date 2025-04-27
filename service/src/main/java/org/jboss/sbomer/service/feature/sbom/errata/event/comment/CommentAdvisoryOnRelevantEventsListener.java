@@ -39,10 +39,13 @@ import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -70,32 +73,45 @@ public class CommentAdvisoryOnRelevantEventsListener {
     @Inject
     FeatureFlags featureFlags;
 
-    public void onRequestEventStatusUpdate(@ObservesAsync RequestEventStatusUpdateEvent event) {
-        log.debug("Event received for request event status update...");
-        if (!featureFlags.errataCommentsGenerationsEnabled()) {
-            log.warn(
-                    "Errata comments generation feature is disabled, no comments will be added to the Errata advisory!!");
-            return;
-        }
-
-        if (!isValidRequestEvent(event)) {
-            return;
-        }
-
-        ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) event.getRequestEventConfig();
-        Errata errata = errataClient.getErratum(config.getAdvisoryId());
-        if (!isValidErrata(errata, config.getAdvisoryId())) {
-            return;
-        }
-
-        if (event.getRequestEventId() != null) {
-            // Advisories which produced request events which handled the manifestation.
-            // Standard advisories and text-only advisories with "deliverables" note content fall in this category.
-            handleAutomatedManifestationAdvisory(event, config);
+    public void onRequestEventStatusUpdate(@ObservesAsync MdcEventWrapper<RequestEventStatusUpdateEvent> wrapper) {
+        Map<String, String> mdcContext = wrapper.getMdcContext();
+        if (mdcContext != null) {
+            MDC.setContextMap(mdcContext);
         } else {
-            // Advisories whose manifestation was handled autonomously.
-            // Text-only advisories with "manifest" notes content fall in this category.
-            handleManualManifestationAdvisory(errata, config);
+            MDC.clear();
+        }
+
+        RequestEventStatusUpdateEvent event = wrapper.getPayload();
+        log.debug("Event received for request event status update...");
+
+        try {
+            if (!featureFlags.errataCommentsGenerationsEnabled()) {
+                log.warn(
+                        "Errata comments generation feature is disabled, no comments will be added to the Errata advisory!!");
+                return;
+            }
+
+            if (!isValidRequestEvent(event)) {
+                return;
+            }
+
+            ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) event.getRequestEventConfig();
+            Errata errata = errataClient.getErratum(config.getAdvisoryId());
+            if (!isValidErrata(errata, config.getAdvisoryId())) {
+                return;
+            }
+
+            if (event.getRequestEventId() != null) {
+                // Advisories which produced request events which handled the manifestation.
+                // Standard advisories and text-only advisories with "deliverables" note content fall in this category.
+                handleAutomatedManifestationAdvisory(event, config);
+            } else {
+                // Advisories whose manifestation was handled autonomously.
+                // Text-only advisories with "manifest" notes content fall in this category.
+                handleManualManifestationAdvisory(errata, config);
+            }
+        } finally {
+            MDC.clear();
         }
     }
 

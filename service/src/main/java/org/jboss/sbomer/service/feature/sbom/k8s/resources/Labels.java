@@ -32,6 +32,10 @@ public class Labels {
     public static final String LABEL_PHASE = "sbomer.jboss.org/phase";
     public static final String LABEL_IDENTIFIER = "sbomer.jboss.org/identifier";
     public static final String LABEL_GENERATION_REQUEST_ID = "sbomer.jboss.org/generation-request-id";
+    public static final String LABEL_OTEL_TRACE_ID = "sbomer.jboss.org/otel-trace-id";
+    public static final String LABEL_OTEL_SPAN_ID = "sbomer.jboss.org/otel-span-id";
+    public static final String LABEL_OTEL_TRACEPARENT = "sbomer.jboss.org/otel-traceparent";
+
     // The selector used but the only (atm) reconciler is generic, without the generation request type label, so to
     // select all types
     public static final String LABEL_SELECTOR = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request";
