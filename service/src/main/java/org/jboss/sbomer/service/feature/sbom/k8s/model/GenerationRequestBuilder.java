@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -40,7 +42,7 @@ public class GenerationRequestBuilder extends GenerationRequestFluent<Generation
     public GenerationRequest build() {
         withNewMetadataLike(
                 new ObjectMetaBuilder().withName("sbom-request-" + getId().toLowerCase())
-                        .withLabels(Labels.defaultLabelsToMap(getType()))
+                        .withLabels(buildLabelsMap())
                         .build())
                 .endMetadata();
 
@@ -70,5 +72,21 @@ public class GenerationRequestBuilder extends GenerationRequestFluent<Generation
         buildable.setAdditionalProperties(getAdditionalProperties());
 
         return buildable;
+    }
+
+    private Map<String, String> buildLabelsMap() {
+        Map<String, String> labels = new HashMap<String, String>();
+        labels.putAll(Labels.defaultLabelsToMap(getType()));
+
+        if (getTraceId() != null) {
+            labels.put(Labels.LABEL_OTEL_TRACE_ID, getTraceId());
+        }
+        if (getSpanId() != null) {
+            labels.put(Labels.LABEL_OTEL_SPAN_ID, getSpanId());
+        }
+        if (getTraceParent() != null) {
+            labels.put(Labels.LABEL_OTEL_TRACEPARENT, getTraceParent());
+        }
+        return labels;
     }
 }

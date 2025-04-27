@@ -22,6 +22,7 @@ import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
@@ -72,6 +73,9 @@ public class TaskRunOperationInitDependentResource
     @Override
     protected TaskRun desired(GenerationRequest generationRequest, Context<GenerationRequest> context) {
 
+        MDCUtils.removeOtelContext();
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
+
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}'",
                 SbomGenerationPhase.OPERATIONINIT,
@@ -82,6 +86,9 @@ public class TaskRunOperationInitDependentResource
         labels.put(Labels.LABEL_IDENTIFIER, generationRequest.getIdentifier());
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.OPERATIONINIT.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
+        labels.put(Labels.LABEL_OTEL_TRACE_ID, generationRequest.getTraceId());
+        labels.put(Labels.LABEL_OTEL_SPAN_ID, generationRequest.getSpanId());
+        labels.put(Labels.LABEL_OTEL_TRACEPARENT, generationRequest.getTraceParent());
 
         OperationConfig config = generationRequest.getConfig(OperationConfig.class, true);
 

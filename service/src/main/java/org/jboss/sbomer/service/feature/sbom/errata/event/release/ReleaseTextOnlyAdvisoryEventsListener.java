@@ -42,11 +42,13 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -62,75 +64,90 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListener {
 
-    public void onReleaseAdvisoryEvent(@ObservesAsync TextOnlyAdvisoryReleaseEvent event) {
+    public void onReleaseAdvisoryEvent(@ObservesAsync MdcEventWrapper<TextOnlyAdvisoryReleaseEvent> wrapper) {
+        Map<String, String> mdcContext = wrapper.getMdcContext();
+        if (mdcContext != null) {
+            MDC.setContextMap(mdcContext);
+        } else {
+            MDC.clear();
+        }
+
+        TextOnlyAdvisoryReleaseEvent event = wrapper.getPayload();
         log.debug("Event received for text-only advisory release ...");
 
-        RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
         try {
-            ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
-            Errata erratum = errataClient.getErratum(config.getAdvisoryId());
-            String toolVersion = statsService.getStats().getVersion();
-            // FIXME: 'Optional.get()' without 'isPresent()' check
-            Component.Type productType = AdvisoryEventUtils
-                    .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
-            // FIXME:'Optional.get()' without 'isPresent()' check
-            JsonNode notes = erratum.getNotesMapping().get();
-            List<String> manifestsPurls;
+            RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
+            try {
+                ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+                Errata erratum = errataClient.getErratum(config.getAdvisoryId());
+                String toolVersion = statsService.getStats().getVersion();
+                // FIXME: 'Optional.get()' without 'isPresent()' check
+                Component.Type productType = AdvisoryEventUtils
+                        .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
+                // FIXME:'Optional.get()' without 'isPresent()' check
+                JsonNode notes = erratum.getNotesMapping().get();
+                List<String> manifestsPurls;
 
-            if (notes.has("manifest")) {
-                log.debug(
-                        "Creating release manifests for manual builds of advisory: '{}'[{}]",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
+                if (notes.has("manifest")) {
+                    log.debug(
+                            "Creating release manifests for manual builds of advisory: '{}'[{}]",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
 
-                // If the notes contain a "manifest" field, search the successful generations for all the purls listed
-                // (there are no generations associated with the request event because no generations were triggered)
-                manifestsPurls = AdvisoryEventUtils.extractPurlUrisFromManifestNode(notes);
-            } else {
-                log.debug(
-                        "Creating release manifests for managed builds of advisory: '{}'[{}]",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
+                    // If the notes contain a "manifest" field, search the successful generations for all the purls
+                    // listed
+                    // (there are no generations associated with the request event because no generations were
+                    // triggered)
+                    manifestsPurls = AdvisoryEventUtils.extractPurlUrisFromManifestNode(notes);
+                } else {
+                    log.debug(
+                            "Creating release manifests for managed builds of advisory: '{}'[{}]",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
 
-                // If the notes contain a "deliverables" field, search the latest successful generations triggered by
-                // the request event
-                V1Beta1RequestRecord advisoryManifestsRecord = sbomService
-                        .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
-                manifestsPurls = advisoryManifestsRecord.manifests()
-                        .stream()
-                        .map(V1Beta1RequestManifestRecord::rootPurl)
-                        .toList();
-            }
+                    // If the notes contain a "deliverables" field, search the latest successful generations triggered
+                    // by
+                    // the request event
+                    V1Beta1RequestRecord advisoryManifestsRecord = sbomService
+                            .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
+                    manifestsPurls = advisoryManifestsRecord.manifests()
+                            .stream()
+                            .map(V1Beta1RequestManifestRecord::rootPurl)
+                            .toList();
+                }
 
-            List<Sbom> sboms = findSbomsByPurls(manifestsPurls);
-            if (sboms.isEmpty()) {
+                List<Sbom> sboms = findSbomsByPurls(manifestsPurls);
+                if (sboms.isEmpty()) {
+                    markRequestFailed(
+                            requestEvent,
+                            event.getReleaseGenerations().values(),
+                            "There are no matching sboms for the content specified within the advisory notes.");
+                    doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+                    return;
+                }
+                createReleaseManifestsForTextOnlyAdvisories(
+                        requestEvent,
+                        erratum,
+                        sboms,
+                        event.getReleaseGenerations(),
+                        toolVersion,
+                        productType);
+            } catch (Exception e) {
+                log.error(
+                        "An error occurred during the creation of release manifests for event '{}'",
+                        requestEvent.getId(),
+                        e);
                 markRequestFailed(
                         requestEvent,
                         event.getReleaseGenerations().values(),
-                        "There are no matching sboms for the content specified within the advisory notes.");
-                doUpdateGenerationsStatus(event.getReleaseGenerations().values());
-                return;
+                        "An error occurred during the creation of the release manifest");
             }
-            createReleaseManifestsForTextOnlyAdvisories(
-                    requestEvent,
-                    erratum,
-                    sboms,
-                    event.getReleaseGenerations(),
-                    toolVersion,
-                    productType);
-        } catch (Exception e) {
-            log.error(
-                    "An error occurred during the creation of release manifests for event '{}'",
-                    requestEvent.getId(),
-                    e);
-            markRequestFailed(
-                    requestEvent,
-                    event.getReleaseGenerations().values(),
-                    "An error occurred during the creation of the release manifest");
-        }
 
-        // Let's trigger the update of statuses and advisory comments
-        doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+            // Let's trigger the update of statuses and advisory comments
+            doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+        } finally {
+            MDC.clear();
+        }
     }
 
     private List<Sbom> findSbomsByPurls(List<String> purls) {

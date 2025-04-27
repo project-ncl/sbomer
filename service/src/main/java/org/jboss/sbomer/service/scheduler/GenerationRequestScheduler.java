@@ -18,17 +18,26 @@
 package org.jboss.sbomer.service.scheduler;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.jboss.pnc.api.constants.MDCKeys;
+import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.leader.LeaderManager;
+import org.slf4j.MDC;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Scope;
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.Scheduled.ConcurrentExecution;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -155,20 +164,53 @@ public class GenerationRequestScheduler {
             return;
         }
 
-        request = new GenerationRequestBuilder(sbomGenerationRequest.getType()).withId(sbomGenerationRequest.getId())
-                .withConfig(sbomGenerationRequest.getConfig())
-                .withIdentifier(sbomGenerationRequest.getIdentifier())
-                .withStatus(sbomGenerationRequest.getStatus())
-                .withReason(sbomGenerationRequest.getReason())
-                .withResult(sbomGenerationRequest.getResult())
-                .build();
-
-        ConfigMap cm = kubernetesClient.configMaps().resource(request).create();
+        // Create a parent child span with values from MDC. This is to differentiate each generationRequest with its own
+        // span
+        SpanBuilder spanBuilder = OtelUtils.buildChildSpan(
+                GlobalOpenTelemetry.get().getTracer(""),
+                "GenerationRequestScheduler.schedule",
+                SpanKind.CLIENT,
+                MDC.get(MDCKeys.TRACE_ID_KEY),
+                MDC.get(MDCKeys.SPAN_ID_KEY),
+                MDC.get(MDCKeys.TRACE_FLAGS_KEY),
+                MDC.get(MDCKeys.TRACE_STATE_KEY),
+                Span.current().getSpanContext(),
+                Map.of(MDCKeys.BUILD_ID_KEY, sbomGenerationRequest.getIdentifier()));
+        Span span = spanBuilder.startSpan();
 
         log.debug(
-                "ConfigMap '{}' created as a representation of the Generation Request '{}'...",
-                cm.getMetadata().getName(),
-                sbomGenerationRequest.getId());
+                "Started a new span context with traceId: {}, spanId: {}, traceFlags: {}",
+                span.getSpanContext().getTraceId(),
+                span.getSpanContext().getSpanId(),
+                span.getSpanContext().getTraceFlags().asHex());
+
+        // put the span into the current Context
+        try (Scope scope = span.makeCurrent()) {
+            request = new GenerationRequestBuilder(sbomGenerationRequest.getType())
+                    .withId(sbomGenerationRequest.getId())
+                    .withConfig(sbomGenerationRequest.getConfig())
+                    .withIdentifier(sbomGenerationRequest.getIdentifier())
+                    .withStatus(sbomGenerationRequest.getStatus())
+                    .withReason(sbomGenerationRequest.getReason())
+                    .withResult(sbomGenerationRequest.getResult())
+                    .withTraceId(span.getSpanContext().getTraceId())
+                    .withSpanId(span.getSpanContext().getSpanId())
+                    .withTraceParent(
+                            OtelUtils.createTraceParent(
+                                    span.getSpanContext().getTraceId(),
+                                    span.getSpanContext().getSpanId(),
+                                    span.getSpanContext().getTraceFlags().asHex()))
+                    .build();
+
+            ConfigMap cm = kubernetesClient.configMaps().resource(request).create();
+
+            log.debug(
+                    "ConfigMap '{}' created as a representation of the Generation Request '{}'...",
+                    cm.getMetadata().getName(),
+                    sbomGenerationRequest.getId());
+        } finally {
+            span.end(); // closing the scope does not end the span, this has to be done manually
+        }
 
     }
 }

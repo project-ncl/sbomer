@@ -18,9 +18,13 @@
 package org.jboss.sbomer.service.feature.sbom.errata.event.umb;
 
 import java.io.IOException;
+import java.util.Map;
+
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.ErrataNotificationHandler;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
+import org.slf4j.MDC;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
@@ -37,7 +41,16 @@ public class AdvisoryUmbStatusChangeEventListener {
     @Inject
     ErrataNotificationHandler errataNotificationHandler;
 
-    public void onAdvisoryStatusUpdate(@ObservesAsync AdvisoryUmbStatusChangeEvent event) {
+    public void onAdvisoryStatusUpdate(@ObservesAsync MdcEventWrapper<AdvisoryUmbStatusChangeEvent> wrapper) {
+
+        Map<String, String> mdcContext = wrapper.getMdcContext();
+        if (mdcContext != null) {
+            MDC.setContextMap(mdcContext);
+        } else {
+            MDC.clear();
+        }
+
+        AdvisoryUmbStatusChangeEvent event = wrapper.getPayload();
 
         try {
             errataNotificationHandler.handle(event.getRequestEventId());
@@ -53,6 +66,8 @@ public class AdvisoryUmbStatusChangeEventListener {
         } catch (RuntimeException exc) {
             log.error("Received error while handing request '{}'", event.getRequestEventId(), exc);
             requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
+        } finally {
+            MDC.clear();
         }
     }
 

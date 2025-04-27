@@ -17,9 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.umb;
 
+import java.util.Map;
+
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.PncNotificationHandler;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -38,19 +42,29 @@ public class PncBuildUmbStatusChangeEventListener {
     @Inject
     PncNotificationHandler pncNotificationHandler;
 
-    public void onPncBuildStatusUpdate(@ObservesAsync PncBuildUmbStatusChangeEvent event) {
+    public void onPncBuildStatusUpdate(@ObservesAsync MdcEventWrapper<PncBuildUmbStatusChangeEvent> wrapper) {
+        Map<String, String> mdcContext = wrapper.getMdcContext();
+        if (mdcContext != null) {
+            MDC.setContextMap(mdcContext);
+        } else {
+            MDC.clear();
+        }
+
+        PncBuildUmbStatusChangeEvent event = wrapper.getPayload();
 
         try {
             pncNotificationHandler.handle(event.getRequestEventId());
         } catch (JsonProcessingException e) {
-            log.error("Unable to deserialize PNC message, this is unexpected", e);
+            log.error("Unable to deserialize PNC message for request '{}'.", event.getRequestEventId(), e);
             requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
-        } catch (ApplicationException exc) {
-            log.error("Received error while handing request '{}': {}", event.getRequestEventId(), exc.getMessage());
+        } catch (ApplicationException e) {
+            log.error("Application error while handling request '{}': {}", event.getRequestEventId(), e.getMessage());
             requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
-        } catch (RuntimeException exc) {
-            log.error("Received error while handing request '{}'", event.getRequestEventId(), exc);
+        } catch (RuntimeException e) {
+            log.error("Unexpected error while handling request '{}'", event.getRequestEventId(), e);
             requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
+        } finally {
+            MDC.clear();
         }
     }
 

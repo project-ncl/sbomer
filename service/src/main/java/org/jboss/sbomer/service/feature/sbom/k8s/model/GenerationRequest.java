@@ -19,6 +19,8 @@ package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 import java.util.Map;
 
+import org.jboss.pnc.api.constants.MDCHeaderKeys;
+import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -251,4 +253,30 @@ public class GenerationRequest extends ConfigMap {
         return getMetadata().getName();
     }
 
+    @JsonIgnore
+    public String getTraceId() {
+        return getMetadata().getLabels().get(Labels.LABEL_OTEL_TRACE_ID);
+    }
+
+    @JsonIgnore
+    public String getSpanId() {
+        return getMetadata().getLabels().get(Labels.LABEL_OTEL_SPAN_ID);
+    }
+
+    @JsonIgnore
+    public String getTraceParent() {
+        return getMetadata().getLabels().get(Labels.LABEL_OTEL_TRACEPARENT);
+    }
+
+    @JsonIgnore
+    public Map<String, String> getMDCOtel() {
+
+        return Map.of(
+                MDCKeys.TRACE_ID_KEY,
+                getTraceId(),
+                MDCKeys.SPAN_ID_KEY,
+                getSpanId(),
+                MDCHeaderKeys.TRACEPARENT.getMdcKey(),
+                getTraceParent());
+    }
 }

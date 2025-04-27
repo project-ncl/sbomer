@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
@@ -71,6 +72,9 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
     @Override
     protected TaskRun desired(GenerationRequest generationRequest, Context<GenerationRequest> context) {
 
+        MDCUtils.removeOtelContext();
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
+
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}'",
                 SbomGenerationPhase.INIT,
@@ -81,6 +85,9 @@ public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentRes
         labels.put(Labels.LABEL_IDENTIFIER, generationRequest.getIdentifier());
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.INIT.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
+        labels.put(Labels.LABEL_OTEL_TRACE_ID, generationRequest.getTraceId());
+        labels.put(Labels.LABEL_OTEL_SPAN_ID, generationRequest.getSpanId());
+        labels.put(Labels.LABEL_OTEL_TRACEPARENT, generationRequest.getTraceParent());
 
         return new TaskRunBuilder().withNewMetadata()
                 .withNamespace(generationRequest.getMetadata().getNamespace())

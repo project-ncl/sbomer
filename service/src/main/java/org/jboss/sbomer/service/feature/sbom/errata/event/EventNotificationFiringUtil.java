@@ -22,9 +22,8 @@ import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdviso
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.TextOnlyAdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.umb.AdvisoryUmbStatusChangeEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.umb.PncBuildUmbStatusChangeEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcWrapperUtil;
 
-import io.quarkus.arc.Arc;
-import jakarta.enterprise.event.Event;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -39,8 +38,8 @@ public class EventNotificationFiringUtil {
                 "Firing async event for status update of request event with id: {} and config: {}",
                 requestEvent.getRequestEventId(),
                 requestEvent.getRequestEventConfig());
-        Event<Object> event = Arc.container().beanManager().getEvent();
-        event.fireAsync(requestEventNotification).whenComplete((result, throwable) -> {
+
+        MdcWrapperUtil.fireAsync(requestEventNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 log.error("Error occurred while processing the async event.", throwable);
             }
@@ -59,8 +58,7 @@ public class EventNotificationFiringUtil {
                     releaseEvent.getRequestEventId());
         }
 
-        Event<Object> event = Arc.container().beanManager().getEvent();
-        event.fireAsync(advisoryReleaseNotification).whenComplete((result, throwable) -> {
+        MdcWrapperUtil.fireAsync(advisoryReleaseNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 log.error("Error occurred while processing the async event.", throwable);
             }
@@ -71,8 +69,8 @@ public class EventNotificationFiringUtil {
         log.info(
                 "Firing async event for advisory UMB status update, with request event id: {} ",
                 ((AdvisoryUmbStatusChangeEvent) advisoryStatusNotification).getRequestEventId());
-        Event<Object> event = Arc.container().beanManager().getEvent();
-        event.fireAsync(advisoryStatusNotification).whenComplete((result, throwable) -> {
+
+        MdcWrapperUtil.fireAsync(advisoryStatusNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 log.error("Error occurred while processing the async event.", throwable);
             }
@@ -83,8 +81,8 @@ public class EventNotificationFiringUtil {
         log.info(
                 "Firing async event for PNC build UMB status update, with request event id: {} ",
                 ((PncBuildUmbStatusChangeEvent) pncBuildStatusNotification).getRequestEventId());
-        Event<Object> event = Arc.container().beanManager().getEvent();
-        event.fireAsync(pncBuildStatusNotification).whenComplete((result, throwable) -> {
+
+        MdcWrapperUtil.fireAsync(pncBuildStatusNotification).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 log.error("Error occurred while processing the async event.", throwable);
             }
