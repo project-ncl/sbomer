@@ -17,15 +17,30 @@
  */
 package org.jboss.sbomer.core.config;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 
-import io.smallrye.config.source.yaml.YamlConfigSourceProvider;
+import io.smallrye.config.AbstractLocationConfigSourceLoader;
+import io.smallrye.config.source.yaml.YamlConfigSource;
 
-class SbomerConfigSourceProvider extends YamlConfigSourceProvider {
+class SbomerConfigSourceProvider extends AbstractLocationConfigSourceLoader implements ConfigSourceProvider {
+    @Override
+    public String[] getFileExtensions() {
+        return new String[] { "yaml", "yml" };
+    }
+
+    @Override
+    protected ConfigSource loadConfigSource(final URL url, final int ordinal) throws IOException {
+        return new YamlConfigSource(url, ordinal);
+    }
+
     @Override
     public Iterable<ConfigSource> getConfigSources(ClassLoader classLoader) {
         return new ArrayList<>(loadConfigSources("META-INF/sbomer-config.yaml", 110, classLoader));
     }
+
 }

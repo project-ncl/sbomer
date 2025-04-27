@@ -38,11 +38,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import io.fabric8.knative.internal.pkg.apis.ConditionBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamValue;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
+import io.fabric8.knative.pkg.apis.ConditionBuilder;
+import io.fabric8.tekton.v1beta1.ParamBuilder;
+import io.fabric8.tekton.v1beta1.ParamValue;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 
@@ -87,8 +87,8 @@ class BuildControllerTest {
         assertEquals("NEW", generationRequest.getMetadata().getLabels().get(Labels.LABEL_STATUS));
 
         assertFalse(control.isNoUpdate());
-        assertFalse(control.isUpdateStatus());
-        assertTrue(control.isUpdateResource());
+        assertFalse(control.isPatchStatus());
+        assertTrue(control.isPatchResource());
     }
 
     @Test
@@ -115,8 +115,8 @@ class BuildControllerTest {
             assertEquals(GenerationResult.ERR_SYSTEM, generationRequest.getResult());
 
             assertFalse(control.isNoUpdate());
-            assertFalse(control.isUpdateStatus());
-            assertTrue(control.isUpdateResource());
+            assertFalse(control.isPatchStatus());
+            assertTrue(control.isPatchResource());
         }
     }
 
@@ -179,8 +179,8 @@ class BuildControllerTest {
                         generationRequest.getReason());
 
                 assertFalse(control.isNoUpdate());
-                assertFalse(control.isUpdateStatus());
-                assertTrue(control.isUpdateResource());
+                assertFalse(control.isPatchStatus());
+                assertTrue(control.isPatchResource());
             }
         }
     }
@@ -233,8 +233,8 @@ class BuildControllerTest {
                 assertEquals(reason, generationRequest.getReason());
 
                 assertFalse(control.isNoUpdate());
-                assertFalse(control.isUpdateStatus());
-                assertTrue(control.isUpdateResource());
+                assertFalse(control.isPatchStatus());
+                assertTrue(control.isPatchResource());
             }
         }
     }

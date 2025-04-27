@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
-import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -54,13 +52,14 @@ import org.slf4j.helpers.MessageFormatter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.tekton.pipeline.v1beta1.Param;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunResult;
-import io.javaoperatorsdk.operator.api.reconciler.Constants;
+import io.fabric8.tekton.v1beta1.Param;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunResult;
+import io.javaoperatorsdk.operator.api.config.informer.Informer;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.javaoperatorsdk.operator.api.reconciler.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
@@ -84,20 +83,26 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @ControllerConfiguration(
-        labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=build",
-        namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
+        informer = @Informer(
+                labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/managed-by=sbomer,app.kubernetes.io/component=generator,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=build"))
+@Workflow(
         dependents = {
                 @Dependent(
+                        useEventSourceWithName = "tekton-generation-request-build",
                         type = TaskRunInitDependentResource.class,
-                        reconcilePrecondition = IsBuildTypeCondition.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME),
+                        reconcilePrecondition = IsBuildTypeCondition.class),
                 @Dependent(
+                        useEventSourceWithName = "tekton-generation-request-build",
                         type = TaskRunGenerateBuildDependentResource.class,
-                        reconcilePrecondition = IsBuildTypeInitializedCondition.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME) })
+                        reconcilePrecondition = IsBuildTypeInitializedCondition.class) })
 @Slf4j
 public class BuildController extends AbstractController {
     final ObjectMapper objectMapper = ObjectMapperProvider.yaml();
+
+    @Override
+    protected GenerationRequestType generationRequestType() {
+        return GenerationRequestType.BUILD;
+    }
 
     @Override
     protected UpdateControl<GenerationRequest> updateRequest(
@@ -122,7 +127,8 @@ public class BuildController extends AbstractController {
         generationRequest.setStatus(status);
         generationRequest.setResult(result);
         generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-        return UpdateControl.updateResource(generationRequest);
+
+        return UpdateControl.patchResource(generationRequest);
     }
 
     /**
@@ -457,7 +463,7 @@ public class BuildController extends AbstractController {
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
-        log.debug("ReconcileNew ...");
+        log.debug("ReconcileScheduled ...");
         TaskRun initTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.INIT);
 
         if (initTaskRun == null) {
@@ -540,7 +546,7 @@ public class BuildController extends AbstractController {
         }
 
         // In case resource gets an update, update th DB entity as well
-        if (action.isUpdateResource()) {
+        if (action.isPatchResource()) {
             SbomGenerationRequest.sync(generationRequest);
         }
 

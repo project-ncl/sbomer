@@ -114,7 +114,7 @@ public class GenerationRequest extends ConfigMap {
         }
 
         getData().put(KEY_TYPE, type.toName());
-        getMetadata().getLabels().put(Labels.LABEL_TYPE, type.toName());
+        getMetadata().getLabels().put(Labels.LABEL_GENERATION_REQUEST_TYPE, type.toName());
     }
 
     @JsonIgnore
