@@ -29,8 +29,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
-import org.jboss.pnc.api.constants.MDCHeaderKeys;
-import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -68,6 +66,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACEPARENT_KEY;
 
 @JsonInclude(Include.NON_NULL)
 @DynamicUpdate
@@ -166,9 +168,9 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         // Update the OTEL metadata
         if (generationRequest.getTraceId() != null) {
             ObjectNode otelMetadata = ObjectMapperProvider.json().createObjectNode();
-            otelMetadata.put(MDCKeys.TRACE_ID_KEY, generationRequest.getTraceId());
-            otelMetadata.put(MDCKeys.SPAN_ID_KEY, generationRequest.getSpanId());
-            otelMetadata.put(MDCHeaderKeys.TRACEPARENT.getMdcKey(), generationRequest.getTraceParent());
+            otelMetadata.put(MDC_TRACE_ID_KEY, generationRequest.getTraceId());
+            otelMetadata.put(MDC_SPAN_ID_KEY, generationRequest.getSpanId());
+            otelMetadata.put(MDC_TRACEPARENT_KEY, generationRequest.getTraceParent());
             sbomGenerationRequest.setOtelMetadata(otelMetadata);
         }
 
