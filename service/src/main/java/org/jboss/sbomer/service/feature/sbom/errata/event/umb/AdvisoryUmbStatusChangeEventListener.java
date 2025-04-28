@@ -41,7 +41,7 @@ public class AdvisoryUmbStatusChangeEventListener {
     @Inject
     ErrataNotificationHandler errataNotificationHandler;
 
-    public void onAdvisoryStatusUpdate(@ObservesAsync MdcEventWrapper<AdvisoryUmbStatusChangeEvent> wrapper) {
+    public void onAdvisoryStatusUpdate(@ObservesAsync MdcEventWrapper wrapper) {
 
         Map<String, String> mdcContext = wrapper.getMdcContext();
         if (mdcContext != null) {
@@ -50,7 +50,7 @@ public class AdvisoryUmbStatusChangeEventListener {
             MDC.clear();
         }
 
-        AdvisoryUmbStatusChangeEvent event = wrapper.getPayload();
+        AdvisoryUmbStatusChangeEvent event = (AdvisoryUmbStatusChangeEvent) wrapper.getPayload();
 
         try {
             errataNotificationHandler.handle(event.getRequestEventId());

@@ -753,9 +753,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        MdcEventWrapper<TextOnlyAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<TextOnlyAdvisoryReleaseEvent>(
-                event,
-                MDC.getCopyOfContextMap());
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
 
         listenerTextOnlyManifests.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
@@ -816,9 +814,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        MdcEventWrapper<TextOnlyAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<TextOnlyAdvisoryReleaseEvent>(
-                event,
-                MDC.getCopyOfContextMap());
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
 
         listenerTextOnlyDeliverables.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
@@ -904,9 +900,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        MdcEventWrapper<StandardAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<StandardAdvisoryReleaseEvent>(
-                event,
-                MDC.getCopyOfContextMap());
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
 
         listenerSingleContainer.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
@@ -1055,9 +1049,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        MdcEventWrapper<StandardAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<StandardAdvisoryReleaseEvent>(
-                event,
-                MDC.getCopyOfContextMap());
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
         listenerMultiContainers.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
@@ -1144,9 +1136,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        MdcEventWrapper<StandardAdvisoryReleaseEvent> wrapper = new MdcEventWrapper<StandardAdvisoryReleaseEvent>(
-                event,
-                MDC.getCopyOfContextMap());
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
         listenerSingleRpm.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
