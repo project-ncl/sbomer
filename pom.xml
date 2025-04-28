@@ -65,7 +65,7 @@
     <version.lombok>1.18.32</version.lombok>
     <version.pnc-rest>3.1.5</version.pnc-rest>
     <version.pnc-api>3.0.7</version.pnc-api>
-    <version.quarkus-jgit>3.3.3</version.quarkus-jgit>
+    <version.quarkus-jgit>3.5.1</version.quarkus-jgit>
     <version.quarkus-kerberos>2.2.0</version.quarkus-kerberos>
     <version.sonar>4.0.0.4121</version.sonar>
     <version.quarkus-unleash>1.10.0</version.quarkus-unleash>
@@ -93,6 +93,12 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Workaround for: https://github.com/quarkiverse/quarkus-jgit/issues/182 until we upgrade to Quarkus >= 3.21.2-->
+      <dependency>
+        <groupId>org.eclipse.jgit</groupId>
+        <artifactId>org.eclipse.jgit</artifactId>
+        <version>7.2.0.202503040940-r</version>
+      </dependency>
       <dependency>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-bom</artifactId>
