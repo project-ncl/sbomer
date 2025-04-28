@@ -73,6 +73,11 @@ public class CommentAdvisoryOnRelevantEventsListener {
     FeatureFlags featureFlags;
 
     public void onRequestEventStatusUpdate(@ObservesAsync MdcEventWrapper wrapper) {
+        Object payload = wrapper.getPayload();
+        if (!(payload instanceof RequestEventStatusUpdateEvent event)) {
+            return;
+        }
+
         Map<String, String> mdcContext = wrapper.getMdcContext();
         if (mdcContext != null) {
             MDC.setContextMap(mdcContext);
@@ -80,7 +85,6 @@ public class CommentAdvisoryOnRelevantEventsListener {
             MDC.clear();
         }
 
-        RequestEventStatusUpdateEvent event = (RequestEventStatusUpdateEvent) wrapper.getPayload();
         log.debug("Event received for request event status update...");
 
         try {
