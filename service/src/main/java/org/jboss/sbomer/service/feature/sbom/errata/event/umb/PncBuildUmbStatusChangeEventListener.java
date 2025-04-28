@@ -43,14 +43,17 @@ public class PncBuildUmbStatusChangeEventListener {
     PncNotificationHandler pncNotificationHandler;
 
     public void onPncBuildStatusUpdate(@ObservesAsync MdcEventWrapper wrapper) {
+        Object payload = wrapper.getPayload();
+        if (!(payload instanceof PncBuildUmbStatusChangeEvent event)) {
+            return;
+        }
+
         Map<String, String> mdcContext = wrapper.getMdcContext();
         if (mdcContext != null) {
             MDC.setContextMap(mdcContext);
         } else {
             MDC.clear();
         }
-
-        PncBuildUmbStatusChangeEvent event = (PncBuildUmbStatusChangeEvent) wrapper.getPayload();
 
         try {
             pncNotificationHandler.handle(event.getRequestEventId());

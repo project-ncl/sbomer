@@ -91,6 +91,11 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
     private static final String NVR_STANDARD_SEPARATOR = "-";
 
     public void onReleaseAdvisoryEvent(@ObservesAsync MdcEventWrapper wrapper) {
+        Object payload = wrapper.getPayload();
+        if (!(payload instanceof StandardAdvisoryReleaseEvent event)) {
+            return;
+        }
+
         Map<String, String> mdcContext = wrapper.getMdcContext();
         if (mdcContext != null) {
             MDC.setContextMap(mdcContext);
@@ -98,7 +103,6 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             MDC.clear();
         }
 
-        StandardAdvisoryReleaseEvent event = (StandardAdvisoryReleaseEvent) wrapper.getPayload();
         log.debug("Event received for standard advisory release ...");
 
         try {
