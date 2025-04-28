@@ -39,7 +39,6 @@ import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
-import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
@@ -73,7 +72,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
     @Inject
     FeatureFlags featureFlags;
 
-    public void onRequestEventStatusUpdate(@ObservesAsync MdcEventWrapper<RequestEventStatusUpdateEvent> wrapper) {
+    public void onRequestEventStatusUpdate(@ObservesAsync MdcEventWrapper wrapper) {
         Map<String, String> mdcContext = wrapper.getMdcContext();
         if (mdcContext != null) {
             MDC.setContextMap(mdcContext);
@@ -81,7 +80,7 @@ public class CommentAdvisoryOnRelevantEventsListener {
             MDC.clear();
         }
 
-        RequestEventStatusUpdateEvent event = wrapper.getPayload();
+        RequestEventStatusUpdateEvent event = (RequestEventStatusUpdateEvent) wrapper.getPayload();
         log.debug("Event received for request event status update...");
 
         try {

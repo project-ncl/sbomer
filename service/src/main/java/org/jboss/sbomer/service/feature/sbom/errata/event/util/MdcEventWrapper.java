@@ -20,16 +20,16 @@ package org.jboss.sbomer.service.feature.sbom.errata.event.util;
 import java.io.Serializable;
 import java.util.Map;
 
-public class MdcEventWrapper<T> implements Serializable {
-    private final T payload;
+public class MdcEventWrapper implements Serializable {
+    private final Object payload;
     private final Map<String, String> mdcContext;
 
-    public MdcEventWrapper(T payload, Map<String, String> mdcContext) {
+    public MdcEventWrapper(Object payload, Map<String, String> mdcContext) {
         this.payload = payload;
         this.mdcContext = mdcContext;
     }
 
-    public T getPayload() {
+    public Object getPayload() {
         return payload;
     }
 

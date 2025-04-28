@@ -29,11 +29,11 @@ public class MdcWrapperUtil {
         throw new IllegalStateException("Utility class");
     }
 
-    public static <T> CompletionStage<MdcEventWrapper<T>> fireAsync(T payload) {
+    public static CompletionStage<MdcEventWrapper> fireAsync(Object payload) {
         Map<String, String> mdcContext = MDC.getCopyOfContextMap();
         Event<Object> event = Arc.container().beanManager().getEvent();
 
-        return event.fireAsync(new MdcEventWrapper<>(payload, mdcContext));
+        return event.fireAsync(new MdcEventWrapper(payload, mdcContext));
     }
 
 }

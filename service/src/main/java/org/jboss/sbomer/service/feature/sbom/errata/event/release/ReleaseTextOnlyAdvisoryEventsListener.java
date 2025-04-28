@@ -64,7 +64,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListener {
 
-    public void onReleaseAdvisoryEvent(@ObservesAsync MdcEventWrapper<TextOnlyAdvisoryReleaseEvent> wrapper) {
+    public void onReleaseAdvisoryEvent(@ObservesAsync MdcEventWrapper wrapper) {
         Map<String, String> mdcContext = wrapper.getMdcContext();
         if (mdcContext != null) {
             MDC.setContextMap(mdcContext);
@@ -72,7 +72,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
             MDC.clear();
         }
 
-        TextOnlyAdvisoryReleaseEvent event = wrapper.getPayload();
+        TextOnlyAdvisoryReleaseEvent event = (TextOnlyAdvisoryReleaseEvent) wrapper.getPayload();
         log.debug("Event received for text-only advisory release ...");
 
         try {
