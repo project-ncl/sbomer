@@ -209,7 +209,7 @@ public class GenerationRequestScheduler {
                                     span.getSpanContext().getTraceFlags().asHex()))
                     .build();
 
-            ConfigMap cm = kubernetesClient.configMaps().resource(request).create();
+            ConfigMap cm = kubernetesClient.configMaps().resource(request).serverSideApply();
 
             log.debug(
                     "ConfigMap '{}' created as a representation of the Generation Request '{}'...",
