@@ -293,7 +293,7 @@ public class SbomService {
             PncBuildConfig config) {
         try {
             PncBuildRequestConfig pncRequestConfig = (PncBuildRequestConfig) requestConfig;
-            MDCUtils.addBuildContext(pncRequestConfig.getBuildId());
+            MDCUtils.addIdentifierContext(pncRequestConfig.getBuildId());
 
             log.info("New generation request for build id '{}'", pncRequestConfig.getBuildId());
             log.debug(
@@ -338,7 +338,7 @@ public class SbomService {
 
             return sbomGenerationRequest;
         } finally {
-            MDCUtils.removeBuildContext();
+            MDCUtils.removeIdentifierContext();
         }
     }
 

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
@@ -45,6 +44,12 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_FLAGS_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_STATE_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_IDENTIFIER_KEY;
 
 @ApplicationScoped
 @Slf4j
@@ -170,12 +175,12 @@ public class GenerationRequestScheduler {
                 GlobalOpenTelemetry.get().getTracer(""),
                 "GenerationRequestScheduler.schedule",
                 SpanKind.CLIENT,
-                MDC.get(MDCKeys.TRACE_ID_KEY),
-                MDC.get(MDCKeys.SPAN_ID_KEY),
-                MDC.get(MDCKeys.TRACE_FLAGS_KEY),
-                MDC.get(MDCKeys.TRACE_STATE_KEY),
+                MDC.get(MDC_TRACE_ID_KEY),
+                MDC.get(MDC_SPAN_ID_KEY),
+                MDC.get(MDC_TRACE_FLAGS_KEY),
+                MDC.get(MDC_TRACE_STATE_KEY),
                 Span.current().getSpanContext(),
-                Map.of(MDCKeys.BUILD_ID_KEY, sbomGenerationRequest.getIdentifier()));
+                Map.of(MDC_IDENTIFIER_KEY, sbomGenerationRequest.getIdentifier()));
         Span span = spanBuilder.startSpan();
 
         log.debug(

@@ -161,7 +161,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     @Transactional
     protected List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
         MDCUtils.removeOtelContext();
-        MDCUtils.addBuildContext(generationRequest.getIdentifier());
+        MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
         MDCUtils.addOtelContext(generationRequest.getMDCOtel());
 
         // First, update the status of the GenerationRequest entity.
@@ -262,7 +262,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     @Override
     public DeleteControl cleanup(GenerationRequest resource, Context<GenerationRequest> context) {
         MDCUtils.removeOtelContext();
-        MDCUtils.addBuildContext(resource.getIdentifier());
+        MDCUtils.addIdentifierContext(resource.getIdentifier());
         MDCUtils.addOtelContext(resource.getMDCOtel());
 
         log.debug("GenerationRequest '{}' was removed from the system", resource.getMetadata().getName());
@@ -275,7 +275,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
             Context<GenerationRequest> context) throws Exception {
 
         MDCUtils.removeContext();
-        MDCUtils.addBuildContext(generationRequest.getIdentifier());
+        MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
         MDCUtils.addOtelContext(generationRequest.getMDCOtel());
 
         // No status is set, it should be "NEW", let's do it.

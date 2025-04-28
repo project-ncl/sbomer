@@ -119,7 +119,7 @@ public class GenerateCommand implements Callable<Integer> {
 
         // Make sure there is no context
         MDCUtils.removeContext();
-        MDCUtils.addBuildContext(config.getBuildId());
+        MDCUtils.addIdentifierContext(config.getBuildId());
 
         if (index != null) {
 

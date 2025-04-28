@@ -474,7 +474,7 @@ public class BuildController extends AbstractController {
             Context<GenerationRequest> context) throws Exception {
 
         MDCUtils.removeContext();
-        MDCUtils.addBuildContext(generationRequest.getIdentifier());
+        MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
         MDCUtils.addOtelContext(generationRequest.getMDCOtel());
 
         // No status is set, it should be "NEW", let's do it.
@@ -549,7 +549,7 @@ public class BuildController extends AbstractController {
 
     protected List<Sbom> storeSboms(GenerationRequest generationRequest) {
         MDCUtils.removeOtelContext();
-        MDCUtils.addBuildContext(generationRequest.getIdentifier());
+        MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
         MDCUtils.addOtelContext(generationRequest.getMDCOtel());
 
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);

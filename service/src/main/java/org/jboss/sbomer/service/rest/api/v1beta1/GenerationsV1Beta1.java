@@ -317,12 +317,12 @@ public class GenerationsV1Beta1 {
     public Response deleteGenerationRequest(@PathParam("id") final String id) {
 
         try {
-            MDCUtils.addProcessContext(id);
+            MDCUtils.addIdentifierContext(id);
             sbomService.deleteSbomRequest(id);
 
             return Response.ok().build();
         } finally {
-            MDCUtils.removeProcessContext();
+            MDCUtils.removeIdentifierContext();
         }
     }
 
