@@ -34,6 +34,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,19 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
     private static final String EQUAL = "=";
 
     private static final String NOT_EQUAL = "<>";
+
+    private static final String FIND_GENERATION_REQUEST_MANIFESTS_NATIVE_QUERY = "SELECT re.id AS request_id, "
+            + "re.receival_time AS receival_time, re.event_type AS event_type, "
+            + "re.event_status AS event_status, re.reason AS reason, re.request_config AS request_config, "
+            + "re.event AS event, s.id AS sbom_id, s.identifier AS sbom_identifier, "
+            + "s.root_purl AS sbom_root_purl, s.creation_time AS sbom_creation_time, "
+            + "s.config_index AS sbom_config_index, s.status_msg AS sbom_status_msg, "
+            + "sgr.id AS generation_request_id, sgr.identifier AS generation_request_identifier, "
+            + "sgr.config AS generation_request_config, sgr.type AS generation_request_type, "
+            + "sgr.creation_time AS generation_request_creation_time, sgr.status AS generation_request_status, "
+            + "sgr.result AS generation_request_result, sgr.reason AS generation_request_reason "
+            + "FROM request re LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id "
+            + "LEFT JOIN sbom s ON sgr.id = s.generationrequest_id";
 
     public RequestEventRepository() {
         super(RequestEvent.class);
@@ -367,31 +381,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
         log.debug("Natively searching records for type '{}' and value '{}'", typeKey, typeValue);
 
         // Build the native SQL query
-        StringBuilder sb = new StringBuilder().append("SELECT ")
-                .append("re.id AS request_id, ")
-                .append("re.receival_time AS receival_time, ")
-                .append("re.event_type AS event_type, ")
-                .append("re.event_status AS event_status, ")
-                .append("re.reason AS reason, ")
-                .append("re.request_config AS request_config, ")
-                .append("re.event AS event, ")
-                .append("s.id AS sbom_id, ")
-                .append("s.identifier AS sbom_identifier, ")
-                .append("s.root_purl AS sbom_root_purl, ")
-                .append("s.creation_time AS sbom_creation_time, ")
-                .append("s.config_index AS sbom_config_index, ")
-                .append("s.status_msg AS sbom_status_msg, ")
-                .append("sgr.id AS generation_request_id, ")
-                .append("sgr.identifier AS generation_request_identifier, ")
-                .append("sgr.config AS generation_request_config, ")
-                .append("sgr.type AS generation_request_type, ")
-                .append("sgr.creation_time AS generation_request_creation_time, ")
-                .append("sgr.status AS generation_request_status, ")
-                .append("sgr.result AS generation_request_result, ")
-                .append("sgr.reason AS generation_request_reason ")
-                .append("FROM request re ")
-                .append("LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id ")
-                .append("LEFT JOIN sbom s ON sgr.id = s.generationrequest_id ");
+        StringBuilder sb = new StringBuilder().append(FIND_GENERATION_REQUEST_MANIFESTS_NATIVE_QUERY);
 
         Map<String, Object> params = filterAndBuildQueryParams(sb, typeKey, typeValue);
         Query query = getEntityManager().createNativeQuery(sb.toString());
@@ -487,7 +477,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
 
         return aggregatedResults.values()
                 .stream()
-                .sorted((record1, record2) -> record2.receivalTime().compareTo(record1.receivalTime()))
+                .sorted(Comparator.comparing(V1Beta1RequestRecord::receivalTime).reversed())
                 .toList();
     }
 }
