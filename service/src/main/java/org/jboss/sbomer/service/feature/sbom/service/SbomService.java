@@ -193,7 +193,13 @@ public class SbomService {
 
     @WithSpan
     public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter) {
-        return requestEventRepository.searchAggregatedResultsNatively(filter);
+        return requestEventRepository.searchAggregatedResultsNatively(filter, true);
+    }
+
+    @WithSpan
+    @Transactional
+    public List<V1Beta1RequestRecord> searchAggregatedResultsNatively(String filter, boolean minimized) {
+        return requestEventRepository.searchAggregatedResultsNatively(filter, minimized);
     }
 
     /**

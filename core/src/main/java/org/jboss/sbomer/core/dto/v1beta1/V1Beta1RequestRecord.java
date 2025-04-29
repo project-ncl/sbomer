@@ -20,6 +20,7 @@ package org.jboss.sbomer.core.dto.v1beta1;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.sbomer.core.config.request.RequestConfig;
@@ -32,4 +33,27 @@ import com.fasterxml.jackson.databind.JsonNode;
 public record V1Beta1RequestRecord(String id, Instant receivalTime, RequestEventType eventType,
         RequestEventStatus eventStatus, String reason, @Schema(implementation = Map.class) RequestConfig requestConfig,
         @Schema(implementation = Map.class) JsonNode event, Collection<V1Beta1RequestManifestRecord> manifests) {
+
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(", ", "V1Beta1RequestRecord[", "]");
+
+        if (id != null)
+            joiner.add("id=" + id);
+        if (receivalTime != null)
+            joiner.add("receivalTime=" + receivalTime);
+        if (eventType != null)
+            joiner.add("eventType=" + eventType);
+        if (eventStatus != null)
+            joiner.add("eventStatus=" + eventStatus);
+        if (reason != null)
+            joiner.add("reason=" + reason);
+        if (requestConfig != null)
+            joiner.add("requestConfig=" + requestConfig);
+        if (event != null)
+            joiner.add("event=" + event);
+        if (manifests != null)
+            joiner.add("manifests=" + manifests);
+        return joiner.toString();
+    }
 }
