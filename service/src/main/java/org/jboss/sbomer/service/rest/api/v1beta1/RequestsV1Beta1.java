@@ -115,7 +115,7 @@ public class RequestsV1Beta1 {
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = ErrorResponse.class)))
     public List<V1Beta1RequestRecord> getRequestEventById(@PathParam("filter") String filter) {
-        return sbomService.searchAggregatedResultsNatively(filter);
+        return sbomService.searchAggregatedResultsNatively(filter, false);
     }
 
     @GET
