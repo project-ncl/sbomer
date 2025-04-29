@@ -811,7 +811,7 @@ class ReleaseAdvisoryEventsListenerTest {
             return generationsMap.get(generationId);
         });
         when(requestEventRepository.findById(anyString())).thenReturn(requestEvent);
-        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
+        when(sbomService.searchLastSuccessfulAdvisoryBuildRequestRecord(anyString(), anyString()))
                 .thenReturn(allAdvisoryRequestRecords.get(0));
 
         String pncBuildUrl = "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.2.11.Final-redhat-00001?type=pom";
@@ -902,7 +902,7 @@ class ReleaseAdvisoryEventsListenerTest {
         when(sbomService.get("A14FF4DDB7DB47D")).thenReturn(firstManifest);
         when(sbomService.get("2A5F7CA4166C470")).thenReturn(indexManifest);
         when(sbomService.save(any(Sbom.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
+        when(sbomService.searchLastSuccessfulAdvisoryBuildRequestRecord(anyString(), anyString()))
                 .thenReturn(latestAdvisoryRequestManifest);
 
         StandardAdvisoryReleaseEvent event = StandardAdvisoryReleaseEvent.builder()
@@ -1051,7 +1051,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
         when(sbomService.get(anyString())).thenAnswer(invocation -> sboms.get(invocation.getArgument(0)));
         when(sbomService.save(any(Sbom.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
+        when(sbomService.searchLastSuccessfulAdvisoryBuildRequestRecord(anyString(), anyString()))
                 .thenReturn(latestAdvisoryRequestManifest);
 
         StandardAdvisoryReleaseEvent event = StandardAdvisoryReleaseEvent.builder()
@@ -1138,7 +1138,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
         when(sbomService.get("356D95E8FF434C4")).thenReturn(manifest);
         when(sbomService.save(any(Sbom.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(sbomService.searchLastSuccessfulAdvisoryRequestRecord(anyString(), anyString()))
+        when(sbomService.searchLastSuccessfulAdvisoryBuildRequestRecord(anyString(), anyString()))
                 .thenReturn(latestAdvisoryRequestManifest);
 
         StandardAdvisoryReleaseEvent event = StandardAdvisoryReleaseEvent.builder()
