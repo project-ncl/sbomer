@@ -113,7 +113,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                 Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
                         config.getAdvisoryId());
                 V1Beta1RequestRecord advisoryManifestsRecord = sbomService
-                        .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
+                        .searchLastSuccessfulAdvisoryBuildRequestRecord(requestEvent.getId(), config.getAdvisoryId());
 
                 String toolVersion = statsService.getStats().getVersion();
                 // FIXME: 'Optional.get()' without 'isPresent()' check

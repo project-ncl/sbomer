@@ -581,6 +581,62 @@ public class SbomService {
         return latestAdvisoryRequestManifest;
     }
 
+    @Transactional
+    public V1Beta1RequestRecord searchLastSuccessfulAdvisoryBuildRequestRecord(
+            String ignoreRequestId,
+            String advisoryId) {
+
+        // Get all the request events generations for this advisory
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecords = searchAggregatedResultsNatively(
+                ErrataAdvisoryRequestConfig.TYPE_NAME + "=" + advisoryId);
+
+        if (allAdvisoryRequestRecords == null || allAdvisoryRequestRecords.isEmpty()) {
+            log.debug("No records found for advisory {}", advisoryId);
+            return null;
+        }
+
+        // Filter the results and remove the current (IN_PROGRESS) requestId
+        log.debug("Filtering found records to ignore current IN_PROGRESS event {} ...", ignoreRequestId);
+        List<V1Beta1RequestRecord> allAdvisoryRequestRecordsFiltered = allAdvisoryRequestRecords.stream()
+                .filter(requestRecord -> !requestRecord.id().equals(ignoreRequestId))
+                .toList();
+
+        if (allAdvisoryRequestRecordsFiltered.isEmpty()) {
+            log.debug("No successful records found for advisory {}", advisoryId);
+            return null;
+        }
+
+        log.debug(
+                "Filtering records to retrieve only the _build_ manifests records (ignoring _release_ manifests records)...");
+        // The generations of _build_ manifests have config != null
+        List<V1Beta1RequestRecord> advisoryBuildRequestRecords = allAdvisoryRequestRecordsFiltered.stream()
+                .filter(
+                        record -> record.manifests()
+                                .stream()
+                                .noneMatch(
+                                        manifest -> manifest.generation() != null
+                                                && manifest.generation().config() == null))
+                .toList();
+
+        if (advisoryBuildRequestRecords.isEmpty()) {
+            log.debug("No successful records found for advisory {}", advisoryId);
+            return null;
+        }
+
+        // Get the latest request and verify there are manifests
+        V1Beta1RequestRecord latestAdvisoryRequestManifest = advisoryBuildRequestRecords.get(0);
+
+        // Check whether the last one was completed successfully and has manifests
+        if (!RequestEventStatus.SUCCESS.equals(latestAdvisoryRequestManifest.eventStatus())
+                || latestAdvisoryRequestManifest.manifests() == null
+                || latestAdvisoryRequestManifest.manifests().isEmpty()) {
+            log.debug("No successful records found for advisory {}", advisoryId);
+            return null;
+        }
+
+        return latestAdvisoryRequestManifest;
+    }
+
     public DeliverableAnalyzerOperation doAnalyzeDeliverables(DeliverableAnalysisConfig config) {
         try {
             return pncClient.analyzeDeliverables(
