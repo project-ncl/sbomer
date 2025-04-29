@@ -58,7 +58,8 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisService;
+import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_DETAILS_INCLUDES;
+import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_REGISTRY_INCLUDES;
 import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
@@ -733,7 +734,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
         log.debug("Getting repositories details from Pyxis for NVR '{}'", nvr);
 
         PyxisRepositoryDetails repositoriesDetails = pyxisClient
-                .getRepositoriesDetails(nvr, PyxisService.REPOSITORIES_DETAILS_INCLUDES);
+                .getRepositoriesDetails(nvr, REPOSITORIES_DETAILS_INCLUDES);
         return repositoriesDetails.getData()
                 .stream()
                 .flatMap(dataSection -> dataSection.getRepositories().stream())
@@ -765,7 +766,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
      * accessible without authentication
      */
     protected PyxisRepository getRepository(String registry, String repository) {
-        return pyxisClient.getRepository(registry, repository, PyxisService.REPOSITORIES_REGISTRY_INCLUDES);
+        return pyxisClient.getRepository(registry, repository, REPOSITORIES_REGISTRY_INCLUDES);
     }
 
     protected ObjectNode collectReleaseInfo(

@@ -60,7 +60,7 @@ import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIEN
 @RegisterProvider(PyxisKrb5ClientRequestFilter.class)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public interface PyxisService {
+public interface PyxisClient {
 
     List<String> REPOSITORIES_DETAILS_INCLUDES = List.of(
             "data.repositories.registry",

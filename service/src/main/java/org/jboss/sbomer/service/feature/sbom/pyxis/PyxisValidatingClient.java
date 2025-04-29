@@ -54,7 +54,7 @@ import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUB
 public class PyxisValidatingClient {
 
     @RestClient
-    PyxisService p;
+    PyxisClient p;
 
     @Inject
     Validator validator;
