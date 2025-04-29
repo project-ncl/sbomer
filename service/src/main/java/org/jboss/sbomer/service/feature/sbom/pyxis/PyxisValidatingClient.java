@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.pyxis;
 
-import java.time.temporal.ChronoUnit;
-
 import java.util.List;
 import java.util.Set;
 
@@ -71,30 +69,15 @@ public class PyxisValidatingClient {
             @QueryParam("include") List<String> includes) {
         PyxisRepositoryDetails prd = p.getRepositoriesDetails(nvr, includes);
         Set<ConstraintViolation<PyxisRepositoryDetails>> violations = validator.validate(prd);
-        if (violations.isEmpty()) {
+        if (violations.isEmpty())
             return prd;
-        } else {
-            throw new ConstraintViolationException("Pyxis Repository constraint failure", violations);
-        }
+        throw new ConstraintViolationException("Pyxis Repository constraint failure", violations);
     }
 
-    @Retry(
-            maxRetries = PYXIS_UNPUBLISHED_MAX_RETRIES,
-            delay = PYXIS_UNPUBLISHED_INITIAL_DELAY,
-            maxDuration = PYXIS_UNPUBLISHED_MAX_DURATION,
-            retryOn = ConstraintViolationException.class)
-    @BeforeRetry(RetryLogger.class)
-    @FibonacciBackoff(maxDelay = PYXIS_UNPUBLISHED_MAX_DELAY)
     public PyxisRepository getRepository(
             @PathParam("registry") String registry,
             @PathParam("repository") String repository,
             @QueryParam("include") List<String> includes) {
-        PyxisRepository pr = p.getRepository(registry, repository, includes);
-        Set<ConstraintViolation<PyxisRepository>> violations = validator.validate(pr);
-        if (violations.isEmpty()) {
-            return pr;
-        } else {
-            throw new ConstraintViolationException("Pyxis Repository constraint failure", violations);
-        }
+        return p.getRepository(registry, repository, includes);
     }
 }
