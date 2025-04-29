@@ -74,7 +74,7 @@ quarkus:
 
   rest-client:
     connect-timeout: 15000
-    read-timeout: 90000
+    read-timeout: 120000
     "atlas-build":
       url: "https://${sbomer.atlas.build.host}"
     "atlas-release":
