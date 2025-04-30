@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.kerberos;
 
 import java.io.IOException;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import jakarta.inject.Inject;
@@ -32,8 +33,8 @@ public class PyxisKrb5ClientRequestFilter implements ClientRequestFilter {
     private static final String AUTHORIZATION = "Authorization";
     private static final String NEGOTIATE = "Negotiate";
 
-    @ConfigProperty(name = "sbomer.features.kerberos.enabled")
-    private static boolean enabled;
+    private static boolean enabled = ConfigProvider.getConfig()
+            .getValue("sbomer.features.kerberos.enabled", Boolean.class);
 
     @Inject
     PyxisCachingKerberosClientSupport kerberosClientSupport;
