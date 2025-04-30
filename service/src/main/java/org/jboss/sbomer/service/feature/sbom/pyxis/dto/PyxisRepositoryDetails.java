@@ -18,14 +18,16 @@
 package org.jboss.sbomer.service.feature.sbom.pyxis.dto;
 
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import lombok.Data;
+import jakarta.validation.constraints.NotEmpty;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PyxisRepositoryDetails {
+
+    // data=[] should give a constraint error
+    @NotEmpty(message = "Pyxis registry looks to be empty")
     private List<DataSection> data;
 
     @Data
