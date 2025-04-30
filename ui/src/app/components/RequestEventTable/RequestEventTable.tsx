@@ -18,15 +18,13 @@ import {
   MenuToggleElement,
   SearchInput,
   Button,
-  Spinner,
   ClipboardCopy,
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useRequestEvents } from './useRequestEvents';
-import { openInNewTab } from '@app/utils/openInNewTab';
 import { RequestsQueryType } from '@app/types';
 import { useRequestEventsFilters } from './useRequestEventsFilters';
 import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
@@ -42,8 +40,6 @@ const columnNames = {
 };
 
 export const RequestEventTable = () => {
-  const navigate = useNavigate();
-
   const { queryType, queryValue, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
 
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
