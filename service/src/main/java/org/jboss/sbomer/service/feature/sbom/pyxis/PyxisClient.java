@@ -71,7 +71,11 @@ public interface PyxisClient {
 
     @GET
     @Path("/images/nvr/{nvr}")
-    @Retry(maxRetries = PYXIS_CLIENT_MAX_RETRIES, delay = PYXIS_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = PYXIS_CLIENT_MAX_RETRIES,
+            delay = PYXIS_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     PyxisRepositoryDetails getRepositoriesDetails(
@@ -80,7 +84,11 @@ public interface PyxisClient {
 
     @GET
     @Path("/repositories/registry/{registry}/repository/{repository}")
-    @Retry(maxRetries = PYXIS_CLIENT_MAX_RETRIES, delay = PYXIS_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = PYXIS_CLIENT_MAX_RETRIES,
+            delay = PYXIS_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     PyxisRepository getRepository(

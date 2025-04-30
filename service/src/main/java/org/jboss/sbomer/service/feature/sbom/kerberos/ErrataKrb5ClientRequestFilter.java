@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.kerberos;
 
 import java.io.IOException;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientRequestContext;
@@ -35,8 +35,8 @@ public class ErrataKrb5ClientRequestFilter implements ClientRequestFilter {
     @Inject
     ErrataCachingKerberosClientSupport kerberosClientSupport;
 
-    @ConfigProperty(name = "sbomer.features.kerberos.enabled")
-    private static boolean enabled;
+    private static boolean enabled = ConfigProvider.getConfig()
+            .getValue("sbomer.features.kerberos.enabled", Boolean.class);
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
