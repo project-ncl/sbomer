@@ -78,9 +78,11 @@ import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
@@ -93,6 +95,10 @@ import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACEPARENT_KEY;
 
 @ApplicationScoped
 @Slf4j
@@ -566,6 +572,11 @@ public class AdvisoryService {
             Set<String> productVersions,
             GenerationRequestType type) {
 
+        ObjectNode otelMetadata = ObjectMapperProvider.json().createObjectNode();
+        otelMetadata.put(MDC_TRACE_ID_KEY, MDC.get(MDC_TRACE_ID_KEY));
+        otelMetadata.put(MDC_SPAN_ID_KEY, MDC.get(MDC_SPAN_ID_KEY));
+        otelMetadata.put(MDC_TRACEPARENT_KEY, MDC.get(MDC_TRACEPARENT_KEY));
+
         // We need to create 1 release manifest per ProductVersion
         // We will identify the Generation with the {Errata}#{ProductVersion} identifier
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -577,6 +588,7 @@ public class AdvisoryService {
                     .withStatus(SbomGenerationStatus.GENERATING)
                     .withConfig(null) // I really don't know what to put here
                     .withRequest(requestEvent)
+                    .withOtelMetadata(otelMetadata)
                     .build();
 
             pvToGenerations.put(pvName, generationRequestRepository.save(sbomGenerationRequest));

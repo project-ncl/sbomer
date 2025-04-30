@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -167,10 +168,9 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                         "An error occurred during the creation of release manifests for event '{}'",
                         requestEvent.getId(),
                         e);
-                markRequestFailed(
-                        requestEvent,
-                        event.getReleaseGenerations().values(),
-                        "An error occurred during the creation of the release manifest");
+                String reason = (e instanceof ApplicationException) ? e.getMessage()
+                        : "An error occurred during the creation of the release manifest";
+                markRequestFailed(requestEvent, event.getReleaseGenerations().values(), reason);
             }
 
             // Let's trigger the update of statuses and advisory comments
@@ -425,8 +425,13 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
         generationToRepositories.put(generation.id(), repositories);
 
         // Create summary (pick the longest value) and evidence purl
-        RepositoryCoordinates preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
-        String summaryPurl = AdvisoryEventUtils.createPurl(preferredRepo, imageIndexMainComponent.getVersion(), false);
+        Optional<RepositoryCoordinates> preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+        if (preferredRepo.isEmpty()) {
+            throw new ApplicationException("No published repositories found in Pyxis for nvr '{}'", generationNVR);
+        }
+
+        String summaryPurl = AdvisoryEventUtils
+                .createPurl(preferredRepo.get(), imageIndexMainComponent.getVersion(), false);
         Set<String> evidencePurls = AdvisoryEventUtils
                 .createPurls(repositories, imageIndexMainComponent.getVersion(), true);
 
@@ -609,7 +614,10 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                 String generationId = entry.getKey();
                 // 2.1 - Select the repository with longest repoFragment + tag
                 List<RepositoryCoordinates> repositories = entry.getValue();
-                RepositoryCoordinates preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+                Optional<RepositoryCoordinates> preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+                if (preferredRepo.isEmpty()) {
+                    throw new ApplicationException("No published repositories found in Pyxis");
+                }
 
                 // 2.2 - Regenerate the manifest purls using the preferredRepo and keep track of the updates.
                 // We need them to update the index manifest variants
@@ -619,7 +627,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                         .toList();
                 Map<String, String> originalToRebuiltPurl = new HashMap<>();
                 buildManifests.forEach(manifestRecord -> {
-                    String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo);
+                    String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo.get());
                     originalToRebuiltPurl.put(manifestRecord.rootPurl(), rebuiltPurl);
                     log.debug("Regenerated rootPurl '{}' to '{}'", manifestRecord.rootPurl(), rebuiltPurl);
                 });
