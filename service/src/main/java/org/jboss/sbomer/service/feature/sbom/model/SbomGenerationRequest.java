@@ -292,6 +292,13 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                 SbomGenerationStatus.NO_OP).list();
     }
 
+    @Transactional
+    public static List<SbomGenerationRequest> findByRequest(String requestId) {
+        return SbomGenerationRequest.find( // NOSONAR
+                "request.id = ?1 order by creationTime asc",
+                requestId).list();
+    }
+
     @PrePersist
     public void prePersist() {
         creationTime = Instant.now();
