@@ -55,6 +55,7 @@ import io.fabric8.tekton.v1beta1.Param;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunResult;
 import io.javaoperatorsdk.operator.api.config.informer.Informer;
+import io.javaoperatorsdk.operator.api.reconciler.Constants;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
@@ -82,6 +83,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @ControllerConfiguration(
         informer = @Informer(
+                namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
                 labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/managed-by=sbomer,app.kubernetes.io/component=generator,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=operation"))
 @Workflow(
         dependents = {
