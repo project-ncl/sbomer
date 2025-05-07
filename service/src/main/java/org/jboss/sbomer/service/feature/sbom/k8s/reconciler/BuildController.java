@@ -107,13 +107,7 @@ public class BuildController extends AbstractController {
     }
 
     @Override
-    protected UpdateControl<GenerationRequest> updateRequest(
-            GenerationRequest generationRequest,
-            SbomGenerationStatus status,
-            GenerationResult result,
-            String reason,
-            Object... params) {
-
+    protected void setPhaseLabel(GenerationRequest generationRequest) {
         if (generationRequest.getStatus() != null) {
             String label = switch (generationRequest.getStatus()) {
                 case INITIALIZING -> SbomGenerationPhase.INIT.name().toLowerCase();
@@ -125,12 +119,6 @@ public class BuildController extends AbstractController {
                 generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
             }
         }
-
-        generationRequest.setStatus(status);
-        generationRequest.setResult(result);
-        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-
-        return UpdateControl.patchResource(generationRequest);
     }
 
     /**

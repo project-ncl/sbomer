@@ -57,7 +57,9 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
+import org.slf4j.helpers.MessageFormatter;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.config.informer.InformerEventSourceConfiguration;
@@ -133,13 +135,32 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         return List.of(ies);
     }
 
-    // TODO: Refactor this to have it's implementation shared
-    protected abstract UpdateControl<GenerationRequest> updateRequest(
+    protected <T extends HasMetadata> void cleanMetadata(T resource) {
+        if (resource != null && resource.getMetadata() != null) {
+            resource.getMetadata().setManagedFields(null);
+        }
+    }
+
+    protected void setPhaseLabel(GenerationRequest generationRequest) {
+        // Default: do nothing; subclasses can override this
+    }
+
+    protected UpdateControl<GenerationRequest> updateRequest(
             GenerationRequest generationRequest,
             SbomGenerationStatus status,
             GenerationResult result,
             String reason,
-            Object... params);
+            Object... params) {
+
+        setPhaseLabel(generationRequest);
+
+        generationRequest.setStatus(status);
+        generationRequest.setResult(result);
+        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
+        cleanMetadata(generationRequest);
+
+        return UpdateControl.patchResource(generationRequest);
+    }
 
     /**
      * Returns the {@link TaskRun} having the specified {@link SbomGenerationPhase} from the given {@link TaskRun}
