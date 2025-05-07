@@ -80,27 +80,12 @@ public class SyftImageController extends AbstractController {
     }
 
     @Override
-    protected UpdateControl<GenerationRequest> updateRequest(
-            GenerationRequest generationRequest,
-            SbomGenerationStatus status,
-            GenerationResult result,
-            String reason,
-            Object... params) {
-
-        if (generationRequest.getStatus() != null) {
-            String label = generationRequest.getStatus() == SbomGenerationStatus.GENERATING
-                    ? SbomGenerationPhase.GENERATE.name().toLowerCase()
-                    : null;
-
-            if (label != null) {
-                generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
-            }
+    protected void setPhaseLabel(GenerationRequest generationRequest) {
+        if (SbomGenerationStatus.GENERATING.equals(generationRequest.getStatus())) {
+            generationRequest.getMetadata()
+                    .getLabels()
+                    .put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
         }
-
-        generationRequest.setStatus(status);
-        generationRequest.setResult(result);
-        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-        return UpdateControl.patchResource(generationRequest);
     }
 
     /**
