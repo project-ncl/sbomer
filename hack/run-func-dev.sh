@@ -1,3 +1,5 @@
+#!/bin/env bash
+
 #
 # JBoss, Home of Professional Open Source.
 # Copyright 2023 Red Hat, Inc., and individual contributors
@@ -16,15 +18,24 @@
 # limitations under the License.
 #
 
-name: docs
-title: SBOMer Documentation
-version: latest
+set -e
 
-start_page: ROOT:index.adoc
+# A very simple wrapper around Maven execution to make it more reusable.
 
-nav:
-  - modules/ROOT/nav.adoc
-  - modules/user-guide/nav.adoc
-  - modules/developer-guide/nav.adoc
-  - modules/admin-guide/nav.adoc
-  - modules/eventing/nav.adoc
+SCRIPT_DIR=$(dirname "$0")
+
+set -x
+
+URL=http://localhost:8080/
+
+EVENT_DATA='{"type": "org.jboss.sbomer.generation.request.zip.v1alpha1", "spec":{"url": "http://host.com/path/to/zip.zip"}}'
+
+exec curl -v --http2-prior-knowledge --ipv4 ${URL} \
+  -H "content-type:application/json" \
+  -H "accept:application/json" \
+  -H "ce-id: $(uuidgen)" \
+  -H "ce-source: https://sbomer/handler/umb" \
+  -H "ce-type: org.jboss.sbomer.generation.request.zip.v1alpha1" \
+  -H "ce-specversion: 1.0" \
+  -d "$EVENT_DATA"
+
