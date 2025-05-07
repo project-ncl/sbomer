@@ -37,6 +37,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.jboss.pnc.dto.requests.ScratchDeliverablesAnalysisRequest;
 
 import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PNC_CLIENT_MAX_RETRIES;
 import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PNC_CLIENT_DELAY;
@@ -65,5 +66,10 @@ public interface PncClient {
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     DeliverableAnalyzerOperation getDeliverableAnalyzerOperation(@PathParam("id") String operationId);
+
+    @POST
+    @Path("/operations/deliverable-analyzer/start")
+    DeliverableAnalyzerOperation startScratchDeliverableAnalysis(
+            ScratchDeliverablesAnalysisRequest scratchDeliverablesAnalysisRequest);
 
 }
