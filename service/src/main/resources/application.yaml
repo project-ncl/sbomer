@@ -84,6 +84,9 @@ quarkus:
       url: "https://${sbomer.errata.host}"
     "pyxis":
       url: "https://${sbomer.pyxis.host}"
+    "mequal":
+      url: "https://${sbomer.mequal.host}"
+      defaultQuery: "data.mequal.main;data.prodsec.main"
 
   # Support for feature-flags
   unleash:
