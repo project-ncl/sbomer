@@ -84,6 +84,9 @@ quarkus:
       url: "https://${sbomer.errata.host}"
     "pyxis":
       url: "https://${sbomer.pyxis.host}"
+      logging:
+        scope: request-response
+        body-limit: 500
 
   # Support for feature-flags
   unleash:
@@ -112,6 +115,8 @@ quarkus:
         level: INFO
       "io.quarkiverse.kerberos.runtime.KerberosIdentityProvider":
         level: TRACE
+      "org.jboss.resteasy.reactive.client.logging":
+        level: DEBUG
 
     console:
       # Enable console logging
