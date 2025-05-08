@@ -42,7 +42,7 @@ public class ErrataKrb5ClientRequestFilter implements ClientRequestFilter {
     public void filter(ClientRequestContext requestContext) throws IOException {
         if (!enabled)
             return;
-            
+
         String serviceTicket = kerberosClientSupport.getServiceTicket();
         requestContext.getHeaders().add(AUTHORIZATION, NEGOTIATE + " " + serviceTicket);
     }

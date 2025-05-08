@@ -36,7 +36,7 @@ public class Labels {
     public static final String LABEL_OTEL_TRACE_ID = "sbomer.jboss.org/otel-trace-id";
     public static final String LABEL_OTEL_SPAN_ID = "sbomer.jboss.org/otel-span-id";
     public static final String LABEL_OTEL_TRACEPARENT = "sbomer.jboss.org/otel-traceparent";
-  
+
     private Labels() {
         // This is a utility class
     }
