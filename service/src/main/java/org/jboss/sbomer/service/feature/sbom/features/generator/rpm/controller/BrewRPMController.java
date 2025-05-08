@@ -123,13 +123,16 @@ public class BrewRPMController extends AbstractController {
 
         // In case the Task Run is not successful, fail the generation
         if (!Boolean.TRUE.equals(isSuccessful(generateTaskRun))) {
-            log.error("Generation failed, the TaskRun returned failure");
+            String detailedFailureMessage = getDetailedFailureMessage(generateTaskRun);
+
+            log.error("Generation failed, the TaskRun returned failure: {}", detailedFailureMessage);
 
             return updateRequest(
                     generationRequest,
                     SbomGenerationStatus.FAILED,
                     GenerationResult.ERR_SYSTEM,
-                    "Generation failed. TaskRun responsible for generation failed. See logs for more information.");
+                    "Generation failed. TaskRun responsible for generation failed: {}",
+                    detailedFailureMessage);
         }
 
         // Construct the path to the working directory of the generator

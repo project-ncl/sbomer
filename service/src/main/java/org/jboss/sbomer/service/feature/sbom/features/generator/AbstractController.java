@@ -51,6 +51,7 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationS
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
@@ -59,9 +60,11 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.slf4j.helpers.MessageFormatter;
 
+import io.fabric8.knative.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunStatus;
 import io.javaoperatorsdk.operator.api.config.informer.InformerEventSourceConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -280,15 +283,68 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
             return null; // FIXME: This is not really binary, but trinary state
         }
 
-        if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
-                && !taskRun.getStatus().getConditions().isEmpty()
-                && Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")) {
-            log.trace("TaskRun '{}' finished successfully", taskRun.getMetadata().getName());
-            return true;
+        TaskRunStatus status = taskRun.getStatus();
+        if (status != null && status.getConditions() != null && !status.getConditions().isEmpty()) {
+            Condition condition = status.getConditions().get(0);
+
+            String taskRunName = taskRun.getMetadata().getName();
+            String conditionStatus = condition.getStatus();
+            String reason = condition.getReason();
+            String message = condition.getMessage();
+            String podName = status.getPodName();
+
+            if (Objects.equals(conditionStatus, "True")) {
+                log.trace("TaskRun '{}' finished successfully (Reason: '{}')", taskRunName, reason);
+                return true;
+            } else {
+                log.warn(
+                        "TaskRun '{}' failed (Reason: '{}', Message: '{}', Pod: '{}')",
+                        taskRunName,
+                        reason,
+                        message,
+                        podName);
+
+                if (status.getSteps() != null) {
+                    status.getSteps().forEach(step -> {
+                        var term = step.getTerminated();
+                        if (term != null) {
+                            String exitCodeReason = TektonExitCodeUtils.interpretExitCode(term.getExitCode());
+                            log.warn(
+                                    "  Step '{}': ExitCode={} ({}), Reason={}, Message={}",
+                                    step.getName(),
+                                    term.getExitCode(),
+                                    exitCodeReason,
+                                    term.getReason(),
+                                    term.getMessage());
+                        }
+                    });
+                }
+            }
         }
 
         log.trace("TaskRun '{}' failed", taskRun.getMetadata().getName());
         return false;
+    }
+
+    protected String getDetailedFailureMessage(TaskRun taskRun) {
+        if (taskRun.getStatus() == null || taskRun.getStatus().getSteps() == null) {
+            return "TaskRun failed with no step information available.";
+        }
+
+        return taskRun.getStatus().getSteps().stream().map(step -> {
+            var term = step.getTerminated();
+            if (term != null && term.getExitCode() != 0) {
+                String reason = TektonExitCodeUtils.interpretExitCode(term.getExitCode());
+                return String.format(
+                        "Step '%s' failed: exitCode=%d (%s), reason=%s%s",
+                        step.getName(),
+                        term.getExitCode(),
+                        reason,
+                        term.getReason(),
+                        term.getMessage() != null ? (", message=" + term.getMessage()) : " ");
+            }
+            return null;
+        }).filter(Objects::nonNull).findFirst().orElse("TaskRun failed, but no step had non-zero exit code.");
     }
 
     @Override

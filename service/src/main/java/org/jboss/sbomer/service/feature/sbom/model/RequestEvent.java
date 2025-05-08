@@ -72,7 +72,6 @@ public class RequestEvent extends PanacheEntityBase {
 
     public static final String IGNORED_UNKNOWN_REASON = "The message type is unknown";
     public static final String IGNORED_DUPLICATED_REASON = "The message was already acknowledged";
-    public static final String FAILED_GENERIC_REASON = "An error occurred while processing";
 
     // The event keys for the UMB event type
     public static final String EVENT_KEY_UMB_CONSUMER = "consumer";
