@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.pyxis;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -39,6 +40,7 @@ import jakarta.validation.Validator;
 
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
+import lombok.extern.slf4j.Slf4j;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import jakarta.inject.Inject;
@@ -49,6 +51,7 @@ import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUB
 import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DURATION;
 
 @ApplicationScoped
+@Slf4j
 public class PyxisValidatingClient {
 
     @RestClient
@@ -71,6 +74,11 @@ public class PyxisValidatingClient {
         Set<ConstraintViolation<PyxisRepositoryDetails>> violations = validator.validate(prd);
         if (violations.isEmpty())
             return prd;
+        log.warn(
+                "The deserialized Pyxis repositry for nvr: {} and includes: {} violated the following constraints: {}",
+                nvr,
+                includes,
+                violations.stream().map(v -> v.getMessage()).collect(Collectors.toList()));
         throw new ConstraintViolationException("Pyxis Repository constraint failure", violations);
     }
 
