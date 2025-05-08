@@ -58,16 +58,20 @@ public class AdvisoryUmbStatusChangeEventListener {
             errataNotificationHandler.handle(event.getRequestEventId());
         } catch (IOException e) {
             log.error("Unable to deserialize Errata message, this is unexpected", e);
-            requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
+            requestEventRepository
+                    .updateWithFailure(event.getRequestEventId(), "Unable to deserialize the Errata UMB message");
         } catch (ApplicationException exc) {
             log.error(
                     "Received error while handing errata request '{}': {}",
                     event.getRequestEventId(),
                     exc.getMessage());
-            requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
+            requestEventRepository.updateWithFailure(
+                    event.getRequestEventId(),
+                    "Application error occurred while processing the Errata UMB message: " + exc.getMessage());
         } catch (RuntimeException exc) {
             log.error("Received error while handing request '{}'", event.getRequestEventId(), exc);
-            requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
+            requestEventRepository
+                    .updateWithFailure(event.getRequestEventId(), "Unexpected error occurred: " + exc.getMessage());
         } finally {
             MDC.clear();
         }
