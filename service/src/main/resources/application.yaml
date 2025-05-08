@@ -72,6 +72,8 @@ quarkus:
       artifact-id: jackson-jakarta-rs-yaml-provider
 
   rest-client:
+    connect-timeout: 15000
+    read-timeout: 90000
     "atlas-build":
       url: "https://${sbomer.atlas.build.host}"
     "atlas-release":
@@ -82,6 +84,9 @@ quarkus:
       url: "https://${sbomer.errata.host}"
     "pyxis":
       url: "https://${sbomer.pyxis.host}"
+      logging:
+        scope: request-response
+        body-limit: 500
 
   # Support for feature-flags
   unleash:
@@ -110,6 +115,8 @@ quarkus:
         level: INFO
       "io.quarkiverse.kerberos.runtime.KerberosIdentityProvider":
         level: TRACE
+      "org.jboss.resteasy.reactive.client.logging":
+        level: DEBUG
 
     console:
       # Enable console logging
@@ -117,7 +124,7 @@ quarkus:
       # Disable JSON logging for console by default
       json:
         ~: false
-      format: "%d{HH:mm:ss,SSS} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId}, sampled=%X{sampled} [%c{3.}] (%t) %s%e mdc:[%X]%n"
+      format: "%d{HH:mm:ss,SSS} %-5p traceId=%X{traceId} parentId=%X{parentId} spanId=%X{spanId} [%c{3.}] (%t) %s%e mdc:[%X]%n"
     file:
       level: DEBUG
       # Disable file logging
@@ -163,6 +170,7 @@ quarkus:
       generate: false
       apply: false
       validate: false
+    enable-ssa: false
 
   ## https://quarkus.io/guides/security-oidc-configuration-properties-reference
   ## OpenID Connect (OIDC) configuration
@@ -219,3 +227,22 @@ sbomer:
           limits:
             cpu: "1000m"
             memory: "1400Mi"
+
+  service:
+    generation-scheduler:
+      # Defines how many requests can be handled concurrently within the namespace
+      # If the capacity is lower than what we have in the DB -- the ones in DB will wait
+      max-concurrent-generations: 20
+
+      # Maximum number of generations that will fetched from the database to be scheduled within the namespace.
+      sync-batch: 10
+
+      # The interval on which the scheduler will run.
+      sync-interval: 15s
+
+  leader:
+    # Duration in seconds that non-leaders will wait before trying to acquire leadership if no renewal occurs.
+    lease-duration: 30
+
+    # The interval on which the lease will be checked
+    check-interval: 10s

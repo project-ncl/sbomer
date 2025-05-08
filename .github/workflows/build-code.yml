@@ -20,7 +20,7 @@ jobs:
         if: github.event_name != 'pull_request_target'
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
@@ -30,7 +30,7 @@ jobs:
         run: mvn --batch-mode -V -U verify -Dsurefire.useFile=false jacoco:report
 
       - name: Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         if: success() || failure()
         with:
           name: Test Results
@@ -39,7 +39,7 @@ jobs:
 
       - name: Add coverage to PR
         id: jacoco
-        uses: madrapps/jacoco-report@v1.6.1
+        uses: madrapps/jacoco-report@v1.7.2
         with:
           paths: |
             ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml

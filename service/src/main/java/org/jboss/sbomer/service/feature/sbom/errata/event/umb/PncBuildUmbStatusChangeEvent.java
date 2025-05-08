@@ -15,15 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.k8s.resources;
+package org.jboss.sbomer.service.feature.sbom.errata.event.umb;
 
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
+import lombok.Builder;
+import lombok.Data;
 
-public class OperationInitResourceDiscriminator extends AbstractResourceDiscriminator {
+@Data
+@Builder(setterPrefix = "with")
+public class PncBuildUmbStatusChangeEvent {
 
-    @Override
-    protected SbomGenerationPhase getPhase() {
-        return SbomGenerationPhase.OPERATIONINIT;
-    }
+    final String requestEventId;
 
 }

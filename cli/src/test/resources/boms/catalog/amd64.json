@@ -26,6 +26,12 @@
         "type": "container",
         "bom-ref": "0e1b3412aa49b90f",
         "version": "sha256:213fd2a0116a76eaa274fee20c86eef4dfba9f311784e8fb7d7f5fc38b32f3ef",
+        "hashes": [
+          {
+            "alg": "SHA-256",
+            "content": "213fd2a0116a76eaa274fee20c86eef4dfba9f311784e8fb7d7f5fc38b32f3ef"
+          }
+        ],
         "properties": [
           {
             "name": "sbomer:image:labels:architecture",

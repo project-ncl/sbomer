@@ -126,7 +126,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
     public Integer call() {
         // Make sure there is no context
         MDCUtils.removeContext();
-        MDCUtils.addBuildContext(parent.getBuildId());
+        MDCUtils.addIdentifierContext(parent.getBuildId());
 
         // Fetch build information
         Build build = pncService.getBuild(parent.getBuildId());

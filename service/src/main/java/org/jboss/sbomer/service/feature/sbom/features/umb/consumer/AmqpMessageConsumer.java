@@ -26,7 +26,6 @@ import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_TOPIC;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_VALUE_UMB_UNKNOWN_MSG_TYPE;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
@@ -38,17 +37,17 @@ import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
-import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.enums.UMBConsumer;
 import org.jboss.sbomer.core.features.sbom.enums.UMBMessageStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.features.UmbConfig;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
+import org.jboss.sbomer.service.feature.sbom.errata.event.umb.AdvisoryUmbStatusChangeEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.umb.PncBuildUmbStatusChangeEvent;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.arc.Unremovable;
@@ -63,6 +62,9 @@ import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 import lombok.extern.slf4j.Slf4j;
 
+import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyAdvisoryUmbStatusUpdate;
+import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyPncBuildsUmbStatusUpdate;
+
 /**
  * A UMB message consumer that utilizes the SmallRye Reactive messaging support with the AMQ connector.
  *
@@ -75,12 +77,6 @@ public class AmqpMessageConsumer {
 
     @Inject
     UmbConfig umbConfig;
-
-    @Inject
-    PncNotificationHandler pncNotificationHandler;
-
-    @Inject
-    ErrataNotificationHandler errataNotificationHandler;
 
     @Inject
     RequestEventRepository requestEventRepository;
@@ -136,19 +132,11 @@ public class AmqpMessageConsumer {
             }
         }
 
-        try {
-            errataNotificationHandler.handle(requestEvent);
-        } catch (IOException e) {
-            log.error("Unable to deserialize Errata message, this is unexpected", e);
-            return nackAndSave(message, requestEvent, e);
-        } catch (ApplicationException exc) {
-            log.error("Received error while handing errata request '{}': {}", requestEvent.getId(), exc.getMessage());
-            return nackAndSave(message, requestEvent, exc);
-        } catch (RuntimeException exc) {
-            log.error("Received error while handing request '{}'", requestEvent.getId(), exc);
-            return nackAndSave(message, requestEvent, exc);
-        }
+        // Send an async notification for the advisory status update processing
+        notifyAdvisoryUmbStatusUpdate(
+                AdvisoryUmbStatusChangeEvent.builder().withRequestEventId(requestEvent.getId()).build());
 
+        // Ack the message
         return ackAndSave(message, requestEvent);
     }
 
@@ -191,19 +179,11 @@ public class AmqpMessageConsumer {
             }
         }
 
-        try {
-            pncNotificationHandler.handle(requestEvent);
-        } catch (JsonProcessingException e) {
-            log.error("Unable to deserialize PNC message, this is unexpected", e);
-            return nackAndSave(message, requestEvent, e);
-        } catch (ApplicationException exc) {
-            log.error("Received error while handing request '{}': {}", requestEvent.getId(), exc.getMessage());
-            return nackAndSave(message, requestEvent, exc);
-        } catch (RuntimeException exc) {
-            log.error("Received error while handing request '{}'", requestEvent.getId(), exc);
-            return nackAndSave(message, requestEvent, exc);
-        }
+        // Send an async notification for the pnc build status update processing
+        notifyPncBuildsUmbStatusUpdate(
+                PncBuildUmbStatusChangeEvent.builder().withRequestEventId(requestEvent.getId()).build());
 
+        // Ack the message
         return ackAndSave(message, requestEvent);
     }
 
@@ -254,16 +234,6 @@ public class AmqpMessageConsumer {
         return event.put(EVENT_KEY_UMB_MSG_CREATION_TIME, Instant.ofEpochMilli(metadata.getCreationTime()).toString())
                 .put(EVENT_KEY_UMB_MSG_ID, metadata.getId())
                 .put(EVENT_KEY_UMB_TOPIC, metadata.getAddress());
-    }
-
-    @Transactional(value = TxType.REQUIRES_NEW)
-    protected CompletionStage<Void> nackAndSave(Message<?> message, RequestEvent requestEvent, Throwable e) {
-        requestEventRepository.updateRequestEvent(
-                requestEvent,
-                RequestEventStatus.FAILED,
-                Map.of(EVENT_KEY_UMB_MSG_STATUS, UMBMessageStatus.NACK.toString()),
-                RequestEvent.FAILED_GENERIC_REASON);
-        return message.nack(e);
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)

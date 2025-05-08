@@ -24,28 +24,28 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.BrewRPMConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
-import org.jboss.sbomer.service.feature.sbom.k8s.resources.GenerateResourceDiscriminator;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import io.fabric8.kubernetes.api.model.Duration;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamValue;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRefBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
+import io.fabric8.tekton.v1beta1.ParamBuilder;
+import io.fabric8.tekton.v1beta1.ParamValue;
+import io.fabric8.tekton.v1beta1.TaskRefBuilder;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.CRUDNoGCKubernetesDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependent;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
-@KubernetesDependent(resourceDiscriminator = GenerateResourceDiscriminator.class)
+@KubernetesDependent
 @Slf4j
 public class TaskRunBrewRPMGenerateDependentResource
         extends CRUDNoGCKubernetesDependentResource<TaskRun, GenerationRequest> {
@@ -79,6 +79,9 @@ public class TaskRunBrewRPMGenerateDependentResource
     @Override
     protected TaskRun desired(GenerationRequest generationRequest, Context<GenerationRequest> context) {
 
+        MDCUtils.removeOtelContext();
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
+
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to '{}' GenerationRequest",
                 SbomGenerationPhase.GENERATE,
@@ -87,6 +90,9 @@ public class TaskRunBrewRPMGenerateDependentResource
 
         labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
         labels.put(Labels.LABEL_GENERATION_REQUEST_ID, generationRequest.getId());
+        labels.put(Labels.LABEL_OTEL_TRACE_ID, generationRequest.getTraceId());
+        labels.put(Labels.LABEL_OTEL_SPAN_ID, generationRequest.getSpanId());
+        labels.put(Labels.LABEL_OTEL_TRACEPARENT, generationRequest.getTraceParent());
 
         Duration timeout;
 

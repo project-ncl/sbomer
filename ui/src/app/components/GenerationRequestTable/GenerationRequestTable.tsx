@@ -1,4 +1,4 @@
-import { statusToColor, statusToDescription, typeToDescription, timestampToHumanReadable } from '@app/utils/Utils';
+import { statusToColor, statusToDescription, timestampToHumanReadable, typeToDescription } from '@app/utils/Utils';
 import {
   Label,
   Pagination,
@@ -14,7 +14,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useGenerationRequests } from './useGenerationRequests';
-import { openInNewTab } from '@app/utils/openInNewTab';
 import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
 
 const columnNames = {
@@ -62,8 +61,7 @@ export const GenerationRequestTable = () => {
           <Tr
             key={generation.id}
             isClickable
-            onRowClick={() => navigate(`/generations/${generation.id}`)}
-            onAuxClick={() => openInNewTab(`/generations/${generation.id}`)}
+            style={{ cursor: 'auto' }}
           >
             <Td dataLabel={columnNames.id}>
               <Link to={`/generations/${generation.id}`}>
@@ -82,7 +80,7 @@ export const GenerationRequestTable = () => {
                   </div>
                 }
               >
-                <Label style={{ cursor: 'pointer' }} color={statusToColor(generation)}>
+                <Label color={statusToColor(generation)}>
                   {statusToDescription(generation)}
                 </Label>
 
@@ -91,7 +89,7 @@ export const GenerationRequestTable = () => {
             </Td>
             <Td dataLabel={columnNames.type}>
               <Tooltip isContentLeftAligned={true} content={<code>{generation.identifier}</code>}>
-                <Label style={{ cursor: 'pointer' }} color="purple">
+                <Label color="purple">
                   {typeToDescription(generation)}
                 </Label>
               </Tooltip>

@@ -17,7 +17,8 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
-import org.jboss.pnc.api.constants.MDCKeys;
+import java.util.Map;
+
 import org.jboss.pnc.common.Strings;
 import org.slf4j.MDC;
 
@@ -26,42 +27,55 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MDCUtils {
 
+    public static final String MDC_IDENTIFIER_KEY = "identifier";
+    public static final String MDC_TRACE_ID_KEY = "traceId";
+    public static final String MDC_SPAN_ID_KEY = "spanId";
+    public static final String MDC_TRACEPARENT_KEY = "traceparent";
+    public static final String MDC_TRACE_FLAGS_KEY = "traceFlags";
+    public static final String MDC_TRACE_STATE_KEY = "traceState";
+
     private MDCUtils() {
         // This is a utility class
     }
 
-    public static void addProcessContext(String processContext) {
-        String current = MDC.get(MDCKeys.PROCESS_CONTEXT_KEY);
+    public static void addIdentifierContext(String identifier) {
+        String current = MDC.get(MDC_IDENTIFIER_KEY);
         if (Strings.isEmpty(current)) {
-            if (!Strings.isEmpty(processContext)) {
-                MDC.put(MDCKeys.PROCESS_CONTEXT_KEY, processContext);
+            if (!Strings.isEmpty(identifier)) {
+                MDC.put(MDC_IDENTIFIER_KEY, identifier);
             }
         } else {
-            log.warn("Did not set new processContext [{}] as value already exists [{}].", processContext, current);
+            log.warn("Did not set new identifierContext [{}] as value already exists [{}].", identifier, current);
         }
     }
 
-    public static void addBuildContext(String buildContext) {
-        String current = MDC.get(MDCKeys.BUILD_ID_KEY);
-        if (Strings.isEmpty(current)) {
-            if (!Strings.isEmpty(buildContext)) {
-                MDC.put(MDCKeys.BUILD_ID_KEY, buildContext);
+    public static void addOtelContext(Map<String, String> otelContextMap) {
+        if (otelContextMap == null || otelContextMap.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) otelContextMap).entrySet()) {
+            final Object key = entry.getKey();
+            final Object value = entry.getValue();
+            if (key != null && value != null) {
+                MDC.put(key.toString(), value.toString());
             }
-        } else {
-            log.warn("Did not set new buildContext [{}] as value already exists [{}].", buildContext, current);
         }
     }
 
-    public static void removeProcessContext() {
-        MDC.remove(MDCKeys.PROCESS_CONTEXT_KEY);
+    public static void removeIdentifierContext() {
+        MDC.remove(MDC_IDENTIFIER_KEY);
     }
 
-    public static void removeBuildContext() {
-        MDC.remove(MDCKeys.BUILD_ID_KEY);
+    public static void removeOtelContext() {
+        MDC.remove(MDC_TRACE_ID_KEY);
+        MDC.remove(MDC_SPAN_ID_KEY);
+        MDC.remove(MDC_TRACEPARENT_KEY);
     }
 
     public static void removeContext() {
-        removeProcessContext();
-        removeBuildContext();
+        removeIdentifierContext();
+        removeOtelContext();
     }
+
 }

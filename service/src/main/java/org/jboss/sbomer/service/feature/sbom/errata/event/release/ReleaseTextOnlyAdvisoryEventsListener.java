@@ -17,11 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingMetadataSupplier;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingSerialNumber;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
-
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -36,7 +31,6 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
@@ -46,124 +40,118 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
-import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
-import org.jboss.sbomer.service.feature.sbom.service.SbomService;
-import org.jboss.sbomer.service.stats.StatsService;
+import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.narayana.jta.QuarkusTransaction;
+import io.smallrye.faulttolerance.api.BeforeRetry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import jakarta.transaction.Transactional.TxType;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-@Setter
 @ApplicationScoped
 @Slf4j
-public class ReleaseTextOnlyAdvisoryEventsListener {
+public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListener {
 
-    // Set the long transaction timeout to 10 minutes
-    private static final int INCREASED_TIMEOUT_SEC = 600;
+    public void onReleaseAdvisoryEvent(@ObservesAsync MdcEventWrapper wrapper) {
+        Object payload = wrapper.getPayload();
+        if (!(payload instanceof TextOnlyAdvisoryReleaseEvent event)) {
+            return;
+        }
 
-    @Inject
-    @RestClient
-    ErrataClient errataClient;
+        Map<String, String> mdcContext = wrapper.getMdcContext();
+        if (mdcContext != null) {
+            MDC.setContextMap(mdcContext);
+        } else {
+            MDC.clear();
+        }
 
-    @Inject
-    SbomService sbomService;
-
-    @Inject
-    StatsService statsService;
-
-    @Inject
-    SbomGenerationRequestRepository generationRequestRepository;
-
-    @Inject
-    RequestEventRepository requestEventRepository;
-
-    public void onReleaseAdvisoryEvent(@ObservesAsync TextOnlyAdvisoryReleaseEvent event) {
         log.debug("Event received for text-only advisory release ...");
 
-        RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
         try {
-            ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
-            Errata erratum = errataClient.getErratum(config.getAdvisoryId());
-            String toolVersion = statsService.getStats().getVersion();
-            // FIXME: 'Optional.get()' without 'isPresent()' check
-            Component.Type productType = AdvisoryEventUtils
-                    .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
-            // FIXME:'Optional.get()' without 'isPresent()' check
-            JsonNode notes = erratum.getNotesMapping().get();
-            List<String> manifestsPurls;
+            RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
+            try {
+                ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+                Errata erratum = errataClient.getErratum(config.getAdvisoryId());
+                String toolVersion = statsService.getStats().getVersion();
+                // FIXME: 'Optional.get()' without 'isPresent()' check
+                Component.Type productType = AdvisoryEventUtils
+                        .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
+                // FIXME:'Optional.get()' without 'isPresent()' check
+                JsonNode notes = erratum.getNotesMapping().get();
+                List<String> manifestsPurls;
 
-            if (notes.has("manifest")) {
-                log.debug(
-                        "Creating release manifests for manual builds of advisory: '{}'[{}]",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
+                if (notes.has("manifest")) {
+                    log.debug(
+                            "Creating release manifests for manual builds of advisory: '{}'[{}]",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
 
-                // If the notes contain a "manifest" field, search the successful generations for all the purls listed
-                // (there are no generations associated with the request event because no generations were triggered)
-                manifestsPurls = AdvisoryEventUtils.extractPurlUrisFromManifestNode(notes);
-            } else {
-                log.debug(
-                        "Creating release manifests for managed builds of advisory: '{}'[{}]",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
+                    // If the notes contain a "manifest" field, search the successful generations for all the purls
+                    // listed
+                    // (there are no generations associated with the request event because no generations were
+                    // triggered)
+                    manifestsPurls = AdvisoryEventUtils.extractPurlUrisFromManifestNode(notes);
+                } else {
+                    log.debug(
+                            "Creating release manifests for managed builds of advisory: '{}'[{}]",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
 
-                // If the notes contain a "deliverables" field, search the latest successful generations triggered by
-                // the request event
-                V1Beta1RequestRecord advisoryManifestsRecord = sbomService
-                        .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
-                manifestsPurls = advisoryManifestsRecord.manifests()
-                        .stream()
-                        .map(V1Beta1RequestManifestRecord::rootPurl)
-                        .toList();
-            }
+                    // If the notes contain a "deliverables" field, search the latest successful generations triggered
+                    // by
+                    // the request event
+                    V1Beta1RequestRecord advisoryManifestsRecord = sbomService
+                            .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
+                    manifestsPurls = advisoryManifestsRecord.manifests()
+                            .stream()
+                            .map(V1Beta1RequestManifestRecord::rootPurl)
+                            .toList();
+                }
 
-            List<Sbom> sboms = findSbomsByPurls(manifestsPurls);
-            if (sboms.isEmpty()) {
+                List<Sbom> sboms = findSbomsByPurls(manifestsPurls);
+                if (sboms.isEmpty()) {
+                    markRequestFailed(
+                            requestEvent,
+                            event.getReleaseGenerations().values(),
+                            "There are no matching sboms for the content specified within the advisory notes.");
+                    doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+                    return;
+                }
+                createReleaseManifestsForTextOnlyAdvisories(
+                        requestEvent,
+                        erratum,
+                        sboms,
+                        event.getReleaseGenerations(),
+                        toolVersion,
+                        productType);
+            } catch (Exception e) {
+                log.error(
+                        "An error occurred during the creation of release manifests for event '{}'",
+                        requestEvent.getId(),
+                        e);
                 markRequestFailed(
                         requestEvent,
                         event.getReleaseGenerations().values(),
-                        "There are no matching sboms for the content specified within the advisory notes.");
-                doUpdateGenerationsStatus(event.getReleaseGenerations().values());
-                return;
+                        "An error occurred during the creation of the release manifest");
             }
-            createReleaseManifestsForTextOnlyAdvisories(
-                    requestEvent,
-                    erratum,
-                    sboms,
-                    event.getReleaseGenerations(),
-                    toolVersion,
-                    productType);
-        } catch (Exception e) {
-            log.error(
-                    "An error occurred during the creation of release manifests for event '{}'",
-                    requestEvent.getId(),
-                    e);
-            markRequestFailed(
-                    requestEvent,
-                    event.getReleaseGenerations().values(),
-                    "An error occurred during the creation of the release manifest");
-        }
 
-        // Let's trigger the update of statuses and advisory comments
-        doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+            // Let's trigger the update of statuses and advisory comments
+            doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+        } finally {
+            MDC.clear();
+        }
     }
 
     private List<Sbom> findSbomsByPurls(List<String> purls) {
@@ -171,24 +159,6 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
             return Collections.emptyList();
         }
         return purls.stream().map(sbomService::findByPurl).filter(Objects::nonNull).toList();
-    }
-
-    @Transactional(value = TxType.REQUIRES_NEW)
-    protected void markRequestFailed(
-            RequestEvent requestEvent,
-            Collection<SbomGenerationRequest> releaseGenerations,
-            String reason) {
-        log.error(reason);
-
-        requestEvent = requestEventRepository.findById(requestEvent.getId());
-        requestEvent.setEventStatus(RequestEventStatus.FAILED);
-        requestEvent.setReason(reason);
-
-        for (SbomGenerationRequest generation : releaseGenerations) {
-            generation = generationRequestRepository.findById(generation.getId());
-            generation.setStatus(SbomGenerationStatus.FAILED);
-            generation.setReason(reason);
-        }
     }
 
     protected void createReleaseManifestsForTextOnlyAdvisories(
@@ -212,13 +182,13 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
         }
 
         // Add the AdvisoryId property
-        addPropertyIfMissing(
+        SbomUtils.addPropertyIfMissing(
                 productVersionBom.getMetadata(),
                 Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                 String.valueOf(erratum.getDetails().get().getId()));
 
-        addMissingMetadataSupplier(productVersionBom);
-        addMissingSerialNumber(productVersionBom);
+        SbomUtils.addMissingMetadataSupplier(productVersionBom);
+        SbomUtils.addMissingSerialNumber(productVersionBom);
 
         SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
         Sbom sbom = saveReleaseManifestForTextOnlyAdvisories(
@@ -237,17 +207,8 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
                 releaseGeneration.getId(),
                 productVersion,
                 erratum.getDetails().get().getFulladvisory());
-    }
 
-    @Transactional
-    protected void doUpdateGenerationsStatus(Collection<SbomGenerationRequest> releaseGenerations) {
-        // Update only one SbomGenerationRequest, because the requestEvent associated is the same for all of them. This
-        // avoids duplicated comments in the advisory
-        if (releaseGenerations != null && !releaseGenerations.isEmpty()) {
-            SbomGenerationRequest generation = releaseGenerations.iterator().next();
-            generation = generationRequestRepository.findById(generation.getId());
-            SbomGenerationRequest.updateRequestEventStatus(generation);
-        }
+        performPost(List.of(sbom));
     }
 
     // FIXME: 'Optional.get()' without 'isPresent()' check
@@ -306,6 +267,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
 
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
+    @BeforeRetry(RetryLogger.class)
     protected Sbom saveReleaseManifestForTextOnlyAdvisories(
             RequestEvent requestEvent,
             Errata erratum,
@@ -352,7 +314,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
                 SbomUtils.addMissingMetadataSupplier(manifestBom);
 
                 // Add the AdvisoryId property
-                addPropertyIfMissing(
+                SbomUtils.addPropertyIfMissing(
                         manifestBom.getMetadata(),
                         Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                         String.valueOf(erratum.getDetails().get().getId()));
@@ -398,15 +360,6 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
         }
     }
 
-    public static final String REQUEST_ID = "request_id";
-    public static final String ERRATA = "errata_fullname";
-    public static final String ERRATA_ID = "errata_id";
-    public static final String ERRATA_SHIP_DATE = "errata_ship_date";
-    public static final String PRODUCT = "product_name";
-    public static final String PRODUCT_SHORTNAME = "product_shortname";
-    public static final String PRODUCT_VERSION = "product_version";
-    public static final String PURL_LIST = "purl_list";
-
     // FIXME: 'Optional.get()' without 'isPresent()' check
     protected ObjectNode collectReleaseInfo(
             String requestEventId,
@@ -449,28 +402,6 @@ public class ReleaseTextOnlyAdvisoryEventsListener {
         log.debug("Calculated evidence purl: {}", evidencePurl);
         component.setPurl(evidencePurl);
         SbomUtils.setEvidenceIdentities(component, Set.of(evidencePurl), Field.PURL);
-    }
-
-    private Metadata createMetadata(
-            String name,
-            String version,
-            Component.Type type,
-            Set<String> cpes,
-            Date shipDate,
-            String toolVersion) {
-        Metadata metadata = new Metadata();
-
-        Component metadataProductComponent = SbomUtils.createComponent(null, name, version, null, null, type);
-        metadataProductComponent.setBomRef(version);
-        SbomUtils.setSupplier(metadataProductComponent);
-        SbomUtils.setEvidenceIdentities(metadataProductComponent, cpes, Field.CPE);
-
-        metadata.setComponent(metadataProductComponent);
-        if (shipDate != null) {
-            metadata.setTimestamp(shipDate);
-        }
-        metadata.setToolChoice(SbomUtils.createToolInformation(toolVersion));
-        return metadata;
     }
 
 }

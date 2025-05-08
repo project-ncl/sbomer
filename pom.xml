@@ -32,7 +32,7 @@
   <parent>
     <artifactId>jboss-parent</artifactId>
     <groupId>org.jboss</groupId>
-    <version>47</version>
+    <version>49</version>
   </parent>
 
   <modules>
@@ -49,8 +49,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <version.failsafe-plugin>3.5.2</version.failsafe-plugin>
-    <version.surefire-plugin>3.5.2</version.surefire-plugin>
+    <version.failsafe-plugin>3.5.3</version.failsafe-plugin>
+    <version.surefire-plugin>3.5.3</version.surefire-plugin>
 
     <!--
     Keep "version.quarkus-platform" in sync with the Quarkus Operator SDK extension.
@@ -58,26 +58,26 @@
     See https://github.com/quarkiverse/quarkus-operator-sdk/blob/main/pom.xml#L15 for the Quarkus
     Operator SDK extension version defined below ("version.quarkus-operator-sdk").
     -->
-    <version.quarkus-platform>3.17.6</version.quarkus-platform>
-    <version.quarkus-operator-sdk>6.9.3</version.quarkus-operator-sdk>
+    <version.quarkus-platform>3.20.0</version.quarkus-platform>
+    <version.quarkus-operator-sdk>7.1.2</version.quarkus-operator-sdk>
 
     <version.cyclonedx>9.1.0-patch</version.cyclonedx>
     <version.lombok>1.18.32</version.lombok>
-    <version.pnc-rest>3.0.4</version.pnc-rest>
-    <version.pnc-api>3.0.5</version.pnc-api>
-    <version.quarkus-jgit>3.3.3</version.quarkus-jgit>
+    <version.pnc-rest>3.1.5</version.pnc-rest>
+    <version.pnc-api>3.0.7</version.pnc-api>
+    <version.quarkus-jgit>3.5.1</version.quarkus-jgit>
     <version.quarkus-kerberos>2.2.0</version.quarkus-kerberos>
     <version.sonar>4.0.0.4121</version.sonar>
-    <version.quarkus-unleash>1.8.0</version.quarkus-unleash>
-    <version.aws>2.29.32</version.aws>
-    <version.lombok>1.18.36</version.lombok>
-    <version.tekton-client>1.1.0</version.tekton-client>
+    <version.quarkus-unleash>1.10.0</version.quarkus-unleash>
+    <version.aws>2.31.38</version.aws>
+    <version.lombok>1.18.38</version.lombok>
+    <version.tekton-client>1.3.0</version.tekton-client>
     <version.rsql-parser>2.1.0</version.rsql-parser>
     <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
     <version.commons-cli>1.9.0</version.commons-cli>
     <version.commons-lang3>3.17.0</version.commons-lang3>
     <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
-    <version.build-finder>2.6.0</version.build-finder>
+    <version.build-finder>2.6.3</version.build-finder>
     <version.mapstruct>1.6.3</version.mapstruct>
     <version.jandex-maven-plugin>3.2.7</version.jandex-maven-plugin>
 
@@ -93,6 +93,12 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Workaround for: https://github.com/quarkiverse/quarkus-jgit/issues/182 until we upgrade to Quarkus >= 3.21.2-->
+      <dependency>
+        <groupId>org.eclipse.jgit</groupId>
+        <artifactId>org.eclipse.jgit</artifactId>
+        <version>7.2.0.202503040940-r</version>
+      </dependency>
       <dependency>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-bom</artifactId>
@@ -214,7 +220,7 @@
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
-        <version>2.25.0</version>
+        <version>2.26.0</version>
         <executions>
           <execution>
             <id>java-format</id>
@@ -231,7 +237,7 @@
       <plugin>
         <groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>4.6</version>
+        <version>5.0.0</version>
         <executions>
           <execution>
             <phase>process-sources</phase>
@@ -249,6 +255,7 @@
               <header>${maven.multiModuleProjectDirectory}/.license-header.txt</header>
               <excludes>
                 <exclude>manifest*.yaml</exclude>
+                <exclude>ui/dist/**</exclude>
                 <exclude>.ci/**</exclude>
                 <exclude>.gitlab-ci.yml</exclude>
                 <exclude>.github/**</exclude>
@@ -270,6 +277,10 @@
                 <exclude>mvnw**</exclude>
                 <exclude>**/secret*.txt</exclude>
                 <exclude>**/src/test/**</exclude>
+                <exclude>commitlint.config.mjs</exclude>
+                <exclude>certs/**</exclude>
+                <exclude>images/**</exclude>
+                <exclude>ui/**</exclude>
               </excludes>
             </licenseSet>
           </licenseSets>
@@ -278,7 +289,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.12</version>
+        <version>0.8.13</version>
         <executions>
           <execution>
             <goals>

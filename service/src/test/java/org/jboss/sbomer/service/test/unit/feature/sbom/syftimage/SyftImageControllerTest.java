@@ -39,11 +39,11 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import io.fabric8.knative.internal.pkg.apis.ConditionBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamValue;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
+import io.fabric8.knative.pkg.apis.ConditionBuilder;
+import io.fabric8.tekton.v1beta1.ParamBuilder;
+import io.fabric8.tekton.v1beta1.ParamValue;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 
 class SyftImageControllerTest {
@@ -175,11 +175,11 @@ class SyftImageControllerTest {
                     Set.of(SyftImageControllerTest.taskRun("tr1", "0", "True")));
 
             assertFalse(updateControl.isNoUpdate());
-            assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+            assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
             assertEquals(
                     "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.",
-                    updateControl.getResource().getReason());
-            assertEquals(GenerationResult.ERR_SYSTEM, updateControl.getResource().getResult());
+                    updateControl.getResource().get().getReason());
+            assertEquals(GenerationResult.ERR_SYSTEM, updateControl.getResource().get().getResult());
         });
     }
 
@@ -199,12 +199,13 @@ class SyftImageControllerTest {
                     Set.of(SyftImageControllerTest.taskRun("tr1", "0", "True")));
 
             assertFalse(updateControl.isNoUpdate());
-            assertEquals(SbomGenerationStatus.FINISHED, updateControl.getResource().getStatus());
+            assertEquals(SbomGenerationStatus.FINISHED, updateControl.getResource().get().getStatus());
             assertTrue(
                     updateControl.getResource()
+                            .get()
                             .getReason()
                             .startsWith("Generation finished successfully. Generated SBOMs: "));
-            assertEquals(GenerationResult.SUCCESS, updateControl.getResource().getResult());
+            assertEquals(GenerationResult.SUCCESS, updateControl.getResource().get().getResult());
         });
     }
 }

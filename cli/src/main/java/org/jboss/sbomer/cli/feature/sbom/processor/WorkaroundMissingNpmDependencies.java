@@ -74,13 +74,13 @@ public class WorkaroundMissingNpmDependencies {
             return;
         }
         String buildId = build.getId();
-        List<Artifact> npmDependencies = buildsWithNpmDependencies
+        List<Artifact> npmDependencies = buildsWithNpmDependencies // also serves as cache for PNC requests
                 .computeIfAbsent(buildId, k -> new ArrayList<>(pncService.getNPMDependencies(k)));
+        List<Component> components = componentsToAddNpmDependencies.computeIfAbsent(buildId, k -> new ArrayList<>());
         if (npmDependencies.isEmpty()) {
             // No NPM dependencies to add
             return;
         }
-        List<Component> components = componentsToAddNpmDependencies.computeIfAbsent(buildId, k -> new ArrayList<>());
         components.add(component);
     }
 

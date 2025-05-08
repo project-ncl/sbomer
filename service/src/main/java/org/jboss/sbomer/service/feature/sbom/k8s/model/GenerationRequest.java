@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.feature.sbom.k8s.model;
 
 import java.util.Map;
 
+import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
@@ -34,7 +35,12 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.model.annotation.Group;
 import io.fabric8.kubernetes.model.annotation.Kind;
 import io.fabric8.kubernetes.model.annotation.Version;
+import io.opentelemetry.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACEPARENT_KEY;
 
 /**
  * <p>
@@ -108,7 +114,7 @@ public class GenerationRequest extends ConfigMap {
         }
 
         getData().put(KEY_TYPE, type.toName());
-        getMetadata().getLabels().put(Labels.LABEL_TYPE, type.toName());
+        getMetadata().getLabels().put(Labels.LABEL_GENERATION_REQUEST_TYPE, type.toName());
     }
 
     @JsonIgnore
@@ -251,4 +257,29 @@ public class GenerationRequest extends ConfigMap {
         return getMetadata().getName();
     }
 
+    @JsonIgnore
+    public String getTraceId() {
+        return getMetadata().getLabels().get(Labels.LABEL_OTEL_TRACE_ID);
+    }
+
+    @JsonIgnore
+    public String getSpanId() {
+        return getMetadata().getLabels().get(Labels.LABEL_OTEL_SPAN_ID);
+    }
+
+    @JsonIgnore
+    public String getTraceParent() {
+        return getMetadata().getLabels().get(Labels.LABEL_OTEL_TRACEPARENT);
+    }
+
+    @JsonIgnore
+    public Map<String, String> getMDCOtel() {
+        String traceId = getTraceId() != null ? getTraceId() : Span.getInvalid().getSpanContext().getTraceId();
+        String spanId = getSpanId() != null ? getSpanId() : Span.getInvalid().getSpanContext().getSpanId();
+        String traceParent = getTraceParent() != null ? getTraceParent()
+                : OtelUtils
+                        .createTraceParent(traceId, spanId, Span.getInvalid().getSpanContext().getTraceFlags().asHex());
+
+        return Map.of(MDC_TRACE_ID_KEY, traceId, MDC_SPAN_ID_KEY, spanId, MDC_TRACEPARENT_KEY, traceParent);
+    }
 }

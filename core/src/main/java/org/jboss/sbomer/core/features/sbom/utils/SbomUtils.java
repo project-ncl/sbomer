@@ -780,7 +780,7 @@ public class SbomUtils {
         if (component.getProperties() != null) {
             Optional<Property> property = component.getProperties()
                     .stream()
-                    .filter(p -> p.getName().equalsIgnoreCase(name))
+                    .filter(p -> p.getName().equals(name))
                     .findFirst();
             property.ifPresent(value -> component.getProperties().remove(value));
         }
@@ -792,7 +792,7 @@ public class SbomUtils {
 
     public static boolean hasProperty(Component component, String property) {
         return component.getProperties() != null
-                && component.getProperties().stream().anyMatch(c -> c.getName().equalsIgnoreCase(property));
+                && component.getProperties().stream().anyMatch(c -> c.getName().equals(property));
     }
 
     public static Optional<Property> findPropertyWithNameInComponent(String propertyName, Component component) {
@@ -808,7 +808,7 @@ public class SbomUtils {
             return Optional.empty();
         }
 
-        return properties.stream().filter(p -> p.getName().equalsIgnoreCase(propertyName)).findFirst();
+        return properties.stream().filter(p -> p.getName().equals(propertyName)).findFirst();
     }
 
     public static boolean hasExternalReference(Component c, ExternalReference.Type type) {
@@ -1305,12 +1305,15 @@ public class SbomUtils {
             return;
         }
 
-        Component mainComponent = bom.getComponents().get(0);
-        if (mainComponent.getType() != Component.Type.CONTAINER) {
+        addMissingContainerHash(bom.getComponents().get(0));
+    }
+
+    public static void addMissingContainerHash(Component component) {
+        if (component.getType() != Component.Type.CONTAINER) {
             return;
         }
 
-        String[] versionTokens = mainComponent.getVersion().split(":");
+        String[] versionTokens = component.getVersion().split(":");
         if (versionTokens.length < 2) {
             return;
         }
@@ -1328,7 +1331,7 @@ public class SbomUtils {
 
         hashMap.forEach((prefix, algorithm) -> {
             if (versionTokens[0].equalsIgnoreCase(prefix)) {
-                addHashIfMissing(mainComponent, versionTokens[1], algorithm);
+                addHashIfMissing(component, versionTokens[1], algorithm);
             }
         });
     }

@@ -38,6 +38,9 @@ public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> exten
     private String config;
     private String envConfig;
     private GenerationResult result;
+    private String traceId;
+    private String spanId;
+    private String traceParent;
 
     public A withType(GenerationRequestType type) {
         this.type = type;
@@ -89,4 +92,18 @@ public class GenerationRequestFluent<A extends GenerationRequestFluent<A>> exten
         return (A) this;
     }
 
+    public A withTraceId(String traceId) {
+        this.traceId = traceId;
+        return (A) this;
+    }
+
+    public A withSpanId(String spanId) {
+        this.spanId = spanId;
+        return (A) this;
+    }
+
+    public A withTraceParent(String traceParent) {
+        this.traceParent = traceParent;
+        return (A) this;
+    }
 }

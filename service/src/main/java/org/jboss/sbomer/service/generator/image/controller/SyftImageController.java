@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.generator.image.controller;
 
-import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -38,10 +36,12 @@ import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.slf4j.helpers.MessageFormatter;
 
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.javaoperatorsdk.operator.api.config.informer.Informer;
 import io.javaoperatorsdk.operator.api.reconciler.Constants;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.javaoperatorsdk.operator.api.reconciler.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -64,38 +64,28 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @ControllerConfiguration(
-        labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=containerimage",
-        namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
-
+        informer = @Informer(
+                namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
+                labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/managed-by=sbomer,app.kubernetes.io/component=generator,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=containerimage"))
+@Workflow(
         dependents = { @Dependent(
-                type = TaskRunSyftImageGenerateDependentResource.class,
-                useEventSourceWithName = EVENT_SOURCE_NAME)
-
-        })
+                useEventSourceWithName = "tekton-generation-request-containerimage",
+                type = TaskRunSyftImageGenerateDependentResource.class) })
 @Slf4j
 public class SyftImageController extends AbstractController {
+
     @Override
-    protected UpdateControl<GenerationRequest> updateRequest(
-            GenerationRequest generationRequest,
-            SbomGenerationStatus status,
-            GenerationResult result,
-            String reason,
-            Object... params) {
+    protected GenerationRequestType generationRequestType() {
+        return GenerationRequestType.CONTAINERIMAGE;
+    }
 
-        if (generationRequest.getStatus() != null) {
-            String label = generationRequest.getStatus() == SbomGenerationStatus.GENERATING
-                    ? SbomGenerationPhase.GENERATE.name().toLowerCase()
-                    : null;
-
-            if (label != null) {
-                generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
-            }
+    @Override
+    protected void setPhaseLabel(GenerationRequest generationRequest) {
+        if (SbomGenerationStatus.GENERATING.equals(generationRequest.getStatus())) {
+            generationRequest.getMetadata()
+                    .getLabels()
+                    .put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
         }
-
-        generationRequest.setStatus(status);
-        generationRequest.setResult(result);
-        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-        return UpdateControl.updateResource(generationRequest);
     }
 
     /**

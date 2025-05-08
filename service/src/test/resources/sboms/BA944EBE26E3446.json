@@ -1,0 +1,62 @@
+{
+    "version": 1,
+    "metadata": {
+      "component": {
+        "name": "openshift/ose-csi-driver-manila-operator-rhel9",
+        "purl": "pkg:oci/ose-csi-driver-manila-operator-rhel9@sha256%3A36234273400823174d6d55cbe13eed40fb19e23069aca9cac43958f8be7c2a53?arch=ppc64le&os=linux&tag=v4.17.0-202504091537.p0.gefc99a2.assembly.stream.el9",
+        "type": "container"
+      },
+      "timestamp": "2025-04-16T18:02:15Z",
+      "properties": [
+        {
+          "name": "redhat:advisory_id",
+          "value": "148016"
+        }
+      ]
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+      {
+        "name": "openshift/ose-csi-driver-manila-operator-rhel9",
+        "purl": "pkg:oci/ose-csi-driver-manila-operator-rhel9@sha256%3A36234273400823174d6d55cbe13eed40fb19e23069aca9cac43958f8be7c2a53?arch=ppc64le&os=linux&tag=v4.17.0-202504091537.p0.gefc99a2.assembly.stream.el9",
+        "type": "container",
+        "hashes": [
+          {
+            "alg": "SHA-256",
+            "content": "36234273400823174d6d55cbe13eed40fb19e23069aca9cac43958f8be7c2a53"
+          }
+        ],
+        "bom-ref": "pkg:oci/ose-csi-driver-manila-operator-rhel9@sha256%3A36234273400823174d6d55cbe13eed40fb19e23069aca9cac43958f8be7c2a53?arch=ppc64le&os=linux&tag=v4.17.0-202504091537.p0.gefc99a2.assembly.stream.el9",
+        "version": "sha256:36234273400823174d6d55cbe13eed40fb19e23069aca9cac43958f8be7c2a53",
+        "publisher": "Red Hat",
+        "properties": [
+          {
+            "name": "sbomer:image:labels:com.redhat.component",
+            "value": "csi-driver-manila-operator-container"
+          },
+          {
+            "name": "sbomer:image:labels:name",
+            "value": "openshift/ose-csi-driver-manila-operator-rhel9"
+          },
+          {
+            "name": "sbomer:image:labels:release",
+            "value": "202504091537.p0.gefc99a2.assembly.stream.el9"
+          },
+          {
+            "name": "sbomer:image:labels:version",
+            "value": "v4.17.0"
+          }
+        ]
+      }
+    ],
+    "specVersion": "1.6",
+    "dependencies": [
+      {
+        "ref": "pkg:oci/ose-csi-driver-manila-operator-rhel9@sha256%3A36234273400823174d6d55cbe13eed40fb19e23069aca9cac43958f8be7c2a53?arch=ppc64le&os=linux&tag=v4.17.0-202504091537.p0.gefc99a2.assembly.stream.el9",
+        "dependsOn": [
+          
+        ]
+      }
+    ],
+    "serialNumber": "urn:uuid:2cd97cbd-5c61-4f21-ad59-175181cc2a6f"
+  }

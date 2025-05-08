@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +39,7 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -47,7 +47,6 @@ import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationService;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -58,15 +57,16 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
+import org.slf4j.helpers.MessageFormatter;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.javaoperatorsdk.operator.api.config.informer.InformerEventSourceConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.EventSourceContext;
-import io.javaoperatorsdk.operator.api.reconciler.EventSourceInitializer;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
@@ -78,10 +78,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractController implements Reconciler<GenerationRequest>,
-        EventSourceInitializer<GenerationRequest>, Cleaner<GenerationRequest> {
-
-    public static final String EVENT_SOURCE_NAME = "GenerationRequestEventSource";
+public abstract class AbstractController implements Reconciler<GenerationRequest>, Cleaner<GenerationRequest> {
 
     @Inject
     @Setter
@@ -105,13 +102,58 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     @Setter
     AtlasHandler atlasHandler;
 
-    // TODO: Refactor this to have it's implementation shared
-    protected abstract UpdateControl<GenerationRequest> updateRequest(
+    protected abstract GenerationRequestType generationRequestType();
+
+    private String labelSelector() {
+        return Labels.defaultLabelsToMap(generationRequestType())
+                .entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(","));
+    }
+
+    @Override
+    public List<EventSource<?, GenerationRequest>> prepareEventSources(EventSourceContext<GenerationRequest> context) {
+        String eventSourceName = "tekton-generation-request-" + generationRequestType().toName();
+
+        log.info(
+                "Preparing event source '{}' to handle generation requests with type '{}'...",
+                eventSourceName,
+                generationRequestType());
+
+        InformerEventSource<TaskRun, GenerationRequest> ies = new InformerEventSource<>(
+                InformerEventSourceConfiguration.from(TaskRun.class, GenerationRequest.class)
+                        .withName(eventSourceName)
+                        .withLabelSelector(labelSelector())
+                        .withNamespacesInheritedFromController()
+                        .withFollowControllerNamespacesChanges(true)
+                        .build(),
+                context);
+
+        log.info("Event source '{}' prepared", eventSourceName);
+
+        return List.of(ies);
+    }
+
+    protected void setPhaseLabel(GenerationRequest generationRequest) {
+        // Default: do nothing; subclasses can override this
+    }
+
+    protected UpdateControl<GenerationRequest> updateRequest(
             GenerationRequest generationRequest,
             SbomGenerationStatus status,
             GenerationResult result,
             String reason,
-            Object... params);
+            Object... params) {
+
+        setPhaseLabel(generationRequest);
+
+        generationRequest.setStatus(status);
+        generationRequest.setResult(result);
+        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
+
+        return UpdateControl.patchResource(generationRequest);
+    }
 
     /**
      * Returns the {@link TaskRun} having the specified {@link SbomGenerationPhase} from the given {@link TaskRun}
@@ -161,6 +203,10 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      */
     @Transactional
     protected List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
+        MDCUtils.removeOtelContext();
+        MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
+
         // First, update the status of the GenerationRequest entity.
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
 
@@ -246,18 +292,11 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     }
 
     @Override
-    public Map<String, EventSource> prepareEventSources(EventSourceContext<GenerationRequest> context) {
-        InformerEventSource<TaskRun, GenerationRequest> ies = new InformerEventSource<>(
-                InformerConfiguration.from(TaskRun.class, context)
-                        .withNamespacesInheritedFromController(context)
-                        .build(),
-                context);
-
-        return Map.of(EVENT_SOURCE_NAME, ies);
-    }
-
-    @Override
     public DeleteControl cleanup(GenerationRequest resource, Context<GenerationRequest> context) {
+        MDCUtils.removeOtelContext();
+        MDCUtils.addIdentifierContext(resource.getIdentifier());
+        MDCUtils.addOtelContext(resource.getMDCOtel());
+
         log.debug("GenerationRequest '{}' was removed from the system", resource.getMetadata().getName());
         return DeleteControl.defaultDelete();
     }
@@ -266,7 +305,10 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     public UpdateControl<GenerationRequest> reconcile(
             GenerationRequest generationRequest,
             Context<GenerationRequest> context) throws Exception {
+
         MDCUtils.removeContext();
+        MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
 
         // No status is set, it should be "NEW", let's do it.
         // "NEW" starts everything.
@@ -283,11 +325,12 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 generationRequest.getMetadata().getName(),
                 generationRequest.getStatus());
 
-        MDCUtils.addBuildContext(generationRequest.getIdentifier());
-
         switch (generationRequest.getStatus()) {
             case NEW:
                 action = reconcileNew(generationRequest, secondaryResources);
+                break;
+            case SCHEDULED:
+                action = reconcileScheduled(generationRequest, secondaryResources);
                 break;
             case GENERATING:
                 action = reconcileGenerating(generationRequest, secondaryResources);
@@ -312,11 +355,25 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         }
 
         // In case resource gets an update, update th DB entity as well
-        if (action.isUpdateResource()) {
+        if (action.isPatchResource()) {
             SbomGenerationRequest.sync(generationRequest);
         }
 
         return action;
+    }
+
+    /**
+     * <p>
+     * Simply change the status of all resurces with {@link SbomGenerationStatus#NEW} status to
+     * {@link SbomGenerationStatus#SCHEDULED}. This is done for backwards-compatibility.
+     * </p>
+     */
+    protected UpdateControl<GenerationRequest> reconcileNew(
+            GenerationRequest generationRequest,
+            Set<TaskRun> secondaryResources) {
+        log.debug("Reconcile NEW for '{}'...", generationRequest.getName());
+
+        return updateRequest(generationRequest, SbomGenerationStatus.SCHEDULED, null, null);
     }
 
     /**
@@ -326,10 +383,10 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * {@link SbomGenerationStatus#NEW} status.
      * </p>
      */
-    protected UpdateControl<GenerationRequest> reconcileNew(
+    protected UpdateControl<GenerationRequest> reconcileScheduled(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
-        log.debug("Reconcile NEW for '{}'...", generationRequest.getName());
+        log.debug("Reconcile SCHEDULED for '{}'...", generationRequest.getName());
 
         TaskRun generateTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.GENERATE);
 

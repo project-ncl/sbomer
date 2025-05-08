@@ -33,12 +33,15 @@ import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.errata.event.comment.RequestEventStatusUpdateEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -63,6 +66,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACEPARENT_KEY;
 
 @JsonInclude(Include.NON_NULL)
 @DynamicUpdate
@@ -118,6 +125,12 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_generationrequest_request"))
     private RequestEvent request;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "otel_metadata")
+    @ToString.Exclude
+    @Schema(implementation = Map.class)
+    private JsonNode otelMetadata;
+
     /**
      * Method to sync the {@link GenerationRequest} Kubernetes resource with the {@link SbomGenerationRequest} entity in
      * the database, with a provided request event.
@@ -152,6 +165,14 @@ public class SbomGenerationRequest extends PanacheEntityBase {
         sbomGenerationRequest.setResult(generationRequest.getResult());
         // And config
         sbomGenerationRequest.setConfig(generationRequest.getConfig());
+        // Update the OTEL metadata
+        if (generationRequest.getTraceId() != null) {
+            ObjectNode otelMetadata = ObjectMapperProvider.json().createObjectNode();
+            otelMetadata.put(MDC_TRACE_ID_KEY, generationRequest.getTraceId());
+            otelMetadata.put(MDC_SPAN_ID_KEY, generationRequest.getSpanId());
+            otelMetadata.put(MDC_TRACEPARENT_KEY, generationRequest.getTraceParent());
+            sbomGenerationRequest.setOtelMetadata(otelMetadata);
+        }
 
         // If the request is null (e.g., sync called from the controllers) do not override it
         if (request != null) {
@@ -269,6 +290,13 @@ public class SbomGenerationRequest extends PanacheEntityBase {
                 GenerationRequestType.OPERATION,
                 operationId,
                 SbomGenerationStatus.NO_OP).list();
+    }
+
+    @Transactional
+    public static List<SbomGenerationRequest> findByRequest(String requestId) {
+        return SbomGenerationRequest.find( // NOSONAR
+                "request.id = ?1 order by creationTime asc",
+                requestId).list();
     }
 
     @PrePersist

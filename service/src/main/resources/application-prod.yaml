@@ -61,6 +61,10 @@ quarkus:
     tls:
       verification: none
 
+  scheduler:
+    tracing:
+      enabled: true
+
   oidc-client:
     client-enabled: true
     connection-retry-count: 10

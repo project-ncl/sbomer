@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
-import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -54,13 +52,15 @@ import org.slf4j.helpers.MessageFormatter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.tekton.pipeline.v1beta1.Param;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunResult;
+import io.fabric8.tekton.v1beta1.Param;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunResult;
+import io.javaoperatorsdk.operator.api.config.informer.Informer;
 import io.javaoperatorsdk.operator.api.reconciler.Constants;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.javaoperatorsdk.operator.api.reconciler.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
@@ -84,29 +84,30 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @ControllerConfiguration(
-        labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=build",
-        namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
+        informer = @Informer(
+                namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
+                labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/managed-by=sbomer,app.kubernetes.io/component=generator,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=build"))
+@Workflow(
         dependents = {
                 @Dependent(
+                        useEventSourceWithName = "tekton-generation-request-build",
                         type = TaskRunInitDependentResource.class,
-                        reconcilePrecondition = IsBuildTypeCondition.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME),
+                        reconcilePrecondition = IsBuildTypeCondition.class),
                 @Dependent(
+                        useEventSourceWithName = "tekton-generation-request-build",
                         type = TaskRunGenerateBuildDependentResource.class,
-                        reconcilePrecondition = IsBuildTypeInitializedCondition.class,
-                        useEventSourceWithName = EVENT_SOURCE_NAME) })
+                        reconcilePrecondition = IsBuildTypeInitializedCondition.class) })
 @Slf4j
 public class BuildController extends AbstractController {
     final ObjectMapper objectMapper = ObjectMapperProvider.yaml();
 
     @Override
-    protected UpdateControl<GenerationRequest> updateRequest(
-            GenerationRequest generationRequest,
-            SbomGenerationStatus status,
-            GenerationResult result,
-            String reason,
-            Object... params) {
+    protected GenerationRequestType generationRequestType() {
+        return GenerationRequestType.BUILD;
+    }
 
+    @Override
+    protected void setPhaseLabel(GenerationRequest generationRequest) {
         if (generationRequest.getStatus() != null) {
             String label = switch (generationRequest.getStatus()) {
                 case INITIALIZING -> SbomGenerationPhase.INIT.name().toLowerCase();
@@ -118,11 +119,6 @@ public class BuildController extends AbstractController {
                 generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
             }
         }
-
-        generationRequest.setStatus(status);
-        generationRequest.setResult(result);
-        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-        return UpdateControl.updateResource(generationRequest);
     }
 
     /**
@@ -453,11 +449,11 @@ public class BuildController extends AbstractController {
      * @return Action to take on the {@link GenerationRequest} resource.
      */
     @Override
-    protected UpdateControl<GenerationRequest> reconcileNew(
+    protected UpdateControl<GenerationRequest> reconcileScheduled(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
 
-        log.debug("ReconcileNew ...");
+        log.debug("ReconcileScheduled ...");
         TaskRun initTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.INIT);
 
         if (initTaskRun == null) {
@@ -474,6 +470,8 @@ public class BuildController extends AbstractController {
             Context<GenerationRequest> context) throws Exception {
 
         MDCUtils.removeContext();
+        MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
 
         // No status is set, it should be "NEW", let's do it.
         // "NEW" starts everything.
@@ -495,11 +493,12 @@ public class BuildController extends AbstractController {
                 generationRequest.getMetadata().getName(),
                 generationRequest.getStatus());
 
-        MDCUtils.addBuildContext(generationRequest.getIdentifier());
-
         switch (generationRequest.getStatus()) {
             case NEW:
                 action = reconcileNew(generationRequest, secondaryResources);
+                break;
+            case SCHEDULED:
+                action = reconcileScheduled(generationRequest, secondaryResources);
                 break;
             case INITIALIZING:
                 action = reconcileInitializing(generationRequest, secondaryResources);
@@ -537,7 +536,7 @@ public class BuildController extends AbstractController {
         }
 
         // In case resource gets an update, update th DB entity as well
-        if (action.isUpdateResource()) {
+        if (action.isPatchResource()) {
             SbomGenerationRequest.sync(generationRequest);
         }
 
@@ -545,6 +544,10 @@ public class BuildController extends AbstractController {
     }
 
     protected List<Sbom> storeSboms(GenerationRequest generationRequest) {
+        MDCUtils.removeOtelContext();
+        MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
+        MDCUtils.addOtelContext(generationRequest.getMDCOtel());
+
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(generationRequest);
 
         log.info(

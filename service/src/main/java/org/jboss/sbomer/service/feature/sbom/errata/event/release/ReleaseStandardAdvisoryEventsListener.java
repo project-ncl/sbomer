@@ -17,10 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingMetadataSupplier;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingSerialNumber;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -30,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -52,25 +49,25 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient;
+import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_DETAILS_INCLUDES;
+import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_REGISTRY_INCLUDES;
+import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
-import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
-import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
-import org.jboss.sbomer.service.feature.sbom.service.SbomService;
-import org.jboss.sbomer.service.stats.StatsService;
+import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -78,127 +75,109 @@ import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 
 import io.quarkus.narayana.jta.QuarkusTransaction;
+import io.smallrye.faulttolerance.api.BeforeRetry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-@Setter
 @ApplicationScoped
 @Slf4j
-public class ReleaseStandardAdvisoryEventsListener {
-
-    // Set the long transaction timeout to 10 minutes
-    private static final int INCREASED_TIMEOUT_SEC = 600;
+public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListener {
 
     @Inject
-    @RestClient
-    ErrataClient errataClient;
-
-    @Inject
-    @RestClient
-    PyxisClient pyxisClient;
-
-    @Inject
-    SbomService sbomService;
-
-    @Inject
-    StatsService statsService;
-
-    @Inject
-    SbomGenerationRequestRepository generationRequestRepository;
-
-    @Inject
-    RequestEventRepository requestEventRepository;
+    @Setter
+    PyxisValidatingClient pyxisClient;
 
     private static final String NVR_STANDARD_SEPARATOR = "-";
 
-    public void onReleaseAdvisoryEvent(@ObservesAsync StandardAdvisoryReleaseEvent event) {
-        log.debug("Event received for standard advisory release ...");
-
-        RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
-        try {
-            ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
-            Errata erratum = errataClient.getErratum(config.getAdvisoryId());
-            Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
-                    config.getAdvisoryId());
-            V1Beta1RequestRecord advisoryManifestsRecord = sbomService
-                    .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
-
-            String toolVersion = statsService.getStats().getVersion();
-            // FIXME: 'Optional.get()' without 'isPresent()' check
-            Component.Type productType = AdvisoryEventUtils
-                    .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
-
-            // Associate each ProductVersion with its list of CPEs
-            Map<ProductVersionEntry, Set<String>> productVersionToCPEs = mapProductVersionToCPEs(advisoryBuildDetails);
-
-            // Associate each build (NVR) in an advisory to its build manifest generation
-            Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration = mapNVRToBuildGeneration(
-                    advisoryManifestsRecord);
-
-            if (erratum.getDetails().get().getContentTypes().contains("docker")) {
-
-                log.debug(
-                        "Creating release manifests for Docker builds of advisory: '{}'[{}]",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
-                releaseManifestsForDockerBuilds(
-                        requestEvent,
-                        erratum,
-                        advisoryBuildDetails,
-                        advisoryManifestsRecord,
-                        event.getReleaseGenerations(),
-                        toolVersion,
-                        productType,
-                        productVersionToCPEs,
-                        nvrToBuildGeneration);
-            } else {
-
-                log.debug(
-                        "Creating release manifests for RPM builds of advisory: '{}'[{}]",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
-
-                releaseManifestsForRPMBuilds(
-                        requestEvent,
-                        erratum,
-                        advisoryBuildDetails,
-                        advisoryManifestsRecord,
-                        event.getReleaseGenerations(),
-                        toolVersion,
-                        productType,
-                        productVersionToCPEs,
-                        nvrToBuildGeneration);
-            }
-        } catch (Exception e) {
-            log.error(
-                    "An error occurred during the creation of release manifests for event '{}'",
-                    requestEvent.getId(),
-                    e);
-            markRequestFailed(requestEvent, event.getReleaseGenerations().values());
+    public void onReleaseAdvisoryEvent(@ObservesAsync MdcEventWrapper wrapper) {
+        Object payload = wrapper.getPayload();
+        if (!(payload instanceof StandardAdvisoryReleaseEvent event)) {
+            return;
         }
 
-        // Let's trigger the update of statuses and advisory comments
-        doUpdateGenerationsStatus(event.getReleaseGenerations().values());
-    }
+        Map<String, String> mdcContext = wrapper.getMdcContext();
+        if (mdcContext != null) {
+            MDC.setContextMap(mdcContext);
+        } else {
+            MDC.clear();
+        }
 
-    @Transactional(value = TxType.REQUIRES_NEW)
-    protected void markRequestFailed(RequestEvent requestEvent, Collection<SbomGenerationRequest> releaseGenerations) {
-        String reason = "An error occurred during the creation of the release manifest";
-        log.error(reason);
+        log.debug("Event received for standard advisory release ...");
 
-        requestEvent = requestEventRepository.findById(requestEvent.getId());
-        requestEvent.setEventStatus(RequestEventStatus.FAILED);
-        requestEvent.setReason(reason);
+        try {
+            RequestEvent requestEvent = requestEventRepository.findById(event.getRequestEventId());
+            try {
+                ErrataAdvisoryRequestConfig config = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+                Errata erratum = errataClient.getErratum(config.getAdvisoryId());
+                Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails = getAdvisoryBuildDetails(
+                        config.getAdvisoryId());
+                V1Beta1RequestRecord advisoryManifestsRecord = sbomService
+                        .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
 
-        for (SbomGenerationRequest generation : releaseGenerations) {
-            generation = generationRequestRepository.findById(generation.getId());
-            generation.setStatus(SbomGenerationStatus.FAILED);
-            generation.setReason(reason);
+                String toolVersion = statsService.getStats().getVersion();
+                // FIXME: 'Optional.get()' without 'isPresent()' check
+                Component.Type productType = AdvisoryEventUtils
+                        .getComponentTypeForProduct(erratum.getDetails().get().getProduct().getShortName());
+
+                // Associate each ProductVersion with its list of CPEs
+                Map<ProductVersionEntry, Set<String>> productVersionToCPEs = mapProductVersionToCPEs(
+                        advisoryBuildDetails);
+
+                // Associate each build (NVR) in an advisory to its build manifest generation
+                Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration = mapNVRToBuildGeneration(
+                        advisoryManifestsRecord);
+
+                if (erratum.getDetails().get().getContentTypes().contains("docker")) {
+
+                    log.debug(
+                            "Creating release manifests for Docker builds of advisory: '{}'[{}]",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
+                    releaseManifestsForDockerBuilds(
+                            requestEvent,
+                            erratum,
+                            advisoryBuildDetails,
+                            advisoryManifestsRecord,
+                            event.getReleaseGenerations(),
+                            toolVersion,
+                            productType,
+                            productVersionToCPEs,
+                            nvrToBuildGeneration);
+                } else {
+
+                    log.debug(
+                            "Creating release manifests for RPM builds of advisory: '{}'[{}]",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
+
+                    releaseManifestsForRPMBuilds(
+                            requestEvent,
+                            erratum,
+                            advisoryBuildDetails,
+                            advisoryManifestsRecord,
+                            event.getReleaseGenerations(),
+                            toolVersion,
+                            productType,
+                            productVersionToCPEs,
+                            nvrToBuildGeneration);
+                }
+            } catch (Exception e) {
+                log.error(
+                        "An error occurred during the creation of release manifests for event '{}'",
+                        requestEvent.getId(),
+                        e);
+                String reason = (e instanceof ApplicationException) ? e.getMessage()
+                        : "An error occurred during the creation of the release manifest";
+                markRequestFailed(requestEvent, event.getReleaseGenerations().values(), reason);
+            }
+
+            // Let's trigger the update of statuses and advisory comments
+            doUpdateGenerationsStatus(event.getReleaseGenerations().values());
+        } finally {
+            MDC.clear();
         }
     }
 
@@ -213,6 +192,8 @@ public class ReleaseStandardAdvisoryEventsListener {
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
 
+        List<Sbom> sboms = new ArrayList<>();
+
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
             // Create the release manifest for this ProductVersion
@@ -226,27 +207,32 @@ public class ReleaseStandardAdvisoryEventsListener {
             Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs = new HashMap<>();
 
             for (BuildItem buildItem : buildItems) {
-                // FIXME: 'Optional.get()' without 'isPresent()' check
-                Component nvrRootComponent = createRootComponentForRPMBuildItem(
-                        buildItem,
-                        nvrToBuildGeneration.get(buildItem.getNvr()),
-                        advisoryManifestsRecord,
-                        erratum.getDetails().get().getProduct().getShortName(),
-                        generationToCDNs);
+                V1Beta1GenerationRecord buildGeneration = nvrToBuildGeneration.get(buildItem.getNvr());
+                if (buildGeneration != null) {
+                    // It could happen that not all the builds attached to the advisory have a generation done in SBOMer
+                    // (the builds which SBOMer is not able to manifest)
+                    // FIXME: 'Optional.get()' without 'isPresent()' check
+                    Component nvrRootComponent = createRootComponentForRPMBuildItem(
+                            buildItem,
+                            buildGeneration,
+                            advisoryManifestsRecord,
+                            erratum.getDetails().get().getProduct().getShortName(),
+                            generationToCDNs);
 
-                // Add the component to the release manifest components and add the purl to the "provides" list
-                productVersionBom.addComponent(nvrRootComponent);
-                productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
+                    // Add the component to the release manifest components and add the purl to the "provides" list
+                    productVersionBom.addComponent(nvrRootComponent);
+                    productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
+                }
             }
 
             // Add the AdvisoryId property
-            addPropertyIfMissing(
+            SbomUtils.addPropertyIfMissing(
                     productVersionBom.getMetadata(),
                     Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                     String.valueOf(erratum.getDetails().get().getId()));
 
-            addMissingMetadataSupplier(productVersionBom);
-            addMissingSerialNumber(productVersionBom);
+            SbomUtils.addMissingMetadataSupplier(productVersionBom);
+            SbomUtils.addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
             Sbom sbom = saveReleaseManifestForRPMGeneration(
@@ -265,18 +251,11 @@ public class ReleaseStandardAdvisoryEventsListener {
                     releaseGeneration.getId(),
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
-        });
-    }
 
-    @Transactional
-    protected void doUpdateGenerationsStatus(Collection<SbomGenerationRequest> releaseGenerations) {
-        // Update only one SbomGenerationRequest, because the requestEvent associated is the same for all of them. This
-        // avoids duplicated comments in the advisory
-        if (releaseGenerations != null && !releaseGenerations.isEmpty()) {
-            SbomGenerationRequest generation = releaseGenerations.iterator().next();
-            generation = generationRequestRepository.findById(generation.getId());
-            SbomGenerationRequest.updateRequestEventStatus(generation);
-        }
+            sboms.add(sbom);
+        });
+
+        performPost(sboms);
     }
 
     protected void releaseManifestsForDockerBuilds(
@@ -289,6 +268,8 @@ public class ReleaseStandardAdvisoryEventsListener {
             Component.Type productType,
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
+
+        List<Sbom> sboms = new ArrayList<>();
 
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
@@ -304,25 +285,30 @@ public class ReleaseStandardAdvisoryEventsListener {
             Map<String, List<RepositoryCoordinates>> generationToRepositories = new HashMap<>();
 
             for (BuildItem buildItem : buildItems) {
-                Component nvrRootComponent = createRootComponentForDockerBuildItem(
-                        buildItem.getNvr(),
-                        nvrToBuildGeneration.get(buildItem.getNvr()),
-                        advisoryManifestsRecord,
-                        generationToRepositories);
+                V1Beta1GenerationRecord buildGeneration = nvrToBuildGeneration.get(buildItem.getNvr());
+                if (buildGeneration != null) {
+                    // It could happen that not all the builds attached to the advisory have a generation done in SBOMer
+                    // (the builds which SBOMer is not able to manifest like build#3572808)
+                    Component nvrRootComponent = createRootComponentForDockerBuildItem(
+                            buildItem.getNvr(),
+                            buildGeneration,
+                            advisoryManifestsRecord,
+                            generationToRepositories);
 
-                // Add the component to the release manifest components and add the purl to the "provides" list
-                productVersionBom.addComponent(nvrRootComponent);
-                productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
+                    // Add the component to the release manifest components and add the purl to the "provides" list
+                    productVersionBom.addComponent(nvrRootComponent);
+                    productVersionBom.getDependencies().get(0).addProvides(new Dependency(nvrRootComponent.getPurl()));
+                }
             }
 
             // Add the AdvisoryId property
-            addPropertyIfMissing(
+            SbomUtils.addPropertyIfMissing(
                     productVersionBom.getMetadata(),
                     Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                     String.valueOf(erratum.getDetails().get().getId()));
 
-            addMissingMetadataSupplier(productVersionBom);
-            addMissingSerialNumber(productVersionBom);
+            SbomUtils.addMissingMetadataSupplier(productVersionBom);
+            SbomUtils.addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
             Sbom sbom = saveReleaseManifestForDockerGeneration(
@@ -341,7 +327,11 @@ public class ReleaseStandardAdvisoryEventsListener {
                     releaseGeneration.getId(),
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
+
+            sboms.add(sbom);
         });
+
+        performPost(sboms);
     }
 
     private Bom createProductVersionBom(
@@ -436,8 +426,13 @@ public class ReleaseStandardAdvisoryEventsListener {
         generationToRepositories.put(generation.id(), repositories);
 
         // Create summary (pick the longest value) and evidence purl
-        RepositoryCoordinates preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
-        String summaryPurl = AdvisoryEventUtils.createPurl(preferredRepo, imageIndexMainComponent.getVersion(), false);
+        Optional<RepositoryCoordinates> preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+        if (preferredRepo.isEmpty()) {
+            throw new ApplicationException("No published repositories found in Pyxis for nvr '{}'", generationNVR);
+        }
+
+        String summaryPurl = AdvisoryEventUtils
+                .createPurl(preferredRepo.get(), imageIndexMainComponent.getVersion(), false);
         Set<String> evidencePurls = AdvisoryEventUtils
                 .createPurls(repositories, imageIndexMainComponent.getVersion(), true);
 
@@ -461,6 +456,7 @@ public class ReleaseStandardAdvisoryEventsListener {
 
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
+    @BeforeRetry(RetryLogger.class)
     protected Sbom saveReleaseManifestForRPMGeneration(
             RequestEvent requestEvent,
             Errata erratum,
@@ -521,7 +517,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     SbomUtils.addMissingMetadataSupplier(manifestBom);
 
                     // Add the AdvisoryId property
-                    addPropertyIfMissing(
+                    SbomUtils.addPropertyIfMissing(
                             manifestBom.getMetadata(),
                             Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                             String.valueOf(erratum.getDetails().get().getId()));
@@ -576,6 +572,7 @@ public class ReleaseStandardAdvisoryEventsListener {
     // TODO: Refactor
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
+    @BeforeRetry(RetryLogger.class)
     protected Sbom saveReleaseManifestForDockerGeneration(
             RequestEvent requestEvent,
             Errata erratum,
@@ -618,7 +615,10 @@ public class ReleaseStandardAdvisoryEventsListener {
                 String generationId = entry.getKey();
                 // 2.1 - Select the repository with longest repoFragment + tag
                 List<RepositoryCoordinates> repositories = entry.getValue();
-                RepositoryCoordinates preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+                Optional<RepositoryCoordinates> preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+                if (preferredRepo.isEmpty()) {
+                    throw new ApplicationException("No published repositories found in Pyxis");
+                }
 
                 // 2.2 - Regenerate the manifest purls using the preferredRepo and keep track of the updates.
                 // We need them to update the index manifest variants
@@ -628,7 +628,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                         .toList();
                 Map<String, String> originalToRebuiltPurl = new HashMap<>();
                 buildManifests.forEach(manifestRecord -> {
-                    String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo);
+                    String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo.get());
                     originalToRebuiltPurl.put(manifestRecord.rootPurl(), rebuiltPurl);
                     log.debug("Regenerated rootPurl '{}' to '{}'", manifestRecord.rootPurl(), rebuiltPurl);
                 });
@@ -645,7 +645,7 @@ public class ReleaseStandardAdvisoryEventsListener {
                     buildManifest.setRootPurl(rebuiltPurl);
                     log.debug("Updated manifest '{}' to rootPurl '{}'", buildManifestRecord.id(), rebuiltPurl);
 
-                    addPropertyIfMissing(
+                    SbomUtils.addPropertyIfMissing(
                             manifestBom.getMetadata(),
                             Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                             String.valueOf(erratum.getDetails().get().getId()));
@@ -722,7 +722,6 @@ public class ReleaseStandardAdvisoryEventsListener {
         }
     }
 
-    @Retry(maxRetries = 10)
     protected Map<ProductVersionEntry, List<BuildItem>> getAdvisoryBuildDetails(String advisoryId) {
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(advisoryId);
         return erratumBuildList.getProductVersions()
@@ -737,7 +736,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                                         .toList()));
     }
 
-    @Retry(maxRetries = 10)
     protected Map<ProductVersionEntry, Set<String>> mapProductVersionToCPEs(
             Map<ProductVersionEntry, List<BuildItem>> advisoryBuildDetails) {
 
@@ -759,11 +757,11 @@ public class ReleaseStandardAdvisoryEventsListener {
         return productVersionToCPEs;
     }
 
-    @Retry(maxRetries = 10)
     protected List<RepositoryCoordinates> getRepositoriesDetails(String nvr) {
         log.debug("Getting repositories details from Pyxis for NVR '{}'", nvr);
+
         PyxisRepositoryDetails repositoriesDetails = pyxisClient
-                .getRepositoriesDetails(nvr, PyxisClient.REPOSITORIES_DETAILS_INCLUDES);
+                .getRepositoriesDetails(nvr, REPOSITORIES_DETAILS_INCLUDES);
         return repositoriesDetails.getData()
                 .stream()
                 .flatMap(dataSection -> dataSection.getRepositories().stream())
@@ -782,7 +780,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                 .toList();
     }
 
-    @Retry(maxRetries = 10)
     protected List<ErrataCDNRepoNormalized> getCDNDetails(BuildItem buildItem, String productShortName) {
         List<ErrataCDNRepoNormalized> allCDNs = new ArrayList<>();
         buildItem.getVariantArch()
@@ -795,19 +792,9 @@ public class ReleaseStandardAdvisoryEventsListener {
      * Not used at the moment. Useful to understand if a repository has requires_terms = false meaning the repo is also
      * accessible without authentication
      */
-    @Retry(maxRetries = 10)
     protected PyxisRepository getRepository(String registry, String repository) {
-        return pyxisClient.getRepository(registry, repository, PyxisClient.REPOSITORIES_REGISTRY_INCLUDES);
+        return pyxisClient.getRepository(registry, repository, REPOSITORIES_REGISTRY_INCLUDES);
     }
-
-    public static final String REQUEST_ID = "request_id";
-    public static final String ERRATA = "errata_fullname";
-    public static final String ERRATA_ID = "errata_id";
-    public static final String ERRATA_SHIP_DATE = "errata_ship_date";
-    public static final String PRODUCT = "product_name";
-    public static final String PRODUCT_SHORTNAME = "product_shortname";
-    public static final String PRODUCT_VERSION = "product_version";
-    public static final String PURL_LIST = "purl_list";
 
     protected ObjectNode collectReleaseInfo(
             String requestEventId,
@@ -878,28 +865,6 @@ public class ReleaseStandardAdvisoryEventsListener {
                                 generation.identifier()));
     }
 
-    private Metadata createMetadata(
-            String name,
-            String version,
-            Component.Type type,
-            Set<String> cpes,
-            Date shipDate,
-            String toolVersion) {
-        Metadata metadata = new Metadata();
-
-        Component metadataProductComponent = SbomUtils.createComponent(null, name, version, null, null, type);
-        metadataProductComponent.setBomRef(version);
-        SbomUtils.setSupplier(metadataProductComponent);
-        SbomUtils.setEvidenceIdentities(metadataProductComponent, cpes, Field.CPE);
-
-        metadata.setComponent(metadataProductComponent);
-        if (shipDate != null) {
-            metadata.setTimestamp(shipDate);
-        }
-        metadata.setToolChoice(SbomUtils.createToolInformation(toolVersion));
-        return metadata;
-    }
-
     private String getGenerationNVRFromManifest(V1Beta1RequestManifestRecord manifestRecord) {
         GenerationRequestType generationRequestType = GenerationRequestType
                 .fromName(manifestRecord.generation().type());
@@ -957,7 +922,11 @@ public class ReleaseStandardAdvisoryEventsListener {
                     }
                 }
             } catch (MalformedPackageURLException e) {
-                log.error("Unable to parse the purl {}", component.getPurl(), e);
+                log.debug(
+                        "Unable to parse the purl '{}' of component with name '{}' ({})",
+                        component.getPurl(),
+                        component.getName(),
+                        e.getMessage());
             }
         }
         return manifestArches;

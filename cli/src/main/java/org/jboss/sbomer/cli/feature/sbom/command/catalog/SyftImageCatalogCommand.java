@@ -130,6 +130,13 @@ public class SyftImageCatalogCommand extends AbstractCatalogCommand {
         SbomUtils.setPublisher(variant);
         SbomUtils.setSupplier(variant);
 
+        // Copy hashes from main component to variant, or compute it if not available
+        if (mainComponent.getHashes() != null && !mainComponent.getHashes().isEmpty()) {
+            variant.setHashes(mainComponent.getHashes());
+        } else {
+            SbomUtils.addMissingContainerHash(variant);
+        }
+
         return variant;
     }
 

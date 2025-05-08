@@ -27,10 +27,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.koji.KojiClientSession;
@@ -73,20 +77,28 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.smallrye.faulttolerance.api.BeforeRetry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACEPARENT_KEY;
 
 @ApplicationScoped
 @Slf4j
@@ -121,6 +133,9 @@ public class AdvisoryService {
 
     @Inject
     ErrataNotesSchemaValidator notesSchemaValidator;
+
+    @Inject
+    ManagedExecutor managedExecutor;
 
     public Collection<SbomGenerationRequest> generateFromAdvisory(RequestEvent requestEvent) {
 
@@ -184,7 +199,10 @@ public class AdvisoryService {
     // FIXME: 'Optional.get()' without 'isPresent()' check
     private Collection<SbomGenerationRequest> handleTextOnlyAdvisory(RequestEvent requestEvent, Errata erratum) {
 
-        if (!featureFlags.textOnlyErrataManifestGenerationEnabled()) {
+        // Check release flag for simplicity too, because release logic is below this condition and is toggled
+        // separately
+        if (!featureFlags.textOnlyErrataManifestGenerationEnabled()
+                && !featureFlags.textOnlyErrataReleaseManifestGenerationEnabled()) {
             return doIgnoreRequest(requestEvent, "Text-Only Errata manifest generation is disabled");
         }
 
@@ -408,6 +426,12 @@ public class AdvisoryService {
                                         .flatMap(build -> build.getBuildItems().values().stream())
                                         .toList()));
 
+        // The are cases where an advisory might have no builds, let's ignore them to avoid a pending request
+        if (buildDetails.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum() == 0) {
+            String reason = String.format("The standard errata advisory has no retrievable builds attached, skipping!");
+            doIgnoreRequest(requestEvent, reason);
+        }
+
         // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
         // manifests.
         // Otherwise, SBOMer will default to the creation of build manifests.
@@ -548,6 +572,11 @@ public class AdvisoryService {
             Set<String> productVersions,
             GenerationRequestType type) {
 
+        ObjectNode otelMetadata = ObjectMapperProvider.json().createObjectNode();
+        otelMetadata.put(MDC_TRACE_ID_KEY, MDC.get(MDC_TRACE_ID_KEY));
+        otelMetadata.put(MDC_SPAN_ID_KEY, MDC.get(MDC_SPAN_ID_KEY));
+        otelMetadata.put(MDC_TRACEPARENT_KEY, MDC.get(MDC_TRACEPARENT_KEY));
+
         // We need to create 1 release manifest per ProductVersion
         // We will identify the Generation with the {Errata}#{ProductVersion} identifier
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -559,6 +588,7 @@ public class AdvisoryService {
                     .withStatus(SbomGenerationStatus.GENERATING)
                     .withConfig(null) // I really don't know what to put here
                     .withRequest(requestEvent)
+                    .withOtelMetadata(otelMetadata)
                     .build();
 
             pvToGenerations.put(pvName, generationRequestRepository.save(sbomGenerationRequest));
@@ -652,7 +682,6 @@ public class AdvisoryService {
                 log.debug("ConfigMap to create: '{}'", req);
 
                 SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
-                kubernetesClient.configMaps().resource(req).create();
 
                 sbomRequests.add(sbomGenerationRequest);
             });
@@ -661,21 +690,8 @@ public class AdvisoryService {
         return sbomRequests;
     }
 
-    private Long findErrataProductVersionIdByName(ErrataProduct product, String pVersionName) {
-        if (product != null && product.getData() != null && product.getData().getRelationships() != null) {
-            return product.getData()
-                    .getRelationships()
-                    .getProductVersions()
-                    .stream()
-                    .filter(version -> version.getName().equals(pVersionName))
-                    .map(ErrataProduct.ErrataProductVersion::getId)
-                    .findFirst()
-                    .orElse(null);
-        }
-        return null;
-    }
-
     @Retry(maxRetries = 10, retryOn = KojiClientException.class)
+    @BeforeRetry(RetryLogger.class)
     protected KojiClientSession getKojiSession() throws KojiClientException {
         if (kojiSession == null) {
             kojiSession = kojiProvider.createSession();
@@ -683,41 +699,86 @@ public class AdvisoryService {
         return kojiSession;
     }
 
+    private static final int BATCH_SIZE = 50;
+
     // This method will be retried up to 10 times if a KojiClientException is thrown
     @Retry(maxRetries = 10, retryOn = KojiClientException.class)
+    @BeforeRetry(RetryLogger.class)
     protected Map<Long, String> getImageNamesFromBuilds(List<Long> buildIds) throws KojiClientException {
-        Map<Long, String> buildsToImageName = new HashMap<>();
+        List<CompletableFuture<Map<Long, String>>> futures = new ArrayList<>();
 
-        try {
-            List<KojiIdOrName> kojiIdOrNames = buildIds.stream().map(id -> KojiIdOrName.getFor(id.toString())).toList();
-
-            List<KojiBuildInfo> buildInfos = getKojiSession().getBuild(kojiIdOrNames);
-            for (KojiBuildInfo kojiBuildInfo : buildInfos) {
-                String imageName = Optional.ofNullable(kojiBuildInfo.getExtra())
-                        .map(extra -> (Map<String, Object>) extra.get("image"))
-                        .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
-                        .map(indexMap -> (List<String>) indexMap.get("pull"))
-                        .flatMap(
-                                list -> !list.isEmpty()
-                                        ? list.stream().filter(item -> item.contains("sha256")).findFirst()
-                                        : Optional.empty())
-                        .or(
-                                () -> Optional.ofNullable(kojiBuildInfo.getExtra())
-                                        .map(extra -> (Map<String, Object>) extra.get("image"))
-                                        .map(imageMap -> (Map<String, Object>) imageMap.get("index"))
-                                        .map(indexMap -> (List<String>) indexMap.get("pull"))
-                                        .flatMap(
-                                                list -> !list.isEmpty() ? list.stream().findFirst() : Optional.empty()))
-                        .orElse(null);
-                buildsToImageName.put((long) kojiBuildInfo.getId(), imageName);
-            }
-        } catch (KojiClientException e) {
-            log.error("Unable to fetch containers information for buildIDs: {}", buildIds, e);
-            // Explicitly throw the exception again so that retry can happen
-            kojiSession = null;
-            throw e;
+        for (int i = 0; i < buildIds.size(); i += BATCH_SIZE) {
+            List<Long> batch = buildIds.subList(i, Math.min(i + BATCH_SIZE, buildIds.size()));
+            futures.add(CompletableFuture.supplyAsync(() -> fetchImageNames(batch), managedExecutor));
         }
-        return buildsToImageName;
+
+        Map<Long, String> merged = new HashMap<>();
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            for (CompletableFuture<Map<Long, String>> future : futures) {
+                merged.putAll(future.get());
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            // Explicitly throw the exception again so that retry can happen
+            log.error("Error while fetching image names for builds: {}", buildIds, e);
+            kojiSession = null;
+            throw new KojiClientException("Batch processing failed", e);
+        }
+
+        return merged;
+    }
+
+    protected Map<Long, String> fetchImageNames(List<Long> buildIds) {
+        try {
+            Map<Long, String> buildsToImageName = new HashMap<>();
+            List<KojiIdOrName> ids = buildIds.stream().map(id -> new KojiIdOrName(id.intValue())).toList();
+
+            List<KojiBuildInfo> buildInfos = getKojiSession().getBuild(ids);
+
+            for (KojiBuildInfo info : buildInfos) {
+                Map<String, Object> extra = info.getExtra();
+                if (extra == null) {
+                    continue;
+                }
+
+                Object imageObj = extra.get("image");
+                if (!(imageObj instanceof Map)) {
+                    continue;
+                }
+
+                Map<String, Object> imageMap = (Map<String, Object>) imageObj;
+                Object indexObj = imageMap.get("index");
+                if (!(indexObj instanceof Map)) {
+                    continue;
+                }
+
+                Map<String, Object> indexMap = (Map<String, Object>) indexObj;
+                Object pullsObj = indexMap.get("pull");
+                if (!(pullsObj instanceof List)) {
+                    continue;
+                }
+
+                List<?> pulls = (List<?>) pullsObj;
+                if (pulls.isEmpty()) {
+                    continue;
+                }
+
+                String imageName = pulls.stream()
+                        .filter(item -> item instanceof String && ((String) item).contains("sha256"))
+                        .map(Object::toString)
+                        .findFirst()
+                        .orElse(pulls.get(0).toString());
+
+                buildsToImageName.put((long) info.getId(), imageName);
+            }
+
+            return buildsToImageName;
+        } catch (KojiClientException e) {
+            log.error("Unable to fetch containers information for buildIDs (batch): {}", buildIds, e);
+            kojiSession = null;
+            throw new RuntimeException(e);
+        }
     }
 
     private void printAllErratumData(Errata erratum) {

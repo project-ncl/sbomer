@@ -15,15 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.k8s.resources;
+package org.jboss.sbomer.service.feature.sbom.errata.event.util;
 
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
+import io.quarkus.arc.Arc;
+import jakarta.enterprise.event.Event;
+import java.util.Map;
+import java.util.concurrent.CompletionStage;
+import org.slf4j.MDC;
 
-public class InitResourceDiscriminator extends AbstractResourceDiscriminator {
+public class MdcWrapperUtil {
 
-    @Override
-    protected SbomGenerationPhase getPhase() {
-        return SbomGenerationPhase.INIT;
+    private MdcWrapperUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static CompletionStage<MdcEventWrapper> fireAsync(Object payload) {
+        Map<String, String> mdcContext = MDC.getCopyOfContextMap();
+        Event<Object> event = Arc.container().beanManager().getEvent();
+
+        return event.fireAsync(new MdcEventWrapper(payload, mdcContext));
     }
 
 }

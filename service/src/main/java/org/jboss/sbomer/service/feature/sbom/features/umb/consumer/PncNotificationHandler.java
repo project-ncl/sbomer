@@ -96,6 +96,13 @@ public class PncNotificationHandler {
     PncClient pncClient;
 
     @Transactional
+    public void handle(String requestEventId) throws JsonProcessingException {
+
+        RequestEvent requestEvent = requestEventRepository.findById(requestEventId);
+        handle(requestEvent);
+    }
+
+    @Transactional
     public void handle(RequestEvent requestEvent) throws JsonProcessingException {
 
         JsonNode msgNode = requestEvent.getEvent().get(EVENT_KEY_UMB_MSG);
@@ -168,13 +175,9 @@ public class PncNotificationHandler {
                 .withStatus(SbomGenerationStatus.NEW)
                 .build();
 
-        log.debug("ConfigMap to create: '{}'", req);
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
-        SbomGenerationRequest.sync(requestEvent, req);
-
-        ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
-
-        log.info("Request created: {}", cm.getMetadata().getName());
+        log.info("GenerationRequest created: {}", sbomGenerationRequest.getId());
     }
 
     /**
@@ -251,14 +254,9 @@ public class PncNotificationHandler {
         requestEvent = addPncOperationRequestConfig(requestEvent, String.valueOf(messageBody.getOperationId()));
 
         GenerationRequest req = createDelAnalysisGenerationRequest(messageBody, pendingRequest);
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
-        log.debug("ConfigMap to create: '{}'", req);
-
-        SbomGenerationRequest.sync(requestEvent, req);
-
-        ConfigMap cm = kubernetesClient.configMaps().resource(req).create();
-
-        log.info("Request created: {}", cm.getMetadata().getName());
+        log.info("GenerationRequest created: {}", sbomGenerationRequest.getId());
 
     }
 

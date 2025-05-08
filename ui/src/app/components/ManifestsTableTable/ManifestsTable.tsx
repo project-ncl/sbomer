@@ -21,10 +21,9 @@ import {
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useManifests } from './useSboms';
-import { openInNewTab } from '@app/utils/openInNewTab';
 import { ManifestsQueryType } from '@app/types';
 import { useManifestsFilters } from './useManifestsFilters';
 import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
@@ -38,8 +37,6 @@ const columnNames = {
 };
 
 export const ManifestsTable = () => {
-
-  const navigate = useNavigate();
 
   const { queryType, queryValue, pageIndex, pageSize, setFilters } = useManifestsFilters();
 
@@ -161,8 +158,7 @@ export const ManifestsTable = () => {
           <Tr
             key={manifest.id}
             isClickable
-            onRowClick={() => navigate(`/manifests/${manifest.id}`)}
-            onAuxClick={() => openInNewTab(`/manifests/${manifest.id}`)}
+            style={{ cursor: 'auto' }}
           >
             <Td dataLabel={columnNames.id}>
               <Link to={`/manifests/${manifest.id}`}>
@@ -170,7 +166,7 @@ export const ManifestsTable = () => {
               </Link>
             </Td>
             <Td dataLabel={columnNames.type}>
-              <Label style={{ cursor: 'pointer' }} color="purple">
+              <Label color="purple">
                 {typeToDescription(manifest.generation)}
               </Label>
             </Td>

@@ -36,7 +36,7 @@
             productVariant: 8Base-RHBQ-2.13
       generator:
         type: maven-domino
-        args: "--warn-on-missing-scm --legacy-scm-locator"
+        args: "--warn-on-missing-scm --legacy-scm-locator --hashes=false"
 "283":
   type: pnc-build
   products:
@@ -48,4 +48,4 @@
             productVariant: TESTPRODUCTVARIANT
       generator:
         type: maven-domino
-        args: "--warn-on-missing-scm --legacy-scm-locator"
+        args: "--warn-on-missing-scm --legacy-scm-locator --hashes=false"

@@ -29,7 +29,7 @@ quarkus:
     database:
       generation: drop-and-create
     log:
-      sql: true
+      sql: false
 
   otel:
     enabled: false
@@ -56,6 +56,10 @@ quarkus:
 
   oidc-client:
     client-enabled: true
+
+  operator-sdk:
+    namespaces: default
+    enable-ssa: false
 
 kerberos-client:
   user-principal-name: principal

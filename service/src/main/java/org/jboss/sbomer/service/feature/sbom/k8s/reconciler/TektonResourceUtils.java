@@ -27,7 +27,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRun;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -53,12 +53,12 @@ public class TektonResourceUtils {
             computeResources = new ResourceRequirements();
         }
 
-        String labelType = taskRun.getMetadata().getLabels().get(Labels.LABEL_TYPE);
+        String labelType = taskRun.getMetadata().getLabels().get(Labels.LABEL_GENERATION_REQUEST_TYPE);
 
         if (labelType == null) {
             log.warn(
                     "Unable to find '{}' label in the '{}' TaskRun, configuring resources will be skipped",
-                    Labels.LABEL_TYPE,
+                    Labels.LABEL_GENERATION_REQUEST_TYPE,
                     taskRun.getMetadata().getName());
 
             return;

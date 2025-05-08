@@ -331,7 +331,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         // Make sure there is no context
         MDCUtils.removeContext();
-        MDCUtils.addBuildContext(this.buildId);
+        MDCUtils.addIdentifierContext(this.buildId);
 
         PncBuildConfig config = null;
 

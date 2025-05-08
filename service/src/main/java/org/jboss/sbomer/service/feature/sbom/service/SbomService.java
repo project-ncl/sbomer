@@ -238,8 +238,6 @@ public class SbomService {
 
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
-        kubernetesClient.configMaps().resource(req).create();
-
         return sbomGenerationRequest;
     }
 
@@ -280,8 +278,6 @@ public class SbomService {
 
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
-        kubernetesClient.configMaps().resource(req).create();
-
         log.debug(
                 "ZipGenerationRequest Kubernetes resource '{}' created for operation '{}'",
                 req.getId(),
@@ -297,10 +293,12 @@ public class SbomService {
             PncBuildConfig config) {
         try {
             PncBuildRequestConfig pncRequestConfig = (PncBuildRequestConfig) requestConfig;
-            MDCUtils.addBuildContext(pncRequestConfig.getBuildId());
+            MDCUtils.addIdentifierContext(pncRequestConfig.getBuildId());
 
             log.info("New generation request for build id '{}'", pncRequestConfig.getBuildId());
-            log.debug("Creating GenerationRequest Kubernetes resource for build id {}...", pncRequestConfig.getBuildId());
+            log.debug(
+                    "Creating GenerationRequest Kubernetes resource for build id {}...",
+                    pncRequestConfig.getBuildId());
 
             GenerationRequest req = new GenerationRequestBuilder(GenerationRequestType.BUILD)
                     .withIdentifier(pncRequestConfig.getBuildId())
@@ -333,8 +331,6 @@ public class SbomService {
 
             SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
-            kubernetesClient.configMaps().resource(req).create();
-
             log.debug(
                     "GenerationRequest Kubernetes resource '{}' created for build '{}'",
                     req.getId(),
@@ -342,7 +338,7 @@ public class SbomService {
 
             return sbomGenerationRequest;
         } finally {
-            MDCUtils.removeBuildContext();
+            MDCUtils.removeIdentifierContext();
         }
     }
 

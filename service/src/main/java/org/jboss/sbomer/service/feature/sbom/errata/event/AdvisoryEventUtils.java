@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Component;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
-import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
@@ -350,10 +349,8 @@ public class AdvisoryEventUtils {
      * @param repositories the list of {@link RepositoryCoordinates} which contain registry, repository and tag values
      * @return The preferred {@link RepositoryCoordinates}.
      */
-    public static RepositoryCoordinates findPreferredRepo(List<RepositoryCoordinates> repositories) {
-        return repositories.stream()
-                .max(Comparator.comparingInt(RepositoryCoordinates::getScore))
-                .orElseThrow(() -> new ApplicationException("Cannot find any preferred repository"));
+    public static Optional<RepositoryCoordinates> findPreferredRepo(List<RepositoryCoordinates> repositories) {
+        return repositories.stream().max(Comparator.comparingInt(RepositoryCoordinates::getScore));
     }
 
     /**

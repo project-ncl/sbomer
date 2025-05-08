@@ -15,15 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.k8s.resources;
+package org.jboss.sbomer.service.feature.sbom.errata.event.util;
 
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
+import java.io.Serializable;
+import java.util.Map;
 
-public class OperationGenerateResourceDiscriminator extends AbstractResourceDiscriminator {
+public class MdcEventWrapper implements Serializable {
+    private final Object payload;
+    private final Map<String, String> mdcContext;
 
-    @Override
-    protected SbomGenerationPhase getPhase() {
-        return SbomGenerationPhase.OPERATIONGENERATE;
+    public MdcEventWrapper(Object payload, Map<String, String> mdcContext) {
+        this.payload = payload;
+        this.mdcContext = mdcContext;
     }
 
+    public Object getPayload() {
+        return payload;
+    }
+
+    public Map<String, String> getMdcContext() {
+        return mdcContext;
+    }
 }

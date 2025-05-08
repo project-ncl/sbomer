@@ -65,6 +65,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
@@ -84,6 +85,14 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
 
     public RequestEventRepository() {
         super(RequestEvent.class);
+    }
+
+    @Transactional
+    public RequestEvent updateWithGenericFailure(String requestEventId) {
+        RequestEvent requestEvent = RequestEvent.findById(requestEventId); // NOSONAR
+        requestEvent.setEventStatus(RequestEventStatus.FAILED);
+        requestEvent.setReason(RequestEvent.FAILED_GENERIC_REASON);
+        return requestEvent.save();
     }
 
     public long countUMBEventsWithStatusFrom(UMBMessageStatus status, UMBConsumer consumer) {

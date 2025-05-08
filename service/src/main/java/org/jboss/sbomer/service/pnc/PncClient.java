@@ -17,12 +17,18 @@
  */
 package org.jboss.sbomer.service.pnc;
 
+import java.time.temporal.ChronoUnit;
+
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
+import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 
 import io.quarkus.oidc.client.filter.OidcClientFilter;
+import io.smallrye.faulttolerance.api.BeforeRetry;
+import io.smallrye.faulttolerance.api.ExponentialBackoff;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -31,6 +37,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PNC_CLIENT_MAX_RETRIES;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PNC_CLIENT_DELAY;
 
 @ApplicationScoped
 @ClientHeaderParam(name = "User-Agent", value = "SBOMer")
@@ -43,12 +52,18 @@ public interface PncClient {
 
     @POST
     @Path("/product-milestones/{id}/analyze-deliverables")
+    @Retry(maxRetries = PNC_CLIENT_MAX_RETRIES, delay = PNC_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @ExponentialBackoff
+    @BeforeRetry(RetryLogger.class)
     DeliverableAnalyzerOperation analyzeDeliverables(
             @PathParam("id") String milestoneId,
             DeliverablesAnalysisRequest request);
 
     @GET
     @Path("/operations/deliverable-analyzer/{id}")
+    @Retry(maxRetries = PNC_CLIENT_MAX_RETRIES, delay = PNC_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @ExponentialBackoff
+    @BeforeRetry(RetryLogger.class)
     DeliverableAnalyzerOperation getDeliverableAnalyzerOperation(@PathParam("id") String operationId);
 
 }

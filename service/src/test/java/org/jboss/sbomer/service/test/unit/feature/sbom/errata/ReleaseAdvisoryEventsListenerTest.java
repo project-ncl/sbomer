@@ -49,6 +49,7 @@ import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
@@ -59,6 +60,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.TextOnlyAdvisoryReleaseEvent;
+import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseStandardAdvisoryEventsListener;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseTextOnlyAdvisoryEventsListener;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -67,7 +69,7 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient;
+import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
@@ -75,6 +77,7 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestReposi
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.stats.StatsService;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -96,11 +99,12 @@ class ReleaseAdvisoryEventsListenerTest {
     ReleaseTextOnlyAdvisoryEventsListenerManifests listenerTextOnlyManifests;
     ReleaseTextOnlyAdvisoryEventsListenerDeliverables listenerTextOnlyDeliverables;
     final ErrataClient errataClient = mock(ErrataClient.class);
-    final PyxisClient pyxisClient = mock(PyxisClient.class);
+    final PyxisValidatingClient pyxisClient = mock(PyxisValidatingClient.class);
     final StatsService statsService = mock(StatsService.class);
     final SbomService sbomService = mock(SbomService.class);
     final SbomGenerationRequestRepository generationRequestRepository = mock(SbomGenerationRequestRepository.class);
     final RequestEventRepository requestEventRepository = mock(RequestEventRepository.class);
+    final AtlasHandler atlasHandler = mock(AtlasHandler.class);
 
     private static void printRawBom(Bom bom) {
         try {
@@ -713,6 +717,7 @@ class ReleaseAdvisoryEventsListenerTest {
         listenerTextOnlyManifests.setSbomService(sbomService);
         listenerTextOnlyManifests.setGenerationRequestRepository(generationRequestRepository);
         listenerTextOnlyManifests.setRequestEventRepository(requestEventRepository);
+        listenerTextOnlyManifests.setAtlasHandler(atlasHandler);
 
         String productVersionText = "Red Hat build of Quarkus 2.13.9.SP2";
         Errata errata = loadErrata("textOnly/manifests/errata.json");
@@ -748,7 +753,9 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerTextOnlyManifests.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
+
+        listenerTextOnlyManifests.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
@@ -762,6 +769,7 @@ class ReleaseAdvisoryEventsListenerTest {
         listenerTextOnlyDeliverables.setSbomService(sbomService);
         listenerTextOnlyDeliverables.setGenerationRequestRepository(generationRequestRepository);
         listenerTextOnlyDeliverables.setRequestEventRepository(requestEventRepository);
+        listenerTextOnlyDeliverables.setAtlasHandler(atlasHandler);
 
         String productVersionText = "Red Hat build of Quarkus 3.2.11";
         Errata errata = loadErrata("textOnly/deliverables/errata.json");
@@ -806,7 +814,9 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerTextOnlyDeliverables.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
+
+        listenerTextOnlyDeliverables.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
@@ -821,6 +831,7 @@ class ReleaseAdvisoryEventsListenerTest {
         listenerSingleContainer.setSbomService(sbomService);
         listenerSingleContainer.setGenerationRequestRepository(generationRequestRepository);
         listenerSingleContainer.setRequestEventRepository(requestEventRepository);
+        listenerSingleContainer.setAtlasHandler(atlasHandler);
 
         // Get all objects required
         Errata errata = loadErrata("singleContainer/errata_143793.json");
@@ -889,7 +900,9 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerSingleContainer.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
+
+        listenerSingleContainer.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
@@ -904,6 +917,7 @@ class ReleaseAdvisoryEventsListenerTest {
         listenerMultiContainers.setSbomService(sbomService);
         listenerMultiContainers.setGenerationRequestRepository(generationRequestRepository);
         listenerMultiContainers.setRequestEventRepository(requestEventRepository);
+        listenerMultiContainers.setAtlasHandler(atlasHandler);
 
         // Get all objects required
         //
@@ -1035,7 +1049,8 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerMultiContainers.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
+        listenerMultiContainers.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
@@ -1050,6 +1065,7 @@ class ReleaseAdvisoryEventsListenerTest {
         listenerSingleRpm.setSbomService(sbomService);
         listenerSingleRpm.setGenerationRequestRepository(generationRequestRepository);
         listenerSingleRpm.setRequestEventRepository(requestEventRepository);
+        listenerSingleRpm.setAtlasHandler(atlasHandler);
 
         // Get all objects required
         Errata errata = loadErrata("singleRpm/errata_89769.json");
@@ -1120,7 +1136,8 @@ class ReleaseAdvisoryEventsListenerTest {
                 .withRequestEventId(requestEvent.getId())
                 .withReleaseGenerations(pvToGenerations)
                 .build();
-        listenerSingleRpm.onReleaseAdvisoryEvent(event);
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
+        listenerSingleRpm.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));

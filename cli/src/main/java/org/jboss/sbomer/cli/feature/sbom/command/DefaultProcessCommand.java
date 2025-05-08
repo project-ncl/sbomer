@@ -59,6 +59,6 @@ public class DefaultProcessCommand extends AbstractProcessCommand {
 
     @Override
     protected void addContext() {
-        MDCUtils.addBuildContext(parent.getParent().getParent().getBuildId());
+        MDCUtils.addIdentifierContext(parent.getParent().getParent().getBuildId());
     }
 }
