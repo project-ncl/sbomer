@@ -165,6 +165,7 @@ quarkus:
       generate: false
       apply: false
       validate: false
+    enable-ssa: false
 
   ## https://quarkus.io/guides/security-oidc-configuration-properties-reference
   ## OpenID Connect (OIDC) configuration

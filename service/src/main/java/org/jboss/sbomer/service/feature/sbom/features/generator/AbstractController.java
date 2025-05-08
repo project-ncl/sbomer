@@ -135,12 +135,6 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         return List.of(ies);
     }
 
-    protected <T extends HasMetadata> void cleanMetadata(T resource) {
-        if (resource != null && resource.getMetadata() != null) {
-            resource.getMetadata().setManagedFields(null);
-        }
-    }
-
     protected void setPhaseLabel(GenerationRequest generationRequest) {
         // Default: do nothing; subclasses can override this
     }
@@ -157,7 +151,6 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         generationRequest.setStatus(status);
         generationRequest.setResult(result);
         generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-        cleanMetadata(generationRequest);
 
         return UpdateControl.patchResource(generationRequest);
     }
