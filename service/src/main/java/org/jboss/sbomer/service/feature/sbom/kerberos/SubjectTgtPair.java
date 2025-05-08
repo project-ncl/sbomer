@@ -17,13 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.kerberos;
 
-import java.util.Date;
-import java.util.Set;
-
 import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosKey;
 import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.kerberos.KeyTab;
+
+import java.util.Date;
+import java.util.Set;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

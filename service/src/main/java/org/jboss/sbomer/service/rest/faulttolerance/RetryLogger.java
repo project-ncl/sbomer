@@ -17,12 +17,11 @@
  */
 package org.jboss.sbomer.service.rest.faulttolerance;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import lombok.extern.slf4j.Slf4j;
-
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
 
 import io.smallrye.faulttolerance.api.BeforeRetryHandler;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

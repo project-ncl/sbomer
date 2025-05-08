@@ -6,11 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import jakarta.enterprise.inject.Alternative;
-
 import org.jboss.sbomer.cli.feature.sbom.command.GradleCycloneDxGenerateCommand;
 import org.jboss.sbomer.cli.feature.sbom.command.ProcessCommand;
 
+import jakarta.enterprise.inject.Alternative;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 

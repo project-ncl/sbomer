@@ -59,7 +59,6 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.slf4j.helpers.MessageFormatter;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.config.informer.InformerEventSourceConfiguration;

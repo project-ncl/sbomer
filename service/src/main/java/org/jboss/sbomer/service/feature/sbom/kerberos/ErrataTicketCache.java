@@ -17,11 +17,11 @@
  */
 package org.jboss.sbomer.service.feature.sbom.kerberos;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosTicket;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;

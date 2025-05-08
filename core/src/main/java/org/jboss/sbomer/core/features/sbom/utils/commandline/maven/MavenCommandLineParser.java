@@ -21,13 +21,13 @@ import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenC
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.PROFILES_OPTION;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.PROJECTS_OPTION;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.SYSTEM_PROPERTIES_OPTION;
+import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addAlternativePomOption;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addIgnorableOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addIneffectiveOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addNoArgsOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addProfilesOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addProjectsOptions;
 import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addSystemPropertyOptions;
-import static org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandOptions.addAlternativePomOption;
 
 import java.util.ArrayList;
 import java.util.Arrays;
