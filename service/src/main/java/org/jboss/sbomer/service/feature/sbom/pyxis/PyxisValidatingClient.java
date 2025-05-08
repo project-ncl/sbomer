@@ -75,7 +75,7 @@ public class PyxisValidatingClient {
         if (violations.isEmpty())
             return prd;
         log.warn(
-                "The deserialized Pyxis repositry for nvr: {} and includes:{} violated the following constraints:{}",
+                "The deserialized Pyxis repositry for nvr: {} and includes: {} violated the following constraints: {}",
                 nvr,
                 includes,
                 violations.stream().map(v -> v.getMessage()).collect(Collectors.toList()));
