@@ -17,6 +17,19 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_CHECKSUM;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_URL;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createBom;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setProductMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.toJsonNode;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -30,13 +43,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import com.redhat.red.build.koji.KojiClientException;
-import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
+import org.cyclonedx.model.Dependency;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
@@ -47,6 +58,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;
@@ -54,24 +66,11 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
+import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import picocli.CommandLine.Command;
-
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createBom;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setProductMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.toJsonNode;
-
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_CHECKSUM;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_URL;
 
 @Slf4j
 @Command(

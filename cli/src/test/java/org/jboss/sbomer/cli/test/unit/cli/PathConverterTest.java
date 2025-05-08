@@ -1,13 +1,13 @@
 package org.jboss.sbomer.cli.test.unit.cli;
 
-import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
-import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+
+import java.nio.file.Path;
+
+import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
+import org.junit.jupiter.api.Test;
 
 class PathConverterTest {
     @Test

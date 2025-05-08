@@ -17,14 +17,14 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.utils.auth;
 
+import java.time.Duration;
+
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.arc.profile.IfBuildProfile;
 import io.quarkus.oidc.client.Tokens;
 import io.vertx.core.json.JsonObject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-
-import java.time.Duration;
 
 @ApplicationScoped
 @LookupIfProperty(name = "quarkus.oidc-client.client-enabled", stringValue = "false")

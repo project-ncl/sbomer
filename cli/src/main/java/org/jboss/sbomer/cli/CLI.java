@@ -25,12 +25,11 @@ import java.util.concurrent.Callable;
 
 import org.jboss.sbomer.cli.errors.SbomerExitCodeExceptionMapper;
 
-import jakarta.enterprise.context.control.ActivateRequestContext;
-import jakarta.inject.Inject;
-
 import io.quarkus.arc.All;
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
+import jakarta.enterprise.context.control.ActivateRequestContext;
+import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;

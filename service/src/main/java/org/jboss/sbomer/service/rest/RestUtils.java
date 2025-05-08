@@ -17,12 +17,12 @@
  */
 package org.jboss.sbomer.service.rest;
 
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_METHOD;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_ADDRESS;
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_USERNAME;
-import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_TRACE_ID;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_METHOD;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_SPAN_ID;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_TRACE_ID;
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_URI_PATH;
+import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_REST_USERNAME;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -31,14 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.transaction.Transactional;
-import jakarta.transaction.Transactional.TxType;
-import jakarta.validation.ConstraintViolation;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.UriInfo;
-import lombok.extern.slf4j.Slf4j;
-
 import org.hibernate.validator.engine.HibernateConstraintViolation;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
@@ -46,6 +38,13 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.yaml.snakeyaml.parser.ParserException;
 
 import io.opentelemetry.api.trace.Span;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
+import jakarta.validation.ConstraintViolation;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class RestUtils {

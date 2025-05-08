@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.feature.sbom.features.umb.consumer;
 
 import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.QE;
 import static org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus.SHIPPED_LIVE;
-
 import static org.jboss.sbomer.service.feature.sbom.model.RequestEvent.EVENT_KEY_UMB_MSG;
 
 import java.io.IOException;

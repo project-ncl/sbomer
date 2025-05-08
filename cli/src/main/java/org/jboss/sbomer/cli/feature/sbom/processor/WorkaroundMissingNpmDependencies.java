@@ -17,17 +17,12 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.processor;
 
-import com.github.packageurl.PackageURL;
-import lombok.extern.slf4j.Slf4j;
-import org.cyclonedx.model.Bom;
-import org.cyclonedx.model.BomReference;
-import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Dependency;
-import org.cyclonedx.model.ExternalReference;
-import org.jboss.pnc.dto.Artifact;
-import org.jboss.pnc.dto.Build;
-import org.jboss.pnc.enums.BuildType;
-import org.jboss.sbomer.core.pnc.PncService;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,12 +33,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
+import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.BomReference;
+import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.ExternalReference;
+import org.jboss.pnc.dto.Artifact;
+import org.jboss.pnc.dto.Build;
+import org.jboss.pnc.enums.BuildType;
+import org.jboss.sbomer.core.pnc.PncService;
+
+import com.github.packageurl.PackageURL;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Class for working around problem with missing NPM dependencies in manifest. For every component produced by a non-NPM

@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
+import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_DETAILS_INCLUDES;
+import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_REGISTRY_INCLUDES;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -37,7 +40,6 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
@@ -60,8 +62,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_DETAILS_INCLUDES;
-import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_REGISTRY_INCLUDES;
 import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;

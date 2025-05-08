@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom.k8s.reconciler;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URL;

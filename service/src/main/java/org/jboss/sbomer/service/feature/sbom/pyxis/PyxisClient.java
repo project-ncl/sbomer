@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.pyxis;
 
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIENT_DELAY;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIENT_MAX_RETRIES;
+
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -46,9 +49,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIENT_MAX_RETRIES;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIENT_DELAY;
 
 /**
  * A client for Pyxis
