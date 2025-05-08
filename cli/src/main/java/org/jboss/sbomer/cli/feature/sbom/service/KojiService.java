@@ -28,8 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
-import lombok.Getter;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.build.finder.core.BuildConfig;
@@ -49,9 +47,11 @@ import org.jboss.sbomer.cli.feature.sbom.utils.buildfinder.FinderStatus;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**

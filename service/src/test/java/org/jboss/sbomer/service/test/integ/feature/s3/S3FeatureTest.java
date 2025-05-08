@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.inject.Inject;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.sbomer.service.feature.FeatureFlags;
@@ -55,6 +54,7 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
+import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(S3ClientConfig.class)

@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.umb;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.jboss.sbomer.core.errors.ApplicationException;

@@ -17,16 +17,16 @@
  */
 package org.jboss.sbomer.core.test.unit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+
 import org.jboss.sbomer.core.features.sbom.utils.commandline.maven.MavenCommandLineParser;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.io.IOException;
 
 class MavenCommandLineParserTest {
 

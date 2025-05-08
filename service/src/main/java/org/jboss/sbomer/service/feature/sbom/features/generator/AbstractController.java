@@ -61,7 +61,6 @@ import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
 import org.slf4j.helpers.MessageFormatter;
 
 import io.fabric8.knative.pkg.apis.Condition;
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;

@@ -17,10 +17,10 @@
  */
 package org.jboss.sbomer.core.test.unit;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.jboss.sbomer.core.features.sbom.utils.commandline.CommandLineInspectorUtil;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CommandLineInspectorUtilTest {
 

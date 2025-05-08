@@ -17,38 +17,31 @@
  */
 package org.jboss.sbomer.service.feature.sbom.pyxis;
 
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_INITIAL_DELAY;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DELAY;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DURATION;
+import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_RETRIES;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.validation.ConstraintViolationException;
-
 import org.eclipse.microprofile.faulttolerance.Retry;
-
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 
 import io.smallrye.faulttolerance.api.BeforeRetry;
 import io.smallrye.faulttolerance.api.FibonacciBackoff;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolation;
-
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
-
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import lombok.extern.slf4j.Slf4j;
-import jakarta.enterprise.context.ApplicationScoped;
-
-import jakarta.inject.Inject;
-
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_RETRIES;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_INITIAL_DELAY;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DELAY;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DURATION;
 
 @ApplicationScoped
 @Slf4j

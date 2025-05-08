@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.comment;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.PROTOCOL;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +53,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.PROTOCOL;
 
 @ApplicationScoped
 @Slf4j

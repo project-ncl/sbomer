@@ -16,15 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.validation.ValidationException;
-
 import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.test.PyxisWireMock;
+import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
@@ -35,9 +33,9 @@ import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.security.TestSecurity;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 
 @QuarkusTest
 @WithTestResource(PyxisWireMock.class)

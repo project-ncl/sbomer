@@ -17,10 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata;
 
+import javax.validation.constraints.Positive;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.validation.constraints.Positive;
 
 import jakarta.validation.constraints.Max;
 import jakarta.ws.rs.DefaultValue;

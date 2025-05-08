@@ -17,8 +17,6 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.dto;
 
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +25,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

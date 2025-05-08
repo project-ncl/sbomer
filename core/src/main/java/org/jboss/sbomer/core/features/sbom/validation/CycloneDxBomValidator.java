@@ -23,14 +23,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
-
 import org.cyclonedx.exception.ParseException;
 import org.cyclonedx.parsers.JsonParser;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class CycloneDxBomValidator implements ConstraintValidator<CycloneDxBom, JsonNode> {
 
