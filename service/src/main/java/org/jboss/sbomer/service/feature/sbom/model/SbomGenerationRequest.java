@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.DynamicUpdate;
@@ -56,7 +57,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.Query;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -204,17 +204,29 @@ public class SbomGenerationRequest extends PanacheEntityBase {
             return;
         }
 
-        Object[] results = countSbomGenerationRequestsOf(sbomGenerationRequest.getRequest());
-        long generationsInProgress = results[0] == null ? 0L : ((Number) results[0]).longValue();
-        long generationsFailed = results[1] == null ? 0L : ((Number) results[1]).longValue();
-        long generationsTotal = results[2] == null ? 0L : ((Number) results[2]).longValue();
+        Map<SbomGenerationStatus, List<String>> groupedIdsByStatus = findGenerationsIdsGroupedByStatus(
+                sbomGenerationRequest.getRequest());
+
+        List<String> inProgressIds = groupedIdsByStatus.entrySet()
+                .stream()
+                .filter(
+                        entry -> entry.getKey() != SbomGenerationStatus.FAILED
+                                && entry.getKey() != SbomGenerationStatus.FINISHED)
+                .flatMap(entry -> entry.getValue().stream())
+                .toList();
+
+        List<String> failedIds = groupedIdsByStatus.getOrDefault(SbomGenerationStatus.FAILED, List.of());
+
+        long generationsInProgress = inProgressIds.size();
+        long generationsFailed = failedIds.size();
+        long generationsTotal = groupedIdsByStatus.values().stream().mapToLong(List::size).sum();
 
         // If this is not a final status update, mark the request as in progress
         if (!sbomGenerationRequest.getStatus().isFinal()) {
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.IN_PROGRESS);
-            if (generationsInProgress == 0) {
+            if (generationsInProgress == 0 || !inProgressIds.contains(sbomGenerationRequest.getId())) {
                 // At least this one is in progress (it might have not been stored in DB yet)
-                generationsInProgress = 1L;
+                generationsInProgress += 1L;
             }
             sbomGenerationRequest.getRequest()
                     .setReason(generationsInProgress + "/" + generationsTotal + " in progress");
@@ -223,7 +235,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
         // This is a final status (FAILED or FINISHED)
         if (generationsInProgress > 0) {
-            // There are still generations in progress for this request
+            // There are still (other) generations in progress for this request
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.IN_PROGRESS);
             sbomGenerationRequest.getRequest()
                     .setReason(generationsInProgress + "/" + generationsTotal + " in progress");
@@ -232,8 +244,7 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
         if (generationsFailed > 0 || SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus())) {
             // There are no more generations in progress and some failed
-            long failed = generationsFailed
-                    + (SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus()) ? 1L : 0L);
+            long failed = generationsFailed + (failedIds.contains(sbomGenerationRequest.getId()) ? 0L : 1L);
             failed = Math.min(failed, generationsTotal);
             sbomGenerationRequest.getRequest().setReason(failed + "/" + generationsTotal + " failed");
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.FAILED);
@@ -256,19 +267,18 @@ public class SbomGenerationRequest extends PanacheEntityBase {
     }
 
     @Transactional
-    private static Object[] countSbomGenerationRequestsOf(RequestEvent request) {
+    public static Map<SbomGenerationStatus, List<String>> findGenerationsIdsGroupedByStatus(RequestEvent request) {
+        List<Object[]> rows = getEntityManager()
+                .createQuery("SELECT status, id FROM SbomGenerationRequest WHERE request.id = ?1", Object[].class)
+                .setParameter(1, request.getId())
+                .getResultList();
 
-        Query query = getEntityManager()
-                .createQuery(
-                        "SELECT SUM(CASE WHEN status != ?1 AND status != ?2 THEN 1 ELSE 0 END), "
-                                + "SUM(CASE WHEN status = ?3 THEN 1 ELSE 0 END), " + "COUNT(*) AS total_count "
-                                + "FROM SbomGenerationRequest WHERE request.id = ?4")
-                .setParameter(1, SbomGenerationStatus.FAILED)
-                .setParameter(2, SbomGenerationStatus.FINISHED)
-                .setParameter(3, SbomGenerationStatus.FAILED)
-                .setParameter(4, request.getId());
-
-        return (Object[]) query.getSingleResult();
+        // Group by status
+        return rows.stream()
+                .collect(
+                        Collectors.groupingBy(
+                                row -> (SbomGenerationStatus) row[0],
+                                Collectors.mapping(row -> (String) row[1], Collectors.toList())));
     }
 
     /**
