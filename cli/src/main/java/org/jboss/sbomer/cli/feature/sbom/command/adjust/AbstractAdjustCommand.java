@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import org.cyclonedx.model.Bom;
+import org.jboss.sbomer.cli.feature.sbom.utils.otel.OtelCLIUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
@@ -42,6 +43,7 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
 
             // Call the hook to set a context, if needed.
             addContext();
+            OtelCLIUtils.startOtel("adjust-cli");
 
             Bom bom = SbomUtils.fromPath(parent.getPath());
 
@@ -56,6 +58,7 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
             return CommandLine.ExitCode.OK;
         } finally {
             MDCUtils.removeContext();
+            OtelCLIUtils.stopOTel();
         }
     }
 
@@ -63,7 +66,7 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
      * Optionally adds an MDC context. The {@link MDCUtils} class can be used for this purpose.
      */
     protected void addContext() {
-
+        MDCUtils.addOtelContext(OtelCLIUtils.getOtelContextFromEnvVariables());
     }
 
     protected abstract String getAdjusterType();
