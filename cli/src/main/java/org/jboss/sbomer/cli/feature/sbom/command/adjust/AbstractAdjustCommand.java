@@ -43,7 +43,7 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
 
             // Call the hook to set a context, if needed.
             addContext();
-            OtelCLIUtils.startOtel("adjust-cli");
+            OtelCLIUtils.startOtel("CLI.adjust");
 
             Bom bom = SbomUtils.fromPath(parent.getPath());
 
