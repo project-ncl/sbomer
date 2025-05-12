@@ -78,7 +78,7 @@
     <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
     <version.build-finder>2.6.4</version.build-finder>
     <version.mapstruct>1.6.3</version.mapstruct>
-    <version.jandex-maven-plugin>3.3.0</version.jandex-maven-plugin>
+    <version.jandex>3.3.0</version.jandex>
 
     <!-- Sonar -->
     <sonar.java.source>17</sonar.java.source>
@@ -112,6 +112,11 @@
         <version>${version.quarkus-operator-sdk}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.smallrye</groupId>
+        <artifactId>jandex</artifactId>
+        <version>${version.jandex}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -157,7 +162,7 @@
         <plugin>
           <groupId>io.smallrye</groupId>
           <artifactId>jandex-maven-plugin</artifactId>
-          <version>${version.jandex-maven-plugin}</version>
+          <version>${version.jandex}</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
