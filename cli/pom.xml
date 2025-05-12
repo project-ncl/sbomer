@@ -58,6 +58,10 @@
       <version>${version.pnc-api}</version>
     </dependency>
     <dependency>
+      <groupId>com.redhat.resilience.otel</groupId>
+      <artifactId>opentelemetry-ext-cli-java</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-scheduler</artifactId>
     </dependency>
