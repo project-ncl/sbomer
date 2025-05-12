@@ -34,7 +34,7 @@ public class OtelCLIUtils {
     public static final String OTEL_SPAN_ID_ENV_VARIABLE = "SPAN_ID";
     public static final String OTEL_TRACEPARENT_ENV_VARIABLE = "TRACEPARENT";
     public static final String OTEL_EXPORTER_OTLP_ENDPOINT_ENV_VARIABLE = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT";
-    public static final String SBOMER_SERVICE_NAME = "SBOMer";
+    public static final String SBOMER_SERVICE_NAME = "sbomer";
 
     public static Map<String, String> getOtelContextFromEnvVariables() {
         String traceId = System.getenv(OTEL_TRACE_ID_ENV_VARIABLE);
