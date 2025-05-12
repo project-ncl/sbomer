@@ -45,7 +45,7 @@ public abstract class AbstractProcessCommand implements Callable<Integer> {
 
             // Call the hook to set a context, if needed.
             addContext();
-            OtelCLIUtils.startOtel("process-cli");
+            OtelCLIUtils.startOtel("CLI.process");
 
             // Fetch manifest on the given path.
             Bom bom = SbomUtils.fromPath(manifestPath());

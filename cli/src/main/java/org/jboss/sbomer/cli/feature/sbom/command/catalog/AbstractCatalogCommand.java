@@ -50,7 +50,7 @@ public abstract class AbstractCatalogCommand implements Callable<Integer> {
 
             // Call the hook to set a context, if needed.
             addContext();
-            OtelCLIUtils.startOtel("catalog-cli");
+            OtelCLIUtils.startOtel("CLI.catalog");
 
             List<Path> sbomPaths = FileUtils.findManifests(parent.getPath());
             List<Bom> boms = sbomPaths.stream().map(SbomUtils::fromPath).toList();

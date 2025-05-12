@@ -72,7 +72,7 @@ public abstract class AbstractGenerateOperationCommand implements Callable<Integ
             MDCUtils.removeContext();
             MDCUtils.addOtelContext(OtelCLIUtils.getOtelContextFromEnvVariables());
 
-            OtelCLIUtils.startOtel("generate-operation-cli");
+            OtelCLIUtils.startOtel("CLI.generateOperation");
 
             // Fetch operation information
             DeliverableAnalyzerOperation operation = pncService

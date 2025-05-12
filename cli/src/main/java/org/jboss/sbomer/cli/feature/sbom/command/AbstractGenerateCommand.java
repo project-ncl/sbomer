@@ -131,7 +131,7 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
             MDCUtils.addIdentifierContext(parent.getBuildId());
             MDCUtils.addOtelContext(OtelCLIUtils.getOtelContextFromEnvVariables());
 
-            OtelCLIUtils.startOtel("generate-cli");
+            OtelCLIUtils.startOtel("CLI.generate");
 
             // Fetch build information
             Build build = pncService.getBuild(parent.getBuildId());
