@@ -69,10 +69,16 @@ public class OtelCLIUtils {
 
         if (endpoint != null) {
             log.info("Enabling OpenTelemetry collection on {} with service name {}", endpoint, SBOMER_SERVICE_NAME);
-            OTelCLIHelper.startOTel(
-                    SBOMER_SERVICE_NAME,
-                    commandName,
-                    OTelCLIHelper.defaultSpanProcessor(OTelCLIHelper.defaultSpanExporter(endpoint)));
+            try {
+                OTelCLIHelper.startOTel(
+                        SBOMER_SERVICE_NAME,
+                        commandName,
+                        OTelCLIHelper.defaultSpanProcessor(OTelCLIHelper.defaultSpanExporter(endpoint)));
+            } catch (IllegalStateException exc) {
+                log.trace("GlobalOpenTelemetry.set has already been called, safely silencing the exception here");
+            } catch (Exception exc) {
+                log.error("Error encountered when starting OTEL", exc);
+            }
         }
     }
 
