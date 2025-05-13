@@ -244,9 +244,12 @@ public class SbomGenerationRequest extends PanacheEntityBase {
 
         if (generationsFailed > 0 || SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus())) {
             // There are no more generations in progress and some failed
-            long failed = generationsFailed + (failedIds.contains(sbomGenerationRequest.getId()) ? 0L : 1L);
-            failed = Math.min(failed, generationsTotal);
-            sbomGenerationRequest.getRequest().setReason(failed + "/" + generationsTotal + " failed");
+            if (SbomGenerationStatus.FAILED.equals(sbomGenerationRequest.getStatus())
+                    && !failedIds.contains(sbomGenerationRequest.getId())) {
+                generationsFailed += 1;
+            }
+            generationsFailed = Math.min(generationsFailed, generationsTotal);
+            sbomGenerationRequest.getRequest().setReason(generationsFailed + "/" + generationsTotal + " failed");
             sbomGenerationRequest.getRequest().setEventStatus(RequestEventStatus.FAILED);
 
         } else {
