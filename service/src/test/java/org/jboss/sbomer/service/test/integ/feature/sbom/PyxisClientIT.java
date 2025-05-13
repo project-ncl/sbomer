@@ -52,30 +52,39 @@ public class PyxisClientIT extends TestUmbProfile {
 
     @Override
     public Map<String, String> getConfigOverrides() {
-      /*
-          The original annotation is 
-          @Retry(
-            maxRetries = PYXIS_UNPUBLISHED_MAX_RETRIES, (18)
-            delay = PYXIS_UNPUBLISHED_INITIAL_DELAY, (3600000)
-            maxDuration = PYXIS_UNPUBLISHED_MAX_DURATION, (68400000)
-            retryOn = ConstraintViolationException.class)
-          @BeforeRetry(RetryLogger.class)
-          @FibonacciBackoff(maxDelay = PYXIS_UNPUBLISHED_MAX_DELAY) (68400000)
-          */
+        /*
+         * The original annotation is
+         *
+         * @Retry( maxRetries = PYXIS_UNPUBLISHED_MAX_RETRIES, (18) delay = PYXIS_UNPUBLISHED_INITIAL_DELAY, (3600000)
+         * maxDuration = PYXIS_UNPUBLISHED_MAX_DURATION, (68400000) retryOn = ConstraintViolationException.class)
+         *
+         * @BeforeRetry(RetryLogger.class)
+         *
+         * @FibonacciBackoff(maxDelay = PYXIS_UNPUBLISHED_MAX_DELAY) (68400000)
+         */
         return Map.of(
-                "Retry/maxRetries","9",
-                "Retry/delay","30",
-                "Retry/maxDuration","6840",
-                "Retry/maxDelay", "4000",
-                "Retry/delayUnit", "millis",
-                "FibonacciBackoff/maxDelay","6830",
-                "ExponentialBackoff/maxDelay", "4000",
-                "Retry/maxDelayUnit", "millis",
-                "Retry/maxDurationUnit", "millis",
-                "Timeout/unit", "millis"
-                );
+                "Retry/maxRetries",
+                "9",
+                "Retry/delay",
+                "30",
+                "Retry/maxDuration",
+                "6840",
+                "Retry/maxDelay",
+                "4000",
+                "Retry/delayUnit",
+                "millis",
+                "FibonacciBackoff/maxDelay",
+                "6830",
+                "ExponentialBackoff/maxDelay",
+                "4000",
+                "Retry/maxDelayUnit",
+                "millis",
+                "Retry/maxDurationUnit",
+                "millis",
+                "Timeout/unit",
+                "millis");
     }
-    
+
     static final String INVALID_PAYLOAD = "{\"data\":[]}";
     static final String EXAMPLE_RETURN = """
                                                                                               {
@@ -376,7 +385,6 @@ public class PyxisClientIT extends TestUmbProfile {
         this.ex(nvr, qp);
     }
 
-    
     void ex(String nvr, List<String> qp) {
         PyxisRepositoryDetails prd = pc.getRepositoriesDetails(nvr, qp);
         Set<ConstraintViolation<PyxisRepositoryDetails>> cvs = validator.validate(prd);
