@@ -184,7 +184,7 @@ public class GenerationRequestScheduler {
                 Map.of(MDC_IDENTIFIER_KEY, sbomGenerationRequest.getIdentifier()));
 
         Span span = spanBuilder.startSpan();
-        
+
         log.debug(
                 "Started a new span context with traceId: {}, spanId: {}, traceFlags: {}",
                 span.getSpanContext().getTraceId(),
