@@ -149,8 +149,13 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
             String reason,
             Object... params) {
 
-        setPhaseLabel(generationRequest);
+        // Get the latest version to avoid conflicts on SSA patch updates
+        generationRequest = (GenerationRequest) kubernetesClient.configMaps()
+                .withName(generationRequest.getMetadata().getName())
+                .get();
+        cleanMetadata(generationRequest);
 
+        setPhaseLabel(generationRequest);
         generationRequest.setStatus(status);
         generationRequest.setResult(result);
         generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
