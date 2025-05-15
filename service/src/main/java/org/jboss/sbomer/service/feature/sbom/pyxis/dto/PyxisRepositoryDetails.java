@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.pyxis.dto;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotEmpty;
 
 @Data
@@ -30,6 +31,21 @@ public class PyxisRepositoryDetails {
     @NotEmpty(message = "Pyxis registry looks to be empty")
     private List<DataSection> data;
 
+    //TIL AssertTrue expects method must start with is, get or has
+    @AssertTrue(message = "At least one Pyxis repository must be published")
+    public boolean isOneRepositoryPublished() {
+        for (DataSection dataSection : this.data) {
+            if (dataSection != null && dataSection.getRepositories() != null) {
+                for (Repository repository : dataSection.getRepositories()) {
+                    if (repository != null && repository.isPublished()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     @Data
     public static class DataSection {
         private List<Repository> repositories;
@@ -38,6 +54,7 @@ public class PyxisRepositoryDetails {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Repository {
+        @AssertTrue
         private boolean published;
 
         private String registry;
