@@ -29,7 +29,7 @@ quarkus:
     database:
       generation: drop-and-create
     log:
-      sql: false
+      sql: true
 
   otel:
     enabled: false
