@@ -78,7 +78,7 @@ public class LeaderManagerTest {
 
         assertTrue(leaderManager.isLeader());
         verify(leases, times(1)).withName("sbomer-generation-scheduler");
-        verify(leaseResource, times(1)).serverSideApply();
+        verify(leaseResource, times(1)).createOrReplace();
     }
 
     @Test
@@ -105,7 +105,7 @@ public class LeaderManagerTest {
 
         assertTrue(leaderManager.isLeader());
         verify(leases, times(1)).withName("sbomer-generation-scheduler");
-        verify(leaseResource, times(1)).serverSideApply();
+        verify(leaseResource, times(1)).createOrReplace();
     }
 
 }

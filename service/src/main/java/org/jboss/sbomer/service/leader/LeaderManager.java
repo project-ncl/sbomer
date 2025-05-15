@@ -108,7 +108,7 @@ public class LeaderManager {
                 .endSpec()
                 .build();
 
-        kubernetesClient.leases().resource(lease).serverSideApply();
+        kubernetesClient.leases().resource(lease).createOrReplace();
 
         isLeader = true;
 

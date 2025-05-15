@@ -206,7 +206,7 @@ public class GenerationRequestSchedulerTest {
         ArgumentCaptor<GenerationRequest> cmCaptor = ArgumentCaptor.forClass(GenerationRequest.class);
 
         Resource<ConfigMap> cmResource = mock(Resource.class);
-        when(cmResource.serverSideApply())
+        when(cmResource.createOrReplace())
                 .thenReturn(new GenerationRequestBuilder(GenerationRequestType.ANALYSIS).build());
 
         when(kubernetesClient.configMaps().resource(cmCaptor.capture())).thenReturn(cmResource);
