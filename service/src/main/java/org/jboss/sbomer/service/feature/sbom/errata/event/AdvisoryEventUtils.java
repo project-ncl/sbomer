@@ -74,6 +74,9 @@ public class AdvisoryEventUtils {
         String[] majorMinorTokens = majorMinor.split("\\.");
 
         return originalCPEs.stream().map(originalCPE -> {
+            if (originalCPE == null) {
+                return null;
+            }
             if (originalCPE.contains(":" + majorMinor + ":")) {
                 // CPE looks augmented already
                 return null;
