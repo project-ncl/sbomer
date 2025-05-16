@@ -612,6 +612,18 @@ public class AdvisoryService {
             return doIgnoreRequest(requestEvent, "Standard Errata RPM release manifest generation is disabled");
         }
 
+        // SBOMER-401: Verify if there are CPEs associated, some very specific standard advisories do not have them
+        Set<String> allCPEs = getAllCPEsOfBuilds(buildDetails);
+
+        if (allCPEs.isEmpty()) {
+            String reason = String.format(
+                    "The Standard Advisory '%s'(%s) does not have any CPE configured, ignoring the generation of the release manifest",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+
+            return doIgnoreRequest(requestEvent, reason);
+        }
+
         Map<String, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
                 erratum,
                 requestEvent,
@@ -626,6 +638,22 @@ public class AdvisoryService {
                         .build());
 
         return releaseGenerations.values();
+    }
+
+    private Set<String> getAllCPEsOfBuilds(Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
+        Set<String> allCPEs = new HashSet<>();
+        buildDetails.forEach((productVersionEntry, buildItems) -> {
+            // Map all VariantArch to ErrataVariant and collect distinct ErrataVariant objects
+            Set<String> productVersionCPEs = buildItems.stream()
+                    .flatMap(buildItem -> buildItem.getVariantArch().keySet().stream())
+                    .map(variantArch -> errataClient.getVariant(variantArch))
+                    .filter(Objects::nonNull)
+                    .map(errataVariant -> errataVariant.getData().getAttributes().getCpe())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            allCPEs.addAll(productVersionCPEs);
+        });
+        return allCPEs;
     }
 
     @Transactional
