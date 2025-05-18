@@ -17,11 +17,11 @@
  */
 package org.jboss.sbomer.core.features.sbom.enums;
 
-public enum TaskStatus {
+public enum EventStatus {
     NEW, IGNORED, IN_PROGRESS, FAILED, SUCCESS;
 
-    public static TaskStatus fromName(String origin) {
-        return TaskStatus.valueOf(origin.toUpperCase());
+    public static EventStatus fromName(String origin) {
+        return EventStatus.valueOf(origin.toUpperCase());
     }
 
     public String toName() {
