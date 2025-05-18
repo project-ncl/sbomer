@@ -33,7 +33,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.TaskStatus;
 import org.jboss.sbomer.core.features.sbom.enums.TaskType;
 import org.jboss.sbomer.core.utils.PaginationParameters;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Task;
@@ -106,15 +106,15 @@ public class TasksV1Beta2 {
         Generation generation = Generation.builder()
                 .withId(RandomStringIdGenerator.generate())
                 .withIdentifier("DUMMY")
-                .withStatus(SbomGenerationStatus.NEW)
-                .withType(GenerationRequestType.BUILD)
+                .withStatus(GenerationStatus.NEW)
+                .withType(GenerationRequestType.BUILD.toName())
                 .build();
 
         Task task = Task.builder()
                 .withId(RandomStringIdGenerator.generate())
                 .withCreated(Instant.now())
                 .withStatus(TaskStatus.NEW)
-                .withType(TaskType.REST.toName()) // TODO: we don't have an enum here anymore
+                .withEventType(TaskType.REST.toName()) // TODO: we don't have an enum here anymore
                 .withEvent(JsonNodeFactory.instance.objectNode()) // TODO: dummy
                 .withGenerations(List.of(generation))
                 .build()

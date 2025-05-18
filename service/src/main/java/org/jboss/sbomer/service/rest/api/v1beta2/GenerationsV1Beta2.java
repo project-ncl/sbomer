@@ -125,7 +125,7 @@ public class GenerationsV1Beta2 {
         List<Generation> generations = Generation.findAll().list();
 
         generations.forEach(generation -> {
-            log.info("Tasks: {}", generation.getTasks().stream().map(t -> t.getId()).toList());
+            log.info("Tasks: {}", generation.getTasks());
         });
 
         return Response.ok(generations).build();
