@@ -24,11 +24,13 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
-import org.jboss.sbomer.core.features.sbom.enums.TaskStatus;
+import org.jboss.sbomer.core.features.sbom.enums.EventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -49,7 +51,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -65,46 +66,58 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Entity
-@Table(name = "task")
+@Table(name = "event")
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(setterPrefix = "with")
 @RegisterForReflection
-public class Task extends PanacheEntityBase {
+public class Event extends PanacheEntityBase {
     @Id
     @Column(nullable = false, updatable = false)
     private String id;
 
     /**
-     * Time when the task was created.
+     * Time when the event was created.
      */
+    @CreationTimestamp
     @Column(name = "created", nullable = false, updatable = false)
     private Instant created;
 
     /**
      * Last update time.
      */
+    @UpdateTimestamp
     @Column(name = "updated")
     private Instant updated;
 
     /**
-     * Time when all the work related to the task was finished (successfully or not).
+     * Time when all the work related to the event was finished (successfully or not).
      */
     @Column(name = "finished")
     private Instant finished;
 
     /**
-     * Stores the source of the task.
+     * External event identifier.
+     *
+     * Can be {@code null}.
+     */
+    @Column(name = "identifier")
+    private String identifier;
+
+    /**
+     * Stores the source of the event.
      *
      * TODO: Do we care what is the source? In the eventing architecture everything will be an event. Maybe it is
      * relevant only for understanding the event field? See below.
      */
-    @Column(name = "event_type", nullable = false)
-    private String eventType;
+    @Column(name = "source", nullable = false)
+    private String source;
 
     /**
-     * Stores the event that triggered instantiated the task.
+     * Event content.
+     *
+     * Content depends on the source of the event.
      */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "event", nullable = false)
@@ -117,7 +130,7 @@ public class Task extends PanacheEntityBase {
      */
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private TaskStatus status;
+    private EventStatus status;
 
     /**
      * A human-readable description of the status.
@@ -126,43 +139,22 @@ public class Task extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "config")
-    @ToString.Exclude
-    @Schema(implementation = Map.class)
-    private JsonNode config; // FIXME: I think this should be generic, to cover everything, even the future types
-                             // TODO: what is the task config? how it it
-
     /**
-     * List of all generations related to the current Task.
+     * List of all generations related to the current Event.
      */
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY) // TODO: this annotation
                                                                                               // has not well thought
                                                                                               // settings.
     @JoinTable(
-            name = "task_generation",
-            joinColumns = @JoinColumn(name = "task_id"),
+            name = "event_generation",
+            joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "generation_id"))
-    @JsonManagedReference("task-generation")
+    @JsonManagedReference("event-generation")
     @Builder.Default
     private List<Generation> generations = new ArrayList<>();
 
-    /**
-     * Ensure time is set correctly before we save.
-     */
-    @PrePersist
-    public void prePersist() {
-        Instant now = Instant.now();
-
-        if (this.created == null) {
-            this.created = now;
-        }
-
-        this.setUpdated(now);
-    }
-
     @Transactional
-    public Task save() {
+    public Event save() {
 
         persistAndFlush();
         return this;
@@ -189,8 +181,8 @@ public class Task extends PanacheEntityBase {
             return false;
         }
 
-        Task task = (Task) o;
-        return Objects.equals(id, task.id);
+        Event event = (Event) o;
+        return Objects.equals(id, event.id);
     }
 
     @Override
@@ -203,9 +195,9 @@ public class Task extends PanacheEntityBase {
         try {
             return ObjectMapperProvider.json().writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            log.warn("Creating JSON string out of the Task failed, defaulting to minimal representation", e);
+            log.warn("Creating JSON string out of the Event failed, defaulting to minimal representation", e);
         }
 
-        return "Task[id=" + id + "]";
+        return "Event[id=" + id + "]";
     }
 }
