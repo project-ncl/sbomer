@@ -29,10 +29,12 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.enums.TaskStatus;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
@@ -63,7 +65,6 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Entity
-@ToString
 @Table(name = "task")
 @Slf4j
 @NoArgsConstructor
@@ -75,36 +76,69 @@ public class Task extends PanacheEntityBase {
     @Column(nullable = false, updatable = false)
     private String id;
 
+    /**
+     * Time when the task was created.
+     */
     @Column(name = "created", nullable = false, updatable = false)
     private Instant created;
 
+    /**
+     * Last update time.
+     */
     @Column(name = "updated")
     private Instant updated;
 
-    @Column(name = "type", nullable = false)
-    private String type;
+    /**
+     * Time when all the work related to the task was finished (successfully or not).
+     */
+    @Column(name = "finished")
+    private Instant finished;
 
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TaskStatus status; // TODO: rename enuum
+    /**
+     * Stores the source of the task.
+     *
+     * TODO: Do we care what is the source? In the eventing architecture everything will be an event. Maybe it is
+     * relevant only for understanding the event field? See below.
+     */
+    @Column(name = "event_type", nullable = false)
+    private String eventType;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "config")
-    @ToString.Exclude
-    @Schema(implementation = Map.class)
-    private JsonNode config; // FIXME: I think this should be generic, to cover everything, even the future types
-
+    /**
+     * Stores the event that triggered instantiated the task.
+     */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "event", nullable = false)
     @ToString.Exclude
     @Schema(implementation = Map.class)
     private JsonNode event;
 
+    /**
+     * Identifier of the status.
+     */
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
+
+    /**
+     * A human-readable description of the status.
+     */
     @Column(name = "reason")
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     String reason;
 
-    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "config")
+    @ToString.Exclude
+    @Schema(implementation = Map.class)
+    private JsonNode config; // FIXME: I think this should be generic, to cover everything, even the future types
+                             // TODO: what is the task config? how it it
+
+    /**
+     * List of all generations related to the current Task.
+     */
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY) // TODO: this annotation
+                                                                                              // has not well thought
+                                                                                              // settings.
     @JoinTable(
             name = "task_generation",
             joinColumns = @JoinColumn(name = "task_id"),
@@ -113,6 +147,9 @@ public class Task extends PanacheEntityBase {
     @Builder.Default
     private List<Generation> generations = new ArrayList<>();
 
+    /**
+     * Ensure time is set correctly before we save.
+     */
     @PrePersist
     public void prePersist() {
         Instant now = Instant.now();
@@ -159,5 +196,16 @@ public class Task extends PanacheEntityBase {
     @Override
     public final int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return ObjectMapperProvider.json().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            log.warn("Creating JSON string out of the Task failed, defaulting to minimal representation", e);
+        }
+
+        return "Task[id=" + id + "]";
     }
 }
