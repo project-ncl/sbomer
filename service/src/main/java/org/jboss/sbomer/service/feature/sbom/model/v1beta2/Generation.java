@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -28,7 +30,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,12 +58,14 @@ public class Generation extends PanacheEntityBase {
     /**
      * Time when the generation was created.
      */
+    @CreationTimestamp
     @Column(name = "created", nullable = false, updatable = false)
     private Instant created;
 
     /**
      * Last update time.
      */
+    @UpdateTimestamp
     @Column(name = "updated")
     private Instant updated;
 
@@ -114,29 +117,15 @@ public class Generation extends PanacheEntityBase {
     String reason;
 
     @ManyToMany(mappedBy = "generations", fetch = FetchType.LAZY)
-    @JsonBackReference("generation-task")
+    @JsonBackReference("generation-event")
     @Builder.Default
-    private List<Task> tasks = new ArrayList<>();
+    private List<Event> events = new ArrayList<>();
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "otel_metadata")
     @ToString.Exclude
     @Schema(implementation = Map.class)
     private JsonNode otelMetadata;
-
-    /**
-     * Ensures time is set correctly before we save.
-     */
-    @PrePersist
-    public void prePersist() {
-        Instant now = Instant.now();
-
-        if (this.created == null) {
-            this.created = now;
-        }
-
-        this.setUpdated(now);
-    }
 
     @Override
     public String toString() {
