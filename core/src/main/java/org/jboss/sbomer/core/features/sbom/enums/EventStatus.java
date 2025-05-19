@@ -25,6 +25,6 @@ public enum EventStatus {
     }
 
     public String toName() {
-        return this.name().toLowerCase();
+        return this.name().toUpperCase();
     }
 }

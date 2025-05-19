@@ -25,7 +25,7 @@ public enum GenerationStatus {
     }
 
     public String toName() {
-        return this.name().toLowerCase();
+        return this.name().toUpperCase();
     }
 
     public boolean isOlderThan(GenerationStatus desiredStatus) {
