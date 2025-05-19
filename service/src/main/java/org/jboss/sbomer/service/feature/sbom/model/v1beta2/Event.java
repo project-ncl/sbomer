@@ -51,6 +51,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -104,6 +105,12 @@ public class Event extends PanacheEntityBase {
      */
     @Column(name = "identifier")
     private String identifier;
+
+    /**
+     * In case of retries, this filed will be populated to make it easy to understand what was the parent event.
+     */
+    @ManyToOne
+    private Event parent;
 
     /**
      * Stores the source of the event.
