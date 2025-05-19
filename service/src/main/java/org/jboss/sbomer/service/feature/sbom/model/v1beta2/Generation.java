@@ -28,9 +28,9 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
-import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
