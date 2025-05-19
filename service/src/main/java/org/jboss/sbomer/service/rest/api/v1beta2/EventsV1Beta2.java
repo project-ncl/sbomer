@@ -31,12 +31,12 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.core.features.sbom.enums.EventStatus;
-import org.jboss.sbomer.core.features.sbom.enums.EventType;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 

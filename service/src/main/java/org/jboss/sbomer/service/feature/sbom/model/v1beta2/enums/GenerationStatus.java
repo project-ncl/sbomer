@@ -15,16 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.enums;
+package org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums;
 
-public enum EventType {
-    REST, UMB;
+public enum GenerationStatus {
+    NEW, SCHEDULED, INITIALIZING, INITIALIZED, GENERATING, FINISHED, FAILED;
 
-    public static RequestEventType fromName(String origin) {
-        return RequestEventType.valueOf(origin.toUpperCase());
+    public static GenerationStatus fromName(String phase) {
+        return GenerationStatus.valueOf(phase.toUpperCase());
     }
 
     public String toName() {
         return this.name().toUpperCase();
+    }
+
+    public boolean isOlderThan(GenerationStatus desiredStatus) {
+        if (desiredStatus == null) {
+            return false;
+        }
+
+        return desiredStatus.ordinal() > this.ordinal();
+    }
+
+    public boolean isFinal() {
+        return this.equals(FAILED) || this.equals(FINISHED);
     }
 }
