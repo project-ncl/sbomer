@@ -44,10 +44,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
 import io.quarkus.resteasy.reactive.links.InjectRestLinks;
@@ -87,9 +84,6 @@ public class GenerationsV1Beta2 {
     @Inject
     FeatureFlags featureFlags;
 
-    @Inject
-    ObjectMapper objectMapper;
-
     @GET
     @Produces({ MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON })
     @RestLink(rel = "list")
@@ -110,17 +104,7 @@ public class GenerationsV1Beta2 {
 
         List<Generation> generations = Generation.findAll().list();
 
-        System.out.println(mapper.toGenerationRecords(generations));
-
-        try {
-            System.out.println(objectMapper.writeValueAsString(mapper.toGenerationRecords(generations)));
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
         return mapper.toGenerationRecords(generations);
-
     }
 
     @GET
@@ -249,8 +233,7 @@ public class GenerationsV1Beta2 {
                 .withId(RandomStringIdGenerator.generate())
                 .withCreated(Instant.now())
                 .withStatus(EventStatus.NEW)
-                .withSource(EventType.REST.toName()) // TODO: we don't have an enum here anymore
-                .withEvent(JsonNodeFactory.instance.objectNode()) // TODO: dummy
+                .withMetadata(Map.of("source", EventType.REST.toName()))
                 .withGenerations(List.of(generation))
                 .build()
                 .save();
