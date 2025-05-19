@@ -99,35 +99,32 @@ public class Event extends PanacheEntityBase {
     private Instant finished;
 
     /**
-     * External event identifier.
-     *
-     * Can be {@code null}.
-     */
-    @Column(name = "identifier")
-    private String identifier;
-
-    /**
      * In case of retries, this filed will be populated to make it easy to understand what was the parent event.
      */
     @ManyToOne
     private Event parent;
 
     /**
-     * Stores the source of the event.
-     *
-     * TODO: Do we care what is the source? In the eventing architecture everything will be an event. Maybe it is
-     * relevant only for understanding the event field? See below.
-     */
-    @Column(name = "source", nullable = false)
-    private String source;
-
-    /**
-     * Event content.
-     *
-     * Content depends on the source of the event.
+     * <p>
+     * Event metadata.
+     * </p>
      */
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "event", nullable = false)
+    @Column(name = "metadata", nullable = false)
+    private Map<String, String> metadata;
+
+    /**
+     * <p>
+     * Optional original event content.
+     * </p>
+     *
+     * <p>
+     * Content depends on the source of the event and it may not be populated at all. This content is used to help trace
+     * events.
+     * </p>
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "event")
     @ToString.Exclude
     @Schema(implementation = Map.class)
     private JsonNode event;

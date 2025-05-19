@@ -48,6 +48,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -143,6 +144,13 @@ public class Generation extends PanacheEntityBase {
     @ToString.Exclude
     @Schema(implementation = Map.class)
     private JsonNode otelMetadata;
+
+    @Transactional
+    public Generation save() {
+
+        persistAndFlush();
+        return this;
+    }
 
     @Override
     public String toString() {
