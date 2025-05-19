@@ -91,6 +91,39 @@ public class GenerationsV1Beta2 {
     ObjectMapper objectMapper;
 
     @GET
+    @Produces({ MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON })
+    @RestLink(rel = "list")
+    @InjectRestLinks
+    @Operation(summary = "Search generations", description = "Paginated list of generations")
+    @APIResponse(
+            responseCode = "200",
+            description = "Paginated list of generations found",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    public List<GenerationRecord> search( // TODO: USE paging
+            @Valid @BeanParam PaginationParameters paginationParams,
+            @QueryParam("query") String rsqlQuery,
+            @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
+
+        List<Generation> generations = Generation.findAll().list();
+
+        System.out.println(mapper.toGenerationRecords(generations));
+
+        try {
+            System.out.println(objectMapper.writeValueAsString(mapper.toGenerationRecords(generations)));
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return mapper.toGenerationRecords(generations);
+
+    }
+
+    @GET
     @Path("/{id}")
     @Produces({ MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON })
     @RestLink(rel = "self")
@@ -175,39 +208,6 @@ public class GenerationsV1Beta2 {
         }
 
         return Response.ok(mapper.toEventRecords(generation.getEvents())).build();
-    }
-
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON })
-    @RestLink(rel = "list")
-    @InjectRestLinks
-    @Operation(summary = "Search manifest generation", description = "Paginated list of generations")
-    @APIResponse(
-            responseCode = "200",
-            description = "Paginated list of generations found",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public List<GenerationRecord> search( // TODO: USE paging
-            @Valid @BeanParam PaginationParameters paginationParams,
-            @QueryParam("query") String rsqlQuery,
-            @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
-
-        List<Generation> generations = Generation.findAll().list();
-
-        System.out.println(mapper.toGenerationRecords(generations));
-
-        try {
-            System.out.println(objectMapper.writeValueAsString(mapper.toGenerationRecords(generations)));
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return mapper.toGenerationRecords(generations);
-
     }
 
     @POST
