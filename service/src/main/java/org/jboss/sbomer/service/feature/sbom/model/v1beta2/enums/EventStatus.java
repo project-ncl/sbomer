@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.core.features.sbom.enums;
+package org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums;
 
 public enum EventStatus {
     NEW, IGNORED, IN_PROGRESS, FAILED, SUCCESS;
