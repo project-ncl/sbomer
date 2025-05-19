@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.core.features.sbom.enums;
 
-public enum TaskType {
+public enum EventType {
     REST, UMB;
 
     public static RequestEventType fromName(String origin) {
@@ -25,6 +25,6 @@ public enum TaskType {
     }
 
     public String toName() {
-        return this.name().toLowerCase();
+        return this.name().toUpperCase();
     }
 }
