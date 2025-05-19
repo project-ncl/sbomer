@@ -87,148 +87,148 @@ public class PyxisClientIT extends TestUmbProfile {
 
     static final String INVALID_PAYLOAD = "{\"data\":[]}";
     static final String EXAMPLE_RETURN = """
-            {
-                      "data": [
-                        {
-                          "repositories": [
-                            {
-                              "registry": "registry-proxy.engineering.redhat.com",
-                              "repository": "rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8",
-                              "tags": [
-                                {
-                                  "added_date": "2025-01-15T19:30:23.330000+00:00",
-                                  "name": "7.4.20-9",
-                                  "_links": {
-                                    "tag_history": {
-                                      "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/7.4.20-9"
-                                    }
+                      {
+                                "data": [
+                                  {
+                                    "repositories": [
+                                      {
+                                        "registry": "registry-proxy.engineering.redhat.com",
+                                        "repository": "rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8",
+                                        "tags": [
+                                          {
+                                            "added_date": "2025-01-15T19:30:23.330000+00:00",
+                                            "name": "7.4.20-9",
+                                            "_links": {
+                                              "tag_history": {
+                                                "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/7.4.20-9"
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "added_date": "2025-01-15T19:30:23.330000+00:00",
+                                            "name": "jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-aarch64",
+                                            "_links": {
+                                              "tag_history": {
+                                                "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-aarch64"
+                                              }
+                                            }
+                                          }
+                                        ],
+                                        "published": true,
+                                        "_links": {
+                                          "repository": {
+                                            "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "repositories": [
+                                      {
+                                        "registry": "registry-proxy.engineering.redhat.com",
+                                        "repository": "rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8",
+                                        "tags": [
+                                          {
+                                            "added_date": "2025-01-15T19:30:15.431000+00:00",
+                                            "name": "7.4.20-9",
+                                            "_links": {
+                                              "tag_history": {
+                                                "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/7.4.20-9"
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "added_date": "2025-01-15T19:30:15.431000+00:00",
+                                            "name": "jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-ppc64le",
+                                            "_links": {
+                                              "tag_history": {
+                                                "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-ppc64le"
+                                              }
+                                            }
+                                          }
+                                        ],
+                                        "published": false,
+                                        "_links": {
+                                          "repository": {
+                                            "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "repositories": [
+                                      {
+                                        "registry": "registry-proxy.engineering.redhat.com",
+                                        "repository": "rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8",
+                                        "tags": [
+                                          {
+                                            "added_date": "2025-01-15T19:30:07.749000+00:00",
+                                            "name": "7.4.20-9",
+                                            "_links": {
+                                              "tag_history": {
+                                                "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/7.4.20-9"
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "added_date": "2025-01-15T19:30:07.749000+00:00",
+                                            "name": "jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-x86_64",
+                                            "_links": {
+                                              "tag_history": {
+                                                "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-x86_64"
+                                              }
+                                            }
+                                          }
+                                        ],
+                                        "published": false,
+                                        "_links": {
+                                          "repository": {
+                                            "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "repositories": [
+                                      {
+                                        "registry": "registry-proxy.engineering.redhat.com",
+                                        "repository": "rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8",
+                                        "tags": [
+                                          {
+                                            "added_date": "2025-01-15T19:29:58.414000+00:00",
+                                            "name": "7.4.20-9",
+                                            "_links": {
+                                              "tag_history": {
+                                                "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/7.4.20-9"
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "added_date": "2025-01-15T19:29:58.414000+00:00",
+                                            "name": "jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-s390x",
+                                            "_links": {
+                                              "tag_history": {
+                                                "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-s390x"
+                                              }
+                                            }
+                                          }
+                                        ],
+                                        "published": false,
+                                        "_links": {
+                                          "repository": {
+                                            "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8"
+                                          }
+                                        }
+                                      }
+                                    ]
                                   }
-                                },
-                                {
-                                  "added_date": "2025-01-15T19:30:23.330000+00:00",
-                                  "name": "jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-aarch64",
-                                  "_links": {
-                                    "tag_history": {
-                                      "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-aarch64"
-                                    }
-                                  }
-                                }
-                              ],
-                              "published": true,
-                              "_links": {
-                                "repository": {
-                                  "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8"
-                                }
+                                ]
                               }
-                            }
-                          ]
-                        },
-                        {
-                          "repositories": [
-                            {
-                              "registry": "registry-proxy.engineering.redhat.com",
-                              "repository": "rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8",
-                              "tags": [
-                                {
-                                  "added_date": "2025-01-15T19:30:15.431000+00:00",
-                                  "name": "7.4.20-9",
-                                  "_links": {
-                                    "tag_history": {
-                                      "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/7.4.20-9"
-                                    }
-                                  }
-                                },
-                                {
-                                  "added_date": "2025-01-15T19:30:15.431000+00:00",
-                                  "name": "jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-ppc64le",
-                                  "_links": {
-                                    "tag_history": {
-                                      "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-ppc64le"
-                                    }
-                                  }
-                                }
-                              ],
-                              "published": false,
-                              "_links": {
-                                "repository": {
-                                  "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8"
-                                }
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "repositories": [
-                            {
-                              "registry": "registry-proxy.engineering.redhat.com",
-                              "repository": "rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8",
-                              "tags": [
-                                {
-                                  "added_date": "2025-01-15T19:30:07.749000+00:00",
-                                  "name": "7.4.20-9",
-                                  "_links": {
-                                    "tag_history": {
-                                      "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/7.4.20-9"
-                                    }
-                                  }
-                                },
-                                {
-                                  "added_date": "2025-01-15T19:30:07.749000+00:00",
-                                  "name": "jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-x86_64",
-                                  "_links": {
-                                    "tag_history": {
-                                      "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-x86_64"
-                                    }
-                                  }
-                                }
-                              ],
-                              "published": false,
-                              "_links": {
-                                "repository": {
-                                  "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8"
-                                }
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "repositories": [
-                            {
-                              "registry": "registry-proxy.engineering.redhat.com",
-                              "repository": "rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8",
-                              "tags": [
-                                {
-                                  "added_date": "2025-01-15T19:29:58.414000+00:00",
-                                  "name": "7.4.20-9",
-                                  "_links": {
-                                    "tag_history": {
-                                      "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/7.4.20-9"
-                                    }
-                                  }
-                                },
-                                {
-                                  "added_date": "2025-01-15T19:29:58.414000+00:00",
-                                  "name": "jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-s390x",
-                                  "_links": {
-                                    "tag_history": {
-                                      "href": "/v1/tag-history/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8/tag/jb-eap-7.4-rhel-8-containers-candidate-12226-20250115185812-s390x"
-                                    }
-                                  }
-                                }
-                              ],
-                              "published": false,
-                              "_links": {
-                                "repository": {
-                                  "href": "/v1/repositories/registry/registry-proxy.engineering.redhat.com/repository/rh-osbs/jboss-eap-7-eap74-openjdk17-openshift-rhel8"
-                                }
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-  }
-                    """;
+            }
+                              """;
     static final String UNPUBLISHED = """
             {
                 "data": [
@@ -304,28 +304,27 @@ public class PyxisClientIT extends TestUmbProfile {
               }
               """;
 
-
     void ex(String nvr, List<String> qp) {
-      PyxisRepositoryDetails prd = pc.getRepositoriesDetails(nvr, qp);
-      Set<ConstraintViolation<PyxisRepositoryDetails>> cvs = validator.validate(prd);
-      cvs.forEach(v -> log.info(v.toString()));
+        PyxisRepositoryDetails prd = pc.getRepositoriesDetails(nvr, qp);
+        Set<ConstraintViolation<PyxisRepositoryDetails>> cvs = validator.validate(prd);
+        cvs.forEach(v -> log.info(v.toString()));
     }
 
     List<Long> requestDeltas(List<ServeEvent> serveEvents) {
-      Iterator it = serveEvents.iterator();
-      List<Long> deltas = new ArrayList();
+        Iterator it = serveEvents.iterator();
+        List<Long> deltas = new ArrayList();
 
-      while (it.hasNext()) {
-          ServeEvent s1 = (ServeEvent) it.next();
-          ServeEvent s2 = it.hasNext() ? (ServeEvent) it.next() : s1;
-          delta(s2.getRequest().getLoggedDate(), s1.getRequest().getLoggedDate(), ChronoUnit.MILLIS);
-          deltas.add(delta(s1.getRequest().getLoggedDate(), s2.getRequest().getLoggedDate(), ChronoUnit.MILLIS));
-      }
-      return deltas;
+        while (it.hasNext()) {
+            ServeEvent s1 = (ServeEvent) it.next();
+            ServeEvent s2 = it.hasNext() ? (ServeEvent) it.next() : s1;
+            delta(s2.getRequest().getLoggedDate(), s1.getRequest().getLoggedDate(), ChronoUnit.MILLIS);
+            deltas.add(delta(s1.getRequest().getLoggedDate(), s2.getRequest().getLoggedDate(), ChronoUnit.MILLIS));
+        }
+        return deltas;
     }
 
     static long delta(Date e, Date o, ChronoUnit unit) {
-      return unit.between(e.toInstant(), o.toInstant());
+        return unit.between(e.toInstant(), o.toInstant());
     }
 
     @Test
