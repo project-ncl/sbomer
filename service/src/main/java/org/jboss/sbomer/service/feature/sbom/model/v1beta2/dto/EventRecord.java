@@ -18,11 +18,13 @@
 package org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonNode;
 
-@JsonPropertyOrder({ "id", "parent", "created", "updated", "finished" })
-public record EventRecord(String id, Instant created, Instant updated, Instant finished, String identifier,
-        EventRecord parent, String source, String status) {
+public record EventRecord(String id, EventRecord parent, Instant created, Instant updated, Instant finished,
+        Map<String, String> metadata, JsonNode event, List<GenerationRecord> generations, String status,
+        String reason) {
 
 }

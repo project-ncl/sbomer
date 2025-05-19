@@ -34,12 +34,13 @@ import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-
+import io.quarkus.arc.Arc;
+import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -55,7 +56,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1beta2/events")
@@ -67,8 +67,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventsV1Beta2 {
 
+    public static final String KEY_SOURCE = "source"; // TODO: externalize it
+    public static final String KEY_RESOLVER = "resolver"; // TODO: externalize it
+    public static final String KEY_IDENTIFIER = "identifier"; // TODO: externalize it
+
     @Inject
     V1Beta2Mapper mapper;
+
+    @Inject
+    EventBus eventBus;
 
     @GET
     @Operation(
@@ -82,15 +89,65 @@ public class EventsV1Beta2 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response search( // TODO: USE pagination
+    public List<EventRecord> search( // TODO: USE pagination
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String query,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
         List<Event> events = Event.findAll().list();
 
-        return Response.ok(mapper.toEventRecords(events)).build();
+        return mapper.toEventRecords(events);
 
+    }
+
+    @POST
+    @Path("/resolve")
+    @Parameter(
+            name = "type",
+            description = "External resolver type",
+            required = true,
+            examples = { @ExampleObject(value = "rh-advisory", name = "Red Hat advisory") })
+    @Parameter(
+            name = "id",
+            description = "External reference identifier",
+            required = true,
+            examples = { @ExampleObject(value = "1234", name = "Reference identifier") })
+    @Operation(
+            summary = "Create new event using resolver",
+            description = "Creates a new event within the system. This event contains information about how the information required to instantiate generations should be resolved.")
+    @APIResponse(
+            responseCode = "200",
+            description = "A new event",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @Transactional
+    public EventRecord create(@QueryParam("type") String resolverType, @QueryParam("id") String identifier) {
+
+        Event event = Event.builder()
+                .withId(RandomStringIdGenerator.generate())
+                .withStatus(EventStatus.NEW)
+                .withMetadata(
+                        Map.of(
+                                KEY_SOURCE,
+                                EventType.REST.toName(),
+                                KEY_RESOLVER,
+                                resolverType,
+                                KEY_IDENTIFIER,
+                                identifier))
+                .build()
+                .save();
+
+        // event = event.save();
+
+        EventRecord record = mapper.toRecord(event);
+
+        // TODO: dirty :)
+        Arc.container().beanManager().getEvent().fire(record);
+
+        return record;
     }
 
     @GET
@@ -124,14 +181,14 @@ public class EventsV1Beta2 {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = ErrorResponse.class)))
-    public Response getById(@PathParam("id") String eventId) {
+    public EventRecord getById(@PathParam("id") String eventId) {
         Event event = Event.findById(eventId); // NOSONAR
 
         if (event == null) {
             throw new NotFoundException("Event with id '{}' could not be found", eventId);
         }
 
-        return Response.ok(mapper.toRecord(event)).build();
+        return mapper.toRecord(event);
     }
 
     @POST
@@ -170,26 +227,25 @@ public class EventsV1Beta2 {
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = ErrorResponse.class)))
     @Transactional
-    public Response retry(@PathParam("id") String eventId, @PathParam("force") boolean force) {
+    public EventRecord retry(@PathParam("id") String eventId, @PathParam("force") boolean force) {
         Event parentEvent = Event.findById(eventId); // NOSONAR
+
+        // TODO: handle force
 
         if (parentEvent == null) {
             throw new NotFoundException("Event with id '{}' could not be found", eventId);
         }
-
-        // System.out.println(parentEvent.getGenerations());
 
         Event event = Event.builder()
                 .withId(RandomStringIdGenerator.generate())
                 .withParent(parentEvent)
                 .withCreated(Instant.now())
                 .withStatus(EventStatus.NEW)
-                .withSource(EventType.REST.toName()) // TODO: we don't have an enum here anymore
-                .withEvent(JsonNodeFactory.instance.objectNode()) // TODO: dummy
+                .withMetadata(Map.of("source", EventType.REST.toName()))
                 .withGenerations(Collections.unmodifiableList(parentEvent.getGenerations()))
                 .build()
                 .save();
 
-        return Response.ok(mapper.toRecord(event)).build();
+        return mapper.toRecord(event);
     }
 }
