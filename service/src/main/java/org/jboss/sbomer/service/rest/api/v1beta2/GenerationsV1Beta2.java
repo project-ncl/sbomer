@@ -29,23 +29,30 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.resteasy.reactive.common.util.RestMediaType;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.enums.EventStatus;
+import org.jboss.sbomer.core.features.sbom.enums.EventType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
-import org.jboss.sbomer.core.features.sbom.enums.TaskType;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.jakarta.rs.yaml.YAMLMediaTypes;
 
+import io.quarkus.resteasy.reactive.links.InjectRestLinks;
+import io.quarkus.resteasy.reactive.links.RestLink;
+import io.quarkus.resteasy.reactive.links.RestLinkType;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -75,13 +82,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GenerationsV1Beta2 {
     @Inject
-    SbomService sbomService;
+    V1Beta2Mapper mapper;
 
     @Inject
     FeatureFlags featureFlags;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     @GET
     @Path("/{id}")
+    @Produces({ MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON })
+    @RestLink(rel = "self")
+    @InjectRestLinks(RestLinkType.INSTANCE)
     @Operation(
             summary = "Get specific manifest generation",
             description = "Get generation for the provided identifier or purl")
@@ -113,17 +126,61 @@ public class GenerationsV1Beta2 {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = ErrorResponse.class)))
-    public Response getGenerationRequestById(@PathParam("id") String generationId) {
+    public GenerationRecord getGenerationRequestById(@PathParam("id") String generationId) {
         Generation generation = Generation.findById(generationId); // NOSONAR
 
         if (generation == null) {
             throw new NotFoundException("Generation request with id '{}' could not be found", generationId);
         }
 
-        return Response.ok(generation).build(); // TODO: USE DTO!
+        return mapper.toRecord(generation);
     }
 
     @GET
+    @Path("/{id}/events")
+    @Operation(summary = "Receive events related to this generation")
+    @Parameter(
+            name = "id",
+            description = "Manifest generation identifier",
+            examples = { @ExampleObject(value = "88CA2291D4014C6", name = "Generation identifier") })
+    @APIResponse(
+            responseCode = "200",
+            description = "Event list",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class))) // TODO:
+                                                                                                                      // populate
+                                                                                                                      // it
+    @APIResponse(
+            responseCode = "400",
+            description = "Malformed request",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "404",
+            description = "Generation could not be found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    public Response getGenerationEvents(@PathParam("id") String generationId) {
+        Generation generation = Generation.findById(generationId); // NOSONAR
+
+        if (generation == null) {
+            throw new NotFoundException("Generation request with id '{}' could not be found", generationId);
+        }
+
+        return Response.ok(mapper.toEventRecords(generation.getEvents())).build();
+    }
+
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON })
+    @RestLink(rel = "list")
+    @InjectRestLinks
     @Operation(summary = "Search manifest generation", description = "Paginated list of generations")
     @APIResponse(
             responseCode = "200",
@@ -133,18 +190,23 @@ public class GenerationsV1Beta2 {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response search( // TODO: USE paging
+    public List<GenerationRecord> search( // TODO: USE paging
             @Valid @BeanParam PaginationParameters paginationParams,
             @QueryParam("query") String rsqlQuery,
             @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
 
         List<Generation> generations = Generation.findAll().list();
 
-        generations.forEach(generation -> {
-            log.info("Tasks: {}", generation.getEvents());
-        });
+        System.out.println(mapper.toGenerationRecords(generations));
 
-        return Response.ok(generations).build();
+        try {
+            System.out.println(objectMapper.writeValueAsString(mapper.toGenerationRecords(generations)));
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return mapper.toGenerationRecords(generations);
 
     }
 
@@ -187,13 +249,13 @@ public class GenerationsV1Beta2 {
                 .withId(RandomStringIdGenerator.generate())
                 .withCreated(Instant.now())
                 .withStatus(EventStatus.NEW)
-                .withSource(TaskType.REST.toName()) // TODO: we don't have an enum here anymore
+                .withSource(EventType.REST.toName()) // TODO: we don't have an enum here anymore
                 .withEvent(JsonNodeFactory.instance.objectNode()) // TODO: dummy
                 .withGenerations(List.of(generation))
                 .build()
                 .save();
 
-        return Response.accepted(event).build();
+        return Response.accepted(mapper.toRecord(event)).build();
     }
 
 }

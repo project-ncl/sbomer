@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -38,5 +39,7 @@ public class ApplicationObjectMapperCustomizer implements ObjectMapperCustomizer
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         objectMapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         objectMapper.disable(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS);
+        objectMapper.enable(MapperFeature.SORT_CREATOR_PROPERTIES_BY_DECLARATION_ORDER);
+        objectMapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
     }
 }
