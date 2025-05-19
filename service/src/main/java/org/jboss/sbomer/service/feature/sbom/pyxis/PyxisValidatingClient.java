@@ -70,12 +70,17 @@ public class PyxisValidatingClient {
     public PyxisRepositoryDetails getRepositoriesDetails(
             @PathParam("nvr") String nvr,
             @QueryParam("include") List<String> includes) {
+
         PyxisRepositoryDetails prd = p.getRepositoriesDetails(nvr, includes);
+        log.debug("Pyxis response for NVR '{}': {}", nvr, prd);
+
         Set<ConstraintViolation<PyxisRepositoryDetails>> violations = validator.validate(prd);
-        if (violations.isEmpty())
+        if (violations.isEmpty()) {
             return prd;
+        }
+
         log.warn(
-                "The deserialized Pyxis repositry for nvr: {} and includes: {} violated the following constraints: {}",
+                "The deserialized Pyxis repository for nvr: {} and includes: {} violated the following constraints: {}",
                 nvr,
                 includes,
                 violations.stream().map(v -> v.getMessage()).collect(Collectors.toList()));
