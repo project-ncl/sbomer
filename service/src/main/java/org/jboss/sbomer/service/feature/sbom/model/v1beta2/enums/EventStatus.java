@@ -18,7 +18,7 @@
 package org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums;
 
 public enum EventStatus {
-    NEW, IGNORED, IN_PROGRESS, FAILED, SUCCESS;
+    NEW, IGNORED, RESOLVING, RESOLVED, IN_PROGRESS, FAILED, SUCCESS, ERROR;
 
     public static EventStatus fromName(String origin) {
         return EventStatus.valueOf(origin.toUpperCase());
