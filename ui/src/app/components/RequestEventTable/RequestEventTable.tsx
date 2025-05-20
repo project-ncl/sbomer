@@ -45,6 +45,8 @@ export const RequestEventTable = () => {
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
 
+  const [paginationVisible, setPaginationVisible] = React.useState<boolean>(queryType == RequestsQueryType.NoFilter);
+
   const [selectIsOpen, setSelectIsOpen] = React.useState<boolean>(false);
   const [selectValue, setSelectValue] = React.useState<RequestsQueryType>(queryType);
 
@@ -74,6 +76,7 @@ export const RequestEventTable = () => {
         setButtonVisible(false)
         setSearchBarValue('')
         setFilters(RequestsQueryType.NoFilter, '', pageIndex, pageSize)
+        setPaginationVisible(true)
         break;
       default:
         setSearchBarVisible(true);
@@ -83,6 +86,7 @@ export const RequestEventTable = () => {
 
   const onSearchCall = () => {
     setFilters(selectValue, searchBarValue, 1, pageSize)
+    setPaginationVisible(selectValue == RequestsQueryType.NoFilter)
   }
 
 
@@ -146,9 +150,19 @@ export const RequestEventTable = () => {
     variant='primary'
     onClick={() => onSearchCall()}>Search</Button>
 
+  const pagination = <Pagination
+    itemCount={total}
+    widgetId="request-table-pagination"
+    perPage={pageSize}
+    page={pageIndex}
+    variant={PaginationVariant.bottom}
+    onSetPage={onSetPage}
+    onPerPageSelect={onPerPageSelect}
+  />
+
   const table = <>
     <Table aria-label="Request events table" variant="compact">
-      <Caption>Latest request events</Caption>
+      <Caption>{queryType != RequestsQueryType.NoFilter ? "Latest filtered request events" : "Latest request events"}</Caption>
       <Thead>
         <Tr>
           <Th>{columnNames.id}</Th>
@@ -224,15 +238,7 @@ export const RequestEventTable = () => {
         ))}
       </Tbody>
     </Table>
-    <Pagination
-      itemCount={total}
-      widgetId="request-table-pagination"
-      perPage={pageSize}
-      page={pageIndex}
-      variant={PaginationVariant.bottom}
-      onSetPage={onSetPage}
-      onPerPageSelect={onPerPageSelect}
-    />
+    {paginationVisible && pagination}
   </>
   const noResults = <NoResultsSection />
   const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
