@@ -84,6 +84,7 @@ import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.cyclonedx.model.Tool;
+import org.cyclonedx.model.license.Expression;
 import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.api.deliverablesanalyzer.dto.LicenseInfo;
@@ -112,6 +113,8 @@ import com.github.packageurl.PackageURLBuilder;
 
 public class SbomUtils {
     public static final String PROTOCOL = "https://";
+
+    public static final String DEFAULT_ACKNOWLEDGEMENT = "concluded";
 
     private SbomUtils() {
         // This is a utility class
@@ -409,12 +412,23 @@ public class SbomUtils {
                 .filter(licenseInfo -> !SpdxLicenseUtils.isUnknownLicenseId(licenseInfo.getSpdxLicenseId()))
                 .collect(Collectors.groupingBy(LicenseInfo::getSpdxLicenseId));
         LicenseChoice licenseChoice = new LicenseChoice();
-        licenseChoice.setLicenses(uniqueLicensesMap.keySet().stream().map(spdxLicenseId -> {
-            License license = new License();
-            license.setId(spdxLicenseId);
-            license.setAcknowledgement("concluded");
-            return license;
-        }).toList());
+        List<String> spdxLicenseIds = uniqueLicensesMap.keySet().stream().sorted().toList();
+
+        if (SpdxLicenseUtils.containsExpression(spdxLicenseIds)) {
+            Expression expression = new Expression();
+            String value = SpdxLicenseUtils.toExpression(spdxLicenseIds);
+            expression.setValue(value);
+            expression.setAcknowledgement(DEFAULT_ACKNOWLEDGEMENT);
+            licenseChoice.setExpression(expression);
+        } else {
+            licenseChoice.setLicenses(spdxLicenseIds.stream().map(spdxLicenseId -> {
+                License license = new License();
+                license.setId(spdxLicenseId);
+                license.setAcknowledgement(DEFAULT_ACKNOWLEDGEMENT);
+                return license;
+            }).toList());
+        }
+
         component.setLicenses(licenseChoice);
         Set<Map.Entry<String, List<LicenseInfo>>> entries = uniqueLicensesMap.entrySet();
 
