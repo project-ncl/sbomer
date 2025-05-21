@@ -26,8 +26,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 
-import jakarta.json.JsonValue;
 import org.jboss.sbomer.test.e2e.E2EStageBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -36,12 +36,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import io.restassured.response.Response;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
-
-import java.util.stream.Stream;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonValue;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

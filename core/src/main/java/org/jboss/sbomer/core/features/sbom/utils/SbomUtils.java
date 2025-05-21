@@ -18,6 +18,7 @@
 package org.jboss.sbomer.core.features.sbom.utils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+
 import static org.jboss.sbomer.core.features.sbom.Constants.MRRC_URL;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
@@ -75,8 +76,6 @@ import org.cyclonedx.model.Evidence;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
-import org.cyclonedx.model.component.evidence.Identity;
-import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.cyclonedx.model.License;
 import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.model.Metadata;
@@ -84,6 +83,8 @@ import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.cyclonedx.model.Tool;
+import org.cyclonedx.model.component.evidence.Identity;
+import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.cyclonedx.model.license.Expression;
 import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.parsers.JsonParser;

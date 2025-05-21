@@ -34,7 +34,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.slf4j.helpers.MessageFormatter;
 
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.config.informer.Informer;

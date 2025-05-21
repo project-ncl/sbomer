@@ -17,18 +17,17 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
-import com.github.packageurl.MalformedPackageURLException;
-import com.github.packageurl.PackageURL;
-
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.features.sbom.Constants;
+
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PurlRebuilder {

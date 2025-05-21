@@ -17,11 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.util;
 
-import io.quarkus.arc.Arc;
-import jakarta.enterprise.event.Event;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
+
 import org.slf4j.MDC;
+
+import io.quarkus.arc.Arc;
+import jakarta.enterprise.event.Event;
 
 public class MdcWrapperUtil {
 

@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import java.util.Map;
 
 import org.jboss.sbomer.core.test.TestResources;
@@ -29,8 +31,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @QuarkusTest
 @TestProfile(TestUmbProfile.class)

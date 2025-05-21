@@ -6,10 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import jakarta.enterprise.inject.Alternative;
-
 import org.jboss.sbomer.cli.feature.sbom.command.CycloneDxGenerateOperationCommand;
 
+import jakarta.enterprise.inject.Alternative;
 import picocli.CommandLine.Command;
 
 @Alternative

@@ -1,28 +1,28 @@
 package org.jboss.sbomer.service.test.unit.feature.sbom.errata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataMessageHelper;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataPage;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataStatus;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.enums.ErrataType;
 import org.jboss.sbomer.service.feature.sbom.features.umb.consumer.model.ErrataStatusChangeMessageBody;

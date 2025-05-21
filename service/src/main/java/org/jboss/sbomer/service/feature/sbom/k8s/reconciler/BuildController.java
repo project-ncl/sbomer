@@ -47,7 +47,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.resources.TaskRunInitDependentR
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.slf4j.helpers.MessageFormatter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

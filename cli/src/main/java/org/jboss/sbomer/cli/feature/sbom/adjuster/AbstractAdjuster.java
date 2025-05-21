@@ -17,7 +17,8 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
@@ -25,7 +26,7 @@ import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.cli.feature.sbom.utils.UriValidator;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractAdjuster implements Adjuster {
