@@ -59,11 +59,11 @@
           },
           "licenses": [
             {
-              "distribution": "repo",
-              "name": "Public Domain",
-              "url": "http://repository.jboss.org/licenses/cc0-1.0.txt",
-              "spdxLicenseId": "CC0-1.0",
-              "source": "POM"
+              "distribution" : "repo",
+              "name" : "Public Domain",
+              "url" : "http://repository.jboss.org/licenses/cc0-1.0.txt",
+              "spdxLicenseId" : "CC0-1.0",
+              "sourceUrl" : "my-7.11.5.GA-maven-repository/org/jboss/jboss-parent/19.0.0.redhat-1/jboss-parent-19.0.0.redhat-1.pom"
             }
           ]
         }
