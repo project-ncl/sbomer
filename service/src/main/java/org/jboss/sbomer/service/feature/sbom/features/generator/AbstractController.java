@@ -332,18 +332,24 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
         return taskRun.getStatus().getSteps().stream().map(step -> {
             var term = step.getTerminated();
-            if (term != null && term.getExitCode() != 0) {
-                String reason = TektonExitCodeUtils.interpretExitCode(term.getExitCode());
-                return String.format(
-                        "Step '%s' failed: exitCode=%d (%s), reason=%s%s",
-                        step.getName(),
-                        term.getExitCode(),
-                        reason,
-                        term.getReason(),
-                        term.getMessage() != null ? (", message=" + term.getMessage()) : " ");
-            }
+            if (term != null) {
+                boolean isOomKilled = "OOMKilled".equals(term.getReason());
+                boolean isFailedExit = term.getExitCode() != 0;
+
+                if (isFailedExit || isOomKilled) {
+                    String reason = TektonExitCodeUtils.interpretExitCode(term.getExitCode());
+                    return String.format(
+                            "Step '%s' failed: exitCode=%d (%s), reason=%s%s",
+                            step.getName(),
+                            term.getExitCode(),
+                            reason,
+                            term.getReason(),
+                            term.getMessage() != null ? (", message=" + term.getMessage()) : " ");
+                }
+             }
+
             return null;
-        }).filter(Objects::nonNull).findFirst().orElse("TaskRun failed, but no step had non-zero exit code.");
+        }).filter(Objects::nonNull).findFirst().orElse("TaskRun failed, but no step had non-zero exit code or OOMKilled reason.");
     }
 
     @Override
