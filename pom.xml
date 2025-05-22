@@ -124,6 +124,17 @@
         <artifactId>opentelemetry-ext-cli-java</artifactId>
         <version>${version.opentelemetry-ext-cli-java}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jboss.pnc</groupId>
+        <artifactId>pnc-api</artifactId>
+        <version>${version.pnc-api}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.pnc</groupId>
+        <artifactId>pnc-api</artifactId>
+        <version>${version.pnc-api}</version>
+        <classifier>jakarta</classifier>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
