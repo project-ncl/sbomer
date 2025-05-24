@@ -19,13 +19,16 @@ package org.jboss.sbomer.cli.feature.sbom.command.catalog;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
 import org.jboss.sbomer.cli.feature.sbom.utils.otel.OtelCLIUtils;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import jakarta.inject.Inject;
@@ -50,10 +53,25 @@ public abstract class AbstractCatalogCommand implements Callable<Integer> {
 
             // Call the hook to set a context, if needed.
             addContext();
-            OtelCLIUtils.startOtel("CLI.catalog");
 
             List<Path> sbomPaths = FileUtils.findManifests(parent.getPath());
             List<Bom> boms = sbomPaths.stream().map(SbomUtils::fromPath).toList();
+
+            Map<String, String> attributes = Map.of(
+                    "params.cataloguer.type",
+                    getCataloguerType(),
+                    "params.image.name",
+                    parent.getImageName(),
+                    "params.image.digest",
+                    parent.getImageDigest(),
+                    "params.sources",
+                    sbomPaths.stream().map(path -> path.toFile().getAbsolutePath()).collect(Collectors.joining(",")),
+                    "params.destination",
+                    parent.getOutputPath().toFile().getAbsolutePath());
+            OtelCLIUtils.startOtel(
+                    OtelCLIUtils.SBOMER_CLI_NAME,
+                    OtelHelper.getEffectiveClassName(this.getClass()) + ".catalog",
+                    attributes);
 
             log.info("Starting {} cataloguer", getCataloguerType());
 
