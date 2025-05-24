@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.scheduler;
 
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_IDENTIFIER_KEY;
 import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
 import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_FLAGS_KEY;
 import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
@@ -28,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.pnc.common.otel.OtelUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -159,9 +159,8 @@ public class GenerationRequestScheduler {
     public void schedule(SbomGenerationRequest sbomGenerationRequest) {
         log.debug("Scheduling Generation Request '{}'...", sbomGenerationRequest.getId());
 
-        GenerationRequest request = (GenerationRequest) kubernetesClient.configMaps()
-                .withName("sbom-request-" + sbomGenerationRequest.getId().toLowerCase())
-                .get();
+        String configMapName = "sbom-request-" + sbomGenerationRequest.getId().toLowerCase();
+        GenerationRequest request = (GenerationRequest) kubernetesClient.configMaps().withName(configMapName).get();
 
         if (request != null) {
             log.warn(
@@ -170,18 +169,30 @@ public class GenerationRequestScheduler {
             return;
         }
 
+        Map<String, String> attributes = Map.of(
+                "generation.id",
+                sbomGenerationRequest.getId(),
+                "generation.identifier",
+                sbomGenerationRequest.getIdentifier(),
+                "generation.config",
+                sbomGenerationRequest.getConfig() != null ? sbomGenerationRequest.getConfig().toJson() : "{}",
+                "generation.type",
+                sbomGenerationRequest.getType().toString(),
+                "generation.resource",
+                configMapName);
+
         // Create a parent child span with values from MDC. This is to differentiate each generationRequest with its own
         // span
         SpanBuilder spanBuilder = OtelUtils.buildChildSpan(
                 GlobalOpenTelemetry.get().getTracer(""),
-                "GenerationRequestScheduler.schedule",
+                OtelHelper.getEffectiveClassName(this.getClass()) + ".schedule",
                 SpanKind.CLIENT,
                 MDC.get(MDC_TRACE_ID_KEY),
                 MDC.get(MDC_SPAN_ID_KEY),
                 MDC.get(MDC_TRACE_FLAGS_KEY),
                 MDC.get(MDC_TRACE_STATE_KEY),
                 Span.current().getSpanContext(),
-                Map.of(MDC_IDENTIFIER_KEY, sbomGenerationRequest.getIdentifier()));
+                attributes);
 
         Span span = spanBuilder.startSpan();
 

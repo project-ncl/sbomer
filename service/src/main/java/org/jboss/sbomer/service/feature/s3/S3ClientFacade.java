@@ -28,8 +28,10 @@ import java.util.Set;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.features.umb.producer.model.Sbom.GenerationRequest;
+import org.slf4j.MDC;
 
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.vertx.ConsumeEvent;
@@ -176,14 +178,15 @@ public class S3ClientFacade {
     }
 
     public void upload(Path path, String key) {
+
         log.debug("Uploading '{}' file as '{}'...", path, key);
 
-        try {
+        Map<String, String> attributes = Map.of("params.path", path.toFile().getAbsolutePath(), "params.key", key);
+        OtelHelper.withSpan(this.getClass(), ".upload", attributes, MDC.getCopyOfContextMap(), () -> {
             PutObjectRequest request = PutObjectRequest.builder().key(key).bucket(bucketName()).build();
             client.putObject(request, path);
-        } catch (SdkException e) {
-            throw new ApplicationException("An error occurred when uploading '{}' file to S3", path, e);
-        }
+            return null;
+        });
     }
 
     /**
@@ -221,11 +224,23 @@ public class S3ClientFacade {
      */
     public String log(String generationRequestId, String path) {
 
-        GetObjectRequest req = GetObjectRequest.builder()
-                .bucket(bucketName())
-                .key(generationRequestId + "/" + path)
-                .build();
+        String bucketName = bucketName();
+        String key = generationRequestId + "/" + path;
 
-        return client.getObjectAsBytes(req).asUtf8String();
+        Map<String, String> attributes = Map.of(
+                "params.bucketName",
+                bucketName,
+                "params.generationRequestId",
+                generationRequestId,
+                "params.path",
+                path,
+                "params.key",
+                key);
+
+        return OtelHelper.withSpan(this.getClass(), ".log", attributes, MDC.getCopyOfContextMap(), () -> {
+            GetObjectRequest req = GetObjectRequest.builder().bucket(bucketName).key(key).build();
+
+            return client.getObjectAsBytes(req).asUtf8String();
+        });
     }
 }
