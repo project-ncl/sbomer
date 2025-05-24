@@ -18,12 +18,14 @@
 package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.utils.otel.OtelCLIUtils;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.pnc.PncService;
 
@@ -45,7 +47,18 @@ public abstract class AbstractProcessCommand implements Callable<Integer> {
 
             // Call the hook to set a context, if needed.
             addContext();
-            OtelCLIUtils.startOtel("CLI.process");
+
+            Map<String, String> attributes = Map.of(
+                    "params.processor.type",
+                    getImplementationType().toString(),
+                    "params.source",
+                    manifestPath().toFile().getAbsolutePath(),
+                    "params.destination",
+                    manifestPath().toFile().getAbsolutePath());
+            OtelCLIUtils.startOtel(
+                    OtelCLIUtils.SBOMER_CLI_NAME,
+                    OtelHelper.getEffectiveClassName(this.getClass()) + ".process",
+                    attributes);
 
             // Fetch manifest on the given path.
             Bom bom = SbomUtils.fromPath(manifestPath());

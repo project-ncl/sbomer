@@ -18,11 +18,13 @@
 package org.jboss.sbomer.cli.feature.sbom.command.adjust;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.utils.otel.OtelCLIUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +45,18 @@ public abstract class AbstractAdjustCommand implements Callable<Integer> {
 
             // Call the hook to set a context, if needed.
             addContext();
-            OtelCLIUtils.startOtel("CLI.adjust");
+
+            Map<String, String> attributes = Map.of(
+                    "params.adjuster.type",
+                    getAdjusterType(),
+                    "params.source",
+                    parent.getPath().toFile().getAbsolutePath(),
+                    "params.destination",
+                    parent.getOutputPath().toFile().getAbsolutePath());
+            OtelCLIUtils.startOtel(
+                    OtelCLIUtils.SBOMER_CLI_NAME,
+                    OtelHelper.getEffectiveClassName(this.getClass()) + ".adjust",
+                    attributes);
 
             Bom bom = SbomUtils.fromPath(parent.getPath());
 

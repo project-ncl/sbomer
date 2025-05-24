@@ -21,8 +21,7 @@ import java.util.Map;
 
 import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
-
-import com.redhat.resilience.otel.OTelCLIHelper;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 
 import io.opentelemetry.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +34,7 @@ public class OtelCLIUtils {
     public static final String OTEL_TRACEPARENT_ENV_VARIABLE = "TRACEPARENT";
     public static final String OTEL_EXPORTER_OTLP_ENDPOINT_ENV_VARIABLE = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT";
     public static final String SBOMER_SERVICE_NAME = "sbomer";
+    public static final String SBOMER_CLI_NAME = "sbomer-cli";
 
     public static Map<String, String> getOtelContextFromEnvVariables() {
         String traceId = System.getenv(OTEL_TRACE_ID_ENV_VARIABLE);
@@ -62,18 +62,19 @@ public class OtelCLIUtils {
     }
 
     /**
-     * Start Otel exporters. The {@link OTelCLIHelper} class will be used for this purpose.
+     * Start Otel exporters. The {@link OtelHelper} class will be used for this purpose.
      */
-    public static void startOtel(String commandName) {
+    public static void startOtel(String serviceName, String commandName, Map<String, String> attributes) {
         String endpoint = System.getenv(OTEL_EXPORTER_OTLP_ENDPOINT_ENV_VARIABLE);
 
         if (endpoint != null) {
             log.info("Enabling OpenTelemetry collection on {} with service name {}", endpoint, SBOMER_SERVICE_NAME);
             try {
-                OTelCLIHelper.startOTel(
-                        SBOMER_SERVICE_NAME,
+                OtelHelper.startOTel(
+                        serviceName,
                         commandName,
-                        OTelCLIHelper.defaultSpanProcessor(OTelCLIHelper.defaultSpanExporter(endpoint)));
+                        OtelHelper.defaultSpanProcessor(OtelHelper.defaultSpanExporter(endpoint)),
+                        attributes);
             } catch (IllegalStateException exc) {
                 log.trace("GlobalOpenTelemetry.set has already been called, safely silencing the exception here");
             } catch (Exception exc) {
@@ -83,10 +84,10 @@ public class OtelCLIUtils {
     }
 
     /**
-     * Stop Otel exporters. The {@link OTelCLIHelper} class will be used for this purpose.
+     * Stop Otel exporters. The {@link OtelHelper} class will be used for this purpose.
      */
     public static void stopOTel() {
-        OTelCLIHelper.stopOTel();
+        OtelHelper.stopOTel();
     }
 
 }

@@ -18,6 +18,7 @@
 package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
@@ -27,6 +28,7 @@ import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.cli.feature.sbom.utils.otel.OtelCLIUtils;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.pnc.PncService;
 
 import jakarta.inject.Inject;
@@ -72,7 +74,21 @@ public abstract class AbstractGenerateOperationCommand implements Callable<Integ
             MDCUtils.removeContext();
             MDCUtils.addOtelContext(OtelCLIUtils.getOtelContextFromEnvVariables());
 
-            OtelCLIUtils.startOtel("CLI.generateOperation");
+            Map<String, String> attributes = Map.of(
+                    "params.generator.type",
+                    generatorType().toString(),
+                    "params.identifier",
+                    parent.getOperationId(),
+                    "params.destination",
+                    Path.of(
+                            parent.getWorkdir().toAbsolutePath().toString(),
+                            String.valueOf(parent.getIndex()),
+                            "bom.json").toFile().getAbsolutePath());
+
+            OtelCLIUtils.startOtel(
+                    OtelCLIUtils.SBOMER_CLI_NAME,
+                    OtelHelper.getEffectiveClassName(this.getClass()) + ".generateOperation",
+                    attributes);
 
             // Fetch operation information
             DeliverableAnalyzerOperation operation = pncService

@@ -25,6 +25,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
@@ -51,6 +52,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.utils.commandline.CommandLineParserUtil;
 import org.jboss.sbomer.core.pnc.PncService;
@@ -131,7 +133,22 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
             MDCUtils.addIdentifierContext(parent.getBuildId());
             MDCUtils.addOtelContext(OtelCLIUtils.getOtelContextFromEnvVariables());
 
-            OtelCLIUtils.startOtel("CLI.generate");
+            Map<String, String> attributes = Map.of(
+                    "params.generator.type",
+                    generatorType().toString(),
+                    "params.generator.args",
+                    generatorArgs(),
+                    "params.tool.version",
+                    toolVersion(),
+                    "params.identifier",
+                    parent.getBuildId(),
+                    "params.destination",
+                    parent.getOutput().toFile().getAbsolutePath());
+
+            OtelCLIUtils.startOtel(
+                    OtelCLIUtils.SBOMER_CLI_NAME,
+                    OtelHelper.getEffectiveClassName(this.getClass()) + ".generate",
+                    attributes);
 
             // Fetch build information
             Build build = pncService.getBuild(parent.getBuildId());
