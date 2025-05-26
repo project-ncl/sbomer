@@ -21,6 +21,7 @@ import java.util.Objects;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 
@@ -78,7 +79,7 @@ public abstract class AbstractResolver implements Resolver {
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
-    protected Event updateEventStatus(String eventId, EventStatus status) {
+    protected EventStatusHistory updateEventStatus(String eventId, EventStatus status) {
         Event event = Event.findById(eventId);
 
         if (event == null) {
@@ -88,6 +89,6 @@ public abstract class AbstractResolver implements Resolver {
 
         event.setStatus(status);
 
-        return event;
+        return new EventStatusHistory(event, status.name(), "Updated by resolver").save();
     }
 }

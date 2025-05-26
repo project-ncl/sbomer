@@ -23,7 +23,9 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.resolver.AbstractResolver;
 
@@ -35,16 +37,16 @@ import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j
-public class RedHatAdvisoryEventListener extends AbstractResolver {
+public class ErrataToolAdvisoryEventListener extends AbstractResolver {
 
-    public static final String RESOLVER_TYPE = "rh-advisory";
+    public static final String RESOLVER_TYPE = "et-advisory";
 
-    public RedHatAdvisoryEventListener() {
+    public ErrataToolAdvisoryEventListener() {
 
     }
 
     @Inject
-    public RedHatAdvisoryEventListener(ManagedExecutor managedExecutor) {
+    public ErrataToolAdvisoryEventListener(ManagedExecutor managedExecutor) {
         super(managedExecutor);
     }
 
@@ -72,14 +74,13 @@ public class RedHatAdvisoryEventListener extends AbstractResolver {
 
         // TODO: dummy
         Generation generation = Generation.builder()
-                .withId(RandomStringIdGenerator.generate())
                 .withIdentifier("DUMMY")
-                .withStatus(GenerationStatus.NEW)
                 .withType(GenerationRequestType.BUILD.toName())
                 .withEvents(List.of(event))
                 .build();
 
         event.getGenerations().add(generation);
+
     }
 
     public void resolveAdvisory(String advisoryId) {

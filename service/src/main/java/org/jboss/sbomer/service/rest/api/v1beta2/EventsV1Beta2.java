@@ -138,12 +138,10 @@ public class EventsV1Beta2 {
         }
 
         Event event = Event.builder()
-                .withId(RandomStringIdGenerator.generate())
-                .withStatus(EventStatus.NEW)
                 .withMetadata(
                         Map.of(
                                 KEY_SOURCE,
-                                EventType.REST.toName(),
+                                String.format("%s:/api/v1beta2/events/resolve", EventType.REST.toName()),
                                 KEY_RESOLVER,
                                 config.getType(),
                                 KEY_IDENTIFIER,
@@ -245,10 +243,8 @@ public class EventsV1Beta2 {
         }
 
         Event event = Event.builder()
-                .withId(RandomStringIdGenerator.generate())
                 .withParent(parentEvent)
                 .withCreated(Instant.now())
-                .withStatus(EventStatus.NEW)
                 .withMetadata(Map.of("source", EventType.REST.toName()))
                 .withGenerations(Collections.unmodifiableList(parentEvent.getGenerations()))
                 .build()

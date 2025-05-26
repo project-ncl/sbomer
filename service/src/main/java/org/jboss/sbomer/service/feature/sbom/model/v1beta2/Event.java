@@ -31,6 +31,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -54,6 +55,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -150,9 +152,7 @@ public class Event extends PanacheEntityBase {
     /**
      * List of all generations related to the current Event.
      */
-    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY) // TODO: this annotation
-                                                                                              // has not well thought
-                                                                                              // settings.
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinTable(
             name = "event_generation",
             joinColumns = @JoinColumn(name = "event_id"),
@@ -165,6 +165,13 @@ public class Event extends PanacheEntityBase {
     @OrderBy("timestamp ASC")
     @Builder.Default
     private List<EventStatusHistory> statuses = new ArrayList<>();
+
+    @PrePersist
+    protected void onPrePersist() {
+        if (this.id == null) {
+            this.id = RandomStringIdGenerator.generate();
+        }
+    }
 
     @Transactional
     public Event save() {
