@@ -182,35 +182,36 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      */
     private void addMissingComponents(List<Component> components, List<Component> sourcesComponents) {
         // Pointless proceeding unless there are components from the sources manifest
-        if (SbomUtils.populatedComponents(sourcesComponents)) {
-            Map<String, Component> mergedComponents = new HashMap<>();
-            for (Component component : components) {
-                // Skip if can't uniquely identify component
-                if (bomRefExists(component)) {
-                    mergedComponents.put(component.getBomRef(), component);
-                }
-            }
-            components.clear();
-            for (Component component : sourcesComponents) {
-                // Skip if can't uniquely identify component
-                if (bomRefExists(component)) {
-                    String bomRef = component.getBomRef();
-                    Component existingComponent = mergedComponents.get(bomRef);
-                    // Duplicate found, see if we have any missing subcomponents
-                    if (existingComponent != null) {
-                        log.debug(
-                                "Component (with bom-ref: '{}') already exists, adding missing subcomponents",
-                                bomRef);
-                        adjustEmptySubComponents(existingComponent);
-                        addMissingComponents(existingComponent.getComponents(), component.getComponents());
-                    } else {
-                        log.debug("Adding missing component (with bom-ref: '{}')", bomRef);
-                        mergedComponents.put(bomRef, component);
-                    }
-                }
-            }
-            components.addAll(mergedComponents.values());
+        if (!SbomUtils.populatedComponents(sourcesComponents)) {
+            return;
         }
+        Map<String, Component> mergedComponents = new HashMap<>();
+        for (Component component : components) {
+            // Skip if can't uniquely identify component
+            if (bomRefExists(component)) {
+                mergedComponents.put(component.getBomRef(), component);
+            }
+        }
+        components.clear();
+        for (Component component : sourcesComponents) {
+            // Skip if can't uniquely identify component
+            if (bomRefExists(component)) {
+                String bomRef = component.getBomRef();
+                Component existingComponent = mergedComponents.get(bomRef);
+                // Duplicate found, see if we have any missing subcomponents
+                if (existingComponent != null) {
+                    log.debug(
+                            "Component (with bom-ref: '{}') already exists, adding missing subcomponents",
+                            bomRef);
+                    adjustEmptySubComponents(existingComponent);
+                    addMissingComponents(existingComponent.getComponents(), component.getComponents());
+                } else {
+                    log.debug("Adding missing component (with bom-ref: '{}')", bomRef);
+                    mergedComponents.put(bomRef, component);
+                }
+            }
+        }
+        components.addAll(mergedComponents.values());
     }
 
     /**
@@ -221,34 +222,35 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      */
     private void addMissingDependencies(List<Dependency> dependencies, List<Dependency> sourcesDependencies) {
         // Pointless proceeding unless there are dependencies from the sources manifest
-        if (SbomUtils.populatedDependencies(sourcesDependencies)) {
-            Map<String, Dependency> mergedDependencies = new HashMap<>();
-            for (Dependency dependency : dependencies) {
-                // Skip if can't uniquely identify dependency
-                if (dependency.getRef() != null) {
-                    mergedDependencies.put(dependency.getRef(), dependency);
-                }
-            }
-            dependencies.clear();
-            for (Dependency dependency : sourcesDependencies) {
-                String ref = dependency.getRef();
-                // Skip if can't uniquely identify dependency
-                if (ref != null) {
-                    Dependency existingDependency = mergedDependencies.get(ref);
-                    // Duplicate found, see if we have any missing sub-dependencies
-                    if (existingDependency != null) {
-                        log.debug("Dependency (with ref: '{}') already exists, adding missing sub-dependencies", ref);
-                        adjustEmptySubDependencies(existingDependency);
-                        addMissingDependencies(existingDependency.getDependencies(), dependency.getDependencies());
-                        addMissingDependencies(existingDependency.getProvides(), dependency.getProvides());
-                    } else {
-                        log.debug("Adding missing dependency (with ref: '{}')", ref);
-                        mergedDependencies.put(ref, dependency);
-                    }
-                }
-            }
-            dependencies.addAll(mergedDependencies.values());
+        if (!SbomUtils.populatedDependencies(sourcesDependencies)) {
+            return;
         }
+        Map<String, Dependency> mergedDependencies = new HashMap<>();
+        for (Dependency dependency : dependencies) {
+            // Skip if can't uniquely identify dependency
+            if (dependency.getRef() != null) {
+                mergedDependencies.put(dependency.getRef(), dependency);
+            }
+        }
+        dependencies.clear();
+        for (Dependency dependency : sourcesDependencies) {
+            String ref = dependency.getRef();
+            // Skip if can't uniquely identify dependency
+            if (ref != null) {
+                Dependency existingDependency = mergedDependencies.get(ref);
+                // Duplicate found, see if we have any missing sub-dependencies
+                if (existingDependency != null) {
+                    log.debug("Dependency (with ref: '{}') already exists, adding missing sub-dependencies", ref);
+                    adjustEmptySubDependencies(existingDependency);
+                    addMissingDependencies(existingDependency.getDependencies(), dependency.getDependencies());
+                    addMissingDependencies(existingDependency.getProvides(), dependency.getProvides());
+                } else {
+                    log.debug("Adding missing dependency (with ref: '{}')", ref);
+                    mergedDependencies.put(ref, dependency);
+                }
+            }
+        }
+        dependencies.addAll(mergedDependencies.values());
     }
 
     /**
