@@ -38,6 +38,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
+import org.jboss.sbomer.service.rest.api.v1beta2.config.ResolverConfig;
 
 import io.quarkus.arc.Arc;
 import io.vertx.core.eventbus.EventBus;
@@ -46,6 +47,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -97,21 +99,26 @@ public class EventsV1Beta2 {
         List<Event> events = Event.findAll().list();
 
         return mapper.toEventRecords(events);
+    }
 
+    @GET
+    @Path("/resolvers")
+    @Operation(summary = "Get registered event resolvers")
+    @APIResponse(
+            responseCode = "200",
+            description = "List of resolvers",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    public List<String> listResolvers() {
+
+        return List.of("rh-advisory", "pnc");
     }
 
     @POST
     @Path("/resolve")
-    @Parameter(
-            name = "type",
-            description = "External resolver type",
-            required = true,
-            examples = { @ExampleObject(value = "rh-advisory", name = "Red Hat advisory") })
-    @Parameter(
-            name = "id",
-            description = "External reference identifier",
-            required = true,
-            examples = { @ExampleObject(value = "1234", name = "Reference identifier") })
     @Operation(
             summary = "Create new event using resolver",
             description = "Creates a new event within the system. This event contains information about how the information required to instantiate generations should be resolved.")
@@ -124,7 +131,11 @@ public class EventsV1Beta2 {
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     @Transactional
-    public EventRecord create(@QueryParam("type") String resolverType, @QueryParam("id") String identifier) {
+    public EventRecord resolve(@Valid ResolverConfig config) {
+
+        if (config == null || config.getType() == null || config.getIdentifier() == null) {
+            throw new BadRequestException("Resolver or identifier were not provided");
+        }
 
         Event event = Event.builder()
                 .withId(RandomStringIdGenerator.generate())
@@ -134,17 +145,14 @@ public class EventsV1Beta2 {
                                 KEY_SOURCE,
                                 EventType.REST.toName(),
                                 KEY_RESOLVER,
-                                resolverType,
+                                config.getType(),
                                 KEY_IDENTIFIER,
-                                identifier))
+                                config.getIdentifier()))
                 .build()
                 .save();
 
-        // event = event.save();
-
         EventRecord record = mapper.toRecord(event);
 
-        // TODO: dirty :)
         Arc.container().beanManager().getEvent().fire(record);
 
         return record;

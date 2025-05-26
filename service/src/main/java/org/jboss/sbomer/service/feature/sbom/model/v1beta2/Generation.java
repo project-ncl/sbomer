@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -47,10 +48,14 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -93,6 +98,9 @@ public class Generation extends PanacheEntityBase {
     @Column(name = "finished")
     private Instant finished;
 
+    @ManyToOne
+    private Generation parent;
+
     @Column(name = "type", nullable = false)
     String type;
 
@@ -110,7 +118,8 @@ public class Generation extends PanacheEntityBase {
      */
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    GenerationStatus status;
+    @Default
+    GenerationStatus status = GenerationStatus.NEW;
 
     /**
      * <p>
@@ -144,6 +153,11 @@ public class Generation extends PanacheEntityBase {
     @ToString.Exclude
     @Schema(implementation = Map.class)
     private JsonNode otelMetadata;
+
+    @OneToMany(mappedBy = "generation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("timestamp ASC") // Ensures history is ordered chronologically
+    @Builder.Default
+    private List<GenerationStatusHistory> statuses = new ArrayList<>();
 
     @Transactional
     public Generation save() {

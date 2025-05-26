@@ -15,13 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto;
+package org.jboss.sbomer.service.rest.api.v1beta2.config;
 
-import java.time.Instant;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 
-import io.quarkus.resteasy.reactive.links.RestLinkId;
-
-public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished, String status,
-        String result, String reason) {
-
+@Slf4j
+@Data
+@SuperBuilder(setterPrefix = "with")
+@AllArgsConstructor
+@NoArgsConstructor
+public class ResolverConfig {
+    @NotBlank
+    String type;
+    @NotBlank
+    String identifier;
 }
