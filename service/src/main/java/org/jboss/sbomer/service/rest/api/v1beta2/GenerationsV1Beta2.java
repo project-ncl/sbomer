@@ -12,9 +12,9 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -49,7 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "SBOM Generations", description = "Endpoints for managing and interacting with SBOM generations.")
+@Tag(name = "v1beta2")
 @Slf4j
 public class GenerationsV1Beta2 {
 
@@ -84,9 +85,11 @@ public class GenerationsV1Beta2 {
         }
 
         Event event = Event.builder()
-                .withId(RandomStringIdGenerator.generate())
                 .withCreated(Instant.now())
-                .withMetadata(Map.of("source", EventType.REST.toName()))
+                .withMetadata(
+                        Map.of(
+                                EventsV1Beta2.KEY_SOURCE,
+                                String.format("%s:/api/v1beta2/generations", EventType.REST.toName())))
                 .withEvent(context)
                 .build()
                 .save();
@@ -115,7 +118,6 @@ public class GenerationsV1Beta2 {
             }
 
             Generation generation = Generation.builder()
-                    .withId(RandomStringIdGenerator.generate())
                     .withIdentifier(request.target().identifier())
                     .withConfig(config) // TODO: validate this and create effective config!!!
                     .withType(request.target().type())
@@ -125,8 +127,12 @@ public class GenerationsV1Beta2 {
             event.getGenerations().add(generation);
         });
 
-        return Response.accepted(
-                new GenerationsResponse(mapper.toRecord(event), mapper.toGenerationRecords(event.getGenerations())))
+        EventRecord eventRecord = mapper.toRecord(event);
+
+        Arc.container().beanManager().getEvent().fire(eventRecord);
+
+        return Response
+                .accepted(new GenerationsResponse(eventRecord, mapper.toGenerationRecords(event.getGenerations())))
                 .build();
     }
 
