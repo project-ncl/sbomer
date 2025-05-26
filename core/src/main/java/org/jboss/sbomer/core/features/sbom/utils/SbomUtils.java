@@ -992,7 +992,7 @@ public class SbomUtils {
 
     public static List<String> computeNVRFromContainerManifest(JsonNode jsonNode) {
         Bom bom = fromJsonNode(jsonNode);
-        if (bom == null || bom.getComponents() == null || bom.getComponents().isEmpty()) {
+        if (bom == null || !SbomUtils.populatedComponents(bom.getComponents())) {
             return List.of();
         }
         Component mainComponent = bom.getComponents().get(0);
@@ -1257,7 +1257,7 @@ public class SbomUtils {
     }
 
     public static void addMissingContainerHash(Bom bom) {
-        if (bom.getComponents() == null || bom.getComponents().isEmpty()) {
+        if (!SbomUtils.populatedComponents(bom.getComponents())) {
             return;
         }
 
@@ -1447,5 +1447,25 @@ public class SbomUtils {
                 .collect(Collectors.toSet());
         allPurls.addAll(purls);
         return allPurls;
+    }
+
+    /**
+     * Verify if components list is populated
+     *
+     * @param components the components
+     * @return {@code true} if components list is populated, {@code false} otherwise
+     */
+    public static boolean populatedComponents(List<Component> components) {
+        return components != null && !components.isEmpty();
+    }
+
+    /**
+     * Verify if dependencies list is populated
+     *
+     * @param dependencies the dependencies
+     * @return {@code true} if dependencies list is populated, {@code false} otherwise
+     */
+    public static boolean populatedDependencies(List<Dependency> dependencies) {
+        return dependencies != null && !dependencies.isEmpty();
     }
 }

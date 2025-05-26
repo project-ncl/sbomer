@@ -17,14 +17,14 @@
  */
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ATLAS_CLIENT_DELAY;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ATLAS_CLIENT_MAX_RETRIES;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.ATLAS_CLIENT_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.ATLAS_CLIENT_MAX_RETRIES;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

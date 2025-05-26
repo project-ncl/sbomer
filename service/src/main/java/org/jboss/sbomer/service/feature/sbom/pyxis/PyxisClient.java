@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.pyxis;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIENT_DELAY;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIENT_MAX_RETRIES;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PYXIS_CLIENT_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PYXIS_CLIENT_MAX_RETRIES;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -31,10 +31,10 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.UnauthorizedException;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.kerberos.PyxisKrb5ClientRequestFilter;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.faulttolerance.api.BeforeRetry;

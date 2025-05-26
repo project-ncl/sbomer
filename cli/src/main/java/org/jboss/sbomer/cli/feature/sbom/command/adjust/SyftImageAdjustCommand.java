@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
+import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -41,6 +42,13 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
     @Option(names = "--rpms", defaultValue = "false", negatable = true)
     boolean rpms;
 
+    @Option(
+            names = { "--sources" },
+            paramLabel = "FILE",
+            description = "Location of the sources manifest",
+            converter = PathConverter.class)
+    Path sources;
+
     @Override
     protected String getAdjusterType() {
         return "syft-image";
@@ -50,8 +58,9 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
     protected Bom doAdjust(Bom bom, Path workDir) {
         log.debug("Paths: {}", paths);
         log.debug("RPMs: {}", rpms);
+        log.debug("Sources: {}", sources != null ? sources.toAbsolutePath() : null);
 
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(workDir, paths, rpms);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(workDir, paths, rpms, sources);
 
         return adjuster.adjust(bom);
     }

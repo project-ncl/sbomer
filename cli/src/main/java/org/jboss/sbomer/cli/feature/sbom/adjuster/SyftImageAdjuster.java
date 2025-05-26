@@ -26,13 +26,16 @@ import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_L
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_SYFT_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingContainerHash;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
@@ -75,14 +78,20 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * If this is {@code null} or an empty list is provided -- all components will be retained in the manifest.
      * </p>
      */
-    List<String> paths = new ArrayList<>();
+    List<String> paths;
     /**
      * A flag to determine whether RPM packages should be retained in the generated manifests (value set to
      * {@code true}) or removed (value set to {@code false}).
      */
-    boolean includeRpms = true;
+    boolean includeRpms;
 
     final Path workDir;
+
+    /**
+     * Location of the sources manifest. Any components or dependencies missing from the container image manifest are
+     * merged into the generated manifest.
+     */
+    final Path sources;
 
     /**
      * <p>
@@ -98,14 +107,11 @@ public class SyftImageAdjuster extends AbstractAdjuster {
             CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX,
             CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX);
 
-    public SyftImageAdjuster(Path workDir) {
-        this.workDir = workDir;
-    }
-
-    public SyftImageAdjuster(Path workDir, List<String> paths, boolean includeRpms) {
+    public SyftImageAdjuster(Path workDir, List<String> paths, boolean includeRpms, Path sources) {
         this.workDir = workDir;
         this.paths = paths;
         this.includeRpms = includeRpms;
+        this.sources = sources;
     }
 
     /**
@@ -127,17 +133,29 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     @Override
     public Bom adjust(Bom bom) {
         log.debug(
-                "Starting adjustment of the manifest, parameters: configuration paths: [{}], includeRpms: [{}]",
+                "Starting adjustment of the manifest, parameters: configuration paths: [{}], includeRpms: [{}], sources manifest: {}",
                 paths,
-                includeRpms);
+                includeRpms,
+                sources != null ? sources.toAbsolutePath() : null);
+
+        // Add missing components and dependencies from sources manifest
+        adjustEmptyComponents(bom);
+        adjustEmptyDependencies(bom);
+        if (sources != null) {
+            log.debug("Adding missing components/dependencies to manifest...");
+            Bom sourcesBom = SbomUtils.fromPath(sources);
+            addMissingComponents(bom.getComponents(), sourcesBom.getComponents());
+            addMissingDependencies(bom.getDependencies(), sourcesBom.getDependencies());
+        } else {
+            log.warn("Skipped adding missing components/dependencies due to no sources manifest...");
+        }
 
         // Remove components from manifest according to 'paths' and 'includeRpms' parameters
         log.debug("Filtering out all components that do not meet requirements...");
 
-        adjustEmptyComponents(bom);
         filterComponents(bom.getComponents());
         adjustProperties(bom);
-        adjustNameAndPurl(bom, workDir);
+        adjustNameAndPurl(bom);
 
         cleanupComponents(bom);
 
@@ -157,6 +175,100 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     }
 
     /**
+     * Add missing components from sources manifest
+     *
+     * @param components the container image components
+     * @param sourcesComponents the sources components
+     */
+    private void addMissingComponents(List<Component> components, List<Component> sourcesComponents) {
+        // Pointless proceeding unless there are components from the sources manifest
+        if (SbomUtils.populatedComponents(sourcesComponents)) {
+            Map<String, Component> mergedComponents = new HashMap<>();
+            for (Component component : components) {
+                // Skip if can't uniquely identify component
+                if (bomRefExists(component)) {
+                    mergedComponents.put(component.getBomRef(), component);
+                }
+            }
+            components.clear();
+            for (Component component : sourcesComponents) {
+                // Skip if can't uniquely identify component
+                if (bomRefExists(component)) {
+                    String bomRef = component.getBomRef();
+                    Component existingComponent = mergedComponents.get(bomRef);
+                    // Duplicate found, see if we have any missing subcomponents
+                    if (existingComponent != null) {
+                        log.debug(
+                                "Component (with bom-ref: '{}') already exists, adding missing subcomponents",
+                                bomRef);
+                        adjustEmptySubComponents(existingComponent);
+                        addMissingComponents(existingComponent.getComponents(), component.getComponents());
+                    } else {
+                        log.debug("Adding missing component (with bom-ref: '{}')", bomRef);
+                        mergedComponents.put(bomRef, component);
+                    }
+                }
+            }
+            components.addAll(mergedComponents.values());
+        }
+    }
+
+    /**
+     * Add missing dependencies from sources manifest
+     *
+     * @param dependencies the container image dependencies
+     * @param sourcesDependencies the sources dependencies
+     */
+    private void addMissingDependencies(List<Dependency> dependencies, List<Dependency> sourcesDependencies) {
+        // Pointless proceeding unless there are dependencies from the sources manifest
+        if (SbomUtils.populatedDependencies(sourcesDependencies)) {
+            Map<String, Dependency> mergedDependencies = new HashMap<>();
+            for (Dependency dependency : dependencies) {
+                // Skip if can't uniquely identify dependency
+                if (dependency.getRef() != null) {
+                    mergedDependencies.put(dependency.getRef(), dependency);
+                }
+            }
+            dependencies.clear();
+            for (Dependency dependency : sourcesDependencies) {
+                String ref = dependency.getRef();
+                // Skip if can't uniquely identify dependency
+                if (ref != null) {
+                    Dependency existingDependency = mergedDependencies.get(ref);
+                    // Duplicate found, see if we have any missing sub-dependencies
+                    if (existingDependency != null) {
+                        log.debug("Dependency (with ref: '{}') already exists, adding missing sub-dependencies", ref);
+                        adjustEmptySubDependencies(existingDependency);
+                        addMissingDependencies(existingDependency.getDependencies(), dependency.getDependencies());
+                        addMissingDependencies(existingDependency.getProvides(), dependency.getProvides());
+                    } else {
+                        log.debug("Adding missing dependency (with ref: '{}')", ref);
+                        mergedDependencies.put(ref, dependency);
+                    }
+                }
+            }
+            dependencies.addAll(mergedDependencies.values());
+        }
+    }
+
+    /**
+     * Verify if component bom-ref exists
+     *
+     * @param component the component
+     * @return {@code true} if bom-ref exists, {@code false} otherwise
+     */
+    private boolean bomRefExists(Component component) {
+        if (component.getBomRef() == null) {
+            log.debug(
+                    "Component (of type '{}', cpe: '{}') does not have bom-ref assigned, skipping",
+                    component.getType(),
+                    component.getCpe());
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * If the bom components are null, initialize an empty list
      *
      * @param bom the bom to adjust
@@ -164,6 +276,42 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     private void adjustEmptyComponents(Bom bom) {
         if (bom.getComponents() == null) {
             bom.setComponents(new ArrayList<>());
+        }
+    }
+
+    /**
+     * If the bom dependencies are null, initialize an empty list
+     *
+     * @param bom the bom to adjust
+     */
+    private void adjustEmptyDependencies(Bom bom) {
+        if (bom.getDependencies() == null) {
+            bom.setDependencies(new ArrayList<>());
+        }
+    }
+
+    /**
+     * If the subcomponents are null, initialize an empty list
+     *
+     * @param component the component to adjust
+     */
+    private void adjustEmptySubComponents(Component component) {
+        if (component.getComponents() == null) {
+            component.setComponents(new ArrayList<>());
+        }
+    }
+
+    /**
+     * If the sub-dependencies are null, initialize an empty list
+     *
+     * @param dependency the dependency to adjust
+     */
+    private void adjustEmptySubDependencies(Dependency dependency) {
+        if (dependency.getDependencies() == null) {
+            dependency.setDependencies(new ArrayList<>());
+        }
+        if (dependency.getProvides() == null) {
+            dependency.setProvides(new ArrayList<>());
         }
     }
 
@@ -348,9 +496,8 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * name.
      *
      * @param bom the manifest to adjust
-     * @param workDir the working directory where the {@code skopeo.json} file is located
      */
-    private void adjustNameAndPurl(Bom bom, Path workDir) {
+    private void adjustNameAndPurl(Bom bom) {
         final Component mainComponent = bom.getMetadata().getComponent();
         ContainerImageInspectOutput inspectData;
 
@@ -482,7 +629,8 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // Adjust property names
         properties.forEach(p -> {
-            String newName = p.getName().replace("syft:", CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX);
+            String newName = p.getName()
+                    .replace(CONTAINER_PROPERTY_SYFT_PREFIX, CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX);
 
             // log.debug("Adjusting property name from '{}' to '{}'", p.getName(), newName);
 

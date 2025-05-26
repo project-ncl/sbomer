@@ -51,6 +51,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
@@ -66,7 +67,6 @@ import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -660,7 +660,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                                     .setDescription(desc.replace(buildManifest.getRootPurl(), rebuiltPurl));
                         }
                     }
-                    if (manifestBom.getComponents() != null && !manifestBom.getComponents().isEmpty()) {
+                    if (SbomUtils.populatedComponents(manifestBom.getComponents())) {
                         manifestBom.getComponents().get(0).setPurl(rebuiltPurl);
 
                         // 2.5 - If there are variants (this is an index image) update also the purls with the rebuilt
