@@ -27,10 +27,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
+import org.jboss.sbomer.service.rest.otel.TracingRestClient;
 
 import io.smallrye.faulttolerance.api.BeforeRetry;
 import io.smallrye.faulttolerance.api.FibonacciBackoff;
@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PyxisValidatingClient {
 
-    @RestClient
+    @TracingRestClient
     PyxisClient p;
 
     @Inject

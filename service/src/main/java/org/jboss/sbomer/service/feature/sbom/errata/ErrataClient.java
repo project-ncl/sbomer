@@ -47,6 +47,8 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
 import org.jboss.sbomer.service.feature.sbom.kerberos.ErrataKrb5ClientRequestFilter;
+import org.jboss.sbomer.service.rest.otel.SpanName;
+import org.jboss.sbomer.service.rest.otel.Traced;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.faulttolerance.api.BeforeRetry;
@@ -77,6 +79,8 @@ import jakarta.ws.rs.core.Response;
 public interface ErrataClient {
 
     // Retrieve the advisory data, the id could be advisory id or advisory name.
+    @Traced
+    @SpanName("errata.get")
     @GET
     @Path("/erratum/{id}")
     @Retry(
@@ -89,6 +93,8 @@ public interface ErrataClient {
     Errata getErratum(@PathParam("id") String erratumId);
 
     // Get the details of a product by its id or short name
+    @Traced
+    @SpanName("errata.product.get")
     @GET
     @Path("/products/{id}")
     @Retry(
@@ -101,6 +107,8 @@ public interface ErrataClient {
     ErrataProduct getProduct(@PathParam("id") String productId);
 
     // Get the details of a release by its id or name
+    @Traced
+    @SpanName("errata.release.get")
     @GET
     @Path("/releases/{id}")
     @Retry(
@@ -113,6 +121,8 @@ public interface ErrataClient {
     ErrataRelease getRelease(@PathParam("id") String releaseId);
 
     // Get the details of a variant by its name or id
+    @Traced
+    @SpanName("errata.variant.get")
     @GET
     @Path("/variants/{id}")
     @Retry(
@@ -125,6 +135,8 @@ public interface ErrataClient {
     ErrataVariant getVariant(@PathParam("id") String variantId);
 
     // Get the details of a variant by its name or id
+    @Traced
+    @SpanName("errata.variants.get")
     @GET
     @Path("/variants")
     @Retry(
@@ -137,6 +149,8 @@ public interface ErrataClient {
     ErrataPage<ErrataVariant.VariantData> getAllVariants(@Valid @BeanParam ErrataQueryParameters pageParameters);
 
     // Add a comment to an advisory. Example request body: {"comment": "This is my comment"}
+    @Traced
+    @SpanName("errata.comment.add")
     @POST
     @Path("/erratum/{id}/add_comment")
     @Retry(
@@ -149,6 +163,8 @@ public interface ErrataClient {
     Errata addCommentToErratum(@PathParam("id") String erratumId, String comment);
 
     // Fetch the Brew builds associated with an advisory.
+    @Traced
+    @SpanName("errata.build_list.get")
     @GET
     @Path("/erratum/{id}/builds_list")
     @Retry(
@@ -161,6 +177,8 @@ public interface ErrataClient {
     ErrataBuildList getBuildsList(@PathParam("id") String erratumId);
 
     // Get the CDN repositories
+    @Traced
+    @SpanName("errata.cdn_repos.get")
     @GET
     @Path("/cdn_repos")
     @Retry(

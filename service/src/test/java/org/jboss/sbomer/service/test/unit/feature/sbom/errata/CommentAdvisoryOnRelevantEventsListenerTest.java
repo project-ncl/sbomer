@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.dto.BaseSbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
@@ -35,6 +34,7 @@ import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.otel.TracingRestClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
@@ -57,7 +57,7 @@ public class CommentAdvisoryOnRelevantEventsListenerTest {
     SbomService sbomService;
 
     @InjectMock
-    @RestClient
+    @TracingRestClient
     ErrataClient errataClient;
 
     public static class MyCustomConfig implements QuarkusTestProfile {

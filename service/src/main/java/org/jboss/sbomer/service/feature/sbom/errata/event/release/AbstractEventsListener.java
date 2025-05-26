@@ -25,7 +25,6 @@ import java.util.Set;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.component.evidence.Identity;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -39,6 +38,7 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
+import org.jboss.sbomer.service.rest.otel.TracingRestClient;
 import org.jboss.sbomer.service.stats.StatsService;
 
 import jakarta.inject.Inject;
@@ -63,7 +63,7 @@ public class AbstractEventsListener {
     public static final String PURL_LIST = "purl_list";
 
     @Inject
-    @RestClient
+    @TracingRestClient
     protected ErrataClient errataClient;
 
     @Inject
