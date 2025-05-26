@@ -76,7 +76,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
      *
      * @return the list of custom error messages
      */
-    List<String> customErrors() {
+    List<String> customErrors(T ex) {
         return new ArrayList<>();
     }
 
@@ -102,7 +102,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
                 .resource(uriInfo.getPath())
                 .errorId(generateErrorId())
                 .error(getStatus(ex).getReasonPhrase())
-                .errors(customErrors())
+                .errors(customErrors(ex))
                 .message(errorMessage(ex))
                 .build();
     }
