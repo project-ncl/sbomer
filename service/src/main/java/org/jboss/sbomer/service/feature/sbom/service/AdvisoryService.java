@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.koji.KojiClientSession;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
@@ -81,6 +80,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.rest.otel.TracingRestClient;
 import org.slf4j.MDC;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -104,7 +104,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AdvisoryService {
 
     @Inject
-    @RestClient
+    @TracingRestClient
     @Setter
     ErrataClient errataClient;
 

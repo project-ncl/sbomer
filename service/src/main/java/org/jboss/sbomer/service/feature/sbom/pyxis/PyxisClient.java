@@ -35,6 +35,8 @@ import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.kerberos.PyxisKrb5ClientRequestFilter;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
+import org.jboss.sbomer.service.rest.otel.SpanName;
+import org.jboss.sbomer.service.rest.otel.Traced;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.faulttolerance.api.BeforeRetry;
@@ -69,6 +71,8 @@ public interface PyxisClient {
             "data.repositories.published");
     List<String> REPOSITORIES_REGISTRY_INCLUDES = List.of("_id", "registry", "repository", "requires_terms");
 
+    @Traced
+    @SpanName("pyxis.repository.details.get")
     @GET
     @Path("/images/nvr/{nvr}")
     @Retry(
@@ -82,6 +86,8 @@ public interface PyxisClient {
             @PathParam("nvr") String nvr,
             @QueryParam("include") List<String> includes);
 
+    @Traced
+    @SpanName("pyxis.repository.get")
     @GET
     @Path("/repositories/registry/{registry}/repository/{repository}")
     @Retry(
