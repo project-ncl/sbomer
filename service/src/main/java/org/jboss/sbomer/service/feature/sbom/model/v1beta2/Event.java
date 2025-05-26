@@ -52,10 +52,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -134,7 +137,8 @@ public class Event extends PanacheEntityBase {
      */
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private EventStatus status;
+    @Default
+    private EventStatus status = EventStatus.NEW;
 
     /**
      * A human-readable description of the status.
@@ -156,6 +160,11 @@ public class Event extends PanacheEntityBase {
     @JsonManagedReference("event-generation")
     @Builder.Default
     private List<Generation> generations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("timestamp ASC")
+    @Builder.Default
+    private List<EventStatusHistory> statuses = new ArrayList<>();
 
     @Transactional
     public Event save() {
