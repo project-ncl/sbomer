@@ -29,6 +29,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 
@@ -51,6 +52,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -111,7 +113,7 @@ public class Generation extends PanacheEntityBase {
     @Column(name = "config")
     @ToString.Exclude
     @Schema(implementation = Map.class)
-    private JsonNode config; // FIXME: I think this should be generic, to cover everything, even the future types
+    private JsonNode config;
 
     /**
      * Identifier of the status.
@@ -158,6 +160,13 @@ public class Generation extends PanacheEntityBase {
     @OrderBy("timestamp ASC") // Ensures history is ordered chronologically
     @Builder.Default
     private List<GenerationStatusHistory> statuses = new ArrayList<>();
+
+    @PrePersist
+    protected void onPrePersist() {
+        if (this.id == null) {
+            this.id = RandomStringIdGenerator.generate();
+        }
+    }
 
     @Transactional
     public Generation save() {
