@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.resolver;
+package org.jboss.sbomer.service.v1beta2.resolver;
 
 public interface Resolver {
     public static final String KEY_RESOLVER = "resolver";
