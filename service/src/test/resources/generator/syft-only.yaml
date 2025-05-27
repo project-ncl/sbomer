@@ -1,0 +1,40 @@
+defaultGeneratorMappings:
+  - targetType: "CONTAINER_IMAGE"
+    generators: ["syft"]
+generatorProfiles:
+  - name: "syft"
+    description: "Syft is a CLI tool and library for generating a Software Bill of Materials (SBOM) from container images and filesystems."
+    versions:
+      - version: "1.26.1"
+        supportedTargetTypes:
+          ["CONTAINER_IMAGE", "FILESYSTEM", "DIRECTORY", "RPM_PACKAGE"]
+        # Schema for custom configuration for the Syft generator.
+        # Below schema is made up!
+        schema:
+          $schema: https://json-schema.org/draft/2020-12/schema
+          description: Syft generator configuration schema
+          type: "object"
+          properties:
+            scope:
+              type: "string"
+              enum: ["Squashed", "AllLayers"]
+              default: "Squashed"
+              description: "Selection of layers to catalog."
+
+            verbosity:
+              type: "integer"
+              minimum: 0
+              default: 1
+              description: "Log verbosity level."
+
+            base-path:
+              type: "string"
+              description: "Base directory to resolve paths from, for directory scans."
+
+          additionalProperties: false
+        # Supported output formats
+        supportedFormats: ["CYCLONEDX_1.6_JSON", "SPDX_2.3_JSON"]
+        # Default resources for the generator execution. Can be adjusted with custom configuration per generation.
+        defaultResources:
+          requests: { "cpu": "500m", "memory": "1Gi" }
+          limits: { "cpu": "1500m", "memory": "3Gi" }
