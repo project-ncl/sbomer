@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -22,6 +23,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatu
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.UpdatePayload;
+import org.jboss.sbomer.service.v1beta2.generator.GeneratorProfileReader;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -44,6 +46,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1beta2/generations")
@@ -52,10 +55,18 @@ import lombok.extern.slf4j.Slf4j;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "v1beta2")
 @Slf4j
+@NoArgsConstructor
 public class GenerationsV1Beta2 {
 
-    @Inject
     V1Beta2Mapper mapper;
+
+    GeneratorProfileReader generatorProfileReader;
+
+    @Inject
+    public GenerationsV1Beta2(V1Beta2Mapper mapper, GeneratorProfileReader generatorProfileReader) {
+        this.mapper = mapper;
+        this.generatorProfileReader = generatorProfileReader;
+    }
 
     @POST
     @Operation(summary = "Request SBOM generations")

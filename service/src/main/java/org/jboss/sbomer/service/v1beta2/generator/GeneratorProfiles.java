@@ -1,8 +1,11 @@
-package org.jboss.sbomer.service.feature.sbom.model.v1beta2.generator;
+package org.jboss.sbomer.service.v1beta2.generator;
 
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+record GeneratorProfilesConfig(List<GeneratorProfile> generatorProfiles) {
+}
 
 /**
  * Defines the profile for a type of generator, including all its supported versions.
@@ -48,4 +51,7 @@ record ResourceRequirement(String cpu, String memory) {
  * @param generators a list of generators that support given type. First in the list is the preferred generator.
  */
 record GeneratorMappingEntry(String type, List<String> generators) {
+}
+
+record GeneratorMappings(List<GeneratorMappingEntry> mappings) {
 }

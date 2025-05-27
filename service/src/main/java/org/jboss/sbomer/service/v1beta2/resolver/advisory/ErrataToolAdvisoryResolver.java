@@ -15,38 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.resolver.advisory;
+package org.jboss.sbomer.service.v1beta2.resolver.advisory;
 
 import java.util.List;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
-import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
-import org.jboss.sbomer.service.resolver.AbstractResolver;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHistory;
+import org.jboss.sbomer.service.v1beta2.resolver.AbstractResolver;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
+@NoArgsConstructor
 @Slf4j
-public class ErrataToolAdvisoryEventListener extends AbstractResolver {
+public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
     public static final String RESOLVER_TYPE = "et-advisory";
 
-    public ErrataToolAdvisoryEventListener() {
-
-    }
-
     @Inject
-    public ErrataToolAdvisoryEventListener(ManagedExecutor managedExecutor) {
+    public ErrataToolAdvisoryResolver(ManagedExecutor managedExecutor) {
         super(managedExecutor);
     }
 
@@ -79,8 +75,10 @@ public class ErrataToolAdvisoryEventListener extends AbstractResolver {
                 .withEvents(List.of(event))
                 .build();
 
-        event.getGenerations().add(generation);
+        // Create status update
+        new GenerationStatusHistory(generation, generation.getStatus().name(), "Initial creation").save();
 
+        event.getGenerations().add(generation);
     }
 
     public void resolveAdvisory(String advisoryId) {

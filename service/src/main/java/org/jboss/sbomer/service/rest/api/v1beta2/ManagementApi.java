@@ -1,5 +1,6 @@
 package org.jboss.sbomer.service.rest.api.v1beta2;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -7,6 +8,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
@@ -24,11 +26,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
 
 @Schema(description = "Payload to request the replay of an external event to be handled by a particular resolver.")
@@ -57,8 +62,24 @@ public class ManagementApi {
     @Inject
     V1Beta2Mapper mapper;
 
+    @GET
+    @Path("/event/resolvers")
+    @Operation(summary = "Get supported event resolvers")
+    @APIResponse(
+            responseCode = "200",
+            description = "List of supported resolvers",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    public List<String> listResolvers() {
+
+        return List.of("et-advisory");
+    }
+
     @POST
-    @Path("/events/replay")
+    @Path("/event/replay")
     @Operation(
             summary = "Initiate replay of an external event",
             description = "Requests SBOMer to command a specified listener type to reprocess a given external event. "
@@ -77,7 +98,7 @@ public class ManagementApi {
             responseCode = "500",
             description = "Internal server error (e.g., failed to dispatch command to listener queue).")
     @Transactional
-    public Response replayExternalEvent(@NotNull @Valid ReplayRequest payload) {
+    public Response replayExternalEvent(@NotNull @Valid ReplayRequest payload, @Context UriInfo uriInfo) {
         log.info(
                 "Received request to replay external event via listener type '{}' for external eventId '{}'",
                 payload.resolver(),
@@ -88,21 +109,17 @@ public class ManagementApi {
         try {
             request = ObjectMapperProvider.json().valueToTree(payload);
         } catch (IllegalArgumentException e) {
-            log.error(
-                    "Critical error: Failed to convert ReplayExternalEventRequest DTO to JsonNode. This should not happen with valid DTOs.",
-                    e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"Internal error processing request payload.\"}")
-                    .build();
+            log.error("Failed to convert the replay request payload: {} to JsonNode", request, e);
+            throw new ApplicationException("Failed to convert received replay request payload", e);
         }
 
+        // Create an event
         Event event = Event.builder()
-                // .withEventType("EXTERNAL_EVENT_REPLAY_INITIATED") // Specific type for this action
                 .withEvent(request)
                 .withMetadata(
                         Map.of(
                                 EventsV1Beta2.KEY_SOURCE,
-                                String.format("%s:/api/v1beta2/management", EventType.REST.toName()),
+                                String.format("%s:%s", EventType.REST.toName(), uriInfo.getPath()),
                                 EventsV1Beta2.KEY_RESOLVER,
                                 payload.resolver(),
                                 EventsV1Beta2.KEY_IDENTIFIER,
@@ -110,12 +127,16 @@ public class ManagementApi {
                 .build()
                 .save();
 
+        // Store new status change
         new EventStatusHistory(event, event.getStatus().name(), "Initial creation").save();
 
+        // Convert to DTO
         EventRecord eventRecord = mapper.toRecord(event);
 
+        // Fire an event so that resolver could handle it
         Arc.container().beanManager().getEvent().fire(eventRecord);
 
+        // Return DTO to user
         return Response.status(Response.Status.ACCEPTED).entity(eventRecord).build();
     }
 

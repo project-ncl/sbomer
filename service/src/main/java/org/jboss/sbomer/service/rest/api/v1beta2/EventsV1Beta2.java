@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -32,22 +33,17 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
-import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
-import org.jboss.sbomer.service.rest.api.v1beta2.config.ResolverConfig;
 
-import io.quarkus.arc.Arc;
 import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -102,61 +98,6 @@ public class EventsV1Beta2 {
     }
 
     @GET
-    @Path("/resolvers")
-    @Operation(summary = "Get registered event resolvers")
-    @APIResponse(
-            responseCode = "200",
-            description = "List of resolvers",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public List<String> listResolvers() {
-
-        return List.of("rh-advisory", "pnc");
-    }
-
-    @POST
-    @Path("/resolve")
-    @Operation(
-            summary = "Create new event using resolver",
-            description = "Creates a new event within the system. This event contains information about how the information required to instantiate generations should be resolved.")
-    @APIResponse(
-            responseCode = "200",
-            description = "A new event",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @Transactional
-    public EventRecord resolve(@Valid ResolverConfig config) {
-
-        if (config == null || config.getType() == null || config.getIdentifier() == null) {
-            throw new BadRequestException("Resolver or identifier were not provided");
-        }
-
-        Event event = Event.builder()
-                .withMetadata(
-                        Map.of(
-                                KEY_SOURCE,
-                                String.format("%s:/api/v1beta2/events/resolve", EventType.REST.toName()),
-                                KEY_RESOLVER,
-                                config.getType(),
-                                KEY_IDENTIFIER,
-                                config.getIdentifier()))
-                .build()
-                .save();
-
-        EventRecord record = mapper.toRecord(event);
-
-        Arc.container().beanManager().getEvent().fire(record);
-
-        return record;
-    }
-
-    @GET
     @Path("/{id}")
     @Operation(summary = "Get specific event", description = "Get event by the identifier")
     @Parameter(
@@ -207,7 +148,8 @@ public class EventsV1Beta2 {
             examples = { @ExampleObject(value = "88CA2291D4014C6", name = "Event identifier") })
     @Parameter(
             name = "force",
-            description = "Whether the retry should be considered a regeneration request (when set to true) or it should just regenerate failed generations and reuse successfully finished ones (when set to false)")
+            description = "Whether the retry should be considered a regeneration request (when set to true) or it should just regenerate failed generations and reuse successfully finished ones (when set to false)",
+            schema = @Schema(type = SchemaType.BOOLEAN, defaultValue = "false"))
     @APIResponse(
             responseCode = "200",
             description = "Event content",
@@ -233,7 +175,7 @@ public class EventsV1Beta2 {
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = ErrorResponse.class)))
     @Transactional
-    public EventRecord retry(@PathParam("id") String eventId, @PathParam("force") boolean force) {
+    public EventRecord retry(@PathParam("id") String eventId, @QueryParam("force") boolean force) {
         Event parentEvent = Event.findById(eventId); // NOSONAR
 
         // TODO: handle force
