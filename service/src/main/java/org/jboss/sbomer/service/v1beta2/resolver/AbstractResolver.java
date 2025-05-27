@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.resolver;
+package org.jboss.sbomer.service.v1beta2.resolver;
 
 import java.util.Objects;
 
@@ -29,16 +29,15 @@ import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@NoArgsConstructor
 public abstract class AbstractResolver implements Resolver {
 
     ManagedExecutor managedExecutor;
 
-    public AbstractResolver() {
-
-    }
 
     public AbstractResolver(ManagedExecutor managedExecutor) {
         this.managedExecutor = managedExecutor;

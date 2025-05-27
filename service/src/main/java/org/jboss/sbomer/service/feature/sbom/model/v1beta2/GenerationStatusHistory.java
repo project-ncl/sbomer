@@ -21,6 +21,12 @@ import lombok.Setter;
 @RegisterForReflection
 public class GenerationStatusHistory extends BaseStatusHistory {
 
+    public GenerationStatusHistory(Generation generation, String status, String reason) {
+        this.generation = generation;
+        this.status = status;
+        this.reason = reason;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "generation_id", nullable = false, updatable = false)
     private Generation generation;
