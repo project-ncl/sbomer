@@ -22,7 +22,6 @@ import java.util.List;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHistory;
 import org.jboss.sbomer.service.v1beta2.resolver.AbstractResolver;

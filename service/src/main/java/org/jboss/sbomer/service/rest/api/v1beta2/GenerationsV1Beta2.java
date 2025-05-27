@@ -40,7 +40,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatu
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.UpdatePayload;
-import org.jboss.sbomer.service.v1beta2.generator.GeneratorProfileReader;
+import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigReader;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -77,10 +77,10 @@ public class GenerationsV1Beta2 {
 
     V1Beta2Mapper mapper;
 
-    GeneratorProfileReader generatorProfileReader;
+    GeneratorConfigReader generatorProfileReader;
 
     @Inject
-    public GenerationsV1Beta2(V1Beta2Mapper mapper, GeneratorProfileReader generatorProfileReader) {
+    public GenerationsV1Beta2(V1Beta2Mapper mapper, GeneratorConfigReader generatorProfileReader) {
         this.mapper = mapper;
         this.generatorProfileReader = generatorProfileReader;
     }
