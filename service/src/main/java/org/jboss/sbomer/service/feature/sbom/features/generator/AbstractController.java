@@ -346,10 +346,13 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                             term.getReason(),
                             term.getMessage() != null ? (", message=" + term.getMessage()) : " ");
                 }
-             }
+            }
 
             return null;
-        }).filter(Objects::nonNull).findFirst().orElse("TaskRun failed, but no step had non-zero exit code or OOMKilled reason.");
+        })
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse("TaskRun failed, but no step had non-zero exit code or OOMKilled reason.");
     }
 
     @Override
