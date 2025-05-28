@@ -110,10 +110,10 @@ public class Generation extends PanacheEntityBase {
     String identifier;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "config")
+    @Column(name = "request")
     @ToString.Exclude
     @Schema(implementation = Map.class)
-    private JsonNode config;
+    private JsonNode request;
 
     /**
      * Identifier of the status.

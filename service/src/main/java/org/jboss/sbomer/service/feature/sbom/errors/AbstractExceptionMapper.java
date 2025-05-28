@@ -132,6 +132,8 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
         // Prepare default error entity for a given exception
         ErrorResponse errorResponse = errorResponse(ex);
 
+        log.error("ErrorId: '{}'", errorResponse.getErrorId());
+
         // Prepare initial response builder with default 500 error and JSON content type
         ResponseBuilder responseBuilder = Response.status(getStatus(ex))
                 .entity(errorResponse)

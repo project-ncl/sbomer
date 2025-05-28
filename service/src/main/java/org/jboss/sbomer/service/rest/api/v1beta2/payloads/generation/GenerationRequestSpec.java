@@ -33,5 +33,5 @@ import jakarta.validation.constraints.NotNull;
  * @param target Information about the deliverable to manifest.
  * @param config Optional configuration for the generator that will take care of manifesting.
  */
-public record GenerationRequestSpec(@NotNull @Valid TargetSpec target, @Valid ConfigSpec config) {
+public record GenerationRequestSpec(@NotNull @Valid TargetSpec target, @Valid GeneratorVersionConfigSpec generator) {
 }

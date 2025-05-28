@@ -1,16 +1,22 @@
 package org.jboss.sbomer.service.test.unit.feature.sbom.generator;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.test.TestResources;
-import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigReader;
+import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
+import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GeneratorVersionConfigSpec;
+import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.TargetSpec;
+import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigProvider;
 import org.jboss.sbomer.service.v1beta2.generator.GeneratorsConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +32,7 @@ public class GeneratorConfigReaderTest {
 
     private static final String CM_NAME = "sbomer-generators-config";
 
-    GeneratorConfigReader generatorProfileReader;
+    GeneratorConfigProvider generatorConfigProvider;
 
     KubernetesClient kubernetesClientMock;
     MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> mockedConfigMapOps;
@@ -39,12 +45,12 @@ public class GeneratorConfigReaderTest {
 
         when(kubernetesClientMock.configMaps()).thenReturn(mockedConfigMapOps);
 
-        generatorProfileReader = new GeneratorConfigReader(kubernetesClientMock);
+        generatorConfigProvider = new GeneratorConfigProvider(kubernetesClientMock);
     }
 
     @Test
     void shouldHandleNonExistingCm() {
-        assertNull(generatorProfileReader.getConfig());
+        assertNull(generatorConfigProvider.getGeneratorsConfig());
     }
 
     @Test
@@ -52,7 +58,7 @@ public class GeneratorConfigReaderTest {
         ConfigMap expectedConfigMap = new ConfigMapBuilder().withNewMetadata().withName(CM_NAME).endMetadata().build();
 
         when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
-        assertNull(generatorProfileReader.getConfig());
+        assertNull(generatorConfigProvider.getGeneratorsConfig());
     }
 
     @Test
@@ -65,9 +71,38 @@ public class GeneratorConfigReaderTest {
 
         when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
 
-        GeneratorsConfig config = generatorProfileReader.getConfig();
+        GeneratorsConfig config = generatorConfigProvider.getGeneratorsConfig();
         assertNotNull(config);
         assertTrue(config.defaultGeneratorMappings().get(0).targetType().equals("CONTAINER_IMAGE"));
         assertTrue(config.generatorProfiles().get(0).name().equals("syft"));
+    }
+
+    @Test
+    void shouldHandleCaseWhenNoRequestIsProvided() {
+        assertThrows(ClientException.class, () -> {
+            generatorConfigProvider.buildEffectiveConfig(null);
+        });
+    }
+
+    @Test
+    void shouldCreateEffectiveConfigWhenNoConfigIsProvided() throws IOException {
+        ConfigMap expectedConfigMap = new ConfigMapBuilder().withNewMetadata()
+                .withName(CM_NAME)
+                .endMetadata()
+                .addToData("generators-config.yaml", TestResources.asString("generator/syft-only.yaml"))
+                .build();
+
+        when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
+
+        GeneratorVersionConfigSpec effectiveConfig = generatorConfigProvider
+                .buildEffectiveConfig(new GenerationRequestSpec(new TargetSpec("image", "CONTAINER_IMAGE"), null));
+
+        assertEquals("syft", effectiveConfig.generator().name());
+        assertEquals("1.26.1", effectiveConfig.generator().version());
+        assertEquals("CYCLONEDX_1.6_JSON", effectiveConfig.config().format());
+        assertEquals("500m", effectiveConfig.config().resources().requests().cpu());
+        assertEquals("1Gi", effectiveConfig.config().resources().requests().memory());
+        assertEquals("1500m", effectiveConfig.config().resources().limits().cpu());
+        assertEquals("3Gi", effectiveConfig.config().resources().limits().memory());
     }
 }

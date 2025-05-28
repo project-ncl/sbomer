@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -29,7 +28,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.utils.ObjectMapperUtils;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
@@ -37,14 +36,11 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
+import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.UpdatePayload;
-import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigReader;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
+import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigProvider;
 
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -61,8 +57,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -73,20 +71,20 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "v1beta2")
 @Slf4j
 @NoArgsConstructor
-public class GenerationsV1Beta2 {
+public class GenerationsApi {
 
     V1Beta2Mapper mapper;
 
-    GeneratorConfigReader generatorProfileReader;
+    GeneratorConfigProvider generatorConfigProvider;
 
     @Inject
-    public GenerationsV1Beta2(V1Beta2Mapper mapper, GeneratorConfigReader generatorProfileReader) {
+    public GenerationsApi(V1Beta2Mapper mapper, GeneratorConfigProvider generatorConfigProvider) {
         this.mapper = mapper;
-        this.generatorProfileReader = generatorProfileReader;
+        this.generatorConfigProvider = generatorConfigProvider;
     }
 
     @POST
-    @Operation(summary = "Request SBOM generations")
+    @Operation(summary = "Request manifest generations")
     @APIResponse(
             responseCode = "202",
             description = "Generations request accepted",
@@ -101,54 +99,31 @@ public class GenerationsV1Beta2 {
                     schema = @Schema(type = SchemaType.ARRAY, implementation = GenerationsResponse.class)))
     @APIResponse(responseCode = "400", description = "Invalid request payload")
     @Transactional
-    public Response requestGenerations(@NotNull @Valid GenerationsRequest payload) {
-        JsonNode context = null;
-
-        try {
-            context = ObjectMapperProvider.json().readTree(ObjectMapperProvider.json().writeValueAsString(payload));
-        } catch (JsonMappingException e) {
-            log.warn("Failed to map originatorContext to JsonNode", e);
-        } catch (JsonProcessingException e) {
-            log.warn("Failed to process originatorContext JSON", e);
-        }
+    public Response requestGenerations(@NotNull @Valid GenerationsRequest payload, @Context UriInfo uriInfo) {
 
         Event event = Event.builder()
                 .withCreated(Instant.now())
                 .withMetadata(
                         Map.of(
-                                EventsV1Beta2.KEY_SOURCE,
-                                String.format("%s:/api/v1beta2/generations", EventType.REST.toName())))
-                .withEvent(context)
+                                EventsApi.KEY_SOURCE,
+                                String.format("%s:%s", EventType.REST.toName(), uriInfo.getPath())))
+                .withRequest(ObjectMapperUtils.toJsonNode(payload))
                 .build()
                 .save();
 
         payload.requests().forEach(request -> {
-            log.debug("Processing request: {}", request.target());
-            if (request.config() != null && request.config().resources() != null) {
-                if (request.config().resources().requests() != null) {
-                    log.debug("Requested specific requests resources: {}", request.config().resources().requests());
-                }
+            log.debug("Processing request: '{}'", request.target());
 
-                if (request.config().resources().limits() != null) {
-                    log.debug("Requested specific limit resources: {}", request.config().resources().limits());
-                }
-            }
+            // Crucial step. From a request, create an effective config which selects the appropriate generator and
+            // prepares its config.
+            GenerationRequestSpec effectiveRequest = generatorConfigProvider.buildEffectiveRequest(request);
 
-            JsonNode config = null;
-
-            try {
-                config = ObjectMapperProvider.json()
-                        .readTree(ObjectMapperProvider.json().writeValueAsString(request.config()));
-            } catch (JsonMappingException e) {
-                log.warn("Failed to map originatorContext to JsonNode", e);
-            } catch (JsonProcessingException e) {
-                log.warn("Failed to process originatorContext JSON", e);
-            }
+            log.debug("Effective request: '{}'", effectiveRequest);
 
             Generation generation = Generation.builder()
-                    .withIdentifier(request.target().identifier())
-                    .withConfig(config) // TODO: validate this and create effective config!!!
                     .withType(request.target().type())
+                    .withIdentifier(request.target().identifier())
+                    .withRequest(ObjectMapperUtils.toJsonNode(effectiveRequest))
                     .build()
                     .save();
 

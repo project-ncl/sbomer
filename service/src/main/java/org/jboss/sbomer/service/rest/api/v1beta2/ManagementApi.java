@@ -25,22 +25,19 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.utils.ObjectMapperUtils;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import org.jboss.sbomer.service.rest.api.v1beta2.payloads.management.ReplayRequest;
 
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -52,21 +49,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
-
-@Schema(description = "Payload to request the replay of an external event to be handled by a particular resolver.")
-record ReplayRequest(
-        @NotBlank @Schema(
-                description = "Identifier for the resolver type responsible for this kind of external event.",
-                example = "et-advisory") String resolver,
-
-        @NotBlank @Schema(
-                description = "The unique identifier the event known to  particular resolver.",
-                example = "1234") String identifier,
-
-        @Schema(
-                description = "Reason for initiating this replay. For audit purposes.",
-                example = "Original event missed during system maintenance on 2024-01-10.") String reason) {
-}
 
 @Path("/api/v1beta2/management")
 @ApplicationScoped
@@ -92,54 +74,41 @@ public class ManagementApi {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public List<String> listResolvers() {
 
+        // TODO: dummy
         return List.of("et-advisory");
     }
 
     @POST
-    @Path("/event/replay")
+    @Path("/event/handle")
     @Operation(
-            summary = "Initiate replay of an external event",
-            description = "Requests SBOMer to command a specified listener type to reprocess a given external event. "
-                    + "This creates an initial 'Replay Initiation Event' in SBOMer to track this request. "
-                    + "The ID of this created Event is returned and serves as the primary handle for tracking the overall reprocessing flow.")
+            summary = "Initiate handling of an external event",
+            description = "A way to manually process an external event supported by a given resolver.")
     @APIResponse(
             responseCode = "202",
-            description = "Replay initiation request accepted. The returned EventRecord tracks this initiation step.",
+            description = "Request accepted.",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = EventRecord.class)))
-    @APIResponse(
-            responseCode = "400",
-            description = "Invalid request payload (e.g., missing listenerType or externalEventId).")
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error (e.g., failed to dispatch command to listener queue).")
+    @APIResponse(responseCode = "400", description = "Invalid request payload.")
+    @APIResponse(responseCode = "500", description = "Internal server error.")
     @Transactional
-    public Response replayExternalEvent(@NotNull @Valid ReplayRequest payload, @Context UriInfo uriInfo) {
+    public Response handleExternalEvent(@NotNull @Valid ReplayRequest payload, @Context UriInfo uriInfo) {
         log.info(
-                "Received request to replay external event via listener type '{}' for external eventId '{}'",
+                "Received request to handle external event via resolver of type '{}' and identifier: '{}'",
                 payload.resolver(),
                 payload.identifier());
 
-        JsonNode request = null;
-
-        try {
-            request = ObjectMapperProvider.json().valueToTree(payload);
-        } catch (IllegalArgumentException e) {
-            log.error("Failed to convert the replay request payload: {} to JsonNode", request, e);
-            throw new ApplicationException("Failed to convert received replay request payload", e);
-        }
-
         // Create an event
         Event event = Event.builder()
-                .withEvent(request)
+                // Convert payload to JsonNode
+                .withRequest(ObjectMapperUtils.toJsonNode(payload))
                 .withMetadata(
                         Map.of(
-                                EventsV1Beta2.KEY_SOURCE,
+                                EventsApi.KEY_SOURCE,
                                 String.format("%s:%s", EventType.REST.toName(), uriInfo.getPath()),
-                                EventsV1Beta2.KEY_RESOLVER,
+                                EventsApi.KEY_RESOLVER,
                                 payload.resolver(),
-                                EventsV1Beta2.KEY_IDENTIFIER,
+                                EventsApi.KEY_IDENTIFIER,
                                 payload.identifier()))
                 .build()
                 .save();
