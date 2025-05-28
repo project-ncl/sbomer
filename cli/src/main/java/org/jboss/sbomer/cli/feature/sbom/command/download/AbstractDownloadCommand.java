@@ -18,10 +18,12 @@
 package org.jboss.sbomer.cli.feature.sbom.command.download;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.jboss.sbomer.cli.feature.sbom.utils.otel.OtelCLIUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
@@ -41,11 +43,23 @@ public abstract class AbstractDownloadCommand implements Callable<Integer> {
 
             // Call the hook to set a context, if needed.
             addContext();
-            OtelCLIUtils.startOtel("CLI.download");
+
+            Map<String, String> attributes = Map.of(
+                    "params.downloader.type",
+                    getDownloaderType().toString(),
+                    "params.source",
+                    parent.getPath().toFile().getAbsolutePath(),
+                    "params.destination",
+                    parent.getOutputDir().toFile().getAbsolutePath());
+
+            OtelCLIUtils.startOtel(
+                    OtelCLIUtils.SBOMER_CLI_NAME,
+                    OtelHelper.getEffectiveClassName(this.getClass()) + ".download",
+                    attributes);
 
             log.info("Starting {} downloader", getDownloaderType());
 
-            doDownload(parent.getOutputDir());
+            doDownload(parent.getPath(), parent.getOutputDir());
 
             log.debug("{} downloader finished", getDownloaderType());
 
@@ -65,6 +79,6 @@ public abstract class AbstractDownloadCommand implements Callable<Integer> {
 
     protected abstract String getDownloaderType();
 
-    protected abstract void doDownload(Path outputDir);
+    protected abstract void doDownload(Path manifestPath, Path outputDir);
 
 }

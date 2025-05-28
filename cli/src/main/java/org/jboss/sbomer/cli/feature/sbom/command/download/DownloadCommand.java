@@ -36,6 +36,15 @@ import picocli.CommandLine.ScopeType;
 public class DownloadCommand {
 
     @Option(
+            names = { "-p", "--path" },
+            required = true,
+            paramLabel = "FILE",
+            description = "Location of the container image manifest file",
+            converter = PathConverter.class,
+            scope = ScopeType.INHERIT)
+    Path path;
+
+    @Option(
             names = { "-o", "--output-dir" },
             required = true,
             paramLabel = "DIR",
