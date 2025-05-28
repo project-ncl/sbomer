@@ -41,7 +41,7 @@ public class PncOperationAdjuster extends AbstractAdjuster {
                 String parentRef = dependency.getRef();
 
                 // Get the dependsOn list and remove entries that match the parent ref
-                if (SbomUtils.populatedDependencies(dependency.getDependencies())) {
+                if (SbomUtils.isNotEmpty(dependency.getDependencies())) {
                     dependency.getDependencies().removeIf(dependRef -> dependRef.getRef().equals(parentRef));
                 }
             }

@@ -242,7 +242,7 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
         } else {
             // Fallback: use the first component from the bom if available
             List<Component> components = rootBom.getComponents();
-            if (SbomUtils.populatedComponents(components)) {
+            if (SbomUtils.isNotEmpty(components)) {
                 metadata.setComponent(components.get(0));
             }
         }

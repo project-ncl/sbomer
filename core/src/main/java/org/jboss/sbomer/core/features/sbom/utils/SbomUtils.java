@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -992,7 +993,7 @@ public class SbomUtils {
 
     public static List<String> computeNVRFromContainerManifest(JsonNode jsonNode) {
         Bom bom = fromJsonNode(jsonNode);
-        if (bom == null || !SbomUtils.populatedComponents(bom.getComponents())) {
+        if (bom == null || !isNotEmpty(bom.getComponents())) {
             return List.of();
         }
         Component mainComponent = bom.getComponents().get(0);
@@ -1257,7 +1258,7 @@ public class SbomUtils {
     }
 
     public static void addMissingContainerHash(Bom bom) {
-        if (!SbomUtils.populatedComponents(bom.getComponents())) {
+        if (!isNotEmpty(bom.getComponents())) {
             return;
         }
 
@@ -1450,22 +1451,153 @@ public class SbomUtils {
     }
 
     /**
-     * Verify if components list is populated
+     * Verify if list is populated
      *
-     * @param components the components
-     * @return {@code true} if components list is populated, {@code false} otherwise
+     * @param list the list
+     * @return {@code true} if list is populated, {@code false} otherwise
      */
-    public static boolean populatedComponents(List<Component> components) {
-        return components != null && !components.isEmpty();
+    public static <T> boolean isNotEmpty(List<T> list) {
+        return list != null && !list.isEmpty();
     }
 
     /**
-     * Verify if dependencies list is populated
+     * Add missing components from one manifest to another
      *
-     * @param dependencies the dependencies
-     * @return {@code true} if dependencies list is populated, {@code false} otherwise
+     * @param targetComponents the target manifest components
+     * @param sourceComponents the source manifest components
      */
-    public static boolean populatedDependencies(List<Dependency> dependencies) {
-        return dependencies != null && !dependencies.isEmpty();
+    private static void addMissingComponents(List<Component> targetComponents, List<Component> sourceComponents) {
+        Map<String, Component> mergedComponents = new HashMap<>();
+        for (Component component : targetComponents) {
+            // Skip if can't uniquely identify component
+            if (bomRefExists(component)) {
+                mergedComponents.put(component.getBomRef(), component);
+            }
+        }
+        targetComponents.clear();
+        for (Component component : sourceComponents) {
+            // Skip if can't uniquely identify component
+            if (bomRefExists(component)) {
+                String bomRef = component.getBomRef();
+                Component existingComponent = mergedComponents.get(bomRef);
+                // Duplicate found, see if we have any missing subcomponents
+                if (existingComponent != null) {
+                    log.debug("Component (with bom-ref: '{}') already exists, adding missing subcomponents", bomRef);
+                    List<Component> subComponents = component.getComponents();
+                    // Pointless proceeding unless there are subcomponents from the source manifest
+                    if (isNotEmpty(subComponents)) {
+                        adjustEmptySubComponents(existingComponent);
+                        addMissingComponents(existingComponent.getComponents(), subComponents);
+                    }
+                } else {
+                    log.debug("Adding missing component (with bom-ref: '{}')", bomRef);
+                    mergedComponents.put(bomRef, component);
+                }
+            }
+        }
+        targetComponents.addAll(mergedComponents.values());
+    }
+
+    /**
+     * Add missing dependencies from one manifest to another
+     *
+     * @param targetDependencies the target manifest dependencies
+     * @param sourceDependencies the source manifest dependencies
+     */
+    private static void addMissingDependencies(
+            List<Dependency> targetDependencies,
+            List<Dependency> sourceDependencies) {
+        Map<String, Dependency> mergedDependencies = new HashMap<>();
+        for (Dependency dependency : targetDependencies) {
+            mergedDependencies.put(dependency.getRef(), dependency);
+        }
+        targetDependencies.clear();
+        for (Dependency dependency : sourceDependencies) {
+            String ref = dependency.getRef();
+            Dependency existingDependency = mergedDependencies.get(ref);
+            // Duplicate found, see if we have any missing sub-dependencies
+            if (existingDependency != null) {
+                log.debug("Dependency (with ref: '{}') already exists, adding missing sub-dependencies", ref);
+                List<Dependency> subDependencies = dependency.getDependencies();
+                // Pointless proceeding unless there are sub-dependencies from source manifest
+                if (isNotEmpty(subDependencies)) {
+                    adjustEmptySubDependencies(existingDependency);
+                    addMissingDependencies(existingDependency.getDependencies(), subDependencies);
+                }
+                List<Dependency> subProvides = dependency.getProvides();
+                // Pointless proceeding unless there are sub-provides from source manifest
+                if (isNotEmpty(subProvides)) {
+                    adjustEmptySubProvides(existingDependency);
+                    addMissingDependencies(existingDependency.getProvides(), subProvides);
+                }
+            } else {
+                log.debug("Adding missing dependency (with ref: '{}')", ref);
+                mergedDependencies.put(ref, dependency);
+            }
+        }
+        targetDependencies.addAll(mergedDependencies.values());
+    }
+
+    public static void addMissingComponentsAndDependencies(Bom targetBom, Bom sourceBom) {
+        List<Component> sourcesComponents = sourceBom.getComponents();
+        // Pointless proceeding unless there are components in source manifest
+        if (isNotEmpty(sourcesComponents)) {
+            addMissingComponents(targetBom.getComponents(), sourcesComponents);
+        }
+        List<Dependency> sourcesDependencies = sourceBom.getDependencies();
+        // Pointless proceeding unless there are dependencies in source manifest
+        if (isNotEmpty(sourcesDependencies)) {
+            addMissingDependencies(targetBom.getDependencies(), sourcesDependencies);
+        }
+    }
+
+    /**
+     * Verify if component bom-ref exists
+     *
+     * @param component the component
+     * @return {@code true} if bom-ref exists, {@code false} otherwise
+     */
+    private static boolean bomRefExists(Component component) {
+        if (component.getBomRef() == null) {
+            log.debug(
+                    "Component (of type '{}', cpe: '{}') does not have bom-ref assigned, skipping",
+                    component.getType(),
+                    component.getCpe());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * If the subcomponents are null, initialize an empty list
+     *
+     * @param component the component to adjust
+     */
+    private static void adjustEmptySubComponents(Component component) {
+        if (component.getComponents() == null) {
+            component.setComponents(new ArrayList<>());
+        }
+    }
+
+    /**
+     * If the sub-dependencies are null, initialize an empty list
+     *
+     * @param dependency the dependency to adjust
+     */
+    private static void adjustEmptySubDependencies(Dependency dependency) {
+        if (dependency.getDependencies() == null) {
+            dependency.setDependencies(new ArrayList<>());
+        }
+    }
+
+    /**
+     * If the sub-provides are null, initialize an empty list
+     *
+     * @param dependency the dependency to adjust
+     */
+    private static void adjustEmptySubProvides(Dependency dependency) {
+        if (dependency.getProvides() == null) {
+            dependency.setProvides(new ArrayList<>());
+        }
     }
 }

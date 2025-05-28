@@ -242,7 +242,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         Component manifestMainComponent;
         Component metadataComponent = manifestBom.getMetadata().getComponent();
         // If there are no components or the manifest is a ZIP manifest, get the main component from the metadata
-        if (!SbomUtils.populatedComponents(manifestBom.getComponents())
+        if (!SbomUtils.isNotEmpty(manifestBom.getComponents())
                 || SbomUtils.hasProperty(metadataComponent, "deliverable-url")) {
             manifestMainComponent = metadataComponent;
         } else {

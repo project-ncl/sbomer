@@ -134,7 +134,7 @@ public class DependencySerializer extends StdSerializer<DependencyList> implemen
     private void writeXMLDependenciesWithGenerator(
             final ToXmlGenerator toXmlGenerator,
             final List<Dependency> dependencies) throws IOException, XMLStreamException {
-        if (SbomUtils.populatedDependencies(dependencies)) {
+        if (SbomUtils.isNotEmpty(dependencies)) {
             processNamespace(toXmlGenerator, parentTagName);
             toXmlGenerator.writeStartArray();
 

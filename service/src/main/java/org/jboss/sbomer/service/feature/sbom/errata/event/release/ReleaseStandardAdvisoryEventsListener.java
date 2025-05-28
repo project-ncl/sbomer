@@ -660,7 +660,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                                     .setDescription(desc.replace(buildManifest.getRootPurl(), rebuiltPurl));
                         }
                     }
-                    if (SbomUtils.populatedComponents(manifestBom.getComponents())) {
+                    if (SbomUtils.isNotEmpty(manifestBom.getComponents())) {
                         manifestBom.getComponents().get(0).setPurl(rebuiltPurl);
 
                         // 2.5 - If there are variants (this is an index image) update also the purls with the rebuilt

@@ -33,9 +33,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingCont
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
@@ -142,12 +140,14 @@ public class SyftImageAdjuster extends AbstractAdjuster {
         adjustEmptyComponents(bom);
         adjustEmptyDependencies(bom);
         if (sources != null) {
-            log.debug("Adding missing components/dependencies to manifest...");
+            log.debug(
+                    "Adding any missing component or dependency to the main manifest, from sources manifest {}",
+                    sources.toAbsolutePath());
             Bom sourcesBom = SbomUtils.fromPath(sources);
-            addMissingComponents(bom.getComponents(), sourcesBom.getComponents());
-            addMissingDependencies(bom.getDependencies(), sourcesBom.getDependencies());
+            SbomUtils.addMissingComponentsAndDependencies(bom, sourcesBom);
         } else {
-            log.warn("Skipped adding missing components/dependencies due to no sources manifest...");
+            log.warn(
+                    "The sources manifest is empty, there are no components nor dependencies to add to the main manifest...");
         }
 
         // Remove components from manifest according to 'paths' and 'includeRpms' parameters
@@ -175,102 +175,6 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     }
 
     /**
-     * Add missing components from sources manifest
-     *
-     * @param components the container image components
-     * @param sourcesComponents the sources components
-     */
-    private void addMissingComponents(List<Component> components, List<Component> sourcesComponents) {
-        // Pointless proceeding unless there are components from the sources manifest
-        if (!SbomUtils.populatedComponents(sourcesComponents)) {
-            return;
-        }
-        Map<String, Component> mergedComponents = new HashMap<>();
-        for (Component component : components) {
-            // Skip if can't uniquely identify component
-            if (bomRefExists(component)) {
-                mergedComponents.put(component.getBomRef(), component);
-            }
-        }
-        components.clear();
-        for (Component component : sourcesComponents) {
-            // Skip if can't uniquely identify component
-            if (bomRefExists(component)) {
-                String bomRef = component.getBomRef();
-                Component existingComponent = mergedComponents.get(bomRef);
-                // Duplicate found, see if we have any missing subcomponents
-                if (existingComponent != null) {
-                    log.debug(
-                            "Component (with bom-ref: '{}') already exists, adding missing subcomponents",
-                            bomRef);
-                    adjustEmptySubComponents(existingComponent);
-                    addMissingComponents(existingComponent.getComponents(), component.getComponents());
-                } else {
-                    log.debug("Adding missing component (with bom-ref: '{}')", bomRef);
-                    mergedComponents.put(bomRef, component);
-                }
-            }
-        }
-        components.addAll(mergedComponents.values());
-    }
-
-    /**
-     * Add missing dependencies from sources manifest
-     *
-     * @param dependencies the container image dependencies
-     * @param sourcesDependencies the sources dependencies
-     */
-    private void addMissingDependencies(List<Dependency> dependencies, List<Dependency> sourcesDependencies) {
-        // Pointless proceeding unless there are dependencies from the sources manifest
-        if (!SbomUtils.populatedDependencies(sourcesDependencies)) {
-            return;
-        }
-        Map<String, Dependency> mergedDependencies = new HashMap<>();
-        for (Dependency dependency : dependencies) {
-            // Skip if can't uniquely identify dependency
-            if (dependency.getRef() != null) {
-                mergedDependencies.put(dependency.getRef(), dependency);
-            }
-        }
-        dependencies.clear();
-        for (Dependency dependency : sourcesDependencies) {
-            String ref = dependency.getRef();
-            // Skip if can't uniquely identify dependency
-            if (ref != null) {
-                Dependency existingDependency = mergedDependencies.get(ref);
-                // Duplicate found, see if we have any missing sub-dependencies
-                if (existingDependency != null) {
-                    log.debug("Dependency (with ref: '{}') already exists, adding missing sub-dependencies", ref);
-                    adjustEmptySubDependencies(existingDependency);
-                    addMissingDependencies(existingDependency.getDependencies(), dependency.getDependencies());
-                    addMissingDependencies(existingDependency.getProvides(), dependency.getProvides());
-                } else {
-                    log.debug("Adding missing dependency (with ref: '{}')", ref);
-                    mergedDependencies.put(ref, dependency);
-                }
-            }
-        }
-        dependencies.addAll(mergedDependencies.values());
-    }
-
-    /**
-     * Verify if component bom-ref exists
-     *
-     * @param component the component
-     * @return {@code true} if bom-ref exists, {@code false} otherwise
-     */
-    private boolean bomRefExists(Component component) {
-        if (component.getBomRef() == null) {
-            log.debug(
-                    "Component (of type '{}', cpe: '{}') does not have bom-ref assigned, skipping",
-                    component.getType(),
-                    component.getCpe());
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * If the bom components are null, initialize an empty list
      *
      * @param bom the bom to adjust
@@ -289,31 +193,6 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     private void adjustEmptyDependencies(Bom bom) {
         if (bom.getDependencies() == null) {
             bom.setDependencies(new ArrayList<>());
-        }
-    }
-
-    /**
-     * If the subcomponents are null, initialize an empty list
-     *
-     * @param component the component to adjust
-     */
-    private void adjustEmptySubComponents(Component component) {
-        if (component.getComponents() == null) {
-            component.setComponents(new ArrayList<>());
-        }
-    }
-
-    /**
-     * If the sub-dependencies are null, initialize an empty list
-     *
-     * @param dependency the dependency to adjust
-     */
-    private void adjustEmptySubDependencies(Dependency dependency) {
-        if (dependency.getDependencies() == null) {
-            dependency.setDependencies(new ArrayList<>());
-        }
-        if (dependency.getProvides() == null) {
-            dependency.setProvides(new ArrayList<>());
         }
     }
 
