@@ -120,19 +120,19 @@ public class Event extends PanacheEntityBase {
 
     /**
      * <p>
-     * Optional original event content.
+     * Optional original request content.
      * </p>
      *
      * <p>
-     * Content depends on the source of the event and it may not be populated at all. This content is used to help trace
-     * events.
+     * Content depends on the {@code metadata.source} and it may not be populated at all. This content is used to help
+     * trace events.
      * </p>
      */
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "event")
+    @Column(name = "request")
     @ToString.Exclude
     @Schema(implementation = Map.class)
-    private JsonNode event;
+    private JsonNode request;
 
     /**
      * Identifier of the status.

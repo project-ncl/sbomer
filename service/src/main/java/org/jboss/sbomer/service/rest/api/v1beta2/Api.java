@@ -31,9 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Tag(name = "v1beta2", description = "latest version")
+@Tag(name = "v1beta2", description = "in development, do not use")
 @PermitAll
 @Slf4j
-public class ApiV1Beta2 {
+public class Api {
 
 }

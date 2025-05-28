@@ -38,7 +38,6 @@ public abstract class AbstractResolver implements Resolver {
 
     ManagedExecutor managedExecutor;
 
-
     public AbstractResolver(ManagedExecutor managedExecutor) {
         this.managedExecutor = managedExecutor;
     }
@@ -48,7 +47,7 @@ public abstract class AbstractResolver implements Resolver {
      *
      * @param eventRecord
      */
-    public void onEvent(@Observes(during = TransactionPhase.AFTER_COMPLETION) EventRecord eventRecord) {
+    public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) EventRecord eventRecord) {
         if (eventRecord == null || eventRecord.metadata() == null
                 || !Objects.equals(eventRecord.metadata().get(Resolver.KEY_RESOLVER), getType())) {
             log.debug("Not an event for '{}' resolver, skipping", getType());
@@ -70,9 +69,9 @@ public abstract class AbstractResolver implements Resolver {
             try {
                 updateEventStatus(eventRecord.id(), EventStatus.RESOLVING);
                 resolve(eventRecord.id(), identifier);
-                updateEventStatus(eventRecord.id(), EventStatus.RESOLVED);
             } catch (Exception e) {
                 updateEventStatus(eventRecord.id(), EventStatus.ERROR);
+                log.error("Unable to resolve event", e);
             }
         });
     }
