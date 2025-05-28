@@ -26,6 +26,7 @@ import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_L
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX;
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_SYFT_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addMissingContainerHash;
 
@@ -75,14 +76,20 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * If this is {@code null} or an empty list is provided -- all components will be retained in the manifest.
      * </p>
      */
-    List<String> paths = new ArrayList<>();
+    List<String> paths;
     /**
      * A flag to determine whether RPM packages should be retained in the generated manifests (value set to
      * {@code true}) or removed (value set to {@code false}).
      */
-    boolean includeRpms = true;
+    boolean includeRpms;
 
     final Path workDir;
+
+    /**
+     * Location of the sources manifest. Any components or dependencies missing from the container image manifest are
+     * merged into the generated manifest.
+     */
+    final Path sources;
 
     /**
      * <p>
@@ -98,14 +105,11 @@ public class SyftImageAdjuster extends AbstractAdjuster {
             CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX,
             CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX);
 
-    public SyftImageAdjuster(Path workDir) {
-        this.workDir = workDir;
-    }
-
-    public SyftImageAdjuster(Path workDir, List<String> paths, boolean includeRpms) {
+    public SyftImageAdjuster(Path workDir, List<String> paths, boolean includeRpms, Path sources) {
         this.workDir = workDir;
         this.paths = paths;
         this.includeRpms = includeRpms;
+        this.sources = sources;
     }
 
     /**
@@ -127,17 +131,31 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     @Override
     public Bom adjust(Bom bom) {
         log.debug(
-                "Starting adjustment of the manifest, parameters: configuration paths: [{}], includeRpms: [{}]",
+                "Starting adjustment of the manifest, parameters: configuration paths: [{}], includeRpms: [{}], sources manifest: {}",
                 paths,
-                includeRpms);
+                includeRpms,
+                sources != null ? sources.toAbsolutePath() : null);
+
+        // Add missing components and dependencies from sources manifest
+        adjustEmptyComponents(bom);
+        adjustEmptyDependencies(bom);
+        if (sources != null) {
+            log.debug(
+                    "Adding any missing component or dependency to the main manifest, from sources manifest {}",
+                    sources.toAbsolutePath());
+            Bom sourcesBom = SbomUtils.fromPath(sources);
+            SbomUtils.addMissingComponentsAndDependencies(bom, sourcesBom);
+        } else {
+            log.warn(
+                    "The sources manifest is empty, there are no components nor dependencies to add to the main manifest...");
+        }
 
         // Remove components from manifest according to 'paths' and 'includeRpms' parameters
         log.debug("Filtering out all components that do not meet requirements...");
 
-        adjustEmptyComponents(bom);
         filterComponents(bom.getComponents());
         adjustProperties(bom);
-        adjustNameAndPurl(bom, workDir);
+        adjustNameAndPurl(bom);
 
         cleanupComponents(bom);
 
@@ -164,6 +182,17 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     private void adjustEmptyComponents(Bom bom) {
         if (bom.getComponents() == null) {
             bom.setComponents(new ArrayList<>());
+        }
+    }
+
+    /**
+     * If the bom dependencies are null, initialize an empty list
+     *
+     * @param bom the bom to adjust
+     */
+    private void adjustEmptyDependencies(Bom bom) {
+        if (bom.getDependencies() == null) {
+            bom.setDependencies(new ArrayList<>());
         }
     }
 
@@ -348,9 +377,8 @@ public class SyftImageAdjuster extends AbstractAdjuster {
      * name.
      *
      * @param bom the manifest to adjust
-     * @param workDir the working directory where the {@code skopeo.json} file is located
      */
-    private void adjustNameAndPurl(Bom bom, Path workDir) {
+    private void adjustNameAndPurl(Bom bom) {
         final Component mainComponent = bom.getMetadata().getComponent();
         ContainerImageInspectOutput inspectData;
 
@@ -482,7 +510,8 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // Adjust property names
         properties.forEach(p -> {
-            String newName = p.getName().replace("syft:", CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX);
+            String newName = p.getName()
+                    .replace(CONTAINER_PROPERTY_SYFT_PREFIX, CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX);
 
             // log.debug("Adjusting property name from '{}' to '{}'", p.getName(), newName);
 

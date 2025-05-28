@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.service.pnc;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PNC_CLIENT_DELAY;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PNC_CLIENT_MAX_RETRIES;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PNC_CLIENT_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PNC_CLIENT_MAX_RETRIES;
 
 import java.time.temporal.ChronoUnit;
 
@@ -27,7 +27,7 @@ import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 
 import io.quarkus.oidc.client.filter.OidcClientFilter;
 import io.smallrye.faulttolerance.api.BeforeRetry;

@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ERRATA_CLIENT_DELAY;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ERRATA_CLIENT_MAX_RETRIES;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.ERRATA_CLIENT_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.ERRATA_CLIENT_MAX_RETRIES;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -37,6 +37,7 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.UnauthorizedException;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepo;
@@ -46,7 +47,6 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
 import org.jboss.sbomer.service.feature.sbom.kerberos.ErrataKrb5ClientRequestFilter;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.faulttolerance.api.BeforeRetry;

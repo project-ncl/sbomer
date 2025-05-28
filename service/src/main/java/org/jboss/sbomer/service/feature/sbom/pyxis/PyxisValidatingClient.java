@@ -17,10 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.pyxis;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_INITIAL_DELAY;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DELAY;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DURATION;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_RETRIES;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_INITIAL_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_DURATION;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PYXIS_UNPUBLISHED_MAX_RETRIES;
 
 import java.util.List;
 import java.util.Set;
@@ -28,9 +28,9 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 
 import io.smallrye.faulttolerance.api.BeforeRetry;
 import io.smallrye.faulttolerance.api.FibonacciBackoff;

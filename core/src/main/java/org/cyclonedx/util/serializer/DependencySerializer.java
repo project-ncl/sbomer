@@ -46,6 +46,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cyclonedx.CycloneDxSchema;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.DependencyList;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -133,7 +134,7 @@ public class DependencySerializer extends StdSerializer<DependencyList> implemen
     private void writeXMLDependenciesWithGenerator(
             final ToXmlGenerator toXmlGenerator,
             final List<Dependency> dependencies) throws IOException, XMLStreamException {
-        if (dependencies != null && !dependencies.isEmpty()) {
+        if (SbomUtils.isNotEmpty(dependencies)) {
             processNamespace(toXmlGenerator, parentTagName);
             toXmlGenerator.writeStartArray();
 

@@ -40,6 +40,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
@@ -47,7 +48,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -242,7 +242,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         Component manifestMainComponent;
         Component metadataComponent = manifestBom.getMetadata().getComponent();
         // If there are no components or the manifest is a ZIP manifest, get the main component from the metadata
-        if (manifestBom.getComponents() == null || manifestBom.getComponents().isEmpty()
+        if (!SbomUtils.isNotEmpty(manifestBom.getComponents())
                 || SbomUtils.hasProperty(metadataComponent, "deliverable-url")) {
             manifestMainComponent = metadataComponent;
         } else {

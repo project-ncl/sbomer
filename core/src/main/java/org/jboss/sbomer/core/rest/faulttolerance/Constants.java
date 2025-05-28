@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.rest.faulttolerance;
+package org.jboss.sbomer.core.rest.faulttolerance;
 
 public class Constants {
 
@@ -23,11 +23,13 @@ public class Constants {
     public static final int ERRATA_CLIENT_MAX_RETRIES = 15;
     public static final int PYXIS_CLIENT_MAX_RETRIES = 15;
     public static final int ATLAS_CLIENT_MAX_RETRIES = 15;
+    public static final int KOJI_DOWNLOAD_CLIENT_MAX_RETRIES = 15;
 
     public static final long PNC_CLIENT_DELAY = 1;
     public static final long ERRATA_CLIENT_DELAY = 1;
     public static final long PYXIS_CLIENT_DELAY = 1;
     public static final long ATLAS_CLIENT_DELAY = 1;
+    public static final long KOJI_DOWNLOAD_CLIENT_DELAY = 1;
 
     /*
      * In some circumstances Pyxis returns a 200 code but an empty RepositoryDescription, this means it may not yet be
