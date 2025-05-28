@@ -21,10 +21,15 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Representation of the {@link Event} entity.
+ */
 public record EventRecord(String id, EventRecord parent, Instant created, Instant updated, Instant finished,
-        Map<String, String> metadata, JsonNode event, List<GenerationRecord> generations, String status,
+        Map<String, String> metadata, JsonNode request, List<GenerationRecord> generations, String status,
         String reason) {
 
 }

@@ -17,9 +17,16 @@
  */
 package org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-public record ConfigSpec(GeneratorOptionsSpec generator, // Optional, if not provided, SBOMer resolves default
-        String format, ResourcesSpec resources) {
+/**
+ * 
+ * 
+ * @param name Name of the generator.
+ * @param version Version of the generator.
+ * @param config The custom configuration for a given generator version.
+ */
+public record GeneratorVersionConfigSpec(GeneratorVersionSpec generator, GeneratorConfigSpec config) {
 }
+
+// @JsonIgnoreProperties(ignoreUnknown = true)
+// public record ConfigSpec(GeneratorVersionSpec generator, String format, ResourcesSpec resources) {
+// }

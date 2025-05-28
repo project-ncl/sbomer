@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.rest.api.v1beta2;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
@@ -63,7 +66,7 @@ import lombok.extern.slf4j.Slf4j;
 @PermitAll
 @Tag(name = "v1beta2")
 @Slf4j
-public class EventsV1Beta2 {
+public class EventsApi {
 
     public static final String KEY_SOURCE = "source"; // TODO: externalize it
     public static final String KEY_RESOLVER = "resolver"; // TODO: externalize it
@@ -188,9 +191,32 @@ public class EventsV1Beta2 {
                 .withParent(parentEvent)
                 .withCreated(Instant.now())
                 .withMetadata(Map.of("source", EventType.REST.toName()))
-                .withGenerations(Collections.unmodifiableList(parentEvent.getGenerations()))
                 .build()
                 .save();
+
+        List<Generation> generations = new ArrayList<>();
+
+        if (force) {
+            parentEvent.getGenerations().forEach(g -> {
+                Generation generation = Generation.builder()
+                        .withIdentifier("DUMMY")
+                        .withType("DUMMY")
+                        .withRequest(g.getRequest())
+                        .withParent(g)
+                        .withEvents(List.of(event))
+                        .build()
+                        .save();
+
+                generations.add(generation);
+
+                new GenerationStatusHistory(generation, generation.getStatus().name(), "Initial creation").save();
+            });
+        } else {
+            generations.addAll(parentEvent.getGenerations());
+        }
+
+        event.setGenerations(generations);
+        event.save();
 
         return mapper.toRecord(event);
     }

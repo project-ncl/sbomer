@@ -19,10 +19,12 @@ package org.jboss.sbomer.service.v1beta2.generator;
 
 import java.util.List;
 
+import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GeneratorConfigSpec;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 public record GeneratorsConfig(List<GeneratorProfile> generatorProfiles,
-                List<DefaultGeneratorMappingEntry> defaultGeneratorMappings) {
+        List<DefaultGeneratorMappingEntry> defaultGeneratorMappings) {
 }
 
 /**
@@ -37,7 +39,7 @@ public record GeneratorsConfig(List<GeneratorProfile> generatorProfiles,
  *
  */
 record GeneratorVersionProfile(String version, List<String> supportedTargetTypes, List<String> supportedFormats,
-                JsonNode schema, GeneratorResources defaultResources) {
+        JsonNode schema, GeneratorConfigSpec defaultConfig) {
 }
 
 /**

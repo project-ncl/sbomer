@@ -34,7 +34,10 @@ generatorProfiles:
           additionalProperties: false
         # Supported output formats
         supportedFormats: ["CYCLONEDX_1.6_JSON", "SPDX_2.3_JSON"]
-        # Default resources for the generator execution. Can be adjusted with custom configuration per generation.
-        defaultResources:
-          requests: { "cpu": "500m", "memory": "1Gi" }
-          limits: { "cpu": "1500m", "memory": "3Gi" }
+        defaultConfig:
+          # Custom options to pass to the generator
+          options: {}
+          format: "CYCLONEDX_1.6_JSON"
+          resources:
+            requests: { "cpu": "500m", "memory": "1Gi" }
+            limits: { "cpu": "1500m", "memory": "3Gi" }

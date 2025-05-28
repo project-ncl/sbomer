@@ -19,9 +19,16 @@ package org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto;
 
 import java.time.Instant;
 
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.quarkus.resteasy.reactive.links.RestLinkId;
 
-public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished, String status,
-        String result, String reason) {
+/**
+ * Representation of the {@link Generation} entity.
+ */
+public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished, String type,
+        String identifier, JsonNode request, String status, String result, String reason) {
 
 }

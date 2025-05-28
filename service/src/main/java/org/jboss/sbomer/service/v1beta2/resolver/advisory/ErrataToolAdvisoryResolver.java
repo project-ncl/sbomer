@@ -20,10 +20,16 @@ package org.jboss.sbomer.service.v1beta2.resolver.advisory;
 import java.util.List;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
-import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
+import org.jboss.sbomer.core.utils.ObjectMapperUtils;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHistory;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
+import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
+import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.TargetSpec;
+import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigProvider;
 import org.jboss.sbomer.service.v1beta2.resolver.AbstractResolver;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -40,9 +46,14 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
     public static final String RESOLVER_TYPE = "et-advisory";
 
+    GeneratorConfigProvider generatorConfigProvider;
+
     @Inject
-    public ErrataToolAdvisoryResolver(ManagedExecutor managedExecutor) {
+    public ErrataToolAdvisoryResolver(
+            ManagedExecutor managedExecutor,
+            GeneratorConfigProvider generatorConfigProvider) {
         super(managedExecutor);
+        this.generatorConfigProvider = generatorConfigProvider;
     }
 
     @Override
@@ -66,25 +77,40 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
             log.warn("Event with id '{}' could not be found, cannot schedule generations", eventId);
             return;
         }
+        GenerationRequestSpec dummyRequestSpec = new GenerationRequestSpec(
+                new TargetSpec("quay.io/from-errata/image:tag", "CONTAINER_IMAGE"),
+                null);
+
+        GenerationRequestSpec effectiveRequest = generatorConfigProvider.buildEffectiveRequest(dummyRequestSpec);
 
         // TODO: dummy
         Generation generation = Generation.builder()
-                .withIdentifier("DUMMY")
-                .withType(GenerationRequestType.BUILD.toName())
+                .withIdentifier(dummyRequestSpec.target().identifier())
+                .withType(dummyRequestSpec.target().type())
                 .withEvents(List.of(event))
-                .build();
+                // Convert payload to JsonNode
+                .withRequest(ObjectMapperUtils.toJsonNode(effectiveRequest))
+                .withStatus(GenerationStatus.FAILED)
+                .withReason("Not implemented, automatically failed by the system")
+                .withResult(GenerationResult.ERR_SYSTEM)
+                .build()
+                .save();
 
         // Create status update
         new GenerationStatusHistory(generation, generation.getStatus().name(), "Initial creation").save();
 
         event.getGenerations().add(generation);
+
+        // TODO: Change to RESOLVED
+        event.setStatus(EventStatus.FAILED);
+        event.setReason("Not implemented, automatically failed by the system");
     }
 
     public void resolveAdvisory(String advisoryId) {
         // TODO: Let's simulate we are querying ET
         try {
             log.info("Reading advisory {}...", advisoryId);
-            Thread.sleep(5000);
+            Thread.sleep(15000);
             log.info("Advisory {} read", advisoryId);
         } catch (InterruptedException e) {
             e.printStackTrace();
