@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Property;
+import org.jboss.sbomer.cli.feature.sbom.command.PathConverter;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -37,10 +38,12 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
+import io.opentelemetry.api.trace.Span;
 import jakarta.inject.Inject;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 @Command(
         mixinStandardHelpOptions = true,
@@ -60,6 +63,14 @@ public class BrewSourcesDownloadCommand extends AbstractDownloadCommand {
             + RELEASE;
     public static final String NVR_DELIMITER = "-";
 
+    @Option(
+            names = { "-p", "--path" },
+            required = true,
+            paramLabel = "FILE",
+            description = "Location of the container image manifest file",
+            converter = PathConverter.class)
+    Path path;
+
     @Inject
     KojiService kojiService;
 
@@ -69,9 +80,14 @@ public class BrewSourcesDownloadCommand extends AbstractDownloadCommand {
     }
 
     @Override
-    protected void doDownload(Path manifestPath, Path outputDir) {
-        log.info("Reading BOM from {}", manifestPath.toAbsolutePath());
-        Bom bom = SbomUtils.fromPath(manifestPath);
+    protected void doDownload(Path outputDir) {
+        log.info("Reading BOM from {}", path.toAbsolutePath());
+        Span currentSpan = Span.current();
+        if (currentSpan.getSpanContext().isValid()) {
+            currentSpan.setAttribute("params.source", path.toFile().getAbsolutePath());
+        }
+
+        Bom bom = SbomUtils.fromPath(path);
         String nvr = findNvr(bom);
         KojiBuildInfo buildInfo = findBuildInfo(nvr);
         if (buildInfo == null) {
