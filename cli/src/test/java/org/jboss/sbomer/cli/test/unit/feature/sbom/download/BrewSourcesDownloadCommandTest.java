@@ -68,8 +68,8 @@ class BrewSourcesDownloadCommandTest {
 
     static class BrewSourcesDownloadCommandAlt extends BrewSourcesDownloadCommand {
         @Override
-        public void doDownload(Path manifestPath, Path outputDir) {
-            super.doDownload(manifestPath, outputDir);
+        public void doDownload(Path outputDir) {
+            super.doDownload(outputDir);
         }
 
         @Override
@@ -106,6 +106,7 @@ class BrewSourcesDownloadCommandTest {
         kojiService.setKojiSession(kojiSession);
         kojiService.setKojiDownloadClient(kojiDownloadClient);
         brewSourcesDownloadCommand = new BrewSourcesDownloadCommandAlt();
+        brewSourcesDownloadCommand.setPath(image);
         brewSourcesDownloadCommand.setKojiService(kojiService);
     }
 
@@ -121,7 +122,7 @@ class BrewSourcesDownloadCommandTest {
         when(kojiSession.getBuild(any())).thenReturn(List.of(buildInfo));
         when(kojiDownloadClient.downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName)).thenReturn(response);
 
-        brewSourcesDownloadCommand.doDownload(image, tmpDir);
+        brewSourcesDownloadCommand.doDownload(tmpDir);
         Path downloadedFile = tmpDir.resolve(remoteSourcesName + SOURCES_FILE_SUFFIX);
 
         assertTrue(Files.exists(downloadedFile));
@@ -140,7 +141,7 @@ class BrewSourcesDownloadCommandTest {
         when(kojiSession.getBuild(any())).thenReturn(List.of(buildInfo));
         when(kojiDownloadClient.downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName)).thenReturn(response);
 
-        brewSourcesDownloadCommand.doDownload(image, tmpDir);
+        brewSourcesDownloadCommand.doDownload(tmpDir);
         Path downloadedFile = tmpDir.resolve(remoteSourcesName + SOURCES_FILE_SUFFIX);
 
         assertTrue(Files.exists(downloadedFile));
@@ -153,7 +154,7 @@ class BrewSourcesDownloadCommandTest {
 
         when(kojiSession.getBuild(any())).thenReturn(List.of(buildInfo));
 
-        brewSourcesDownloadCommand.doDownload(image, tmpDir);
+        brewSourcesDownloadCommand.doDownload(tmpDir);
 
         try (Stream<Path> files = Files.list(tmpDir)) {
             boolean fileExists = files.filter(Files::isRegularFile)
@@ -175,7 +176,7 @@ class BrewSourcesDownloadCommandTest {
 
         ApplicationException ex = assertThrows(
                 ApplicationException.class,
-                () -> brewSourcesDownloadCommand.doDownload(image, tmpDir));
+                () -> brewSourcesDownloadCommand.doDownload(tmpDir));
         assertEquals("Failed to download sources file: HTTP 404", ex.getMessage());
     }
 
@@ -206,7 +207,7 @@ class BrewSourcesDownloadCommandTest {
     void testNoBuildInfo() throws KojiClientException, IOException {
         when(kojiSession.getBuild(any())).thenReturn(Collections.emptyList());
 
-        brewSourcesDownloadCommand.doDownload(image, tmpDir);
+        brewSourcesDownloadCommand.doDownload(tmpDir);
 
         try (Stream<Path> files = Files.list(tmpDir)) {
             boolean fileExists = files.filter(Files::isRegularFile)
@@ -221,7 +222,7 @@ class BrewSourcesDownloadCommandTest {
 
         ApplicationException ex = assertThrows(
                 ApplicationException.class,
-                () -> brewSourcesDownloadCommand.doDownload(image, tmpDir));
+                () -> brewSourcesDownloadCommand.doDownload(tmpDir));
 
         assertEquals("Lookup in Brew failed", ex.getMessage());
     }

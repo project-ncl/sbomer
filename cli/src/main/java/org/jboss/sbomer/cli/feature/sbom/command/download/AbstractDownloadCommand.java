@@ -47,8 +47,6 @@ public abstract class AbstractDownloadCommand implements Callable<Integer> {
             Map<String, String> attributes = Map.of(
                     "params.downloader.type",
                     getDownloaderType().toString(),
-                    "params.source",
-                    parent.getPath().toFile().getAbsolutePath(),
                     "params.destination",
                     parent.getOutputDir().toFile().getAbsolutePath());
 
@@ -59,7 +57,7 @@ public abstract class AbstractDownloadCommand implements Callable<Integer> {
 
             log.info("Starting {} downloader", getDownloaderType());
 
-            doDownload(parent.getPath(), parent.getOutputDir());
+            doDownload(parent.getOutputDir());
 
             log.debug("{} downloader finished", getDownloaderType());
 
@@ -79,6 +77,6 @@ public abstract class AbstractDownloadCommand implements Callable<Integer> {
 
     protected abstract String getDownloaderType();
 
-    protected abstract void doDownload(Path manifestPath, Path outputDir);
+    protected abstract void doDownload(Path outputDir);
 
 }
