@@ -170,7 +170,7 @@ class ReleaseAdvisoryEventsListenerTest {
     static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForDockerGeneration(
+        protected List<Sbom> saveReleaseManifestForDockerGeneration(
                 RequestEvent requestEvent,
                 Errata erratum,
                 ProductVersionEntry productVersion,
@@ -220,14 +220,14 @@ class ReleaseAdvisoryEventsListenerTest {
                     Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                     String.valueOf(erratum.getDetails().get().getId()));
             printRawBom(bom);
-            return null;
+            return List.of(new Sbom());
         }
     }
 
     static class ReleaseAdvisoryEventsListenerMultiContainer extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForDockerGeneration(
+        protected List<Sbom> saveReleaseManifestForDockerGeneration(
                 RequestEvent requestEvent,
                 Errata erratum,
                 ProductVersionEntry productVersion,
@@ -403,14 +403,14 @@ class ReleaseAdvisoryEventsListenerTest {
                     bom.getMetadata().getProperties(),
                     Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                     String.valueOf(erratum.getDetails().get().getId()));
-            return sbom;
+            return List.of(sbom);
         }
     }
 
     static class ReleaseAdvisoryEventsListenerSingleRPM extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForRPMGeneration(
+        protected List<Sbom> saveReleaseManifestForRPMGeneration(
                 RequestEvent requestEvent,
                 Errata erratum,
                 ProductVersionEntry productVersion,
@@ -492,13 +492,13 @@ class ReleaseAdvisoryEventsListenerTest {
                     bom.getMetadata().getProperties(),
                     Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                     String.valueOf(erratum.getDetails().get().getId()));
-            return sbom;
+            return List.of(sbom);
         }
     }
 
     static class ReleaseTextOnlyAdvisoryEventsListenerManifests extends ReleaseTextOnlyAdvisoryEventsListener {
         @Override
-        protected Sbom saveReleaseManifestForTextOnlyAdvisories(
+        protected List<Sbom> saveReleaseManifestForTextOnlyAdvisories(
                 RequestEvent requestEvent,
                 Errata erratum,
                 String productName,
@@ -587,13 +587,13 @@ class ReleaseAdvisoryEventsListenerTest {
                 JsonNode node = arrayNode.get(i);
                 assertEquals(node.asText(), allPurls.get(i));
             }
-            return sbom;
+            return List.of(sbom);
         }
     }
 
     static class ReleaseTextOnlyAdvisoryEventsListenerDeliverables extends ReleaseTextOnlyAdvisoryEventsListener {
         @Override
-        protected Sbom saveReleaseManifestForTextOnlyAdvisories(
+        protected List<Sbom> saveReleaseManifestForTextOnlyAdvisories(
                 RequestEvent requestEvent,
                 Errata erratum,
                 String productName,
@@ -705,7 +705,7 @@ class ReleaseAdvisoryEventsListenerTest {
                 assertEquals(node.asText(), allPurls.get(i));
             }
             printRawBom(bom);
-            return sbom;
+            return List.of(sbom);
         }
     }
 
