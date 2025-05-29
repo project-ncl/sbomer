@@ -192,8 +192,6 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
 
-        List<Sbom> sboms = new ArrayList<>();
-
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
             // Create the release manifest for this ProductVersion
@@ -235,7 +233,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             SbomUtils.addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
-            Sbom sbom = saveReleaseManifestForRPMGeneration(
+            List<Sbom> sboms = saveReleaseManifestForRPMGeneration(
                     requestEvent,
                     erratum,
                     productVersion,
@@ -247,15 +245,13 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             // FIXME: 'Optional.get()' without 'isPresent()' check
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}' for RPM builds",
-                    sbom,
+                    sboms.get(sboms.size() - 1), // Will always be release SBOM
                     releaseGeneration.getId(),
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
 
-            sboms.add(sbom);
+            performPost(sboms);
         });
-
-        performPost(sboms);
     }
 
     protected void releaseManifestsForDockerBuilds(
@@ -268,8 +264,6 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Component.Type productType,
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
-
-        List<Sbom> sboms = new ArrayList<>();
 
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
@@ -311,7 +305,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             SbomUtils.addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
-            Sbom sbom = saveReleaseManifestForDockerGeneration(
+            List<Sbom> sboms = saveReleaseManifestForDockerGeneration(
                     requestEvent,
                     erratum,
                     productVersion,
@@ -323,15 +317,13 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             // FIXME: 'Optional.get()' without 'isPresent()' check
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}' for Docker builds",
-                    sbom,
+                    sboms.get(sboms.size() - 1), // Will always be release SBOM
                     releaseGeneration.getId(),
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
 
-            sboms.add(sbom);
+            performPost(sboms);
         });
-
-        performPost(sboms);
     }
 
     private Bom createProductVersionBom(
@@ -457,7 +449,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     @BeforeRetry(RetryLogger.class)
-    protected Sbom saveReleaseManifestForRPMGeneration(
+    protected List<Sbom> saveReleaseManifestForRPMGeneration(
             RequestEvent requestEvent,
             Errata erratum,
             ProductVersionEntry productVersion,
@@ -468,6 +460,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs) {
 
         try {
+            List<Sbom> sboms = new ArrayList<>();
             QuarkusTransaction.begin(QuarkusTransaction.beginOptions().timeout(INCREASED_TIMEOUT_SEC));
 
             // 1 - Save the release generation with the release manifest
@@ -548,14 +541,16 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                             productVersion,
                             manifestBom);
                     buildManifest.setReleaseMetadata(buildManifestMetadataNode);
+                    sboms.add(buildManifest);
                 }
             }
 
             requestEvent = requestEventRepository.findById(requestEvent.getId());
             requestEvent.setEventStatus(RequestEventStatus.SUCCESS);
             QuarkusTransaction.commit();
+            sboms.add(sbom); // For consistency upload release after build SBOMs
 
-            return sbom;
+            return sboms;
         } catch (Exception e) {
             try {
                 QuarkusTransaction.rollback();
@@ -573,7 +568,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     @BeforeRetry(RetryLogger.class)
-    protected Sbom saveReleaseManifestForDockerGeneration(
+    protected List<Sbom> saveReleaseManifestForDockerGeneration(
             RequestEvent requestEvent,
             Errata erratum,
             ProductVersionEntry productVersion,
@@ -584,6 +579,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Map<String, List<RepositoryCoordinates>> generationToRepositories) {
 
         try {
+            List<Sbom> sboms = new ArrayList<>();
             QuarkusTransaction.begin(QuarkusTransaction.beginOptions().timeout(INCREASED_TIMEOUT_SEC));
 
             // 1 - Save the release generation with the release manifest
@@ -701,14 +697,16 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                             productVersion,
                             manifestBom);
                     buildManifest.setReleaseMetadata(buildManifestMetadataNode);
+                    sboms.add(buildManifest);
                 }
             }
 
             requestEvent = requestEventRepository.findById(requestEvent.getId());
             requestEvent.setEventStatus(RequestEventStatus.SUCCESS);
             QuarkusTransaction.commit();
+            sboms.add(sbom); // For consistency upload release after build SBOMs
 
-            return sbom;
+            return sboms;
         } catch (Exception e) {
             try {
                 QuarkusTransaction.rollback();

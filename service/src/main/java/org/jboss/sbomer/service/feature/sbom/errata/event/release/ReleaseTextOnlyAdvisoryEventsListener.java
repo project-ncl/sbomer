@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -191,7 +192,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         SbomUtils.addMissingSerialNumber(productVersionBom);
 
         SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
-        Sbom sbom = saveReleaseManifestForTextOnlyAdvisories(
+        List<Sbom> sbomsToUpload = saveReleaseManifestForTextOnlyAdvisories(
                 requestEvent,
                 erratum,
                 productName,
@@ -203,12 +204,12 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
 
         log.info(
                 "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
-                sbom,
+                sbomsToUpload.get(sbomsToUpload.size() - 1), // Will always be release SBOM
                 releaseGeneration.getId(),
                 productVersion,
                 erratum.getDetails().get().getFulladvisory());
 
-        performPost(List.of(sbom));
+        performPost(sbomsToUpload);
     }
 
     // FIXME: 'Optional.get()' without 'isPresent()' check
@@ -268,7 +269,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     @BeforeRetry(RetryLogger.class)
-    protected Sbom saveReleaseManifestForTextOnlyAdvisories(
+    protected List<Sbom> saveReleaseManifestForTextOnlyAdvisories(
             RequestEvent requestEvent,
             Errata erratum,
             String productName,
@@ -279,6 +280,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
             List<Sbom> sboms) {
 
         try {
+            List<Sbom> sbomsToUpload = new ArrayList<>();
             QuarkusTransaction.begin(QuarkusTransaction.beginOptions().timeout(INCREASED_TIMEOUT_SEC));
 
             // 1 - Save the release generation with the release manifest
@@ -340,13 +342,15 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
                         productVersion,
                         manifestBom);
                 buildManifest.setReleaseMetadata(buildManifestMetadataNode);
+                sbomsToUpload.add(buildManifest);
             }
 
             requestEvent = requestEventRepository.findById(requestEvent.getId());
             requestEvent.setEventStatus(RequestEventStatus.SUCCESS);
             QuarkusTransaction.commit();
+            sbomsToUpload.add(releaseSbom); // For consistency upload release after build SBOMs
 
-            return releaseSbom;
+            return sbomsToUpload;
         } catch (Exception e) {
             try {
                 QuarkusTransaction.rollback();
