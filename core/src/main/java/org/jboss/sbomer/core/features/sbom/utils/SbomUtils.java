@@ -90,7 +90,6 @@ import org.cyclonedx.model.license.Expression;
 import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.api.deliverablesanalyzer.dto.LicenseInfo;
-import org.jboss.pnc.api.enums.LicenseSource;
 import org.jboss.pnc.build.finder.core.SpdxLicenseUtils;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.Artifact;
@@ -116,7 +115,9 @@ import com.github.packageurl.PackageURLBuilder;
 public class SbomUtils {
     public static final String PROTOCOL = "https://";
 
-    public static final String DEFAULT_ACKNOWLEDGEMENT = "concluded";
+    public static final String COMPONENT_LICENSE_ACKNOWLEDGEMENT = "concluded";
+
+    public static final String EVIDENCE_LICENSE_ACKNOWLEDGEMENT = "declared";
 
     private SbomUtils() {
         // This is a utility class
@@ -353,16 +354,6 @@ public class SbomUtils {
         }
     }
 
-    public static String licenseSourceToDescription(LicenseSource source) {
-        return switch (source) {
-            case UNKNOWN -> "unknown";
-            case POM -> ".pom file of artifact";
-            case POM_XML -> "pom.xml file inside artifact";
-            case BUNDLE_LICENSE -> "Bundle-License header inside MANIFEST.MF of artifact";
-            case TEXT -> "license text file inside artifact";
-        };
-    }
-
     private static void addLicenseEvidence(Component component, List<LicenseInfo> licenseInfos) {
         if (licenseInfos.isEmpty()) {
             return;
@@ -370,39 +361,50 @@ public class SbomUtils {
 
         Evidence evidence = new Evidence();
         LicenseChoice licenseChoice = new LicenseChoice();
-        licenseChoice.setLicenses(licenseInfos.stream().map(licenseInfo -> {
-            License license = new License();
-            license.setId(licenseInfo.getSpdxLicenseId());
-            license.setAcknowledgement("declared");
-            List<Property> properties = new ArrayList<>();
-            Property sourceProperty = new Property();
-            sourceProperty.setName("source");
-            sourceProperty.setValue(licenseInfo.getSource().toString());
-            properties.add(sourceProperty);
-            Property sourceDescriptionProperty = new Property();
-            sourceDescriptionProperty.setName("source-description");
-            sourceDescriptionProperty.setValue(licenseSourceToDescription(licenseInfo.getSource()));
-            properties.add(sourceDescriptionProperty);
-            String url = licenseInfo.getUrl();
-            Optional<URI> optionalURI = getNormalizedUrl(url);
+        List<String> spdxLicenseIds = licenseInfos.stream()
+                .map(LicenseInfo::getSpdxLicenseId)
+                .filter(spdxLicenseId -> !SpdxLicenseUtils.isUnknownLicenseId(spdxLicenseId))
+                .toList();
 
-            if (optionalURI.isPresent()) {
-                URI uri = optionalURI.get();
-                String normalizedUri = uri.toASCIIString();
+        if (SpdxLicenseUtils.containsExpression(spdxLicenseIds)) {
+            Expression expression = new Expression();
+            String value = SpdxLicenseUtils.toExpression(spdxLicenseIds);
+            expression.setValue(value);
+            expression.setAcknowledgement(EVIDENCE_LICENSE_ACKNOWLEDGEMENT);
+            licenseChoice.setExpression(expression);
+            evidence.setLicenses(licenseChoice);
+            component.setEvidence(evidence);
+            return;
+        }
 
-                if (uri.isAbsolute()) {
-                    license.setUrl(normalizedUri);
-                } else {
-                    Property relativeUrlProperty = new Property();
-                    relativeUrlProperty.setName("relative-url");
-                    relativeUrlProperty.setValue(normalizedUri);
-                    properties.add(relativeUrlProperty);
-                }
-            }
+        licenseChoice.setLicenses(
+                licenseInfos.stream()
+                        .filter(licenseInfo -> !SpdxLicenseUtils.isUnknownLicenseId(licenseInfo.getSpdxLicenseId()))
+                        .map(licenseInfo -> {
+                            License license = new License();
+                            license.setId(licenseInfo.getSpdxLicenseId());
+                            license.setAcknowledgement(EVIDENCE_LICENSE_ACKNOWLEDGEMENT);
+                            List<Property> properties = new ArrayList<>();
+                            Property sourceProperty = new Property();
+                            sourceProperty.setName("sourceUrl");
+                            sourceProperty.setValue(licenseInfo.getSourceUrl());
+                            properties.add(sourceProperty);
+                            String url = licenseInfo.getUrl();
+                            Optional<URI> optionalURI = getNormalizedUrl(url);
 
-            license.setProperties(properties);
-            return license;
-        }).toList());
+                            if (optionalURI.isPresent()) {
+                                URI uri = optionalURI.get();
+                                String normalizedUri = uri.toASCIIString();
+
+                                if (uri.isAbsolute()) {
+                                    license.setUrl(normalizedUri);
+                                }
+                            }
+
+                            license.setProperties(properties);
+                            return license;
+                        })
+                        .toList());
         evidence.setLicenses(licenseChoice);
         component.setEvidence(evidence);
     }
@@ -420,13 +422,13 @@ public class SbomUtils {
             Expression expression = new Expression();
             String value = SpdxLicenseUtils.toExpression(spdxLicenseIds);
             expression.setValue(value);
-            expression.setAcknowledgement(DEFAULT_ACKNOWLEDGEMENT);
+            expression.setAcknowledgement(COMPONENT_LICENSE_ACKNOWLEDGEMENT);
             licenseChoice.setExpression(expression);
         } else {
             licenseChoice.setLicenses(spdxLicenseIds.stream().map(spdxLicenseId -> {
                 License license = new License();
                 license.setId(spdxLicenseId);
-                license.setAcknowledgement(DEFAULT_ACKNOWLEDGEMENT);
+                license.setAcknowledgement(COMPONENT_LICENSE_ACKNOWLEDGEMENT);
                 return license;
             }).toList());
         }

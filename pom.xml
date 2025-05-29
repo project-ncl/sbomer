@@ -63,7 +63,7 @@
 
     <version.cyclonedx>9.1.0-patch</version.cyclonedx>
     <version.lombok>1.18.32</version.lombok>
-    <version.pnc-rest>3.1.5</version.pnc-rest>
+    <version.pnc>3.1.5</version.pnc>
     <version.pnc-api>3.0.7</version.pnc-api>
     <version.quarkus-jgit>3.5.1</version.quarkus-jgit>
     <version.quarkus-kerberos>2.2.0</version.quarkus-kerberos>
@@ -123,6 +123,29 @@
         <groupId>com.redhat.resilience.otel</groupId>
         <artifactId>opentelemetry-ext-cli-java</artifactId>
         <version>${version.opentelemetry-ext-cli-java}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.pnc</groupId>
+        <artifactId>dto</artifactId>
+        <version>${version.pnc}</version>
+        <classifier>patch-builders</classifier>
+        <exclusions>
+          <exclusion>
+            <groupId>org.jboss.pnc</groupId>
+            <artifactId>pnc-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.pnc</groupId>
+        <artifactId>pnc-api</artifactId>
+        <version>${version.pnc-api}</version>
+        <classifier>jakarta</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.pnc</groupId>
+        <artifactId>rest-client-jakarta</artifactId>
+        <version>${version.pnc}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
