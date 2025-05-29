@@ -64,7 +64,6 @@
     <dependency>
       <groupId>org.jboss.pnc</groupId>
       <artifactId>rest-client-jakarta</artifactId>
-      <version>${version.pnc-rest}</version>
       <exclusions>
         <exclusion>
           <groupId>org.jboss.resteasy</groupId>

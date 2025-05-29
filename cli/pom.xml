@@ -48,14 +48,8 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.pnc</groupId>
-      <artifactId>rest-client-jakarta</artifactId>
-      <version>${version.pnc-rest}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.pnc</groupId>
-      <artifactId>pnc-api</artifactId>
-      <classifier>jakarta</classifier>
-      <version>${version.pnc-api}</version>
+      <artifactId>dto</artifactId>
+      <classifier>patch-builders</classifier>
     </dependency>
     <dependency>
       <groupId>com.redhat.resilience.otel</groupId>
