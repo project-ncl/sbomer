@@ -35,7 +35,10 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 
+import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
+import io.fabric8.tekton.v1beta1.StepState;
 import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunStatus;
 import io.javaoperatorsdk.operator.api.config.informer.Informer;
 import io.javaoperatorsdk.operator.api.reconciler.Constants;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
@@ -126,6 +129,17 @@ public class BrewRPMController extends AbstractController {
 
             log.error("Generation failed, the TaskRun returned failure: {}", detailedFailureMessage);
 
+            // If we get return code 10 then its going to be related to unsupported
+            if (getFirstFailedStepExitCode(generateTaskRun) == 10) {
+                return updateRequest(
+                        generationRequest,
+                        SbomGenerationStatus.FAILED,
+                        GenerationResult.ERR_GENERATION,
+                        "Generation failed. TaskRun responsible for generation failed: {}",
+                        detailedFailureMessage);
+
+            }
+
             return updateRequest(
                     generationRequest,
                     SbomGenerationStatus.FAILED,
@@ -212,4 +226,19 @@ public class BrewRPMController extends AbstractController {
                         sboms.stream().map(Sbom::getId).collect(Collectors.joining(", "))));
     }
 
+    public static Integer getFirstFailedStepExitCode(TaskRun taskRun) {
+        TaskRunStatus status = taskRun.getStatus();
+
+        for (StepState stepState : status.getSteps()) {
+            ContainerStateTerminated terminatedState = stepState.getTerminated();
+            if (terminatedState != null) {
+                Integer exitCode = terminatedState.getExitCode();
+                // We only want failed non-zero exit code
+                if (exitCode != null && exitCode != 0) {
+                    return exitCode;
+                }
+            }
+        }
+        return null;
+    }
 }
