@@ -637,7 +637,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                     SbomUtils.addMissingMetadataSupplier(manifestBom);
 
                     // 2.4 Update rootPurl, metadata.component.purl, bom.component[0].purl with the rebuiltPurl
-                    String rebuiltPurl = originalToRebuiltPurl.get(buildManifest.getRootPurl());
+                    String rebuiltPurl = originalToRebuiltPurl.get(buildManifestRecord.rootPurl());
                     buildManifest.setRootPurl(rebuiltPurl);
                     log.debug("Updated manifest '{}' to rootPurl '{}'", buildManifestRecord.id(), rebuiltPurl);
 
