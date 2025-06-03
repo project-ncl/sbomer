@@ -26,6 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.utils.ObjectMapperUtils;
+import org.jboss.sbomer.service.events.EventCreatedEvent;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
@@ -120,7 +121,7 @@ public class ManagementApi {
         EventRecord eventRecord = mapper.toRecord(event);
 
         // Fire an event so that resolver could handle it
-        Arc.container().beanManager().getEvent().fire(eventRecord);
+        Arc.container().beanManager().getEvent().fire(new EventCreatedEvent(eventRecord));
 
         // Return DTO to user
         return Response.status(Response.Status.ACCEPTED).entity(eventRecord).build();

@@ -36,6 +36,7 @@ import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.service.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -47,12 +48,13 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResul
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.v1beta2.controller.AbstractController;
 import org.jboss.sbomer.service.v1beta2.controller.TaskRunEventProvider;
+import org.jboss.sbomer.service.v1beta2.controller.request.Request;
+import org.jboss.sbomer.service.v1beta2.controller.request.RequestType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.fabric8.kubernetes.api.model.Duration;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
@@ -89,6 +91,8 @@ public class SyftController extends AbstractController {
     public static final String SA_SUFFIX = "-sa";
     public static final String TASK_SUFFIX = "-generator-syft";
 
+    public static final String GENERATOR_NAME = "syft";
+
     @Inject
     public SyftController(
             KubernetesClient kubernetesClient,
@@ -97,9 +101,14 @@ public class SyftController extends AbstractController {
         super(kubernetesClient, controllerConfig, managedExecutor);
     }
 
-    public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationRecord generation) {
+    public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
+        if (!event.isOfRequestType(RequestType.CONTAINER_IMAGE)) {
+            // This is not an event handled by this listener
+            return;
+        }
+
         managedExecutor.runAsync(() -> {
-            reconcile(generation, Collections.emptySet());
+            reconcile(event.generation(), Collections.emptySet());
         });
     }
 
@@ -269,12 +278,26 @@ public class SyftController extends AbstractController {
         try {
             request = ObjectMapperProvider.json().treeToValue(generation.request(), Request.class);
         } catch (JsonProcessingException e) {
-            throw new ApplicationException("Unable to parse provided resource configuration");
+            throw new ApplicationException("Unable to parse provided resource configuration", e);
         }
+
+        SyftOptions options = null;
+
+        try {
+            options = ObjectMapperProvider.json()
+                    .treeToValue(request.generator().config().options(), SyftOptions.class);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException(
+                    "Unexpected options provided, expected Syft generator options, but got: {}",
+                    request.generator().config().options(),
+                    e);
+        }
+
+        // SyftOptions options = (SyftOptions) request.generator().config().options();
 
         Duration timeout;
 
-        String timeoutSetting = Optional.ofNullable(request.generator().config().options().timeout()).orElse("6h");
+        String timeoutSetting = Optional.ofNullable(options.timeout()).orElse("6h");
 
         // Parse duration
         try {
@@ -302,21 +325,16 @@ public class SyftController extends AbstractController {
                         new ParamBuilder().withName(PARAM_PATHS)
                                 .withValue(
                                         new ParamValue(
-                                                Objects.requireNonNullElse(
-                                                        request.generator().config().options().paths(),
-                                                        Collections.emptyList())))
+                                                Objects.requireNonNullElse(options.paths(), Collections.emptyList())))
                                 .build());
                 /*
                  * TODO: We use a hardcoded value here. This will be externalized to a custom processor listening on
-                 * generation finished event. Syft controller should not know anything about RH.
+                 * generation finished event.
                  */
-                params.add(
-                        new ParamBuilder().withName(PARAM_PROCESSORS).withNewValue("default redhat-product").build());
+                params.add(new ParamBuilder().withName(PARAM_PROCESSORS).withNewValue("default").build());
                 params.add(
                         new ParamBuilder().withName(PARAM_RPMS)
-                                .withValue(
-                                        new ParamValue(
-                                                Boolean.toString(request.generator().config().options().includeRpms())))
+                                .withValue(new ParamValue(Boolean.toString(options.includeRpms())))
                                 .build());
                 break;
 
@@ -328,26 +346,12 @@ public class SyftController extends AbstractController {
             throw new ApplicationException("Unknown target type: {}", request.target().type());
         }
 
-        Deployment deployment = kubernetesClient.apps().deployments().withName(release + "-service").get();
-        OwnerReference ownerReference = null;
-
-        if (deployment != null) {
-            log.debug("Setting SBOMer deployment as the owner for the newly created TaskRun");
-
-            ownerReference = new OwnerReferenceBuilder().withKind(HasMetadata.getKind(Deployment.class))
-                    .withApiVersion(HasMetadata.getApiVersion(Deployment.class))
-                    .withName(release + "-service")
-                    .withUid(deployment.getMetadata().getUid())
-                    .build();
-        }
-
-        return new TaskRunBuilder().withNewMetadata()
+        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withLabels(labels)
                 // TODO: this should be a method
                 .withName(
                         "generation-" + generation.id().toLowerCase() + "-" + SbomGenerationPhase.GENERATE.ordinal()
                                 + "-" + SbomGenerationPhase.GENERATE.name().toLowerCase())
-                .withOwnerReferences(ownerReference)
                 .endMetadata()
                 .withNewSpec()
                 .withServiceAccountName(release + SA_SUFFIX)
@@ -364,6 +368,22 @@ public class SyftController extends AbstractController {
                                 .build())
                 .endSpec()
                 .build();
+
+        Deployment deployment = kubernetesClient.apps().deployments().withName(release + "-service").get();
+
+        if (deployment != null) {
+            log.debug("Setting SBOMer deployment as the owner for the newly created TaskRun");
+
+            taskRun.getMetadata()
+                    .setOwnerReferences(
+                            Collections.singletonList(
+                                    new OwnerReferenceBuilder().withKind(HasMetadata.getKind(Deployment.class))
+                                            .withApiVersion(HasMetadata.getApiVersion(Deployment.class))
+                                            .withName(release + "-service")
+                                            .withUid(deployment.getMetadata().getUid())
+                                            .build()));
+        }
+        return taskRun;
     }
 
     /**

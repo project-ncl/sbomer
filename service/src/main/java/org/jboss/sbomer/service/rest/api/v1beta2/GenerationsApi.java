@@ -29,6 +29,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.ObjectMapperUtils;
+import org.jboss.sbomer.service.events.EventCreatedEvent;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHistory;
@@ -135,7 +136,7 @@ public class GenerationsApi {
 
         EventRecord eventRecord = mapper.toRecord(event);
 
-        Arc.container().beanManager().getEvent().fire(eventRecord);
+        Arc.container().beanManager().getEvent().fire(new EventCreatedEvent(eventRecord));
 
         return Response
                 .accepted(new GenerationsResponse(eventRecord, mapper.toGenerationRecords(event.getGenerations())))
