@@ -21,12 +21,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.sbomer.core.SchemaValidator;
+import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
+import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GeneratorVersionConfigSpec;
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GeneratorVersionSpec;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -156,12 +158,30 @@ public class GeneratorConfigProvider {
         log.info("Using generator '{}' with version '{}'", generatorProfile.name(), generatorVersionProfile.version());
 
         // Prepare effective configuration which will be passed to the generator
-        return new GenerationRequestSpec(
+        GenerationRequestSpec effectiveRequest = new GenerationRequestSpec(
                 requestSpec.target(),
                 new GeneratorVersionConfigSpec(
-                        new GeneratorVersionSpec(generatorProfile.name(), generatorVersionProfile.version()),
+                        generatorProfile.name(),
+                        generatorVersionProfile.version(),
                         generatorVersionProfile.defaultConfig()));
 
+        String request;
+
+        try {
+            request = ObjectMapperProvider.json().writeValueAsString(effectiveRequest);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Unable to serialize request", e);
+        }
+
+        ValidationResult result = SchemaValidator.validate(generatorVersionProfile.schema().toString(), request);
+
+        if (!result.isValid()) {
+            throw new ValidationException(
+                    "Effective configuration for the  generation zis not valid",
+                    result.getErrors());
+        }
+
+        return effectiveRequest;
     }
 
     public GeneratorVersionConfigSpec buildEffectiveConfig(GenerationRequestSpec requestSpec) {
@@ -226,7 +246,8 @@ public class GeneratorConfigProvider {
 
         // Prepare effective configuration which will be passed to the generator
         return new GeneratorVersionConfigSpec(
-                new GeneratorVersionSpec(generatorProfile.name(), generatorVersionProfile.version()),
+                generatorProfile.name(),
+                generatorVersionProfile.version(),
                 generatorVersionProfile.defaultConfig());
     }
 

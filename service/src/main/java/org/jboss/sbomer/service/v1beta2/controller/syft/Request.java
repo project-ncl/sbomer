@@ -15,19 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation;
+package org.jboss.sbomer.service.v1beta2.controller.syft;
 
-import java.util.Map;
+import java.util.List;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
+enum RequestType {
+    CONTAINER_IMAGE;
+};
 
-/**
- * Options for a given generator used for generating manifests.
- *
- * @param format The manifest output format.
- * @param resources Resource requirements related to execution phase for a current generation.
- * @param options Custom, generator(version)-specific, options which should be applied to the generation process.
- */
-public record GeneratorConfigSpec(String format, ResourcesSpec resources,
-        @Schema(description = "Specific options for a particular generator version.") Map<String, Object> options) {
+record ResourceSpec(String cpu, String memory) {
+};
+
+record Resources(ResourceSpec requests, ResourceSpec limits) {
+};
+
+record SyftOptions(boolean includeRpms, List<String> paths, String timeout) {
+};
+
+record Config(Resources resources, String format, SyftOptions options) {
+};
+
+record Generator(String name, String version, Config config) {
+};
+
+record Target(RequestType type, String identifier) {
+};
+
+public record Request(Generator generator, Target target) {
+
 }
