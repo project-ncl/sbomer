@@ -8,28 +8,99 @@ generatorProfiles:
       - version: "1.26.1"
         supportedTargetTypes:
           ["CONTAINER_IMAGE", "FILESYSTEM", "DIRECTORY", "RPM_PACKAGE"]
-        # Schema for custom configuration for the Syft generator.
-        # Below schema is made up!
         schema:
           $schema: https://json-schema.org/draft/2020-12/schema
-          description: Syft generator configuration schema
-          type: "object"
+          $id: https://example.com/schemas/request
+          title: Request
+          description: Main request schema
+          type: object
           properties:
-            scope:
-              type: "string"
-              enum: ["Squashed", "AllLayers"]
-              default: "Squashed"
-              description: "Selection of layers to catalog."
-
-            verbosity:
-              type: "integer"
-              minimum: 0
-              default: 1
-              description: "Log verbosity level."
-
-            base-path:
-              type: "string"
-              description: "Base directory to resolve paths from, for directory scans."
+            generator:
+              $ref: "#/$defs/Generator"
+            target:
+              $ref: "#/$defs/Target"
+          required:
+            - generator
+            - target
+          $defs:
+            RequestType:
+              type: string
+              enum:
+                - CONTAINER_IMAGE
+            ResourceSpec:
+              type: object
+              properties:
+                cpu:
+                  type: string
+                memory:
+                  type: string
+              required:
+                - cpu
+                - memory
+            Resources:
+              type: object
+              properties:
+                requests:
+                  $ref: "#/$defs/ResourceSpec"
+                limits:
+                  $ref: "#/$defs/ResourceSpec"
+              required:
+                - requests
+                - limits
+            SyftOptions:
+              type: object
+              properties:
+                includeRpms:
+                  type: boolean
+                paths:
+                  type: array
+                  items:
+                    type: string
+                timeout:
+                  type: string
+              required:
+                - includeRpms
+                - paths
+                - timeout
+            Config:
+              type: object
+              properties:
+                resources:
+                  $ref: "#/$defs/Resources"
+                format:
+                  type: string
+                options:
+                  oneOf:
+                    - $ref: "#/$defs/SyftOptions"
+                    - type: object
+                      description: Represents other types of options. Define specific schemas here if known.
+              required:
+                - resources
+                - format
+                - options
+            Generator:
+              type: object
+              properties:
+                name:
+                  type: string
+                version:
+                  type: string
+                config:
+                  $ref: "#/$defs/Config"
+              required:
+                - name
+                - version
+                - config
+            Target:
+              type: object
+              properties:
+                type:
+                  $ref: "#/$defs/RequestType"
+                identifier:
+                  type: string
+              required:
+                - type
+                - identifier
 
           additionalProperties: false
         # Supported output formats

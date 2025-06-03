@@ -18,13 +18,13 @@
 package org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation;
 
 /**
- * 
- * 
+ *
+ *
  * @param name Name of the generator.
  * @param version Version of the generator.
  * @param config The custom configuration for a given generator version.
  */
-public record GeneratorVersionConfigSpec(GeneratorVersionSpec generator, GeneratorConfigSpec config) {
+public record GeneratorVersionConfigSpec(String name, String version, GeneratorConfigSpec config) {
 }
 
 // @JsonIgnoreProperties(ignoreUnknown = true)

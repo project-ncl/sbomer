@@ -19,7 +19,6 @@ package org.jboss.sbomer.service.rest.api.v1beta2;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

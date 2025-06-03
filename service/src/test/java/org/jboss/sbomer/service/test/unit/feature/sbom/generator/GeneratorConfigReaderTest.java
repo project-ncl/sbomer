@@ -97,8 +97,8 @@ public class GeneratorConfigReaderTest {
         GeneratorVersionConfigSpec effectiveConfig = generatorConfigProvider
                 .buildEffectiveConfig(new GenerationRequestSpec(new TargetSpec("image", "CONTAINER_IMAGE"), null));
 
-        assertEquals("syft", effectiveConfig.generator().name());
-        assertEquals("1.26.1", effectiveConfig.generator().version());
+        assertEquals("syft", effectiveConfig.name());
+        assertEquals("1.26.1", effectiveConfig.version());
         assertEquals("CYCLONEDX_1.6_JSON", effectiveConfig.config().format());
         assertEquals("500m", effectiveConfig.config().resources().requests().cpu());
         assertEquals("1Gi", effectiveConfig.config().resources().requests().memory());
