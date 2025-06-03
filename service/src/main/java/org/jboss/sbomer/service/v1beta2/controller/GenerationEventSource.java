@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.pnc.common.otel.OtelUtils;
+import org.jboss.sbomer.service.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
@@ -152,6 +153,8 @@ public class GenerationEventSource {
 
             new GenerationStatusHistory(g, g.getStatus().name(), "Generation picked up by scheduler").save();
 
+            Arc.container().beanManager().getEvent().fire(new GenerationScheduledEvent(mapper.toRecord(g)));
+
             schedule(g);
         });
     }
@@ -204,7 +207,6 @@ public class GenerationEventSource {
 
         // put the span into the current Context
         try (Scope scope = span.makeCurrent()) {
-            Arc.container().beanManager().getEvent().fire(mapper.toRecord(generation));
 
             // generationController.reconcile(mapper.toRecord(generation), Collections.emptyList());
             // request = new GenerationRequestBuilder(GenerationRequestType.CONTAINERIMAGE)
