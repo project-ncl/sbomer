@@ -21,14 +21,14 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 
-import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
+import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,12 +38,10 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,10 +54,7 @@ import lombok.ToString;
 @Setter
 @Entity
 @ToString
-@Table(
-        name = "manifest",
-        indexes = { @Index(name = "idx_sbom_identifier", columnList = "identifier"),
-                @Index(name = "idx_sbom_rootpurl", columnList = "root_purl") })
+@Table(name = "manifest")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(setterPrefix = "with")
@@ -70,15 +65,16 @@ public class Manifest extends PanacheEntityBase {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @Column(name = "identifier", nullable = false, updatable = false)
-    @NotBlank(message = "Identifier missing")
-    private String identifier;
+    // @Column(name = "identifier", nullable = false, updatable = false)
+    // @NotBlank(message = "Identifier missing")
+    // private String identifier;
 
-    @Column(name = "root_purl")
-    private String rootPurl;
-
-    @Column(name = "creation_time", nullable = false, updatable = false)
-    private Instant creationTime;
+    /**
+     * Time when the manifest was created.
+     */
+    @CreationTimestamp
+    @Column(name = "created", nullable = false, updatable = false)
+    private Instant created;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "sbom")
@@ -88,8 +84,8 @@ public class Manifest extends PanacheEntityBase {
                                         // big schema which is the case if we use the Bom.class
     private JsonNode sbom;
 
-    @Column(name = "config_index")
-    private Integer configIndex;
+    // @Column(name = "config_index")
+    // private Integer configIndex;
 
     // @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     // @JoinColumn(foreignKey = @ForeignKey(name = "fk_sbom_generationrequest"))
@@ -107,29 +103,43 @@ public class Manifest extends PanacheEntityBase {
     @Schema(implementation = Map.class)
     private JsonNode releaseMetadata;
 
-    /**
-     * Updates the purl for the object based on the SBOM content, if provided.
-     *
-     */
-    private void setupRootPurl() {
-        Bom bom = SbomUtils.fromJsonNode(getSbom());
-
-        rootPurl = null;
-
-        if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-            rootPurl = bom.getMetadata().getComponent().getPurl();
+    @PrePersist
+    protected void onPrePersist() {
+        if (this.id == null) {
+            this.id = RandomStringIdGenerator.generate();
         }
     }
 
-    @PrePersist
-    public void prePersist() {
-        creationTime = Instant.now();
-        setupRootPurl();
-    }
+    // /**
+    // * Updates the purl for the object based on the SBOM content, if provided.
+    // *
+    // */
+    // private void setupRootPurl() {
+    // Bom bom = SbomUtils.fromJsonNode(getSbom());
 
-    @PreUpdate
-    public void preUpdate() {
-        setupRootPurl();
+    // rootPurl = null;
+
+    // if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
+    // rootPurl = bom.getMetadata().getComponent().getPurl();
+    // }
+    // }
+
+    // @PrePersist
+    // public void prePersist() {
+    // creationTime = Instant.now();
+    // setupRootPurl();
+    // }
+
+    // @PreUpdate
+    // public void preUpdate() {
+    // setupRootPurl();
+    // }
+
+    @Transactional
+    public Manifest save() {
+
+        persistAndFlush();
+        return this;
     }
 
     @Override
