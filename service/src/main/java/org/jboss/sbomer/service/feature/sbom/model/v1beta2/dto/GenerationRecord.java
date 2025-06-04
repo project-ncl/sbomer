@@ -29,7 +29,7 @@ import io.quarkus.resteasy.reactive.links.RestLinkId;
 /**
  * Representation of the {@link Generation} entity.
  */
-public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished, String type,
-        String identifier, JsonNode request, GenerationStatus status, String result, String reason) {
+public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished,
+        JsonNode request, GenerationStatus status, String result, String reason) {
 
 }

@@ -103,12 +103,6 @@ public class Generation extends PanacheEntityBase {
     @ManyToOne
     private Generation parent;
 
-    @Column(name = "type", nullable = false)
-    String type;
-
-    @Column(name = "identifier", nullable = false, updatable = false)
-    String identifier;
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "request")
     @ToString.Exclude
@@ -172,6 +166,17 @@ public class Generation extends PanacheEntityBase {
     public Generation save() {
 
         persistAndFlush();
+        return this;
+    }
+
+    @Transactional
+    public Generation updateStatus(GenerationStatus status, String reason) {
+
+        this.setStatus(status);
+        this.setReason(reason);
+
+        new GenerationStatusHistory(this, status.name(), reason).save();
+
         return this;
     }
 
