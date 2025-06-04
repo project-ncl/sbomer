@@ -146,7 +146,9 @@ public class GenerationEventSource {
         log.debug("Got {} generations to be scheduled...", oldestResultsBatch.size());
 
         oldestResultsBatch.forEach(g -> {
-            g.updateStatus(GenerationStatus.SCHEDULED, "Generation scheduled");
+            g.setStatus(GenerationStatus.SCHEDULED);
+            g.setReason("Generation scheduled");
+            g.save();
 
             Arc.container().beanManager().getEvent().fire(new GenerationScheduledEvent(mapper.toRecord(g)));
 

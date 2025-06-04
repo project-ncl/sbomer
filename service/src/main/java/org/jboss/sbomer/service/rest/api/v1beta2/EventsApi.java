@@ -38,7 +38,6 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 
 import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
@@ -201,11 +200,11 @@ public class EventsApi {
                         .withRequest(g.getRequest())
                         .withParent(g)
                         .withEvents(List.of(event))
+                        .withReason("Created as a result of force retry of generation '" + g.getId() + "'")
                         .build()
                         .save();
 
                 generations.add(generation);
-                generation.updateStatus(GenerationStatus.NEW, "Initial creation");
             });
         } else {
             generations.addAll(parentEvent.getGenerations());

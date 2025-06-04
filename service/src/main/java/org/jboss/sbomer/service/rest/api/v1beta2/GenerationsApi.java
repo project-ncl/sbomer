@@ -35,7 +35,6 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
@@ -110,6 +109,7 @@ public class GenerationsApi {
                                 EventsApi.KEY_SOURCE,
                                 String.format("%s:%s", EventType.REST.toName(), uriInfo.getPath())))
                 .withRequest(ObjectMapperUtils.toJsonNode(payload))
+                .withReason("Created as a result of a REST API call")
                 .build()
                 .save();
 
@@ -124,16 +124,13 @@ public class GenerationsApi {
 
             Generation generation = Generation.builder()
                     .withRequest(ObjectMapperUtils.toJsonNode(effectiveRequest))
+                    .withReason("Created as a result of a REST API call")
                     .build()
                     .save();
-
-            generation.updateStatus(GenerationStatus.NEW, "Generation created");
 
             event.getGenerations().add(generation);
 
         });
-
-        event.updateStatus(EventStatus.NEW, "Received via REST API");
 
         EventRecord eventRecord = mapper.toRecord(event);
 

@@ -24,7 +24,6 @@ import org.jboss.sbomer.core.utils.ObjectMapperUtils;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.TargetSpec;
 import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigProvider;
@@ -86,14 +85,14 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
                 .withEvents(List.of(event))
                 // Convert payload to JsonNode
                 .withRequest(ObjectMapperUtils.toJsonNode(effectiveRequest))
+                .withReason("Generation created by Errata Tool resolver")
                 .build()
                 .save();
 
-        // Create status update
-        generation.updateStatus(GenerationStatus.NEW, "Generation created");
-
         event.getGenerations().add(generation);
-        event.updateStatus(EventStatus.RESOLVED, "Event was successfully resolved");
+        event.setStatus(EventStatus.RESOLVED);
+        event.setReason("Event was successfully resolved");
+        event.save();
     }
 
     public void resolveAdvisory(String advisoryId) {

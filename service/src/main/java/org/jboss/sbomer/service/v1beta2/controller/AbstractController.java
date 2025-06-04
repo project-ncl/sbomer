@@ -32,6 +32,7 @@ import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -114,7 +115,7 @@ public abstract class AbstractController implements Controller<GenerationRecord>
     void reconcileScheduled(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.SCHEDULED, generation.id());
 
-        updateStatus(generation, GenerationStatus.GENERATING, null, "Work started");
+        updateStatus(generation, GenerationStatus.GENERATING, null, "Generation is in progress");
 
         try {
             kubernetesClient.resources(TaskRun.class).resource(desired(generation)).create();
@@ -323,13 +324,18 @@ public abstract class AbstractController implements Controller<GenerationRecord>
             GenerationResult result,
             String reason,
             Object... params) {
+
         Generation generation = Generation.findById(generationRecord.id());
+
+        if (generation == null) {
+            throw new NotFoundException("Generation request with id '{}' could not be found", generationRecord.id());
+        }
 
         String reasonContent = MessageFormatter.arrayFormat(reason, params).getMessage();
 
+        generation.setStatus(status);
+        generation.setReason(reasonContent);
         generation.setResult(result);
         generation.save();
-
-        generation.updateStatus(status, reasonContent);
     }
 }
