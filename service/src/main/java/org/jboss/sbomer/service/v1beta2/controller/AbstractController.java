@@ -37,7 +37,6 @@ import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerC
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;

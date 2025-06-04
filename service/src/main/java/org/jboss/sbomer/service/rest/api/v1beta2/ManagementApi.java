@@ -29,7 +29,6 @@ import org.jboss.sbomer.core.utils.ObjectMapperUtils;
 import org.jboss.sbomer.service.events.EventCreatedEvent;
 import org.jboss.sbomer.service.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;

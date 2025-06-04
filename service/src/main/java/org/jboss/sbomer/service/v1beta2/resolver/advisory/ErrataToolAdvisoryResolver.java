@@ -23,7 +23,6 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.utils.ObjectMapperUtils;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
@@ -92,7 +91,6 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
         // Create status update
         generation.updateStatus(GenerationStatus.NEW, "Generation created");
-
 
         event.getGenerations().add(generation);
         event.updateStatus(EventStatus.RESOLVED, "Event was successfully resolved");
