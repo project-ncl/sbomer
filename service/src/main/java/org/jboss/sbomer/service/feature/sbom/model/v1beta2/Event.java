@@ -180,6 +180,17 @@ public class Event extends PanacheEntityBase {
         return this;
     }
 
+    @Transactional
+    public Event updateStatus(EventStatus status, String reason) {
+
+        this.setStatus(status);
+        this.setReason(reason);
+
+        new EventStatusHistory(this, status.name(), reason).save();
+
+        return this;
+    }
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) {

@@ -328,11 +328,9 @@ public abstract class AbstractController implements Controller<GenerationRecord>
 
         String reasonContent = MessageFormatter.arrayFormat(reason, params).getMessage();
 
-        generation.setStatus(status);
         generation.setResult(result);
-        generation.setReason(reasonContent);
         generation.save();
 
-        new GenerationStatusHistory(generation, status.name(), reasonContent).save();
+        generation.updateStatus(status, reasonContent);
     }
 }

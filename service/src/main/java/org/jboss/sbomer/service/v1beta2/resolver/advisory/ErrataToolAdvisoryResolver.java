@@ -25,7 +25,6 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.TargetSpec;
@@ -78,32 +77,25 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
             return;
         }
         GenerationRequestSpec dummyRequestSpec = new GenerationRequestSpec(
-                new TargetSpec("quay.io/from-errata/image:tag", "CONTAINER_IMAGE"),
+                new TargetSpec("quay.io/pct-security/mequal:latest", "CONTAINER_IMAGE"),
                 null);
 
         GenerationRequestSpec effectiveRequest = generatorConfigProvider.buildEffectiveRequest(dummyRequestSpec);
 
         // TODO: dummy
         Generation generation = Generation.builder()
-                .withIdentifier(dummyRequestSpec.target().identifier())
-                .withType(dummyRequestSpec.target().type())
                 .withEvents(List.of(event))
                 // Convert payload to JsonNode
                 .withRequest(ObjectMapperUtils.toJsonNode(effectiveRequest))
-                .withStatus(GenerationStatus.FAILED)
-                .withReason("Not implemented, automatically failed by the system")
-                .withResult(GenerationResult.ERR_SYSTEM)
                 .build()
                 .save();
 
         // Create status update
-        new GenerationStatusHistory(generation, generation.getStatus().name(), "Initial creation").save();
+        generation.updateStatus(GenerationStatus.NEW, "Generation created");
+
 
         event.getGenerations().add(generation);
-
-        // TODO: Change to RESOLVED
-        event.setStatus(EventStatus.FAILED);
-        event.setReason("Not implemented, automatically failed by the system");
+        event.updateStatus(EventStatus.RESOLVED, "Event was successfully resolved");
     }
 
     public void resolveAdvisory(String advisoryId) {
