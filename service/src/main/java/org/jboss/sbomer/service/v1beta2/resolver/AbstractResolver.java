@@ -84,6 +84,8 @@ public abstract class AbstractResolver implements Resolver {
             return;
         }
 
-        event.updateStatus(status, "Updated by resolver");
+        event.setStatus(status);
+        event.setReason("Updated by resolver");
+        event.save();
     }
 }
