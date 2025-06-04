@@ -206,7 +206,6 @@ export const ManifestsTable = () => {
   </>
   const noResults = <NoResultsSection />
   const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
-  const errorSection = <ErrorSection />
 
   const filtersBar = <>
     <Toolbar>
@@ -225,7 +224,7 @@ export const ManifestsTable = () => {
   </>
 
   const tableArea =
-    error ? errorSection :
+    error ? <ErrorSection error={error} /> :
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 

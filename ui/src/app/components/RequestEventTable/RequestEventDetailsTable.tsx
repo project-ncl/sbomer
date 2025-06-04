@@ -44,8 +44,11 @@ export const RequestEventDetailsTable = () => {
   const [{ request: sbomerRequestManifest, loading, error }] = useRequestEventManifest(id!);
   const [{ value: sbomerRequestGenerations, loading: loadingGeneration, error: errorGeneration }] = useRequestEventGeneration(id!);
 
-  if (error || errorGeneration) {
-    return <ErrorSection />;
+  if (error) {
+    return <ErrorSection error={error} />;
+  }
+  if (errorGeneration) {
+    return <ErrorSection error={errorGeneration} />;
   }
 
   if (loading || loadingGeneration) {
