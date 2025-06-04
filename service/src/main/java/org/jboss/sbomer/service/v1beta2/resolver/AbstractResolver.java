@@ -20,9 +20,8 @@ package org.jboss.sbomer.service.v1beta2.resolver;
 import java.util.Objects;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.sbomer.service.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 
 import jakarta.enterprise.event.Observes;
@@ -47,16 +46,16 @@ public abstract class AbstractResolver implements Resolver {
      *
      * @param eventRecord
      */
-    public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) EventRecord eventRecord) {
-        if (eventRecord == null || eventRecord.metadata() == null
-                || !Objects.equals(eventRecord.metadata().get(Resolver.KEY_RESOLVER), getType())) {
+    public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) ResolveRequestEvent event) {
+        if (event == null || event.event() == null || event.event().metadata() == null
+                || !Objects.equals(event.event().metadata().get(Resolver.KEY_RESOLVER), getType())) {
             log.debug("Not an event for '{}' resolver, skipping", getType());
             return;
         }
 
-        log.info("Handling new {} event with metadata: {}", getType(), eventRecord.metadata());
+        log.info("Handling new {} event with metadata: {}", getType(), event.event().metadata());
 
-        String identifier = eventRecord.metadata().get(Resolver.KEY_IDENTIFIER);
+        String identifier = event.event().metadata().get(Resolver.KEY_IDENTIFIER);
 
         if (identifier == null || identifier.trim().isEmpty()) {
             log.warn("Identifier missing, event won't be processed");
@@ -67,26 +66,24 @@ public abstract class AbstractResolver implements Resolver {
 
         managedExecutor.runAsync(() -> {
             try {
-                updateEventStatus(eventRecord.id(), EventStatus.RESOLVING);
-                resolve(eventRecord.id(), identifier);
+                updateEventStatus(event.event().id(), EventStatus.RESOLVING);
+                resolve(event.event().id(), identifier);
             } catch (Exception e) {
-                updateEventStatus(eventRecord.id(), EventStatus.ERROR);
+                updateEventStatus(event.event().id(), EventStatus.ERROR);
                 log.error("Unable to resolve event", e);
             }
         });
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
-    protected EventStatusHistory updateEventStatus(String eventId, EventStatus status) {
+    protected void updateEventStatus(String eventId, EventStatus status) {
         Event event = Event.findById(eventId);
 
         if (event == null) {
             log.warn("Event with id '{}' could not be found, cannot update status", eventId);
-            return null;
+            return;
         }
 
-        event.setStatus(status);
-
-        return new EventStatusHistory(event, status.name(), "Updated by resolver").save();
+        event.updateStatus(status, "Updated by resolver");
     }
 }

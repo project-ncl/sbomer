@@ -57,9 +57,6 @@ public abstract class BaseStatusHistory extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     protected String reason;
 
-    @Column(name = "changed_by", updatable = false)
-    private String changedBy;
-
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {

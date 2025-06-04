@@ -148,10 +148,7 @@ public class GenerationEventSource {
         log.debug("Got {} generations to be scheduled...", oldestResultsBatch.size());
 
         oldestResultsBatch.forEach(g -> {
-            g.setStatus(GenerationStatus.SCHEDULED);
-            g.save();
-
-            new GenerationStatusHistory(g, g.getStatus().name(), "Generation picked up by scheduler").save();
+            g.updateStatus(GenerationStatus.SCHEDULED, "Generation scheduled");
 
             Arc.container().beanManager().getEvent().fire(new GenerationScheduledEvent(mapper.toRecord(g)));
 
@@ -195,7 +192,8 @@ public class GenerationEventSource {
                 MDC.get(MDC_TRACE_FLAGS_KEY),
                 MDC.get(MDC_TRACE_STATE_KEY),
                 Span.current().getSpanContext(),
-                Map.of(MDC_IDENTIFIER_KEY, generation.getIdentifier()));
+                Map.of());
+        // Map.of(MDC_IDENTIFIER_KEY, generation.getIdentifier())); TODO: @avibelli
 
         Span span = spanBuilder.startSpan();
 

@@ -27,10 +27,12 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.utils.ObjectMapperUtils;
 import org.jboss.sbomer.service.events.EventCreatedEvent;
+import org.jboss.sbomer.service.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.EventStatusHistory;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.management.ReplayRequest;
 
@@ -115,13 +117,16 @@ public class ManagementApi {
                 .save();
 
         // Store new status change
-        new EventStatusHistory(event, event.getStatus().name(), "Initial creation").save();
+        event.updateStatus(EventStatus.NEW, "Initial creation");
 
         // Convert to DTO
         EventRecord eventRecord = mapper.toRecord(event);
 
         // Fire an event so that resolver could handle it
         Arc.container().beanManager().getEvent().fire(new EventCreatedEvent(eventRecord));
+
+        // And fire an additional event that encapsulates the information that this is a request for resolution
+        Arc.container().beanManager().getEvent().fire(new ResolveRequestEvent(eventRecord));
 
         // Return DTO to user
         return Response.status(Response.Status.ACCEPTED).entity(eventRecord).build();

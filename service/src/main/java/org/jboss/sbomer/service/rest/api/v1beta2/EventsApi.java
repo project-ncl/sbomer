@@ -39,6 +39,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.GenerationStatusHisto
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 
 import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
@@ -198,8 +199,6 @@ public class EventsApi {
         if (force) {
             parentEvent.getGenerations().forEach(g -> {
                 Generation generation = Generation.builder()
-                        .withIdentifier("DUMMY")
-                        .withType("DUMMY")
                         .withRequest(g.getRequest())
                         .withParent(g)
                         .withEvents(List.of(event))
@@ -207,8 +206,7 @@ public class EventsApi {
                         .save();
 
                 generations.add(generation);
-
-                new GenerationStatusHistory(generation, generation.getStatus().name(), "Initial creation").save();
+                generation.updateStatus(GenerationStatus.NEW, "Initial creation");
             });
         } else {
             generations.addAll(parentEvent.getGenerations());
