@@ -17,8 +17,15 @@
  */
 package org.jboss.sbomer.service.feature.sbom.model.v1beta2;
 
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -38,14 +45,19 @@ import lombok.Setter;
 @RegisterForReflection
 public class GenerationStatusHistory extends BaseStatusHistory {
 
-    public GenerationStatusHistory(Generation generation, String status, String reason) {
+    public GenerationStatusHistory(Generation generation, GenerationStatus status, String reason) {
         this.generation = generation;
         this.status = status;
         this.reason = reason;
     }
 
+    @Column(name = "status", nullable = false, updatable = false)
+    @Enumerated(EnumType.STRING)
+    private GenerationStatus status;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "generation_id", nullable = false, updatable = false)
+    @JsonBackReference
     private Generation generation;
 
     @Transactional

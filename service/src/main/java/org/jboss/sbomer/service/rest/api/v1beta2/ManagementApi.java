@@ -31,7 +31,6 @@ import org.jboss.sbomer.service.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventStatus;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.management.ReplayRequest;
 
@@ -112,11 +111,9 @@ public class ManagementApi {
                                 payload.resolver(),
                                 EventsApi.KEY_IDENTIFIER,
                                 payload.identifier()))
+                .withReason("Created as a result of a REST API call")
                 .build()
                 .save();
-
-        // Store new status change
-        event.updateStatus(EventStatus.NEW, "Initial creation");
 
         // Convert to DTO
         EventRecord eventRecord = mapper.toRecord(event);

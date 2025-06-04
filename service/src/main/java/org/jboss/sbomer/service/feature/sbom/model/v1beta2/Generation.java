@@ -36,6 +36,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatu
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -53,6 +54,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -153,30 +155,34 @@ public class Generation extends PanacheEntityBase {
     @OneToMany(mappedBy = "generation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("timestamp ASC") // Ensures history is ordered chronologically
     @Builder.Default
+    @JsonManagedReference
     private List<GenerationStatusHistory> statuses = new ArrayList<>();
+
+    public void setStatus(GenerationStatus status) {
+        // This is a workaround so that when we update the status of the entity later, the status history entity will be
+        // created as well.
+        statuses.size();
+        this.status = status;
+    }
 
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {
             this.id = RandomStringIdGenerator.generate();
         }
+
+        statuses.add(new GenerationStatusHistory(this, status, reason));
+    }
+
+    @PreUpdate
+    protected void onPreUpdate() {
+        statuses.add(new GenerationStatusHistory(this, status, reason));
     }
 
     @Transactional
     public Generation save() {
 
         persistAndFlush();
-        return this;
-    }
-
-    @Transactional
-    public Generation updateStatus(GenerationStatus status, String reason) {
-
-        this.setStatus(status);
-        this.setReason(reason);
-
-        new GenerationStatusHistory(this, status.name(), reason).save();
-
         return this;
     }
 

@@ -50,9 +50,6 @@ public abstract class BaseStatusHistory extends PanacheEntityBase {
     @Column(name = "timestamp", nullable = false, updatable = false)
     private Instant timestamp;
 
-    @Column(name = "status", nullable = false, updatable = false)
-    protected String status;
-
     @Column(name = "reason", updatable = false)
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     protected String reason;

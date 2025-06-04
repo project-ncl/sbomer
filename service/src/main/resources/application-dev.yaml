@@ -48,6 +48,8 @@ quarkus:
       "org.jboss.resteasy.reactive.client.logging":
         level: TRACE
         min-level: TRACE
+    console:
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
 
   rest-client:
     logging:

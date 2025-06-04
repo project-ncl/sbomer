@@ -56,6 +56,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -164,30 +165,34 @@ public class Event extends PanacheEntityBase {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("timestamp ASC")
     @Builder.Default
+    @JsonManagedReference
     private List<EventStatusHistory> statuses = new ArrayList<>();
+
+    public void setStatus(EventStatus status) {
+        // This is a workaround so that when we update the status of the entity later, the status history entity will be
+        // created as well.
+        statuses.size();
+        this.status = status;
+    }
 
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {
             this.id = RandomStringIdGenerator.generate();
         }
+
+        statuses.add(new EventStatusHistory(this, status, reason));
+    }
+
+    @PreUpdate
+    protected void onPreUpdate() {
+        statuses.add(new EventStatusHistory(this, status, reason));
     }
 
     @Transactional
     public Event save() {
 
         persistAndFlush();
-        return this;
-    }
-
-    @Transactional
-    public Event updateStatus(EventStatus status, String reason) {
-
-        this.setStatus(status);
-        this.setReason(reason);
-
-        new EventStatusHistory(this, status.name(), reason).save();
-
         return this;
     }
 
