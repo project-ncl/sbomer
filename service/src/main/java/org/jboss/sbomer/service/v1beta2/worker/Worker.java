@@ -15,37 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.v1beta2.worker;
 
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
-import org.jboss.sbomer.service.v1beta2.controller.request.Request;
 
-import lombok.extern.slf4j.Slf4j;
+public interface Worker {
+    public static final String KEY_WORKER = "worker";
 
-/**
- * Event fired after a Generation is scheduled.
- */
-@Slf4j
-public record GenerationScheduledEvent(EventRecord event, GenerationRecord generation) {
+    String getType();
 
-    public boolean isOfRequestType(String type) {
-        if (this.generation == null) {
-            log.warn("Generation was not populated");
-            return false;
-        }
-
-        if (this.generation.request() == null) {
-            log.warn("Request was not provided");
-            return false;
-        }
-
-        Request request = Request.parse(generation);
-
-        if (request.target().type().equals(type)) {
-            return true;
-        }
-
-        return false;
-    }
+    public void handle(EventRecord event, GenerationRecord generation);
 }

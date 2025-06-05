@@ -150,7 +150,10 @@ public class GenerationEventSource {
             g.setReason("Generation scheduled");
             g.save();
 
-            Arc.container().beanManager().getEvent().fire(new GenerationScheduledEvent(mapper.toRecord(g)));
+            Arc.container()
+                    .beanManager()
+                    .getEvent()
+                    .fire(new GenerationScheduledEvent(mapper.toRecord(g.getEvents().get(0)), mapper.toRecord(g)));
 
             schedule(g);
         });

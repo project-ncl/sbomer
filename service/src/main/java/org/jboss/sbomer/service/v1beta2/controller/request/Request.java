@@ -17,6 +17,18 @@
  */
 package org.jboss.sbomer.service.v1beta2.controller.request;
 
-public record Request(Generator generator, Target target) {
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+public record Request(Generator generator, Target target) {
+    public static Request parse(GenerationRecord generation) {
+        try {
+            return ObjectMapperProvider.json().treeToValue(generation.request(), Request.class);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Unable to parse provided resource configuration", e);
+        }
+    }
 }
