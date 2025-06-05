@@ -158,6 +158,11 @@ public class Generation extends PanacheEntityBase {
     @JsonManagedReference
     private List<GenerationStatusHistory> statuses = new ArrayList<>();
 
+    @OneToMany(mappedBy = "generation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    @JsonManagedReference
+    private List<Manifest> manifests = new ArrayList<>();
+
     public void setStatus(GenerationStatus status) {
         // This is a workaround so that when we update the status of the entity later, the status history entity will be
         // created as well.

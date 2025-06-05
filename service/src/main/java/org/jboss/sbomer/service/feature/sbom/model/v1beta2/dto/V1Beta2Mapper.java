@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Manifest;
 import org.jboss.sbomer.service.rest.mapper.MapperConfig;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -34,7 +35,13 @@ public interface V1Beta2Mapper {
     List<EventRecord> toEventRecords(List<Event> events);
 
     @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    List<ManifestRecord> toManifestRecords(List<Manifest> manifests);
+
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
     GenerationRecord toRecord(Generation generation);
+
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    ManifestRecord toRecord(Manifest manifest);
 
     @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
     List<GenerationRecord> toGenerationRecords(List<Generation> generations);

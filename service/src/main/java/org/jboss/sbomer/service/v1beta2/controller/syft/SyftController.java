@@ -102,7 +102,7 @@ public class SyftController extends AbstractController {
     }
 
     public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
-        if (!event.isOfRequestType(RequestType.CONTAINER_IMAGE)) {
+        if (!event.isOfRequestType("CONTAINER_IMAGE")) {
             // This is not an event handled by this listener
             return;
         }
@@ -272,14 +272,7 @@ public class SyftController extends AbstractController {
         // labels.put(Labels.LABEL_OTEL_SPAN_ID, generationRequest.getSpanId());
         // labels.put(Labels.LABEL_OTEL_TRACEPARENT, generationRequest.getTraceParent());
 
-        Request request = null;
-
-        // Parse request
-        try {
-            request = ObjectMapperProvider.json().treeToValue(generation.request(), Request.class);
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException("Unable to parse provided resource configuration", e);
-        }
+        Request request = Request.parse(generation);
 
         SyftOptions options = null;
 
@@ -314,7 +307,7 @@ public class SyftController extends AbstractController {
 
         // Select Tekton Task and set parameters depending on the type of the target
         switch (request.target().type()) {
-            case CONTAINER_IMAGE:
+            case "CONTAINER_IMAGE":
                 taskSuffix = TASK_SUFFIX;
 
                 params.add(
