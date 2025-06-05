@@ -206,7 +206,7 @@ VALUES (
 		'AASSBB',
 		now(),
 		'ARYT3LBXDVYAC',
-		'build_ARYT3LBXDVYAC',
+		'build_ARYT3LBXDVYAC', 
 		'FINISHED',
 		'SUCCESS',
 		'It succeeded',
@@ -3205,6 +3205,201 @@ VALUES (
 		'OPBGCD23DVYAC',
 		'OPAASSDDFF',
 		0,
+    '{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-02-14T17:42:25Z",
+    "tools": [
+      {
+        "vendor": "Red Hat",
+        "name": "sbomer",
+        "version": "1.0.0"
+      }
+    ],
+    "licenses": [
+      {
+        "license": {
+          "id": "Apache-2.0"
+        }
+      }
+    ],
+    "properties": [
+      {
+        "name": "vcs",
+        "value": "git@github.com:project-ncl/sbomer.git"
+      },
+      {
+        "name": "website",
+        "value": "https://github.com/project-ncl/sbomer"
+      }
+    ],
+    "component": {
+      "name": "my-broker-7.11.5.CR3-bin.zip",
+      "version": "7.11.5.CR3",
+      "description": "SBOM representing the deliverable my-broker-7.11.5.CR3-bin.zip analyzed with operation OPBGCD23DVYAC",
+      "licenses": [
+        
+      ],
+      "purl": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
+      "type": "file",
+      "bom-ref": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
+      "externalReferences": [
+        {
+          "type": "build-system",
+          "url": "http://orch.com/pnc-rest/v2/operations/deliverable-analyzer/OPBGCD23DVYAC",
+          "comment": "pnc-operation-id"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "group": "com.google.errorprone",
+      "name": "error_prone_annotations",
+      "version": "2.2.0",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "416757b9e6ba0563368ab59e668b3225"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "88e3c593e9b3586e1c6177f89267da6fc6986f0c"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "6ebd22ca1b9d8ec06d41de8d64e0596981d9607b42035f9ed374f9de271a481a"
+        }
+      ],
+      "purl": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
+      "externalReferences": [
+        {
+          "type": "build-system",
+          "url": "https://brewweb.com/buildinfo?buildID=649279",
+          "comment": "brew-build-id"
+        }
+      ],
+      "type": "library",
+      "bom-ref": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar"
+    },
+    {
+      "group": "org.codehaus.mojo",
+      "name": "animal-sniffer-annotations",
+      "version": "1.17",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "7ca108b790cf6ab5dbf5422cc79f0d89"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "f97ce6decaea32b36101e37979f8b647f00681fb"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "92654f493ecfec52082e76354f0ebf87648dc3d5cec2e3c3cdb947c016747a53"
+        }
+      ],
+      "purl": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar",
+      "externalReferences": [
+        {
+          "type": "build-system",
+          "url": "https://brewweb.com/buildinfo?buildID=848654",
+          "comment": "brew-build-id"
+        }
+      ],
+      "type": "library",
+      "bom-ref": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
+      "dependsOn": [
+        "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
+        "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar"
+      ]
+    },
+    {
+      "ref": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
+      "dependsOn": [
+        
+      ]
+    },
+    {
+      "ref": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar",
+      "dependsOn": [
+        
+      ]
+    }
+  ]
+}');
+
+-- NEXTGEN example content
+
+INSERT INTO generation(
+		id,
+		created,
+        updated,
+        finished,
+        request,
+		status,
+        result,
+        reason
+	)
+VALUES (
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '{}',
+        'FINISHED',
+        'SUCCESS',
+        'Generation successfully finished'
+);
+
+INSERT INTO event(
+		id,
+		created,
+        updated,
+        finished,
+        metadata,
+		status,
+        reason
+	)
+VALUES (
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '{}',
+        'SUCCESS',
+        'Event processed'
+);
+
+INSERT INTO event_generation(
+		event_id,
+		generation_id
+	) VALUES (
+		'E1AAAAA',
+		'G1AAAAA'
+);
+
+
+INSERT INTO manifest(
+		id,
+		created,
+        generation_id,
+		sbom
+	)
+VALUES (
+		'816640206274228223',
+		'2023-12-25T00:00:00.000000Z',
+        'G1AAAAA',
     '{
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",

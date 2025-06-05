@@ -1,6 +1,7 @@
 defaultGeneratorMappings:
   - targetType: "CONTAINER_IMAGE"
     generators: ["syft"]
+  - targetType: "EVENT"
 generatorProfiles:
   - name: "syft"
     description: "Syft is a CLI tool and library for generating a Software Bill of Materials (SBOM) from container images and filesystems."
@@ -112,3 +113,15 @@ generatorProfiles:
           resources:
             requests: { "cpu": "500m", "memory": "1Gi" }
             limits: { "cpu": "1500m", "memory": "3Gi" }
+  - name: "redhat-release"
+    description: "Manifest generator that transforms a build manifest into a release manifest according to Red Hat guidelines"
+    versions:
+      - version: "0.1.0"
+        supportedTargetTypes:
+          ["EVENT"]
+        supportedFormats: ["CYCLONEDX_1.6_JSON"]
+        defaultConfig:
+          format: "CYCLONEDX_1.6_JSON"
+          resources:
+            requests: { "cpu": "500m", "memory": "1Gi" }
+            limits: { "cpu": "800m", "memory": "3Gi" }

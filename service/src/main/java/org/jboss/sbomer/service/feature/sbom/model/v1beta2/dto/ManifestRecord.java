@@ -15,12 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.worker;
+package org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto;
 
-public interface Worker {
-    public static final String KEY_WORKER = "worker";
+import java.time.Instant;
 
-    String getType();
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Manifest;
 
-    public void resolve(String eventId, String identifier);
+import com.fasterxml.jackson.databind.JsonNode;
+
+/**
+ * Representation of the {@link Manifest} entity.
+ */
+public record ManifestRecord(String id, Instant created, JsonNode sbom) {
+
 }

@@ -116,44 +116,80 @@ public class GeneratorConfigProvider {
 
         log.debug("Searching for generators that support requested '{}' type", requestSpec.target().type());
 
-        Optional<DefaultGeneratorMappingEntry> generatorMappingOpt = sbomerGeneratorsConfig.defaultGeneratorMappings()
+        Optional<DefaultGeneratorMappingEntry> generatorMappingForSelectedTypeOpt = sbomerGeneratorsConfig
+                .defaultGeneratorMappings()
                 .stream()
                 .filter(m -> m.targetType().equals(requestSpec.target().type()))
                 .findFirst();
 
-        if (generatorMappingOpt.isEmpty()) {
+        if (generatorMappingForSelectedTypeOpt.isEmpty()) {
             throw new ClientException(
                     "Provided target: '{}' is not supported. Supported targets: {}",
                     requestSpec.target().type(),
                     sbomerGeneratorsConfig.defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
         }
 
-        if (requestSpec.generator() == null) {
-            log.info(
-                    "No generator selected within the request, will use best generator available for '{}'",
-                    requestSpec.target().type());
+        GeneratorProfile generatorProfile = null;
+        GeneratorVersionProfile generatorVersionProfile = null;
+
+        if (requestSpec.generator() != null || requestSpec.generator().name() != null) {
+            Optional<GeneratorProfile> generatorProfileOpt = sbomerGeneratorsConfig.generatorProfiles()
+                    .stream()
+                    .filter(p -> p.name().equals(requestSpec.generator().name()))
+                    .findFirst();
+
+            // If we did not find anything, fail
+            if (generatorProfileOpt.isEmpty()) {
+                throw new ApplicationException(
+                        "Selected generator '{}' is not registered",
+                        requestSpec.generator().name());
+            }
+
+            generatorProfile = generatorProfileOpt.get();
+
+            // Find the best version of selected generator
+            generatorVersionProfile = generatorProfile.versions().get(0);
+
         } else {
-            // TODO: merge configs, currently ignored entirely
+
+            // TODO: support taking into account provided partial config (merging)
+
+            log.info(
+                    "No generator selected within the request for type '{}', will try to find best generator",
+                    requestSpec.target().type());
+
+            DefaultGeneratorMappingEntry generatorMappingForSelectedType = generatorMappingForSelectedTypeOpt.get();
+
+            List<String> generators = generatorMappingForSelectedType.generators();
+
+            if (generators == null || generators.isEmpty()) {
+                throw new ClientException(
+                        "Unable to determine best generator, selected target type: '{}' is supported, but does not have default generator configured and thus needs to be provided explicitly as part of the request with requests[].generator.name field",
+                        requestSpec.target().type());
+
+            }
+
+            // Select the best generator (name) for a given target type
+            String defaultGenerator = generators.get(0);
+
+            log.info("Will use '{}' generator, trying to find best profile", defaultGenerator);
+
+            // Now find the profile for this generator
+            Optional<GeneratorProfile> generatorProfileOpt = sbomerGeneratorsConfig.generatorProfiles()
+                    .stream()
+                    .filter(p -> p.name().equals(defaultGenerator))
+                    .findFirst();
+
+            // If we did not find anything, fail
+            if (generatorProfileOpt.isEmpty()) {
+                throw new ApplicationException("There are no generator profiles for '{}' generator", defaultGenerator);
+            }
+
+            generatorProfile = generatorProfileOpt.get();
+
+            // Find the best version of selected generator
+            generatorVersionProfile = generatorProfile.versions().get(0);
         }
-
-        // Select the best generator (name) for a given target type
-        String defaultGenerator = generatorMappingOpt.get().generators().get(0);
-
-        // Now find the profile for this generator
-        Optional<GeneratorProfile> generatorProfileOpt = sbomerGeneratorsConfig.generatorProfiles()
-                .stream()
-                .filter(p -> p.name().equals(defaultGenerator))
-                .findFirst();
-
-        // If we did not find anything, fail
-        if (generatorProfileOpt.isEmpty()) {
-            throw new ApplicationException("There is not generator profile for '{}' generator", defaultGenerator);
-        }
-
-        GeneratorProfile generatorProfile = generatorProfileOpt.get();
-
-        // Find the best version of selected generator
-        GeneratorVersionProfile generatorVersionProfile = generatorProfile.versions().get(0);
 
         log.info("Using generator '{}' with version '{}'", generatorProfile.name(), generatorVersionProfile.version());
 
@@ -165,20 +201,24 @@ public class GeneratorConfigProvider {
                         generatorVersionProfile.version(),
                         generatorVersionProfile.defaultConfig()));
 
-        String request;
+        // Schema is provided, let's validate it!
+        if (generatorVersionProfile.schema() != null) {
 
-        try {
-            request = ObjectMapperProvider.json().writeValueAsString(effectiveRequest);
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException("Unable to serialize request", e);
-        }
+            String request;
 
-        ValidationResult result = SchemaValidator.validate(generatorVersionProfile.schema().toString(), request);
+            try {
+                request = ObjectMapperProvider.json().writeValueAsString(effectiveRequest);
+            } catch (JsonProcessingException e) {
+                throw new ApplicationException("Unable to serialize request", e);
+            }
 
-        if (!result.isValid()) {
-            throw new ValidationException(
-                    "Effective configuration for the  generation zis not valid",
-                    result.getErrors());
+            ValidationResult result = SchemaValidator.validate(generatorVersionProfile.schema().toString(), request);
+
+            if (!result.isValid()) {
+                throw new ValidationException(
+                        "Effective configuration for the  generation zis not valid",
+                        result.getErrors());
+            }
         }
 
         return effectiveRequest;
