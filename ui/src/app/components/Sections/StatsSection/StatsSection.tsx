@@ -112,7 +112,7 @@ export const StatsSection = () => {
   );
 
   if (error) {
-    return <ErrorSection />;
+    return <ErrorSection error={error} />;
   }
 
   return value ? (

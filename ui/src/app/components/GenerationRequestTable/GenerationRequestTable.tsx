@@ -116,10 +116,9 @@ export const GenerationRequestTable = () => {
 
   const noResults = <NoResultsSection />
   const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
-  const errorSection = <ErrorSection />
 
   const tableArea =
-    error ? errorSection :
+    error ? <ErrorSection error={error} /> :
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 
