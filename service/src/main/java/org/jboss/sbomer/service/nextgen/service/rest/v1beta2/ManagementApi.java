@@ -26,11 +26,11 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.utils.JsonUtils;
-import org.jboss.sbomer.service.events.EventCreatedEvent;
-import org.jboss.sbomer.service.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.enums.EventType;
+import org.jboss.sbomer.service.nextgen.core.events.EventCreatedEvent;
+import org.jboss.sbomer.service.nextgen.core.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.management.ReplayRequest;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 
@@ -60,7 +60,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ManagementApi {
 
     @Inject
-    V1Beta2Mapper mapper;
+    EntityMapper mapper;
 
     @GET
     @Path("/event/resolvers")

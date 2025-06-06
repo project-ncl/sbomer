@@ -30,7 +30,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @Mapper(config = MapperConfig.class)
 @ApplicationScoped
-public interface V1Beta2Mapper {
+public interface EntityMapper {
     @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
     EventRecord toRecord(Event event);
 

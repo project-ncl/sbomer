@@ -37,9 +37,11 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
+import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationStateChangedEvent;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -48,6 +50,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
+import io.quarkus.arc.Arc;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.NoArgsConstructor;
@@ -64,15 +67,19 @@ public abstract class AbstractController implements Controller<GenerationRecord>
 
     protected ManagedExecutor managedExecutor;
 
+    EntityMapper mapper;
+
     @Inject
     public AbstractController(
             KubernetesClient kubernetesClient,
             GenerationRequestControllerConfig controllerConfig,
-            ManagedExecutor managedExecutor) {
+            ManagedExecutor managedExecutor,
+            EntityMapper mapper) {
         this.kubernetesClient = kubernetesClient;
         this.release = ConfigProvider.getConfig().getOptionalValue("SBOMER_RELEASE", String.class).orElse("sbomer");
         this.controllerConfig = controllerConfig;
         this.managedExecutor = managedExecutor;
+        this.mapper = mapper;
     }
 
     @Override
@@ -99,6 +106,8 @@ public abstract class AbstractController implements Controller<GenerationRecord>
             default:
                 break;
         }
+
+        Arc.container().beanManager().getEvent().fire(new GenerationStateChangedEvent(generation));
     }
 
     abstract protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns);

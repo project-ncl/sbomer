@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.events;
 
-import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
 
 /**
- * An event fired after a particular {@link EventRecord} has been created.
+ * Event fired after successful finish of a particular generation.
  */
-public record EventCreatedEvent(EventRecord event) {
+public record GenerationStateChangedEvent(GenerationRecord generation) {
 
 }

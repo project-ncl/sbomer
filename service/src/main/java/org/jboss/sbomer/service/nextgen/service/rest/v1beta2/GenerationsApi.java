@@ -30,12 +30,12 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.JsonUtils;
-import org.jboss.sbomer.service.events.EventCreatedEvent;
 import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.enums.EventType;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.core.events.EventCreatedEvent;
 import org.jboss.sbomer.service.nextgen.core.generator.mapping.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
@@ -77,12 +77,12 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 public class GenerationsApi {
 
-    V1Beta2Mapper mapper;
+    EntityMapper mapper;
 
     GeneratorConfigProvider generatorConfigProvider;
 
     @Inject
-    public GenerationsApi(V1Beta2Mapper mapper, GeneratorConfigProvider generatorConfigProvider) {
+    public GenerationsApi(EntityMapper mapper, GeneratorConfigProvider generatorConfigProvider) {
         this.mapper = mapper;
         this.generatorConfigProvider = generatorConfigProvider;
     }
