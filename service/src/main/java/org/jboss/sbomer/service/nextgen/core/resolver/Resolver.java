@@ -15,20 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.generator;
+package org.jboss.sbomer.service.nextgen.core.resolver;
 
-import java.util.List;
+public interface Resolver {
+    public static final String KEY_RESOLVER = "resolver";
+    public static final String KEY_IDENTIFIER = "identifier";
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+    String getType();
 
-/**
- * Defines the profile for a type of generator, including all its supported versions.
- *
- * @param name name of the generator
- * @param description optional description of the generator
- * @param versions list of supported/available versions of a given generator
- */
-public record GeneratorProfile(@NotBlank String name, String description,
-        @NotEmpty List<GeneratorVersionProfile> versions) {
+    public void resolve(String eventId, String identifier);
 }
