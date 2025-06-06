@@ -32,9 +32,4 @@ public class DefaultExceptionMapper extends AbstractExceptionMapper<Throwable> {
         return responseBuilder.build();
     }
 
-    @Override
-    String errorMessage(Throwable ex) {
-        return ex.getMessage();
-    }
-
 }
