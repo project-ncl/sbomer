@@ -13,11 +13,11 @@ import java.io.IOException;
 
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.test.TestResources;
+import org.jboss.sbomer.service.nextgen.generator.GeneratorConfigProvider;
+import org.jboss.sbomer.service.nextgen.generator.GeneratorsConfig;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GeneratorVersionConfigSpec;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.TargetSpec;
-import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigProvider;
-import org.jboss.sbomer.service.v1beta2.generator.GeneratorsConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
