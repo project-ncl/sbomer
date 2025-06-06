@@ -146,7 +146,6 @@ public class DefaultProcessor implements Processor {
                     // It looks like we found the artifact with a hash-only query, but the purl query failed on us.
                     // This means that the purl most probably is incorrect in the manifest, so let's update it.
                     log.debug("Updating component's purl from '{}' to '{}'", oldPurl, newPurl);
-                    component.setPurl(newPurl);
 
                     purlRelocations.put(oldPurl, newPurl);
                 }

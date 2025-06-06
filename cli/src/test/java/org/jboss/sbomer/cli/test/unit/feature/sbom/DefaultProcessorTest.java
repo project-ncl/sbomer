@@ -17,6 +17,7 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.ExternalReference.Type;
+import org.cyclonedx.model.Hash;
 import org.jboss.pnc.build.finder.core.BuildConfig;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
@@ -139,6 +140,48 @@ class DefaultProcessorTest {
 
         assertEquals("hash", commit.getUid());
         assertEquals("https://git.com/repo#hash", commit.getUrl());
+    }
+
+    @Test
+    void testUpdateComponentAndDependency() throws IOException {
+        PncService pncServiceMock = Mockito.mock(PncService.class);
+        KojiService kojiServiceMock = Mockito.mock(KojiService.class);
+
+        Artifact artifact = Artifact.builder()
+                .purl(
+                        "pkg:generic/gradle-wrapper.jar?checksum=sha256%3Ae996d452d2645e70c01c11143ca2d3742734a28da2bf61f25c82bdc288c9e637")
+                .sha1("23a1590b048918cb655153298462fe64d284cb78")
+                .build();
+
+        when(pncServiceMock.getArtifact(null, Optional.empty(), Optional.of(artifact.getSha1()), Optional.empty()))
+                .thenReturn(artifact);
+
+        DefaultProcessor defaultProcessor = new DefaultProcessor(pncServiceMock, kojiServiceMock);
+
+        Bom bom = SbomUtils.fromString(TestResources.asString("boms/image-after-adjustments.json"));
+        Component component = SbomUtils.createComponent(
+                null,
+                "gradle-wrapper",
+                "UNKNOWN",
+                null,
+                "pkg:maven/gradle-wrapper/gradle-wrapper?type=jar",
+                Component.Type.LIBRARY);
+        component.addHash(new Hash(Hash.Algorithm.SHA1, artifact.getSha1()));
+        bom.addComponent(component);
+        Dependency dependency = SbomUtils.createDependency(component.getBomRef());
+        bom.addDependency(dependency);
+
+        Bom processed = defaultProcessor.process(bom);
+
+        Component updatedComponent = getComponent(processed, artifact.getPurl()).orElseThrow();
+        Dependency updatedDependency = getDependency(artifact.getPurl(), processed.getDependencies()).orElseThrow();
+
+        assertEquals(193, processed.getComponents().size());
+        assertEquals(193, processed.getDependencies().size());
+        assertEquals(artifact.getPurl(), updatedComponent.getBomRef());
+        assertEquals(artifact.getPurl(), updatedComponent.getPurl());
+        assertEquals(component.getName(), updatedComponent.getName());
+        assertEquals(artifact.getPurl(), updatedDependency.getRef());
     }
 
     @Test
