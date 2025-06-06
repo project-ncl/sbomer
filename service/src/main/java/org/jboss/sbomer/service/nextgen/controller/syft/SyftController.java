@@ -42,14 +42,14 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Manifest;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.controller.AbstractController;
 import org.jboss.sbomer.service.nextgen.controller.TaskRunEventProvider;
 import org.jboss.sbomer.service.nextgen.controller.request.Request;
+import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.service.model.Generation;
+import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

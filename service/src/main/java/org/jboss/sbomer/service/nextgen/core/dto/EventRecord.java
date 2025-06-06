@@ -15,10 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.dto;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
+import org.jboss.sbomer.service.nextgen.service.model.Event;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+/**
+ * Representation of the {@link Event} entity.
+ */
+public record EventRecord(String id, EventRecord parent, Instant created, Instant updated, Instant finished,
+        Map<String, String> metadata, JsonNode request, List<GenerationRecord> generations, String status,
+        String reason) {
 
 }

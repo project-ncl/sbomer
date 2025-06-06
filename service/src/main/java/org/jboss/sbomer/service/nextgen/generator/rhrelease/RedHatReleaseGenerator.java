@@ -22,14 +22,14 @@ import java.util.List;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Manifest;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.controller.request.Request;
+import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
+import org.jboss.sbomer.service.nextgen.service.model.Event;
+import org.jboss.sbomer.service.nextgen.service.model.Generation;
+import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;

@@ -19,8 +19,8 @@ package org.jboss.sbomer.service.nextgen.core.generator;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.service.events.GenerationScheduledEvent;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.slf4j.helpers.MessageFormatter;
 
 import jakarta.enterprise.event.Observes;

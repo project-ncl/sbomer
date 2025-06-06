@@ -37,10 +37,10 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.slf4j.helpers.MessageFormatter;
 
 import io.fabric8.knative.pkg.apis.Condition;

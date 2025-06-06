@@ -15,10 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import java.util.Map;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+/**
+ * Options for a given generator used for generating manifests.
+ *
+ * @param format The manifest output format.
+ * @param resources Resource requirements related to execution phase for a current generation.
+ * @param options Custom, generator(version)-specific, options which should be applied to the generation process.
+ */
+public record GeneratorConfigSpec(String format, ResourcesSpec resources,
+        @Schema(description = "Specific options for a particular generator version.") Map<String, Object> options) {
 }
