@@ -48,12 +48,6 @@ quarkus:
       "org.jboss.resteasy.reactive.client.logging":
         level: TRACE
         min-level: TRACE
-      "com.arjuna":
-        level: TRACE
-      "io.narayana":
-        level: TRACE
-      "org.jboss.jca":
-        level: TRACE
     console:
       format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
 
@@ -86,6 +80,11 @@ sbomer:
     #  url:
     #web:
     #  url:
+
+  service:
+    generation-scheduler:
+      max-concurrent-generations: 4
+      sync-batch: 5
 
   purl-qualifiers-allow-list:
     - repository_url

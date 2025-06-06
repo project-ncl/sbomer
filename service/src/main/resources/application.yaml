@@ -80,6 +80,8 @@ quarkus:
       url: "https://${sbomer.atlas.release.host}"
     "pnc":
       url: "https://${sbomer.pnc.host}"
+    "sbomer":
+      url: "https://${sbomer.host}"
     "errata":
       url: "https://${sbomer.errata.host}"
     "pyxis":
@@ -154,7 +156,10 @@ quarkus:
       max-size: 10
       min-size: 0
       initial-size: 1
-      acquisition-timeout: 10
+      acquisition-timeout: 30
+      additional-jdbc-properties:
+        connectTimeout: 15
+        socketTimeout: 30
 
   # https://quarkus.io/guides/hibernate-orm
   hibernate-orm:

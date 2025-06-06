@@ -27,8 +27,10 @@ import jakarta.validation.constraints.NotNull;
  * Representation of the payload when requesting generations.
  * </p>
  *
+ * @param eventId An (optional) event identifier within SBOMer under which the requested generations should be put on.
  * @param context Optional context related to the external generation request event.
  * @param requests List of generation requests.
  */
-public record GenerationsRequest(@Valid ContextSpec context, @NotNull List<GenerationRequestSpec> requests) {
+public record GenerationsRequest(String eventId, @Valid ContextSpec context,
+        @NotNull List<GenerationRequestSpec> requests) {
 }

@@ -24,8 +24,10 @@ import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_STATE
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.service.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
@@ -37,6 +39,8 @@ import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.scheduler.GenerationSchedulerConfig;
 import org.jboss.sbomer.service.v1beta2.controller.syft.SyftController;
 import org.slf4j.MDC;
+
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -57,6 +61,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GenerationEventSource {
 
+    private final static String DEPLOYMENT_KEY = "deployment";
+
     KubernetesClient kubernetesClient;
 
     GenerationSchedulerConfig generationSchedulerConfig;
@@ -66,6 +72,8 @@ public class GenerationEventSource {
     SyftController generationController;
 
     V1Beta2Mapper mapper;
+
+    String deploymentInfo;
 
     @Inject
     public GenerationEventSource(
@@ -79,6 +87,20 @@ public class GenerationEventSource {
         this.leaderManager = leaderManager;
         this.generationController = generationController;
         this.mapper = mapper;
+
+        String release = ConfigProvider.getConfig().getOptionalValue("SBOMER_RELEASE", String.class).orElse("sbomer");
+        String deploymentTarget = ConfigProvider.getConfig()
+                .getOptionalValue("SBOMER_DEPLOYMENT_TARGET", String.class)
+                .orElse("local");
+        String deploymentType = ConfigProvider.getConfig()
+                .getOptionalValue("SBOMER_DEPLOYMENT_TYPE", String.class)
+                .orElse("dev");
+        String deploymentZone = ConfigProvider.getConfig()
+                .getOptionalValue("SBOMER_DEPLOYMENT_ZONE", String.class)
+                .orElse("default");
+
+        this.deploymentInfo = String.format("%s:%s:%s:%s", release, deploymentType, deploymentTarget, deploymentZone);
+
     }
 
     /**
@@ -105,22 +127,13 @@ public class GenerationEventSource {
             delay = 1,
             delayUnit = TimeUnit.SECONDS,
             concurrentExecution = ConcurrentExecution.SKIP)
-    @Transactional(value = TxType.REQUIRES_NEW)
     public void scheduleGenerations() {
         if (!leaderManager.isLeader()) {
             log.info("Current instance is not the leader, skipping scheduling of generations in this instance");
             return;
         }
 
-        // Get all ConfigMaps that represent generation requests within the namespace that are in progress
-        int scheduledGenerationsCount = kubernetesClient.configMaps()
-                .withLabelSelector(
-                        "sbomer.jboss.org/type=generation-request,sbomer.jboss.org/status notin (FAILED, FINISHED)")
-                .list()
-                .getItems()
-                .size();
-
-        log.info("There are {} generations in progress", scheduledGenerationsCount);
+        long scheduledGenerationsCount = numberOfGenerationsInProgressInCluster();
 
         // In case we will exceed the max number of concurrent generations, do nothing and wait
         if (scheduledGenerationsCount > generationSchedulerConfig.maxConcurrentGenerations()) {
@@ -131,10 +144,15 @@ public class GenerationEventSource {
             return;
         }
 
+        fetchAndSchedule();
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    protected void fetchAndSchedule() {
         log.debug("There is space in the cluster to process new generations, fetching them now...");
 
         @SuppressWarnings("unchecked")
-        List<Generation> oldestResultsBatch = Generation.getEntityManager()
+        List<Generation> generations = Generation.getEntityManager()
                 .createNativeQuery(
                         String.format(
                                 "SELECT * FROM generation WHERE status = '%s' ORDER BY created ASC FOR UPDATE SKIP LOCKED LIMIT %s",
@@ -143,20 +161,39 @@ public class GenerationEventSource {
                         Generation.class)
                 .getResultList();
 
-        log.debug("Got {} generations to be scheduled...", oldestResultsBatch.size());
+        log.debug("Got {} generations to be scheduled...", generations.size());
 
-        oldestResultsBatch.forEach(g -> {
+        generations.forEach(g -> {
             g.setStatus(GenerationStatus.SCHEDULED);
-            g.setReason("Generation scheduled");
+            g.setReason("Scheduled for execution for {}", deploymentInfo);
+            g.setMetadata(
+                    Optional.ofNullable(g.getMetadata())
+                            .orElse(JsonNodeFactory.instance.objectNode())
+                            .put(DEPLOYMENT_KEY, deploymentInfo));
             g.save();
 
             Arc.container()
                     .beanManager()
                     .getEvent()
                     .fire(new GenerationScheduledEvent(mapper.toRecord(g.getEvents().get(0)), mapper.toRecord(g)));
-
-            schedule(g);
         });
+    }
+
+    private long numberOfGenerationsInProgressInCluster() {
+        log.debug("Counting generations running in the current deploymentL {}", deploymentInfo);
+
+        long count = ((Number) Generation.getEntityManager()
+                .createNativeQuery(
+                        "SELECT count(*) FROM generation WHERE status = :status AND metadata ->> :deploymentKey = :deploymentInfo",
+                        Long.class)
+                .setParameter("status", GenerationStatus.GENERATING.name())
+                .setParameter("deploymentKey", DEPLOYMENT_KEY)
+                .setParameter("deploymentInfo", deploymentInfo)
+                .getSingleResult()).longValue();
+
+        log.debug("There are {} generations in progress", count);
+
+        return count;
     }
 
     /**

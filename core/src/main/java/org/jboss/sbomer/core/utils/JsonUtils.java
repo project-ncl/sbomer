@@ -17,16 +17,20 @@
  */
 package org.jboss.sbomer.core.utils;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ObjectMapperUtils {
-    private ObjectMapperUtils() {
+public class JsonUtils {
+    private JsonUtils() {
         throw new IllegalStateException("This is a utility class that should not be instantiated");
     }
 
@@ -37,5 +41,34 @@ public class ObjectMapperUtils {
             log.error("Failed to convert object: '{}' to JsonNode", payload, e);
             throw new ApplicationException("Failed to convert given object to JsonNode", e);
         }
+    }
+
+    /**
+     * Merges two {@link JsonNode} objects that are in fact {@link ObjectNode}s.
+     *
+     * @param mainNode The main object.
+     * @param updateNode The secondary object which should be merged with the main one.
+     * @return Updated main object.
+     */
+    public static JsonNode merge(JsonNode mainNode, JsonNode updateNode) {
+        if (mainNode.isObject() && updateNode.isObject()) {
+            ObjectNode mainObjectNode = (ObjectNode) mainNode;
+            Iterator<Map.Entry<String, JsonNode>> updateFields = updateNode.fields();
+
+            while (updateFields.hasNext()) {
+                Map.Entry<String, JsonNode> fieldEntry = updateFields.next();
+                String fieldName = fieldEntry.getKey();
+                JsonNode value = fieldEntry.getValue();
+
+                if (mainObjectNode.has(fieldName) && mainObjectNode.get(fieldName).isObject() && value.isObject()) {
+                    // Recursive merge for nested objects
+                    merge(mainObjectNode.get(fieldName), value);
+                } else {
+                    // Overwrite or add the field
+                    mainObjectNode.set(fieldName, value);
+                }
+            }
+        }
+        return mainNode;
     }
 }

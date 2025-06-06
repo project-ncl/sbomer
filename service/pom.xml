@@ -46,6 +46,11 @@
       <version>${version.aws}</version>
     </dependency>
     <dependency>
+      <groupId>com.github.f4b6a3</groupId>
+      <artifactId>tsid-creator</artifactId>
+      <version>${version.tsid}</version>
+    </dependency>
+    <dependency>
       <groupId>software.amazon.awssdk</groupId>
       <artifactId>aws-crt-client</artifactId>
       <version>${version.aws}</version>
