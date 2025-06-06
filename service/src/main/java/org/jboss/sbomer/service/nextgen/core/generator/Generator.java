@@ -15,18 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.generator;
+package org.jboss.sbomer.service.nextgen.core.generator;
 
-import java.util.List;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+public interface Generator {
+    public static final String KEY_WORKER = "worker";
 
-/**
- * Represents a single mapping from a content type to a list of preferred generators.
- *
- * @param type the type of the content to manifest, for example {@code CONTAINER_IMAGE} or {@code MAVEN_PROJECT}
- * @param generators a list of generators that support given type. First in the list is the preferred generator.
- */
-public record DefaultGeneratorMappingEntry(String targetType, @NotEmpty List<@NotBlank String> generators) {
+    String getType();
+
+    public void handle(EventRecord event, GenerationRecord generation);
 }

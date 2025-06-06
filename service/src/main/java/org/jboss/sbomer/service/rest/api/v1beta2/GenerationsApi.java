@@ -38,7 +38,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.EventType;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.generator.GeneratorConfigProvider;
+import org.jboss.sbomer.service.nextgen.core.generator.mapping.GeneratorConfigProvider;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsResponse;

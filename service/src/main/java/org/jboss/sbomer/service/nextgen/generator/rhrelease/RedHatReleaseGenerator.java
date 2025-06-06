@@ -29,7 +29,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.controller.request.Request;
-import org.jboss.sbomer.service.nextgen.generator.AbstractGenerator;
+import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
