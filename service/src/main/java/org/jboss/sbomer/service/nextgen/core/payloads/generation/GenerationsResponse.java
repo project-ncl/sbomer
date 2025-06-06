@@ -15,10 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
+import java.util.List;
+
+import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
+import jakarta.validation.constraints.NotNull;
 
+/**
+ * <p>
+ * Representation of the response after requesting generations.
+ * </p>
+ *
+ * @param event Event related to the work information.
+ * @param generations List of generations.
+ */
+public record GenerationsResponse(EventRecord event, @NotNull List<GenerationRecord> generations) {
 }

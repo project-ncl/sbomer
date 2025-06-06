@@ -15,10 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import java.time.Instant;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
+import jakarta.validation.constraints.NotBlank;
 
+/**
+ * <p>
+ * The original context.
+ * </p>
+ *
+ * <p>
+ * In case we are responding to an <strong>external event</strong> that should result in generation(s), we should
+ * encapsulate this information using {@link ContextSpec}.
+ * </p>
+ *
+ * @param eventId Original, external event identifier.
+ * @param system What is the source system of this event.
+ * @param receivedAt What is the date and time when we initially received it.
+ */
+public record ContextSpec(@NotBlank String eventId, String system, Instant receivedAt, String payload) {
 }

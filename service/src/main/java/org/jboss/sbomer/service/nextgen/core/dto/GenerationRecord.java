@@ -15,10 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.dto;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import java.time.Instant;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.service.model.Generation;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.quarkus.resteasy.reactive.links.RestLinkId;
+
+/**
+ * Representation of the {@link Generation} entity.
+ */
+public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished,
+        JsonNode request, GenerationStatus status, String result, String reason) {
 
 }

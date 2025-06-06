@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.events;
 
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 
 /**
  * Event sent after a request for resolution is received.

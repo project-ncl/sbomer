@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.nextgen.controller.request;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

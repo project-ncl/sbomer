@@ -15,10 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
-
-public record GenerationRequestEvent(GenerationRecord generation) {
-
+/**
+ *
+ *
+ * @param name Name of the generator.
+ * @param version Version of the generator.
+ * @param config The custom configuration for a given generator version.
+ */
+public record GeneratorVersionConfigSpec(String name, String version, GeneratorConfigSpec config) {
 }

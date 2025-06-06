@@ -18,8 +18,8 @@
 package org.jboss.sbomer.service.nextgen.core.rest;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsRequest;
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsResponse;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.rest.otel.SpanName;
 import org.jboss.sbomer.service.rest.otel.Traced;
 
