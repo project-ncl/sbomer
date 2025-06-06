@@ -1,0 +1,1 @@
+This package contains many DTOs. We will be cleaning them up as we go.
