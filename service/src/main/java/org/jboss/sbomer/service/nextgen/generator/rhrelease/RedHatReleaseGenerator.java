@@ -22,9 +22,9 @@ import java.util.List;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.service.nextgen.controller.request.Request;
 import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.request.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
@@ -56,7 +56,7 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
     @Override
     @ActivateRequestContext
     public void handle(EventRecord e, GenerationRecord generationRecord) {
-        Request request = Request.parse(generationRecord);
+        GenerationRequest request = GenerationRequest.parse(generationRecord);
 
         // Fetch event identified by the provided ID
         Event event = Event.findById(request.target().identifier());

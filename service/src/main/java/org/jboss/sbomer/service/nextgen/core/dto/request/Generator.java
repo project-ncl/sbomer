@@ -15,7 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller.request;
+package org.jboss.sbomer.service.nextgen.core.dto.request;
 
-public record Target(String type, String identifier) {
+import jakarta.validation.constraints.NotBlank;
+
+/**
+ * Definition of the generator that should be used to perform the generation.
+ * 
+ * @param name Name of the generator
+ * @param name Version of the generator
+ * @param config Optional generator configuration
+ */
+public record Generator(@NotBlank String name, String version, GeneratorConfig config) {
 }

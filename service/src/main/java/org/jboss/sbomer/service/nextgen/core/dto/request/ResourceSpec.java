@@ -15,9 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller.request;
+package org.jboss.sbomer.service.nextgen.core.dto.request;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-public record Config(Resources resources, String format, JsonNode options) {
+/**
+ * Resource configuration. Uses Kubernetes values.
+ * 
+ * @see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes
+ * @param cpu CPU value
+ * @param memory Memory value
+ */
+public record ResourceSpec(String cpu, String memory) {
 }
