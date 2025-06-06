@@ -15,10 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
-
+/**
+ * <p>
+ * Configuration of resources for requests and limits for a given execution.
+ * </p>
+ *
+ * <p>
+ * Generator may or may not take this into account. This is a suggestion. Please check documentation of a given
+ * generator for more information.
+ * </p>
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record ResourcesSpec(ResourceRequirementSpec requests, ResourceRequirementSpec limits) {
 }

@@ -15,10 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import jakarta.validation.constraints.NotNull;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
-
+public record TargetSpec(@NotNull String identifier, @NotNull String type) {
 }

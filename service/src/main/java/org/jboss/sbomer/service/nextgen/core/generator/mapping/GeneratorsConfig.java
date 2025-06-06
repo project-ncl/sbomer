@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.nextgen.core.generator.mapping;
 
 import java.util.List;
 
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GeneratorConfigSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorConfigSpec;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

@@ -20,9 +20,9 @@ package org.jboss.sbomer.service.nextgen.controller;
 import java.util.HashSet;
 import java.util.List;
 
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
 import org.jboss.sbomer.service.nextgen.controller.syft.SyftController;
+import org.jboss.sbomer.service.nextgen.core.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.nextgen.service.model.Generation;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;

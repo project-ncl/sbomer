@@ -15,10 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.service.rest.v1beta2;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
+import jakarta.annotation.security.PermitAll;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import lombok.extern.slf4j.Slf4j;
+
+@Path("/api/v1beta2")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@ApplicationScoped
+@Tag(name = "v1beta2", description = "in development, do not use")
+@PermitAll
+@Slf4j
+public class Api {
 
 }

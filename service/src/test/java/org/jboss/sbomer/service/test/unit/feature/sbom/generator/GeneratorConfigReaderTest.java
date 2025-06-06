@@ -15,9 +15,9 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.nextgen.core.generator.mapping.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.core.generator.mapping.GeneratorsConfig;
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GeneratorVersionConfigSpec;
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.TargetSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersionConfigSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.TargetSpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

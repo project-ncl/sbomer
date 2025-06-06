@@ -15,10 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
-
+/**
+ * <p>
+ * Configuration of CPU and memory for a given execution.
+ * </p>
+ *
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record ResourceRequirementSpec(String cpu, String memory) {
 }

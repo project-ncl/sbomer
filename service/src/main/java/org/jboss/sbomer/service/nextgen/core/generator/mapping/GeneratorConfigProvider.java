@@ -27,8 +27,8 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationRequestSpec;
-import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GeneratorVersionConfigSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersionConfigSpec;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

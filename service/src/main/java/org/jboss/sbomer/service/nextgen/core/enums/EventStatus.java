@@ -15,10 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.enums;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+public enum EventStatus {
+    NEW, IGNORED, RESOLVING, RESOLVED, IN_PROGRESS, FAILED, SUCCESS, ERROR;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
+    public static EventStatus fromName(String origin) {
+        return EventStatus.valueOf(origin.toUpperCase());
+    }
 
+    public String toName() {
+        return this.name().toUpperCase();
+    }
 }

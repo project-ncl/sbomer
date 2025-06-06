@@ -15,10 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.enums;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+public enum GenerationStatus {
+    NEW, SCHEDULED, INITIALIZING, INITIALIZED, GENERATING, FINISHED, FAILED;
 
-public record GenerationRequestEvent(GenerationRecord generation) {
+    public static GenerationStatus fromName(String phase) {
+        return GenerationStatus.valueOf(phase.toUpperCase());
+    }
 
+    public String toName() {
+        return this.name().toUpperCase();
+    }
+
+    public boolean isOlderThan(GenerationStatus desiredStatus) {
+        if (desiredStatus == null) {
+            return false;
+        }
+
+        return desiredStatus.ordinal() > this.ordinal();
+    }
+
+    public boolean isFinal() {
+        return this.equals(FAILED) || this.equals(FINISHED);
+    }
 }

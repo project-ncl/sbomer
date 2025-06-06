@@ -32,11 +32,11 @@ import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.service.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.V1Beta2Mapper;
-import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.nextgen.controller.syft.SyftController;
+import org.jboss.sbomer.service.nextgen.core.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.scheduler.GenerationSchedulerConfig;
 import org.slf4j.MDC;
 
