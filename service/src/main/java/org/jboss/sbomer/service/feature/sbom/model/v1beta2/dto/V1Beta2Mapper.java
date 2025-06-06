@@ -26,7 +26,10 @@ import org.jboss.sbomer.service.rest.mapper.MapperConfig;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 @Mapper(config = MapperConfig.class)
+@ApplicationScoped
 public interface V1Beta2Mapper {
     @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
     EventRecord toRecord(Event event);

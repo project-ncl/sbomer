@@ -24,7 +24,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
-import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
+
+import com.github.f4b6a3.tsid.TsidCreator;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -57,7 +58,7 @@ public abstract class BaseStatusHistory extends PanacheEntityBase {
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {
-            this.id = RandomStringIdGenerator.generate();
+            this.id = TsidCreator.getTsid1024().toString();
         }
     }
 

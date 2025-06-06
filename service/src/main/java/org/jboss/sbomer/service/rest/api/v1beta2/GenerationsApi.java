@@ -27,8 +27,9 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.core.utils.ObjectMapperUtils;
+import org.jboss.sbomer.core.utils.JsonUtils;
 import org.jboss.sbomer.service.events.EventCreatedEvent;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
@@ -42,6 +43,8 @@ import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.Generations
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation.UpdatePayload;
 import org.jboss.sbomer.service.v1beta2.generator.GeneratorConfigProvider;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -102,16 +105,35 @@ public class GenerationsApi {
     @Transactional
     public Response requestGenerations(@NotNull @Valid GenerationsRequest payload, @Context UriInfo uriInfo) {
 
-        Event event = Event.builder()
-                .withCreated(Instant.now())
-                .withMetadata(
-                        Map.of(
-                                EventsApi.KEY_SOURCE,
-                                String.format("%s:%s", EventType.REST.toName(), uriInfo.getPath())))
-                .withRequest(ObjectMapperUtils.toJsonNode(payload))
-                .withReason("Created as a result of a REST API call")
-                .build()
-                .save();
+        Event event;
+
+        if (payload.eventId() != null) {
+            event = Event.findById(payload.eventId());
+
+            if (event == null) {
+                throw new ClientException(
+                        "Unable to find Event with id '{}', processing this request cannot continue. Make sure you either: provide correct event id or remove it entirely.",
+                        payload.eventId());
+            }
+
+            // If the event exist, let's merge the original request with the curent one which contains generations as
+            // well.
+            JsonNode mergedRequest = JsonUtils.merge(event.getRequest(), JsonUtils.toJsonNode(payload));
+
+            event.setRequest(mergedRequest);
+
+        } else {
+            event = Event.builder()
+                    .withCreated(Instant.now())
+                    .withMetadata(
+                            Map.of(
+                                    EventsApi.KEY_SOURCE,
+                                    String.format("%s:%s", EventType.REST.toName(), uriInfo.getPath())))
+                    .withRequest(JsonUtils.toJsonNode(payload))
+                    .withReason("Created as a result of a REST API call")
+                    .build()
+                    .save();
+        }
 
         payload.requests().forEach(request -> {
             log.debug("Processing request: '{}'", request.target());
@@ -123,7 +145,7 @@ public class GenerationsApi {
             log.debug("Effective request: '{}'", effectiveRequest);
 
             Generation generation = Generation.builder()
-                    .withRequest(ObjectMapperUtils.toJsonNode(effectiveRequest))
+                    .withRequest(JsonUtils.toJsonNode(effectiveRequest))
                     .withReason("Created as a result of a REST API call")
                     .build()
                     .save();

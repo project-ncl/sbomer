@@ -29,7 +29,7 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
 import org.jboss.sbomer.service.v1beta2.controller.request.Request;
-import org.jboss.sbomer.service.v1beta2.worker.AbstractWorker;
+import org.jboss.sbomer.service.v1beta2.generator.AbstractGenerator;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @NoArgsConstructor
 @Slf4j
-public class RedHatReleaseGenerator extends AbstractWorker {
+public class RedHatReleaseGenerator extends AbstractGenerator {
 
     @Inject
     public RedHatReleaseGenerator(ManagedExecutor managedExecutor) {

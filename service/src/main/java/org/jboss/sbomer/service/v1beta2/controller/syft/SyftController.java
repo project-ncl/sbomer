@@ -42,6 +42,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Generation;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Manifest;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
@@ -49,7 +50,6 @@ import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatu
 import org.jboss.sbomer.service.v1beta2.controller.AbstractController;
 import org.jboss.sbomer.service.v1beta2.controller.TaskRunEventProvider;
 import org.jboss.sbomer.service.v1beta2.controller.request.Request;
-import org.jboss.sbomer.service.v1beta2.controller.request.RequestType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -393,10 +393,10 @@ public class SyftController extends AbstractController {
      * @return the list of stored {@link Sbom}s
      */
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public List<Manifest> storeBoms(GenerationRecord generation, List<Bom> boms) {
+    public List<Manifest> storeBoms(GenerationRecord generationRecord, List<Bom> boms) {
         // TODO @avibelli
         MDCUtils.removeOtelContext();
-        MDCUtils.addIdentifierContext(generation.id());
+        MDCUtils.addIdentifierContext(generationRecord.id());
         // MDCUtils.addOtelContext(generation.getMDCOtel());
 
         // TODO @avibelli
@@ -417,14 +417,22 @@ public class SyftController extends AbstractController {
         // });
         // }
 
-        log.info("There are {} manifests to be stored for the {} generation...", boms.size(), generation.id());
+        log.info("There are {} manifests to be stored for the {} generation...", boms.size(), generationRecord.id());
+
+        // Find the Generation
+        Generation generation = Generation.findById(generationRecord.id());
+
+        if (generation == null) {
+            throw new ApplicationException("Unable to find Generation with ID '{}'", generationRecord.id());
+        }
 
         List<Manifest> manifests = new ArrayList<>();
 
         // Create Manifest entities for all manifests
         boms.forEach(bom -> {
-            log.info("Storing manifests for the Generation '{}'", generation.id());
-            manifests.add(Manifest.builder().withSbom(SbomUtils.toJsonNode(bom)).build().save());
+            log.info("Storing manifests for the Generation '{}'", generationRecord.id());
+            manifests.add(
+                    Manifest.builder().withSbom(SbomUtils.toJsonNode(bom)).withGeneration(generation).build().save());
         });
 
         return manifests;

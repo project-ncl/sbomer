@@ -132,7 +132,7 @@ public class GeneratorConfigProvider {
         GeneratorProfile generatorProfile = null;
         GeneratorVersionProfile generatorVersionProfile = null;
 
-        if (requestSpec.generator() != null || requestSpec.generator().name() != null) {
+        if (requestSpec.generator() != null && requestSpec.generator().name() != null) {
             Optional<GeneratorProfile> generatorProfileOpt = sbomerGeneratorsConfig.generatorProfiles()
                     .stream()
                     .filter(p -> p.name().equals(requestSpec.generator().name()))
