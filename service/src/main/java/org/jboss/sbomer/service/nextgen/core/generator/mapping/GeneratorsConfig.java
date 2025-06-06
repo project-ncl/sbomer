@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.generator;
+package org.jboss.sbomer.service.nextgen.core.generator.mapping;
 
 import java.util.List;
 
