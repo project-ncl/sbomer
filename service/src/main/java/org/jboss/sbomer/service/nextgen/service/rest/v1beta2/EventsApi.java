@@ -34,7 +34,7 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.enums.EventType;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
@@ -71,7 +71,7 @@ public class EventsApi {
     public static final String KEY_IDENTIFIER = "identifier"; // TODO: externalize it
 
     @Inject
-    V1Beta2Mapper mapper;
+    EntityMapper mapper;
 
     @Inject
     EventBus eventBus;

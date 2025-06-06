@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.jboss.sbomer.service.nextgen.controller.syft.SyftController;
-import org.jboss.sbomer.service.nextgen.core.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -38,13 +38,13 @@ public class TaskRunEventHandler implements ResourceEventHandler<TaskRun> {
 
     KubernetesClient kubernetesClient;
     SyftController generationController;
-    V1Beta2Mapper mapper;
+    EntityMapper mapper;
 
     @Inject
     public TaskRunEventHandler(
             KubernetesClient kubernetesClient,
             SyftController generationController,
-            V1Beta2Mapper mapper) {
+            EntityMapper mapper) {
         this.kubernetesClient = kubernetesClient;
         this.generationController = generationController;
         this.mapper = mapper;

@@ -36,7 +36,6 @@ import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
-import org.jboss.sbomer.service.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -46,8 +45,11 @@ import org.jboss.sbomer.service.nextgen.controller.AbstractController;
 import org.jboss.sbomer.service.nextgen.controller.TaskRunEventProvider;
 import org.jboss.sbomer.service.nextgen.controller.request.Request;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationStateChangedEvent;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
@@ -69,6 +71,7 @@ import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverride;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverrideBuilder;
 import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
+import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
@@ -97,8 +100,9 @@ public class SyftController extends AbstractController {
     public SyftController(
             KubernetesClient kubernetesClient,
             GenerationRequestControllerConfig controllerConfig,
-            ManagedExecutor managedExecutor) {
-        super(kubernetesClient, controllerConfig, managedExecutor);
+            ManagedExecutor managedExecutor,
+            EntityMapper mapper) {
+        super(kubernetesClient, controllerConfig, managedExecutor, mapper);
     }
 
     public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
@@ -231,6 +235,8 @@ public class SyftController extends AbstractController {
                 GenerationStatus.FINISHED,
                 GenerationResult.SUCCESS,
                 "Generation finished successfully");
+
+        Arc.container().beanManager().getEvent().fire(new GenerationStateChangedEvent(generation));
     }
 
     private TaskRunStepOverride resourceOverrides(Request request) {
