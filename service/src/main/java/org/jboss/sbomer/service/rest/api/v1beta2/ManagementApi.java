@@ -25,7 +25,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.utils.ObjectMapperUtils;
+import org.jboss.sbomer.core.utils.JsonUtils;
 import org.jboss.sbomer.service.events.EventCreatedEvent;
 import org.jboss.sbomer.service.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.Event;
@@ -102,7 +102,7 @@ public class ManagementApi {
         // Create an event
         Event event = Event.builder()
                 // Convert payload to JsonNode
-                .withRequest(ObjectMapperUtils.toJsonNode(payload))
+                .withRequest(JsonUtils.toJsonNode(payload))
                 .withMetadata(
                         Map.of(
                                 EventsApi.KEY_SOURCE,

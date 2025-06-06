@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.rest.api.v1beta2.payloads.generation;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -33,5 +36,6 @@ import jakarta.validation.constraints.NotNull;
  * @param target Information about the deliverable to manifest.
  * @param config Optional configuration for the generator that will take care of manifesting.
  */
+@JsonInclude(Include.NON_NULL)
 public record GenerationRequestSpec(@NotNull @Valid TargetSpec target, @Valid GeneratorVersionConfigSpec generator) {
 }

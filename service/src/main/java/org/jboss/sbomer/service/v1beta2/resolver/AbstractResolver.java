@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 public abstract class AbstractResolver implements Resolver {
 
-    ManagedExecutor managedExecutor;
+    protected ManagedExecutor managedExecutor;
 
     public AbstractResolver(ManagedExecutor managedExecutor) {
         this.managedExecutor = managedExecutor;

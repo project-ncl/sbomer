@@ -29,9 +29,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationResult;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.enums.GenerationStatus;
+import org.slf4j.helpers.MessageFormatter;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -39,6 +39,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.f4b6a3.tsid.TsidCreator;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -108,8 +110,12 @@ public class Generation extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "request")
     @ToString.Exclude
-    @Schema(implementation = Map.class)
     private JsonNode request;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "metadata")
+    @ToString.Exclude
+    private ObjectNode metadata;
 
     /**
      * Identifier of the status.
@@ -170,10 +176,14 @@ public class Generation extends PanacheEntityBase {
         this.status = status;
     }
 
+    public void setReason(String reason, Object... params) {
+        this.reason = MessageFormatter.arrayFormat(reason, params).getMessage();
+    }
+
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {
-            this.id = RandomStringIdGenerator.generate();
+            this.id = TsidCreator.getTsid1024().toString();
         }
 
         statuses.add(new GenerationStatusHistory(this, status, reason));

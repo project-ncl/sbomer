@@ -15,12 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.v1beta2.worker;
+package org.jboss.sbomer.service.v1beta2.generator;
 
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.EventRecord;
 import org.jboss.sbomer.service.feature.sbom.model.v1beta2.dto.GenerationRecord;
 
-public interface Worker {
+public interface Generator {
     public static final String KEY_WORKER = "worker";
 
     String getType();

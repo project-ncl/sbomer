@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.v1beta2.worker;
+package org.jboss.sbomer.service.v1beta2.generator;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.service.events.GenerationScheduledEvent;
@@ -32,11 +32,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @NoArgsConstructor
-public abstract class AbstractWorker implements Worker {
+public abstract class AbstractGenerator implements Generator {
 
     ManagedExecutor managedExecutor;
 
-    public AbstractWorker(ManagedExecutor managedExecutor) {
+    public AbstractGenerator(ManagedExecutor managedExecutor) {
         this.managedExecutor = managedExecutor;
     }
 
