@@ -168,6 +168,8 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
     /**
      * Updates the bom-ref in the dependency hierarchy, looking for nested dependencies and provides.
      *
+     * TODO: Write a unit test for this
+     *
      * @param bom the bom to update
      * @param regExp the regExp that matches the bom-ref to update
      * @param newRef the new reference
@@ -178,11 +180,8 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
         if (bom.getDependencies() != null) {
             List<Dependency> updatedDependencies = new ArrayList<>(bom.getDependencies().size());
             for (Dependency dependency : bom.getDependencies()) {
-                Matcher matcher = pattern.matcher(dependency.getRef());
-                if (matcher.matches()) {
-                    dependency = SbomUtils.updateDependencyRef(dependency, newRef);
-                }
-                updatedDependencies.add(dependency);
+                Dependency updatedDependency = SbomUtils.updateDependencyRef(dependency, pattern, newRef);
+                updatedDependencies.add(updatedDependency);
             }
             bom.setDependencies(updatedDependencies);
         }
