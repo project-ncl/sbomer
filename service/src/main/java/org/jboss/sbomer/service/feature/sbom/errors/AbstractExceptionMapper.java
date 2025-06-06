@@ -76,7 +76,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
      *
      * @return the list of custom error messages
      */
-    List<String> customErrors() {
+    List<String> customErrors(T ex) {
         return new ArrayList<>();
     }
 
@@ -102,7 +102,7 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
                 .resource(uriInfo.getPath())
                 .errorId(generateErrorId())
                 .error(getStatus(ex).getReasonPhrase())
-                .errors(customErrors())
+                .errors(customErrors(ex))
                 .message(errorMessage(ex))
                 .build();
     }
@@ -131,6 +131,8 @@ public abstract class AbstractExceptionMapper<T extends Throwable> implements Ex
     public Response toResponse(T ex) {
         // Prepare default error entity for a given exception
         ErrorResponse errorResponse = errorResponse(ex);
+
+        log.error("ErrorId: '{}'", errorResponse.getErrorId());
 
         // Prepare initial response builder with default 500 error and JSON content type
         ResponseBuilder responseBuilder = Response.status(getStatus(ex))

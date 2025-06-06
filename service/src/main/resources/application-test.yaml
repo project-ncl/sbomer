@@ -33,6 +33,10 @@ quarkus:
     log:
       sql: true
 
+  log:
+    console:
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+
   rest-client:
     "errata":
       url: "https://dummy"
