@@ -15,7 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller.request;
+package org.jboss.sbomer.service.nextgen.core.dto.request;
 
-public record Generator(String name, String version, Config config) {
+/**
+ * Generator runtime resources.
+ * 
+ * @param requests
+ * @param limits
+ */
+public record Resources(ResourceSpec requests, ResourceSpec limits) {
 }

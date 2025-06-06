@@ -37,15 +37,14 @@ import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.nextgen.controller.AbstractController;
 import org.jboss.sbomer.service.nextgen.controller.TaskRunEventProvider;
-import org.jboss.sbomer.service.nextgen.controller.request.Request;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
+import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.request.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
@@ -239,7 +238,7 @@ public class SyftController extends AbstractController {
         Arc.container().beanManager().getEvent().fire(new GenerationStateChangedEvent(generation));
     }
 
-    private TaskRunStepOverride resourceOverrides(Request request) {
+    private TaskRunStepOverride resourceOverrides(GenerationRequest request) {
 
         return new TaskRunStepOverrideBuilder().withName("generate")
                 .withNewResources()
@@ -278,7 +277,7 @@ public class SyftController extends AbstractController {
         // labels.put(Labels.LABEL_OTEL_SPAN_ID, generationRequest.getSpanId());
         // labels.put(Labels.LABEL_OTEL_TRACEPARENT, generationRequest.getTraceParent());
 
-        Request request = Request.parse(generation);
+        GenerationRequest request = GenerationRequest.parse(generation);
 
         SyftOptions options = null;
 
