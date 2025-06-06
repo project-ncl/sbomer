@@ -30,7 +30,7 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.ManifestRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.V1Beta2Mapper;
+import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import io.vertx.core.eventbus.EventBus;
@@ -58,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ManifestsApi {
     @Inject
-    V1Beta2Mapper mapper;
+    EntityMapper mapper;
 
     @Inject
     EventBus eventBus;

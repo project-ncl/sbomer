@@ -20,8 +20,8 @@ package org.jboss.sbomer.service.nextgen.core.resolver;
 import java.util.Objects;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
-import org.jboss.sbomer.service.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
+import org.jboss.sbomer.service.nextgen.core.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 
 import jakarta.enterprise.event.Observes;

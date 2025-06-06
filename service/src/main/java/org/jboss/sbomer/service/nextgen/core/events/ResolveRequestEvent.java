@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.events;
+package org.jboss.sbomer.service.nextgen.core.events;
 
 import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 
