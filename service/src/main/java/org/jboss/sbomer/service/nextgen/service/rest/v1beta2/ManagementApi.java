@@ -25,13 +25,13 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.sbomer.core.utils.JsonUtils;
-import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
+import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.EventType;
 import org.jboss.sbomer.service.nextgen.core.events.EventCreatedEvent;
 import org.jboss.sbomer.service.nextgen.core.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.management.ReplayRequest;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 
 import io.quarkus.arc.Arc;
@@ -102,7 +102,7 @@ public class ManagementApi {
         // Create an event
         Event event = Event.builder()
                 // Convert payload to JsonNode
-                .withRequest(JsonUtils.toJsonNode(payload))
+                .withRequest(JacksonUtils.toObjectNode(payload))
                 .withMetadata(
                         Map.of(
                                 EventsApi.KEY_SOURCE,

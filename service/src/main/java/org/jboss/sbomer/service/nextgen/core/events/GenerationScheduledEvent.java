@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.nextgen.core.events;
 import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.request.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +41,7 @@ public record GenerationScheduledEvent(EventRecord event, GenerationRecord gener
             return false;
         }
 
-        GenerationRequest request = GenerationRequest.parse(generation);
+        GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
 
         if (request.target().type().equals(type)) {
             return true;

@@ -1,21 +1,4 @@
-/*
- * JBoss, Home of Professional Open Source.
- * Copyright 2023 Red Hat, Inc., and individual contributors
- * as indicated by the @author tags.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.jboss.sbomer.core.utils;
+package org.jboss.sbomer.service.nextgen.core.utils;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -23,20 +6,36 @@ import java.util.Map;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class JsonUtils {
-    private JsonUtils() {
+public class JacksonUtils {
+    private JacksonUtils() {
         throw new IllegalStateException("This is a utility class that should not be instantiated");
     }
 
-    public static JsonNode toJsonNode(Object payload) {
+    /**
+     * Converts the {@link ObjectNode} into an object representation of a given class.
+     *
+     * @param clazz The class the object should be converted to
+     * @param node The content that should be converted
+     * @return Converted object.
+     */
+    public static <T> T parse(Class<T> clazz, ObjectNode node) {
         try {
-            return ObjectMapperProvider.json().valueToTree(payload);
+            return ObjectMapperProvider.json().treeToValue(node, clazz);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Unable to convert provided content ino a {} object", clazz.getName(), e);
+        }
+    }
+
+    public static ObjectNode toObjectNode(Object payload) {
+        try {
+            return ObjectMapperProvider.json().convertValue(payload, ObjectNode.class);
         } catch (IllegalArgumentException e) {
             log.error("Failed to convert object: '{}' to JsonNode", payload, e);
             throw new ApplicationException("Failed to convert given object to JsonNode", e);

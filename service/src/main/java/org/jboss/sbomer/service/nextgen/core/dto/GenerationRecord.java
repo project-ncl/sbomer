@@ -22,7 +22,7 @@ import java.time.Instant;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.resteasy.reactive.links.RestLinkId;
 
@@ -30,6 +30,6 @@ import io.quarkus.resteasy.reactive.links.RestLinkId;
  * Representation of the {@link Generation} entity.
  */
 public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished,
-        JsonNode request, GenerationStatus status, String result, String reason) {
+        ObjectNode request, ObjectNode metadata, GenerationStatus status, String result, String reason) {
 
 }

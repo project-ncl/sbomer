@@ -15,13 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller.syft;
+package org.jboss.sbomer.service.nextgen.generator.syft;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +32,6 @@ import java.util.Set;
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
@@ -39,7 +39,6 @@ import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.nextgen.controller.AbstractController;
 import org.jboss.sbomer.service.nextgen.controller.TaskRunEventProvider;
 import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
@@ -49,10 +48,12 @@ import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStateChangedEvent;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.Duration;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -269,21 +270,38 @@ public class SyftController extends AbstractController {
                 "Preparing dependent resource for the '{}' phase related to Generation with id '{}'",
                 SbomGenerationPhase.GENERATE,
                 generation.id());
-        Map<String, String> labels = Labels.defaultLabelsToMap(GenerationRequestType.CONTAINERIMAGE);
 
-        labels.put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
+        // TODO: populate traces when we create generations
+        // TODO: make this a utility maybe
+        Map<String, String> labels = new HashMap<>();
+
         labels.put(TaskRunEventProvider.GENERATION_ID_LABEL, generation.id());
-        // labels.put(Labels.LABEL_OTEL_TRACE_ID, generationRequest.getTraceId()); TODO: add this
-        // labels.put(Labels.LABEL_OTEL_SPAN_ID, generationRequest.getSpanId());
-        // labels.put(Labels.LABEL_OTEL_TRACEPARENT, generationRequest.getTraceParent());
 
-        GenerationRequest request = GenerationRequest.parse(generation);
+        Optional.ofNullable(generation.metadata())
+                .map(meta -> meta.get("otelTraceId"))
+                .filter(JsonNode::isTextual)
+                .map(JsonNode::asText)
+                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_TRACE_ID, traceId));
 
-        SyftOptions options = null;
+        Optional.ofNullable(generation.metadata())
+                .map(meta -> meta.get("otelSpanId"))
+                .filter(JsonNode::isTextual)
+                .map(JsonNode::asText)
+                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_SPAN_ID, traceId));
+
+        Optional.ofNullable(generation.metadata())
+                .map(meta -> meta.get("otelTraceParent"))
+                .filter(JsonNode::isTextual)
+                .map(JsonNode::asText)
+                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_TRACEPARENT, traceId));
+
+        GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
+
+        SyftContainerImageOptions options = null;
 
         try {
             options = ObjectMapperProvider.json()
-                    .treeToValue(request.generator().config().options(), SyftOptions.class);
+                    .treeToValue(request.generator().config().options(), SyftContainerImageOptions.class);
         } catch (JsonProcessingException e) {
             throw new ApplicationException(
                     "Unexpected options provided, expected Syft generator options, but got: {}",
@@ -386,7 +404,7 @@ public class SyftController extends AbstractController {
 
     /**
      * <p>
-     * Stores the generated manifests in the database which results in creation of new {@link Sbom}s entities.
+     * Stores the generated manifests in the database which results in creation of new {@link Manifest}s entities.
      * </p>
      *
      * <p>
@@ -395,7 +413,7 @@ public class SyftController extends AbstractController {
      *
      * @param generation the generation request
      * @param boms the BOMs to store
-     * @return the list of stored {@link Sbom}s
+     * @return the list of stored {@link Manifest}s
      */
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public List<Manifest> storeBoms(GenerationRecord generationRecord, List<Bom> boms) {

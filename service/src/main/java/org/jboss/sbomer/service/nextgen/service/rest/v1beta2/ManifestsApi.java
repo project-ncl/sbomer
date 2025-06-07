@@ -29,8 +29,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
-import org.jboss.sbomer.service.nextgen.core.dto.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
+import org.jboss.sbomer.service.nextgen.core.dto.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import io.vertx.core.eventbus.EventBus;

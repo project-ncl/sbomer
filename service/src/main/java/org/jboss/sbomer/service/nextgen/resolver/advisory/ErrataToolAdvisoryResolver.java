@@ -41,6 +41,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.Build;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
+import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.nextgen.core.generator.mapping.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.ContextSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
@@ -49,7 +50,6 @@ import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResp
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.TargetSpec;
 import org.jboss.sbomer.service.nextgen.core.resolver.AbstractResolver;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
-import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.rest.otel.TracingRestClient;
 
 import com.fasterxml.jackson.databind.JsonNode;

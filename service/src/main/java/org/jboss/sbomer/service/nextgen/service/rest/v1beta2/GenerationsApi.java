@@ -29,10 +29,9 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.core.utils.JsonUtils;
+import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.enums.EventType;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventCreatedEvent;
@@ -41,6 +40,7 @@ import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationReque
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 
@@ -118,7 +118,7 @@ public class GenerationsApi {
 
             // If the event exist, let's merge the original request with the curent one which contains generations as
             // well.
-            JsonNode mergedRequest = JsonUtils.merge(event.getRequest(), JsonUtils.toJsonNode(payload));
+            JsonNode mergedRequest = JacksonUtils.merge(event.getRequest(), JacksonUtils.toObjectNode(payload));
 
             event.setRequest(mergedRequest);
 
@@ -129,7 +129,7 @@ public class GenerationsApi {
                             Map.of(
                                     EventsApi.KEY_SOURCE,
                                     String.format("%s:%s", EventType.REST.toName(), uriInfo.getPath())))
-                    .withRequest(JsonUtils.toJsonNode(payload))
+                    .withRequest(JacksonUtils.toObjectNode(payload))
                     .withReason("Created as a result of a REST API call")
                     .build()
                     .save();
@@ -145,7 +145,7 @@ public class GenerationsApi {
             log.debug("Effective request: '{}'", effectiveRequest);
 
             Generation generation = Generation.builder()
-                    .withRequest(JsonUtils.toJsonNode(effectiveRequest))
+                    .withRequest(JacksonUtils.toObjectNode(effectiveRequest))
                     .withReason("Created as a result of a REST API call")
                     .build()
                     .save();

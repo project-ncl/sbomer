@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.nextgen.core.dto.request;
 
 /**
  * Generator runtime resources.
- * 
+ *
  * @param requests
  * @param limits
  */
