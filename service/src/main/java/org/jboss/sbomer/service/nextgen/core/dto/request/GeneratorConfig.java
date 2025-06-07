@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Generator configuration.
- * 
+ *
  * @param resources Generator resources in Kubernetes style. This is more a hint than actual values. Usage of these
  *        values depend on the generator
  * @param format Requested manifest format

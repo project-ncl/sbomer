@@ -21,7 +21,7 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * Definition of the generator that should be used to perform the generation.
- * 
+ *
  * @param name Name of the generator
  * @param name Version of the generator
  * @param config Optional generator configuration

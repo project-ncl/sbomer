@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.nextgen.core.dto.request;
 
 /**
  * Resource configuration. Uses Kubernetes values.
- * 
+ *
  * @see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes
  * @param cpu CPU value
  * @param memory Memory value

@@ -20,9 +20,7 @@ package org.jboss.sbomer.service.nextgen.service.model;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -38,7 +36,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.f4b6a3.tsid.TsidCreator;
 
@@ -110,7 +107,7 @@ public class Generation extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "request")
     @ToString.Exclude
-    private JsonNode request;
+    private ObjectNode request;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata")
@@ -151,12 +148,6 @@ public class Generation extends PanacheEntityBase {
     @JsonBackReference("generation-event")
     @Builder.Default
     private List<Event> events = new ArrayList<>();
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "otel_metadata")
-    @ToString.Exclude
-    @Schema(implementation = Map.class)
-    private JsonNode otelMetadata;
 
     @OneToMany(mappedBy = "generation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("timestamp ASC") // Ensures history is ordered chronologically

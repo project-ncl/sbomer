@@ -15,12 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller.syft;
+package org.jboss.sbomer.service.nextgen.generator.syft;
 
 import java.util.List;
 
+import org.jboss.sbomer.service.nextgen.core.dto.request.GeneratorConfig;
+
 /**
- * Representation of configuration options related to Syft generator.
+ * Representation of configuration options related to Syft generator. This is the representation of the {@code options}
+ * field in {@link GeneratorConfig}.
+ *
+ * @see GeneratorConfig
+ * @param includeRpms Whether to include RPMs in the manifest.
+ * @param paths List of paths within the container image that should be scanned by Syft.
+ * @param timeout The timeout after which the generation should be terminated.
  */
-public record SyftOptions(boolean includeRpms, List<String> paths, String timeout) {
+public record SyftContainerImageOptions(boolean includeRpms, List<String> paths, String timeout) {
 }

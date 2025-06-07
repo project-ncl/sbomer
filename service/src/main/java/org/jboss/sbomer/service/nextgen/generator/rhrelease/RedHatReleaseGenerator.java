@@ -27,6 +27,7 @@ import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.request.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
@@ -56,7 +57,7 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
     @Override
     @ActivateRequestContext
     public void handle(EventRecord e, GenerationRecord generationRecord) {
-        GenerationRequest request = GenerationRequest.parse(generationRecord);
+        GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generationRecord.request());
 
         // Fetch event identified by the provided ID
         Event event = Event.findById(request.target().identifier());

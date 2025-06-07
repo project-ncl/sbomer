@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.nextgen.core.dto.request;
 
 /**
  * Identifier of the deliverable to be manifested.
- * 
+ *
  * @param type Type of the deliverable. This should be set to a type that is supported by particular SBOMer deployment,
  *        for example: {@code CONTAINER_IMAGE}.
  * @param identifier An identifier of the deliverable that is meaningful in the context of the {@code type} param, for

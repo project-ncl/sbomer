@@ -17,31 +17,10 @@
  */
 package org.jboss.sbomer.service.nextgen.core.dto.request;
 
-import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 /**
  * Represents a single generation request. This object is used to encapsulate information that is required to start a
  * generation of manifest for a single deliverable.
  */
 public record GenerationRequest(Generator generator, Target target) {
 
-    /**
-     * Converts the {@code request} field from {@link GenerationRecord} which is a {@link ObjectNode} into a
-     * {@link GenerationRequest}.
-     * 
-     * @param generation
-     * @return Converted {@link GenerationRequest} object.
-     */
-    public static GenerationRequest parse(GenerationRecord generation) {
-        try {
-            return ObjectMapperProvider.json().treeToValue(generation.request(), GenerationRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException("Unable to parse provided resource configuration", e);
-        }
-    }
 }
