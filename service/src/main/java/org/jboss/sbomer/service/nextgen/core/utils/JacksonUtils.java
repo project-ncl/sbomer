@@ -1,6 +1,27 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2023 Red Hat, Inc., and individual contributors
+ * as indicated by the @author tags.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.sbomer.service.nextgen.core.utils;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -69,5 +90,35 @@ public class JacksonUtils {
             }
         }
         return mainNode;
+    }
+
+    /**
+     * Reads manifests at given {@code paths} as {@link JsonNode}s.
+     *
+     * @param paths List of {@link Path}s to manifests in JSON format.
+     * @return List of {@link JsonNode}s.
+     */
+    public static List<JsonNode> readBoms(List<Path> paths) {
+        List<JsonNode> boms = new ArrayList<>();
+
+        log.info("Reading {} files...", paths.size());
+
+        for (Path manifestPath : paths) {
+            log.debug("Reading manifest at path '{}'...", manifestPath);
+
+            JsonNode bom;
+
+            try {
+                bom = ObjectMapperProvider.json().readTree(manifestPath.toFile());
+            } catch (IOException e) {
+                throw new ApplicationException("Could not read the manifest at '{}'", manifestPath.toAbsolutePath(), e);
+            }
+
+            if (bom == null) {
+                throw new ApplicationException("Manifest at path '{}' is empty", manifestPath.toAbsolutePath());
+            }
+        }
+
+        return boms;
     }
 }

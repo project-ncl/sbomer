@@ -29,28 +29,26 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
-import org.jboss.sbomer.service.nextgen.controller.AbstractController;
 import org.jboss.sbomer.service.nextgen.controller.TaskRunEventProvider;
+import org.jboss.sbomer.service.nextgen.controller.tekton.AbstractTektonController;
 import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.request.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStateChangedEvent;
+import org.jboss.sbomer.service.nextgen.core.events.ManifestStoredEvent;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
-import org.jboss.sbomer.service.nextgen.service.model.Generation;
-import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -76,7 +74,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,7 +81,7 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @NoArgsConstructor
 @Slf4j
-public class SyftController extends AbstractController {
+public class SyftController extends AbstractTektonController {
     public static final String PARAM_COMMAND_CONTAINER_IMAGE = "image";
     public static final String PARAM_COMMAND_TYPE = "type";
     public static final String PARAM_COMMAND_IDENTIFIER = "identifier";
@@ -106,6 +103,7 @@ public class SyftController extends AbstractController {
     }
 
     public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
+        // Currently handling only container images
         if (!event.isOfRequestType("CONTAINER_IMAGE")) {
             // This is not an event handled by this listener
             return;
@@ -189,10 +187,11 @@ public class SyftController extends AbstractController {
             return;
         }
 
-        List<Bom> boms;
+        // Read manifests
+        List<JsonNode> boms;
 
         try {
-            boms = readManifests(manifestPaths);
+            boms = JacksonUtils.readBoms(manifestPaths);
         } catch (Exception e) {
             log.error("Unable to read one or more manifests", e);
 
@@ -205,10 +204,13 @@ public class SyftController extends AbstractController {
             return;
         }
 
-        List<Manifest> sboms;
+        // TODO: Validate manifests
+
+        // Store manifests
+        List<ManifestRecord> manifests;
 
         try {
-            sboms = storeBoms(generation, boms);
+            manifests = storeBoms(generation, boms);
         } catch (ValidationException e) {
             // There was an error when validating the entity, most probably the SBOM is not valid
             log.error("Unable to validate generated SBOMs: {}", e.getMessage(), e);
@@ -223,6 +225,10 @@ public class SyftController extends AbstractController {
             return;
         }
 
+        // Send event
+        // TODO: This should be done by the service, after storing manifests
+        Arc.container().beanManager().getEvent().fire(new ManifestStoredEvent(manifests));
+
         try {
             // syftImageController.performPost(sboms); // TODO: add thios back
         } catch (ApplicationException e) {
@@ -236,6 +242,7 @@ public class SyftController extends AbstractController {
                 GenerationResult.SUCCESS,
                 "Generation finished successfully");
 
+        // TODO: This should be done by the service, after updating the status
         Arc.container().beanManager().getEvent().fire(new GenerationStateChangedEvent(generation));
     }
 
@@ -400,65 +407,6 @@ public class SyftController extends AbstractController {
                                             .build()));
         }
         return taskRun;
-    }
-
-    /**
-     * <p>
-     * Stores the generated manifests in the database which results in creation of new {@link Manifest}s entities.
-     * </p>
-     *
-     * <p>
-     * Additionally updates the database entity with the current state of the {@link GenerationRequest}.
-     * </p>
-     *
-     * @param generation the generation request
-     * @param boms the BOMs to store
-     * @return the list of stored {@link Manifest}s
-     */
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public List<Manifest> storeBoms(GenerationRecord generationRecord, List<Bom> boms) {
-        // TODO @avibelli
-        MDCUtils.removeOtelContext();
-        MDCUtils.addIdentifierContext(generationRecord.id());
-        // MDCUtils.addOtelContext(generation.getMDCOtel());
-
-        // TODO @avibelli
-        // Maybe we should add it later, when we will be transitioning this into a release manifest?
-        // Syft controller should be generic and not know anything about RH internals.
-
-        // Verify if the request event for this generation is associated with an Errata advisory
-        // RequestEvent event = sbomGenerationRequest.getRequest();
-        // if (event != null && event.getRequestConfig() != null
-        // && event.getRequestConfig() instanceof ErrataAdvisoryRequestConfig config) {
-
-        // boms.forEach(bom -> {
-        // // Add the AdvisoryId property
-        // addPropertyIfMissing(
-        // bom.getMetadata(),
-        // Constants.CONTAINER_PROPERTY_ADVISORY_ID,
-        // config.getAdvisoryId());
-        // });
-        // }
-
-        log.info("There are {} manifests to be stored for the {} generation...", boms.size(), generationRecord.id());
-
-        // Find the Generation
-        Generation generation = Generation.findById(generationRecord.id());
-
-        if (generation == null) {
-            throw new ApplicationException("Unable to find Generation with ID '{}'", generationRecord.id());
-        }
-
-        List<Manifest> manifests = new ArrayList<>();
-
-        // Create Manifest entities for all manifests
-        boms.forEach(bom -> {
-            log.info("Storing manifests for the Generation '{}'", generationRecord.id());
-            manifests.add(
-                    Manifest.builder().withSbom(SbomUtils.toJsonNode(bom)).withGeneration(generation).build().save());
-        });
-
-        return manifests;
     }
 
 }

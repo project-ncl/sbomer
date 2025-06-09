@@ -15,8 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller;
+package org.jboss.sbomer.service.nextgen.core.validator;
 
-public interface Controller {
+import com.fasterxml.jackson.databind.JsonNode;
 
+public interface BomValidator {
+    public BomValidationResult validate(JsonNode bom);
+
+    public BomValidationResult validate(JsonNode bom, String version);
 }

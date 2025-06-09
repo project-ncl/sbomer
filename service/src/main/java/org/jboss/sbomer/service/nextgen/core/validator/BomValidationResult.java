@@ -15,8 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller;
+package org.jboss.sbomer.service.nextgen.core.validator;
 
-public interface Controller {
+import java.util.List;
+
+public record BomValidationResult(boolean isValid, String message, List<String> errors) {
 
 }

@@ -15,8 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller;
+package org.jboss.sbomer.service.nextgen.core.utils;
 
-public interface Controller {
+import org.eclipse.microprofile.config.ConfigProvider;
 
+public class ConfigUtils {
+    private ConfigUtils() {
+        throw new IllegalStateException("This is a utility class that should not be instantiated");
+    }
+
+    public static String getRelease() {
+        return ConfigProvider.getConfig().getOptionalValue("SBOMER_RELEASE", String.class).orElse("sbomer");
+    }
 }
