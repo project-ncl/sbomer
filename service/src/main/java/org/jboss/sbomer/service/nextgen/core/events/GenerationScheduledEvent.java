@@ -17,36 +17,12 @@
  */
 package org.jboss.sbomer.service.nextgen.core.events;
 
-import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Event fired after a Generation is scheduled.
  */
-@Slf4j
 public record GenerationScheduledEvent(EventRecord event, GenerationRecord generation) {
 
-    public boolean isOfRequestType(String type) {
-        if (this.generation == null) {
-            log.warn("Generation was not populated");
-            return false;
-        }
-
-        if (this.generation.request() == null) {
-            log.warn("Request was not provided");
-            return false;
-        }
-
-        GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
-
-        if (request.target().type().equals(type)) {
-            return true;
-        }
-
-        return false;
-    }
 }

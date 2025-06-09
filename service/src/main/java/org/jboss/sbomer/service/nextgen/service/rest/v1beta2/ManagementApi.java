@@ -26,7 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.events.EventCreatedEvent;
+import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.events.ResolveRequestEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.management.ReplayRequest;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
@@ -118,7 +118,7 @@ public class ManagementApi {
         EventRecord eventRecord = mapper.toRecord(event);
 
         // Fire an event so that resolver could handle it
-        Arc.container().beanManager().getEvent().fire(new EventCreatedEvent(eventRecord));
+        Arc.container().beanManager().getEvent().fire(new EventStatusChangeEvent(eventRecord));
 
         // And fire an additional event that encapsulates the information that this is a request for resolution
         Arc.container().beanManager().getEvent().fire(new ResolveRequestEvent(eventRecord));

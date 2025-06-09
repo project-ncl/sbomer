@@ -19,16 +19,34 @@ package org.jboss.sbomer.service.nextgen.core.dto.model;
 
 import java.time.Instant;
 
+import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.resteasy.reactive.links.RestLinkId;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Representation of the Generation entity.
  */
+@Slf4j
 public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished,
         ObjectNode request, ObjectNode metadata, GenerationStatus status, String result, String reason) {
 
+    public boolean isOfRequestType(String type) {
+        if (request() == null) {
+            log.warn("Request was not provided");
+            return false;
+        }
+
+        GenerationRequest generationRequest = JacksonUtils.parse(GenerationRequest.class, request());
+
+        if (generationRequest.target().type().equals(type)) {
+            return true;
+        }
+
+        return false;
+    }
 }

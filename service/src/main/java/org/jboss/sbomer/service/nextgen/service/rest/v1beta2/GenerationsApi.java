@@ -32,14 +32,14 @@ import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.core.events.EventCreatedEvent;
-import org.jboss.sbomer.service.nextgen.core.generator.mapping.GeneratorConfigProvider;
+import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
+import org.jboss.sbomer.service.nextgen.service.config.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 
@@ -125,9 +125,7 @@ public class GenerationsApi {
             event = Event.builder()
                     .withCreated(Instant.now())
                     .withMetadata(
-                            Map.of(
-                                    EventsApi.KEY_SOURCE,
-                                    String.format("%s:%s", Api.EVENT_TYPE, uriInfo.getPath())))
+                            Map.of(EventsApi.KEY_SOURCE, String.format("%s:%s", Api.EVENT_TYPE, uriInfo.getPath())))
                     .withRequest(JacksonUtils.toObjectNode(payload))
                     .withReason("Created as a result of a REST API call")
                     .build()
@@ -155,7 +153,7 @@ public class GenerationsApi {
 
         EventRecord eventRecord = mapper.toRecord(event);
 
-        Arc.container().beanManager().getEvent().fire(new EventCreatedEvent(eventRecord));
+        Arc.container().beanManager().getEvent().fire(new EventStatusChangeEvent(eventRecord));
 
         return Response
                 .accepted(new GenerationsResponse(eventRecord, mapper.toGenerationRecords(event.getGenerations())))
