@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.nextgen.core.events;
 
 import java.util.List;
 
-import org.jboss.sbomer.service.nextgen.core.dto.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 
 // TODO: This should not contain content of the manifest, probably a dedicated DTO will be required
 public record ManifestStoredEvent(List<ManifestRecord> manifests) {

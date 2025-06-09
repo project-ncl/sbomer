@@ -15,16 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto.request;
+package org.jboss.sbomer.service.nextgen.core.dto.api;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Identifier of the deliverable to be manifested.
+ * Generator configuration.
  *
- * @param type Type of the deliverable. This should be set to a type that is supported by particular SBOMer deployment,
- *        for example: {@code CONTAINER_IMAGE}.
- * @param identifier An identifier of the deliverable that is meaningful in the context of the {@code type} param, for
- *        example:
- *        {@code registry.access.redhat.com/ubi8@sha256:0c1757c4526cfd7fdfedc54fadf4940e7f453201de65c0fefd454f3dde117273}.
+ * @param resources Generator resources in Kubernetes style. This is more a hint than actual values. Usage of these
+ *        values depend on the generator
+ * @param format Requested manifest format
+ * @param options Custom options for generator
  */
-public record Target(String type, String identifier) {
+public record GeneratorConfig(Resources resources, String format, JsonNode options) {
 }

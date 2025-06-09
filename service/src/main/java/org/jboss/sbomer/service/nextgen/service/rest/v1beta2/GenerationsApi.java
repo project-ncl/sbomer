@@ -29,10 +29,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
-import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.enums.EventType;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventCreatedEvent;
 import org.jboss.sbomer.service.nextgen.core.generator.mapping.GeneratorConfigProvider;
@@ -41,6 +39,7 @@ import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequ
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
+import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 
@@ -128,7 +127,7 @@ public class GenerationsApi {
                     .withMetadata(
                             Map.of(
                                     EventsApi.KEY_SOURCE,
-                                    String.format("%s:%s", EventType.REST.toName(), uriInfo.getPath())))
+                                    String.format("%s:%s", Api.EVENT_TYPE, uriInfo.getPath())))
                     .withRequest(JacksonUtils.toObjectNode(payload))
                     .withReason("Created as a result of a REST API call")
                     .build()

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller;
+package org.jboss.sbomer.service.nextgen.controller.tekton;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
@@ -26,16 +26,21 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Prepares an informer for Kubernetes cluster and watches all {@link TaskRun}s which are related to generations.
+ */
 @ApplicationScoped
 @Slf4j
-public class TaskRunEventProvider {
+public class GenerationTaskRunEventProvider {
     public final static String GENERATION_ID_LABEL = "sbomer.jboss.org/generation-id";
 
     KubernetesClient kubernetesClient;
-    TaskRunEventHandler taskRunEventHandler;
+    GenerationTaskRunEventHandler taskRunEventHandler;
 
     @Inject
-    public TaskRunEventProvider(KubernetesClient kubernetesClient, TaskRunEventHandler taskRunEventHandler) {
+    public GenerationTaskRunEventProvider(
+            KubernetesClient kubernetesClient,
+            GenerationTaskRunEventHandler taskRunEventHandler) {
         this.kubernetesClient = kubernetesClient;
         this.taskRunEventHandler = taskRunEventHandler;
     }
@@ -53,5 +58,4 @@ public class TaskRunEventProvider {
             }
         });
     }
-
 }

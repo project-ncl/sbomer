@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.nextgen.core.enums;
 
+// TODO: Ensure statuses are correct
 public enum EventStatus {
     NEW, IGNORED, RESOLVING, RESOLVED, IN_PROGRESS, FAILED, SUCCESS, ERROR;
 

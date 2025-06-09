@@ -15,13 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto.request;
+package org.jboss.sbomer.service.nextgen.core.dto.model;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Generator runtime resources.
- *
- * @param requests
- * @param limits
+ * Representation of the Event entity.
  */
-public record Resources(ResourceSpec requests, ResourceSpec limits) {
+public record EventRecord(String id, EventRecord parent, Instant created, Instant updated, Instant finished,
+        Map<String, String> metadata, JsonNode request, List<GenerationRecord> generations, String status,
+        String reason) {
+
 }

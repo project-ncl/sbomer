@@ -37,18 +37,18 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
-import org.jboss.sbomer.service.nextgen.controller.TaskRunEventProvider;
 import org.jboss.sbomer.service.nextgen.controller.tekton.AbstractTektonController;
-import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.ManifestRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.request.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.controller.tekton.GenerationTaskRunEventProvider;
+import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStateChangedEvent;
 import org.jboss.sbomer.service.nextgen.core.events.ManifestStoredEvent;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
+import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -268,7 +268,7 @@ public class SyftController extends AbstractTektonController {
     }
 
     @Override
-    protected TaskRun desired(GenerationRecord generation) {
+    public TaskRun desired(GenerationRecord generation) {
 
         MDCUtils.removeOtelContext();
         // MDCUtils.addOtelContext(generationRequest.getMDCOtel()); TODO: add this
@@ -282,7 +282,7 @@ public class SyftController extends AbstractTektonController {
         // TODO: make this a utility maybe
         Map<String, String> labels = new HashMap<>();
 
-        labels.put(TaskRunEventProvider.GENERATION_ID_LABEL, generation.id());
+        labels.put(GenerationTaskRunEventProvider.GENERATION_ID_LABEL, generation.id());
 
         Optional.ofNullable(generation.metadata())
                 .map(meta -> meta.get("otelTraceId"))

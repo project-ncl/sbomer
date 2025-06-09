@@ -17,9 +17,9 @@
  */
 package org.jboss.sbomer.service.nextgen.core.events;
 
-import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.request.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 
 import lombok.extern.slf4j.Slf4j;

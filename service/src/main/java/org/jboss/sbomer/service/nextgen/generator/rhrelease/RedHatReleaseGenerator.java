@@ -22,9 +22,9 @@ import java.util.List;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.request.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;

@@ -17,8 +17,8 @@
  */
 package org.jboss.sbomer.service.nextgen.core.generator;
 
-import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 
 public interface Generator {
     public static final String KEY_WORKER = "worker";

@@ -15,17 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto;
-
-import java.time.Instant;
-
-import org.jboss.sbomer.service.nextgen.service.model.Manifest;
-
-import com.fasterxml.jackson.databind.JsonNode;
+package org.jboss.sbomer.service.nextgen.core.dto.api;
 
 /**
- * Representation of the {@link Manifest} entity.
+ * Generator runtime resources.
+ *
+ * @param requests
+ * @param limits
  */
-public record ManifestRecord(String id, Instant created, JsonNode sbom) {
-
+public record Resources(ResourceSpec requests, ResourceSpec limits) {
 }

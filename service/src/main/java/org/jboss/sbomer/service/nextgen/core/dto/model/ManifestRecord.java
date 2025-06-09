@@ -15,14 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto.request;
+package org.jboss.sbomer.service.nextgen.core.dto.model;
+
+import java.time.Instant;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Resource configuration. Uses Kubernetes values.
- *
- * @see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes
- * @param cpu CPU value
- * @param memory Memory value
+ * Representation of the Manifest entity.
  */
-public record ResourceSpec(String cpu, String memory) {
+public record ManifestRecord(String id, Instant created, JsonNode sbom) {
+
 }

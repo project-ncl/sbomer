@@ -35,5 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 @PermitAll
 @Slf4j
 public class Api {
+    public static final String EVENT_TYPE = "REST";
 
 }
