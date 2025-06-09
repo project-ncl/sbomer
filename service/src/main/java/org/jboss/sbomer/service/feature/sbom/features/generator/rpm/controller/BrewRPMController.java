@@ -137,24 +137,24 @@ public class BrewRPMController extends AbstractController {
 
                         log.error("Generation failed, the TaskRun returned failure: {}", detailedFailureMessage);
 
-            // If we get return code 10 then its going to be related to unsupported
-            if (getFirstFailedStepExitCode(generateTaskRun) == 10) {
-                return updateRequest(
-                        generationRequest,
-                        SbomGenerationStatus.FAILED,
-                        GenerationResult.ERR_GENERATION,
-                        "Generation failed. TaskRun responsible for generation failed: {}",
-                        detailedFailureMessage);
+                        // If we get return code 10 then its going to be related to unsupported
+                        if (getFirstFailedStepExitCode(generateTaskRun) != null && getFirstFailedStepExitCode(generateTaskRun) == 10) {
+                            return updateRequest(
+                                    generationRequest,
+                                    SbomGenerationStatus.FAILED,
+                                    GenerationResult.ERR_GENERATION,
+                                    "Generation failed. TaskRun responsible for generation failed: {}",
+                                    detailedFailureMessage);
 
-            }
+                        }
 
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. TaskRun responsible for generation failed: {}",
-                    detailedFailureMessage);
-        }
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_SYSTEM,
+                                "Generation failed. TaskRun responsible for generation failed: {}",
+                                detailedFailureMessage);
+                    }
 
                     // Construct the path to the working directory of the generator
                     Path generationDir = Path.of(controllerConfig.sbomDir(), generationRequest.getMetadata().getName());
