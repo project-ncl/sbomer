@@ -15,21 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-
-import org.jboss.sbomer.service.nextgen.service.model.Event;
-
-import com.fasterxml.jackson.databind.JsonNode;
+package org.jboss.sbomer.service.nextgen.core.dto.api;
 
 /**
- * Representation of the {@link Event} entity.
+ * Resource configuration. Uses Kubernetes values.
+ *
+ * @see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes
+ * @param cpu CPU value
+ * @param memory Memory value
  */
-public record EventRecord(String id, EventRecord parent, Instant created, Instant updated, Instant finished,
-        Map<String, String> metadata, JsonNode request, List<GenerationRecord> generations, String status,
-        String reason) {
-
+public record ResourceSpec(String cpu, String memory) {
 }

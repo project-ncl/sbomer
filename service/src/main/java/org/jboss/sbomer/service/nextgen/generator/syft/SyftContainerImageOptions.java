@@ -19,7 +19,7 @@ package org.jboss.sbomer.service.nextgen.generator.syft;
 
 import java.util.List;
 
-import org.jboss.sbomer.service.nextgen.core.dto.request.GeneratorConfig;
+import org.jboss.sbomer.service.nextgen.core.dto.api.GeneratorConfig;
 
 /**
  * Representation of configuration options related to Syft generator. This is the representation of the {@code options}

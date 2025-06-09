@@ -15,18 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.enums;
+package org.jboss.sbomer.service.nextgen.core.dto.model;
 
-import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
+import java.time.Instant;
 
-public enum EventType {
-    REST, UMB;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 
-    public static RequestEventType fromName(String origin) {
-        return RequestEventType.valueOf(origin.toUpperCase());
-    }
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-    public String toName() {
-        return this.name().toUpperCase();
-    }
+import io.quarkus.resteasy.reactive.links.RestLinkId;
+
+/**
+ * Representation of the Generation entity.
+ */
+public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished,
+        ObjectNode request, ObjectNode metadata, GenerationStatus status, String result, String reason) {
+
 }

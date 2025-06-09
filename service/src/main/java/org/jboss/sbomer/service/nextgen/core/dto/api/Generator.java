@@ -15,21 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto;
+package org.jboss.sbomer.service.nextgen.core.dto.api;
 
-import java.time.Instant;
-
-import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.service.model.Generation;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import io.quarkus.resteasy.reactive.links.RestLinkId;
+import jakarta.validation.constraints.NotBlank;
 
 /**
- * Representation of the {@link Generation} entity.
+ * Definition of the generator that should be used to perform the generation.
+ *
+ * @param name Name of the generator
+ * @param name Version of the generator
+ * @param config Optional generator configuration
  */
-public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished,
-        ObjectNode request, ObjectNode metadata, GenerationStatus status, String result, String reason) {
-
+public record Generator(@NotBlank String name, String version, GeneratorConfig config) {
 }

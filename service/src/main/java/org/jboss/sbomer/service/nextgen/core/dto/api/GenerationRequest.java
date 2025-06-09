@@ -15,16 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto.request;
-
-import jakarta.validation.constraints.NotBlank;
+package org.jboss.sbomer.service.nextgen.core.dto.api;
 
 /**
- * Definition of the generator that should be used to perform the generation.
- *
- * @param name Name of the generator
- * @param name Version of the generator
- * @param config Optional generator configuration
+ * Represents a single generation request. This object is used to encapsulate information that is required to start a
+ * generation of manifest for a single deliverable.
  */
-public record Generator(@NotBlank String name, String version, GeneratorConfig config) {
+public record GenerationRequest(Generator generator, Target target) {
+
 }

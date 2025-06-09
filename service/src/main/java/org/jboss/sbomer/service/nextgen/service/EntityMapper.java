@@ -15,10 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto;
+package org.jboss.sbomer.service.nextgen.service;
 
 import java.util.List;
 
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;

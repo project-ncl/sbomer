@@ -19,8 +19,8 @@ package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
 import java.util.List;
 
-import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 
 import jakarta.validation.constraints.NotNull;
 

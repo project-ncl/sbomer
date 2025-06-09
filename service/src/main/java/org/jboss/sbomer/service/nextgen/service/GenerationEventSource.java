@@ -32,7 +32,6 @@ import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.leader.LeaderManager;
-import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.nextgen.generator.syft.SyftController;

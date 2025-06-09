@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.nextgen.core.events;
 
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 
 /**
  * Event fired after successful finish of a particular generation.

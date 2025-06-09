@@ -15,16 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller;
+package org.jboss.sbomer.service.nextgen.controller.tekton;
 
 import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
-import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.generator.syft.SyftController;
+import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
@@ -85,7 +85,7 @@ public class GenerationTaskRunEventHandler implements ResourceEventHandler<TaskR
             log.warn(
                     "TaskRun '{}' is not related to any generation, it does not have required label: '{}', skipping",
                     taskRun.getMetadata().getName(),
-                    TaskRunEventProvider.GENERATION_ID_LABEL);
+                    GenerationTaskRunEventProvider.GENERATION_ID_LABEL);
             return;
         }
 
@@ -103,7 +103,7 @@ public class GenerationTaskRunEventHandler implements ResourceEventHandler<TaskR
 
         // Find all TaskRuns that are related to this generation.
         List<TaskRun> relatedTaskRuns = kubernetesClient.resources(TaskRun.class)
-                .withLabel(TaskRunEventProvider.GENERATION_ID_LABEL, generationId)
+                .withLabel(GenerationTaskRunEventProvider.GENERATION_ID_LABEL, generationId)
                 .list()
                 .getItems();
 
@@ -112,10 +112,10 @@ public class GenerationTaskRunEventHandler implements ResourceEventHandler<TaskR
     }
 
     /**
-     * Read the Generation identifier from the TaskRun label {@link TaskRunEventProvider.GENERATION_ID_LABEL}.
-     * 
+     * Read the Generation identifier from the TaskRun label {@link GenerationTaskRunEventProvider.GENERATION_ID_LABEL}.
+     *
      * It will return {@code null} in case the label cannot be found.
-     * 
+     *
      * @param taskRun
      * @return The Generation identifier.
      */
@@ -124,10 +124,10 @@ public class GenerationTaskRunEventHandler implements ResourceEventHandler<TaskR
             log.info(
                     "Task run '{}' does not have required '{}' annotations, skipping",
                     taskRun.getMetadata().getName(),
-                    TaskRunEventProvider.GENERATION_ID_LABEL);
+                    GenerationTaskRunEventProvider.GENERATION_ID_LABEL);
             return null;
         }
 
-        return taskRun.getMetadata().getLabels().get(TaskRunEventProvider.GENERATION_ID_LABEL);
+        return taskRun.getMetadata().getLabels().get(GenerationTaskRunEventProvider.GENERATION_ID_LABEL);
     }
 }

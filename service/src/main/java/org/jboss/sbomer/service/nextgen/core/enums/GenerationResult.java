@@ -23,6 +23,7 @@ import java.util.Optional;
 import lombok.Getter;
 
 @Getter
+// TODO: We should update these. Or maybe these should NOT be added here at all? These are specific to generators.
 public enum GenerationResult {
     SUCCESS(0),
     ERR_GENERAL(1),

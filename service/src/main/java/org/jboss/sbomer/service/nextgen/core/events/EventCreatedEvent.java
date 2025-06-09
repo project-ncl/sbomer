@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.nextgen.core.events;
 
-import org.jboss.sbomer.service.nextgen.core.dto.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 
 /**
  * An event fired after a particular {@link EventRecord} has been created.

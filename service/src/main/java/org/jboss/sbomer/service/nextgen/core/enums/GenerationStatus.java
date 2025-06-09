@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.nextgen.core.enums;
 
+/**
+ * Represents status of a given generation.
+ */
 public enum GenerationStatus {
     NEW, SCHEDULED, INITIALIZING, INITIALIZED, GENERATING, FINISHED, FAILED;
 
