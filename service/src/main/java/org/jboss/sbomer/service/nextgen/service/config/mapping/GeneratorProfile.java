@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.generator.mapping;
+package org.jboss.sbomer.service.nextgen.service.config.mapping;
 
 import java.util.List;
 
@@ -23,10 +23,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
 /**
- * Represents a single mapping from a content type to a list of preferred generators.
+ * Defines the profile for a type of generator, including all its supported versions.
  *
- * @param type the type of the content to manifest, for example {@code CONTAINER_IMAGE} or {@code MAVEN_PROJECT}
- * @param generators a list of generators that support given type. First in the list is the preferred generator.
+ * @param name name of the generator
+ * @param description optional description of the generator
+ * @param versions list of supported/available versions of a given generator
  */
-public record DefaultGeneratorMappingEntry(String targetType, @NotEmpty List<@NotBlank String> generators) {
+public record GeneratorProfile(@NotBlank String name, String description,
+        @NotEmpty List<GeneratorVersionProfile> versions) {
 }

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.generator.mapping;
+package org.jboss.sbomer.service.nextgen.service.config;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +29,10 @@ import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersionConfigSpec;
+import org.jboss.sbomer.service.nextgen.service.config.mapping.DefaultGeneratorMappingEntry;
+import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorProfile;
+import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorVersionProfile;
+import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorsConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

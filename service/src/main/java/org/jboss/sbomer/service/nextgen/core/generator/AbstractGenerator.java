@@ -41,7 +41,7 @@ public abstract class AbstractGenerator implements Generator {
     }
 
     public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
-        if (!event.isOfRequestType(getType())) {
+        if (!event.generation().isOfRequestType(getType())) {
             // This is not an event handled by this generator
             return;
         }

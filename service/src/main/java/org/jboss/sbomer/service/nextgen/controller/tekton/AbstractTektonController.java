@@ -38,7 +38,7 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.core.events.GenerationStateChangedEvent;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
@@ -110,7 +110,7 @@ public abstract class AbstractTektonController implements TektonController<Gener
         }
 
         // TODO: This should be done only in the service, after updating its status via REST API
-        Arc.container().beanManager().getEvent().fire(new GenerationStateChangedEvent(generationRecord));
+        Arc.container().beanManager().getEvent().fire(new GenerationStatusChangeEvent(generationRecord));
     }
 
     /**

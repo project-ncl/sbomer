@@ -17,11 +17,11 @@
  */
 package org.jboss.sbomer.service.nextgen.core.events;
 
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 
 /**
- * An event fired after a particular {@link EventRecord} has been created.
+ * Event fired after any status change of a generation.
  */
-public record EventCreatedEvent(EventRecord event) {
+public record GenerationStatusChangeEvent(GenerationRecord generation) {
 
 }

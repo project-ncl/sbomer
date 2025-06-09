@@ -15,31 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.generator.mapping;
+package org.jboss.sbomer.service.nextgen.service.config.mapping;
 
 import java.util.List;
 
-import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorConfigSpec;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 public record GeneratorsConfig(List<GeneratorProfile> generatorProfiles,
         List<DefaultGeneratorMappingEntry> defaultGeneratorMappings) {
-}
-
-/**
- * Defines the profile for a specific version of a generator.
- *
- * @param version the version of the Generator
- * @param supportedTargetTypes list of types supported by this profile
- * @param supportedFormats list of manifest formats supported by this specific generator.
- * @param schema the JSON Schema for the config that the given version of the Generator supports. It is used to validate
- *        user input.
- * @param defaultResources default resource configuration for given Generator version
- *
- */
-record GeneratorVersionProfile(String version, List<String> supportedTargetTypes, List<String> supportedFormats,
-        JsonNode schema, GeneratorConfigSpec defaultConfig) {
 }
 
 /**

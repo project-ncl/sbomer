@@ -15,13 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.events;
+package org.jboss.sbomer.service.nextgen.service.config.mapping;
 
 import java.util.List;
 
-import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
-// TODO: This should not contain content of the manifest, probably a dedicated DTO will be required
-public record ManifestStoredEvent(List<ManifestRecord> manifests) {
-
+/**
+ * Represents a single mapping from a content type to a list of preferred generators.
+ *
+ * @param type the type of the content to manifest, for example {@code CONTAINER_IMAGE} or {@code MAVEN_PROJECT}
+ * @param generators a list of generators that support given type. First in the list is the preferred generator.
+ */
+public record DefaultGeneratorMappingEntry(String targetType, @NotEmpty List<@NotBlank String> generators) {
 }

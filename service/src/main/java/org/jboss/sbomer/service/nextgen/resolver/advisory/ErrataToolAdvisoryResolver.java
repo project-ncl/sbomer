@@ -42,7 +42,6 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.Build;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
-import org.jboss.sbomer.service.nextgen.core.generator.mapping.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.ContextSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
@@ -78,17 +77,14 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
     SBOMerClient sbomerClient;
 
-    GeneratorConfigProvider generatorConfigProvider;
-
     @Inject
     public ErrataToolAdvisoryResolver(
             ManagedExecutor managedExecutor,
-            GeneratorConfigProvider generatorConfigProvider,
             @TracingRestClient ErrataClient errataClient,
             KojiProvider kojiProvider,
             @RestClient SBOMerClient sbomerClient) {
         super(managedExecutor);
-        this.generatorConfigProvider = generatorConfigProvider;
+
         this.errataClient = errataClient;
         this.kojiProvider = kojiProvider;
         this.sbomerClient = sbomerClient;

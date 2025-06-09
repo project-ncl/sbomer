@@ -45,8 +45,7 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
-import org.jboss.sbomer.service.nextgen.core.events.GenerationStateChangedEvent;
-import org.jboss.sbomer.service.nextgen.core.events.ManifestStoredEvent;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
@@ -104,7 +103,7 @@ public class SyftController extends AbstractTektonController {
 
     public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
         // Currently handling only container images
-        if (!event.isOfRequestType("CONTAINER_IMAGE")) {
+        if (!event.generation().isOfRequestType("CONTAINER_IMAGE")) {
             // This is not an event handled by this listener
             return;
         }
@@ -225,10 +224,6 @@ public class SyftController extends AbstractTektonController {
             return;
         }
 
-        // Send event
-        // TODO: This should be done by the service, after storing manifests
-        Arc.container().beanManager().getEvent().fire(new ManifestStoredEvent(manifests));
-
         try {
             // syftImageController.performPost(sboms); // TODO: add thios back
         } catch (ApplicationException e) {
@@ -243,7 +238,7 @@ public class SyftController extends AbstractTektonController {
                 "Generation finished successfully");
 
         // TODO: This should be done by the service, after updating the status
-        Arc.container().beanManager().getEvent().fire(new GenerationStateChangedEvent(generation));
+        Arc.container().beanManager().getEvent().fire(new GenerationStatusChangeEvent(generation));
     }
 
     private TaskRunStepOverride resourceOverrides(GenerationRequest request) {
