@@ -138,7 +138,8 @@ public class BrewRPMController extends AbstractController {
                         log.error("Generation failed, the TaskRun returned failure: {}", detailedFailureMessage);
 
                         // If we get return code 10 then its going to be related to unsupported
-                        if (getFirstFailedStepExitCode(generateTaskRun) != null && getFirstFailedStepExitCode(generateTaskRun) == 10) {
+                        if (getFirstFailedStepExitCode(generateTaskRun) != null
+                                && getFirstFailedStepExitCode(generateTaskRun) == 10) {
                             return updateRequest(
                                     generationRequest,
                                     SbomGenerationStatus.FAILED,
