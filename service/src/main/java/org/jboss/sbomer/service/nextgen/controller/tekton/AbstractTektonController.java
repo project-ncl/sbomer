@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller;
+package org.jboss.sbomer.service.nextgen.controller.tekton;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,22 +28,24 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.cyclonedx.model.Bom;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.NotFoundException;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
-import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
 import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStateChangedEvent;
+import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
+import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 import org.slf4j.helpers.MessageFormatter;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.knative.pkg.apis.Condition;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -58,7 +60,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @NoArgsConstructor
-public abstract class AbstractController implements Controller<GenerationRecord> {
+public abstract class AbstractTektonController implements TektonController<GenerationRecord> {
     protected KubernetesClient kubernetesClient;
 
     protected GenerationRequestControllerConfig controllerConfig;
@@ -70,49 +72,55 @@ public abstract class AbstractController implements Controller<GenerationRecord>
     EntityMapper mapper;
 
     @Inject
-    public AbstractController(
+    public AbstractTektonController(
             KubernetesClient kubernetesClient,
             GenerationRequestControllerConfig controllerConfig,
             ManagedExecutor managedExecutor,
             EntityMapper mapper) {
         this.kubernetesClient = kubernetesClient;
-        this.release = ConfigProvider.getConfig().getOptionalValue("SBOMER_RELEASE", String.class).orElse("sbomer");
+        this.release = ConfigUtils.getRelease();
         this.controllerConfig = controllerConfig;
         this.managedExecutor = managedExecutor;
         this.mapper = mapper;
     }
 
     @Override
-    public void reconcile(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
-        log.info("Reconciling {}", generation);
-        log.info("Related TaskRuns: {}", relatedTaskRuns.stream().map(tr -> tr.getMetadata().getName()).toList());
+    public void reconcile(GenerationRecord generationRecord, Set<TaskRun> relatedTaskRuns) {
+        log.info("Reconciling Generation {}", generationRecord);
+        log.debug("Related TaskRuns: {}", relatedTaskRuns.stream().map(tr -> tr.getMetadata().getName()).toList());
 
-        switch (generation.status()) {
+        switch (generationRecord.status()) {
             case NEW:
-                reconcileNew(generation, relatedTaskRuns);
+                reconcileNew(generationRecord, relatedTaskRuns);
                 break;
             case SCHEDULED:
-                reconcileScheduled(generation, relatedTaskRuns);
+                reconcileScheduled(generationRecord, relatedTaskRuns);
                 break;
             case GENERATING:
-                reconcileGenerating(generation, relatedTaskRuns);
+                reconcileGenerating(generationRecord, relatedTaskRuns);
                 break;
             case FINISHED:
-                reconcileFinished(generation, relatedTaskRuns);
+                reconcileFinished(generationRecord, relatedTaskRuns);
                 break;
             case FAILED:
-                reconcileFailed(generation, relatedTaskRuns);
+                reconcileFailed(generationRecord, relatedTaskRuns);
                 break;
             default:
                 break;
         }
 
-        Arc.container().beanManager().getEvent().fire(new GenerationStateChangedEvent(generation));
+        // TODO: This should be done only in the service, after updating its status via REST API
+        Arc.container().beanManager().getEvent().fire(new GenerationStateChangedEvent(generationRecord));
     }
 
+    /**
+     * Logic that should be performed when the status of the main resource is {@link GenerationStatus.GENERATING}.
+     *
+     * @see GenerationStatus
+     * @param generation
+     * @param relatedTaskRuns
+     */
     abstract protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns);
-
-    abstract protected TaskRun desired(GenerationRecord generation);
 
     void reconcileNew(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.NEW, generation.id());
@@ -255,35 +263,63 @@ public abstract class AbstractController implements Controller<GenerationRecord>
     }
 
     /**
-     * Reads manifests for given {@code manifestPaths} and converts them into {@link Bom}s.
+     * <p>
+     * Stores generated manifests in the database which results in creation of new {@link Manifest}s entities.
+     * </p>
      *
-     * @param manifestPaths List of {@link Path}s to manifests in JSON format.
-     * @return List of {@link Bom}s.
+     * TODO: This should use REST API instead of interacting with DB directly
+     *
+     * @param generation the generation request
+     * @param boms the BOMs to store
+     * @return the list of stored {@link Manifest}s
      */
-    public List<Bom> readManifests(List<Path> manifestPaths) {
-        List<Bom> boms = new ArrayList<>();
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public List<ManifestRecord> storeBoms(GenerationRecord generationRecord, List<JsonNode> boms) {
+        // TODO @avibelli
+        MDCUtils.removeOtelContext();
+        MDCUtils.addIdentifierContext(generationRecord.id());
+        // MDCUtils.addOtelContext(generation.getMDCOtel());
 
-        log.info("Reading {} manifests...", manifestPaths.size());
+        // TODO @avibelli
+        // Maybe we should add it later, when we will be transitioning this into a release manifest?
+        // Syft controller should be generic and not know anything about RH internals.
 
-        for (Path manifestPath : manifestPaths) {
-            log.debug("Reading manifest at path '{}'...", manifestPath);
+        // Verify if the request event for this generation is associated with an Errata advisory
+        // RequestEvent event = sbomGenerationRequest.getRequest();
+        // if (event != null && event.getRequestConfig() != null
+        // && event.getRequestConfig() instanceof ErrataAdvisoryRequestConfig config) {
 
-            // Read the generated SBOM JSON file
-            Bom bom = SbomUtils.fromPath(manifestPath);
+        // boms.forEach(bom -> {
+        // // Add the AdvisoryId property
+        // addPropertyIfMissing(
+        // bom.getMetadata(),
+        // Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+        // config.getAdvisoryId());
+        // });
+        // }
 
-            // If we couldn't read it, this is a fatal failure for us
-            if (bom == null) {
-                throw new ApplicationException("Could not read the manifest at '{}'", manifestPath.toAbsolutePath());
-            }
+        log.info("There are {} manifests to be stored for the {} generation...", boms.size(), generationRecord.id());
 
-            boms.add(bom);
+        // Find the Generation
+        Generation generation = Generation.findById(generationRecord.id());
+
+        if (generation == null) {
+            throw new ApplicationException("Unable to find Generation with ID '{}'", generationRecord.id());
         }
 
-        return boms;
+        List<Manifest> manifests = new ArrayList<>();
+
+        // Create Manifest entities for all manifests
+        boms.forEach(bom -> {
+            log.info("Storing manifests for the Generation '{}'", generationRecord.id());
+            manifests.add(Manifest.builder().withSbom(bom).withGeneration(generation).build().save());
+        });
+
+        return mapper.toManifestRecords(manifests);
     }
 
     /**
-     * Removes related to finished {@link GenerationRequest} and its instance as well.
+     * Removes TaskRuns related to finished {@link GenerationRecord} as well ass all files in the shared volume.
      *
      * @param generation the generation request
      */
@@ -326,6 +362,7 @@ public abstract class AbstractController implements Controller<GenerationRecord>
         });
     }
 
+    // TODO: This should be here, we should update the status of generation via REST API call
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     protected void updateStatus(
             GenerationRecord generationRecord,

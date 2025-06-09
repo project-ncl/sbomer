@@ -15,8 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.controller;
+package org.jboss.sbomer.service.nextgen.core.events;
 
-public interface Controller {
+import java.util.List;
+
+import org.jboss.sbomer.service.nextgen.core.dto.ManifestRecord;
+
+// TODO: This should not contain content of the manifest, probably a dedicated DTO will be required
+public record ManifestStoredEvent(List<ManifestRecord> manifests) {
 
 }

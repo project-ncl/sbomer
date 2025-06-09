@@ -20,9 +20,11 @@ package org.jboss.sbomer.service.nextgen.controller;
 import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.service.nextgen.core.dto.EntityMapper;
+import org.jboss.sbomer.service.nextgen.core.dto.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.generator.syft.SyftController;
-import org.jboss.sbomer.service.nextgen.service.model.Generation;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
@@ -34,20 +36,23 @@ import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j
-public class TaskRunEventHandler implements ResourceEventHandler<TaskRun> {
+public class GenerationTaskRunEventHandler implements ResourceEventHandler<TaskRun> {
 
     KubernetesClient kubernetesClient;
     SyftController generationController;
     EntityMapper mapper;
+    SBOMerClient sbomerClient;
 
     @Inject
-    public TaskRunEventHandler(
+    public GenerationTaskRunEventHandler(
             KubernetesClient kubernetesClient,
             SyftController generationController,
-            EntityMapper mapper) {
+            EntityMapper mapper,
+            @RestClient SBOMerClient sbomerClient) {
         this.kubernetesClient = kubernetesClient;
         this.generationController = generationController;
         this.mapper = mapper;
+        this.sbomerClient = sbomerClient;
     }
 
     @Override
@@ -65,42 +70,55 @@ public class TaskRunEventHandler implements ResourceEventHandler<TaskRun> {
     @Override
     public void onDelete(TaskRun taskRun, boolean deletedFinalStateUnknown) {
         log.info("{} TaskRun deleted", taskRun.getMetadata().getName());
+        // TODO: setting generation status? Potentially to FAILED state.
     }
 
     @ActivateRequestContext
     public void handle(TaskRun taskRun) {
         log.info("Handling TaskRun '{}'", taskRun.getMetadata().getName());
 
+        // Get Generation identifier from the TaskRun label
         String generationId = obtainGenerationId(taskRun);
 
+        // This TaskRun is not related to any Generation
         if (generationId == null) {
             log.warn(
-                    "TaskRun '{}' does not have required label: '{}', skipping",
+                    "TaskRun '{}' is not related to any generation, it does not have required label: '{}', skipping",
                     taskRun.getMetadata().getName(),
                     TaskRunEventProvider.GENERATION_ID_LABEL);
             return;
         }
 
-        // Find the Generation
-        Generation generation = Generation.findById(generationId);
+        GenerationRecord generationRecord = null;
 
-        if (generation == null) {
-            // TODO: delete TR?
-            log.warn("Unable to find Generation with ID '{}', skipping", generationId);
+        // Fetch Generation from the API
+        try {
+            generationRecord = sbomerClient.getGenerationById(generationId);
+        } catch (Exception e) {
+            log.warn("Unable to fetch Generation with ID '{}', skipping", generationId, e);
             return;
         }
 
         log.debug("Finding TaskRuns related to Generation '{}'", generationId);
 
+        // Find all TaskRuns that are related to this generation.
         List<TaskRun> relatedTaskRuns = kubernetesClient.resources(TaskRun.class)
                 .withLabel(TaskRunEventProvider.GENERATION_ID_LABEL, generationId)
                 .list()
                 .getItems();
 
         // Reconcile
-        generationController.reconcile(mapper.toRecord(generation), new HashSet<>(relatedTaskRuns));
+        generationController.reconcile(generationRecord, new HashSet<>(relatedTaskRuns));
     }
 
+    /**
+     * Read the Generation identifier from the TaskRun label {@link TaskRunEventProvider.GENERATION_ID_LABEL}.
+     * 
+     * It will return {@code null} in case the label cannot be found.
+     * 
+     * @param taskRun
+     * @return The Generation identifier.
+     */
     private String obtainGenerationId(TaskRun taskRun) {
         if (taskRun.getMetadata() == null || taskRun.getMetadata().getLabels() == null) {
             log.info(
