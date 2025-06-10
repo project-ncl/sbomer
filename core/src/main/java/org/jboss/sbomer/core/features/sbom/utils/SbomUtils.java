@@ -600,15 +600,15 @@ public class SbomUtils {
             if (bom.getDependencies() != null) {
                 List<Dependency> updatedDependencies = new ArrayList<>(bom.getDependencies().size());
                 for (Dependency dependency : bom.getDependencies()) {
-                    updateDependencyRef(dependency, oldRef, newRef);
-                    updatedDependencies.add(dependency);
+                    Dependency updatedDependency = updateDependencyRef(dependency, oldRef, newRef);
+                    updatedDependencies.add(updatedDependency);
                 }
                 bom.setDependencies(updatedDependencies);
             }
         }
     }
 
-    public static void updateDependencyRef(Dependency dependency, String oldRef, String newRef) {
+    public static Dependency updateDependencyRef(Dependency dependency, String oldRef, String newRef) {
         // If the current dependency has the oldRef, replace it with newRef
         if (dependency.getRef().equals(oldRef)) {
             Dependency updatedDependency = new Dependency(newRef);
@@ -621,39 +621,58 @@ public class SbomUtils {
 
         // Recursively update sub-dependencies
         if (dependency.getDependencies() != null) {
+            List<Dependency> subDependencies = new ArrayList<>(dependency.getDependencies().size());
             for (Dependency subDependency : dependency.getDependencies()) {
-                updateDependencyRef(subDependency, oldRef, newRef);
+                Dependency updatedSubDependency = updateDependencyRef(subDependency, oldRef, newRef);
+                subDependencies.add(updatedSubDependency);
             }
+            dependency.setDependencies(subDependencies);
         }
 
         // Recursively update provided dependencies
         if (dependency.getProvides() != null) {
+            List<Dependency> subProvides = new ArrayList<>(dependency.getProvides().size());
             for (Dependency subProvide : dependency.getProvides()) {
-                updateDependencyRef(subProvide, oldRef, newRef);
+                Dependency updatedSubProvide = updateDependencyRef(subProvide, oldRef, newRef);
+                subProvides.add(updatedSubProvide);
             }
+            dependency.setProvides(subProvides);
         }
+
+        return dependency;
     }
 
-    public static Dependency updateDependencyRef(Dependency dependency, String newRef) {
-        // If the current dependency has the oldRef, replace it with newRef
-        Dependency updatedDependency = new Dependency(newRef);
-        updatedDependency.setDependencies(dependency.getDependencies());
-        updatedDependency.setProvides(dependency.getProvides());
+    public static Dependency updateDependencyRef(Dependency dependency, Pattern pattern, String newRef) {
+        // If the current dependency ref matches pattern, replace it with newRef
+        if (pattern.matcher(dependency.getRef()).matches()) {
+            Dependency updatedDependency = new Dependency(newRef);
+            updatedDependency.setDependencies(dependency.getDependencies());
+            updatedDependency.setProvides(dependency.getProvides());
+
+            // Replace the old dependency with the updated one
+            dependency = updatedDependency;
+        }
 
         // Recursively update sub-dependencies
-        if (updatedDependency.getDependencies() != null) {
-            for (Dependency subDependency : updatedDependency.getDependencies()) {
-                updateDependencyRef(subDependency, newRef);
+        if (dependency.getDependencies() != null) {
+            List<Dependency> subDependencies = new ArrayList<>(dependency.getDependencies().size());
+            for (Dependency subDependency : dependency.getDependencies()) {
+                Dependency updatedSubDependency = updateDependencyRef(subDependency, pattern, newRef);
+                subDependencies.add(updatedSubDependency);
             }
+            dependency.setDependencies(subDependencies);
         }
 
         // Recursively update provided dependencies
-        if (updatedDependency.getProvides() != null) {
-            for (Dependency subProvide : updatedDependency.getProvides()) {
-                updateDependencyRef(subProvide, newRef);
+        if (dependency.getProvides() != null) {
+            List<Dependency> subProvides = new ArrayList<>(dependency.getProvides().size());
+            for (Dependency subProvide : dependency.getProvides()) {
+                Dependency updatedSubProvide = updateDependencyRef(subProvide, pattern, newRef);
+                subProvides.add(updatedSubProvide);
             }
+            dependency.setProvides(subProvides);
         }
-        return updatedDependency;
+        return dependency;
     }
 
     public static ToolInformation createToolInformation(String version) {
