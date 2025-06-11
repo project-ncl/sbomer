@@ -16,12 +16,12 @@
 /// limitations under the License.
 ///
 
-import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
+import { DefaultSbomerApiV2 } from 'src/appV2/api/DefaultSbomerApiV2';
 
 export function useGenerationRequests(initialPage: number, intialPageSize: number) {
-  const sbomerApi = DefaultSbomerApi.getInstance();
+  const sbomerApi = DefaultSbomerApiV2.getInstance();
   const [total, setTotal] = useState(0);
   const [pageIndex, setPageIndex] = useState(initialPage || 0);
   const [pageSize, setPageSize] = useState(intialPageSize || 10);

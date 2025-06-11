@@ -1,8 +1,8 @@
-import { RequestEventTable } from '@app/components/RequestEventTable/RequestEventTable';
-import { useDocumentTitle } from '@app/utils/useDocumentTitle';
+import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
+import { RequestEventTable } from '@appV2/components/RequestEventTable/RequestEventTable';
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 import * as React from 'react';
-import { AppLayout } from '../AppLayout/AppLayout';
 
 export function RequestEventsPage() {
   useDocumentTitle('SBOMer | Request Events');

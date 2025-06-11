@@ -16,8 +16,8 @@
 /// limitations under the License.
 ///
 
-import { RequestsQueryType } from '@app/types';
-import { isRequestsQueryType } from '@app/utils/Utils';
+import { RequestsQueryType } from '@appV2/types';
+import { isRequestsQueryType } from '@appV2/utils/Utils';
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 

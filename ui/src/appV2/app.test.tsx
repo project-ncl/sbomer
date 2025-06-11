@@ -1,5 +1,5 @@
 import * as React from 'react';
-import App from '@app/index';
+import App from '@appV2/index';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';

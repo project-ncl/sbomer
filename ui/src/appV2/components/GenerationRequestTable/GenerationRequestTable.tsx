@@ -1,4 +1,4 @@
-import { statusToColor, statusToDescription, timestampToHumanReadable, typeToDescription } from '@app/utils/Utils';
+import { statusToColor, statusToDescription, timestampToHumanReadable, typeToDescription } from '@appV2/utils/Utils';
 import {
   Label,
   Pagination,
@@ -12,9 +12,10 @@ import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-tabl
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
-import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
-import { useGenerationRequests } from './useGenerationRequests';
-import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
+
+import { useGenerationRequests } from '@appV2/components/GenerationRequestTable/useGenerationRequests';
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 
 const columnNames = {
   id: 'ID',

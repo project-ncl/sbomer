@@ -16,8 +16,8 @@
 /// limitations under the License.
 ///
 
-import { ManifestsQueryType } from '@app/types';
-import { isManifestsQueryType } from '@app/utils/Utils';
+import { ManifestsQueryType } from '@appV2/types';
+import { isManifestsQueryType } from '@appV2/utils/Utils';
 
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';

@@ -16,13 +16,14 @@
 /// limitations under the License.
 ///
 
-import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
-import { SbomerGeneration } from '@app/types';
+import { SbomerGeneration } from '@appV2/types';
+import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useCallback } from 'react';
 import { useAsync, useAsyncRetry } from 'react-use';
 
+
 export function useGenerationRequestManifests(id: string) {
-  const sbomerApi = DefaultSbomerApi.getInstance();
+  const sbomerApi = DefaultSbomerApiV2.getInstance();
   const getManifests = useCallback(
     async (id: string) => {
       try {

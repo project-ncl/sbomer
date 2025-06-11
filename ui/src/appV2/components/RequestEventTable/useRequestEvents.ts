@@ -16,14 +16,15 @@
 /// limitations under the License.
 ///
 
-import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
-import { RequestsQueryType } from '@app/types';
+import { useRequestEventsFilters } from '@appV2/components/RequestEventTable/useRequestEventsFilters';
+import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
+import { RequestsQueryType } from '@appV2/types';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
-import { useRequestEventsFilters } from './useRequestEventsFilters';
+
 
 export function useRequestEvents() {
-  const sbomerApi = DefaultSbomerApi.getInstance();
+  const sbomerApi = DefaultSbomerApiV2.getInstance();
   const [total, setTotal] = useState(0);
 
   const { queryType, queryValue, pageIndex, pageSize } = useRequestEventsFilters();

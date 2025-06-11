@@ -1,5 +1,6 @@
-import { useDocumentTitle } from '@app/utils/useDocumentTitle';
-import { typeToDescription } from '@app/utils/Utils';
+import { useManifest } from '@appV2/components/Pages/Manifests/useManifest';
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { typeToDescription } from '@appV2/utils/Utils';
 import {
   ActionList,
   ActionListItem,
@@ -33,7 +34,7 @@ import { CopyIcon, DownloadIcon, ExternalLinkSquareAltIcon, InfoIcon } from '@pa
 import * as React from 'react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useManifest } from './useManifest';
+
 
 const ManifestPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();
