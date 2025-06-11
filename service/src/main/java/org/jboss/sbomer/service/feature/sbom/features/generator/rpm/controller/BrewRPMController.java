@@ -79,6 +79,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BrewRPMController extends AbstractController {
 
+    private static Integer UNSUPPORTED_EXIT_CODE = 10;
+
     @Override
     protected GenerationRequestType generationRequestType() {
         return GenerationRequestType.BREW_RPM;
@@ -138,8 +140,7 @@ public class BrewRPMController extends AbstractController {
                         log.error("Generation failed, the TaskRun returned failure: {}", detailedFailureMessage);
 
                         // If we get return code 10 then its going to be related to unsupported
-                        if (getFirstFailedStepExitCode(generateTaskRun) != null
-                                && getFirstFailedStepExitCode(generateTaskRun) == 10) {
+                        if (UNSUPPORTED_EXIT_CODE.equals(getFirstFailedStepExitCode(generateTaskRun))) {
                             return updateRequest(
                                     generationRequest,
                                     SbomGenerationStatus.FAILED,
