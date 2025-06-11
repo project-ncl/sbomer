@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Switcher from "./Switcher";
+import Switcher from "./AppSwitcherWrapper";
 
 
 if (process.env.NODE_ENV !== "production") {
