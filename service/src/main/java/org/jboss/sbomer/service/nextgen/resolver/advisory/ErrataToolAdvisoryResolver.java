@@ -59,11 +59,9 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
 import io.smallrye.faulttolerance.api.BeforeRetry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
-@NoArgsConstructor
 @Slf4j
 public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
@@ -77,12 +75,16 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
     SBOMerClient sbomerClient;
 
+    private ErrataToolAdvisoryResolver() {
+        super(null);
+    }
+
     @Inject
     public ErrataToolAdvisoryResolver(
             ManagedExecutor managedExecutor,
             @TracingRestClient ErrataClient errataClient,
             KojiProvider kojiProvider,
-            @TracingRestClient SBOMerClient sbomerClient) {
+            @RestClient SBOMerClient sbomerClient) {
         super(managedExecutor);
 
         this.errataClient = errataClient;

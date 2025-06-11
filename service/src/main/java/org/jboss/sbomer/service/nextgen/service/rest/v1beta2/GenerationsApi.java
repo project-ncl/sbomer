@@ -33,9 +33,9 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResponse;
-import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.config.GeneratorConfigProvider;
@@ -200,7 +200,7 @@ public class GenerationsApi {
     }
 
     @PATCH
-    @Path("/{generationId}")
+    @Path("/{generationId}/status")
     @Operation(summary = "Update progress of a generation task (Worker only)")
     @APIResponse(
             responseCode = "200",
@@ -212,7 +212,7 @@ public class GenerationsApi {
     @Transactional
     public Response updateGenerationProgress(
             @PathParam("generationId") String generationId,
-            @NotNull @Valid UpdatePayload payload) {
+            @NotNull @Valid GenerationStatusUpdatePayload payload) {
 
         Generation generation = Generation.findById(generationId); // NOSONAR
 
@@ -220,10 +220,8 @@ public class GenerationsApi {
             throw new NotFoundException("Generation request with id '{}' could not be found", generationId);
         }
 
-        // TODO: I think we may want to take a GenerationRecord as the payload and update every non-null field
-        // TODO: Will we use the same endpoint to publish manifests? Or maybe a dedicated one? POST @Path("/{generationId}/manifests") ?
-
         generation.setStatus(payload.status());
+        generation.setResult(payload.result());
         generation.setReason(payload.reason());
         generation.save();
 
