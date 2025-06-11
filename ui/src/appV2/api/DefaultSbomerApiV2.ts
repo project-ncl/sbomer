@@ -32,14 +32,14 @@ type Options = {
   baseUrl: string;
 };
 
-export class DefaultSbomerApi implements SbomerApi {
+export class DefaultSbomerApiV2 implements SbomerApi {
   private readonly baseUrl: string;
 
   private client: Axios;
-  private static _instance: DefaultSbomerApi;
+  private static _instance: DefaultSbomerApiV2;
 
   public static getInstance(): SbomerApi {
-    if (!DefaultSbomerApi._instance) {
+    if (!DefaultSbomerApiV2._instance) {
       var sbomerUrl = process.env.REACT_APP_SBOMER_URL;
 
       if (!sbomerUrl) {
@@ -52,10 +52,10 @@ export class DefaultSbomerApi implements SbomerApi {
         }
       }
 
-      DefaultSbomerApi._instance = new DefaultSbomerApi({ baseUrl: sbomerUrl });
+      DefaultSbomerApiV2._instance = new DefaultSbomerApiV2({ baseUrl: sbomerUrl });
     }
 
-    return DefaultSbomerApi._instance;
+    return DefaultSbomerApiV2._instance;
   }
 
   public getBaseUrl(): string {
@@ -95,7 +95,7 @@ export class DefaultSbomerApi implements SbomerApi {
     const queryFullString = `${isQueryInputInvalid ? '' : 'query='}${encodeURIComponent(queryStringValue)}${isQueryInputInvalid ? '' : '&'}`;
 
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/manifests?${queryFullString}pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta2/manifests?${queryFullString}pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -119,7 +119,7 @@ export class DefaultSbomerApi implements SbomerApi {
 
   async getManifestsForGeneration(generationId: string): Promise<{ data: SbomerManifest[]; total: number }> {
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/manifests?query=generation.id==${generationId}&pageSize=20&pageIndex=0`,
+      `${this.baseUrl}/api/v1beta2/manifests?query=generation.id==${generationId}&pageSize=20&pageIndex=0`,
     );
 
     if (response.status != 200) {
@@ -142,7 +142,7 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async getManifest(id: string): Promise<SbomerManifest> {
-    const request = await this.client.get<SbomerManifest>(`/api/v1beta1/manifests/${id}`).then((response) => {
+    const request = await this.client.get<SbomerManifest>(`/api/v1beta2/manifests/${id}`).then((response) => {
       return response.data as SbomerManifest;
     });
 
@@ -150,7 +150,7 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async getLogPaths(generationId: string): Promise<Array<string>> {
-    const response = await this.client.get(`/api/v1beta1/generations/${generationId}/logs`);
+    const response = await this.client.get(`/api/v1beta2/generations/${generationId}/logs`);
 
     if (response.status != 200) {
       throw new Error(
@@ -167,7 +167,7 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async stats(): Promise<SbomerStats> {
-    const response = await fetch(`${this.baseUrl}/api/v1beta1/stats`);
+    const response = await fetch(`${this.baseUrl}/api/v1beta2/stats`);
 
     if (response.status != 200) {
       const body = await response.text();
@@ -183,7 +183,7 @@ export class DefaultSbomerApi implements SbomerApi {
     pageIndex: number;
   }): Promise<{ data: SbomerGeneration[]; total: number }> {
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/generations?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta2/generations?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -208,7 +208,7 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async getGeneration(id: string): Promise<SbomerGeneration> {
-    const request = await this.client.get<SbomerGeneration>(`/api/v1beta1/generations/${id}`).then((response) => {
+    const request = await this.client.get<SbomerGeneration>(`/api/v1beta2/generations/${id}`).then((response) => {
       return response.data as SbomerGeneration;
     });
 
@@ -256,7 +256,7 @@ export class DefaultSbomerApi implements SbomerApi {
     const queryFullString = queryPrefix == '' ? '' : `${queryPrefix}=${query}`;
 
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta1/requests/${encodeURIComponent(queryFullString)}?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta2/requests/${encodeURIComponent(queryFullString)}?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -287,7 +287,7 @@ export class DefaultSbomerApi implements SbomerApi {
   }
 
   async getRequestEvent(id: string): Promise<SbomerRequestManifest> {
-    const request = await this.client.get<SbomerRequestManifest>(`/api/v1beta1/requests/id=${id}`).then((response) => {
+    const request = await this.client.get<SbomerRequestManifest>(`/api/v1beta2/requests/id=${id}`).then((response) => {
       return new SbomerRequestManifest(response.data[0]);
     });
 
@@ -303,7 +303,7 @@ export class DefaultSbomerApi implements SbomerApi {
     // Loop through pages until all content is retrieved
     while (true) {
       const response = await fetch(
-        `${this.baseUrl}/api/v1beta1/generations?query=request.id=eq=${id}&sort=creationTime=desc=&pageSize=${pageSize}&pageIndex=${pageIndex}`,
+        `${this.baseUrl}/api/v1beta2/generations?query=request.id=eq=${id}&sort=creationTime=desc=&pageSize=${pageSize}&pageIndex=${pageIndex}`,
       );
 
       if (response.status !== 200) {

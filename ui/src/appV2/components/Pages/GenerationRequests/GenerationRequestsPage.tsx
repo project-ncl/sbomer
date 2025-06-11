@@ -1,8 +1,8 @@
-import { GenerationRequestTable } from '@app/components/GenerationRequestTable/GenerationRequestTable';
-import { useDocumentTitle } from '@app/utils/useDocumentTitle';
+import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
+import { GenerationRequestTable } from '@appV2/components/GenerationRequestTable/GenerationRequestTable';
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 import * as React from 'react';
-import { AppLayout } from '../AppLayout/AppLayout';
 
 export function GenerationRequestsPage() {
   useDocumentTitle('SBOMer | Generations');

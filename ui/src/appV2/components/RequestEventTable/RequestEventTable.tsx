@@ -1,4 +1,4 @@
-import { requestEventStatusToColor, requestEventStatusToDescription, timestampToHumanReadable } from '@app/utils/Utils';
+import { requestEventStatusToColor, requestEventStatusToDescription, timestampToHumanReadable } from '@appV2/utils/Utils';
 import {
   Label,
   Pagination,
@@ -23,11 +23,12 @@ import {
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
-import { useRequestEvents } from './useRequestEvents';
-import { RequestsQueryType } from '@app/types';
-import { useRequestEventsFilters } from './useRequestEventsFilters';
-import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
+import { RequestsQueryType } from '@appV2/types';
+import { useRequestEventsFilters } from '@appV2/components/RequestEventTable/useRequestEventsFilters';
+import { useRequestEvents } from '@appV2/components/RequestEventTable/useRequestEvents';
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
+
 
 const columnNames = {
   id: 'ID',

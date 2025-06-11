@@ -1,9 +1,9 @@
-import { AboutSection } from '@app/components/Sections/AboutSection/AboutSection';
-import { StatsSection } from '@app/components/Sections/StatsSection/StatsSection';
+import { AboutSection } from '@appV2/components/Sections/AboutSection/AboutSection';
+import { StatsSection } from '@appV2/components/Sections/StatsSection/StatsSection';
 import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 import * as React from 'react';
-import { AppLayout } from '../AppLayout/AppLayout';
-import { useDocumentTitle } from '@app/utils/useDocumentTitle';
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
 
 const Dashboard: React.FunctionComponent = () => {
 
@@ -15,7 +15,7 @@ const Dashboard: React.FunctionComponent = () => {
         <Grid hasGutter span={12}>
           <GridItem span={12}>
             <Title headingLevel="h1" size="4xl">
-              SBOMer
+              SBOMer Version 2.0
             </Title>
           </GridItem>
           <GridItem span={6}>

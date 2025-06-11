@@ -1,5 +1,5 @@
 import rhlogo from '../../../../assets/Logo-Red_Hat-A-Standard-RGB.svg';
-import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
+import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
 import {
   Brand,
   Button,
@@ -28,7 +28,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const Header = (
     <Masthead>
-      
+
       <MastheadMain><MastheadToggle>
         <Button icon={<BarsIcon />} variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation" />
       </MastheadToggle>

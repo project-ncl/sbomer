@@ -1,8 +1,8 @@
-import { ManifestsTable } from '@app/components/ManifestsTableTable/ManifestsTable';
+import { ManifestsTable } from '@appV2/components/ManifestsTableTable/ManifestsTable';
 import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 import * as React from 'react';
 import { AppLayout } from '../AppLayout/AppLayout';
-import { useDocumentTitle } from '@app/utils/useDocumentTitle';
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 
 const ManifestsPage: React.FunctionComponent = () => {
   useDocumentTitle('SBOMer | Manifests');

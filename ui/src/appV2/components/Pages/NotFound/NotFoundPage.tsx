@@ -1,8 +1,9 @@
+import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
 import { Button, EmptyState, EmptyStateBody, EmptyStateFooter, PageSection } from '@patternfly/react-core';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppLayout } from '../AppLayout/AppLayout';
+;
 
 const NotFoundPage: React.FunctionComponent = () => {
   function GoHomeBtn() {

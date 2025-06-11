@@ -1,4 +1,7 @@
-import { timestampToHumanReadable, typeToDescription } from '@app/utils/Utils';
+import { useManifests } from '@appV2/components/ManifestsTableTable/useSboms';
+import { useManifestsFilters } from '@appV2/components/ManifestsTableTable/useManifestsFilters';
+import { ManifestsQueryType } from '@appV2/types';
+import { timestampToHumanReadable, typeToDescription } from '@appV2/utils/Utils';
 import {
   Label,
   Pagination,
@@ -22,11 +25,9 @@ import {
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
-import { useManifests } from './useSboms';
-import { ManifestsQueryType } from '@app/types';
-import { useManifestsFilters } from './useManifestsFilters';
-import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
+
 
 const columnNames = {
   id: 'ID',

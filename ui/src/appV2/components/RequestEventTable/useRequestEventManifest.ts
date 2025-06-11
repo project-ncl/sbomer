@@ -16,12 +16,12 @@
 /// limitations under the License.
 ///
 
-import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
+import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useCallback } from 'react';
 import { useAsyncRetry } from 'react-use';
 
 export function useRequestEventManifest(id: string) {
-  const sbomerApi = DefaultSbomerApi.getInstance();
+  const sbomerApi = DefaultSbomerApiV2.getInstance();
   const getRequestEvent = useCallback(
     async (id: string) => {
       try {

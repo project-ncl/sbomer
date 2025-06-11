@@ -1,4 +1,5 @@
-import { requestEventStatusToColor, requestEventStatusToDescription, statusToColor, statusToDescription, typeToDescription, timestampToHumanReadable } from '@app/utils/Utils';
+import { useRequestEventManifest } from '@appV2/components/RequestEventTable/useRequestEventManifest';
+import { requestEventStatusToColor, requestEventStatusToDescription, statusToColor, statusToDescription, typeToDescription, timestampToHumanReadable } from '@appV2/utils/Utils';
 import {
   CodeBlock,
   CodeBlockCode,
@@ -22,9 +23,9 @@ import {
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
-import { useRequestEventManifest } from './useRequestEventManifest';
-import { useRequestEventGeneration } from './useRequestEventGeneration';
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import { useRequestEventGeneration } from '@appV2/components/RequestEventTable/useRequestEventGeneration';
+
 
 
 const columnNames = {

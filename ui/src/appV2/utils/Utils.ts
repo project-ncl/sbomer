@@ -16,7 +16,7 @@
 /// limitations under the License.
 ///
 
-import { ManifestsQueryType, RequestsQueryType, SbomerGeneration, SbomerRequest } from '@app/types';
+import { ManifestsQueryType, RequestsQueryType, SbomerGeneration, SbomerRequest } from '@appV2/types';
 import { Label } from '@patternfly/react-core';
 
 const GenerationRequestTypes = new Map<string, { description?: string }>([

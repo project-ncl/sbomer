@@ -1,6 +1,5 @@
-import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
-import { SbomerStats } from '@app/types';
-import { timestampToHumanReadable } from '@app/utils/Utils';
+import { SbomerStats } from '@appV2/types';
+import { timestampToHumanReadable } from '@appV2/utils/Utils';
 import {
   Card,
   CardBody,
@@ -17,6 +16,7 @@ import { InfoIcon } from '@patternfly/react-icons';
 import React, { useCallback } from 'react';
 import { ErrorSection } from '../ErrorSection/ErrorSection';
 import { useAsyncRetry } from 'react-use';
+import { DefaultSbomerApiV2 } from 'src/appV2/api/DefaultSbomerApiV2';
 
 const StatisticsContent = (props: { stats: SbomerStats }) => {
   return (
@@ -93,7 +93,7 @@ const StatisticsContent = (props: { stats: SbomerStats }) => {
 };
 
 export const StatsSection = () => {
-  const sbomerApi = DefaultSbomerApi.getInstance();
+  const sbomerApi = DefaultSbomerApiV2.getInstance();
 
   const getStats = useCallback(async () => {
     try {

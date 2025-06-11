@@ -1,8 +1,6 @@
-import { DefaultSbomerApi } from '@app/api/DefaultSbomerApi';
-import { useGenerationRequestsLogPaths } from '@app/components/GenerationRequestTable/useGenerationRequestsLogPaths';
-import { SbomerGeneration } from '@app/types';
-import { useDocumentTitle } from '@app/utils/useDocumentTitle';
-import { resultToDescription, statusToColor, statusToDescription, typeToDescription } from '@app/utils/Utils';
+
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { resultToDescription, statusToColor, statusToDescription, typeToDescription } from '@appV2/utils/Utils';
 import { LazyLog } from '@melloware/react-logviewer';
 import {
   Alert,
@@ -42,6 +40,8 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useGenerationRequest } from './useGenerationRequest';
 import { useGenerationRequestManifests } from './useGenerationRequestManifests';
+import { DefaultSbomerApiV2 } from 'src/appV2/api/DefaultSbomerApiV2';
+import { useGenerationRequestsLogPaths } from '../../GenerationRequestTable/useGenerationRequestsLogPaths';
 
 const Logs = ({ request }: { request: SbomerGeneration }) => {
   const [{ logPaths, loading, error }] = useGenerationRequestsLogPaths(request);
@@ -79,7 +79,7 @@ const Logs = ({ request }: { request: SbomerGeneration }) => {
               height="500"
               onLineContentClick={function noRefCheck() {}}
               selectableLines
-              url={`${DefaultSbomerApi.getInstance().getBaseUrl()}/api/v1beta1/generations/${request.id}/logs/${encodeURIComponent(logPath)}`}
+              url={`${DefaultSbomerApiV2.getInstance().getBaseUrl()}/api/v1beta2/generations/${request.id}/logs/${encodeURIComponent(logPath)}`}
             />
           </Tab>
         ))}
