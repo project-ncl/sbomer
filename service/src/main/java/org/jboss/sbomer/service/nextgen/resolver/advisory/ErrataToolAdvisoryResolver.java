@@ -82,7 +82,7 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
             ManagedExecutor managedExecutor,
             @TracingRestClient ErrataClient errataClient,
             KojiProvider kojiProvider,
-            @RestClient SBOMerClient sbomerClient) {
+            @TracingRestClient SBOMerClient sbomerClient) {
         super(managedExecutor);
 
         this.errataClient = errataClient;
@@ -104,39 +104,16 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
                 new ContextSpec(eventId, "SBOMER", null, null),
                 generationRequests);
 
-        scheduleGenerations(eventId, generationsRequest);
-    }
-
-    void scheduleGenerations(String eventId, GenerationsRequest generationsRequest) {
         log.info("Requesting new generations...");
 
-        // Event event = Event.findById(eventId);
+        GenerationsResponse generationResponse = sbomerClient.requestGenerations(generationsRequest);
 
-        // if (event == null) {
-        // log.warn("Event with id '{}' could not be found, cannot schedule generations", eventId);
-        // return;
-        // }
+        log.info(
+                "There were {} generations requested under event '{}'",
+                generationResponse.generations().size(),
+                generationResponse.event().id());
 
-        GenerationsResponse generations = sbomerClient.requestGenerations(generationsRequest);
-
-        // GenerationRequestSpec dummyRequestSpec = new GenerationRequestSpec(
-        // new TargetSpec("quay.io/pct-security/mequal:latest", "CONTAINER_IMAGE"),
-        // null);
-
-        // GenerationRequestSpec effectiveRequest = generatorConfigProvider.buildEffectiveRequest(dummyRequestSpec);
-
-        // // TODO: dummy
-        // Generation generation = Generation.builder()
-        // .withEvents(List.of(event))
-        // // Convert payload to JsonNode
-        // .withRequest(ObjectMapperUtils.toJsonNode(effectiveRequest))
-        // .withReason("Generation created by Errata Tool resolver")
-        // .build()
-        // .save();
-
-        // event.setStatus(EventStatus.RESOLVED);
-        // event.setReason("Event was successfully resolved");
-        // event.save();
+        log.info("Requested generations: {}", generationResponse.generations().stream().map(g -> g.id()).toList());
     }
 
     public List<GenerationRequestSpec> resolveAdvisory(String advisoryId) {

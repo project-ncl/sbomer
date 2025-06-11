@@ -23,7 +23,7 @@ import java.util.List;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
-import org.jboss.sbomer.service.nextgen.generator.syft.SyftController;
+import org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -39,14 +39,14 @@ import lombok.extern.slf4j.Slf4j;
 public class GenerationTaskRunEventHandler implements ResourceEventHandler<TaskRun> {
 
     KubernetesClient kubernetesClient;
-    SyftController generationController;
+    SyftGenerator generationController;
     EntityMapper mapper;
     SBOMerClient sbomerClient;
 
     @Inject
     public GenerationTaskRunEventHandler(
             KubernetesClient kubernetesClient,
-            SyftController generationController,
+            SyftGenerator generationController,
             EntityMapper mapper,
             @RestClient SBOMerClient sbomerClient) {
         this.kubernetesClient = kubernetesClient;
@@ -93,7 +93,7 @@ public class GenerationTaskRunEventHandler implements ResourceEventHandler<TaskR
 
         // Fetch Generation from the API
         try {
-            generationRecord = sbomerClient.getGenerationById(generationId);
+            generationRecord = sbomerClient.getGeneration(generationId);
         } catch (Exception e) {
             log.warn("Unable to fetch Generation with ID '{}', skipping", generationId, e);
             return;

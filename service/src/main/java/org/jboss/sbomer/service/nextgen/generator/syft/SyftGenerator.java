@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
@@ -40,12 +41,13 @@ import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.nextgen.controller.tekton.AbstractTektonController;
 import org.jboss.sbomer.service.nextgen.controller.tekton.GenerationTaskRunEventProvider;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
+import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
@@ -70,17 +72,13 @@ import io.fabric8.tekton.v1beta1.TaskRunStepOverrideBuilder;
 import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.event.TransactionPhase;
 import jakarta.inject.Inject;
 import jakarta.validation.ValidationException;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@ApplicationScoped
-@NoArgsConstructor
 @Slf4j
-public class SyftController extends AbstractTektonController {
+@ApplicationScoped
+public class SyftGenerator extends AbstractTektonController {
     public static final String PARAM_COMMAND_CONTAINER_IMAGE = "image";
     public static final String PARAM_COMMAND_TYPE = "type";
     public static final String PARAM_COMMAND_IDENTIFIER = "identifier";
@@ -92,25 +90,28 @@ public class SyftController extends AbstractTektonController {
 
     public static final String GENERATOR_NAME = "syft";
 
+    private SyftGenerator() {
+        super(null, null, null, null, null);
+    }
+
     @Inject
-    public SyftController(
+    public SyftGenerator(
+            @RestClient SBOMerClient sbomerClient,
             KubernetesClient kubernetesClient,
             GenerationRequestControllerConfig controllerConfig,
             ManagedExecutor managedExecutor,
             EntityMapper mapper) {
-        super(kubernetesClient, controllerConfig, managedExecutor, mapper);
+        super(sbomerClient, kubernetesClient, controllerConfig, managedExecutor, mapper);
     }
 
-    public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
-        // Currently handling only container images
-        if (!event.generation().isOfRequestType("CONTAINER_IMAGE")) {
-            // This is not an event handled by this listener
-            return;
-        }
+    @Override
+    public Set<String> getTypes() {
+        return Set.of("CONTAINER_IMAGE");
+    }
 
-        managedExecutor.runAsync(() -> {
-            reconcile(event.generation(), Collections.emptySet());
-        });
+    @Override
+    public void handle(EventRecord eventRecord, GenerationRecord generationRecord) {
+        reconcile(generationRecord, Collections.emptySet());
     }
 
     @Override
@@ -145,7 +146,7 @@ public class SyftController extends AbstractTektonController {
         if (!success) {
             String detailedFailureMessage = getDetailedFailureMessage(erroredTaskRun);
             updateStatus(
-                    generation,
+                    generation.id(),
                     GenerationStatus.FAILED,
                     GenerationResult.ERR_GENERAL,
                     "Generation failed, the TaskRun returned failure: {}",
@@ -167,7 +168,7 @@ public class SyftController extends AbstractTektonController {
             log.error("Unexpected IO exception occurred while trying to find generated manifests", e);
 
             updateStatus(
-                    generation,
+                    generation.id(),
                     GenerationStatus.FAILED,
                     GenerationResult.ERR_SYSTEM,
                     "Generation succeeded, but reading generated SBOMs failed due IO exception. See logs for more information.");
@@ -179,7 +180,7 @@ public class SyftController extends AbstractTektonController {
             log.error("No manifests found, this is unexpected");
 
             updateStatus(
-                    generation,
+                    generation.id(),
                     GenerationStatus.FAILED,
                     GenerationResult.ERR_SYSTEM,
                     "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.");
@@ -195,7 +196,7 @@ public class SyftController extends AbstractTektonController {
             log.error("Unable to read one or more manifests", e);
 
             updateStatus(
-                    generation,
+                    generation.id(),
                     GenerationStatus.FAILED,
                     GenerationResult.ERR_SYSTEM,
                     "Generation succeeded, but reading generated manifests failed was not successful. See logs for more information.");
@@ -215,7 +216,7 @@ public class SyftController extends AbstractTektonController {
             log.error("Unable to validate generated SBOMs: {}", e.getMessage(), e);
 
             updateStatus(
-                    generation,
+                    generation.id(),
                     GenerationStatus.FAILED,
                     GenerationResult.ERR_SYSTEM,
                     "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.",
@@ -227,12 +228,12 @@ public class SyftController extends AbstractTektonController {
         try {
             // syftImageController.performPost(sboms); // TODO: add thios back
         } catch (ApplicationException e) {
-            updateStatus(generation, GenerationStatus.FAILED, GenerationResult.ERR_POST, e.getMessage());
+            updateStatus(generation.id(), GenerationStatus.FAILED, GenerationResult.ERR_POST, e.getMessage());
             return;
         }
 
         updateStatus(
-                generation,
+                generation.id(),
                 GenerationStatus.FINISHED,
                 GenerationResult.SUCCESS,
                 "Generation finished successfully");
@@ -403,5 +404,4 @@ public class SyftController extends AbstractTektonController {
         }
         return taskRun;
     }
-
 }

@@ -34,7 +34,7 @@ import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
-import org.jboss.sbomer.service.nextgen.generator.syft.SyftController;
+import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.scheduler.GenerationSchedulerConfig;
 import org.slf4j.MDC;
@@ -68,8 +68,6 @@ public class GenerationEventSource {
 
     LeaderManager leaderManager;
 
-    SyftController generationController;
-
     EntityMapper mapper;
 
     String deploymentInfo;
@@ -79,15 +77,13 @@ public class GenerationEventSource {
             KubernetesClient kubernetesClient,
             GenerationSchedulerConfig generationSchedulerConfig,
             LeaderManager leaderManager,
-            SyftController generationController,
             EntityMapper mapper) {
         this.kubernetesClient = kubernetesClient;
         this.generationSchedulerConfig = generationSchedulerConfig;
         this.leaderManager = leaderManager;
-        this.generationController = generationController;
         this.mapper = mapper;
 
-        String release = ConfigProvider.getConfig().getOptionalValue("SBOMER_RELEASE", String.class).orElse("sbomer");
+        String release = ConfigUtils.getRelease();
         String deploymentTarget = ConfigProvider.getConfig()
                 .getOptionalValue("SBOMER_DEPLOYMENT_TARGET", String.class)
                 .orElse("local");

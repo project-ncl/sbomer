@@ -31,7 +31,6 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
@@ -221,8 +220,12 @@ public class GenerationsApi {
             throw new NotFoundException("Generation request with id '{}' could not be found", generationId);
         }
 
-        // TODO: handle other payload elements
-        generation.setStatus(GenerationStatus.GENERATING);
+        // TODO: I think we may want to take a GenerationRecord as the payload and update every non-null field
+        // TODO: Will we use the same endpoint to publish manifests? Or maybe a dedicated one? POST @Path("/{generationId}/manifests") ?
+
+        generation.setStatus(payload.status());
+        generation.setReason(payload.reason());
+        generation.save();
 
         return Response.ok(mapper.toRecord(generation)).build();
     }

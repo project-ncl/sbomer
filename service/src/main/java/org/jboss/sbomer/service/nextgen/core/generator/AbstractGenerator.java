@@ -18,69 +18,84 @@
 package org.jboss.sbomer.service.nextgen.core.generator;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
-import org.jboss.sbomer.service.nextgen.service.model.Generation;
-import org.slf4j.helpers.MessageFormatter;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
+import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
-import jakarta.transaction.Transactional;
-import jakarta.transaction.Transactional.TxType;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@NoArgsConstructor
 public abstract class AbstractGenerator implements Generator {
 
     ManagedExecutor managedExecutor;
+    protected SBOMerClient sbomerClient;
 
-    public AbstractGenerator(ManagedExecutor managedExecutor) {
+    public AbstractGenerator(SBOMerClient sbomerClient, ManagedExecutor managedExecutor) {
+        this.sbomerClient = sbomerClient;
         this.managedExecutor = managedExecutor;
     }
 
+    public abstract void handle(EventRecord event, GenerationRecord generation);
+
+    @Override
     public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
-        if (!event.generation().isOfRequestType(getType())) {
+        if (!event.generation().isSupported(getTypes())) {
             // This is not an event handled by this generator
             return;
         }
 
-        log.info("Handling new {} event with data: {}", getType(), event.generation());
+        log.info("Handling new generation with data: {}", event.generation());
 
         managedExecutor.runAsync(() -> {
             try {
-                updateGenerationStatus(event.generation().id(), GenerationStatus.GENERATING, "Generation started");
+                // updateGenerationStatus(event.generation().id(), GenerationStatus.GENERATING, "Generation started");
+
+                sbomerClient.updateGenerationStatus(
+                        event.generation().id(),
+                        UpdatePayload.of(GenerationStatus.GENERATING, "Generation started"));
+
                 handle(event.event(), event.generation());
             } catch (Exception e) {
                 log.error("Unable to generate", e);
 
-                updateGenerationStatus(
+                sbomerClient.updateGenerationStatus(
                         event.generation().id(),
-                        GenerationStatus.FAILED,
-                        "Generation failed, reason: {}",
-                        e.getMessage());
+                        UpdatePayload.of(GenerationStatus.FAILED, "Generation failed, reason: {}", e.getMessage()));
+
+                // sbomerClient.updateGenerationStatus(
+                // event.generation().id(),
+                // new UpdatePayload(
+                // GenerationStatus.FAILED,
+                // null,
+                // MessageFormatter.arrayFormat("Generation failed, reason: {}", newe.getMessage())
+                // .getMessage(),
+                // null));
+
+                // updateGenerationStatus(
+                // event.generation().id(),
+                // GenerationStatus.FAILED,
+                // "Generation failed, reason: {}",
+                // e.getMessage());
 
             }
         });
     }
 
-    @Transactional(value = TxType.REQUIRES_NEW)
-    protected void updateGenerationStatus(
+    protected void updateStatus(
             String generationId,
             GenerationStatus status,
+            GenerationResult result,
             String reason,
             Object... params) {
-        Generation generation = Generation.findById(generationId);
 
-        if (generation == null) {
-            log.warn("Generation with id '{}' could not be found, cannot update status", generationId);
-            return;
-        }
+        sbomerClient.updateGenerationStatus(generationId, UpdatePayload.of(status, reason, params));
 
-        generation.setStatus(status);
-        generation.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-        generation.save();
     }
 
 }

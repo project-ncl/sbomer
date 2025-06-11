@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.nextgen.controller;
 
-public interface Controller {
+import org.jboss.sbomer.service.nextgen.core.generator.Generator;
+
+public interface Controller extends Generator {
 
 }

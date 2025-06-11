@@ -19,43 +19,46 @@ package org.jboss.sbomer.service.nextgen.generator.rhrelease;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
+import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
-@NoArgsConstructor
 @Slf4j
 public class RedHatReleaseGenerator extends AbstractGenerator {
 
+    private RedHatReleaseGenerator() {
+        super(null, null);
+    }
+
     @Inject
-    public RedHatReleaseGenerator(ManagedExecutor managedExecutor) {
-        super(managedExecutor);
+    public RedHatReleaseGenerator(@RestClient SBOMerClient sbomerClient, ManagedExecutor managedExecutor) {
+        super(sbomerClient, managedExecutor);
     }
 
     @Override
-    public String getType() {
-        return "EVENT";
+    public Set<String> getTypes() {
+        return Set.of("EVENT");
     }
 
     @Override
-    @ActivateRequestContext
+    // @ActivateRequestContext
     public void handle(EventRecord e, GenerationRecord generationRecord) {
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generationRecord.request());
 
@@ -99,7 +102,7 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
         save(manifests, generationRecord.id());
     }
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    // @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     protected void save(List<Manifest> manifests, String generationId) {
         Generation generation = Generation.findById(generationId);
 

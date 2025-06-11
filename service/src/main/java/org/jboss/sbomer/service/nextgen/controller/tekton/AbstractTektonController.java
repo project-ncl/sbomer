@@ -30,20 +30,20 @@ import java.util.stream.Stream;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
-import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
+import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
+import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
-import org.slf4j.helpers.MessageFormatter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -53,34 +53,29 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
 import io.quarkus.arc.Arc;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@NoArgsConstructor
-public abstract class AbstractTektonController implements TektonController<GenerationRecord> {
+public abstract class AbstractTektonController extends AbstractGenerator implements TektonController<GenerationRecord> {
     protected KubernetesClient kubernetesClient;
 
     protected GenerationRequestControllerConfig controllerConfig;
 
     protected String release;
 
-    protected ManagedExecutor managedExecutor;
-
     EntityMapper mapper;
 
-    @Inject
     public AbstractTektonController(
+            SBOMerClient sbomerClient,
             KubernetesClient kubernetesClient,
             GenerationRequestControllerConfig controllerConfig,
             ManagedExecutor managedExecutor,
             EntityMapper mapper) {
+        super(sbomerClient, managedExecutor);
+
         this.kubernetesClient = kubernetesClient;
         this.release = ConfigUtils.getRelease();
         this.controllerConfig = controllerConfig;
-        this.managedExecutor = managedExecutor;
         this.mapper = mapper;
     }
 
@@ -132,16 +127,23 @@ public abstract class AbstractTektonController implements TektonController<Gener
     void reconcileScheduled(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.SCHEDULED, generation.id());
 
-        updateStatus(generation, GenerationStatus.GENERATING, null, "Generation is in progress");
+        sbomerClient.updateGenerationStatus(
+                generation.id(),
+                UpdatePayload.of(GenerationStatus.GENERATING, "Generation started"));
 
         try {
             kubernetesClient.resources(TaskRun.class).resource(desired(generation)).create();
         } catch (KubernetesClientException e) {
-            updateStatus(
-                    generation,
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Unable to schedule Tekton TaskRun: " + e.getMessage());
+
+            sbomerClient.updateGenerationStatus(
+                    generation.id(),
+                    UpdatePayload.of(GenerationStatus.FAILED, "Unable to schedule Tekton TaskRun: {}", e.getMessage()));
+
+            // updateStatus(
+            // generation,
+            // GenerationStatus.FAILED,
+            // GenerationResult.ERR_SYSTEM,
+            // "Unable to schedule Tekton TaskRun: " + e.getMessage());
         }
     }
 
@@ -273,7 +275,7 @@ public abstract class AbstractTektonController implements TektonController<Gener
      * @param boms the BOMs to store
      * @return the list of stored {@link Manifest}s
      */
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    // @Transactional(Transactional.TxType.REQUIRES_NEW)
     public List<ManifestRecord> storeBoms(GenerationRecord generationRecord, List<JsonNode> boms) {
         // TODO @avibelli
         MDCUtils.removeOtelContext();
@@ -362,26 +364,26 @@ public abstract class AbstractTektonController implements TektonController<Gener
         });
     }
 
-    // TODO: This should be here, we should update the status of generation via REST API call
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
-    protected void updateStatus(
-            GenerationRecord generationRecord,
-            GenerationStatus status,
-            GenerationResult result,
-            String reason,
-            Object... params) {
+    // // TODO: This should be here, we should update the status of generation via REST API call
+    // @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    // protected void updateStatus(
+    // GenerationRecord generationRecord,
+    // GenerationStatus status,
+    // GenerationResult result,
+    // String reason,
+    // Object... params) {
 
-        Generation generation = Generation.findById(generationRecord.id());
+    // Generation generation = Generation.findById(generationRecord.id());
 
-        if (generation == null) {
-            throw new NotFoundException("Generation request with id '{}' could not be found", generationRecord.id());
-        }
+    // if (generation == null) {
+    // throw new NotFoundException("Generation request with id '{}' could not be found", generationRecord.id());
+    // }
 
-        String reasonContent = MessageFormatter.arrayFormat(reason, params).getMessage();
+    // String reasonContent = MessageFormatter.arrayFormat(reason, params).getMessage();
 
-        generation.setStatus(status);
-        generation.setReason(reasonContent);
-        generation.setResult(result);
-        generation.save();
-    }
+    // generation.setStatus(status);
+    // generation.setReason(reasonContent);
+    // generation.setResult(result);
+    // generation.save();
+    // }
 }
