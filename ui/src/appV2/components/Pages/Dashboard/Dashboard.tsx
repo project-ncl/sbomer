@@ -15,7 +15,7 @@ const Dashboard: React.FunctionComponent = () => {
         <Grid hasGutter span={12}>
           <GridItem span={12}>
             <Title headingLevel="h1" size="4xl">
-              SBOMer Version 2.0
+              SBOMer
             </Title>
           </GridItem>
           <GridItem span={6}>

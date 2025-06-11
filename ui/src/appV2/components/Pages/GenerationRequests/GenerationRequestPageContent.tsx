@@ -42,6 +42,7 @@ import { useGenerationRequest } from './useGenerationRequest';
 import { useGenerationRequestManifests } from './useGenerationRequestManifests';
 import { DefaultSbomerApiV2 } from 'src/appV2/api/DefaultSbomerApiV2';
 import { useGenerationRequestsLogPaths } from '../../GenerationRequestTable/useGenerationRequestsLogPaths';
+import { SbomerGeneration } from '@appV2/types';
 
 const Logs = ({ request }: { request: SbomerGeneration }) => {
   const [{ logPaths, loading, error }] = useGenerationRequestsLogPaths(request);

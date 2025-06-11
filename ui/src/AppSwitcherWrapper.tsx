@@ -4,7 +4,7 @@ import AppV2 from './appV2/index';
 import { Button } from '@patternfly/react-core';
 
 const AppSwitcherWrapper = () => {
-  const [useV2, setUseV2] = useState(true);
+  const [useV2, setUseV2] = useState(false);
 
   return (
     <>
@@ -25,7 +25,7 @@ const AppSwitcherWrapper = () => {
         }}
       >
         <span style={{ fontSize: '0.9rem', color: '#333', fontWeight: 'bold' }}>
-          {useV2 ? 'App V2' : 'App V1'}
+          Now using {useV2 ? 'UI for API v1beta2' : 'UI for API v1beta1'}
         </span>
         <Button
           variant="primary"
@@ -35,7 +35,7 @@ const AppSwitcherWrapper = () => {
             minWidth: '100px',
           }}
         >
-          Switch to {useV2 ? 'App V1' : 'App V2'}
+          Switch to {useV2 ? 'UI for v1beta1' : 'UI for v1beta2'}
         </Button>
       </div>
       {useV2 ? <AppV2 /> : <App />}
