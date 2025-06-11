@@ -7,16 +7,13 @@ import { IAppRoute, routes } from './routes';
 
 const AppV2 = () => {
   return (
-    <>
-      <h1>This is App V2</h1>
-      <RouterProvider
-        router={createBrowserRouter(
-          routes
-            .filter((route) => !route.routes)
-            .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
-        )}
-      />
-    </>
+    <RouterProvider
+      router={createBrowserRouter(
+        routes
+          .filter((route) => !route.routes)
+          .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
+      )}
+    />
   );
 };
 

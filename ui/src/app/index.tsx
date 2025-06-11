@@ -9,16 +9,13 @@ import { IAppRoute, routes } from './routes';
 const App = () => {
   return (
 
-    <div>
-      <h1>This is App V1</h1>
-      <RouterProvider
-        router={createBrowserRouter(
-          routes
-            .filter((route) => !route.routes)
-            .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
-        )}
-      />
-    </div>
+    <RouterProvider
+      router={createBrowserRouter(
+        routes
+          .filter((route) => !route.routes)
+          .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
+      )}
+    />
   );
 };
 
