@@ -21,9 +21,6 @@ const Dashboard: React.FunctionComponent = () => {
           <GridItem span={6}>
             <AboutSection />
           </GridItem>
-          <GridItem span={6}>
-            <StatsSection />
-          </GridItem>
         </Grid>
       </PageSection>
     </AppLayout>
