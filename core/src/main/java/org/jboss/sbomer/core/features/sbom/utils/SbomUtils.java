@@ -384,11 +384,15 @@ public class SbomUtils {
                             License license = new License();
                             license.setId(licenseInfo.getSpdxLicenseId());
                             license.setAcknowledgement(EVIDENCE_LICENSE_ACKNOWLEDGEMENT);
-                            List<Property> properties = new ArrayList<>();
-                            Property sourceProperty = new Property();
-                            sourceProperty.setName("sourceUrl");
-                            sourceProperty.setValue(licenseInfo.getSourceUrl());
-                            properties.add(sourceProperty);
+                            String sourceUrl = licenseInfo.getSourceUrl();
+
+                            if (!Strings.isEmpty(sourceUrl)) {
+                                Property sourceProperty = new Property();
+                                sourceProperty.setName("sourceUrl");
+                                sourceProperty.setValue(sourceUrl);
+                                license.setProperties(List.of(sourceProperty));
+                            }
+
                             String url = licenseInfo.getUrl();
                             Optional<URI> optionalURI = getNormalizedUrl(url);
 
@@ -401,7 +405,6 @@ public class SbomUtils {
                                 }
                             }
 
-                            license.setProperties(properties);
                             return license;
                         })
                         .toList());
