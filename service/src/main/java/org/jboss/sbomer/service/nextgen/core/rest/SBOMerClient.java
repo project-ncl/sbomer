@@ -21,12 +21,14 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResponse;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
 import org.jboss.sbomer.service.rest.otel.SpanName;
 import org.jboss.sbomer.service.rest.otel.Traced;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -54,5 +56,11 @@ public interface SBOMerClient {
     @SpanName("sbomer.generations.get.id")
     @GET
     @Path("/generations/{generationId}")
-    GenerationRecord getGenerationById(@PathParam("generationId") String generationId);
+    GenerationRecord getGeneration(@PathParam("generationId") String generationId);
+
+    @Traced
+    @SpanName("sbomer.generations.get.id")
+    @PATCH
+    @Path("/generations/{generationId}")
+    GenerationRecord updateGenerationStatus(@PathParam("generationId") String generationId, UpdatePayload payload);
 }

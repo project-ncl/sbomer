@@ -75,6 +75,7 @@ public class ManagementApi {
     public List<String> listResolvers() {
 
         // TODO: dummy
+        // TODO: probably will not be used
         return List.of("et-advisory");
     }
 

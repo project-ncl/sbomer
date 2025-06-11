@@ -19,6 +19,9 @@ package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
 import java.util.List;
 
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.slf4j.helpers.MessageFormatter;
+
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -29,11 +32,17 @@ import jakarta.validation.constraints.NotNull;
  * <p>
  * This endpoint is used only by workers (generators).
  * </p>
+ * 
+ * TODO: This probably should not exist and we should send the full FenerationRecord, manifests should be handled in a different call maybe
  *
  * @param status The status identifier.
  * @param result A programmatic result information.
  * @param reason A human-readable description of the current status.
  * @param manifests List of manifest identifiers.
  */
-public record UpdatePayload(@NotNull String status, String result, String reason, List<String> manifests) {
+public record UpdatePayload(@NotNull GenerationStatus status, String result, String reason, List<String> manifests) {
+
+    public static UpdatePayload of(GenerationStatus status, String reason, Object... params) {
+        return new UpdatePayload(status, null, MessageFormatter.arrayFormat(reason, params).getMessage(), null);
+    }
 }

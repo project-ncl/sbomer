@@ -20,7 +20,6 @@ package org.jboss.sbomer.service.nextgen.service.config;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -29,6 +28,7 @@ import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersionConfigSpec;
+import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.DefaultGeneratorMappingEntry;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorProfile;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorVersionProfile;
@@ -57,9 +57,7 @@ public class GeneratorConfigProvider {
     @Inject
     public GeneratorConfigProvider(KubernetesClient kubernetesClient) {
         this.kubernetesClient = kubernetesClient;
-        this.sbomerReleaseName = ConfigProvider.getConfig()
-                .getOptionalValue("SBOMER_RELEASE", String.class)
-                .orElse("sbomer");
+        this.sbomerReleaseName = ConfigUtils.getRelease();
     }
 
     public List<GeneratorProfile> getGeneratorProfiles() {

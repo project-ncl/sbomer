@@ -17,13 +17,24 @@
  */
 package org.jboss.sbomer.service.nextgen.core.generator;
 
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import java.util.Set;
+
+import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
+
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.TransactionPhase;
 
 public interface Generator {
-    public static final String KEY_WORKER = "worker";
+    /**
+     * A set of supported target deliverable types.
+     */
+    Set<String> getTypes();
 
-    String getType();
-
-    public void handle(EventRecord event, GenerationRecord generation);
+    /**
+     * Main entrypoint for requesting the generation. It will receive many events. We need to react only to the ones
+     * that we can handle by filtering supported types.
+     *
+     * @param event
+     */
+    void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event);
 }
