@@ -30,12 +30,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.cyclonedx.model.Ancestors;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Component.Type;
@@ -44,6 +46,7 @@ import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
 import org.cyclonedx.model.Metadata;
+import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
@@ -59,12 +62,15 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 
 class SbomUtilsTest {
-
     static Path sbomPath(String fileName) {
         return Paths.get("src", "test", "resources", "sboms", fileName);
     }
@@ -207,30 +213,39 @@ class SbomUtilsTest {
             assertEquals(Optional.empty(), SbomUtils.findPropertyWithNameInComponent("blah", component));
         }
 
-        @Test
-        void shouldHandleRegularProtocolUrlsForPedigrees() {
+        @ParameterizedTest
+        @ValueSource(
+                strings = { "https://github.com/FasterXML/jackson-annotations.git",
+                        "git@github.com:FasterXML/jackson-annotations.git",
+                        "git+https://github.com/FasterXML/jackson-annotations.git",
+                        "https://github.com/FasterXML/jackson-annotations.git#2.18.3" })
+        void shouldHandleProtocolUrlsForPedigrees(String url) throws MalformedPackageURLException {
+            URI uri = SbomUtils.fixGitUrl(url).orElseThrow();
+            Type type = Type.LIBRARY;
+            String name = "jackson-annotations";
+            String version = "2.18.3";
+            String uid = "aaabbbcccdddeee";
+            String purl = "pkg:generic/FasterXML/jackson-annotations@aaabbbcccdddeee?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2FFasterXML%2Fjackson-annotations.git";
+            String rawFragment = uri.getRawFragment();
+            String expectedPurl = rawFragment != null ? String.join("", purl, "%23" + rawFragment, "#" + rawFragment)
+                    : purl;
             Component component = new Component();
-            SbomUtils.addPedigreeCommit(
-                    component,
-                    "https://github.com/FasterXML/jackson-annotations.git",
-                    "aaabbbcccdddeee");
-
-            assertEquals(
-                    "https://github.com/FasterXML/jackson-annotations.git",
-                    component.getPedigree().getCommits().get(0).getUrl());
-        }
-
-        @Test
-        void shouldHandleGitProtocolUrlsForPedigrees() {
-            Component component = new Component();
-            SbomUtils.addPedigreeCommit(
-                    component,
-                    "git@github.com:FasterXML/jackson-annotations.git",
-                    "aaabbbcccdddeee");
-
-            assertEquals(
-                    "https://github.com/FasterXML/jackson-annotations.git",
-                    component.getPedigree().getCommits().get(0).getUrl());
+            component.setType(type);
+            component.setName(name);
+            component.setVersion(version);
+            SbomUtils.addPedigreeAncestor(component, url, uid);
+            Pedigree pedigree = component.getPedigree();
+            Ancestors ancestors = pedigree.getAncestors();
+            List<Component> components = ancestors.getComponents();
+            assertEquals(1, components.size());
+            Component component1 = components.get(0);
+            PackageURL packageURL = new PackageURL(component1.getPurl());
+            assertEquals(expectedPurl, packageURL.toString());
+            assertEquals(type, component1.getType());
+            assertEquals(name, component1.getName());
+            assertEquals(uid, component1.getVersion());
+            assertEquals(expectedPurl, component1.getBomRef());
+            assertEquals(component.getHashes(), component1.getHashes());
         }
 
         @Test
