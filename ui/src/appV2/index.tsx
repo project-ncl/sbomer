@@ -1,16 +1,14 @@
 import '@app/app.css';
 import '@patternfly/react-core/dist/styles/base.css';
 import * as React from 'react';
-import { createBrowserRouter, RouteObject, RouterProvider, useNavigate } from 'react-router-dom';
+import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 
 import { IAppRoute, routes } from './routes';
 
-
-const App = () => {
+const AppV2 = () => {
   return (
-
-    <div>
-      <h1>This is App V1</h1>
+    <>
+      <h1>This is App V2</h1>
       <RouterProvider
         router={createBrowserRouter(
           routes
@@ -18,8 +16,8 @@ const App = () => {
             .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
         )}
       />
-    </div>
+    </>
   );
 };
 
-export default App;
+export default AppV2;
