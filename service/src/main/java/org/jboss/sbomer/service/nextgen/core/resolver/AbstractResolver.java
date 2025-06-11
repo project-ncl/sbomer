@@ -28,11 +28,9 @@ import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@NoArgsConstructor
 public abstract class AbstractResolver implements Resolver {
 
     protected ManagedExecutor managedExecutor;

@@ -23,7 +23,7 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
-import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 
 import jakarta.enterprise.event.Observes;
@@ -54,39 +54,23 @@ public abstract class AbstractGenerator implements Generator {
 
         managedExecutor.runAsync(() -> {
             try {
-                // updateGenerationStatus(event.generation().id(), GenerationStatus.GENERATING, "Generation started");
-
-                sbomerClient.updateGenerationStatus(
-                        event.generation().id(),
-                        UpdatePayload.of(GenerationStatus.GENERATING, "Generation started"));
+                updateStatus(event.generation().id(), GenerationStatus.GENERATING, null, "Generation started");
 
                 handle(event.event(), event.generation());
             } catch (Exception e) {
                 log.error("Unable to generate", e);
 
-                sbomerClient.updateGenerationStatus(
+                updateStatus(
                         event.generation().id(),
-                        UpdatePayload.of(GenerationStatus.FAILED, "Generation failed, reason: {}", e.getMessage()));
-
-                // sbomerClient.updateGenerationStatus(
-                // event.generation().id(),
-                // new UpdatePayload(
-                // GenerationStatus.FAILED,
-                // null,
-                // MessageFormatter.arrayFormat("Generation failed, reason: {}", newe.getMessage())
-                // .getMessage(),
-                // null));
-
-                // updateGenerationStatus(
-                // event.generation().id(),
-                // GenerationStatus.FAILED,
-                // "Generation failed, reason: {}",
-                // e.getMessage());
-
+                        GenerationStatus.FAILED,
+                        null, // TODO
+                        "Generation failed, reason: {}",
+                        e.getMessage());
             }
         });
     }
 
+    // TODO: This should be retried in case of failures
     protected void updateStatus(
             String generationId,
             GenerationStatus status,
@@ -94,8 +78,8 @@ public abstract class AbstractGenerator implements Generator {
             String reason,
             Object... params) {
 
-        sbomerClient.updateGenerationStatus(generationId, UpdatePayload.of(status, reason, params));
+        sbomerClient
+                .updateGenerationStatus(generationId, GenerationStatusUpdatePayload.of(status, result, reason, params));
 
     }
-
 }

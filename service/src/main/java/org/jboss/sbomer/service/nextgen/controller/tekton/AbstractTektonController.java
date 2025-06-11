@@ -35,10 +35,10 @@ import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerC
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
-import org.jboss.sbomer.service.nextgen.core.payloads.generation.UpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
@@ -53,6 +53,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
 import io.quarkus.arc.Arc;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -127,23 +128,19 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
     void reconcileScheduled(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.SCHEDULED, generation.id());
 
-        sbomerClient.updateGenerationStatus(
-                generation.id(),
-                UpdatePayload.of(GenerationStatus.GENERATING, "Generation started"));
+        updateStatus(generation.id(), GenerationStatus.GENERATING, null, "Generation started");
 
         try {
             kubernetesClient.resources(TaskRun.class).resource(desired(generation)).create();
         } catch (KubernetesClientException e) {
 
-            sbomerClient.updateGenerationStatus(
+            updateStatus(
                     generation.id(),
-                    UpdatePayload.of(GenerationStatus.FAILED, "Unable to schedule Tekton TaskRun: {}", e.getMessage()));
+                    GenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Unable to schedule Tekton TaskRun: {}",
+                    e.getMessage());
 
-            // updateStatus(
-            // generation,
-            // GenerationStatus.FAILED,
-            // GenerationResult.ERR_SYSTEM,
-            // "Unable to schedule Tekton TaskRun: " + e.getMessage());
         }
     }
 
@@ -275,7 +272,7 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
      * @param boms the BOMs to store
      * @return the list of stored {@link Manifest}s
      */
-    // @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public List<ManifestRecord> storeBoms(GenerationRecord generationRecord, List<JsonNode> boms) {
         // TODO @avibelli
         MDCUtils.removeOtelContext();
@@ -363,27 +360,4 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
             kubernetesClient.resource(tr).delete();
         });
     }
-
-    // // TODO: This should be here, we should update the status of generation via REST API call
-    // @Transactional(value = Transactional.TxType.REQUIRES_NEW)
-    // protected void updateStatus(
-    // GenerationRecord generationRecord,
-    // GenerationStatus status,
-    // GenerationResult result,
-    // String reason,
-    // Object... params) {
-
-    // Generation generation = Generation.findById(generationRecord.id());
-
-    // if (generation == null) {
-    // throw new NotFoundException("Generation request with id '{}' could not be found", generationRecord.id());
-    // }
-
-    // String reasonContent = MessageFormatter.arrayFormat(reason, params).getMessage();
-
-    // generation.setStatus(status);
-    // generation.setReason(reasonContent);
-    // generation.setResult(result);
-    // generation.save();
-    // }
 }
