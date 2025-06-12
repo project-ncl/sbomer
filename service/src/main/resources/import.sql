@@ -3394,7 +3394,7 @@ INSERT INTO manifest(
 		id,
 		created,
         generation_id,
-		sbom
+		bom
 	)
 VALUES (
 		'816640206274228223',

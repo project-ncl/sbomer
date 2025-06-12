@@ -27,10 +27,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
-import org.jboss.sbomer.core.features.sbom.validation.CycloneDxBom;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.f4b6a3.tsid.TsidCreator;
 
@@ -41,7 +39,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -69,10 +66,6 @@ public class Manifest extends PanacheEntityBase {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    // @Column(name = "identifier", nullable = false, updatable = false)
-    // @NotBlank(message = "Identifier missing")
-    // private String identifier;
-
     /**
      * Time when the manifest was created.
      */
@@ -82,29 +75,14 @@ public class Manifest extends PanacheEntityBase {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "bom")
-    @CycloneDxBom // tODO: remove
     @ToString.Exclude
-    @Schema(implementation = Map.class) // Workaround for swagger limitation of not being able to digest through a very
-                                        // big schema which is the case if we use the Bom.class
+    @Schema(implementation = Map.class)
     private JsonNode bom;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "generation_id", nullable = false, updatable = false)
     @JsonBackReference
     private Generation generation;
-
-    // @Column(name = "config_index")
-    // private Integer configIndex;
-
-    // @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    // @JoinColumn(foreignKey = @ForeignKey(name = "fk_sbom_generationrequest"))
-    // private SbomGenerationRequest generationRequest;
-
-    @JsonIgnore
-    @Lob
-    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
-    @Column(name = "status_msg")
-    private String statusMessage;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata")
@@ -118,31 +96,6 @@ public class Manifest extends PanacheEntityBase {
             this.id = TsidCreator.getTsid1024().toString();
         }
     }
-
-    // /**
-    // * Updates the purl for the object based on the SBOM content, if provided.
-    // *
-    // */
-    // private void setupRootPurl() {
-    // Bom bom = SbomUtils.fromJsonNode(getSbom());
-
-    // rootPurl = null;
-
-    // if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-    // rootPurl = bom.getMetadata().getComponent().getPurl();
-    // }
-    // }
-
-    // @PrePersist
-    // public void prePersist() {
-    // creationTime = Instant.now();
-    // setupRootPurl();
-    // }
-
-    // @PreUpdate
-    // public void preUpdate() {
-    // setupRootPurl();
-    // }
 
     @Transactional
     public Manifest save() {
