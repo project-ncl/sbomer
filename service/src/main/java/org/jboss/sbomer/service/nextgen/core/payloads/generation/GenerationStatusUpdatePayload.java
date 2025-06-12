@@ -36,7 +36,6 @@ import jakarta.validation.constraints.NotNull;
  * @param status The status identifier.
  * @param result A programmatic result information.
  * @param reason A human-readable description of the current status.
- * @param manifests List of manifest identifiers.
  */
 public record GenerationStatusUpdatePayload(@NotNull GenerationStatus status, GenerationResult result, String reason) {
 

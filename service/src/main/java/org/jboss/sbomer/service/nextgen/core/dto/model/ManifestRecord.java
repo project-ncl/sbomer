@@ -19,11 +19,9 @@ package org.jboss.sbomer.service.nextgen.core.dto.model;
 
 import java.time.Instant;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 /**
  * Representation of the Manifest entity.
  */
-public record ManifestRecord(String id, Instant created, JsonNode sbom) {
+public record ManifestRecord(String id, Instant created) {
 
 }

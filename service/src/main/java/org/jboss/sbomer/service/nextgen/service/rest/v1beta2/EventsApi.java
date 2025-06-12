@@ -34,6 +34,7 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
@@ -44,16 +45,19 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1beta2/events")
@@ -136,6 +140,34 @@ public class EventsApi {
         }
 
         return mapper.toRecord(event);
+    }
+
+    @PATCH
+    @Path("/{id}/status")
+    @Operation(summary = "Update status of an event (Worker only)")
+    @APIResponse(
+            responseCode = "200",
+            description = "Event status updated",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = EventRecord.class)))
+    @APIResponse(responseCode = "404", description = "Event not found")
+    @Transactional
+    public Response updateEventStatus(
+            @PathParam("id") String eventId,
+            @NotNull @Valid EventStatusUpdatePayload payload) {
+
+        Event event = Event.findById(eventId); // NOSONAR
+
+        if (event == null) {
+            throw new NotFoundException("Event with id '{}' could not be found", eventId);
+        }
+
+        event.setStatus(payload.status());
+        event.setReason(payload.reason());
+        event.save();
+
+        return Response.ok(mapper.toRecord(event)).build();
     }
 
     @POST

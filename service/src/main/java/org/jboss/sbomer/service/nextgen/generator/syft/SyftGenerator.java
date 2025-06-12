@@ -46,7 +46,6 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
@@ -70,7 +69,6 @@ import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverride;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverrideBuilder;
 import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
-import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.ValidationException;
@@ -226,7 +224,7 @@ public class SyftGenerator extends AbstractTektonController {
         }
 
         try {
-            // syftImageController.performPost(sboms); // TODO: add thios back
+            // syftImageController.performPost(sboms); // TODO: add this back
         } catch (ApplicationException e) {
             updateStatus(generation.id(), GenerationStatus.FAILED, GenerationResult.ERR_POST, e.getMessage());
             return;
@@ -237,9 +235,6 @@ public class SyftGenerator extends AbstractTektonController {
                 GenerationStatus.FINISHED,
                 GenerationResult.SUCCESS,
                 "Generation finished successfully");
-
-        // TODO: This should be done by the service, after updating the status
-        Arc.container().beanManager().getEvent().fire(new GenerationStatusChangeEvent(generation));
     }
 
     private TaskRunStepOverride resourceOverrides(GenerationRequest request) {

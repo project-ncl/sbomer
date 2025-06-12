@@ -21,20 +21,15 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
-import org.jboss.sbomer.core.errors.ApplicationException;
-import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
@@ -42,10 +37,6 @@ import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
-import org.jboss.sbomer.service.nextgen.service.model.Generation;
-import org.jboss.sbomer.service.nextgen.service.model.Manifest;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.knative.pkg.apis.Condition;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -53,7 +44,6 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
 import io.quarkus.arc.Arc;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -259,62 +249,6 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse("TaskRun failed, but no step had non-zero exit code or OOMKilled reason.");
-    }
-
-    /**
-     * <p>
-     * Stores generated manifests in the database which results in creation of new {@link Manifest}s entities.
-     * </p>
-     *
-     * TODO: This should use REST API instead of interacting with DB directly
-     *
-     * @param generation the generation request
-     * @param boms the BOMs to store
-     * @return the list of stored {@link Manifest}s
-     */
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public List<ManifestRecord> storeBoms(GenerationRecord generationRecord, List<JsonNode> boms) {
-        // TODO @avibelli
-        MDCUtils.removeOtelContext();
-        MDCUtils.addIdentifierContext(generationRecord.id());
-        // MDCUtils.addOtelContext(generation.getMDCOtel());
-
-        // TODO @avibelli
-        // Maybe we should add it later, when we will be transitioning this into a release manifest?
-        // Syft controller should be generic and not know anything about RH internals.
-
-        // Verify if the request event for this generation is associated with an Errata advisory
-        // RequestEvent event = sbomGenerationRequest.getRequest();
-        // if (event != null && event.getRequestConfig() != null
-        // && event.getRequestConfig() instanceof ErrataAdvisoryRequestConfig config) {
-
-        // boms.forEach(bom -> {
-        // // Add the AdvisoryId property
-        // addPropertyIfMissing(
-        // bom.getMetadata(),
-        // Constants.CONTAINER_PROPERTY_ADVISORY_ID,
-        // config.getAdvisoryId());
-        // });
-        // }
-
-        log.info("There are {} manifests to be stored for the {} generation...", boms.size(), generationRecord.id());
-
-        // Find the Generation
-        Generation generation = Generation.findById(generationRecord.id());
-
-        if (generation == null) {
-            throw new ApplicationException("Unable to find Generation with ID '{}'", generationRecord.id());
-        }
-
-        List<Manifest> manifests = new ArrayList<>();
-
-        // Create Manifest entities for all manifests
-        boms.forEach(bom -> {
-            log.info("Storing manifests for the Generation '{}'", generationRecord.id());
-            manifests.add(Manifest.builder().withSbom(bom).withGeneration(generation).build().save());
-        });
-
-        return mapper.toManifestRecords(manifests);
     }
 
     /**

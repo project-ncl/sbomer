@@ -31,7 +31,9 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
@@ -41,8 +43,11 @@ import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.config.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
+import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -225,7 +230,49 @@ public class GenerationsApi {
         generation.setReason(payload.reason());
         generation.save();
 
-        return Response.ok(mapper.toRecord(generation)).build();
+        GenerationRecord generationRecord = mapper.toRecord(generation);
+
+        Arc.container().beanManager().getEvent().fire(new GenerationStatusChangeEvent(generationRecord));
+
+        return Response.ok(generationRecord).build();
+    }
+
+    @POST
+    @Path("/{generationId}/manifests")
+    @Operation(summary = "Upload new manifest and attach it to a generation (Worker only)")
+    @APIResponse(
+            responseCode = "200",
+            description = "Manifest uploaded",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ManifestRecord.class)))
+    @APIResponse(responseCode = "404", description = "Generation not found")
+    @Transactional
+    public Response uploadManifest(@PathParam("generationId") String generationId, JsonNode payload) {
+
+        log.info("About to store manifests for generation {}", generationId);
+
+        Generation generation = Generation.findById(generationId); // NOSONAR
+
+        if (generation == null) {
+            throw new NotFoundException("Generation request with id '{}' could not be found", generationId);
+        }
+
+        log.debug("Preparing new manifest entity for the payload");
+
+        ObjectNode metadata = JsonNodeFactory.instance.objectNode();
+        metadata.put("sha256", JacksonUtils.hash(payload));
+
+        Manifest manifest = Manifest.builder()
+                .withGeneration(generation)
+                .withBom(payload)
+                .withMetadata(metadata)
+                .build()
+                .save();
+        generation.getManifests().add(manifest);
+        generation.save();
+
+        return Response.ok(mapper.toRecord(manifest)).build();
     }
 
 }

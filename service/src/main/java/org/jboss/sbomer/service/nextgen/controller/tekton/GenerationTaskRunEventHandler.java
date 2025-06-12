@@ -96,6 +96,7 @@ public class GenerationTaskRunEventHandler implements ResourceEventHandler<TaskR
             generationRecord = sbomerClient.getGeneration(generationId);
         } catch (Exception e) {
             log.warn("Unable to fetch Generation with ID '{}', skipping", generationId, e);
+
             return;
         }
 
