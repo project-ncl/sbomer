@@ -18,12 +18,17 @@
 package org.jboss.sbomer.service.nextgen.core.rest;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResponse;
 import org.jboss.sbomer.service.rest.otel.SpanName;
 import org.jboss.sbomer.service.rest.otel.Traced;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Consumes;
@@ -65,4 +70,16 @@ public interface SBOMerClient {
     GenerationRecord updateGenerationStatus(
             @PathParam("generationId") String generationId,
             GenerationStatusUpdatePayload payload);
+
+    @Traced
+    @SpanName("sbomer.generations.patch.manifests")
+    @POST
+    @Path("/generations/{generationId}/manifests")
+    ManifestRecord uploadManifest(@PathParam("generationId") String generationId, JsonNode manifest);
+
+    @Traced
+    @SpanName("sbomer.events.patch.status")
+    @PATCH
+    @Path("/events/{eventId}/status")
+    EventRecord updateEventStatus(@PathParam("eventId") String eventId, EventStatusUpdatePayload payload);
 }

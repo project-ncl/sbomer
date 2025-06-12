@@ -81,12 +81,12 @@ public class Manifest extends PanacheEntityBase {
     private Instant created;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "sbom")
-    @CycloneDxBom
+    @Column(name = "bom")
+    @CycloneDxBom // tODO: remove
     @ToString.Exclude
     @Schema(implementation = Map.class) // Workaround for swagger limitation of not being able to digest through a very
                                         // big schema which is the case if we use the Bom.class
-    private JsonNode sbom;
+    private JsonNode bom;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "generation_id", nullable = false, updatable = false)
@@ -107,10 +107,10 @@ public class Manifest extends PanacheEntityBase {
     private String statusMessage;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "release_metadata")
+    @Column(name = "metadata")
     @ToString.Exclude
     @Schema(implementation = Map.class)
-    private JsonNode releaseMetadata;
+    private JsonNode metadata;
 
     @PrePersist
     protected void onPrePersist() {

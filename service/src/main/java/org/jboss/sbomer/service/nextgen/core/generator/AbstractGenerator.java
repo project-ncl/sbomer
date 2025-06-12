@@ -17,17 +17,26 @@
  */
 package org.jboss.sbomer.service.nextgen.core.generator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
+import org.jboss.sbomer.service.nextgen.service.model.Manifest;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -70,7 +79,54 @@ public abstract class AbstractGenerator implements Generator {
         });
     }
 
+    /**
+     * <p>
+     * Stores generated manifests in the database which results in creation of new Manifest entities.
+     * </p>
+     *
+     * @param generation the generation request
+     * @param boms the BOMs to store
+     * @return the list of stored {@link Manifest}s
+     */
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public List<ManifestRecord> storeBoms(GenerationRecord generationRecord, List<JsonNode> boms) {
+        // TODO @avibelli
+        MDCUtils.removeOtelContext();
+        MDCUtils.addIdentifierContext(generationRecord.id());
+        // MDCUtils.addOtelContext(generation.getMDCOtel());
+
+        // TODO @avibelli
+        // Maybe we should add it later, when we will be transitioning this into a release manifest?
+        // Syft controller should be generic and not know anything about RH internals.
+
+        // Verify if the request event for this generation is associated with an Errata advisory
+        // RequestEvent event = sbomGenerationRequest.getRequest();
+        // if (event != null && event.getRequestConfig() != null
+        // && event.getRequestConfig() instanceof ErrataAdvisoryRequestConfig config) {
+
+        // boms.forEach(bom -> {
+        // // Add the AdvisoryId property
+        // addPropertyIfMissing(
+        // bom.getMetadata(),
+        // Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+        // config.getAdvisoryId());
+        // });
+        // }
+
+        log.info("There are {} manifests to be stored for the '{}' generation...", boms.size(), generationRecord.id());
+
+        List<ManifestRecord> manifests = new ArrayList<>();
+
+        boms.forEach(bom -> {
+            log.info("Storing manifests for the Generation '{}'", generationRecord.id());
+            manifests.add(sbomerClient.uploadManifest(generationRecord.id(), bom));
+        });
+
+        return manifests;
+    }
+
     // TODO: This should be retried in case of failures
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     protected void updateStatus(
             String generationId,
             GenerationStatus status,

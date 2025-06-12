@@ -15,21 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.dto.model;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
+package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
+import org.slf4j.helpers.MessageFormatter;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.validation.constraints.NotNull;
 
 /**
- * Representation of the Event entity.
+ * <p>
+ * Payload used to update event status.
+ * </p>
+ *
+ * <p>
+ * This endpoint is used only by workers (generators).
+ * </p>
+ *
+ *
+ * @param status The status identifier.
+ * @param reason A human-readable description of the current status.
  */
-public record EventRecord(String id, EventRecord parent, Instant created, Instant updated, Instant finished,
-        Map<String, String> metadata, JsonNode request, List<GenerationRecord> generations, EventStatus status,
-        String reason) {
+public record EventStatusUpdatePayload(@NotNull EventStatus status, String reason) {
 
+    public static EventStatusUpdatePayload of(EventStatus status, String reason, Object... params) {
+        return new EventStatusUpdatePayload(status, MessageFormatter.arrayFormat(reason, params).getMessage());
+    }
 }

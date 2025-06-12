@@ -22,7 +22,8 @@ import java.util.Objects;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 import org.jboss.sbomer.service.nextgen.core.events.ResolveRequestEvent;
-import org.jboss.sbomer.service.nextgen.service.model.Event;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
+import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
@@ -35,7 +36,10 @@ public abstract class AbstractResolver implements Resolver {
 
     protected ManagedExecutor managedExecutor;
 
-    public AbstractResolver(ManagedExecutor managedExecutor) {
+    protected SBOMerClient sbomerClient;
+
+    public AbstractResolver(SBOMerClient sbomerClient, ManagedExecutor managedExecutor) {
+        this.sbomerClient = sbomerClient;
         this.managedExecutor = managedExecutor;
     }
 
@@ -64,26 +68,23 @@ public abstract class AbstractResolver implements Resolver {
 
         managedExecutor.runAsync(() -> {
             try {
-                updateEventStatus(event.event().id(), EventStatus.RESOLVING);
+                updateEventStatus(event.event().id(), EventStatus.RESOLVING, "Event is being resolved");
                 resolve(event.event().id(), identifier);
+                updateEventStatus(event.event().id(), EventStatus.RESOLVED, "Event was successfully resolved");
             } catch (Exception e) {
-                updateEventStatus(event.event().id(), EventStatus.ERROR);
                 log.error("Unable to resolve event", e);
+                updateEventStatus(
+                        event.event().id(),
+                        EventStatus.ERROR,
+                        "An error occurred while resolving the event: {}",
+                        e.getMessage());
+
             }
         });
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
-    protected void updateEventStatus(String eventId, EventStatus status) {
-        Event event = Event.findById(eventId);
-
-        if (event == null) {
-            log.warn("Event with id '{}' could not be found, cannot update status", eventId);
-            return;
-        }
-
-        event.setStatus(status);
-        event.setReason("Updated by resolver");
-        event.save();
+    protected void updateEventStatus(String eventId, EventStatus status, String reason, Object... params) {
+        sbomerClient.updateEventStatus(eventId, EventStatusUpdatePayload.of(status, reason, params));
     }
 }

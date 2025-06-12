@@ -87,7 +87,7 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
             for (Manifest m : g.getManifests()) {
                 log.info("Processing manifest '{}'", m.getId());
 
-                Manifest manifest = Manifest.builder().withSbom(m.getSbom()).build();
+                Manifest manifest = Manifest.builder().withBom(m.getBom()).build();
                 manifests.add(manifest);
             }
         }

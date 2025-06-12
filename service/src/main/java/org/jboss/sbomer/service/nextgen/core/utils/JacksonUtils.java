@@ -19,6 +19,8 @@ package org.jboss.sbomer.service.nextgen.core.utils;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -117,8 +119,43 @@ public class JacksonUtils {
             if (bom == null) {
                 throw new ApplicationException("Manifest at path '{}' is empty", manifestPath.toAbsolutePath());
             }
+
+            boms.add(bom);
         }
 
         return boms;
+    }
+
+    public static String hash(JsonNode content) {
+        byte[] value;
+
+        try {
+            value = ObjectMapperProvider.json().writeValueAsBytes(content);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException("Unable to convert content to bytes", e);
+        }
+
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new ApplicationException("Unable to find digest algorithm", e);
+        }
+
+        byte[] hash = digest.digest(value);
+
+        return bytesToHex(hash);
+    }
+
+    private static String bytesToHex(byte[] hash) {
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (byte b : hash) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
     }
 }

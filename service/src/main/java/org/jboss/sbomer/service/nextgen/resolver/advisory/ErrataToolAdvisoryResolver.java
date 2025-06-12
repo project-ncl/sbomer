@@ -42,6 +42,7 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.Build;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductVersionEntry;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
+import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.ContextSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
@@ -73,10 +74,8 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
     ErrataClient errataClient;
 
-    SBOMerClient sbomerClient;
-
     private ErrataToolAdvisoryResolver() {
-        super(null);
+        super(null, null);
     }
 
     @Inject
@@ -85,11 +84,10 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
             @TracingRestClient ErrataClient errataClient,
             KojiProvider kojiProvider,
             @RestClient SBOMerClient sbomerClient) {
-        super(managedExecutor);
+        super(sbomerClient, managedExecutor);
 
         this.errataClient = errataClient;
         this.kojiProvider = kojiProvider;
-        this.sbomerClient = sbomerClient;
     }
 
     @Override
@@ -99,10 +97,10 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
     @Override
     public void resolve(String eventId, String advisoryId) {
-        List<GenerationRequestSpec> generationRequests = resolveAdvisory(advisoryId);
+        List<GenerationRequestSpec> generationRequests = resolveAdvisory(eventId, advisoryId);
 
         GenerationsRequest generationsRequest = new GenerationsRequest(
-                null,
+                eventId,
                 new ContextSpec(eventId, "SBOMER", null, null),
                 generationRequests);
 
@@ -118,17 +116,19 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
         log.info("Requested generations: {}", generationResponse.generations().stream().map(g -> g.id()).toList());
     }
 
-    public List<GenerationRequestSpec> resolveAdvisory(String advisoryId) {
+    public List<GenerationRequestSpec> resolveAdvisory(String eventId, String advisoryId) {
         // Fetching Erratum
         Errata erratum = errataClient.getErratum(advisoryId);
 
         if (erratum == null) {
+            updateEventStatus(eventId, EventStatus.ERROR, "Could not retrieve the Advisory '{}'", advisoryId);
             throw new ClientException("Could not retrieve the Advisory '{}'", advisoryId);
         }
 
         Optional<Details> optDetails = erratum.getDetails();
 
         if (optDetails.isEmpty()) {
+            updateEventStatus(eventId, EventStatus.ERROR, "Could not retrieve the Advisory '{}' details", advisoryId);
             throw new ClientException("Could not retrieve the Advisory '{}' details", advisoryId);
         }
 
@@ -138,10 +138,10 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
         printAllErratumData(erratum);
 
         if (!Boolean.TRUE.equals(details.getTextonly())) {
-            System.out.println("IT IS A STANDARD ADVISORY");
-            return handleStandardAdvisory(erratum);
+            log.info("Handling advisory {} as a standard advisory", advisoryId);
+            return handleStandardAdvisory(eventId, erratum);
         } else {
-            System.out.println("IT IS A TEXT_ONLY ADVISORY");
+            log.info("Handling advisory {} as a Text-only advisory", advisoryId);
             // return handleTextOnlyAdvisory(requestEvent, erratum);
         }
 
@@ -149,7 +149,7 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
     }
 
-    private List<GenerationRequestSpec> handleStandardAdvisory(Errata erratum) {
+    private List<GenerationRequestSpec> handleStandardAdvisory(String eventId, Errata erratum) {
         log.info(
                 "Advisory {} ({}) is standard (non Text-Only), with status {}",
                 erratum.getDetails().get().getFulladvisory(),
@@ -157,18 +157,23 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
                 erratum.getDetails().get().getStatus());
 
         Details details = erratum.getDetails().get();
-        if (details.getContentTypes().size() != 1) {
 
-            String reason = String.format(
-                    "The standard errata advisory has zero or multiple content-types (%s)",
+        if (details.getContentTypes().size() != 1) {
+            updateEventStatus(
+                    eventId,
+                    EventStatus.IGNORED,
+                    "The standard errata advisory has zero or multiple content-types ({})",
                     details.getContentTypes());
-            // doIgnoreRequest(requestEvent, reason);
+            return null;
         }
 
         if (details.getContentTypes().stream().noneMatch(type -> type.equals("docker") || type.equals("rpm"))) {
-            String reason = String
-                    .format("The standard errata advisory has unknown content-types (%s)", details.getContentTypes());
-            // doIgnoreRequest(requestEvent, reason);
+            updateEventStatus(
+                    eventId,
+                    EventStatus.IGNORED,
+                    "The standard errata advisory has unknown content-types ({}})",
+                    details.getContentTypes());
+            return null;
         }
 
         ErrataBuildList erratumBuildList = errataClient.getBuildsList(String.valueOf(details.getId()));
@@ -185,8 +190,11 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
 
         // The are cases where an advisory might have no builds, let's ignore them to avoid a pending request
         if (buildDetails.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum() == 0) {
-            String reason = String.format("The standard errata advisory has no retrievable builds attached, skipping!");
-            // doIgnoreRequest(requestEvent, reason);
+            updateEventStatus(
+                    eventId,
+                    EventStatus.IGNORED,
+                    "The standard errata advisory has no retrievable builds attached, skipping!");
+            return null;
         }
 
         // If the status is SHIPPED_LIVE and there is a successful generation for this advisory, create release
@@ -240,7 +248,9 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
             imageNamesFromBuilds = getImageNamesFromBuilds(buildIds);
         } catch (KojiClientException e) {
             log.error("Failed to retrieve image names after retries", e);
-            return null; // TODO
+            updateEventStatus(eventId, EventStatus.ERROR, "Failed to retrieve image names after retries");
+
+            return null;
         }
 
         imageNamesFromBuilds.forEach((buildId, imageName) -> {
@@ -248,7 +258,7 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
             if (imageName != null) {
                 // SyftImageConfig config =
                 // SyftImageConfig.builder().withIncludeRpms(true).withImage(imageName).build();
-                log.debug("Creating GenerationRequest Kubernetes resource...");
+                log.debug("Creating a generation request for image '{}''...", imageName);
 
                 generationRequests.add(new GenerationRequestSpec(new TargetSpec(imageName, "CONTAINER_IMAGE"), null));
 
