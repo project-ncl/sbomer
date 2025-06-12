@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
@@ -607,12 +608,16 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     private String doCleanupPurl(String purl) throws MalformedPackageURLException {
         PackageURL packageURL = new PackageURL(purl);
 
-        TreeMap<String, String> qualifiers = new TreeMap<>(packageURL.getQualifiers());
+        Map<String, String> origQualifiers = packageURL.getQualifiers();
+        if (origQualifiers == null) {
+            return packageURL.toString();
+        }
+
+        TreeMap<String, String> qualifiers = new TreeMap<>(origQualifiers);
 
         // If we removed any qualifiers, we need to rebuild the purl
         if (qualifiers.entrySet().removeIf(q -> !q.getKey().equals("arch") && !q.getKey().equals("epoch"))) {
 
-            // log.debug("Updating purl to: '{}'", updatedPurl);
             return new PackageURL(
                     packageURL.getType(),
                     packageURL.getNamespace(),
