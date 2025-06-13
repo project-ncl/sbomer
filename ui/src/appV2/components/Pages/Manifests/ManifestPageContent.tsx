@@ -42,25 +42,8 @@ const ManifestPageContent: React.FunctionComponent = () => {
 
   useDocumentTitle('SBOMer | Manifests | ' + id);
 
-  const [copied, setCopied] = useState(false);
 
-  const clipboardCopyFunc = (event, text) => {
-    navigator.clipboard.writeText(text.toString());
-  };
 
-  const onClick = (event, text) => {
-    clipboardCopyFunc(event, text);
-    setCopied(true);
-  };
-
-  const downloadManifest = (manifest) => {
-    const element = document.createElement('a');
-    const file = new Blob([JSON.stringify(manifest.sbom, null, 2)], { type: 'application/json' });
-    element.href = URL.createObjectURL(file);
-    element.download = manifest.id + '.json';
-    document.body.appendChild(element);
-    element.click();
-  };
 
   if (error) {
     return (
@@ -109,38 +92,20 @@ const ManifestPageContent: React.FunctionComponent = () => {
 
           </DescriptionList>
 
-          <br />
-
-          <Panel>
-            <PanelMain>
-              <PanelMainBody>
-
-                <br />
-
-                <Title headingLevel="h2">Raw content</Title>
-
-                <br />
-
-                <HelperText>
-                  <HelperTextItem icon={<InfoIcon />}>
-                    Please note that the raw content below contains the RAW body of the API response, which encapsulates
-                    the manifest itself. If you are interested in the <strong>manifest content</strong>, please use the
-                    download and copy buttons available above.
-                  </HelperTextItem>
-                </HelperText>
-
-                <br />
-
-                <CodeBlock
-
-                >
-                  <ExpandableSection toggleTextExpanded="Hide" toggleTextCollapsed="Show">
-                    <CodeBlockCode>{JSON.stringify(manifest, null, 2)}</CodeBlockCode>
-                  </ExpandableSection>
+        </GridItem>
+        <GridItem span={12}>
+          <DescriptionList>
+            <DescriptionListGroup>
+              <DescriptionListTerm>Attributes</DescriptionListTerm>
+              <DescriptionListDescription>
+                <CodeBlock >
+                  <CodeBlockCode>
+                    {JSON.stringify(manifest, null, 2)}
+                  </CodeBlockCode>
                 </CodeBlock>
-              </PanelMainBody>
-            </PanelMain>
-          </Panel>
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+          </DescriptionList>
         </GridItem>
       </Grid>
     </PageSection>

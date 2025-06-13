@@ -1,5 +1,4 @@
 import { useRequestEventManifest } from '@appV2/components/RequestEventTable/useRequestEventManifest';
-import { requestEventStatusToColor, requestEventStatusToDescription } from '@appV2/utils/Utils';
 import {
   CodeBlock,
   CodeBlockCode,
@@ -7,23 +6,16 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  ExpandableSection,
   Grid,
   GridItem,
-  Label,
-  Tab,
-  TabTitleText,
-  Tabs,
   Timestamp,
   TimestampTooltipVariant,
   Title,
-  Tooltip,
 } from '@patternfly/react-core';
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
-
 
 export const RequestEventDetailsTable = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,20 +46,19 @@ export const RequestEventDetailsTable = () => {
               <Timestamp date={request?.created} tooltip={{ variant: TimestampTooltipVariant.default }} />
             </DescriptionListDescription>
           </DescriptionListGroup>
+        </DescriptionList>
+      </GridItem>
+      <GridItem>
+        <DescriptionList >
           <DescriptionListGroup>
             <DescriptionListTerm>Attributes</DescriptionListTerm>
             <DescriptionListDescription>
               {request ? (
-                <DescriptionList isHorizontal>
-                  {Object.entries(request).map(([key, value]) => (
-                    <DescriptionListGroup key={key}>
-                      <DescriptionListTerm>{key}</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        <pre style={{ margin: 0 }}>{JSON.stringify(value, null, 2)}</pre>
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                  ))}
-                </DescriptionList>
+                <CodeBlock>
+                  <CodeBlockCode>
+                    {JSON.stringify(request, null, 2)}
+                  </CodeBlockCode>
+                </CodeBlock>
               ) : (
                 <span>No request attributes available</span>
               )}
