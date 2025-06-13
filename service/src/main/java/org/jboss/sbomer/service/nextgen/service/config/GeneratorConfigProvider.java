@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.nextgen.service.config;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.sbomer.core.SchemaValidator;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
@@ -38,7 +39,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.quarkus.runtime.StartupEvent;
+import io.quarkus.scheduler.Scheduled;
+import io.quarkus.scheduler.Scheduled.ConcurrentExecution;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +59,8 @@ public class GeneratorConfigProvider {
 
     String sbomerReleaseName;
 
+    GeneratorsConfig config;
+
     @Inject
     public GeneratorConfigProvider(KubernetesClient kubernetesClient) {
         this.kubernetesClient = kubernetesClient;
@@ -64,6 +71,18 @@ public class GeneratorConfigProvider {
         GeneratorsConfig config = getGeneratorsConfig();
 
         return config.generatorProfiles();
+    }
+
+    void init(@Observes StartupEvent ev) {
+        this.config = getGeneratorsConfig();
+    }
+
+    /**
+     * Read the generator config periodically and cache it.
+     */
+    @Scheduled(every = "30s", delay = 10, delayUnit = TimeUnit.SECONDS, concurrentExecution = ConcurrentExecution.SKIP)
+    public void updateConfig() {
+        this.config = getGeneratorsConfig();
     }
 
     /**
@@ -78,12 +97,12 @@ public class GeneratorConfigProvider {
      * @return Generators configs and defaults.
      */
     public GeneratorsConfig getGeneratorsConfig() {
-        // TODO: Add caching
         String content = getCmContent(cmName());
 
         if (content == null) {
             log.warn("Could not read '{}' ConfigMap content, see logs for more information", cmName());
-            return null;
+            throw new ApplicationException(
+                    "Could not read generators config, please make sure the system is properly configured, unable to process request");
         }
 
         GeneratorsConfig config = null;
@@ -93,7 +112,8 @@ public class GeneratorConfigProvider {
         } catch (JsonProcessingException e) {
             log.error("Failed to parse generator config from ConfigMap '{}', profiles won't be applied!", cmName(), e);
 
-            return null;
+            throw new ApplicationException(
+                    "Could not read generators config, please make sure the system is properly configured, unable to process request");
         }
 
         return config;
@@ -106,19 +126,9 @@ public class GeneratorConfigProvider {
         }
 
         log.debug("Will build effective config for provided request: {}", requestSpec);
-
-        // Read all enabled generators
-        GeneratorsConfig sbomerGeneratorsConfig = getGeneratorsConfig();
-
-        // Ouch, we don't have any generators registered
-        if (sbomerGeneratorsConfig == null) {
-            throw new ApplicationException(
-                    "Could not read generators config, please make sure the system is properly configured, unable to process request");
-        }
-
         log.debug("Searching for generators that support requested '{}' type", requestSpec.target().type());
 
-        Optional<DefaultGeneratorMappingEntry> generatorMappingForSelectedTypeOpt = sbomerGeneratorsConfig
+        Optional<DefaultGeneratorMappingEntry> generatorMappingForSelectedTypeOpt = this.config
                 .defaultGeneratorMappings()
                 .stream()
                 .filter(m -> m.targetType().equals(requestSpec.target().type()))
@@ -128,14 +138,14 @@ public class GeneratorConfigProvider {
             throw new ClientException(
                     "Provided target: '{}' is not supported. Supported targets: {}",
                     requestSpec.target().type(),
-                    sbomerGeneratorsConfig.defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
+                    this.config.defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
         }
 
         GeneratorProfile generatorProfile = null;
         GeneratorVersionProfile generatorVersionProfile = null;
 
         if (requestSpec.generator() != null && requestSpec.generator().name() != null) {
-            Optional<GeneratorProfile> generatorProfileOpt = sbomerGeneratorsConfig.generatorProfiles()
+            Optional<GeneratorProfile> generatorProfileOpt = this.config.generatorProfiles()
                     .stream()
                     .filter(p -> p.name().equals(requestSpec.generator().name()))
                     .findFirst();
@@ -177,7 +187,7 @@ public class GeneratorConfigProvider {
             log.info("Will use '{}' generator, trying to find best profile", defaultGenerator);
 
             // Now find the profile for this generator
-            Optional<GeneratorProfile> generatorProfileOpt = sbomerGeneratorsConfig.generatorProfiles()
+            Optional<GeneratorProfile> generatorProfileOpt = this.config.generatorProfiles()
                     .stream()
                     .filter(p -> p.name().equals(defaultGenerator))
                     .findFirst();
@@ -233,19 +243,9 @@ public class GeneratorConfigProvider {
         }
 
         log.debug("Will build effective config for provided request: {}", requestSpec);
-
-        // Read all enabled generators
-        GeneratorsConfig sbomerGeneratorsConfig = getGeneratorsConfig();
-
-        // Ouch, we don't have any generators registered
-        if (sbomerGeneratorsConfig == null) {
-            throw new ApplicationException(
-                    "Could not read generators config, please make sure the system is properly configured, unable to process request");
-        }
-
         log.debug("Searching for generators that support requested '{}' type", requestSpec.target().type());
 
-        Optional<DefaultGeneratorMappingEntry> generatorMappingOpt = sbomerGeneratorsConfig.defaultGeneratorMappings()
+        Optional<DefaultGeneratorMappingEntry> generatorMappingOpt = this.config.defaultGeneratorMappings()
                 .stream()
                 .filter(m -> m.targetType().equals(requestSpec.target().type()))
                 .findFirst();
@@ -254,7 +254,7 @@ public class GeneratorConfigProvider {
             throw new ClientException(
                     "Provided target: '{}' is not supported. Supported targets: {}",
                     requestSpec.target().type(),
-                    sbomerGeneratorsConfig.defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
+                    this.config.defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
         }
 
         if (requestSpec.generator() == null) {
@@ -269,7 +269,7 @@ public class GeneratorConfigProvider {
         String defaultGenerator = generatorMappingOpt.get().generators().get(0);
 
         // Now find the profile for this generator
-        Optional<GeneratorProfile> generatorProfileOpt = sbomerGeneratorsConfig.generatorProfiles()
+        Optional<GeneratorProfile> generatorProfileOpt = this.config.generatorProfiles()
                 .stream()
                 .filter(p -> p.name().equals(defaultGenerator))
                 .findFirst();
