@@ -61,8 +61,6 @@ export class SbomerGeneration {
   public status: string;
   public result: string;
   public reason: string;
-  public identifier: string;
-  public type: string;
   public creationTime: Date;
   public updatedTime?: Date;
   public finishedTime?: Date;
@@ -75,15 +73,10 @@ export class SbomerGeneration {
     this.result = payload.result;
     this.reason = payload.reason;
 
-    if (payload.request && payload.request.target) {
-      this.identifier = payload.request.target.identifier || "unknown";
-      this.type = payload.request.target.type || "unknown";
-    }
-
     this.creationTime = new Date(payload.created);
-    if (payload.updated) {
-      this.updatedTime = new Date(payload.updated);
-    }
+
+    this.updatedTime = new Date(payload.updated);
+    
 
     this.finishedTime = payload.finished ? new Date(payload.finished) : undefined;
 

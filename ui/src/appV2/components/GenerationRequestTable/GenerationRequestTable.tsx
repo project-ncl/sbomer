@@ -68,7 +68,6 @@ export const GenerationRequestTable = () => {
         <Tr>
           <Th>{columnNames.id}</Th>
           <Th>{columnNames.status}</Th>
-          <Th>{columnNames.type}</Th>
           <Th>{columnNames.creationTime}</Th>
           <Th>{columnNames.updatedTime}</Th>
           <Th>{columnNames.finishedTime}</Th>
@@ -105,13 +104,6 @@ export const GenerationRequestTable = () => {
                 {/* <span className="pf-v5-c-timestamp pf-m-help-text">{request.status}</span> */}
               </Tooltip>
             </Td>
-            <Td dataLabel={columnNames.type}>
-              <Tooltip isContentLeftAligned={true} content={<code>{generation.identifier}</code>}>
-                <Label color="purple">
-                  {typeToDescription(generation)}
-                </Label>
-              </Tooltip>
-            </Td>
             <Td dataLabel={columnNames.creationTime}>
               <Timestamp date={generation.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
                 {timestampToHumanReadable(Date.now() - generation.creationTime.getTime(), false, 'ago')}
@@ -125,10 +117,12 @@ export const GenerationRequestTable = () => {
               )}
             </Td>
             <Td dataLabel={columnNames.finishedTime}>
-              {generation.finishedTime && (
+              {generation.finishedTime ? (
                 <Timestamp date={generation.finishedTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
                   {timestampToHumanReadable(Date.now() - generation.finishedTime.getTime(), false, 'ago')}
                 </Timestamp>
+              ) : (
+                <span className="pf-v5-c-timestamp pf-m-help-text">N/A</span>
               )}
             </Td>
           </Tr>

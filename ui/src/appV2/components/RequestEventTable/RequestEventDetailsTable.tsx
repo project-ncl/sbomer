@@ -55,32 +55,7 @@ export const RequestEventDetailsTable = () => {
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>Request Event Status</DescriptionListTerm>
-            <DescriptionListDescription>
-              <Tooltip
-                isContentLeftAligned={true}
-                content={
-                  <div>
-                    <div>
-                      <strong>{request?.status}</strong>
-                    </div>
-                  </div>
-                }
-              >
-                <Label style={{ cursor: 'pointer' }} color={requestEventStatusToColor(request?.status)}>
-                  {requestEventStatusToDescription(request?.status)}
-                </Label>
-              </Tooltip>
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>Request Event Status Reason</DescriptionListTerm>
-            <DescriptionListDescription>
-              {request?.reason}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>Request Attributes</DescriptionListTerm>
+            <DescriptionListTerm>Attributes</DescriptionListTerm>
             <DescriptionListDescription>
               {request ? (
                 <DescriptionList isHorizontal>

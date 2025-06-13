@@ -195,7 +195,7 @@ export const RequestEventTable = () => {
               </Label>
             </Td>
             <Td dataLabel={columnNames.created}>
-              <Timestamp date={requestEvent.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+              <Timestamp date={requestEvent.created} tooltip={{ variant: TimestampTooltipVariant.default }}>
                 {timestampToHumanReadable(Date.now() - requestEvent.created.getTime(), false, 'ago')}
               </Timestamp>
             </Td>
