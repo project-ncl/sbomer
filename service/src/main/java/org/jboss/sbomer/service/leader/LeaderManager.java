@@ -59,7 +59,7 @@ public class LeaderManager {
 
     @Scheduled(
             every = "${sbomer.service.leader.check-interval:10s}",
-            delay = 5,
+            delay = 30,
             delayUnit = TimeUnit.SECONDS,
             concurrentExecution = ConcurrentExecution.SKIP)
     public void lease() {
