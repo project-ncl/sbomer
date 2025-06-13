@@ -34,11 +34,14 @@ import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 
+import io.quarkus.arc.Arc;
 import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -167,7 +170,11 @@ public class EventsApi {
         event.setReason(payload.reason());
         event.save();
 
-        return Response.ok(mapper.toRecord(event)).build();
+        EventRecord eventRecord = mapper.toRecord(event);
+
+        Arc.container().beanManager().getEvent().fire(new EventStatusChangeEvent(eventRecord));
+
+        return Response.ok(eventRecord).build();
     }
 
     @POST
@@ -185,9 +192,7 @@ public class EventsApi {
     @APIResponse(
             responseCode = "200",
             description = "Event content",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class))) // TODO:
-                                                                                                                      // populate
-                                                                                                                      // it
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
     @APIResponse(
             responseCode = "400",
             description = "Malformed request",
@@ -208,9 +213,13 @@ public class EventsApi {
                     schema = @Schema(implementation = ErrorResponse.class)))
     @Transactional
     public EventRecord retry(@PathParam("id") String eventId, @QueryParam("force") boolean force) {
-        Event parentEvent = Event.findById(eventId); // NOSONAR
+        log.info("Received new requested to retry event '{}' with force set to {}", eventId, force);
 
-        // TODO: handle force
+        log.trace("Fetching event '{}'", eventId);
+
+        // TODO: ensure event is finished
+
+        Event parentEvent = Event.findById(eventId); // NOSONAR
 
         if (parentEvent == null) {
             throw new NotFoundException("Event with id '{}' could not be found", eventId);
@@ -226,6 +235,9 @@ public class EventsApi {
         List<Generation> generations = new ArrayList<>();
 
         if (force) {
+            // Rebuild all generations
+            log.info("The force parameter was set, will red all generations assigned to this event");
+
             parentEvent.getGenerations().forEach(g -> {
                 Generation generation = Generation.builder()
                         .withRequest(g.getRequest())
@@ -238,12 +250,43 @@ public class EventsApi {
                 generations.add(generation);
             });
         } else {
-            generations.addAll(parentEvent.getGenerations());
+            // Find failed generations and retry only these
+            log.debug("Filtering generations from event {}, will retry failed ones", eventId);
+
+            parentEvent.getGenerations().forEach(g -> {
+                log.debug("Investigating generation '{}'", g.getId());
+
+                Generation generation;
+
+                if (g.getStatus() == GenerationStatus.FAILED) {
+                    log.debug("Generation '{}' has failed stated, will retry", g.getId());
+
+                    generation = Generation.builder()
+                            .withRequest(g.getRequest())
+                            .withParent(g)
+                            .withEvents(List.of(event))
+                            .withReason("Created as a result of retry of a failed generation '" + g.getId() + "'")
+                            .build()
+                            .save();
+                } else {
+                    log.debug("Generation '{}' is in correct state, will reuse", g.getId());
+
+                    generation = g;
+                }
+
+                generations.add(generation);
+            });
         }
 
         event.setGenerations(generations);
         event.save();
 
-        return mapper.toRecord(event);
+        log.info("New event created: {}", event.getId());
+
+        EventRecord eventRecord = mapper.toRecord(event);
+
+        Arc.container().beanManager().getEvent().fire(new EventStatusChangeEvent(eventRecord));
+
+        return eventRecord;
     }
 }
