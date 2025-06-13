@@ -5,13 +5,14 @@ import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-d
 
 import { IAppRoute, routes } from './routes';
 
-const AppV2 = () => {
+const AppV2 = ({basename}:{basename: string}) => {
   return (
     <RouterProvider
       router={createBrowserRouter(
         routes
           .filter((route) => !route.routes)
           .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
+          { basename: basename }
       )}
     />
   );
