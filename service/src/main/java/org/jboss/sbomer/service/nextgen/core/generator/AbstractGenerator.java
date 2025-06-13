@@ -63,7 +63,7 @@ public abstract class AbstractGenerator implements Generator {
 
         managedExecutor.runAsync(() -> {
             try {
-                updateStatus(event.generation().id(), GenerationStatus.GENERATING, null, "Generation started");
+                updateStatus(event.generation().id(), GenerationStatus.GENERATING, null, "Generation in progress");
 
                 handle(event.event(), event.generation());
             } catch (Exception e) {

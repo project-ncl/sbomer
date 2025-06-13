@@ -118,7 +118,7 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
     void reconcileScheduled(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.SCHEDULED, generation.id());
 
-        updateStatus(generation.id(), GenerationStatus.GENERATING, null, "Generation started");
+        updateStatus(generation.id(), GenerationStatus.GENERATING, null, "Generation in progress");
 
         try {
             kubernetesClient.resources(TaskRun.class).resource(desired(generation)).create();

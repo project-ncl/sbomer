@@ -3363,6 +3363,66 @@ VALUES (
         'Generation successfully finished'
 );
 
+INSERT INTO generation_status_history(
+		id,
+        generation_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S1AAAAA',
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'NEW',
+        'Initial state'
+);
+
+INSERT INTO generation_status_history(
+		id,
+        generation_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S2AAAAA',
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'SCHEDULED',
+        'WAiting to be picked up'
+);
+
+INSERT INTO generation_status_history(
+		id,
+        generation_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S3AAAAA',
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'GENERATING',
+        'In progress'
+);
+
+INSERT INTO generation_status_history(
+		id,
+        generation_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S4AAAAA',
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'FINISHED',
+        'Generation successfully finished'
+);
+
 INSERT INTO event(
 		id,
 		created,
@@ -3390,6 +3450,65 @@ INSERT INTO event_generation(
 		'G1AAAAA'
 );
 
+INSERT INTO event_status_history(
+		id,
+        event_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S1AAAAA',
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'NEW',
+        'Initial state'
+);
+
+INSERT INTO event_status_history(
+		id,
+        event_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S2AAAAA',
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'RESOLVING',
+        'Being resolved'
+);
+
+INSERT INTO event_status_history(
+		id,
+        event_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S3AAAAA',
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'RESOLVED',
+        ''
+);
+
+INSERT INTO event_status_history(
+		id,
+        event_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S4AAAAA',
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'SUCCESS',
+        'Event successfully finished'
+);
 
 INSERT INTO manifest(
 		id,
