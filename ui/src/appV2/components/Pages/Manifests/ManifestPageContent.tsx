@@ -106,45 +106,7 @@ const ManifestPageContent: React.FunctionComponent = () => {
                 </Timestamp>
               </DescriptionListDescription>
             </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Type</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Tooltip content={manifest.generation.type}>
-                  <Label style={{ cursor: 'pointer' }} color="purple">
-                    {typeToDescription(manifest.generation)}
-                  </Label>
-                </Tooltip>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Identifier</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Tooltip content="Main identifier used as a source for the manifest generation. It's related to the TYPE.">
-                  <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.identifier}</span>
-                </Tooltip>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Generation Request</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Button
-                  variant="link"
-                  icon={<ExternalLinkSquareAltIcon />}
-                  iconPosition="end"
-                  component={(props: any) => <Link {...props} to={`/generations/${manifest.generation.id}`} />}
-                >
-                  {manifest.generation.id}
-                </Button>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Purl</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Tooltip content="Root purl">
-                  <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.rootPurl}</span>
-                </Tooltip>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
+
           </DescriptionList>
 
           <br />
@@ -152,30 +114,6 @@ const ManifestPageContent: React.FunctionComponent = () => {
           <Panel>
             <PanelMain>
               <PanelMainBody>
-                <Title headingLevel="h2">Actions</Title>
-
-                <br />
-
-                <ActionList>
-                  <ActionListItem>
-                    <Button variant="primary" icon={<DownloadIcon />} onClick={(e) => downloadManifest(manifest)}>
-                      {' '}
-                      Download
-                    </Button>
-                  </ActionListItem>
-                  <ActionListItem>
-                    <Tooltip content="Click to copy manifest content">
-                      <Button
-                        variant="secondary"
-                        icon={<CopyIcon />}
-                        onClick={(e) => onClick(e, JSON.stringify(manifest.sbom, null, 2))}
-                      >
-                        {' '}
-                        Copy
-                      </Button>
-                    </Tooltip>
-                  </ActionListItem>
-                </ActionList>
 
                 <br />
 
@@ -194,24 +132,7 @@ const ManifestPageContent: React.FunctionComponent = () => {
                 <br />
 
                 <CodeBlock
-                  actions={
-                    <>
-                      <CodeBlockAction>
-                        <ClipboardCopyButton
-                          id="copy-button"
-                          textId="code-content"
-                          aria-label="Copy to clipboard"
-                          onClick={(e) => onClick(e, JSON.stringify(manifest.sbom, null, 2))}
-                          exitDelay={copied ? 1500 : 600}
-                          maxWidth="110px"
-                          variant="plain"
-                          onTooltipHidden={() => setCopied(false)}
-                        >
-                          {copied ? 'Successfully copied to clipboard!' : 'Copy to clipboard'}
-                        </ClipboardCopyButton>
-                      </CodeBlockAction>
-                    </>
-                  }
+
                 >
                   <ExpandableSection toggleTextExpanded="Hide" toggleTextCollapsed="Show">
                     <CodeBlockCode>{JSON.stringify(manifest, null, 2)}</CodeBlockCode>

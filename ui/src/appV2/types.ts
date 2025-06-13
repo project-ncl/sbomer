@@ -76,7 +76,7 @@ export class SbomerGeneration {
     this.creationTime = new Date(payload.created);
 
     this.updatedTime = new Date(payload.updated);
-    
+
 
     this.finishedTime = payload.finished ? new Date(payload.finished) : undefined;
 
@@ -87,19 +87,12 @@ export class SbomerGeneration {
 
 export class SbomerManifest {
   public id: string;
-  public identifier: string;
-  public rootPurl: string;
   public creationTime: Date;
-  public generation: SbomerGeneration;
-  public sbom: string;
+
 
   constructor(payload: any) {
     this.id = payload.id;
-    this.identifier = payload.identifier;
-    this.rootPurl = payload.rootPurl;
-    this.creationTime = new Date(payload.creationTime);
-    this.generation = new SbomerGeneration(payload.generation);
-    this.sbom = payload.sbom;
+    this.creationTime = new Date(payload.created);
   }
 }
 
