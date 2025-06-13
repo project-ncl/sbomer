@@ -23,8 +23,7 @@ import {
   SbomerApi,
   SbomerGeneration,
   SbomerManifest,
-  SbomerRequest,
-  SbomerRequestManifest,
+  SbomerEvent,
   SbomerStats,
 } from '../types';
 
@@ -215,14 +214,14 @@ export class DefaultSbomerApiV2 implements SbomerApi {
     return request;
   }
 
-  async getRequestEvents(
+  async getEvents(
     pagination: {
       pageSize: number;
       pageIndex: number;
     },
     queryType: string,
     query: string,
-  ): Promise<{ data: SbomerRequest[]; total: number }> {
+  ): Promise<{ data: SbomerEvent[]; total: number }> {
     let queryPrefix = '';
     switch (queryType) {
       case RequestsQueryType.PNCBuild:
@@ -256,7 +255,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
     const queryFullString = queryPrefix == '' ? '' : `${queryPrefix}=${query}`;
 
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta2/requests/${encodeURIComponent(queryFullString)}?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta2/events/${encodeURIComponent(queryFullString)}?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -268,6 +267,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
     }
 
     const data = await response.json();
+    data.id
+    const requests: SbomerEvent[] = [];
 
     const requests: SbomerRequest[] = [];
 
@@ -281,14 +282,14 @@ export class DefaultSbomerApiV2 implements SbomerApi {
 
     // filtered response has different format than normal
     data.forEach((request: any) => {
-      requests.push(new SbomerRequest(request));
+      requests.push(new SbomerEvent(request));
     });
     return { data: requests, total: requests.length || 0 };
   }
 
-  async getRequestEvent(id: string): Promise<SbomerRequestManifest> {
-    const request = await this.client.get<SbomerRequestManifest>(`/api/v1beta2/requests/id=${id}`).then((response) => {
-      return new SbomerRequestManifest(response.data[0]);
+  async getRequestEvent(id: string): Promise<SbomerEvent> {
+    const request = await this.client.get<SbomerEvent>(`/api/v1beta2/events/id=${id}`).then((response) => {
+      return new SbomerEvent(response.data[0]);
     });
 
     return request;

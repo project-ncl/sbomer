@@ -110,134 +110,34 @@ export class SbomerManifest {
   }
 }
 
-export class SbomerRequest {
+
+
+export class SbomerEvent {
   public id: string;
-  public receivalTime: Date;
-  public eventType: string;
-  public eventStatus: string;
+  public parent: any;
+  public created: Date;
+  public updated: Date;
+  public finished?: Date;
+  public status: string;
   public reason: string;
-  public requestConfig: string;
-  public requestConfigTypeName: string;
-  public requestConfigTypeValue: string;
-  public event: any;
+  public metadata?: object;
+  public request?: object;
+  public generations: SbomerGeneration[] = [];
 
   constructor(payload: any) {
     this.id = payload.id;
-    this.receivalTime = new Date(payload.receivalTime);
-    this.eventType = payload.eventType;
-    this.eventStatus = payload.eventStatus;
+    this.parent = payload.parent;
+    this.created = new Date(payload.created);
+    this.updated = new Date(payload.updated);
+    if (payload.finished) {
+      this.finished = new Date(payload.finished);
+    }
+    this.status = payload.status;
     this.reason = payload.reason;
-    this.event = payload.event;
-
-    // Parse `request_config` if it exists
-    if (payload.requestConfig) {
-      try {
-        this.requestConfig = JSON.stringify(payload.requestConfig);
-        var rConfig = JSON.parse(this.requestConfig); // Convert to JSON object
-        this.requestConfigTypeName = rConfig.type;
-
-        // Match the type and extract the value
-        switch (this.requestConfigTypeName) {
-          case 'errata-advisory':
-            this.requestConfigTypeValue = rConfig.advisoryId;
-            break;
-          case 'image':
-            this.requestConfigTypeValue = rConfig.image;
-            break;
-          case 'pnc-build':
-            this.requestConfigTypeValue = rConfig.buildId;
-            break;
-          case 'pnc-operation':
-            this.requestConfigTypeValue = rConfig.operationId;
-            break;
-          case 'pnc-analysis':
-            this.requestConfigTypeValue = rConfig.milestoneId;
-            break;
-          default:
-            this.requestConfigTypeName = '';
-            this.requestConfigTypeValue = '';
-        }
-      } catch (error) {
-        console.error('Failed to parse requestConfig:', error);
-        this.requestConfig = ''; // Set to null if parsing fails
-        this.requestConfigTypeName = '';
-        this.requestConfigTypeValue = '';
-      }
-    } else {
-      this.requestConfig = '';
-      this.requestConfigTypeName = '';
-      this.requestConfigTypeValue = '';
-    }
+    this.metadata = payload.metadata;
+    this.request = payload.request;
   }
 }
-
-export class SbomerRequestManifest {
-  public reqId: string;
-  public reqReceivalTime: Date;
-  public reqEventType: string;
-  public reqEventStatus: string;
-  public reqReason: string;
-  public reqConfig: string;
-  public reqConfigTypeName: string;
-  public reqConfigTypeValue: string;
-  public reqEvent: any;
-  public manifests: SbomerManifest[] = [];
-
-  constructor(payload: any) {
-    this.reqId = payload.id;
-    this.reqReceivalTime = new Date(payload.receivalTime);
-    this.reqEventType = payload.eventType;
-    this.reqEventStatus = payload.eventStatus;
-    this.reqReason = payload.reason;
-    this.reqEvent = payload.event;
-
-    // Parse `request_config` if it exists
-    if (payload.requestConfig) {
-      try {
-        this.reqConfig = JSON.stringify(payload.requestConfig);
-        var rConfig = JSON.parse(this.reqConfig); // Convert to JSON object
-        this.reqConfigTypeName = rConfig.type;
-
-        // Match the type and extract the value
-        switch (this.reqConfigTypeName) {
-          case 'errata-advisory':
-            this.reqConfigTypeValue = rConfig.advisoryId;
-            break;
-          case 'image':
-            this.reqConfigTypeValue = rConfig.image;
-            break;
-          case 'pnc-build':
-            this.reqConfigTypeValue = rConfig.buildId;
-            break;
-          case 'pnc-operation':
-            this.reqConfigTypeValue = rConfig.operationId;
-            break;
-          case 'pnc-analysis':
-            this.reqConfigTypeValue = rConfig.milestoneId;
-            break;
-          default:
-            this.reqConfigTypeName = '';
-            this.reqConfigTypeValue = '';
-        }
-      } catch (error) {
-        console.error('Failed to parse requestConfig:', error);
-        this.reqConfig = ''; // Set to null if parsing fails
-        this.reqConfigTypeName = '';
-        this.reqConfigTypeValue = '';
-      }
-    } else {
-      this.reqConfig = '';
-      this.reqConfigTypeName = '';
-      this.reqConfigTypeValue = '';
-    }
-    if (payload.manifests) {
-      payload.manifests.forEach((man: any) => {
-        this.manifests.push(new SbomerManifest(man));
-      });
-    }
-  }
-}
-
 export type GenerateParams = {
   config: string;
 };
@@ -280,16 +180,16 @@ export type SbomerApi = {
 
   getManifest(id: string): Promise<SbomerManifest>;
 
-  getRequestEvents(
+  getEvents(
     pagination: {
       pageSize: number;
       pageIndex: number;
     },
     queryType: RequestsQueryType,
     query: string,
-  ): Promise<{ data: SbomerRequest[]; total: number }>;
+  ): Promise<{ data: SbomerEvent[]; total: number }>;
 
-  getRequestEvent(id: string): Promise<SbomerRequestManifest>;
+  getRequestEvent(id: string): Promise<SbomerEvent>;
 
   getRequestEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }>;
 };

@@ -32,16 +32,19 @@ import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/No
 
 const columnNames = {
   id: 'ID',
-  receivalTime: 'Received',
-  eventType: 'Source',
-  eventStatus: 'Request Status',
-  requestTypeName: 'Request Type Name',
-  requestTypeIdentifier: 'Request Type Identifier',
-  event: 'Event',
+  created: 'Created',
+  updated: 'Updated',
+  finished: 'Finished',
+  status: 'Status',
 };
 
 export const RequestEventTable = () => {
   const { queryType, queryValue, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
+
+  // todo enable when searching is implemented
+  const enableSearching = false;
+  // todo enable when pagination is implemented
+  const enablePagination = false;
 
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
@@ -167,11 +170,10 @@ export const RequestEventTable = () => {
       <Thead>
         <Tr>
           <Th>{columnNames.id}</Th>
-          <Th>{columnNames.eventStatus}</Th>
-          <Th>{columnNames.eventType}</Th>
-          <Th>{columnNames.requestTypeName}</Th>
-          <Th>{columnNames.requestTypeIdentifier}</Th>
-          <Th>{columnNames.receivalTime}</Th>
+          <Th>{columnNames.status}</Th>
+          <Th>{columnNames.created}</Th>
+          <Th>{columnNames.updated}</Th>
+          <Th>{columnNames.finished}</Th>
         </Tr>
       </Thead>
       <Tbody>
@@ -186,60 +188,36 @@ export const RequestEventTable = () => {
                 <pre>{requestEvent.id}</pre>
               </Link>
             </Td>
-            <Td dataLabel={columnNames.eventStatus}>
-              <Tooltip
-                isContentLeftAligned={true}
-                content={
-                  <div>
-                    <div>
-                      <strong>{requestEvent.eventStatus}</strong>
-                    </div>
-                    <div>{requestEvent.reason}</div>
-                  </div>
-                }
-              >
-                <Label color={requestEventStatusToColor(requestEvent.eventStatus)}>
-                  {requestEventStatusToDescription(requestEvent.eventStatus)}
-                </Label>
 
-                {/* <span className="pf-v5-c-timestamp pf-m-help-text">{requestEvent.eventStatus}</span> */}
-              </Tooltip>
-            </Td>
-            <Td dataLabel={columnNames.eventType}>
+            <Td dataLabel={columnNames.status}>
               <Label color="yellow">
-                {requestEvent.eventType}
+                {requestEvent.status}
               </Label>
             </Td>
-            <Td dataLabel={columnNames.requestTypeName}>
-              {requestEvent.requestConfigTypeName ? (
-                <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
-                  <span className="pf-v5-c-timestamp pf-m-help-text">
-                    {requestEvent.requestConfigTypeName}
-                  </span>
-                </Tooltip>
-              ) : null}
-            </Td>
-            <Td dataLabel={columnNames.requestTypeIdentifier}>
-              {requestEvent.requestConfigTypeValue ? (
-                <Tooltip isContentLeftAligned={true} content={<code>{requestEvent.requestConfig}</code>}>
-                  <span className="pf-v5-c-timestamp pf-m-help-text">
-                    <ClipboardCopy variant='inline-compact' position='right'>
-                      {requestEvent.requestConfigTypeValue}
-                    </ClipboardCopy>
-                  </span>
-                </Tooltip>
-              ) : null}
-            </Td>
-            <Td dataLabel={columnNames.receivalTime}>
-              <Timestamp date={requestEvent.receivalTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                {timestampToHumanReadable(Date.now() - requestEvent.receivalTime.getTime(), false, 'ago')}
+            <Td dataLabel={columnNames.created}>
+              <Timestamp date={requestEvent.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                {timestampToHumanReadable(Date.now() - requestEvent.created.getTime(), false, 'ago')}
               </Timestamp>
+            </Td>
+            <Td dataLabel={columnNames.updated}>
+              <Timestamp date={requestEvent.updated} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                {timestampToHumanReadable(Date.now() - requestEvent.updated.getTime(), false, 'ago')}
+              </Timestamp>
+            </Td>
+            <Td dataLabel={columnNames.finished}>
+              {requestEvent.finished ? (
+                <Timestamp date={requestEvent.finished} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                  {timestampToHumanReadable(Date.now() - requestEvent.finished.getTime(), false, 'ago')}
+                </Timestamp>
+              ) : (
+                <span className="pf-v5-c-timestamp pf-m-help-text">N/A</span>
+              )}
             </Td>
           </Tr>
         ))}
       </Tbody>
     </Table>
-    {paginationVisible && pagination}
+    {enablePagination && paginationVisible && pagination}
   </>
   const noResults = <NoResultsSection />
   const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
@@ -267,7 +245,7 @@ export const RequestEventTable = () => {
 
   return (
     <>
-      {filtersBar}
+      {enableSearching && filtersBar}
       {tableArea}
     </>
   );
