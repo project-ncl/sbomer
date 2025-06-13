@@ -62,7 +62,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             style={{ color: '#2196f3', backgroundColor: '#fff', borderColor: '#fff' }}
             onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
           >
-            Go to Classic API
+            Go to Classic
           </Button>
           </FlexItem>
 
