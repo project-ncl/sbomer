@@ -18,6 +18,11 @@ const Dashboard: React.FunctionComponent = () => {
               SBOMer Next Generation
             </Title>
           </GridItem>
+          <GridItem>
+            <Title headingLevel="h2" size="2xl">
+             In development, do not use
+            </Title>
+          </GridItem>
           <GridItem span={6}>
             <AboutSection />
           </GridItem>
