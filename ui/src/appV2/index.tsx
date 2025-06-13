@@ -4,19 +4,18 @@ import * as React from 'react';
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 
 import { IAppRoute, routes } from './routes';
-import { Alert } from '@patternfly/react-core';
 
-const AppV2 = ({basename}:{basename: string}) => {
+const AppV2 = ({ basename }: { basename: string }) => {
   return (
     <>
-     <RouterProvider
-      router={createBrowserRouter(
-        routes
-          .filter((route) => !route.routes)
-          .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
+      <RouterProvider
+        router={createBrowserRouter(
+          routes
+            .filter((route) => !route.routes)
+            .map((route: IAppRoute) => ({ element: route.element, path: route.path }) as RouteObject),
           { basename: basename }
-      )}
-    />
+        )}
+      />
     </>
   );
 };
