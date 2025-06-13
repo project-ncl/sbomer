@@ -4,10 +4,12 @@ import * as React from 'react';
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 
 import { IAppRoute, routes } from './routes';
+import { Alert } from '@patternfly/react-core';
 
 const AppV2 = ({basename}:{basename: string}) => {
   return (
-    <RouterProvider
+    <>
+     <RouterProvider
       router={createBrowserRouter(
         routes
           .filter((route) => !route.routes)
@@ -15,6 +17,7 @@ const AppV2 = ({basename}:{basename: string}) => {
           { basename: basename }
       )}
     />
+    </>
   );
 };
 
