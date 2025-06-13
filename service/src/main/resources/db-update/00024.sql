@@ -18,6 +18,8 @@
 
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 CREATE TABLE
     event (
         id character varying(50) NOT NULL,
@@ -52,7 +54,7 @@ CREATE INDEX idx_event_metadata_identifier ON event ((metadata->>'identifier'));
 --
 -- GIN indexes with pg_trgm (Trigram Extension) for partial matching
 --
-CREATE INDEX idx_event_metadata_source ON generation USING GIN ((metadata->>'source') gin_trgm_ops);
+CREATE INDEX idx_event_metadata_source ON event USING GIN ((metadata->>'source') gin_trgm_ops);
 -- Example: SELECT * FROM event WHERE metadata->>'source' ILIKE 'REST:%';
 
 CREATE TABLE
@@ -96,7 +98,7 @@ CREATE TABLE
         id character varying(50) NOT NULL,
         created timestamp without time zone NOT NULL,
         bom jsonb NOT NULL,
-        generation_id character varying(50) NOT NULL
+        generation_id character varying(50) NOT NULL,
         metadata jsonb,
         CONSTRAINT manifest_pkey PRIMARY KEY (id)
     );
