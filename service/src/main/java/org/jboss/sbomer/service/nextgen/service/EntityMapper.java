@@ -20,10 +20,14 @@ package org.jboss.sbomer.service.nextgen.service;
 import java.util.List;
 
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.EventStatusRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationStatusRecord;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
+import org.jboss.sbomer.service.nextgen.service.model.EventStatusHistory;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
+import org.jboss.sbomer.service.nextgen.service.model.GenerationStatusHistory;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 import org.jboss.sbomer.service.rest.mapper.MapperConfig;
 import org.mapstruct.BeanMapping;
@@ -52,4 +56,15 @@ public interface EntityMapper {
     @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
     List<GenerationRecord> toGenerationRecords(List<Generation> generations);
 
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    GenerationStatusRecord toRecord(GenerationStatusHistory status);
+
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    List<GenerationStatusRecord> toGenerationStatusRecords(List<GenerationStatusHistory> statuses);
+
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    EventStatusRecord toRecord(EventStatusHistory status);
+
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    List<EventStatusRecord> toEventStatusRecords(List<EventStatusHistory> statuses);
 }

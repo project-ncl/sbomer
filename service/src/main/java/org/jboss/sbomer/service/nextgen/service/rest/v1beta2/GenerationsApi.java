@@ -32,6 +32,7 @@ import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationStatusRecord;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
@@ -253,6 +254,24 @@ public class GenerationsApi {
         Arc.container().beanManager().getEvent().fire(new GenerationStatusChangeEvent(generationRecord));
 
         return Response.ok(generationRecord).build();
+    }
+
+    @GET
+    @Path("/{generationId}/history")
+    @Operation(summary = "Get status history of a generation")
+    @APIResponse(
+            responseCode = "200",
+            description = "Status history",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(responseCode = "404", description = "Generation not found")
+    public List<GenerationStatusRecord> getStatusesForGeneration(@PathParam("generationId") String generationId) {
+        Generation generation = Generation.findById(generationId); // NOSONAR
+
+        if (generation == null) {
+            throw new NotFoundException("Generation request with id '{}' could not be found", generationId);
+        }
+
+        return mapper.toGenerationStatusRecords(generation.getStatuses());
     }
 
     @POST
