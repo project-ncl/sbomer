@@ -41,7 +41,7 @@ export function useRequestEvents() {
     }) => {
       try {
         const pageIndexOffsetted = pageIndex - 1;
-        const response = await sbomerApi.getRequestEvents(
+        const response = await sbomerApi.getEvents(
           { pageSize, pageIndex: pageIndexOffsetted },
           queryType,
           queryValue,
