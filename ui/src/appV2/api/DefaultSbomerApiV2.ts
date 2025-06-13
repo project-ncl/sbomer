@@ -270,12 +270,11 @@ export class DefaultSbomerApiV2 implements SbomerApi {
     data.id
     const requests: SbomerEvent[] = [];
 
-    const requests: SbomerRequest[] = [];
 
     if (data.content) {
       // basic response without any filters applied
       data.content.forEach((request: any) => {
-        requests.push(new SbomerRequest(request));
+        requests.push(new SbomerEvent(request));
       });
       return { data: requests, total: data.totalHits };
     }
@@ -288,8 +287,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
   }
 
   async getRequestEvent(id: string): Promise<SbomerEvent> {
-    const request = await this.client.get<SbomerEvent>(`/api/v1beta2/events/id=${id}`).then((response) => {
-      return new SbomerEvent(response.data[0]);
+    const request  = await this.client.get<SbomerEvent>(`/api/v1beta2/events/${id}`).then((response) => {
+      return response.data as SbomerEvent;
     });
 
     return request;
