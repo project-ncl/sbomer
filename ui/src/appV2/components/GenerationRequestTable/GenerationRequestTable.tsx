@@ -23,12 +23,17 @@ const columnNames = {
   identifier: 'Identifier',
   status: 'Status',
   creationTime: 'Created',
+  updatedTime: 'Updated',
+  finishedTime: 'Finished',
 };
 
 export const GenerationRequestTable = () => {
   const navigate = useNavigate();
   const paramPage = useSearchParam('page') || 1;
   const paramPageSize = useSearchParam('pageSize') || 10;
+
+  // enable when pagination is implemented
+  const paginationEnabled = false;
 
   const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useGenerationRequests(
     +paramPage - 1,
@@ -46,6 +51,16 @@ export const GenerationRequestTable = () => {
     navigate({ search: `?page=1&pageSize=${newPerPage}` });
   };
 
+  const pagination =  <Pagination
+      itemCount={total}
+      widgetId="request-table-pagination"
+      perPage={pageSize}
+      page={pageIndex + 1}
+      variant={PaginationVariant.bottom}
+      onSetPage={onSetPage}
+      onPerPageSelect={onPerPageSelect}
+    />
+
   const table = <>
     <Table aria-label="Generation request table" variant="compact">
       <Caption>Latest manifest generations</Caption>
@@ -55,6 +70,8 @@ export const GenerationRequestTable = () => {
           <Th>{columnNames.status}</Th>
           <Th>{columnNames.type}</Th>
           <Th>{columnNames.creationTime}</Th>
+          <Th>{columnNames.updatedTime}</Th>
+          <Th>{columnNames.finishedTime}</Th>
         </Tr>
       </Thead>
       <Tbody>
@@ -100,19 +117,25 @@ export const GenerationRequestTable = () => {
                 {timestampToHumanReadable(Date.now() - generation.creationTime.getTime(), false, 'ago')}
               </Timestamp>
             </Td>
+            <Td dataLabel={columnNames.updatedTime}>
+              {generation.updatedTime && (
+                <Timestamp date={generation.updatedTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                  {timestampToHumanReadable(Date.now() - generation.updatedTime.getTime(), false, 'ago')}
+                </Timestamp>
+              )}
+            </Td>
+            <Td dataLabel={columnNames.finishedTime}>
+              {generation.finishedTime && (
+                <Timestamp date={generation.finishedTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
+                  {timestampToHumanReadable(Date.now() - generation.finishedTime.getTime(), false, 'ago')}
+                </Timestamp>
+              )}
+            </Td>
           </Tr>
         ))}
       </Tbody>
     </Table>
-    <Pagination
-      itemCount={total}
-      widgetId="request-table-pagination"
-      perPage={pageSize}
-      page={pageIndex + 1}
-      variant={PaginationVariant.bottom}
-      onSetPage={onSetPage}
-      onPerPageSelect={onPerPageSelect}
-    />
+   {paginationEnabled && pagination}
   </>
 
   const noResults = <NoResultsSection />

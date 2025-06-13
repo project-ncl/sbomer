@@ -1,4 +1,3 @@
-
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { resultToDescription, statusToColor, statusToDescription, typeToDescription } from '@appV2/utils/Utils';
 import { LazyLog } from '@melloware/react-logviewer';
@@ -184,11 +183,25 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
             <DescriptionListGroup>
               <DescriptionListTerm>Created</DescriptionListTerm>
               <DescriptionListDescription>
-                <Timestamp date={request.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {/* {timestampToHumanReadable(Date.now() - request.creationTime.getTime(), false, 'ago')} */}
-                </Timestamp>
+                <Timestamp date={request.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }} />
               </DescriptionListDescription>
             </DescriptionListGroup>
+            {request.updatedTime && (
+              <DescriptionListGroup>
+                <DescriptionListTerm>Updated</DescriptionListTerm>
+                <DescriptionListDescription>
+                  <Timestamp date={request.updatedTime} tooltip={{ variant: TimestampTooltipVariant.default }} />
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+            )}
+            {request.finishedTime && (
+              <DescriptionListGroup>
+                <DescriptionListTerm>Finished</DescriptionListTerm>
+                <DescriptionListDescription>
+                  <Timestamp date={request.finishedTime} tooltip={{ variant: TimestampTooltipVariant.default }} />
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+            )}
             <DescriptionListGroup>
               <DescriptionListTerm>Type</DescriptionListTerm>
               <DescriptionListDescription>
