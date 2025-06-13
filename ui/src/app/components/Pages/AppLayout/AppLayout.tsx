@@ -15,6 +15,9 @@ import {
   PageSidebar,
   PageSidebarBody,
   SkipToContent,
+  MastheadContent,
+  Flex,
+  FlexItem,
 } from '@patternfly/react-core';
 import { BarsIcon } from '@patternfly/react-icons';
 import * as React from 'react';
@@ -28,7 +31,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const Header = (
     <Masthead>
-      
+
       <MastheadMain><MastheadToggle>
         <Button icon={<BarsIcon />} variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation" />
       </MastheadToggle>
@@ -36,6 +39,24 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           <Link to="/"><Brand src={rhlogo} alt="Red Hat" widths={{ default: '150px' }} /></Link>
         </MastheadLogo></MastheadBrand>
       </MastheadMain>
+      <MastheadContent>
+              <Flex style={{ marginLeft: 'auto', alignItems: 'center', gap: '1rem' }}>
+                <FlexItem>
+                  <span style={{ fontWeight: 'bold', fontSize: '1.1rem', letterSpacing: '1px' }}>
+                  SBOMER CLASSIC
+                </span>
+                </FlexItem>
+                <FlexItem>
+                  <Button
+                  variant="primary"
+                  onClick={() => window.location.pathname !== '/nextgen' && (window.location.href = '/nextgen')}
+                >
+                  Go to Next Gen
+                </Button>
+                </FlexItem>
+
+              </Flex>
+            </MastheadContent>
     </Masthead>
   );
 
