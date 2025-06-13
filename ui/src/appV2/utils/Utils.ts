@@ -16,7 +16,7 @@
 /// limitations under the License.
 ///
 
-import { ManifestsQueryType, RequestsQueryType, SbomerGeneration, SbomerRequest } from '@appV2/types';
+import { ManifestsQueryType, RequestsQueryType, SbomerGeneration } from '@appV2/types';
 import { Label } from '@patternfly/react-core';
 
 const GenerationRequestTypes = new Map<string, { description?: string }>([
@@ -92,11 +92,7 @@ export function timestampToHumanReadable(millis: number, seconds?: false, suffix
   return hrd;
 }
 
-export function typeToDescription(request: SbomerGeneration): string {
-  var resolved = GenerationRequestTypes.get(request.type);
 
-  return resolved?.description ?? request.type;
-}
 
 export function statusToDescription(request: SbomerGeneration): string {
   var resolved = GenerationRequestStatuses.get(request.status);

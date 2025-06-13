@@ -1,4 +1,4 @@
-import { statusToColor, statusToDescription, timestampToHumanReadable, typeToDescription } from '@appV2/utils/Utils';
+import { statusToColor, statusToDescription, timestampToHumanReadable } from '@appV2/utils/Utils';
 import {
   Label,
   Pagination,
