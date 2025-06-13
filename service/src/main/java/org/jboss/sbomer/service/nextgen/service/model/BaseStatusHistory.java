@@ -58,7 +58,7 @@ public abstract class BaseStatusHistory extends PanacheEntityBase {
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {
-            this.id = TsidCreator.getTsid1024().toString();
+            this.id = "H" + TsidCreator.getTsid1024().toString();
         }
     }
 
