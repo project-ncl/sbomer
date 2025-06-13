@@ -15,10 +15,14 @@ import {
   PageSidebar,
   PageSidebarBody,
   SkipToContent,
+  Flex,
+  MastheadContent,
+  FlexItem,
 } from '@patternfly/react-core';
 import { BarsIcon } from '@patternfly/react-icons';
 import * as React from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -27,15 +31,43 @@ interface IAppLayout {
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const Header = (
-    <Masthead>
-
-      <MastheadMain><MastheadToggle>
-        <Button icon={<BarsIcon />} variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation" />
-      </MastheadToggle>
-        <MastheadBrand data-codemods><MastheadLogo data-codemods component="a">
-          <Link to="/"><Brand src={rhlogo} alt="Red Hat" widths={{ default: '150px' }} /></Link>
-        </MastheadLogo></MastheadBrand>
+    <Masthead style={{ backgroundColor: '#2196f3' }}>
+      <MastheadMain>
+        <MastheadToggle>
+          <Button
+            icon={<BarsIcon />}
+            variant="plain"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Global navigation"
+          />
+        </MastheadToggle>
+        <MastheadBrand data-codemods>
+          <MastheadLogo data-codemods component="a">
+            <Link to="/">
+              <Brand src={rhlogo} alt="Red Hat" widths={{ default: '150px' }} />
+            </Link>
+          </MastheadLogo>
+        </MastheadBrand>
       </MastheadMain>
+      <MastheadContent>
+        <Flex style={{ marginLeft: 'auto', alignItems: 'center', gap: '1rem' }}>
+          <FlexItem>
+            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.1rem', letterSpacing: '1px' }}>
+            SBOMER NEXT GEN
+          </span>
+          </FlexItem>
+          <FlexItem>
+            <Button
+            variant="primary"
+            style={{ color: '#2196f3', backgroundColor: '#fff', borderColor: '#fff' }}
+            onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
+          >
+            Go to Classic API
+          </Button>
+          </FlexItem>
+
+        </Flex>
+      </MastheadContent>
     </Masthead>
   );
 
