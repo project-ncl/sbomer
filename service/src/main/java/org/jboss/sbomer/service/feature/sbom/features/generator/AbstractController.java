@@ -112,7 +112,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
 
     protected abstract GenerationRequestType generationRequestType();
 
-    private String labelSelector() {
+    protected String labelSelector() {
         return Labels.defaultLabelsToMap(generationRequestType())
                 .entrySet()
                 .stream()
@@ -212,7 +212,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return the list of stored {@link Sbom}s
      */
     @Transactional
-    protected List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
+    public List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
         MDCUtils.removeOtelContext();
         MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
         MDCUtils.addOtelContext(generationRequest.getMDCOtel());
@@ -263,7 +263,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param taskRun The {@link TaskRun} to check
      * @return {@code true} if the {@link TaskRun} finished, {@code false} otherwise
      */
-    protected boolean isFinished(TaskRun taskRun) {
+    public boolean isFinished(TaskRun taskRun) {
         if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
                 && !taskRun.getStatus().getConditions().isEmpty()
                 && (Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")
@@ -284,7 +284,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return {@code true} if the {@link TaskRun} finished successfully, {@code false} otherwise or {@code null} in
      *         case it is still in progress.
      */
-    protected Boolean isSuccessful(TaskRun taskRun) {
+    public Boolean isSuccessful(TaskRun taskRun) {
         if (!isFinished(taskRun)) {
             log.trace("TaskRun '{}' still in progress", taskRun.getMetadata().getName());
             return null; // FIXME: This is not really binary, but trinary state
@@ -333,7 +333,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         return false;
     }
 
-    protected String getDetailedFailureMessage(TaskRun taskRun) {
+    public String getDetailedFailureMessage(TaskRun taskRun) {
         if (taskRun.getStatus() == null || taskRun.getStatus().getSteps() == null) {
             return "TaskRun failed with no step information available.";
         }
@@ -563,7 +563,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 });
     }
 
-    protected void performPost(List<Sbom> sboms) {
+    public void performPost(List<Sbom> sboms) {
         CompletableFuture<Void> publishToUmb = CompletableFuture.runAsync(() -> {
             try {
                 notificationService.notifyCompleted(sboms);
@@ -571,6 +571,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 log.warn(e.getMessage(), e);
             }
         }).exceptionally(e -> {
+            log.error("An error occurred while sending UMB notification", e);
             throw new ApplicationException("UMB notification failed: {}", e.getMessage(), e);
         });
 
@@ -581,6 +582,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 log.warn(e.getMessage(), e);
             }
         }).exceptionally(e -> {
+            log.error("An error occurred while uploading manifests to Atlas", e);
             throw new ApplicationException("Atlas upload failed: {}", e.getMessage(), e);
         });
 
@@ -658,7 +660,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param manifestPaths List of {@link Path}s to manifests in JSON format.
      * @return List of {@link Bom}s.
      */
-    protected List<Bom> readManifests(List<Path> manifestPaths) {
+    public List<Bom> readManifests(List<Path> manifestPaths) {
         List<Bom> boms = new ArrayList<>();
 
         log.info("Reading {} manifests...", manifestPaths.size());
