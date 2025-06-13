@@ -204,6 +204,24 @@ public class GenerationsApi {
         return Response.ok(mapper.toRecord(generation)).build();
     }
 
+    @GET
+    @Path("/{generationId}/manifests")
+    @Operation(summary = "Get all manifests related to a particular generation")
+    @APIResponse(
+            responseCode = "200",
+            description = "List of manifests",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(responseCode = "404", description = "Generation not found")
+    public List<ManifestRecord> getManifestsForGeneration(@PathParam("generationId") String generationId) {
+        Generation generation = Generation.findById(generationId); // NOSONAR
+
+        if (generation == null) {
+            throw new NotFoundException("Generation request with id '{}' could not be found", generationId);
+        }
+
+        return mapper.toManifestRecords(generation.getManifests());
+    }
+
     @PATCH
     @Path("/{generationId}/status")
     @Operation(summary = "Update progress of a generation task (Worker only)")
