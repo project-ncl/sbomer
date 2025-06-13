@@ -93,7 +93,7 @@ public class Manifest extends PanacheEntityBase {
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {
-            this.id = TsidCreator.getTsid1024().toString();
+            this.id = "M" + TsidCreator.getTsid1024().toString();
         }
     }
 

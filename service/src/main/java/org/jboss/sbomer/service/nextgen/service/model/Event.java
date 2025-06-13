@@ -178,7 +178,7 @@ public class Event extends PanacheEntityBase {
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {
-            this.id = TsidCreator.getTsid1024().toString();
+            this.id = "E" + TsidCreator.getTsid1024().toString();
         }
 
         statuses.add(new EventStatusHistory(this, status, reason));

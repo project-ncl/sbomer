@@ -174,7 +174,7 @@ public class Generation extends PanacheEntityBase {
     @PrePersist
     protected void onPrePersist() {
         if (this.id == null) {
-            this.id = TsidCreator.getTsid1024().toString();
+            this.id = "G" + TsidCreator.getTsid1024().toString();
         }
 
         statuses.add(new GenerationStatusHistory(this, status, reason));
