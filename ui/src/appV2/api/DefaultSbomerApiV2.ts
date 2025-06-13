@@ -198,8 +198,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
 
     const requests: SbomerGeneration[] = [];
 
-    if (data.content) {
-      data.content.forEach((request: any) => {
+    if (data) {
+      data.forEach((request: any) => {
         requests.push(new SbomerGeneration(request));
       });
     }

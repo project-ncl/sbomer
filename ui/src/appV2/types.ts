@@ -63,20 +63,32 @@ export class SbomerGeneration {
   public reason: string;
   public identifier: string;
   public type: string;
-  public config: string;
-  public envConfig: string;
   public creationTime: Date;
+  public updatedTime?: Date;
+  public finishedTime?: Date;
+  public request?: object;
+  public metadata?: object;
 
-  constructor(payload: any) {
+   constructor(payload: any) {
     this.id = payload.id;
     this.status = payload.status;
     this.result = payload.result;
     this.reason = payload.reason;
-    this.identifier = payload.identifier;
-    this.type = payload.type;
-    this.creationTime = new Date(payload.creationTime);
-    this.config = payload.config;
-    this.envConfig = payload.envConfig;
+
+    if (payload.request && payload.request.target) {
+      this.identifier = payload.request.target.identifier || "unknown";
+      this.type = payload.request.target.type || "unknown";
+    }
+
+    this.creationTime = new Date(payload.created);
+    if (payload.updated) {
+      this.updatedTime = new Date(payload.updated);
+    }
+
+    this.finishedTime = payload.finished ? new Date(payload.finished) : undefined;
+
+    this.request = payload.request;
+    this.metadata = payload.metadata;
   }
 }
 
