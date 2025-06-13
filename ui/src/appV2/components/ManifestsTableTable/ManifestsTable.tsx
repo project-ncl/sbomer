@@ -31,15 +31,17 @@ import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/No
 
 const columnNames = {
   id: 'ID',
-  rootPurl: 'Purl',
-  type: 'Resource Type',
-  identifier: 'Resource Identifier',
   creationTime: 'Created',
 };
 
 export const ManifestsTable = () => {
 
   const { queryType, queryValue, pageIndex, pageSize, setFilters } = useManifestsFilters();
+
+  // enable when pagination is implemented
+  const enableFiltering = false
+  // enable when pagination is implemented
+  const enablePagination = false;
 
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
@@ -142,6 +144,16 @@ export const ManifestsTable = () => {
     variant='primary'
     onClick={() => onSearchCall()}>Search</Button>
 
+  const pagination = <Pagination
+      itemCount={total}
+      widgetId="manifests-table-pagination"
+      perPage={pageSize}
+      page={pageIndex}
+      variant={PaginationVariant.bottom}
+      onSetPage={onSetPage}
+      onPerPageSelect={onPerPageSelect}
+    />
+
 
   const table = <>
     <Table aria-label="Manifests table" variant="compact">
@@ -149,8 +161,7 @@ export const ManifestsTable = () => {
       <Thead>
         <Tr>
           <Th>{columnNames.id}</Th>
-          <Th>{columnNames.type}</Th>
-          <Th>{columnNames.identifier}</Th>
+
           <Th>{columnNames.creationTime}</Th>
         </Tr>
       </Thead>
@@ -166,26 +177,6 @@ export const ManifestsTable = () => {
                 <pre>{manifest.id}</pre>
               </Link>
             </Td>
-            <Td dataLabel={columnNames.type}>
-              <Label color="purple">
-                {typeToDescription(manifest.generation)}
-              </Label>
-            </Td>
-            <Td dataLabel={columnNames.identifier}>
-              <Tooltip
-                isContentLeftAligned={true}
-                content={
-                  <div>
-                    <div>
-                      <strong>Purl</strong>
-                    </div>
-                    <div>{manifest.rootPurl}</div>
-                  </div>
-                }
-              >
-                <span className="pf-v5-c-timestamp pf-m-help-text">{manifest.identifier}</span>
-              </Tooltip>
-            </Td>
             <Td dataLabel={columnNames.creationTime}>
               <Timestamp date={manifest.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
                 {timestampToHumanReadable(Date.now() - manifest.creationTime.getTime(), false, 'ago')}
@@ -195,15 +186,7 @@ export const ManifestsTable = () => {
         ))}
       </Tbody>
     </Table>
-    <Pagination
-      itemCount={total}
-      widgetId="manifests-table-pagination"
-      perPage={pageSize}
-      page={pageIndex}
-      variant={PaginationVariant.bottom}
-      onSetPage={onSetPage}
-      onPerPageSelect={onPerPageSelect}
-    />
+    {enablePagination && pagination}
   </>
   const noResults = <NoResultsSection />
   const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
@@ -231,7 +214,7 @@ export const ManifestsTable = () => {
 
 
   return <>
-    {filtersBar}
+    {enableFiltering && filtersBar}
     {tableArea}
   </>
 
