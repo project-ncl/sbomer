@@ -8,7 +8,7 @@ const AppSwitcherWrapper = () => {
 
   return (
     <>
-      {useV2 ? <AppV2 basename="/nextgen"/> : <App />}
+      {useV2 ? <AppV2 basename="/nextgen" /> : <App />}
     </>
   );
 };
