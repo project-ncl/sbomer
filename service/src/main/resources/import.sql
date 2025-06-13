@@ -3357,7 +3357,7 @@ VALUES (
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
-        '{}',
+        '{"target":{"identifier":"quay.io/pct-security/mequal:latest","type":"CONTAINER_IMAGE"},"generator":{"name":"syft","version":"1.26.1","config":{"format":"CYCLONEDX_1.6_JSON","resources":{"requests":{"cpu":"100m","memory":"300Mi"},"limits":{"cpu":"1000m","memory":"1Gi"}},"options":{}}}}',
         'FINISHED',
         'SUCCESS',
         'Generation successfully finished'
