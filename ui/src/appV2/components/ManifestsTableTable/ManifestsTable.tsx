@@ -1,16 +1,14 @@
 import { useManifests } from '@appV2/components/ManifestsTableTable/useSboms';
 import { useManifestsFilters } from '@appV2/components/ManifestsTableTable/useManifestsFilters';
 import { ManifestsQueryType } from '@appV2/types';
-import { timestampToHumanReadable, typeToDescription } from '@appV2/utils/Utils';
+import { timestampToHumanReadable } from '@appV2/utils/Utils';
 import {
-  Label,
   Pagination,
   PaginationVariant,
   Skeleton,
   Timestamp,
   TimestampTooltipVariant,
   ToolbarItem,
-  Tooltip,
   Toolbar,
   Select,
   SearchInput,
