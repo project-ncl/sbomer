@@ -17,26 +17,31 @@
  */
 package org.jboss.sbomer.service.nextgen.generator.rhrelease;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
-import org.jboss.sbomer.service.nextgen.service.model.Event;
-import org.jboss.sbomer.service.nextgen.service.model.Generation;
-import org.jboss.sbomer.service.nextgen.service.model.Manifest;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
@@ -53,82 +58,94 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
     }
 
     @Override
-    public Set<String> getTypes() {
+    public Set<String> getSupportedTypes() {
         return Set.of("EVENT");
     }
 
     @Override
-    // @ActivateRequestContext
-    public void handle(EventRecord e, GenerationRecord generationRecord) {
+    public void generate(GenerationRecord generationRecord) {
+        log.info("Requested Red Hat release manifests as part of generation '{}'", generationRecord.id());
+
+        log.debug("Reading generation request...");
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generationRecord.request());
 
-        // Fetch event identified by the provided ID
-        Event event = Event.findById(request.target().identifier());
-        // Event event = Event
-        // .find(
-        // "FROM Event e LEFT JOIN FETCH e.generations g LEFT JOIN FETCH g.manifests WHERE e.id = ?1",
-        // e.id())
-        // .firstResult();
+        EventRecord eventRecord;
 
-        if (event == null) {
+        log.debug("Fetching event with identifier '{}'...", request.target().identifier());
+
+        try {
+            eventRecord = sbomerClient.getEvent(request.target().identifier());
+        } catch (NotFoundException ex) {
             throw new ApplicationException(
                     "Event with id '{}' could not be found, cannot process generation",
-                    request.target().identifier());
-
+                    request.target().identifier(),
+                    ex);
         }
 
-        List<Manifest> manifests = new ArrayList<>();
+        List<JsonNode> boms = new ArrayList<>();
 
         // Iterate over each generation that was part of that particular event and create copies
         // updates
-        for (Generation g : event.getGenerations()) {
-            log.info("Processing generation '{}'", g.getId());
+        for (GenerationRecord g : eventRecord.generations()) {
+            log.info("Processing generation '{}'", g.id());
 
-            for (Manifest m : g.getManifests()) {
-                log.info("Processing manifest '{}'", m.getId());
+            for (ManifestRecord m : g.manifests()) {
+                log.info("Processing manifest '{}'", m.id());
 
-                Manifest manifest = Manifest.builder().withBom(m.getBom()).build();
-                manifests.add(manifest);
+                JsonNode bom = sbomerClient.getManifestContent(m.id());
+
+                boms.add(bom);
             }
         }
 
         // Apply qualifier transformations to all manifests
-        manifests.forEach(m -> adjustQualifiers(m));
+        boms.forEach(m -> adjustQualifiers(m));
 
         // Create release manifest
-        manifests.add(createReleaseManifest(manifests));
+        boms.add(createReleaseManifest(boms));
+
+        if (boms.isEmpty()) {
+            log.info("No manifests to upload...");
+
+            updateStatus(
+                    generationRecord.id(),
+                    GenerationStatus.FAILED,
+                    GenerationResult.ERR_GENERAL,
+                    "No manifests were generated");
+        }
 
         // Save all manifests linked to the current generation
-        save(manifests, generationRecord.id());
+        upload(boms, generationRecord.id());
     }
 
-    // @Transactional(value = Transactional.TxType.REQUIRES_NEW)
-    protected void save(List<Manifest> manifests, String generationId) {
-        Generation generation = Generation.findById(generationId);
+    @Retry(maxRetries = 5, delay = 10, delayUnit = ChronoUnit.SECONDS, abortOn = NotFoundException.class)
+    protected void upload(List<JsonNode> boms, String generationId) {
+        log.info("Uploading {} manifests...", boms.size());
 
-        if (generation == null) {
-            throw new ApplicationException(
-                    "Generation with id '{}' could not be found, cannot process generation",
-                    generationId);
+        for (JsonNode bom : boms) {
+            log.info("Uploading manifest...");
+            ManifestRecord manifestRecord = sbomerClient.uploadManifest(generationId, bom);
+            log.info("Manifest uploaded, registered with id '{}", manifestRecord.id());
         }
 
-        for (Manifest manifest : manifests) {
-            manifest.setGeneration(generation);
-            generation.getManifests().add(manifest);
-        }
-
-        generation.setStatus(GenerationStatus.FINISHED);
-        generation.setReason("Successfully generated release manifests");
-        generation.save();
-
-        // TODO: send event
+        updateStatus(
+                generationId,
+                GenerationStatus.FINISHED,
+                GenerationResult.SUCCESS,
+                "Release manifest generation completed successfully");
     }
 
-    private void adjustQualifiers(Manifest manifest) {
+    private void adjustQualifiers(JsonNode bom) {
+        log.info("Adjusting qualifiers...");
 
+        log.info("Qualifiers adjusted");
     }
 
-    private Manifest createReleaseManifest(List<Manifest> manifests) {
-        return Manifest.builder().build();
+    private JsonNode createReleaseManifest(List<JsonNode> boms) {
+        log.info("Creating release manifest...");
+
+        log.info("Release manifest created");
+
+        return JsonNodeFactory.instance.objectNode();
     }
 }
