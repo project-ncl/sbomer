@@ -1,4 +1,4 @@
-package org.jboss.sbomer.service.test.scheduler;
+package org.jboss.sbomer.service.test.unit.scheduler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;

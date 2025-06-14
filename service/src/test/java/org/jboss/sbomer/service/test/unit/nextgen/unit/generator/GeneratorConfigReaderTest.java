@@ -1,8 +1,7 @@
-package org.jboss.sbomer.service.test.nextgen.unit.generator;
+package org.jboss.sbomer.service.test.unit.nextgen.unit.generator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -11,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
@@ -50,15 +50,28 @@ public class GeneratorConfigReaderTest {
 
     @Test
     void shouldHandleNonExistingCm() {
-        assertNull(generatorConfigProvider.getGeneratorsConfig());
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
+            generatorConfigProvider.getConfig();
+        });
+
+        assertEquals(
+                "Could not read generators config, please make sure the system is properly configured, unable to process request",
+                ex.getMessage());
+
     }
 
     @Test
     void shouldHandleCmWithMissingContent() {
         ConfigMap expectedConfigMap = new ConfigMapBuilder().withNewMetadata().withName(CM_NAME).endMetadata().build();
-
         when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
-        assertNull(generatorConfigProvider.getGeneratorsConfig());
+
+        ApplicationException ex = assertThrows(ApplicationException.class, () -> {
+            generatorConfigProvider.getConfig();
+        });
+
+        assertEquals(
+                "Could not read generators config, please make sure the system is properly configured, unable to process request",
+                ex.getMessage());
     }
 
     @Test
@@ -71,7 +84,7 @@ public class GeneratorConfigReaderTest {
 
         when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
 
-        GeneratorsConfig config = generatorConfigProvider.getGeneratorsConfig();
+        GeneratorsConfig config = generatorConfigProvider.getConfig();
         assertNotNull(config);
         assertTrue(config.defaultGeneratorMappings().get(0).targetType().equals("CONTAINER_IMAGE"));
         assertTrue(config.generatorProfiles().get(0).name().equals("syft"));

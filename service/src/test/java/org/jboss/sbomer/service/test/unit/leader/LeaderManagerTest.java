@@ -1,4 +1,4 @@
-package org.jboss.sbomer.service.test.leader;
+package org.jboss.sbomer.service.test.unit.leader;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
