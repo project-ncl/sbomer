@@ -63,6 +63,11 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
     }
 
     @Override
+    public String getGeneratorName() {
+        return "Red Hat Release Generator";
+    }
+
+    @Override
     public void generate(GenerationRecord generationRecord) {
         log.info("Requested Red Hat release manifests as part of generation '{}'", generationRecord.id());
 

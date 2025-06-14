@@ -27,6 +27,8 @@ public interface Generator {
      */
     public Set<String> getSupportedTypes();
 
+    public String getGeneratorName();
+
     /**
      * Main method that initiates generation.
      *
