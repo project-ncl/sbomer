@@ -65,7 +65,7 @@ public abstract class AbstractGenerator implements Generator {
                 event.generation().status());
 
         if (!event.generation().isSupported(getSupportedTypes())
-                || event.generation().status() != GenerationStatus.NEW) {
+                || event.generation().status() != GenerationStatus.SCHEDULED) {
             log.info("This is not an event handled by this generator");
             return;
         }
@@ -74,7 +74,12 @@ public abstract class AbstractGenerator implements Generator {
 
         managedExecutor.runAsync(() -> {
             try {
-                updateStatus(event.generation().id(), GenerationStatus.GENERATING, null, "Generation in progress");
+                updateStatus(
+                        event.generation().id(),
+                        GenerationStatus.GENERATING,
+                        null,
+                        "Generation in progress, handled by {}",
+                        getGeneratorName());
 
                 generate(event.generation());
             } catch (Exception e) {
