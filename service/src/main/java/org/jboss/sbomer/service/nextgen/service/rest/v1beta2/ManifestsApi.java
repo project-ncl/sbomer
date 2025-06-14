@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.nextgen.service.rest.v1beta2;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -32,6 +33,8 @@ import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
@@ -87,7 +90,9 @@ public class ManifestsApi {
 
     @GET
     @Path("/{id}")
-    @Operation(summary = "Get specific manifest", description = "Get manifest by the identifier")
+    @Operation(
+            summary = "Get specific manifest.",
+            description = "Get manifest by the identifier. It does not return the manifest content. For this purpose you need to use /manifests/{id}/bom endpoint.")
     @Parameter(
             name = "id",
             description = "Manifest identifier",
@@ -124,5 +129,47 @@ public class ManifestsApi {
         }
 
         return mapper.toRecord(manifest);
+    }
+
+    @GET
+    @Path("/{id}/bom")
+    @Operation(summary = "Get specific manifest content", description = "Get manifest content by the identifier")
+    @Parameter(
+            name = "id",
+            description = "Manifest identifier",
+            examples = { @ExampleObject(value = "88CA2291D4014C6", name = "Manifest identifier") },
+            schema = @Schema(implementation = Map.class))
+    @APIResponse(
+            responseCode = "200",
+            description = "Event content",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ManifestRecord.class)))
+    @APIResponse(
+            responseCode = "400",
+            description = "Malformed request",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "404",
+            description = "Manifest could not be found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    public JsonNode getContentById(@PathParam("id") String manifestId) {
+        Manifest manifest = Manifest.findById(manifestId); // NOSONAR
+
+        if (manifest == null) {
+            throw new NotFoundException("Manifest with id '{}' could not be found", manifestId);
+        }
+
+        return manifest.getBom();
     }
 }

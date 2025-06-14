@@ -51,35 +51,59 @@ import jakarta.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 public interface SBOMerClient {
 
+    //
+    // Generations
+    //
+
     @Traced
     @SpanName("sbomer.generations.post")
     @POST
     @Path("/generations")
-    GenerationsResponse requestGenerations(GenerationsRequest generationRecord);
+    public GenerationsResponse requestGenerations(GenerationsRequest generationRecord);
 
     @Traced
     @SpanName("sbomer.generations.get.id")
     @GET
     @Path("/generations/{generationId}")
-    GenerationRecord getGeneration(@PathParam("generationId") String generationId);
+    public GenerationRecord getGeneration(@PathParam("generationId") String generationId);
 
     @Traced
-    @SpanName("sbomer.generations.patch.status")
+    @SpanName("sbomer.generations.status.update")
     @PATCH
     @Path("/generations/{generationId}/status")
-    GenerationRecord updateGenerationStatus(
+    public GenerationRecord updateGenerationStatus(
             @PathParam("generationId") String generationId,
             GenerationStatusUpdatePayload payload);
 
     @Traced
-    @SpanName("sbomer.generations.patch.manifests")
+    @SpanName("sbomer.generations.manifests.upload")
     @POST
     @Path("/generations/{generationId}/manifests")
     ManifestRecord uploadManifest(@PathParam("generationId") String generationId, JsonNode manifest);
+
+    //
+    // Events
+    //
+
+    @Traced
+    @SpanName("sbomer.events.get.id")
+    @GET
+    @Path("/events/{eventId}")
+    public EventRecord getEvent(@PathParam("eventId") String eventId);
 
     @Traced
     @SpanName("sbomer.events.patch.status")
     @PATCH
     @Path("/events/{eventId}/status")
-    EventRecord updateEventStatus(@PathParam("eventId") String eventId, EventStatusUpdatePayload payload);
+    public EventRecord updateEventStatus(@PathParam("eventId") String eventId, EventStatusUpdatePayload payload);
+
+    //
+    // Manifests
+    //
+
+    @Traced
+    @SpanName("sbomer.manifests.get.bom")
+    @GET
+    @Path("/manifests/{manifestId}/bom")
+    JsonNode getManifestContent(@PathParam("manifestId") String manifestId);
 }
