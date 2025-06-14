@@ -25,7 +25,7 @@ import io.quarkus.resteasy.reactive.links.RestLinkId;
 
 /**
  * Representation of a status update.
- 
+ *
  */
 public record GenerationStatusRecord(@RestLinkId String id, Instant timestamp, GenerationStatus status, String reason) {
 

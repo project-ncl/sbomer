@@ -31,7 +31,7 @@ quarkus:
     database:
       generation: drop-and-create
     log:
-      sql: true
+      sql: false
 
   log:
     console:
@@ -41,6 +41,8 @@ quarkus:
     "errata":
       url: "https://dummy"
     "pyxis":
+      url: "https://dummy"
+    "sbomer":
       url: "https://dummy"
 
   operator-sdk:

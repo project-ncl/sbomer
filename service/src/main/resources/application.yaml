@@ -45,6 +45,7 @@ mp:
         enabled: ${sbomer.features.umb.enabled}
         client-options-name: umb
         failure-strategy: reject
+
     outgoing:
       finished:
         port: ${UMB_BROKER_PORT}

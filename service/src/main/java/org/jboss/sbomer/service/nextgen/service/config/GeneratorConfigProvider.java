@@ -39,17 +39,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.Scheduled.ConcurrentExecution;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
-@NoArgsConstructor
 @Slf4j
 public class GeneratorConfigProvider {
 
@@ -59,7 +55,15 @@ public class GeneratorConfigProvider {
 
     String sbomerReleaseName;
 
-    GeneratorsConfig config;
+    protected GeneratorsConfig config;
+
+    public GeneratorsConfig getConfig() {
+        if (config == null) {
+            updateConfig();
+        }
+
+        return config;
+    }
 
     @Inject
     public GeneratorConfigProvider(KubernetesClient kubernetesClient) {
@@ -67,36 +71,14 @@ public class GeneratorConfigProvider {
         this.sbomerReleaseName = ConfigUtils.getRelease();
     }
 
-    public List<GeneratorProfile> getGeneratorProfiles() {
-        GeneratorsConfig config = getGeneratorsConfig();
-
-        return config.generatorProfiles();
-    }
-
-    void init(@Observes StartupEvent ev) {
-        this.config = getGeneratorsConfig();
-    }
-
     /**
-     * Read the generator config periodically and cache it.
+     * <p>
+     * Reads, deserializes and stores generation config.
+     * </p>
+     *
      */
-    @Scheduled(every = "30s", delay = 10, delayUnit = TimeUnit.SECONDS, concurrentExecution = ConcurrentExecution.SKIP)
+    @Scheduled(every = "20s", delay = 10, delayUnit = TimeUnit.SECONDS, concurrentExecution = ConcurrentExecution.SKIP)
     public void updateConfig() {
-        this.config = getGeneratorsConfig();
-    }
-
-    /**
-     * <p>
-     * Reads and deserializes generation config.
-     * </p>
-     *
-     * <p>
-     * It provides additional configuration and defaults as well.
-     * </p>
-     *
-     * @return Generators configs and defaults.
-     */
-    public GeneratorsConfig getGeneratorsConfig() {
         String content = getCmContent(cmName());
 
         if (content == null) {
@@ -116,7 +98,7 @@ public class GeneratorConfigProvider {
                     "Could not read generators config, please make sure the system is properly configured, unable to process request");
         }
 
-        return config;
+        this.config = config;
     }
 
     public GenerationRequestSpec buildEffectiveRequest(GenerationRequestSpec requestSpec) {
@@ -128,7 +110,7 @@ public class GeneratorConfigProvider {
         log.debug("Will build effective config for provided request: {}", requestSpec);
         log.debug("Searching for generators that support requested '{}' type", requestSpec.target().type());
 
-        Optional<DefaultGeneratorMappingEntry> generatorMappingForSelectedTypeOpt = this.config
+        Optional<DefaultGeneratorMappingEntry> generatorMappingForSelectedTypeOpt = getConfig()
                 .defaultGeneratorMappings()
                 .stream()
                 .filter(m -> m.targetType().equals(requestSpec.target().type()))
@@ -138,14 +120,14 @@ public class GeneratorConfigProvider {
             throw new ClientException(
                     "Provided target: '{}' is not supported. Supported targets: {}",
                     requestSpec.target().type(),
-                    this.config.defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
+                    getConfig().defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
         }
 
         GeneratorProfile generatorProfile = null;
         GeneratorVersionProfile generatorVersionProfile = null;
 
         if (requestSpec.generator() != null && requestSpec.generator().name() != null) {
-            Optional<GeneratorProfile> generatorProfileOpt = this.config.generatorProfiles()
+            Optional<GeneratorProfile> generatorProfileOpt = getConfig().generatorProfiles()
                     .stream()
                     .filter(p -> p.name().equals(requestSpec.generator().name()))
                     .findFirst();
@@ -187,7 +169,7 @@ public class GeneratorConfigProvider {
             log.info("Will use '{}' generator, trying to find best profile", defaultGenerator);
 
             // Now find the profile for this generator
-            Optional<GeneratorProfile> generatorProfileOpt = this.config.generatorProfiles()
+            Optional<GeneratorProfile> generatorProfileOpt = getConfig().generatorProfiles()
                     .stream()
                     .filter(p -> p.name().equals(defaultGenerator))
                     .findFirst();
@@ -245,7 +227,7 @@ public class GeneratorConfigProvider {
         log.debug("Will build effective config for provided request: {}", requestSpec);
         log.debug("Searching for generators that support requested '{}' type", requestSpec.target().type());
 
-        Optional<DefaultGeneratorMappingEntry> generatorMappingOpt = this.config.defaultGeneratorMappings()
+        Optional<DefaultGeneratorMappingEntry> generatorMappingOpt = getConfig().defaultGeneratorMappings()
                 .stream()
                 .filter(m -> m.targetType().equals(requestSpec.target().type()))
                 .findFirst();
@@ -254,7 +236,7 @@ public class GeneratorConfigProvider {
             throw new ClientException(
                     "Provided target: '{}' is not supported. Supported targets: {}",
                     requestSpec.target().type(),
-                    this.config.defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
+                    getConfig().defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
         }
 
         if (requestSpec.generator() == null) {
@@ -269,7 +251,7 @@ public class GeneratorConfigProvider {
         String defaultGenerator = generatorMappingOpt.get().generators().get(0);
 
         // Now find the profile for this generator
-        Optional<GeneratorProfile> generatorProfileOpt = this.config.generatorProfiles()
+        Optional<GeneratorProfile> generatorProfileOpt = getConfig().generatorProfiles()
                 .stream()
                 .filter(p -> p.name().equals(defaultGenerator))
                 .findFirst();
