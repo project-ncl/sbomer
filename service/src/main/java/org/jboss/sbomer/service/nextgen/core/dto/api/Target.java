@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.nextgen.core.dto.api;
 
+import jakarta.validation.constraints.NotNull;
+
 /**
  * Identifier of the deliverable to be manifested.
  *
@@ -26,5 +28,5 @@ package org.jboss.sbomer.service.nextgen.core.dto.api;
  *        example:
  *        {@code registry.access.redhat.com/ubi8@sha256:0c1757c4526cfd7fdfedc54fadf4940e7f453201de65c0fefd454f3dde117273}.
  */
-public record Target(String type, String identifier) {
+public record Target(@NotNull String type, @NotNull String identifier) {
 }

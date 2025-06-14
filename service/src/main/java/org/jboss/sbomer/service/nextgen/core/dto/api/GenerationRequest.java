@@ -17,10 +17,12 @@
  */
 package org.jboss.sbomer.service.nextgen.core.dto.api;
 
+import jakarta.validation.constraints.NotNull;
+
 /**
  * Represents a single generation request. This object is used to encapsulate information that is required to start a
  * generation of manifest for a single deliverable.
  */
-public record GenerationRequest(Generator generator, Target target) {
+public record GenerationRequest(Generator generator, @NotNull Target target) {
 
 }

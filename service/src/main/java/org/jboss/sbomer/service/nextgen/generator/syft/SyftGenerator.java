@@ -41,7 +41,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.nextgen.controller.tekton.AbstractTektonController;
 import org.jboss.sbomer.service.nextgen.controller.tekton.GenerationTaskRunEventProvider;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
@@ -103,12 +102,12 @@ public class SyftGenerator extends AbstractTektonController {
     }
 
     @Override
-    public Set<String> getTypes() {
+    public Set<String> getSupportedTypes() {
         return Set.of("CONTAINER_IMAGE");
     }
 
     @Override
-    public void handle(EventRecord eventRecord, GenerationRecord generationRecord) {
+    public void generate(GenerationRecord generationRecord) {
         reconcile(generationRecord, Collections.emptySet());
     }
 

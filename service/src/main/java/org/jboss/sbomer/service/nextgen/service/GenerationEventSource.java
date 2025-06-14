@@ -33,7 +33,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.scheduler.GenerationSchedulerConfig;
@@ -167,10 +167,7 @@ public class GenerationEventSource {
                             .put(DEPLOYMENT_KEY, deploymentInfo));
             g.save();
 
-            Arc.container()
-                    .beanManager()
-                    .getEvent()
-                    .fire(new GenerationScheduledEvent(mapper.toRecord(g.getEvents().get(0)), mapper.toRecord(g)));
+            Arc.container().beanManager().getEvent().fire(new GenerationStatusChangeEvent(mapper.toRecord(g)));
         });
     }
 

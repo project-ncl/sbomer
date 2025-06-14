@@ -17,17 +17,18 @@
  */
 package org.jboss.sbomer.service.nextgen.core.generator;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -50,12 +52,21 @@ public abstract class AbstractGenerator implements Generator {
         this.managedExecutor = managedExecutor;
     }
 
-    public abstract void handle(EventRecord event, GenerationRecord generation);
+    /**
+     * Method that handles notification for generations. It will receive many events. We need to react only to the ones
+     * that we can handle by filtering supported types.
+     *
+     * @param event
+     */
+    protected void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationStatusChangeEvent event) {
+        log.info(
+                "Received generation status change event for generation '{}' and status '{}'",
+                event.generation().id(),
+                event.generation().status());
 
-    @Override
-    public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event) {
-        if (!event.generation().isSupported(getTypes())) {
-            // This is not an event handled by this generator
+        if (!event.generation().isSupported(getSupportedTypes())
+                || event.generation().status() != GenerationStatus.NEW) {
+            log.info("This is not an event handled by this generator");
             return;
         }
 
@@ -65,7 +76,7 @@ public abstract class AbstractGenerator implements Generator {
             try {
                 updateStatus(event.generation().id(), GenerationStatus.GENERATING, null, "Generation in progress");
 
-                handle(event.event(), event.generation());
+                generate(event.generation());
             } catch (Exception e) {
                 log.error("Unable to generate", e);
 
@@ -84,7 +95,7 @@ public abstract class AbstractGenerator implements Generator {
      * Stores generated manifests in the database which results in creation of new Manifest entities.
      * </p>
      *
-     * @param generation the generation request
+     * @param generationREcord the generation request
      * @param boms the BOMs to store
      * @return the list of stored {@link Manifest}s
      */
@@ -125,7 +136,7 @@ public abstract class AbstractGenerator implements Generator {
         return manifests;
     }
 
-    // TODO: This should be retried in case of failures
+    @Retry(maxRetries = 5, delay = 10, delayUnit = ChronoUnit.SECONDS, abortOn = NotFoundException.class)
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     protected void updateStatus(
             String generationId,
