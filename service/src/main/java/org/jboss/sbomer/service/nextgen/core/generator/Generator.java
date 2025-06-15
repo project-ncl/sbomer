@@ -19,22 +19,38 @@ package org.jboss.sbomer.service.nextgen.core.generator;
 
 import java.util.Set;
 
-import org.jboss.sbomer.service.nextgen.core.events.GenerationScheduledEvent;
-
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.event.TransactionPhase;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 
 public interface Generator {
     /**
      * A set of supported target deliverable types.
      */
-    Set<String> getTypes();
+    public Set<String> getSupportedTypes();
 
     /**
-     * Main entrypoint for requesting the generation. It will receive many events. We need to react only to the ones
-     * that we can handle by filtering supported types.
+     * <p>
+     * Returns a name of the generator which is its identifier at the same time.
+     * </p>
      *
-     * @param event
+     * <p>
+     * It should contain only lower case letters and optionally '-' sign.
+     * </p>
+     *
+     * @return Generator name
      */
-    void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationScheduledEvent event);
+    public String getGeneratorName();
+
+    /**
+     * Returns a version of the generator.
+     *
+     * @return Generator version
+     */
+    public String getGeneratorVersion();
+
+    /**
+     * Main method that initiates generation.
+     *
+     * @param generationRecord
+     */
+    public void generate(GenerationRecord generationRecord);
 }
