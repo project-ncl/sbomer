@@ -64,7 +64,12 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
 
     @Override
     public String getGeneratorName() {
-        return "Red Hat Release Generator";
+        return "rh-release";
+    }
+
+    @Override
+    public String getGeneratorVersion() {
+        return "0.1.0";
     }
 
     @Override
