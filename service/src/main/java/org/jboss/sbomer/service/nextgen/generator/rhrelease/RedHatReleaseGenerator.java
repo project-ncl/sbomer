@@ -64,7 +64,7 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
 
     @Override
     public String getGeneratorName() {
-        return "rh-release";
+        return "redhat-release";
     }
 
     @Override

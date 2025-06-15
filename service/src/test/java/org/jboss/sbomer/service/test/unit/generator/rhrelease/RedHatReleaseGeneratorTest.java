@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,10 +18,13 @@ import java.util.Set;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.dto.api.Generator;
 import org.jboss.sbomer.service.nextgen.core.dto.api.Target;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
+import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.generator.rhrelease.RedHatReleaseGenerator;
@@ -42,16 +46,16 @@ public class RedHatReleaseGeneratorTest {
     @Mock
     SBOMerClient client;
 
-    private RedHatReleaseGenerator generator;
+    RedHatReleaseGenerator generator;
 
     @BeforeEach
     void beforeEach() {
-        generator = new RedHatReleaseGenerator(client, managedExecutor);
+        generator = spy(new RedHatReleaseGenerator(client, managedExecutor));
     }
 
     /**
      * A method to generate test data.
-     * 
+     *
      * @param numGenerations
      * @param numManifests
      * @return
@@ -93,13 +97,99 @@ public class RedHatReleaseGeneratorTest {
 
     @Test
     void ensureGeneratorName() {
-        assertEquals("rh-release", generator.getGeneratorName());
+        assertEquals("redhat-release", generator.getGeneratorName());
     }
 
     @Test
     void ensureGeneratorVersion() {
         assertNotNull(generator.getGeneratorVersion());
         assertFalse(generator.getGeneratorVersion().isBlank());
+    }
+
+    @Test
+    void shouldSkipEventIfUnsupportedGeneratorName() {
+        GenerationStatusChangeEvent event = new GenerationStatusChangeEvent(
+                new GenerationRecord(
+                        "G",
+                        Instant.now(),
+                        Instant.now(),
+                        null,
+                        JacksonUtils.toObjectNode(
+                                new GenerationRequest(
+                                        new Generator("unsupported", "1.0", null),
+                                        new Target("EVENT", "E1"))),
+                        null,
+                        null,
+                        GenerationStatus.SCHEDULED,
+                        null,
+                        null));
+
+        generator.onEvent(event);
+
+        verify(generator, times(0)).generate(any());
+    }
+
+    @Test
+    void shouldSkipEventIfNoGeneratorIsProvided() {
+        GenerationStatusChangeEvent event = new GenerationStatusChangeEvent(
+                new GenerationRecord(
+                        "G",
+                        Instant.now(),
+                        Instant.now(),
+                        null,
+                        JacksonUtils.toObjectNode(new GenerationRequest(null, new Target("EVENT", "E1"))),
+                        null,
+                        null,
+                        GenerationStatus.SCHEDULED,
+                        null,
+                        null));
+
+        generator.onEvent(event);
+
+        verify(generator, times(0)).generate(any());
+    }
+
+    @Test
+    void shouldSkipEventIfNoRequestIsProvided() {
+        GenerationStatusChangeEvent event = new GenerationStatusChangeEvent(
+                new GenerationRecord(
+                        "G",
+                        Instant.now(),
+                        Instant.now(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        GenerationStatus.SCHEDULED,
+                        null,
+                        null));
+
+        generator.onEvent(event);
+
+        verify(generator, times(0)).generate(any());
+    }
+
+    @Test
+    void shouldSkipEventIfUnsupportedGeneratorVersion() {
+        GenerationStatusChangeEvent event = new GenerationStatusChangeEvent(
+                new GenerationRecord(
+                        "G",
+                        Instant.now(),
+                        Instant.now(),
+                        null,
+                        JacksonUtils.toObjectNode(
+                                new GenerationRequest(
+                                        new Generator("redhat-release", "1.0", null),
+                                        new Target("EVENT", "E1"))),
+                        null,
+                        null,
+                        GenerationStatus.SCHEDULED,
+                        null,
+                        null));
+
+        generator.onEvent(event);
+
+        verify(generator, times(0)).generate(any());
     }
 
     @Test
