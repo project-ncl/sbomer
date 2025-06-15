@@ -31,18 +31,18 @@ public interface Generator {
      * <p>
      * Returns a name of the generator which is its identifier at the same time.
      * </p>
-     * 
+     *
      * <p>
      * It should contain only lower case letters and optionally '-' sign.
      * </p>
-     * 
+     *
      * @return Generator name
      */
     public String getGeneratorName();
 
     /**
      * Returns a version of the generator.
-     * 
+     *
      * @return Generator version
      */
     public String getGeneratorVersion();

@@ -24,6 +24,7 @@ import java.util.List;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
@@ -31,6 +32,7 @@ import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -52,21 +54,75 @@ public abstract class AbstractGenerator implements Generator {
         this.managedExecutor = managedExecutor;
     }
 
+    private boolean isSupportedType(GenerationRequest generationRequest) {
+        for (String type : getSupportedTypes()) {
+
+            if (generationRequest.target().type().equals(type)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Method that handles notification for generations. It will receive many events. We need to react only to the ones
      * that we can handle by filtering supported types.
      *
+     * TODO: when properly switching to Kafka we need to ensure we filter messages we are able to handle
+     *
      * @param event
      */
-    protected void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationStatusChangeEvent event) {
-        log.info(
+    public void onEvent(@Observes(during = TransactionPhase.AFTER_SUCCESS) GenerationStatusChangeEvent event) {
+        log.debug(
                 "Received generation status change event for generation '{}' and status '{}'",
                 event.generation().id(),
                 event.generation().status());
 
-        if (!event.generation().isSupported(getSupportedTypes())
-                || event.generation().status() != GenerationStatus.SCHEDULED) {
-            log.info("This is not an event handled by this generator");
+        if (event.generation().status() != GenerationStatus.SCHEDULED) {
+            log.info(
+                    "Generation status is '{}', but expected status is '{}', skipping",
+                    event.generation().status(),
+                    GenerationStatus.SCHEDULED);
+            return;
+        }
+
+        if (event.generation().request() == null) {
+            log.warn(
+                    "Generation status change event for generation '{}' does not have a request, skipping",
+                    event.generation().id());
+
+            return;
+        }
+
+        GenerationRequest generationRequest = JacksonUtils.parse(GenerationRequest.class, event.generation().request());
+
+        if (!isSupportedType(generationRequest)) {
+            log.info(
+                    "Event type: {} is not supported by the {} generator",
+                    generationRequest.target().type(),
+                    getGeneratorName());
+            return;
+        }
+
+        if (generationRequest.generator() == null) {
+            log.warn("Event does not have generator specified, skipping");
+            return;
+        }
+
+        if (!getGeneratorName().equals(generationRequest.generator().name())) {
+            log.debug(
+                    "Requested generator name: '{}' is different from requested: '{}', skipping",
+                    getGeneratorName(),
+                    generationRequest.generator().name());
+            return;
+        }
+
+        if (!getGeneratorVersion().equals(generationRequest.generator().version())) {
+            log.debug(
+                    "Requested generator version: '{}' is different from this generator's version: '{}', skipping",
+                    getGeneratorVersion(),
+                    generationRequest.generator().version());
             return;
         }
 
