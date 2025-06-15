@@ -1,6 +1,8 @@
 package org.jboss.sbomer.service.test.unit.generator.rhrelease;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,6 +49,13 @@ public class RedHatReleaseGeneratorTest {
         generator = new RedHatReleaseGenerator(client, managedExecutor);
     }
 
+    /**
+     * A method to generate test data.
+     * 
+     * @param numGenerations
+     * @param numManifests
+     * @return
+     */
     private EventRecord genEvent(int numGenerations, int numManifests) {
         List<GenerationRecord> generations = new ArrayList<>();
 
@@ -80,6 +89,17 @@ public class RedHatReleaseGeneratorTest {
     @Test
     void ensureSupportedTypes() {
         assertEquals(Set.of("EVENT"), generator.getSupportedTypes());
+    }
+
+    @Test
+    void ensureGeneratorName() {
+        assertEquals("rh-release", generator.getGeneratorName());
+    }
+
+    @Test
+    void ensureGeneratorVersion() {
+        assertNotNull(generator.getGeneratorVersion());
+        assertFalse(generator.getGeneratorVersion().isBlank());
     }
 
     @Test
