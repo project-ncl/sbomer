@@ -33,9 +33,9 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationStatusRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
-import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsRequest;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationsResponse;
@@ -120,7 +120,7 @@ public class GenerationsApi {
                         payload.eventId());
             }
 
-            // If the event exist, let's merge the original request with the curent one which contains generations as
+            // If the event exist, let's merge the original request with the current one which contains generations as
             // well.
             JsonNode mergedRequest = JacksonUtils.merge(event.getRequest(), JacksonUtils.toObjectNode(payload));
 
@@ -137,24 +137,9 @@ public class GenerationsApi {
                     .save();
         }
 
-        payload.requests().forEach(request -> {
-            log.debug("Processing request: '{}'", request.target());
-
-            // Crucial step. From a request, create an effective config which selects the appropriate generator and
-            // prepares its config.
-            GenerationRequestSpec effectiveRequest = generatorConfigProvider.buildEffectiveRequest(request);
-
-            log.debug("Effective request: '{}'", effectiveRequest);
-
-            Generation generation = Generation.builder()
-                    .withRequest(JacksonUtils.toObjectNode(effectiveRequest))
-                    .withReason("Created as a result of a REST API call")
-                    .build()
-                    .save();
-
-            event.getGenerations().add(generation);
-
-        });
+        event.setStatus(EventStatus.INITIALIZING);
+        event.setReason("Event is being initialized");
+        event.save();
 
         EventRecord eventRecord = mapper.toRecord(event);
 

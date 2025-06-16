@@ -19,6 +19,8 @@ package org.jboss.sbomer.service.nextgen.core.payloads.generation;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -31,6 +33,7 @@ import jakarta.validation.constraints.NotNull;
  * @param context Optional context related to the external generation request event.
  * @param requests List of generation requests.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record GenerationsRequest(String eventId, @Valid ContextSpec context,
         @NotNull List<GenerationRequestSpec> requests) {
 }

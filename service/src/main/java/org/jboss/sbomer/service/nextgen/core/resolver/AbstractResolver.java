@@ -70,7 +70,6 @@ public abstract class AbstractResolver implements Resolver {
             try {
                 updateEventStatus(event.event().id(), EventStatus.RESOLVING, "Event is being resolved");
                 resolve(event.event().id(), identifier);
-                updateEventStatus(event.event().id(), EventStatus.RESOLVED, "Event was successfully resolved");
             } catch (Exception e) {
                 log.error("Unable to resolve event", e);
                 updateEventStatus(

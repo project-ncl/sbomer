@@ -39,8 +39,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
-import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ServerErrorException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -160,7 +159,6 @@ public abstract class AbstractGenerator implements Generator {
      * @param boms the BOMs to store
      * @return the list of stored {@link Manifest}s
      */
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public List<ManifestRecord> storeBoms(GenerationRecord generationRecord, List<JsonNode> boms) {
         // TODO @avibelli
         MDCUtils.removeOtelContext();
@@ -197,8 +195,7 @@ public abstract class AbstractGenerator implements Generator {
         return manifests;
     }
 
-    @Retry(maxRetries = 5, delay = 10, delayUnit = ChronoUnit.SECONDS, abortOn = NotFoundException.class)
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Retry(maxRetries = 10, delay = 10, delayUnit = ChronoUnit.SECONDS, retryOn = ServerErrorException.class)
     protected void updateStatus(
             String generationId,
             GenerationStatus status,
