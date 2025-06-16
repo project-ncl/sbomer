@@ -57,7 +57,7 @@ mp:
 
 quarkus:
   application:
-    version: ${buildNumber:dev}
+    version: ${buildNumber}
 
   # Make the startup a bit nicer
   banner:
