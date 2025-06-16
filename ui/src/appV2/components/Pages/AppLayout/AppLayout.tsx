@@ -23,15 +23,42 @@ import { BarsIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 
-
 interface IAppLayout {
   children: React.ReactNode;
 }
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
+
+  // Bar above the app with the button
+  const TopBar = (
+    <div
+      style={{
+        width: '100%',
+        background: '#2196f3',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        padding: '0.5rem 1rem',
+        boxSizing: 'border-box',
+        zIndex: 2000,
+      }}
+    >
+      <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.1rem', letterSpacing: '1px', marginRight: '1rem' }}>
+        SBOMER NEXT GEN
+      </span>
+      <Button
+        variant="primary"
+        style={{ color: '#2196f3', backgroundColor: '#fff', borderColor: '#fff' }}
+        onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
+      >
+        Go to Classic
+      </Button>
+    </div>
+  );
+
   const Header = (
-    <Masthead style={{ backgroundColor: '#2196f3' }}>
+    <Masthead>
       <MastheadMain>
         <MastheadToggle>
           <Button
@@ -49,25 +76,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </MastheadLogo>
         </MastheadBrand>
       </MastheadMain>
-      <MastheadContent>
-        <Flex style={{ marginLeft: 'auto', alignItems: 'center', gap: '1rem' }}>
-          <FlexItem>
-            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.1rem', letterSpacing: '1px' }}>
-            SBOMER NEXT GEN
-          </span>
-          </FlexItem>
-          <FlexItem>
-            <Button
-            variant="primary"
-            style={{ color: '#2196f3', backgroundColor: '#fff', borderColor: '#fff' }}
-            onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
-          >
-            Go to Classic
-          </Button>
-          </FlexItem>
-
-        </Flex>
-      </MastheadContent>
     </Masthead>
   );
 
@@ -122,10 +130,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       Skip to Content
     </SkipToContent>
   );
+
   return (
-    <Page mainContainerId={pageId} masthead={Header} sidebar={sidebarOpen && Sidebar} skipToContent={PageSkipToContent}>
-      {children}
-    </Page>
+    <>
+      {TopBar}
+      <Page mainContainerId={pageId} masthead={Header} sidebar={sidebarOpen && Sidebar} skipToContent={PageSkipToContent}>
+        {children}
+      </Page>
+    </>
   );
 };
 
