@@ -3438,7 +3438,7 @@ VALUES (
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
         '{}',
-        'SUCCESS',
+        'PROCESSED',
         'Event processed'
 );
 
@@ -3506,7 +3506,7 @@ VALUES (
         'S4AAAAA',
         'E1AAAAA',
         '2023-12-25T00:00:00.000000Z',
-        'SUCCESS',
+        'PROCESSED',
         'Event successfully finished'
 );
 

@@ -78,7 +78,6 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
 
         log.debug("Reading generation request...");
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generationRecord.request());
-
         EventRecord eventRecord;
 
         log.debug("Fetching event with identifier '{}'...", request.target().identifier());

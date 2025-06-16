@@ -104,19 +104,18 @@ public class ErrataToolAdvisoryResolver extends AbstractResolver {
                 new ContextSpec(eventId, "SBOMER", null, null),
                 generationRequests);
 
+        updateEventStatus(eventId, EventStatus.RESOLVED, "Event successfully resolved");
+
         log.info("Requesting new generations...");
 
         GenerationsResponse generationResponse = sbomerClient.requestGenerations(generationsRequest);
 
-        log.info(
-                "There were {} generations requested under event '{}'",
-                generationResponse.generations().size(),
-                generationResponse.event().id());
-
-        log.info("Requested generations: {}", generationResponse.generations().stream().map(g -> g.id()).toList());
+        log.info("Generations requested, event status: {}", generationResponse.event().status());
     }
 
     public List<GenerationRequestSpec> resolveAdvisory(String eventId, String advisoryId) {
+        log.info("Resolving Advisory '{}'...", advisoryId);
+
         // Fetching Erratum
         Errata erratum = errataClient.getErratum(advisoryId);
 

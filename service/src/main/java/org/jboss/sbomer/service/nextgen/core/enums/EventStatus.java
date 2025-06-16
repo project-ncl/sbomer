@@ -19,7 +19,43 @@ package org.jboss.sbomer.service.nextgen.core.enums;
 
 // TODO: Ensure statuses are correct
 public enum EventStatus {
-    NEW, IGNORED, RESOLVING, RESOLVED, IN_PROGRESS, FAILED, SUCCESS, ERROR;
+    /**
+     * New event, no work has been performed at all. This is the starting point of the life of an event.
+     */
+    NEW,
+    /**
+     * Event ignored. The reason on why it happened should be available in teh reason field of the event.
+     */
+    IGNORED,
+    /**
+     * Event is being processed by a resolver.
+     */
+    RESOLVING,
+    /**
+     * Resolver finished the work.
+     */
+    RESOLVED,
+    /**
+     * Generation initialization is being performed.
+     */
+    INITIALIZING,
+    /**
+     * Event is initialized (generations are populated).
+     */
+    INITIALIZED,
+    /**
+     * Event is being processed (handled).
+     */
+    PROCESSING,
+    /**
+     * Event was successfully processed.
+     */
+    PROCESSED,
+    /**
+     * Processing of this event failed. The reason on why it happened should be available in teh reason field of the
+     * event.
+     */
+    ERROR;
 
     public static EventStatus fromName(String origin) {
         return EventStatus.valueOf(origin.toUpperCase());
