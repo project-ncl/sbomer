@@ -75,11 +75,15 @@ public class GenerationTaskRunEventProvider {
             return;
         }
 
+        if (taskRunInformer != null && taskRunInformer.isRunning()) {
+            log.debug("Reusing current TaskRun informer");
+            return;
+        }
+
         log.info("Instantiating informer for TaskRun");
 
         taskRunInformer = kubernetesClient.resources(TaskRun.class)
                 .withLabel(GENERATION_ID_LABEL)
-                .withLimit(50l)
                 .inform(taskRunEventHandler, 60 * 1000L); // TODO: Configure it
 
         taskRunInformer.stopped().whenComplete((v, t) -> {
@@ -87,6 +91,6 @@ public class GenerationTaskRunEventProvider {
                 log.error("Exception occurred, caught: {}", t.getMessage());
             }
         });
-
     }
+
 }

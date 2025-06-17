@@ -101,7 +101,7 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
      */
     abstract protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns);
 
-    void reconcileNew(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
+    protected void reconcileNew(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.NEW, generation.id());
         log.debug(
                 "Ignoring, the {} ({}) controller does not act on this status",
@@ -109,7 +109,7 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
                 getGeneratorVersion());
     }
 
-    void reconcileScheduled(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
+    protected void reconcileScheduled(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.SCHEDULED, generation.id());
         log.debug(
                 "Ignoring, the {} ({}) controller does not act on this status",
@@ -117,12 +117,12 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
                 getGeneratorVersion());
     }
 
-    void reconcileFinished(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
+    protected void reconcileFinished(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.FINISHED, generation.id());
         cleanupFinishedGenerationRequest(generation, relatedTaskRuns);
     }
 
-    void reconcileFailed(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
+    protected void reconcileFailed(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.FAILED, generation.id());
 
         cleanupFinishedGenerationRequest(generation, relatedTaskRuns);
