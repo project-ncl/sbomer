@@ -17,10 +17,16 @@
  */
 package org.jboss.sbomer.service.nextgen.controller.tekton;
 
+import java.util.concurrent.TimeUnit;
+
+import org.jboss.sbomer.service.leader.LeaderManager;
+
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.quarkus.runtime.StartupEvent;
+import io.quarkus.scheduler.Scheduled;
+import io.quarkus.scheduler.Scheduled.ConcurrentExecution;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -36,20 +42,44 @@ public class GenerationTaskRunEventProvider {
 
     KubernetesClient kubernetesClient;
     GenerationTaskRunEventHandler taskRunEventHandler;
+    LeaderManager leaderManager;
+
+    SharedIndexInformer<TaskRun> taskRunInformer;
 
     @Inject
     public GenerationTaskRunEventProvider(
             KubernetesClient kubernetesClient,
-            GenerationTaskRunEventHandler taskRunEventHandler) {
+            GenerationTaskRunEventHandler taskRunEventHandler,
+            LeaderManager leaderManager) {
         this.kubernetesClient = kubernetesClient;
         this.taskRunEventHandler = taskRunEventHandler;
+        this.leaderManager = leaderManager;
     }
 
     void init(@Observes StartupEvent ev) {
+        ensureInformer();
+    }
+
+    @Scheduled(every = "20s", delay = 10, delayUnit = TimeUnit.SECONDS, concurrentExecution = ConcurrentExecution.SKIP)
+    void ensureInformer() {
+        if (!leaderManager.isLeader()) {
+            log.info("Current instance is not the leader, skipping instantiating TaskRun informer for this instance");
+
+            if (taskRunInformer != null) {
+                log.info("Cleaning up resources related to the informer");
+                taskRunInformer.stop();
+                taskRunInformer.close();
+                taskRunInformer = null;
+            }
+
+            return;
+        }
+
         log.info("Instantiating informer for TaskRun");
 
-        SharedIndexInformer<TaskRun> taskRunInformer = kubernetesClient.resources(TaskRun.class)
+        taskRunInformer = kubernetesClient.resources(TaskRun.class)
                 .withLabel(GENERATION_ID_LABEL)
+                .withLimit(50l)
                 .inform(taskRunEventHandler, 60 * 1000L); // TODO: Configure it
 
         taskRunInformer.stopped().whenComplete((v, t) -> {
@@ -57,5 +87,6 @@ public class GenerationTaskRunEventProvider {
                 log.error("Exception occurred, caught: {}", t.getMessage());
             }
         });
+
     }
 }
