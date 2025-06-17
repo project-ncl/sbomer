@@ -118,11 +118,10 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
     void reconcileScheduled(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.SCHEDULED, generation.id());
 
-        updateStatus(generation.id(), GenerationStatus.GENERATING, null, "Generation in progress");
-
         try {
             kubernetesClient.resources(TaskRun.class).resource(desired(generation)).create();
         } catch (KubernetesClientException e) {
+            log.warn("Unable to schedule Tekton TaskRun", e);
 
             updateStatus(
                     generation.id(),
@@ -131,7 +130,10 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
                     "Unable to schedule Tekton TaskRun: {}",
                     e.getMessage());
 
+            return;
         }
+
+        updateStatus(generation.id(), GenerationStatus.GENERATING, null, "Generation in progress");
     }
 
     void reconcileFinished(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
