@@ -172,7 +172,7 @@ public class GenerationEventSource {
     }
 
     private long numberOfGenerationsInProgressInCluster() {
-        log.debug("Counting generations running in the current deploymentL {}", deploymentInfo);
+        log.debug("Counting generations running in the current deployment '{}'", deploymentInfo);
 
         long count = ((Number) Generation.getEntityManager()
                 .createNativeQuery(
