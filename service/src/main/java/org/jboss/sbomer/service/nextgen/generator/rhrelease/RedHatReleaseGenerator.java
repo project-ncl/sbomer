@@ -121,6 +121,8 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
                     GenerationStatus.FAILED,
                     GenerationResult.ERR_GENERAL,
                     "No manifests were generated");
+
+            return;
         }
 
         // Save all manifests linked to the current generation
