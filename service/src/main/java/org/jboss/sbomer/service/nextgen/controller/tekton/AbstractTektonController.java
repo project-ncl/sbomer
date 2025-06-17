@@ -30,9 +30,7 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
-import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
-import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
@@ -40,10 +38,8 @@ import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
 import io.fabric8.knative.pkg.apis.Condition;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
-import io.quarkus.arc.Arc;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -94,9 +90,6 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
             default:
                 break;
         }
-
-        // TODO: This should be done only in the service, after updating its status via REST API
-        Arc.container().beanManager().getEvent().fire(new GenerationStatusChangeEvent(generationRecord));
     }
 
     /**
@@ -110,30 +103,18 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
 
     void reconcileNew(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.NEW, generation.id());
-        log.warn(
-                "Got to reconcile a Generation with status '{}', ignoring, because we are expecting different statuses to act on",
-                generation.status());
+        log.debug(
+                "Ignoring, the {} ({}) controller does not act on this status",
+                getGeneratorName(),
+                getGeneratorVersion());
     }
 
     void reconcileScheduled(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.SCHEDULED, generation.id());
-
-        try {
-            kubernetesClient.resources(TaskRun.class).resource(desired(generation)).create();
-        } catch (KubernetesClientException e) {
-            log.warn("Unable to schedule Tekton TaskRun", e);
-
-            updateStatus(
-                    generation.id(),
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Unable to schedule Tekton TaskRun: {}",
-                    e.getMessage());
-
-            return;
-        }
-
-        updateStatus(generation.id(), GenerationStatus.GENERATING, null, "Generation in progress");
+        log.debug(
+                "Ignoring, the {} ({}) controller does not act on this status",
+                getGeneratorName(),
+                getGeneratorVersion());
     }
 
     void reconcileFinished(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
