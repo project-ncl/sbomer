@@ -59,6 +59,7 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.Param;
 import io.fabric8.tekton.v1beta1.ParamBuilder;
 import io.fabric8.tekton.v1beta1.ParamValue;
@@ -118,7 +119,26 @@ public class SyftGenerator extends AbstractTektonController {
 
     @Override
     public void generate(GenerationRecord generationRecord) {
-        reconcile(generationRecord, Collections.emptySet());
+        log.info("Preparing Tekton Task Run for generation '{}'", generationRecord.id());
+
+        TaskRun desired = desired(generationRecord);
+
+        log.trace("Prepared TaskRun for generation '{}': {}", generationRecord.id(), desired);
+
+        try {
+            kubernetesClient.resources(TaskRun.class).resource(desired).create();
+        } catch (KubernetesClientException e) {
+            log.warn("Unable to schedule Tekton TaskRun", e);
+
+            updateStatus(
+                    generationRecord.id(),
+                    GenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Unable to schedule Tekton TaskRun: {}",
+                    e.getMessage());
+
+            return;
+        }
     }
 
     @Override
