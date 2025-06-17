@@ -1,0 +1,88 @@
+{
+    "mappings": [
+        {
+            "scenarioName": "Bad openshift",
+            "requiredScenarioState": "Started",
+            "newScenarioState": "Service Fully Degraded",
+            "request": {
+                "method": "GET",
+                "url": "/api/v1beta1/generations?pageIndex=0&pageSize=1&query=id%3D%3DAABBCCDD&sort=creationTime%3Ddesc%3D"
+            },
+            "response": {
+                "fault": "RANDOM_DATA_THEN_CLOSE",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "fixedDelayMilliseconds": 3000
+            }
+        },
+        {
+            "scenarioName": "Bad openshift",
+            "requiredScenarioState": "Service Fully Degraded",
+            "newScenarioState": "Service Partially Degraded",
+            "request": {
+                "method": "GET",
+                "url": "/api/v1beta1/generations?pageIndex=0&pageSize=1&query=id%3D%3DAABBCCDD&sort=creationTime%3Ddesc%3D"
+            },
+            "response": {
+                "fault": "CONNECTION_RESET_BY_PEER",
+                "fixedDelayMilliseconds": 2000
+            }
+        },
+        {
+            "scenarioName": "Bad openshift",
+            "requiredScenarioState": "Service Partially Degraded",
+            "newScenarioState": "Service Working",
+            "request": {
+                "method": "GET",
+                "url": "/api/v1beta1/generations?pageIndex=0&pageSize=1&query=id%3D%3DAABBCCDD&sort=creationTime%3Ddesc%3D"
+            },
+            "response": {
+                "status": 200,
+                "jsonBody": {
+                    "pageIndex": 0,
+                    "pageSize": 1,
+                    "totalPages": 1,
+                    "totalHits": 1,
+                    "content": [
+                        {
+                            "id": "AABBCCDD",
+                            "identifier": "QUARKUS",
+                            "type": "BUILD",
+                            "config": {
+                                "buildId": "QUARKUS",
+                                "type": "pnc-build",
+                                "products": [
+                                    {
+                                        "generator": {
+                                            "args": "--include-non-managed --warn-on-missing-scm",
+                                            "type": "maven-domino",
+                                            "version": "0.0.90"
+                                        },
+                                        "processors": [
+                                            {
+                                                "type": "default"
+                                            },
+                                            {
+                                                "type": "redhat-product",
+                                                "errata": {
+                                                    "productName": "RHBQ",
+                                                    "productVariant": "8Base-RHBQ-2.13",
+                                                    "productVersion": "RHEL-8-RHBQ-2.13"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "apiVersion": "sbomer.jboss.org/v1alpha1"
+                            }
+                        }
+                    ]
+                },
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+        }
+    ]
+}

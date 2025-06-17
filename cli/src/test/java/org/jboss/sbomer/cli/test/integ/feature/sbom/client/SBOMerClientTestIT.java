@@ -144,4 +144,28 @@ class SBOMerClientTestIT {
             }
         }
     }
+    @Test
+    void testNetworkConnectionTimeout(){
+        PaginationParameters pagParams = new PaginationParameters();
+        pagParams.setPageIndex(0);
+        pagParams.setPageSize(1);
+        String rsqlQuery = "id==AABBCCDD";
+        String sortQuery = "creationTime=desc=";
+        try (Response response = client.searchGenerationRequests("AABBCCDD", pagParams, rsqlQuery, sortQuery)) {
+            String json = response.readEntity(String.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            TypeReference<Page<SbomGenerationRequestRecord>> typeReference = new TypeReference<>() {
+            };
+            try {
+                Page<SbomGenerationRequestRecord> sbomRequests = objectMapper.readValue(json, typeReference);
+                assertNotNull(sbomRequests);
+                assertEquals("AABBCCDD", sbomRequests.getContent().iterator().next().id());
+                assertEquals("QUARKUS", sbomRequests.getContent().iterator().next().identifier());
+            } catch (JsonProcessingException e) {
+                fail(e.getMessage());
+            }
+        }
+
+    }
 }

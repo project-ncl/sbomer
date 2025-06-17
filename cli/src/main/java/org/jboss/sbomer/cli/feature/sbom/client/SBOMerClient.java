@@ -17,12 +17,21 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.client;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
 import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.core.utils.PaginationParameters;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOMER_CLIENT_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOMER_CLIENT_MAX_RETRIES;
 
+import java.time.temporal.ChronoUnit;
+
+import io.smallrye.faulttolerance.api.BeforeRetry;
+import io.smallrye.faulttolerance.api.ExponentialBackoff;
 import jakarta.enterprise.context.ApplicationScoped;
+
 import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
@@ -51,6 +60,11 @@ public interface SBOMerClient {
      * @param id the identifier of the SBOM
      * @return the {@link Sbom SBOM}
      */
+    @Retry( maxRetries = SBOMER_CLIENT_MAX_RETRIES,
+            delay = SBOMER_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS)
+    @BeforeRetry(RetryLogger.class)
+    @ExponentialBackoff
     @GET
     @Path("/manifests/{id}")
     Response getById(@HeaderParam("log-process-context") String processContext, @PathParam("id") String id);
@@ -61,6 +75,11 @@ public interface SBOMerClient {
      * @param id the identifier of the SBOM Generation Request
      * @return {@link SbomGenerationRequest SBOM Generation Request}
      */
+    @Retry( maxRetries = SBOMER_CLIENT_MAX_RETRIES,
+            delay = SBOMER_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS)
+    @BeforeRetry(RetryLogger.class)
+    @ExponentialBackoff
     @GET
     @Path("/generations/{id}")
     Response getGenerationRequestById(
@@ -74,6 +93,11 @@ public interface SBOMerClient {
      * @param rsqlQuery the RSQL query
      * @return {@link Response res}
      */
+    @Retry( maxRetries = SBOMER_CLIENT_MAX_RETRIES,
+            delay = SBOMER_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS)
+    @BeforeRetry(RetryLogger.class)
+    @ExponentialBackoff
     @GET
     @Path("/manifests")
     Response searchSboms(
@@ -89,6 +113,11 @@ public interface SBOMerClient {
      * @param rsqlQuery the RSQL query
      * @return {@link Response response}
      */
+    @Retry( maxRetries = SBOMER_CLIENT_MAX_RETRIES,
+            delay = SBOMER_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS)
+    @BeforeRetry(RetryLogger.class)
+    @ExponentialBackoff
     @GET
     @Path("/generations")
     Response searchGenerationRequests(
@@ -97,6 +126,11 @@ public interface SBOMerClient {
             @QueryParam("query") String rsqlQuery,
             @QueryParam("sort") String rsqlSort);
 
+    @Retry( maxRetries = SBOMER_CLIENT_MAX_RETRIES,
+            delay = SBOMER_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS)
+    @BeforeRetry(RetryLogger.class)
+    @ExponentialBackoff
     @GET
     @Path("/stats")
     Response getStats();
