@@ -72,7 +72,7 @@ public class JacksonUtils {
      * @param updateNode The secondary object which should be merged with the main one.
      * @return Updated main object.
      */
-    public static JsonNode merge(JsonNode mainNode, JsonNode updateNode) {
+    public static ObjectNode merge(JsonNode mainNode, JsonNode updateNode) {
         if (mainNode.isObject() && updateNode.isObject()) {
             ObjectNode mainObjectNode = (ObjectNode) mainNode;
             Iterator<Map.Entry<String, JsonNode>> updateFields = updateNode.fields();
@@ -91,7 +91,7 @@ public class JacksonUtils {
                 }
             }
         }
-        return mainNode;
+        return (ObjectNode) mainNode;
     }
 
     /**

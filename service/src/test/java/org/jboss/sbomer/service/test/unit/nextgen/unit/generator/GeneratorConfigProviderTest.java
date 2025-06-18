@@ -14,6 +14,10 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorConfigSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersionConfigSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.ResourceRequirementSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.ResourcesSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.TargetSpec;
 import org.jboss.sbomer.service.nextgen.service.config.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorsConfig;
@@ -97,7 +101,7 @@ public class GeneratorConfigProviderTest {
     }
 
     @Test
-    void shouldCreateEffectiveConfigWhenNoConfigIsProvided() throws IOException {
+    void shouldCreateDefaultConfigWhenNoConfigIsProvided() throws IOException {
         ConfigMap expectedConfigMap = new ConfigMapBuilder().withNewMetadata()
                 .withName(CM_NAME)
                 .endMetadata()
@@ -110,7 +114,7 @@ public class GeneratorConfigProviderTest {
                 .buildEffectiveRequest(new GenerationRequestSpec(new TargetSpec("image", "CONTAINER_IMAGE"), null));
 
         assertEquals("syft", requestSpec.generator().name());
-        assertEquals("1.26.1", requestSpec.generator().version());
+        assertEquals("1.16.0", requestSpec.generator().version());
         assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
         assertEquals("500m", requestSpec.generator().config().resources().requests().cpu());
         assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
@@ -128,5 +132,56 @@ public class GeneratorConfigProviderTest {
 
         when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
 
+        GenerationRequestSpec requestSpec = generatorConfigProvider.buildEffectiveRequest(
+                new GenerationRequestSpec(
+                        new TargetSpec("image", "CONTAINER_IMAGE"),
+                        new GeneratorVersionConfigSpec(
+                                "syft",
+                                null,
+                                new GeneratorConfigSpec(
+                                        null,
+                                        new ResourcesSpec(
+                                                new ResourceRequirementSpec("800m", "2Gi"),
+                                                new ResourceRequirementSpec("2000m", "4Gi")),
+                                        null))));
+
+        assertEquals("syft", requestSpec.generator().name());
+        assertEquals("1.16.0", requestSpec.generator().version());
+        assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
+        assertEquals("800m", requestSpec.generator().config().resources().requests().cpu());
+        assertEquals("2Gi", requestSpec.generator().config().resources().requests().memory());
+        assertEquals("2000m", requestSpec.generator().config().resources().limits().cpu());
+        assertEquals("4Gi", requestSpec.generator().config().resources().limits().memory());
+
+    }
+
+    @Test
+    void shouldAllowForPartialOverridingOfResources() throws IOException {
+        ConfigMap expectedConfigMap = new ConfigMapBuilder().withNewMetadata()
+                .withName(CM_NAME)
+                .endMetadata()
+                .addToData("generators-config.yaml", TestResources.asString("generator/syft-only.yaml"))
+                .build();
+
+        when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
+
+        GenerationRequestSpec requestSpec = generatorConfigProvider.buildEffectiveRequest(
+                new GenerationRequestSpec(
+                        new TargetSpec("image", "CONTAINER_IMAGE"),
+                        new GeneratorVersionConfigSpec(
+                                "syft",
+                                null,
+                                new GeneratorConfigSpec(
+                                        null,
+                                        new ResourcesSpec(null, new ResourceRequirementSpec("3000m", "4Gi")),
+                                        null))));
+
+        assertEquals("syft", requestSpec.generator().name());
+        assertEquals("1.16.0", requestSpec.generator().version());
+        assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
+        assertEquals("500m", requestSpec.generator().config().resources().requests().cpu());
+        assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
+        assertEquals("3000m", requestSpec.generator().config().resources().limits().cpu());
+        assertEquals("4Gi", requestSpec.generator().config().resources().limits().memory());
     }
 }

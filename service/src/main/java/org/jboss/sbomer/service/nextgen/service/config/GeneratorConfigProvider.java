@@ -27,14 +27,17 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ValidationException;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorConfigSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersionConfigSpec;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.DefaultGeneratorMappingEntry;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorProfile;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorVersionProfile;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorsConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -184,7 +187,7 @@ public class GeneratorConfigProvider {
         // In case the generator was not specified within the request we will use defaults
         if (requestSpec.generator() == null || requestSpec.generator().name() == null
                 || requestSpec.generator().name().isBlank()) {
-            log.info(
+            log.debug(
                     "No generator selected within the request, will use best generator available for '{}'",
                     requestSpec.target().type());
 
@@ -202,15 +205,32 @@ public class GeneratorConfigProvider {
                 generatorName,
                 Optional.ofNullable(requestSpec.generator()).map(GeneratorVersionConfigSpec::version).orElse(null));
 
-        log.info("Using generator '{}' with version '{}'", generatorName, generatorVersionProfile.version());
+        log.debug("Using generator '{}' with version '{}'", generatorName, generatorVersionProfile.version());
+
+        GeneratorConfigSpec configSpec = null;
+
+        if (requestSpec.generator() != null && requestSpec.generator().config() != null) {
+            log.debug("Generator configuration was provided, will use it");
+
+            ObjectNode mergedConfig = JacksonUtils.merge(
+                    JacksonUtils.toObjectNode(generatorVersionProfile.defaultConfig()),
+                    JacksonUtils.toObjectNode(requestSpec.generator().config()));
+
+            log.trace("Merged config: {}", mergedConfig);
+
+            configSpec = JacksonUtils.parse(GeneratorConfigSpec.class, mergedConfig);
+        } else {
+            log.debug(
+                    "Using default configuration for generator '{}' and version '{}'",
+                    generatorName,
+                    generatorVersionProfile.version());
+            configSpec = generatorVersionProfile.defaultConfig();
+        }
 
         // Prepare effective configuration which will be passed to the generator
         GenerationRequestSpec effectiveRequest = new GenerationRequestSpec(
                 requestSpec.target(),
-                new GeneratorVersionConfigSpec(
-                        generatorName,
-                        generatorVersionProfile.version(),
-                        generatorVersionProfile.defaultConfig()));
+                new GeneratorVersionConfigSpec(generatorName, generatorVersionProfile.version(), configSpec));
 
         // Schema is provided, let's validate it!
         if (generatorVersionProfile.schema() != null) {
