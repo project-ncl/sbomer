@@ -182,9 +182,18 @@ class SBOMerClientTestIT {
         List<ServeEvent> servs = wireMockServer.getAllServeEvents();
         for (ServeEvent se : servs) {
             log.info(
-                    "Request URL: " + se.getRequest().getUrl() + ", Method: " + se.getRequest().getMethod()
-                            + ", Status: " + se.getResponse().getStatus() + ", Matched Stub Id: "
-                            + se.getStubMapping().getId() + ", Matched Stub Name: " + se.getStubMapping().getName());
+                    """
+                            Request URL: {},
+                            Method: {},
+                            Request ts: {},
+                            Matched Stub Id: {}
+                            Matched Stub Name: {}
+                            """,
+                    se.getRequest().getUrl(),
+                    se.getRequest().getMethod(),
+                    se.getRequest().getLoggedDate().toInstant().toEpochMilli(),
+                    se.getStubMapping().getId(),
+                    se.getStubMapping().getNewScenarioState());
         }
 
         // One timeout, one failure and one success, all should be retried
