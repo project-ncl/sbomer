@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.cli.test.integ.feature.sbom.client;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,10 +26,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.List;
 import java.util.Map;
 
-
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.cli.feature.sbom.client.SBOMerClient;
-
 import org.jboss.sbomer.cli.test.integ.feature.sbom.client.SBOMerClientTestIT.CustomSbomerProfile;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomGenerationRequestRecord;
 import org.jboss.sbomer.core.dto.v1alpha3.SbomRecord;
@@ -43,7 +42,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import io.quarkus.test.common.WithTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -71,8 +69,8 @@ class SBOMerClientTestIT {
         @Override
         public Map<String, String> getConfigOverrides() {
             return Map.of("quarkus.rest-client.read-timeout", "1600");
-            }
         }
+    }
 
     @Test
     void testGetValidSbom() {
@@ -147,8 +145,7 @@ class SBOMerClientTestIT {
     }
 
     @Test
-    void testSearchSbomRequest()
-    {
+    void testSearchSbomRequest() {
         testSearchSbomRequestParamerterised("AABBCC", "id==AABBCC");
     }
 
@@ -177,21 +174,24 @@ class SBOMerClientTestIT {
     @Test
     void testNetworkConnectionTimeout() {
 
-        //Check for ultimate success first
-       testSearchSbomRequestParamerterised("AABBCCDD", "id==AABBCCDD");
+        // Check for ultimate success first
+        testSearchSbomRequestParamerterised("AABBCCDD", "id==AABBCCDD");
 
-        //Check what actually happened after
-        //Print the requests for visual confirmation
+        // Check what actually happened after
+        // Print the requests for visual confirmation
         List<ServeEvent> servs = wireMockServer.getAllServeEvents();
         for (ServeEvent se : servs) {
-            log.info("Request URL: " + se.getRequest().getUrl() +
-                        ", Method: " + se.getRequest().getMethod() +
-                        ", Status: " + se.getResponse().getStatus() +
-                        ", Matched Stub Id: " + se.getStubMapping().getId() +
-                        ", Matched Stub Name: " + se.getStubMapping().getName());
+            log.info(
+                    "Request URL: " + se.getRequest().getUrl() + ", Method: " + se.getRequest().getMethod()
+                            + ", Status: " + se.getResponse().getStatus() + ", Matched Stub Id: "
+                            + se.getStubMapping().getId() + ", Matched Stub Name: " + se.getStubMapping().getName());
         }
 
-        //One timeout, one failure and one success, all should be retried
-        wireMockServer.verify(3, getRequestedFor(urlEqualTo("/api/v1beta1/generations?pageIndex=0&pageSize=1&query=id%3D%3DAABBCCDD&sort=creationTime%3Ddesc%3D")));
+        // One timeout, one failure and one success, all should be retried
+        wireMockServer.verify(
+                3,
+                getRequestedFor(
+                        urlEqualTo(
+                                "/api/v1beta1/generations?pageIndex=0&pageSize=1&query=id%3D%3DAABBCCDD&sort=creationTime%3Ddesc%3D")));
     }
 }

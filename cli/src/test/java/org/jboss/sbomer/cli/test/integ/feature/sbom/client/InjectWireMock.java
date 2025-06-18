@@ -26,6 +26,6 @@ import java.lang.annotation.Target;
  * see https://quarkus.io/guides/getting-started-testing#altering-the-test-class
  */
 @Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME) 
+@Retention(RetentionPolicy.RUNTIME)
 public @interface InjectWireMock {
 }

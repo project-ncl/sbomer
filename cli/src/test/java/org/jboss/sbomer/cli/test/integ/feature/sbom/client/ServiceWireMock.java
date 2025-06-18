@@ -49,6 +49,8 @@ public class ServiceWireMock implements QuarkusTestResourceLifecycleManager {
 
     @Override
     public void inject(TestInjector testInjector) {
-        testInjector.injectIntoFields(wireMockServer, new TestInjector.AnnotatedAndMatchesType(InjectWireMock.class, WireMockServer.class));
+        testInjector.injectIntoFields(
+                wireMockServer,
+                new TestInjector.AnnotatedAndMatchesType(InjectWireMock.class, WireMockServer.class));
     }
 }
