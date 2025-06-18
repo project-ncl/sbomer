@@ -14,7 +14,6 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
-import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersionConfigSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.TargetSpec;
 import org.jboss.sbomer.service.nextgen.service.config.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorsConfig;
@@ -28,7 +27,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
-public class GeneratorConfigReaderTest {
+public class GeneratorConfigProviderTest {
 
     private static final String CM_NAME = "sbomer-generators-config";
 
@@ -93,7 +92,7 @@ public class GeneratorConfigReaderTest {
     @Test
     void shouldHandleCaseWhenNoRequestIsProvided() {
         assertThrows(ClientException.class, () -> {
-            generatorConfigProvider.buildEffectiveConfig(null);
+            generatorConfigProvider.buildEffectiveRequest(null);
         });
     }
 
@@ -107,15 +106,27 @@ public class GeneratorConfigReaderTest {
 
         when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
 
-        GeneratorVersionConfigSpec effectiveConfig = generatorConfigProvider
-                .buildEffectiveConfig(new GenerationRequestSpec(new TargetSpec("image", "CONTAINER_IMAGE"), null));
+        GenerationRequestSpec requestSpec = generatorConfigProvider
+                .buildEffectiveRequest(new GenerationRequestSpec(new TargetSpec("image", "CONTAINER_IMAGE"), null));
 
-        assertEquals("syft", effectiveConfig.name());
-        assertEquals("1.26.1", effectiveConfig.version());
-        assertEquals("CYCLONEDX_1.6_JSON", effectiveConfig.config().format());
-        assertEquals("500m", effectiveConfig.config().resources().requests().cpu());
-        assertEquals("1Gi", effectiveConfig.config().resources().requests().memory());
-        assertEquals("1500m", effectiveConfig.config().resources().limits().cpu());
-        assertEquals("3Gi", effectiveConfig.config().resources().limits().memory());
+        assertEquals("syft", requestSpec.generator().name());
+        assertEquals("1.26.1", requestSpec.generator().version());
+        assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
+        assertEquals("500m", requestSpec.generator().config().resources().requests().cpu());
+        assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
+        assertEquals("1500m", requestSpec.generator().config().resources().limits().cpu());
+        assertEquals("3Gi", requestSpec.generator().config().resources().limits().memory());
+    }
+
+    @Test
+    void shouldAllowForOverridingResources() throws IOException {
+        ConfigMap expectedConfigMap = new ConfigMapBuilder().withNewMetadata()
+                .withName(CM_NAME)
+                .endMetadata()
+                .addToData("generators-config.yaml", TestResources.asString("generator/syft-only.yaml"))
+                .build();
+
+        when(kubernetesClientMock.configMaps().withName(CM_NAME).get()).thenReturn(expectedConfigMap);
+
     }
 }
