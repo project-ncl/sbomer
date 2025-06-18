@@ -17,7 +17,6 @@
  */
 package org.jboss.sbomer.service.nextgen.service.config;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -101,6 +100,63 @@ public class GeneratorConfigProvider {
         this.config = config;
     }
 
+    /**
+     * Fetches generator profile for a given generator name and version. If version is not provided, default version
+     * will be used.
+     * 
+     * @param name Generator name
+     * @param version Generator version
+     * @return {@link GeneratorVersionProfile} representing the configuration
+     */
+    private GeneratorVersionProfile getGeneratorProfile(String name, String version) {
+        if (name == null || name.isBlank()) {
+            throw new ApplicationException("No generator name specified, cannot continue");
+        }
+
+        log.debug("Finding generator profile for '{}' name", name);
+
+        // Find the profile for this generator
+        Optional<GeneratorProfile> generatorProfileOpt = getConfig().generatorProfiles()
+                .stream()
+                .filter(p -> p.name().equals(name))
+                .findFirst();
+
+        // If we did not find anything, fail
+        if (generatorProfileOpt.isEmpty()) {
+            throw new ApplicationException("No generator profile found for '{}' generator", name);
+        }
+
+        GeneratorProfile generatorProfile = generatorProfileOpt.get();
+
+        log.debug("Found a profile for generator '{}', obtaining profile version now...", generatorProfile.name());
+
+        GeneratorVersionProfile versionProfile = null;
+
+        // If a specific version is requested
+        if (version != null) {
+            log.debug("Trying to find a profile version for '{}'", version);
+
+            Optional<GeneratorVersionProfile> versionProfileOpt = generatorProfile.versions()
+                    .stream()
+                    .filter(pv -> pv.version().equals(version))
+                    .findFirst();
+
+            if (versionProfileOpt.isEmpty()) {
+                throw new ClientException(
+                        "Could not find requested version: '{}' for generator '{}'",
+                        version,
+                        generatorProfile.name());
+            }
+
+            versionProfile = versionProfileOpt.get();
+        } else {
+            // If no version is specified -- use default version which is the first version in the config
+            versionProfile = generatorProfile.versions().get(0);
+        }
+
+        return versionProfile;
+    }
+
     public GenerationRequestSpec buildEffectiveRequest(GenerationRequestSpec requestSpec) {
         if (requestSpec == null) {
             log.error("No request specification provided, this should not happen");
@@ -108,13 +164,13 @@ public class GeneratorConfigProvider {
         }
 
         log.debug("Will build effective config for provided request: {}", requestSpec);
-        log.debug("Searching for generators that support requested '{}' type", requestSpec.target().type());
+        log.debug("Searching for generator that support requested '{}' type", requestSpec.target().type());
 
         Optional<DefaultGeneratorMappingEntry> generatorMappingForSelectedTypeOpt = getConfig()
                 .defaultGeneratorMappings()
                 .stream()
                 .filter(m -> m.targetType().equals(requestSpec.target().type()))
-                .findFirst();
+                .findFirst(); // TODO: Shouldn't be a list actually?
 
         if (generatorMappingForSelectedTypeOpt.isEmpty()) {
             throw new ClientException(
@@ -123,75 +179,36 @@ public class GeneratorConfigProvider {
                     getConfig().defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
         }
 
-        GeneratorProfile generatorProfile = null;
-        GeneratorVersionProfile generatorVersionProfile = null;
+        String generatorName = null;
 
-        if (requestSpec.generator() != null && requestSpec.generator().name() != null) {
-            Optional<GeneratorProfile> generatorProfileOpt = getConfig().generatorProfiles()
-                    .stream()
-                    .filter(p -> p.name().equals(requestSpec.generator().name()))
-                    .findFirst();
-
-            // If we did not find anything, fail
-            if (generatorProfileOpt.isEmpty()) {
-                throw new ApplicationException(
-                        "Selected generator '{}' is not registered",
-                        requestSpec.generator().name());
-            }
-
-            generatorProfile = generatorProfileOpt.get();
-
-            // Find the best version of selected generator
-            generatorVersionProfile = generatorProfile.versions().get(0);
-
-        } else {
-
-            // TODO: support taking into account provided partial config (merging)
-
+        // In case the generator was not specified within the request we will use defaults
+        if (requestSpec.generator() == null || requestSpec.generator().name() == null
+                || requestSpec.generator().name().isBlank()) {
             log.info(
-                    "No generator selected within the request for type '{}', will try to find best generator",
+                    "No generator selected within the request, will use best generator available for '{}'",
                     requestSpec.target().type());
 
-            DefaultGeneratorMappingEntry generatorMappingForSelectedType = generatorMappingForSelectedTypeOpt.get();
-
-            List<String> generators = generatorMappingForSelectedType.generators();
-
-            if (generators == null || generators.isEmpty()) {
-                throw new ClientException(
-                        "Unable to determine best generator, selected target type: '{}' is supported, but does not have default generator configured and thus needs to be provided explicitly as part of the request with requests[].generator.name field",
-                        requestSpec.target().type());
-
-            }
-
             // Select the best generator (name) for a given target type
-            String defaultGenerator = generators.get(0);
+            generatorName = generatorMappingForSelectedTypeOpt.get().generators().get(0);
 
-            log.info("Will use '{}' generator, trying to find best profile", defaultGenerator);
+            log.debug("Default generator for {} type is: '{}', will use it", generatorName);
+        } else {
+            generatorName = requestSpec.generator().name();
 
-            // Now find the profile for this generator
-            Optional<GeneratorProfile> generatorProfileOpt = getConfig().generatorProfiles()
-                    .stream()
-                    .filter(p -> p.name().equals(defaultGenerator))
-                    .findFirst();
-
-            // If we did not find anything, fail
-            if (generatorProfileOpt.isEmpty()) {
-                throw new ApplicationException("There are no generator profiles for '{}' generator", defaultGenerator);
-            }
-
-            generatorProfile = generatorProfileOpt.get();
-
-            // Find the best version of selected generator
-            generatorVersionProfile = generatorProfile.versions().get(0);
+            log.debug("Using requested generator: '{}'", generatorName);
         }
 
-        log.info("Using generator '{}' with version '{}'", generatorProfile.name(), generatorVersionProfile.version());
+        GeneratorVersionProfile generatorVersionProfile = getGeneratorProfile(
+                generatorName,
+                Optional.ofNullable(requestSpec.generator()).map(GeneratorVersionConfigSpec::version).orElse(null));
+
+        log.info("Using generator '{}' with version '{}'", generatorName, generatorVersionProfile.version());
 
         // Prepare effective configuration which will be passed to the generator
         GenerationRequestSpec effectiveRequest = new GenerationRequestSpec(
                 requestSpec.target(),
                 new GeneratorVersionConfigSpec(
-                        generatorProfile.name(),
+                        generatorName,
                         generatorVersionProfile.version(),
                         generatorVersionProfile.defaultConfig()));
 
@@ -216,63 +233,6 @@ public class GeneratorConfigProvider {
         }
 
         return effectiveRequest;
-    }
-
-    public GeneratorVersionConfigSpec buildEffectiveConfig(GenerationRequestSpec requestSpec) {
-        if (requestSpec == null) {
-            log.error("No request specification provided, this should not happen");
-            throw new ClientException("No request specification provided, please make sure your request is correct.");
-        }
-
-        log.debug("Will build effective config for provided request: {}", requestSpec);
-        log.debug("Searching for generators that support requested '{}' type", requestSpec.target().type());
-
-        Optional<DefaultGeneratorMappingEntry> generatorMappingOpt = getConfig().defaultGeneratorMappings()
-                .stream()
-                .filter(m -> m.targetType().equals(requestSpec.target().type()))
-                .findFirst();
-
-        if (generatorMappingOpt.isEmpty()) {
-            throw new ClientException(
-                    "Provided target: '{}' is not supported. Supported targets: {}",
-                    requestSpec.target().type(),
-                    getConfig().defaultGeneratorMappings().stream().map(m -> m.targetType()).toList());
-        }
-
-        if (requestSpec.generator() == null) {
-            log.info(
-                    "No generator selected within the request, will use best generator available for '{}'",
-                    requestSpec.target().type());
-        } else {
-            // TODO: merge configs, currently ignored entirely
-        }
-
-        // Select the best generator (name) for a given target type
-        String defaultGenerator = generatorMappingOpt.get().generators().get(0);
-
-        // Now find the profile for this generator
-        Optional<GeneratorProfile> generatorProfileOpt = getConfig().generatorProfiles()
-                .stream()
-                .filter(p -> p.name().equals(defaultGenerator))
-                .findFirst();
-
-        // If we did not find anything, fail
-        if (generatorProfileOpt.isEmpty()) {
-            throw new ApplicationException("There is not generator profile for '{}' generator", defaultGenerator);
-        }
-
-        GeneratorProfile generatorProfile = generatorProfileOpt.get();
-
-        // Find the best version of selected generator
-        GeneratorVersionProfile generatorVersionProfile = generatorProfile.versions().get(0);
-
-        log.info("Using generator '{}' with version '{}'", generatorProfile.name(), generatorVersionProfile.version());
-
-        // Prepare effective configuration which will be passed to the generator
-        return new GeneratorVersionConfigSpec(
-                generatorProfile.name(),
-                generatorVersionProfile.version(),
-                generatorVersionProfile.defaultConfig());
     }
 
     /**
