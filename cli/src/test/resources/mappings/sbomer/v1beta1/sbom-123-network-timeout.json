@@ -13,7 +13,7 @@
                 "headers": {
                     "Content-Type": "application/json"
                 },
-                "fixedDelayMilliseconds": 3000
+                "fixedDelayMilliseconds": 1700
             }
         },
         {
@@ -26,7 +26,7 @@
             },
             "response": {
                 "fault": "CONNECTION_RESET_BY_PEER",
-                "fixedDelayMilliseconds": 2000
+                "fixedDelayMilliseconds": 200
             }
         },
         {
