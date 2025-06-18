@@ -6,7 +6,7 @@ generatorProfiles:
   - name: "syft"
     description: "Syft is a CLI tool and library for generating a Software Bill of Materials (SBOM) from container images and filesystems."
     versions:
-      - version: "1.26.1"
+      - version: "1.16.0"
         supportedTargetTypes:
           ["CONTAINER_IMAGE", "FILESYSTEM", "DIRECTORY", "RPM_PACKAGE"]
         schema:
