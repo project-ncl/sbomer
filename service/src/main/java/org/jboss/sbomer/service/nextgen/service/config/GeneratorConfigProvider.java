@@ -106,7 +106,7 @@ public class GeneratorConfigProvider {
     /**
      * Fetches generator profile for a given generator name and version. If version is not provided, default version
      * will be used.
-     * 
+     *
      * @param name Generator name
      * @param version Generator version
      * @return {@link GeneratorVersionProfile} representing the configuration
