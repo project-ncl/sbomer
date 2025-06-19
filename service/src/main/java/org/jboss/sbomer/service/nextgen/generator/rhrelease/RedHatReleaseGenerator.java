@@ -78,12 +78,12 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
 
         log.debug("Reading generation request...");
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generationRecord.request());
-        EventRecord eventRecord;
 
-        log.debug("Fetching event with identifier '{}'...", request.target().identifier());
+        log.debug("Fetching generations related to event with identifier '{}'...", request.target().identifier());
+        List<GenerationRecord> generations;
 
         try {
-            eventRecord = sbomerClient.getEvent(request.target().identifier());
+            generations = sbomerClient.getEventGenerations(request.target().identifier());
         } catch (NotFoundException ex) {
             throw new ApplicationException(
                     "Event with id '{}' could not be found, cannot process generation",
@@ -95,7 +95,7 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
 
         // Iterate over each generation that was part of that particular event and create copies
         // updates
-        for (GenerationRecord g : eventRecord.generations()) {
+        for (GenerationRecord g : generations) {
             log.info("Processing generation '{}'", g.id());
 
             for (ManifestRecord m : g.manifests()) {

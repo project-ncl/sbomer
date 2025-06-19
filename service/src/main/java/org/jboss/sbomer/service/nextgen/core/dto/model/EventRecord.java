@@ -18,7 +18,6 @@
 package org.jboss.sbomer.service.nextgen.core.dto.model;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
@@ -29,7 +28,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  * Representation of the Event entity.
  */
 public record EventRecord(String id, EventRecord parent, Instant created, Instant updated, Instant finished,
-        Map<String, String> metadata, JsonNode request, List<GenerationRecord> generations, EventStatus status,
-        String reason) {
+        Map<String, String> metadata, JsonNode request, EventStatus status, String reason) {
 
 }

@@ -20,7 +20,6 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.api.Generator;
 import org.jboss.sbomer.service.nextgen.core.dto.api.Target;
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
@@ -53,14 +52,7 @@ public class RedHatReleaseGeneratorTest {
         generator = spy(new RedHatReleaseGenerator(client, managedExecutor));
     }
 
-    /**
-     * A method to generate test data.
-     *
-     * @param numGenerations
-     * @param numManifests
-     * @return
-     */
-    private EventRecord genEvent(int numGenerations, int numManifests) {
+    private List<GenerationRecord> genGenrations(int numGenerations, int numManifests) {
         List<GenerationRecord> generations = new ArrayList<>();
 
         for (int i = 0; i < numGenerations; i++) {
@@ -87,7 +79,7 @@ public class RedHatReleaseGeneratorTest {
                             null));
         }
 
-        return new EventRecord("E1", null, Instant.now(), Instant.now(), null, null, null, generations, null, null);
+        return generations;
     }
 
     @Test
@@ -194,7 +186,7 @@ public class RedHatReleaseGeneratorTest {
 
     @Test
     void handleGeneration() {
-        when(client.getEvent("E1MMM")).thenReturn(genEvent(2, 2));
+        when(client.getEventGenerations("E1MMM")).thenReturn(genGenrations(2, 2));
 
         GenerationRecord generationRecord = new GenerationRecord(
                 "G1",
@@ -221,6 +213,6 @@ public class RedHatReleaseGeneratorTest {
 
         verify(client, times(4)).getManifestContent(anyString());
         verify(client, times(5)).uploadManifest(anyString(), any());
-        verify(client, times(1)).getEvent(anyString());
+        verify(client, times(1)).getEventGenerations(anyString());
     }
 }

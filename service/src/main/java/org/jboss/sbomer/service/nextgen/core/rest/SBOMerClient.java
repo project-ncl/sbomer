@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.nextgen.core.rest;
 
+import java.util.List;
+
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
@@ -96,6 +98,12 @@ public interface SBOMerClient {
     @PATCH
     @Path("/events/{eventId}/status")
     public EventRecord updateEventStatus(@PathParam("eventId") String eventId, EventStatusUpdatePayload payload);
+
+    @Traced
+    @SpanName("sbomer.get.events.generations")
+    @PATCH
+    @Path("/events/{eventId}/generations")
+    public List<GenerationRecord> getEventGenerations(@PathParam("eventId") String eventId);
 
     //
     // Manifests

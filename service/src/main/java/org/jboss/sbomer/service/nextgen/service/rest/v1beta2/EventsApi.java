@@ -35,6 +35,7 @@ import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventStatusRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
@@ -162,6 +163,24 @@ public class EventsApi {
         }
 
         return mapper.toEventStatusRecords(event.getStatuses());
+    }
+
+    @GET
+    @Path("/{eventId}/generations")
+    @Operation(summary = "Get generations related to an event")
+    @APIResponse(
+            responseCode = "200",
+            description = "Generation list",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(responseCode = "404", description = "Event not found")
+    public List<GenerationRecord> getGenerationsForEvent(@PathParam("eventId") String eventId) {
+        Event event = Event.findById(eventId); // NOSONAR
+
+        if (event == null) {
+            throw new NotFoundException("Event with id '{}' could not be found", eventId);
+        }
+
+        return mapper.toGenerationRecords(event.getGenerations());
     }
 
     @PATCH
