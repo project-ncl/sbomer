@@ -91,19 +91,20 @@ public class EventsApi {
     @APIResponse(
             responseCode = "200",
             description = "Paginated list of events",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(type = SchemaType.ARRAY, implementation = EventRecord.class)))
     @APIResponse(
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public List<EventRecord> search( // TODO: USE pagination
-            @Valid @BeanParam PaginationParameters paginationParams,
-            @QueryParam("query") String query,
-            @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
+    public Response search(@Valid @BeanParam PaginationParameters paginationParams) {
+        List<EventRecord> events = Generation.findAll()
+                .project(EventRecord.class)
+                .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
+                .list();
 
-        List<Event> events = Event.findAll().list();
-
-        return mapper.toEventRecords(events);
+        return Response.ok(events).header("X-Total-Count", events.size()).build();
     }
 
     @GET
