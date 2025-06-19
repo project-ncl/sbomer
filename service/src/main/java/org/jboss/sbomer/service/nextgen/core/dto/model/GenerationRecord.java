@@ -18,7 +18,6 @@
 package org.jboss.sbomer.service.nextgen.core.dto.model;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
@@ -35,8 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished,
-        ObjectNode request, ObjectNode metadata, List<ManifestRecord> manifests, GenerationStatus status, String result,
-        String reason) {
+        ObjectNode request, ObjectNode metadata, GenerationStatus status, String result, String reason) {
 
     public boolean isSupported(Set<String> types) {
         if (request() == null) {
