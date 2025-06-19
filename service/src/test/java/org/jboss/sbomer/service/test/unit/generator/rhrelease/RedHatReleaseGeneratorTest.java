@@ -52,15 +52,19 @@ public class RedHatReleaseGeneratorTest {
         generator = spy(new RedHatReleaseGenerator(client, managedExecutor));
     }
 
-    private List<GenerationRecord> genGenrations(int numGenerations, int numManifests) {
+    private List<ManifestRecord> genManifests(int numManifests) {
+        List<ManifestRecord> manifests = new ArrayList<>();
+
+        for (int i = 0; i < numManifests; i++) {
+            manifests.add(new ManifestRecord("M" + i, Instant.now()));
+        }
+        return manifests;
+    }
+
+    private List<GenerationRecord> genGenerations(int numGenerations) {
         List<GenerationRecord> generations = new ArrayList<>();
 
         for (int i = 0; i < numGenerations; i++) {
-            List<ManifestRecord> manifests = new ArrayList<>();
-
-            for (int j = 0; j < numManifests; j++) {
-                manifests.add(new ManifestRecord("M" + j + "G" + i, Instant.now()));
-            }
 
             generations.add(
                     new GenerationRecord(
@@ -73,7 +77,6 @@ public class RedHatReleaseGeneratorTest {
                                             null,
                                             new Target("CONTAINER_IMAGE", "quay.io/org/image1:tag"))),
                             null,
-                            manifests,
                             null,
                             null,
                             null));
@@ -111,7 +114,6 @@ public class RedHatReleaseGeneratorTest {
                                         new Generator("unsupported", "1.0", null),
                                         new Target("EVENT", "E1"))),
                         null,
-                        null,
                         GenerationStatus.SCHEDULED,
                         null,
                         null));
@@ -131,7 +133,6 @@ public class RedHatReleaseGeneratorTest {
                         null,
                         JacksonUtils.toObjectNode(new GenerationRequest(null, new Target("EVENT", "E1"))),
                         null,
-                        null,
                         GenerationStatus.SCHEDULED,
                         null,
                         null));
@@ -148,7 +149,6 @@ public class RedHatReleaseGeneratorTest {
                         "G",
                         Instant.now(),
                         Instant.now(),
-                        null,
                         null,
                         null,
                         null,
@@ -174,7 +174,6 @@ public class RedHatReleaseGeneratorTest {
                                         new Generator("redhat-release", "1.0", null),
                                         new Target("EVENT", "E1"))),
                         null,
-                        null,
                         GenerationStatus.SCHEDULED,
                         null,
                         null));
@@ -186,7 +185,9 @@ public class RedHatReleaseGeneratorTest {
 
     @Test
     void handleGeneration() {
-        when(client.getEventGenerations("E1MMM")).thenReturn(genGenrations(2, 2));
+        when(client.getEventGenerations(eq("E1MMM"))).thenReturn(genGenerations(2));
+        when(client.getGenerationManifests(eq("G0"))).thenReturn(genManifests(2));
+        when(client.getGenerationManifests(eq("G1"))).thenReturn(genManifests(2));
 
         GenerationRecord generationRecord = new GenerationRecord(
                 "G1",
@@ -194,7 +195,6 @@ public class RedHatReleaseGeneratorTest {
                 Instant.now(),
                 null,
                 JacksonUtils.toObjectNode(new GenerationRequest(null, new Target("EVENT", "E1MMM"))),
-                null,
                 null,
                 null,
                 null,
@@ -214,5 +214,6 @@ public class RedHatReleaseGeneratorTest {
         verify(client, times(4)).getManifestContent(anyString());
         verify(client, times(5)).uploadManifest(anyString(), any());
         verify(client, times(1)).getEventGenerations(anyString());
+        verify(client, times(2)).getGenerationManifests(anyString());
     }
 }

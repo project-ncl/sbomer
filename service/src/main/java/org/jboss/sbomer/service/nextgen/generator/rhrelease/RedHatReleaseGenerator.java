@@ -27,7 +27,6 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
@@ -79,7 +78,7 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
         log.debug("Reading generation request...");
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generationRecord.request());
 
-        log.debug("Fetching generations related to event with identifier '{}'...", request.target().identifier());
+        log.debug("Fetching generations related to event '{}'...", request.target().identifier());
         List<GenerationRecord> generations;
 
         try {
@@ -98,7 +97,20 @@ public class RedHatReleaseGenerator extends AbstractGenerator {
         for (GenerationRecord g : generations) {
             log.info("Processing generation '{}'", g.id());
 
-            for (ManifestRecord m : g.manifests()) {
+            log.debug("Fetching manifests related to generation '{}'", g.id());
+
+            List<ManifestRecord> manifests;
+
+            try {
+                manifests = sbomerClient.getGenerationManifests(g.id());
+            } catch (NotFoundException ex) {
+                throw new ApplicationException(
+                        "Generation with id '{}' could not be found, cannot process manifests",
+                        g.id(),
+                        ex);
+            }
+
+            for (ManifestRecord m : manifests) {
                 log.info("Processing manifest '{}'", m.id());
 
                 JsonNode bom = sbomerClient.getManifestContent(m.id());

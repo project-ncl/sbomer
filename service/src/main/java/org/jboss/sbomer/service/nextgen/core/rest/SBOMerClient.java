@@ -70,6 +70,12 @@ public interface SBOMerClient {
     public GenerationRecord getGeneration(@PathParam("generationId") String generationId);
 
     @Traced
+    @SpanName("sbomer.generations.get.id")
+    @GET
+    @Path("/generations/{generationId}/manifests")
+    public List<ManifestRecord> getGenerationManifests(@PathParam("generationId") String generationId);
+
+    @Traced
     @SpanName("sbomer.generations.status.update")
     @PATCH
     @Path("/generations/{generationId}/status")
@@ -81,7 +87,7 @@ public interface SBOMerClient {
     @SpanName("sbomer.generations.manifests.upload")
     @POST
     @Path("/generations/{generationId}/manifests")
-    ManifestRecord uploadManifest(@PathParam("generationId") String generationId, JsonNode manifest);
+    public ManifestRecord uploadManifest(@PathParam("generationId") String generationId, JsonNode manifest);
 
     //
     // Events
