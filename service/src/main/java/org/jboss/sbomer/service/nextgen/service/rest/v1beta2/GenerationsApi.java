@@ -29,6 +29,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationStatusRecord;
@@ -56,15 +57,14 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -158,16 +158,14 @@ public class GenerationsApi {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(type = SchemaType.ARRAY, implementation = GenerationRecord.class)))
-    public Response listGenerations(
-            @QueryParam("status") String status,
-            @QueryParam("targetIdentifier") String targetIdentifier,
-            // Add other relevant filter parameters (e.g., targetType, eventId)
-            @QueryParam("pageIndex") @DefaultValue("0") int pageIndex,
-            @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+    public Response listGenerations(@Valid @BeanParam PaginationParameters paginationParams) {
 
-        List<Generation> generations = Generation.findAll().list();
+        List<GenerationRecord> generations = Generation.findAll()
+                .project(GenerationRecord.class)
+                .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
+                .list();
 
-        return Response.ok(mapper.toGenerationRecords(generations)).header("X-Total-Count", generations.size()).build();
+        return Response.ok(generations).header("X-Total-Count", generations.size()).build();
     }
 
     @GET
@@ -196,16 +194,17 @@ public class GenerationsApi {
     @APIResponse(
             responseCode = "200",
             description = "List of manifests",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(type = SchemaType.ARRAY, implementation = ManifestRecord.class)))
     @APIResponse(responseCode = "404", description = "Generation not found")
-    public List<ManifestRecord> getManifestsForGeneration(@PathParam("generationId") String generationId) {
-        Generation generation = Generation.findById(generationId); // NOSONAR
+    public Response getManifestsForGeneration(@PathParam("generationId") String generationId) {
+        List<ManifestRecord> manifests = Manifest
+                .find("where generation = ?1", Generation.builder().withId(generationId).build())
+                .project(ManifestRecord.class)
+                .list();
 
-        if (generation == null) {
-            throw new NotFoundException("Generation request with id '{}' could not be found", generationId);
-        }
-
-        return mapper.toManifestRecords(generation.getManifests());
+        return Response.ok(manifests).header("X-Total-Count", manifests.size()).build();
     }
 
     @PATCH

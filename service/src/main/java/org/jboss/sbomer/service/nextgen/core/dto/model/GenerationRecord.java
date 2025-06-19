@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.Set;
 
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 
@@ -34,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public record GenerationRecord(@RestLinkId String id, Instant created, Instant updated, Instant finished,
-        ObjectNode request, ObjectNode metadata, GenerationStatus status, String result, String reason) {
+        ObjectNode request, ObjectNode metadata, GenerationStatus status, GenerationResult result, String reason) {
 
     public boolean isSupported(Set<String> types) {
         if (request() == null) {

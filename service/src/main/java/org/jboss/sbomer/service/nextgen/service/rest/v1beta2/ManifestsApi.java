@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -43,13 +44,12 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Path("/api/v1beta2/manifests")
@@ -73,19 +73,24 @@ public class ManifestsApi {
     @APIResponse(
             responseCode = "200",
             description = "Paginated list of manifests",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(type = SchemaType.ARRAY, implementation = ManifestRecord.class)))
     @APIResponse(
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public List<ManifestRecord> search( // TODO: USE pagination
-            @Valid @BeanParam PaginationParameters paginationParams,
-            @QueryParam("query") String query,
-            @DefaultValue("creationTime=desc=") @QueryParam("sort") String sort) {
+    public Response search(@Valid @BeanParam PaginationParameters paginationParams) {
+        List<ManifestRecord> manifests = Manifest.findAll()
+                .project(ManifestRecord.class)
+                .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
+                .list();
 
-        List<Manifest> manifests = Manifest.listAll();
-
-        return mapper.toManifestRecords(manifests);
+        return Response.ok(manifests)
+                .header("X-Total-Count", manifests.size())
+                .header("X-Page-Index", paginationParams.getPageIndex())
+                .header("X-Page-Size", paginationParams.getPageSize())
+                .build();
     }
 
     @GET
