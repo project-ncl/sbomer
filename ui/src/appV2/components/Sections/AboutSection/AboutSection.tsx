@@ -9,8 +9,7 @@ export const AboutSection = () => {
       <CardBody>
         <Grid cellSpacing={3} span={12}>
           <GridItem span={12}>
-            A service to generate <strong>manifests</strong> in the <strong>CycloneDX</strong> format for Application
-            Services products.
+            A service to generate <strong>manifests</strong> in the <strong>CycloneDX</strong> format for products.
           </GridItem>
           <GridItem>
             <br />
