@@ -107,8 +107,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
 
     const sboms: SbomerManifest[] = [];
 
-    if (data) {
-      data.forEach((sbom: any) => {
+    if (data.content) {
+      data.content.forEach((sbom: any) => {
         sboms.push(new SbomerManifest(sbom));
       });
     }
@@ -197,8 +197,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
 
     const requests: SbomerGeneration[] = [];
 
-    if (data) {
-      data.forEach((request: any) => {
+    if (data.content) {
+      data.content.forEach((request: any) => {
         requests.push(new SbomerGeneration(request));
       });
     }
