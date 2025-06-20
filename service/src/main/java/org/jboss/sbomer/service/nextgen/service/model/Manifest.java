@@ -87,8 +87,7 @@ public class Manifest extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata")
     @ToString.Exclude
-    @Schema(implementation = Map.class)
-    private JsonNode metadata;
+    private Map<String, String> metadata;
 
     @PrePersist
     protected void onPrePersist() {

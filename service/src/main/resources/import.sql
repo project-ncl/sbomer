@@ -3535,12 +3535,14 @@ INSERT INTO manifest(
 		id,
 		created,
         generation_id,
+        metadata,
 		bom
 	)
 VALUES (
 		'816640206274228223',
 		'2023-12-25T00:00:00.000000Z',
         'G1AAAAA',
+        '{"sha256": "0f632851ad89b7897c37020326fe511f608b36b1124143376d4d413522612c6f"}',
     '{
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",

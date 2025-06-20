@@ -281,13 +281,10 @@ public class GenerationsApi {
 
         log.debug("Preparing new manifest entity for the payload");
 
-        ObjectNode metadata = JsonNodeFactory.instance.objectNode();
-        metadata.put("sha256", JacksonUtils.hash(payload));
-
         Manifest manifest = Manifest.builder()
                 .withGeneration(generation)
                 .withBom(payload)
-                .withMetadata(metadata)
+                .withMetadata(Map.of("sha256", JacksonUtils.hash(payload)))
                 .build()
                 .save();
         generation.getManifests().add(manifest);

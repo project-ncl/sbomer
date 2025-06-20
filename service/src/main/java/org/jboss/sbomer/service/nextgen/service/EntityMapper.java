@@ -40,7 +40,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public interface EntityMapper {
     @BeanMapping(unmappedSourcePolicy = ReportingPolicy.IGNORE)
-    String mapToIdentifier(Event value);
+    String toIdentifier(Event value);
+
+    @BeanMapping(unmappedSourcePolicy = ReportingPolicy.IGNORE)
+    String toIdentifier(Generation value);
 
     @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
     EventRecord toRecord(Event event);
