@@ -39,7 +39,7 @@ export const ManifestsTable = () => {
   // enable when pagination is implemented
   const enableFiltering = false
   // enable when pagination is implemented
-  const enablePagination = false;
+  const enablePagination = true;
 
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
