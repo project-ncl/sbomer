@@ -110,7 +110,7 @@ public class EventsApi {
         Page<EventRecord> page = RestUtils.toPage(events, paginationParams, count);
 
         return Response.ok(page)
-                .header("X-Total-Count", events.size())
+                .header("X-Total-Count", count)
                 .header("X-Page-Index", paginationParams.getPageIndex())
                 .header("X-Page-Size", paginationParams.getPageSize())
                 .build();

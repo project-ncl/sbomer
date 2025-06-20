@@ -170,7 +170,7 @@ public class GenerationsApi {
         Page<GenerationRecord> page = RestUtils.toPage(generations, paginationParams, count);
 
         return Response.ok(page)
-                .header("X-Total-Count", generations.size())
+                .header("X-Total-Count", count)
                 .header("X-Page-Index", paginationParams.getPageIndex())
                 .header("X-Page-Size", paginationParams.getPageSize())
                 .build();

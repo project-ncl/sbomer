@@ -94,7 +94,7 @@ public class ManifestsApi {
         Page<ManifestRecord> page = RestUtils.toPage(manifests, paginationParams, count);
 
         return Response.ok(page)
-                .header("X-Total-Count", manifests.size())
+                .header("X-Total-Count", count)
                 .header("X-Page-Index", paginationParams.getPageIndex())
                 .header("X-Page-Size", paginationParams.getPageSize())
                 .build();
