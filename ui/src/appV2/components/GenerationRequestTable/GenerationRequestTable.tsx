@@ -33,7 +33,7 @@ export const GenerationRequestTable = () => {
   const paramPageSize = useSearchParam('pageSize') || 10;
 
   // enable when pagination is implemented
-  const paginationEnabled = false;
+  const paginationEnabled = true;
 
   const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useGenerationRequests(
     +paramPage - 1,
