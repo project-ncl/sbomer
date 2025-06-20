@@ -148,6 +148,15 @@ export class DefaultSbomerApiV2 implements SbomerApi {
     return request;
   }
 
+  async getManifestJson(id: string): Promise<any> {
+  const response = await fetch(`${this.baseUrl}/api/v1beta2/manifests/${id}/bom`);
+  if (response.status !== 200) {
+    const body = await response.text();
+    throw new Error('Failed to fetch manifest JSON, got: ' + response.status + " response: '" + body + "'");
+  }
+  return await response.json();
+}
+
   async getLogPaths(generationId: string): Promise<Array<string>> {
     const response = await this.client.get(`/api/v1beta2/generations/${generationId}/logs`);
 

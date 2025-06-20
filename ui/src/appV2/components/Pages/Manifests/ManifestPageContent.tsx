@@ -1,7 +1,11 @@
+import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useManifest } from '@appV2/components/Pages/Manifests/useManifest';
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import {
+  ActionList,
+  ActionListItem,
   Alert,
+  Button,
   CodeBlock,
   CodeBlockCode,
   DescriptionList,
@@ -16,6 +20,7 @@ import {
   TimestampTooltipVariant,
   Title,
 } from '@patternfly/react-core';
+import { DownloadIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -25,6 +30,24 @@ const ManifestPageContent: React.FunctionComponent = () => {
   const [{ request: manifest, error, loading }] = useManifest(id!);
 
   useDocumentTitle('SBOMer | Manifests | ' + id);
+
+
+  const downloadManifest = async (manifest: any) => {
+    try {
+      const json = await DefaultSbomerApiV2.getInstance().getManifestJson(manifest.id);
+      const blob = new Blob([JSON.stringify(json)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const element = document.createElement('a');
+      element.href = url;
+      element.download = `${manifest.id}.json`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      alert('Download failed: ' + e.message);
+    }
+  };
 
 
 
@@ -77,6 +100,15 @@ const ManifestPageContent: React.FunctionComponent = () => {
           </DescriptionList>
 
         </GridItem>
+
+        <ActionList>
+          <ActionListItem>
+            <Button variant="primary" icon={<DownloadIcon />} onClick={(e) => downloadManifest(manifest)}>
+              {' '}
+              Download
+            </Button>
+          </ActionListItem>
+        </ActionList>
         <GridItem span={12}>
           <DescriptionList>
             <DescriptionListGroup>
