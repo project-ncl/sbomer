@@ -1,6 +1,6 @@
 import { AboutSection } from '@appV2/components/Sections/AboutSection/AboutSection';
 import { StatsSection } from '@appV2/components/Sections/StatsSection/StatsSection';
-import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
+import { Alert, Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 import * as React from 'react';
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
@@ -17,12 +17,16 @@ const Dashboard: React.FunctionComponent = () => {
             <Title headingLevel="h1" size="4xl">
               SBOMer Next Generation
             </Title>
+
           </GridItem>
-          <GridItem>
-            <Title headingLevel="h2" size="2xl">
-             In development, do not use
-            </Title>
+          <GridItem span={12}>
+             <Alert
+              variant="warning"
+              title="IN DEVELOPMENT" >
+              </Alert>
           </GridItem>
+
+
           <GridItem span={6}>
             <AboutSection />
           </GridItem>
