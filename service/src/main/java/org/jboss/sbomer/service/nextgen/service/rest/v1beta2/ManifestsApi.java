@@ -30,10 +30,13 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
+import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
+import org.jboss.sbomer.service.nextgen.service.rest.RestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -86,7 +89,11 @@ public class ManifestsApi {
                 .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .list();
 
-        return Response.ok(manifests)
+        long count = Manifest.findAll().count();
+
+        Page<ManifestRecord> page = RestUtils.toPage(manifests, paginationParams, count);
+
+        return Response.ok(page)
                 .header("X-Total-Count", manifests.size())
                 .header("X-Page-Index", paginationParams.getPageIndex())
                 .header("X-Page-Size", paginationParams.getPageSize())

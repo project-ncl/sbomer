@@ -32,6 +32,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventStatusRecord;
@@ -42,6 +43,7 @@ import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpda
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
+import org.jboss.sbomer.service.nextgen.service.rest.RestUtils;
 
 import io.quarkus.arc.Arc;
 import io.vertx.core.eventbus.EventBus;
@@ -53,7 +55,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
@@ -93,7 +94,7 @@ public class EventsApi {
             description = "Paginated list of events",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(type = SchemaType.ARRAY, implementation = EventRecord.class)))
+                    schema = @Schema(type = SchemaType.OBJECT, implementation = Page.class)))
     @APIResponse(
             responseCode = "500",
             description = "Internal server error",
@@ -104,7 +105,15 @@ public class EventsApi {
                 .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .list();
 
-        return Response.ok(events).header("X-Total-Count", events.size()).build();
+        long count = Event.findAll().count();
+
+        Page<EventRecord> page = RestUtils.toPage(events, paginationParams, count);
+
+        return Response.ok(page)
+                .header("X-Total-Count", events.size())
+                .header("X-Page-Index", paginationParams.getPageIndex())
+                .header("X-Page-Size", paginationParams.getPageSize())
+                .build();
     }
 
     @GET

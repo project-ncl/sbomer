@@ -29,6 +29,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.NotFoundException;
+import org.jboss.sbomer.core.features.sbom.rest.Page;
 import org.jboss.sbomer.core.utils.PaginationParameters;
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
@@ -46,10 +47,9 @@ import org.jboss.sbomer.service.nextgen.service.config.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.model.Manifest;
+import org.jboss.sbomer.service.nextgen.service.rest.RestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -157,7 +157,7 @@ public class GenerationsApi {
             description = "A list of generations",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(type = SchemaType.ARRAY, implementation = GenerationRecord.class)))
+                    schema = @Schema(type = SchemaType.OBJECT, implementation = Page.class)))
     public Response listGenerations(@Valid @BeanParam PaginationParameters paginationParams) {
 
         List<GenerationRecord> generations = Generation.findAll()
@@ -165,7 +165,15 @@ public class GenerationsApi {
                 .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .list();
 
-        return Response.ok(generations).header("X-Total-Count", generations.size()).build();
+        long count = Generation.findAll().count();
+
+        Page<GenerationRecord> page = RestUtils.toPage(generations, paginationParams, count);
+
+        return Response.ok(page)
+                .header("X-Total-Count", generations.size())
+                .header("X-Page-Index", paginationParams.getPageIndex())
+                .header("X-Page-Size", paginationParams.getPageSize())
+                .build();
     }
 
     @GET
