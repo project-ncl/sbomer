@@ -24,10 +24,13 @@ import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.quarkus.hibernate.orm.panache.common.ProjectedFieldName;
+
 /**
  * Representation of the Event entity.
  */
-public record EventRecord(String id, EventRecord parent, Instant created, Instant updated, Instant finished,
-        Map<String, String> metadata, JsonNode request, EventStatus status, String reason) {
+
+public record EventRecord(String id, @ProjectedFieldName("parent.id") String parent, Instant created, Instant updated,
+        Instant finished, Map<String, String> metadata, JsonNode request, EventStatus status, String reason) {
 
 }

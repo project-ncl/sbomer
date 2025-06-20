@@ -3433,7 +3433,28 @@ INSERT INTO event(
         reason
 	)
 VALUES (
+        'E0AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '{}',
+        'PROCESSED',
+        'Event processed'
+);
+
+INSERT INTO event(
+		id,
+        parent_id,
+		created,
+        updated,
+        finished,
+        metadata,
+		status,
+        reason
+	)
+VALUES (
         'E1AAAAA',
+        'E0AAAAA',
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
