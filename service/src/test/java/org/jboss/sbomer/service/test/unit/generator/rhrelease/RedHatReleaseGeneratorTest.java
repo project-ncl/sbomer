@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -56,7 +57,7 @@ public class RedHatReleaseGeneratorTest {
         List<ManifestRecord> manifests = new ArrayList<>();
 
         for (int i = 0; i < numManifests; i++) {
-            manifests.add(new ManifestRecord("M" + i, Instant.now()));
+            manifests.add(new ManifestRecord("M" + i, "G", Instant.now(), Collections.emptyMap()));
         }
         return manifests;
     }
@@ -203,7 +204,7 @@ public class RedHatReleaseGeneratorTest {
         ArgumentCaptor<JsonNode> argumentCaptor = ArgumentCaptor.forClass(JsonNode.class);
 
         when(client.uploadManifest(eq("G1"), argumentCaptor.capture()))
-                .thenReturn(new ManifestRecord("MX", Instant.now()));
+                .thenReturn(new ManifestRecord("MX", "G1", Instant.now(), Collections.emptyMap()));
 
         generator.generate(generationRecord);
 
