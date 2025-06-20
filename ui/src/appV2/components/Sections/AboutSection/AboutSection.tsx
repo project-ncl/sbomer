@@ -21,8 +21,8 @@ export const AboutSection = () => {
                 </Button>
               </ActionListItem> */}
               <ActionListItem>
-                <Button variant="primary" size="lg" component={(props: any) => <Link {...props} to="requests" />}>
-                  Generation Requests
+                <Button variant="primary" size="lg" component={(props: any) => <Link {...props} to="generations" />}>
+                  Generations
                 </Button>
               </ActionListItem>
               <ActionListItem>
