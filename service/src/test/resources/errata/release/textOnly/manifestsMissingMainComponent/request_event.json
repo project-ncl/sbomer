@@ -1,0 +1,21 @@
+{
+    "id": "4C51D4F9AA34468",
+    "receivalTime": "2025-06-02T21:25:39.802179Z",
+    "eventType": "UMB",
+    "eventStatus": "SUCCESS",
+    "reason": "1/1 completed with success",
+    "requestConfig": {
+        "type": "errata-advisory",
+        "apiVersion": "sbomer.jboss.org/v1alpha1",
+        "advisoryId": "150098"
+    },
+    "event": {
+        "msg": "{\"who\":\"qa-errata-list@redhat.com\",\"when\":\"2025-06-02 21:25:36 UTC\",\"errata_id\":150098,\"product\":\"RHBQ\",\"release\":\"Red Hat build of Quarkus Middleware\",\"type\":\"RHSA\",\"from\":\"IN_PUSH\",\"to\":\"SHIPPED_LIVE\",\"errata_status\":\"SHIPPED_LIVE\",\"synopsis\":\"Important: Red Hat build of Quarkus 3.20.1 release\",\"fulladvisory\":\"RHSA-2025:8258-01\",\"skip_customer_notifications\":false,\"content_types\":[]}",
+        "msg_id": "ID:umb-prod-6.umb-001.prod.us-east-1.aws.redhat.com-40623-1748863005007-12:9208:-1:1:1",
+        "consumer": "ERRATA",
+        "msg_type": "errata-advisory",
+        "msg_status": "ACK",
+        "destination": "topic://VirtualTopic.eng.errata.activity.status",
+        "creation_time": "2025-06-02T21:25:39.760Z"
+    }
+}
