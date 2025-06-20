@@ -99,7 +99,7 @@ public class EventsApi {
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response search(@Valid @BeanParam PaginationParameters paginationParams) {
-        List<EventRecord> events = Generation.findAll()
+        List<EventRecord> events = Event.findAll()
                 .project(EventRecord.class)
                 .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .list();
