@@ -165,8 +165,8 @@ export const RequestEventTable = () => {
   />
 
   const table = <>
-    <Table aria-label="Request events table" variant="compact">
-      <Caption>{queryType != RequestsQueryType.NoFilter ? "Latest filtered request events" : "Latest request events"}</Caption>
+    <Table aria-label="Events table" variant="compact">
+      <Caption>{queryType != RequestsQueryType.NoFilter ? "Latest filtered events" : "Latest events"}</Caption>
       <Thead>
         <Tr>
           <Th>{columnNames.id}</Th>
@@ -184,7 +184,7 @@ export const RequestEventTable = () => {
             style={{ cursor: 'auto' }}
           >
             <Td dataLabel={columnNames.id}>
-              <Link to={`/requestevents/${requestEvent.id}`}>
+              <Link to={`/events/${requestEvent.id}`}>
                 <pre>{requestEvent.id}</pre>
               </Link>
             </Td>

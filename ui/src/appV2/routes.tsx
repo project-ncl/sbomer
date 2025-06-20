@@ -57,12 +57,12 @@ const routes: AppRouteConfig[] = [
   },
   {
     element: <RequestEventsPage />,
-    label: 'Request Events',
-    path: '/requestevents',
+    label: 'Events',
+    path: '/events',
   },
   {
     element: <RequestEventDetailsPage />,
-    path: '/requestevents/:id',
+    path: '/events/:id',
   },
   {
     element: <NotFoundPage />,
