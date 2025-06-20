@@ -43,8 +43,8 @@ export const RequestEventTable = () => {
 
   // todo enable when searching is implemented
   const enableSearching = false;
-  // todo enable when pagination is implemented
-  const enablePagination = false;
+  // enable when pagination is implemented
+  const enablePagination = true;
 
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);

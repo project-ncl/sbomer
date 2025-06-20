@@ -29,19 +29,19 @@ export const RequestEventDetailsTable = () => {
     <Grid hasGutter span={12}>
       <GridItem span={12}>
         <Title headingLevel="h1" size="4xl">
-          Request Event {id}
+          Event {id}
         </Title>
       </GridItem>
       <GridItem span={12}>
         <DescriptionList columnModifier={{ default: '2Col' }}>
           <DescriptionListGroup>
-            <DescriptionListTerm>Request Event ID</DescriptionListTerm>
+            <DescriptionListTerm>Event ID</DescriptionListTerm>
             <DescriptionListDescription>
               <pre>{id}</pre>
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>Request Event Received At</DescriptionListTerm>
+            <DescriptionListTerm>Event Received At</DescriptionListTerm>
             <DescriptionListDescription>
               <Timestamp date={request?.created} tooltip={{ variant: TimestampTooltipVariant.default }} />
             </DescriptionListDescription>
