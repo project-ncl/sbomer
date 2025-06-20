@@ -13,7 +13,7 @@ export function RequestEventsPage() {
         <Grid hasGutter span={12}>
           <GridItem span={12}>
             <Title headingLevel="h1" size="4xl">
-              Request Events
+              Events
             </Title>
           </GridItem>
           <GridItem span={12}>
