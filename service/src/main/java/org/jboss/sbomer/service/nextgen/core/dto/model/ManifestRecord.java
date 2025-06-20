@@ -18,10 +18,14 @@
 package org.jboss.sbomer.service.nextgen.core.dto.model;
 
 import java.time.Instant;
+import java.util.Map;
+
+import io.quarkus.hibernate.orm.panache.common.ProjectedFieldName;
 
 /**
  * Representation of the Manifest entity.
  */
-public record ManifestRecord(String id, Instant created) {
+public record ManifestRecord(String id, @ProjectedFieldName("generation.id") String generation, Instant created,
+        Map<String, String> metadata) {
 
 }
