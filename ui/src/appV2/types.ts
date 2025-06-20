@@ -166,6 +166,8 @@ export type SbomerApi = {
 
   getManifest(id: string): Promise<SbomerManifest>;
 
+  getManifestJson(id: string): Promise<string>;
+
   getEvents(
     pagination: {
       pageSize: number;
