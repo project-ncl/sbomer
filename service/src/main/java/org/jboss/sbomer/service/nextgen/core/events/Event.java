@@ -17,16 +17,9 @@
  */
 package org.jboss.sbomer.service.nextgen.core.events;
 
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
-
-/**
- * An event fired after a particular {@link EventRecord} has been created.
- */
-public record EventStatusChangeEvent(EventRecord event) implements Event {
-
-    @Override
-    public String getName() {
-        return "event.status.change";
-    }
-
+public interface Event {
+    /**
+     * Returns the name of the event.
+     */
+    String getName();
 }

@@ -22,6 +22,10 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 /**
  * Event fired after any status change of a generation.
  */
-public record GenerationStatusChangeEvent(GenerationRecord generation) {
+public record GenerationStatusChangeEvent(GenerationRecord generation) implements Event {
+    @Override
+    public String getName() {
+        return "generation.status.change";
+    }
 
 }

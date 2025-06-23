@@ -15,18 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.events;
+package org.jboss.sbomer.service.nextgen.workflow.model;
 
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-/**
- * An event fired after a particular {@link EventRecord} has been created.
- */
-public record EventStatusChangeEvent(EventRecord event) implements Event {
+@JsonTypeName("expression")
+public record ExpressionCondition(String type, @JsonProperty("if") String expression) implements Condition {
 
     @Override
-    public String getName() {
-        return "event.status.change";
+    public boolean isMet() {
+        return Boolean.parseBoolean(expression);
     }
 
 }

@@ -15,18 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.events;
+package org.jboss.sbomer.service.nextgen.workflow.model;
 
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
+import java.util.List;
 
-/**
- * An event fired after a particular {@link EventRecord} has been created.
- */
-public record EventStatusChangeEvent(EventRecord event) implements Event {
-
-    @Override
-    public String getName() {
-        return "event.status.change";
-    }
+public record WorkflowDefinition(List<WorkflowSpec> workflows) {
 
 }
