@@ -37,6 +37,12 @@
             "enabled": false
         },
         {
+            "groupName": "ESLint dependencies",
+            "groupSlug": "eslint",
+            "matchPackageNames": ["^eslint", "^@eslint"]
+        },
+
+        {
             "extends": ["monorepo:aws-java-sdk-v2", "monorepo:typescript-eslint", "monorepo:mapstruct", "monorepo:commitlint"]
         },
         {
