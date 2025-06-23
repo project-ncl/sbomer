@@ -114,7 +114,7 @@ public class SyftGenerator extends AbstractTektonController {
 
     @Override
     public String getGeneratorVersion() {
-        return "1.16.0";
+        return "1.27.1";
     }
 
     @Override

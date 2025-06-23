@@ -114,7 +114,7 @@ public class GeneratorConfigProviderTest {
                 .buildEffectiveRequest(new GenerationRequestSpec(new TargetSpec("image", "CONTAINER_IMAGE"), null));
 
         assertEquals("syft", requestSpec.generator().name());
-        assertEquals("1.16.0", requestSpec.generator().version());
+        assertEquals("1.27.1", requestSpec.generator().version());
         assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
         assertEquals("500m", requestSpec.generator().config().resources().requests().cpu());
         assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
@@ -146,7 +146,7 @@ public class GeneratorConfigProviderTest {
                                         null))));
 
         assertEquals("syft", requestSpec.generator().name());
-        assertEquals("1.16.0", requestSpec.generator().version());
+        assertEquals("1.27.1", requestSpec.generator().version());
         assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
         assertEquals("800m", requestSpec.generator().config().resources().requests().cpu());
         assertEquals("2Gi", requestSpec.generator().config().resources().requests().memory());
@@ -177,7 +177,7 @@ public class GeneratorConfigProviderTest {
                                         null))));
 
         assertEquals("syft", requestSpec.generator().name());
-        assertEquals("1.16.0", requestSpec.generator().version());
+        assertEquals("1.27.1", requestSpec.generator().version());
         assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
         assertEquals("500m", requestSpec.generator().config().resources().requests().cpu());
         assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
