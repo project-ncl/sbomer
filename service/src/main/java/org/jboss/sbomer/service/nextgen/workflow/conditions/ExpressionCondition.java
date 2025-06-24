@@ -15,11 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.workflow.model;
+package org.jboss.sbomer.service.nextgen.workflow.conditions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@JsonTypeName("event")
-public record EventTrigger(String name) implements Trigger {
+@JsonTypeName("expression")
+public record ExpressionCondition(String type, @JsonProperty("if") String expression) implements Condition {
+
+    @Override
+    public boolean isMet() {
+        return Boolean.parseBoolean(expression);
+    }
 
 }

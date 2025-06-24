@@ -33,7 +33,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 -- UMB request event for the pnc build ARYT3LBXDVYAC
 INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
   VALUES ('build_ARYT3LBXDVYAC', '2024-10-14 14:18:45.148407', 'UMB', 'SUCCESS',

@@ -19,14 +19,21 @@ package org.jboss.sbomer.service.nextgen.core.events;
 
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 /**
  * An event fired after a particular {@link EventRecord} has been created.
  */
-public record EventStatusChangeEvent(EventRecord event) implements Event {
+@JsonTypeName(EventStatusChangeEvent.TYPE)
+public record EventStatusChangeEvent(String type, String key, EventRecord event) implements Event {
+    public static final String TYPE = "event.status.change";
 
-    @Override
-    public String getName() {
-        return "event.status.change";
+    public EventStatusChangeEvent(String key, EventRecord event) {
+        this(TYPE, key, event);
+    }
+
+    public EventStatusChangeEvent(EventRecord event) {
+        this(TYPE, event.id(), event);
     }
 
 }

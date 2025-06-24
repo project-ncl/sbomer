@@ -28,9 +28,7 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.nextgen.core.events.Event;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
-import org.jboss.sbomer.service.nextgen.workflow.model.EventTrigger;
-import org.jboss.sbomer.service.nextgen.workflow.model.WorkflowDefinition;
-import org.jboss.sbomer.service.nextgen.workflow.model.WorkflowSpec;
+import org.jboss.sbomer.service.nextgen.workflow.triggers.EventTrigger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

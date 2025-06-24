@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.core.events;
+package org.jboss.sbomer.service.nextgen.workflow;
 
-import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
-import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import java.util.List;
 
-/**
- * Event fired after a Generation is scheduled.
- */
-public record GenerationScheduledEvent(EventRecord event, GenerationRecord generation) {
+import jakarta.validation.constraints.NotEmpty;
+
+public record WorkflowDefinition(@NotEmpty List<WorkflowSpec> workflows) {
 
 }

@@ -17,9 +17,30 @@
  */
 package org.jboss.sbomer.service.nextgen.core.events;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        visible = true,
+        property = "type")
+@JsonSubTypes({ @Type(EventStatusChangeEvent.class), @Type(GenerationStatusChangeEvent.class),
+        @Type(ResolveRequestEvent.class) })
 public interface Event {
     /**
-     * Returns the name of the event.
+     * The type (name) of the event.
+     * 
+     * @return Type of the event
      */
-    String getName();
+    String type();
+
+    /**
+     * Key that is used for scheduling and storage purposes.
+     * 
+     * @see https://www.confluent.io/learn/kafka-message-key/#what-is-a-kafka-message-key
+     * @return A string being the key
+     */
+    String key();
 }

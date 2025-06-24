@@ -15,14 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.workflow.model;
+package org.jboss.sbomer.service.nextgen.workflow.conditions;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes({ @Type(EventTrigger.class) })
-public interface Trigger {
-
+@JsonSubTypes({ @Type(ExpressionCondition.class) })
+public interface Condition {
+    @JsonIgnore
+    public boolean isMet();
 }

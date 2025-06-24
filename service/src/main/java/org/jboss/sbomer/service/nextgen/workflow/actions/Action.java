@@ -15,17 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.workflow.model;
+package org.jboss.sbomer.service.nextgen.workflow.actions;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeName("expression")
-public record ExpressionCondition(String type, @JsonProperty("if") String expression) implements Condition {
-
-    @Override
-    public boolean isMet() {
-        return Boolean.parseBoolean(expression);
-    }
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({ @Type(EventAction.class) })
+public interface Action {
 
 }

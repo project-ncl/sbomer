@@ -15,10 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.workflow.model;
+package org.jboss.sbomer.service.nextgen.workflow.actions;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.JsonNode;
 
-public record WorkflowSpec(List<Trigger> triggers, List<Condition> conditions, List<ActionSpec> actions) {
+@JsonTypeName("event")
+public record EventAction(String name, JsonNode payload) implements Action {
 
 }

@@ -15,10 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.workflow.model;
+package org.jboss.sbomer.service.nextgen.workflow.triggers;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-public record ActionSpec(String type, String name, JsonNode payload) {
+@JsonTypeName("event")
+public record EventTrigger(String name) implements Trigger {
 
 }

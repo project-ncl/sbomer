@@ -15,10 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.workflow.model;
+package org.jboss.sbomer.service.nextgen.workflow;
 
 import java.util.List;
 
-public record WorkflowDefinition(List<WorkflowSpec> workflows) {
+import org.jboss.sbomer.service.nextgen.workflow.actions.Action;
+import org.jboss.sbomer.service.nextgen.workflow.conditions.Condition;
+import org.jboss.sbomer.service.nextgen.workflow.triggers.Trigger;
+
+public record WorkflowSpec(List<Trigger> triggers, List<Condition> conditions, List<Action> actions) {
 
 }

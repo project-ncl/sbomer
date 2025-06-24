@@ -18,14 +18,14 @@ import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.GenerationStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.workflow.WorkflowProcessor;
-import org.jboss.sbomer.service.nextgen.workflow.model.ExpressionCondition;
-import org.jboss.sbomer.service.nextgen.workflow.model.WorkflowSpec;
+import org.jboss.sbomer.service.nextgen.workflow.WorkflowSpec;
+import org.jboss.sbomer.service.nextgen.workflow.actions.EventAction;
+import org.jboss.sbomer.service.nextgen.workflow.conditions.ExpressionCondition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
@@ -112,9 +112,9 @@ public class WorkflowTest {
 
         assertEquals(1, workflowSpec.actions().size());
 
-        JsonNode payload = workflowSpec.actions().get(0).payload();
+        EventAction action = (EventAction) workflowSpec.actions().get(0);
 
-        assertEquals("G", payload.get("generation").asText());
+        assertEquals("G", action.payload().get("generation").asText());
     }
 
     @Test

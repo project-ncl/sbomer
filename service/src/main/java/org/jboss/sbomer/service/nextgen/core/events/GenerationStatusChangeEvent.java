@@ -19,13 +19,21 @@ package org.jboss.sbomer.service.nextgen.core.events;
 
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 /**
  * Event fired after any status change of a generation.
  */
-public record GenerationStatusChangeEvent(GenerationRecord generation) implements Event {
-    @Override
-    public String getName() {
-        return "generation.status.change";
+@JsonTypeName(GenerationStatusChangeEvent.TYPE)
+public record GenerationStatusChangeEvent(String type, String key, GenerationRecord generation) implements Event {
+    public static final String TYPE = "generation.status.change";
+
+    public GenerationStatusChangeEvent(String key, GenerationRecord generation) {
+        this(TYPE, key, generation);
+    }
+
+    public GenerationStatusChangeEvent(GenerationRecord generation) {
+        this(TYPE, generation.id(), generation);
     }
 
 }

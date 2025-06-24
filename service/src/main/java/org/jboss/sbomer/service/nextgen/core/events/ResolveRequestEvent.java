@@ -19,9 +19,21 @@ package org.jboss.sbomer.service.nextgen.core.events;
 
 import org.jboss.sbomer.service.nextgen.core.dto.model.EventRecord;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 /**
  * Event sent after a request for resolution is received.
  */
-public record ResolveRequestEvent(EventRecord event) {
+@JsonTypeName(ResolveRequestEvent.TYPE)
+public record ResolveRequestEvent(String type, String key, EventRecord event) implements Event {
+    public static final String TYPE = "resolve.request"; // TODO: Rename
+
+    public ResolveRequestEvent(String key, EventRecord event) {
+        this(TYPE, key, event);
+    }
+
+    public ResolveRequestEvent(EventRecord event) {
+        this(TYPE, event.id(), event);
+    }
 
 }
