@@ -19,10 +19,35 @@ package org.jboss.sbomer.core.dto.v1beta1;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 
 public record V1Beta1GenerationRecord(String id, String identifier, @Schema(implementation = Map.class) Config config,
         String type, Instant creationTime, String status, String result, String reason) {
+
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(", ", "V1Beta1GenerationRecord[", "]");
+
+        if (id != null)
+            joiner.add("id=" + id);
+        if (identifier != null)
+            joiner.add("identifier=" + identifier);
+        if (config != null)
+            joiner.add("config=" + config);
+        if (creationTime != null)
+            joiner.add("creationTime=" + creationTime);
+        if (type != null)
+            joiner.add("type=" + type);
+        if (status != null)
+            joiner.add("status=" + status);
+        if (result != null)
+            joiner.add("result=" + result);
+        if (reason != null)
+            joiner.add("reason=" + reason);
+
+        return joiner.toString();
+    }
 }
