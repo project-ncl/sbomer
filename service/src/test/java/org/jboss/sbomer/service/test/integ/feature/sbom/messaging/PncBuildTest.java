@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.test.integ.feature.sbom.messaging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -34,6 +35,7 @@ import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
+import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
@@ -45,6 +47,7 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.AmqpMessagePr
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
 import org.jboss.sbomer.service.feature.sbom.service.SbomGenerationRequestRepository;
 import org.jboss.sbomer.service.test.PncWireMock;
 import org.jboss.sbomer.service.test.utils.AmqpMessageHelper;
@@ -53,6 +56,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.quarkus.test.common.WithTestResource;
@@ -85,6 +89,9 @@ class PncBuildTest {
 
     @Inject
     SbomGenerationRequestRepository sbomGenerationRequestRepository;
+
+    @Inject
+    RequestEventRepository requestEventRepository;
 
     @Inject
     @Connector("smallrye-in-memory")
@@ -248,6 +255,79 @@ class PncBuildTest {
         headers.put("timestamp", 1698076061381L);
 
         return AmqpMessageHelper.toMessage(TestResources.asString("payloads/umb-pnc-build-body.json"), headers);
+    }
+
+    @Test
+    void testUMBConsumeSuccessfulDelAnalysisOperationWithPendingRequest() throws Exception {
+        log.info("Running testUMBConsumeSuccessfulDelAnalysisOperationWithPendingRequest...");
+
+        // --- ARRANGE (Pre-conditions) ---
+        final String TEST_OPERATION_ID = "A6DFVW2SACIAA"; // Must match preparePNCDelAnalysisMsg()
+        final String TEST_SBOM_REQUEST_ID = "TEST_PENDING_REQ_ID"; // Unique ID for our pending request
+
+        // 1. Create a RequestEvent using the provided method
+        ObjectNode dummyEventPayload = ObjectMapperProvider.json().createObjectNode();
+        dummyEventPayload.put("type", "InitialApiCall");
+        dummyEventPayload.put("data", "some-initial-data");
+
+        RequestEvent initialRequestEvent = requestEventRepository
+                .createRequestEvent(RequestEventStatus.IN_PROGRESS, dummyEventPayload, "Created by UMB Message");
+
+        // 2. Prepare initial NO_OP SbomGenerationRequest linked to the RequestEvent
+        SbomGenerationRequest pendingSbomRequest = SbomGenerationRequest.builder()
+                .withId(TEST_SBOM_REQUEST_ID)
+                .withIdentifier(TEST_OPERATION_ID)
+                .withType(GenerationRequestType.OPERATION)
+                .withStatus(SbomGenerationStatus.NO_OP)
+                .withRequest(initialRequestEvent)
+                .build();
+        sbomGenerationRequestRepository.save(pendingSbomRequest);
+
+        log.info(
+                "Pre-created SbomGenerationRequest ID: {} with status {} and linked to RequestEvent ID: {}",
+                pendingSbomRequest.getId(),
+                pendingSbomRequest.getStatus(),
+                pendingSbomRequest.getRequest().getId());
+
+        InMemorySource<Message<String>> builds = connector.source("builds");
+        Message<String> txgMsg = preparePNCDelAnalysisMsg();
+
+        // Send the message to notify that the build failed.
+        builds.send(txgMsg);
+
+        ArgumentCaptor<RequestEvent> requestEventArgumentCaptor = ArgumentCaptor.forClass(RequestEvent.class);
+
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
+            SbomGenerationRequest updated = sbomGenerationRequestRepository.findById(TEST_SBOM_REQUEST_ID);
+
+            return updated != null && updated.getStatus().equals(SbomGenerationStatus.INITIALIZED);
+        });
+
+        // Verify we handled a message
+        verify(handler, times(1)).handle(requestEventArgumentCaptor.capture());
+
+        // Check if the sbom generation request is now initialized and ready to be picked up
+        SbomGenerationRequest updatedRequest = sbomGenerationRequestRepository.findById(TEST_SBOM_REQUEST_ID);
+        assertEquals(SbomGenerationStatus.INITIALIZED, updatedRequest.getStatus());
+
+        // Check if the initial event request is the same as the one that ends up attached to the sbom generation
+        // request
+        RequestEvent initialRequestEventUpdated = requestEventRepository.findById(initialRequestEvent.getId());
+        RequestEvent requestEventConnectedToGenerationRequest = updatedRequest.getRequest();
+        assertNotNull(initialRequestEventUpdated, "The original RequestEvent should still exist in the database.");
+        assertNotNull(requestEventConnectedToGenerationRequest, "RequestEvent of Generation should not be null");
+        assertEquals(
+                initialRequestEventUpdated.getId(),
+                requestEventConnectedToGenerationRequest.getId(),
+                "They should be the same request event, thus the IDs should be the same, but got different:\n"
+                        + initialRequestEventUpdated.toString() + "\n"
+                        + requestEventConnectedToGenerationRequest.toString());
+
+        // Assuming generation request created from it, event should be successful
+        assertEquals(RequestEventStatus.SUCCESS, initialRequestEventUpdated.getEventStatus());
+
+        // TODO check for OTEL metadata
+
     }
 
     private Message<String> preparePNCDelAnalysisMsg() throws IOException {
