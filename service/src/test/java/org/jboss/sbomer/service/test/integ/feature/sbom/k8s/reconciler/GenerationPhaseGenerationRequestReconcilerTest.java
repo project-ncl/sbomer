@@ -50,7 +50,7 @@ import org.mockito.Mockito;
 
 import io.fabric8.knative.pkg.apis.ConditionBuilder;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminatedBuilder;
-import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
+import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import io.fabric8.mockwebserver.http.RecordedRequest;
 import io.fabric8.tekton.v1beta1.ParamBuilder;
 import io.fabric8.tekton.v1beta1.ParamValue;
@@ -80,7 +80,7 @@ class GenerationPhaseGenerationRequestReconcilerTest {
     BuildController controller;
 
     @KubernetesTestServer
-    KubernetesServer mockServer;
+    KubernetesMockServer mockServer;
 
     private GenerationRequest dummyGenerationRequest() throws IOException {
         GenerationRequest generationRequest = new GenerationRequestBuilder(GenerationRequestType.BUILD)
