@@ -12,12 +12,15 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- * An ANTLR Listener that traverses the parsed query tree and builds a JPQL (Java Persistence Query Language) `WHERE`
- * clause along with a map of named parameters. This is designed to be used with Panache queries.
+ * An ANTLR Listener that traverses the parsed query tree and builds a JPQL
+ * (Java Persistence Query Language) `WHERE`
+ * clause along with a map of named parameters. This is designed to be used with
+ * Panache queries.
  * </p>
  *
  * <p>
- * It uses a stack to construct the query string as the {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
+ * It uses a stack to construct the query string as the
+ * {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
  * enter/exit events.
  * </p>
  */
@@ -43,7 +46,8 @@ public class JpqlQueryListener extends QueryBaseListener {
     /**
      * Returns the map of named parameters collected during the tree traversal.
      *
-     * @return A map where keys are parameter names (e.g., "param0") and values are the corresponding query values.
+     * @return A map where keys are parameter names (e.g., "param0") and values are
+     *         the corresponding query values.
      */
     public Map<String, Object> getParameters() {
         return parameters;
@@ -66,10 +70,12 @@ public class JpqlQueryListener extends QueryBaseListener {
 
     @Override
     public void exitExpression(QueryParser.ExpressionContext ctx) {
-        // This is the core logic for the listener. It fires after all children of an expression have been processed.
+        // This is the core logic for the listener. It fires after all children of an
+        // expression have been processed.
         log.info("  <- Exiting Expression: '{}'", ctx.getText());
 
-        // If the expression is a logical AND or OR, its two operands will be on the top of the stack.
+        // If the expression is a logical AND or OR, its two operands will be on the top
+        // of the stack.
         if (ctx.AND() != null || ctx.OR() != null) {
             // The right-hand side was visited last, so it's on top.
             String right = queryParts.pop();
@@ -79,13 +85,15 @@ public class JpqlQueryListener extends QueryBaseListener {
             // Combine them, wrap in parentheses, and push the result back.
             queryParts.push("(" + left + op + right + ")");
         }
-        // If it's a parenthesized expression, like `(id = "A")`, the inner result `id = :param0` is already on the
+        // If it's a parenthesized expression, like `(id = "A")`, the inner result `id =
+        // :param0` is already on the
         // stack. We just wrap it in parentheses.
         else if (ctx.LPAREN() != null) {
             String expr = queryParts.pop();
             queryParts.push("(" + expr + ")");
         }
-        // If it's just a simple predicate, its result is already on the stack from exitPredicate, so we do nothing.
+        // If it's just a simple predicate, its result is already on the stack from
+        // exitPredicate, so we do nothing.
     }
 
     @Override
@@ -95,14 +103,26 @@ public class JpqlQueryListener extends QueryBaseListener {
 
     @Override
     public void exitPredicate(QueryParser.PredicateContext ctx) {
+        // todo cleanup and check for empty predicates
         log.info("    <- Exiting Predicate: '{}'", ctx.getText());
 
         String field = mapIdentifierToEntityField(ctx.IDENTIFIER().getText());
         String operator = getOperator(ctx);
 
-        // This is a leaf node in the expression tree, so we process it and push its string representation to the stack.
+        // This is a leaf node in the expression tree, so we process it and push its
+        // string representation to the stack.
         String rawValue = ctx.value().getText();
         Object value = rawValue.substring(1, rawValue.length() - 1); // Remove quotes
+
+        if ("status".equalsIgnoreCase(field)) {
+            value = org.jboss.sbomer.service.nextgen.core.enums.EventStatus.valueOf(value.toString());
+        }
+
+        if ("created".equalsIgnoreCase(field) ||
+                "updated".equalsIgnoreCase(field) ||
+                "finished".equalsIgnoreCase(field)) {
+            value = java.time.Instant.parse(value.toString());
+        }
 
         if (ctx.CONTAINS() != null) {
             value = "%" + value + "%";

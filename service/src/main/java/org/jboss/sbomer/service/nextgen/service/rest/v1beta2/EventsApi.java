@@ -111,6 +111,7 @@ public class EventsApi {
 
         PanacheQuery<Event> panacheQuery;
 
+        // todo input and error handling
         if (query != null && !query.isBlank()) {
             QueryLexer lexer = new QueryLexer(CharStreams.fromString(query));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
