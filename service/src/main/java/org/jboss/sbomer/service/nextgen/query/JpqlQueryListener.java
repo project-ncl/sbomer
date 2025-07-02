@@ -1,3 +1,20 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2023 Red Hat, Inc., and individual contributors
+ * as indicated by the @author tags.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.sbomer.service.nextgen.query;
 
 import java.util.HashMap;
@@ -12,15 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- * An ANTLR Listener that traverses the parsed query tree and builds a JPQL
- * (Java Persistence Query Language) `WHERE`
- * clause along with a map of named parameters. This is designed to be used with
- * Panache queries.
+ * An ANTLR Listener that traverses the parsed query tree and builds a JPQL (Java Persistence Query Language) `WHERE`
+ * clause along with a map of named parameters. This is designed to be used with Panache queries.
  * </p>
  *
  * <p>
- * It uses a stack to construct the query string as the
- * {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
+ * It uses a stack to construct the query string as the {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
  * enter/exit events.
  * </p>
  */
@@ -46,8 +60,7 @@ public class JpqlQueryListener extends QueryBaseListener {
     /**
      * Returns the map of named parameters collected during the tree traversal.
      *
-     * @return A map where keys are parameter names (e.g., "param0") and values are
-     *         the corresponding query values.
+     * @return A map where keys are parameter names (e.g., "param0") and values are the corresponding query values.
      */
     public Map<String, Object> getParameters() {
         return parameters;
@@ -118,9 +131,8 @@ public class JpqlQueryListener extends QueryBaseListener {
             value = org.jboss.sbomer.service.nextgen.core.enums.EventStatus.valueOf(value.toString());
         }
 
-        if ("created".equalsIgnoreCase(field) ||
-                "updated".equalsIgnoreCase(field) ||
-                "finished".equalsIgnoreCase(field)) {
+        if ("created".equalsIgnoreCase(field) || "updated".equalsIgnoreCase(field)
+                || "finished".equalsIgnoreCase(field)) {
             value = java.time.Instant.parse(value.toString());
         }
 
