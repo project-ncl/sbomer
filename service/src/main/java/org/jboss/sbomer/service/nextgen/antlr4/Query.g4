@@ -5,6 +5,8 @@ grammar Query;
 package org.jboss.sbomer.service.nextgen.antlr4.antlr;
 }
 
+// use 'antlr4 Query.g4 -listener -o antlr' to generate classes
+
 
 query: expression;
 
@@ -20,7 +22,6 @@ predicate
 value
     : STRING
     | NUMBER
-    | DATE
     ;
 
 // Lexer Rules
@@ -39,5 +40,4 @@ CONTAINS: '~';
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 STRING: '"' ( ~'"' )* '"';
 NUMBER: [0-9]+ ('.' [0-9]+)?;
-DATE: '\'' [0-9]{4} '-' [0-9]{2} '-' [0-9]{2} '\'';
 WS: [ \t\r\n]+ -> skip;
