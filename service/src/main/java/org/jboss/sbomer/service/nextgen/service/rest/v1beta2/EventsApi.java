@@ -53,6 +53,7 @@ import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.rest.RestUtils;
 
 import io.quarkus.arc.Arc;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -108,31 +109,35 @@ public class EventsApi {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response search(@Valid @BeanParam PaginationParameters paginationParams, @QueryParam("query") String query) {
 
-        if (query != null) {
+        PanacheQuery<Event> panacheQuery;
 
+        if (query != null && !query.isBlank()) {
             QueryLexer lexer = new QueryLexer(CharStreams.fromString(query));
-
             CommonTokenStream tokens = new CommonTokenStream(lexer);
-
             QueryParser parser = new QueryParser(tokens);
+            QueryParser.QueryContext tree = parser.query();
+
+            log.info("Parse Tree: " + tree.toStringTree(parser));
+
             JpqlQueryListener listener = new JpqlQueryListener();
-
-            // Start parsing from the top-level 'query' rule
-            QueryContext parseTree = parser.query();
-
-            log.info("Parse Tree: " + parseTree.toStringTree(parser));
-
             ParseTreeWalker walker = new ParseTreeWalker();
-            walker.walk(listener, parseTree);
+            walker.walk(listener, tree);
 
+            String whereClause = listener.getJpqlWhereClause();
+            Map<String, Object> parameters = listener.getParameters();
+
+            log.info("Translated JPQL WHERE clause: '{}' with parameters: {}", whereClause, parameters);
+
+            panacheQuery = Event.find(whereClause, parameters);
+        } else {
+            panacheQuery = Event.findAll();
         }
 
-        List<EventRecord> events = Event.findAll()
+        List<EventRecord> events = panacheQuery.page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .project(EventRecord.class)
-                .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .list();
 
-        long count = Event.findAll().count();
+        long count = panacheQuery.count();
 
         Page<EventRecord> page = RestUtils.toPage(events, paginationParams, count);
 
