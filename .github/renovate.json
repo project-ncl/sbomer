@@ -14,6 +14,14 @@
     "prConcurrentLimit": 20,
     "packageRules": [
         {
+            "matchFileNames": ["**/pom.xml"],
+            "addLabels": ["deps:java"]
+        },
+        {
+            "matchFileNames": ["**/package.json"],
+            "addLabels": ["deps:javascript"]
+        },
+        {
             "description": "lockFileMaintenance",
             "matchUpdateTypes": ["pin", "digest", "patch", "minor", "major", "lockFileMaintenance"],
             "dependencyDashboardApproval": false,
