@@ -244,7 +244,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         Component metadataComponent = manifestBom.getMetadata().getComponent();
         // If there are no components or the manifest is a ZIP manifest, get the main component from the metadata
         if (!SbomUtils.isNotEmpty(manifestBom.getComponents())
-                || SbomUtils.hasProperty(metadataComponent, "deliverable-url")) {
+                || SbomUtils.hasProperty(metadataComponent, Constants.SBOM_RED_HAT_DELIVERABLE_URL)) {
             manifestMainComponent = metadataComponent;
         } else {
             manifestMainComponent = manifestBom.getComponents().get(0);
@@ -252,7 +252,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
                 manifestMainComponent,
                 Map.of("repository_url", Constants.MRRC_URL),
-                !SbomUtils.hasProperty(manifestMainComponent, "deliverable-url"));
+                !SbomUtils.hasProperty(manifestMainComponent, Constants.SBOM_RED_HAT_DELIVERABLE_URL));
 
         // Finally, create the root component for this build (NVR) from the manifest
         Component sbomRootComponent = SbomUtils.createComponent(manifestMainComponent);
@@ -402,7 +402,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
                 component,
                 Map.of("repository_url", Constants.MRRC_URL),
-                !SbomUtils.hasProperty(component, "deliverable-url"));
+                !SbomUtils.hasProperty(component, Constants.SBOM_RED_HAT_DELIVERABLE_URL));
         log.debug("Calculated evidence purl: {}", evidencePurl);
         component.setPurl(evidencePurl);
         SbomUtils.setEvidenceIdentities(component, Set.of(evidencePurl), Field.PURL);
