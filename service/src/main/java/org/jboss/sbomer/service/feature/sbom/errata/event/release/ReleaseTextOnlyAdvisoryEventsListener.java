@@ -397,7 +397,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         return releaseMetadata;
     }
 
-    private void adjustComponent(Component component) {
+    protected void adjustComponent(Component component) {
 
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
                 component,
