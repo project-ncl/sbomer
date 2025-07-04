@@ -402,7 +402,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
                 component,
                 Map.of("repository_url", Constants.MRRC_URL),
-                !SbomUtils.hasProperty(component, Constants.SBOM_RED_HAT_DELIVERABLE_URL));
+                SbomUtils.hasProperty(component, Constants.SBOM_RED_HAT_DELIVERABLE_URL));
         log.debug("Calculated evidence purl: {}", evidencePurl);
         component.setPurl(evidencePurl);
         SbomUtils.setEvidenceIdentities(component, Set.of(evidencePurl), Field.PURL);
