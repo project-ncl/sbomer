@@ -705,6 +705,15 @@ class ReleaseAdvisoryEventsListenerTest {
                 assertEquals(node.asText(), allPurls.get(i));
             }
             printRawBom(bom);
+
+            // for each build manifest component in componets[], test component adjustment
+            for (Sbom buildSbom : sboms) {
+                Bom manifestBom = SbomUtils.fromJsonNode(buildSbom.getSbom());
+                for (Component component : manifestBom.getComponents()) {
+                    adjustComponent(component);
+                }
+            }
+
             return List.of(sbom);
         }
     }
