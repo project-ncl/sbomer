@@ -104,8 +104,9 @@ class EventsQueryProcessorTest {
 
     @DisplayName("Should reject queries with grammar violations")
     @ParameterizedTest
-    @ValueSource(strings = { "id = E0AAAAA", "(id = \"E0AAAAA\"", "status =", "status !! \"PROCESSED\"",
-            "id = \"E0AAAAA\" AND", "\"PROCESSED\" = status", "id ! ! = \"some-id\"", "id !== \"some-id\"" })
+    @ValueSource(
+            strings = { "id = E0AAAAA", "(id = \"E0AAAAA\"", "status =", "status !! \"PROCESSED\"",
+                    "id = \"E0AAAAA\" AND", "\"PROCESSED\" = status", "id ! ! = \"some-id\"", "id !== \"some-id\"" })
     void testGrammarViolations(String query) {
         ClientException ex = assertThrows(ClientException.class, () -> eventsQueryProcessor.process(query));
         assertTrue(ex.getMessage().contains("Invalid query"));
@@ -121,10 +122,11 @@ class EventsQueryProcessorTest {
 
     @DisplayName("Should reject queries with invalid value formats")
     @ParameterizedTest
-    @ValueSource(strings = { "updated = \"10-25-2023\"", "status=\"INCORRECT\"", "created = \"2023/10/25\"",
-            "finished = \"25-10-2023 10:00\"", "updated = \"2023-10-25T10:00:00\"",
-            "created = \"2023-10-25 10:00:00 AM\"", "finished = \"Friday, 25 October 2023\"",
-            "updated = \"just text\"" })
+    @ValueSource(
+            strings = { "updated = \"10-25-2023\"", "status=\"INCORRECT\"", "created = \"2023/10/25\"",
+                    "finished = \"25-10-2023 10:00\"", "updated = \"2023-10-25T10:00:00\"",
+                    "created = \"2023-10-25 10:00:00 AM\"", "finished = \"Friday, 25 October 2023\"",
+                    "updated = \"just text\"" })
     void testInvalidFormats(String query) {
         ClientException ex = assertThrows(ClientException.class, () -> eventsQueryProcessor.process(query));
         assertTrue(ex.getMessage().contains("Invalid query"));
@@ -141,12 +143,12 @@ class EventsQueryProcessorTest {
 
     @DisplayName("Should correctly handle queries with varied whitespace")
     @ParameterizedTest
-    @ValueSource(strings = { "status=\"NEW\"", "status = \"NEW\"", "status      =       \"NEW\"",
-            "    id = \"some-id-123\"",
-            "status=\"NEW\"       OR       reason ~ \"E\"", "(      status = \"NEW\"      )",
-            "reason = \"This is a valid reason\"", "reason = \"It's a test case\"",
-            "(id=\"event-abc\" AND reason=\"It's all processed\") OR status=\"NEW\"",
-            "status       =       \"NEW\"" })
+    @ValueSource(
+            strings = { "status=\"NEW\"", "status = \"NEW\"", "status      =       \"NEW\"", "    id = \"some-id-123\"",
+                    "status=\"NEW\"       OR       reason ~ \"E\"", "(      status = \"NEW\"      )",
+                    "reason = \"This is a valid reason\"", "reason = \"It's a test case\"",
+                    "(id=\"event-abc\" AND reason=\"It's all processed\") OR status=\"NEW\"",
+                    "status       =       \"NEW\"" })
     void testWhitespaceHandling(String query) {
 
         assertNotNull(eventsQueryProcessor.process(query));

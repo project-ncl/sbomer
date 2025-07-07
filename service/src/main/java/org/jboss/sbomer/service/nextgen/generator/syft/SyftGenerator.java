@@ -55,9 +55,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.Duration;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -67,6 +69,7 @@ import io.fabric8.tekton.v1beta1.ParamValue;
 import io.fabric8.tekton.v1beta1.TaskRefBuilder;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.v1beta1.TaskRunSpec;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverride;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverrideBuilder;
 import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
@@ -87,8 +90,17 @@ public class SyftGenerator extends AbstractTektonController {
     public static final String PARAM_PROCESSORS = "processors";
     public static final String SA_SUFFIX = "-sa";
     public static final String TASK_SUFFIX = "-generator-syft";
-
+    public static final String ANNOTATION_RETRY_COUNT = "sbomer.jboss.org/retry-count";
+    public static final int MAX_RETRIES = 4;
+    public static final String GENERATE_OVERRIDE = "generate";
+    public static final String CPU_OVERRIDE = "cpu";
+    public static final String MEMORY_OVERRIDE = "memory";
+    public static final String SERVICE_SUFFIX = "-service";
+    public static final String RETRY_SUFFIX = "-retry-";
     public static final String GENERATOR_NAME = "syft";
+    // Gradual compounding memory increase, with doubling being last ditch effort
+    // Do we need this to be configurable?
+    public static final Map<Integer, Double> RETRY_MULTIPLYERS = Map.of(1, 1.30d, 2, 1.20d, 3, 1.10d, 4, 2.0d);
 
     private SyftGenerator() {
         super(null, null, null, null, null, null);
@@ -184,13 +196,38 @@ public class SyftGenerator extends AbstractTektonController {
         }
 
         if (!success) {
-            String detailedFailureMessage = getDetailedFailureMessage(erroredTaskRun);
-            updateStatus(
-                    generation.id(),
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_GENERAL,
-                    "Generation failed, the TaskRun returned failure: {}",
-                    detailedFailureMessage);
+            Map<String, String> erroredAnnotations = erroredTaskRun.getMetadata().getAnnotations();
+            GenerationResult result = isOomKilled(erroredTaskRun) ? GenerationResult.ERR_OOM
+                    : GenerationResult.ERR_GENERAL;
+            int retryCount = Integer.parseInt(erroredAnnotations.getOrDefault(ANNOTATION_RETRY_COUNT, "0"));
+
+            if (result == GenerationResult.ERR_GENERAL || ++retryCount > MAX_RETRIES) {
+                String detailedFailureMessage = getDetailedFailureMessage(erroredTaskRun);
+                updateStatus(
+                        generation.id(),
+                        GenerationStatus.FAILED,
+                        result,
+                        "Generation failed, the TaskRun returned failure: {}",
+                        detailedFailureMessage);
+            } else {
+                log.info("Retrying Tekton Task Run for generation '{}', count '{}'", generation.id(), retryCount);
+                TaskRun taskRun = createRetry(erroredTaskRun, retryCount);
+
+                try {
+                    // Prevent last task run continuously being rescheduled
+                    kubernetesClient.resources(TaskRun.class).resource(erroredTaskRun).delete();
+                    kubernetesClient.resources(TaskRun.class).resource(taskRun).create();
+                } catch (KubernetesClientException e) {
+                    log.warn("Unable to schedule Tekton TaskRun retry", e);
+
+                    updateStatus(
+                            generation.id(),
+                            GenerationStatus.FAILED,
+                            GenerationResult.ERR_SYSTEM,
+                            "Unable to schedule Tekton TaskRun retry: {}",
+                            e.getMessage());
+                }
+            }
 
             return;
         }
@@ -281,23 +318,102 @@ public class SyftGenerator extends AbstractTektonController {
 
     private TaskRunStepOverride resourceOverrides(GenerationRequest request) {
 
-        return new TaskRunStepOverrideBuilder().withName("generate")
+        return new TaskRunStepOverrideBuilder().withName(GENERATE_OVERRIDE)
                 .withNewResources()
                 .withRequests(
                         Map.of(
-                                "cpu",
+                                CPU_OVERRIDE,
                                 new Quantity(request.generator().config().resources().requests().cpu()),
-                                "memory",
+                                MEMORY_OVERRIDE,
                                 new Quantity(request.generator().config().resources().requests().memory())))
                 .withLimits(
                         Map.of(
-                                "cpu",
+                                CPU_OVERRIDE,
                                 new Quantity(request.generator().config().resources().limits().cpu()),
-                                "memory",
+                                MEMORY_OVERRIDE,
                                 new Quantity(request.generator().config().resources().limits().memory())))
                 .endResources()
                 .build();
 
+    }
+
+    private TaskRunStepOverride multiplyMemoryOverrides(TaskRunStepOverride originalStepOverride, double multiplier) {
+        ResourceRequirements resources = originalStepOverride.getResources();
+        Quantity cpuRequestsQuantity = resources.getRequests().get(CPU_OVERRIDE);
+        Quantity memoryRequestsQuantity = resources.getRequests().get(MEMORY_OVERRIDE);
+        Quantity cpuLimitsQuantity = resources.getLimits().get(CPU_OVERRIDE);
+        Quantity memoryLimitsQuantity = resources.getLimits().get(MEMORY_OVERRIDE);
+
+        return new TaskRunStepOverrideBuilder().withName(GENERATE_OVERRIDE)
+                .withNewResources()
+                .withRequests(
+                        Map.of(
+                                CPU_OVERRIDE,
+                                new Quantity(cpuRequestsQuantity.getAmount(), cpuRequestsQuantity.getFormat()),
+                                MEMORY_OVERRIDE,
+                                multiplyMemory(memoryRequestsQuantity, multiplier)))
+                .withLimits(
+                        Map.of(
+                                CPU_OVERRIDE,
+                                new Quantity(cpuLimitsQuantity.getAmount(), cpuLimitsQuantity.getFormat()),
+                                MEMORY_OVERRIDE,
+                                multiplyMemory(memoryLimitsQuantity, multiplier)))
+                .endResources()
+                .build();
+    }
+
+    private Quantity multiplyMemory(Quantity originalQuantity, double multiplier) {
+        int value = Integer.parseInt(originalQuantity.getAmount());
+        return new Quantity((int) Math.ceil(value * multiplier) + originalQuantity.getFormat());
+    }
+
+    private void configureOwner(TaskRun taskRun) {
+        Deployment deployment = kubernetesClient.apps().deployments().withName(release + SERVICE_SUFFIX).get();
+
+        if (deployment != null) {
+            log.debug("Setting SBOMer deployment as the owner for the newly created TaskRun");
+
+            taskRun.getMetadata()
+                    .setOwnerReferences(
+                            Collections.singletonList(
+                                    new OwnerReferenceBuilder().withKind(HasMetadata.getKind(Deployment.class))
+                                            .withApiVersion(HasMetadata.getApiVersion(Deployment.class))
+                                            .withName(release + SERVICE_SUFFIX)
+                                            .withUid(deployment.getMetadata().getUid())
+                                            .build()));
+        }
+    }
+
+    private TaskRun createRetry(TaskRun originalTaskRun, int retryCount) {
+        ObjectMeta originalMetadata = originalTaskRun.getMetadata();
+        TaskRunSpec originalSpec = originalTaskRun.getSpec();
+        TaskRunStepOverride originalStepOverride = originalTaskRun.getSpec().getStepOverrides().get(0);
+        String originalName = originalMetadata.getName();
+
+        TaskRunStepOverride stepOverride = multiplyMemoryOverrides(
+                originalStepOverride,
+                RETRY_MULTIPLYERS.get(retryCount));
+
+        String name = originalName.replaceFirst(RETRY_SUFFIX + "\\d+$", "") + RETRY_SUFFIX + retryCount;
+
+        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
+                .withLabels(originalMetadata.getLabels())
+                .withName(name)
+                .addToAnnotations(ANNOTATION_RETRY_COUNT, String.valueOf(retryCount))
+                .endMetadata()
+                .withNewSpec()
+                .withServiceAccountName(originalSpec.getServiceAccountName())
+                .withTimeout(originalSpec.getTimeout())
+                .withParams(originalSpec.getParams())
+                .withTaskRef(originalSpec.getTaskRef())
+                .withStepOverrides(stepOverride)
+                .withWorkspaces(originalSpec.getWorkspaces())
+                .endSpec()
+                .build();
+
+        configureOwner(taskRun);
+
+        return taskRun;
     }
 
     @Override
@@ -409,6 +525,7 @@ public class SyftGenerator extends AbstractTektonController {
                 .withName(
                         "generation-" + generation.id().toLowerCase() + "-" + SbomGenerationPhase.GENERATE.ordinal()
                                 + "-" + SbomGenerationPhase.GENERATE.name().toLowerCase())
+                .addToAnnotations(ANNOTATION_RETRY_COUNT, "0")
                 .endMetadata()
                 .withNewSpec()
                 .withServiceAccountName(release + SA_SUFFIX)
@@ -426,20 +543,8 @@ public class SyftGenerator extends AbstractTektonController {
                 .endSpec()
                 .build();
 
-        Deployment deployment = kubernetesClient.apps().deployments().withName(release + "-service").get();
+        configureOwner(taskRun);
 
-        if (deployment != null) {
-            log.debug("Setting SBOMer deployment as the owner for the newly created TaskRun");
-
-            taskRun.getMetadata()
-                    .setOwnerReferences(
-                            Collections.singletonList(
-                                    new OwnerReferenceBuilder().withKind(HasMetadata.getKind(Deployment.class))
-                                            .withApiVersion(HasMetadata.getApiVersion(Deployment.class))
-                                            .withName(release + "-service")
-                                            .withUid(deployment.getMetadata().getUid())
-                                            .build()));
-        }
         return taskRun;
     }
 }
