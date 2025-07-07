@@ -240,27 +240,19 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
     protected Component createRootComponentForSbom(Sbom sbom) {
 
         Bom manifestBom = SbomUtils.fromJsonNode(sbom.getSbom());
-        Component manifestMainComponent;
         Component metadataComponent = manifestBom.getMetadata().getComponent();
-        // If there are no components or the manifest is a ZIP manifest, get the main component from the metadata
-        if (!SbomUtils.isNotEmpty(manifestBom.getComponents())
-                || SbomUtils.hasProperty(metadataComponent, Constants.SBOM_RED_HAT_DELIVERABLE_URL)) {
-            manifestMainComponent = metadataComponent;
-        } else {
-            manifestMainComponent = manifestBom.getComponents().get(0);
-        }
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
-                manifestMainComponent,
+                metadataComponent,
                 Map.of("repository_url", Constants.MRRC_URL),
-                !SbomUtils.hasProperty(manifestMainComponent, Constants.SBOM_RED_HAT_DELIVERABLE_URL));
+                !SbomUtils.hasProperty(metadataComponent, Constants.SBOM_RED_HAT_DELIVERABLE_URL));
 
         // Finally, create the root component for this build (NVR) from the manifest
-        Component sbomRootComponent = SbomUtils.createComponent(manifestMainComponent);
+        Component sbomRootComponent = SbomUtils.createComponent(metadataComponent);
 
-        sbomRootComponent.setSupplier(manifestMainComponent.getSupplier());
-        sbomRootComponent.setPublisher(manifestMainComponent.getPublisher());
-        sbomRootComponent.setHashes(manifestMainComponent.getHashes());
-        sbomRootComponent.setLicenses(manifestMainComponent.getLicenses());
+        sbomRootComponent.setSupplier(metadataComponent.getSupplier());
+        sbomRootComponent.setPublisher(metadataComponent.getPublisher());
+        sbomRootComponent.setHashes(metadataComponent.getHashes());
+        sbomRootComponent.setLicenses(metadataComponent.getLicenses());
         SbomUtils.setEvidenceIdentities(sbomRootComponent, Set.of(evidencePurl), Field.PURL);
 
         return sbomRootComponent;

@@ -1,0 +1,394 @@
+{
+    "id": "78FB7472C67D41E",
+    "identifier": "BHSYFUKLBSIAA",
+    "rootPurl": "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?repository_url=https://maven.repository.redhat.com/ga/&type=pom",
+    "creationTime": "2025-05-21T20:55:24.416Z",
+    "sbom": {
+      "version": 1,
+      "metadata": {
+        "tools": [
+          {
+            "name": "Domino 0.0.120 SBOM Generator",
+            "hashes": [
+              {
+                "alg": "MD5",
+                "content": "fd2df8b5b4fdaef8f953ea626b2f43e2"
+              },
+              {
+                "alg": "SHA-1",
+                "content": "be8e14f10352de260452654cf0d1d1a51fe2c2ce"
+              },
+              {
+                "alg": "SHA-256",
+                "content": "904ed7ba90bc66f843a7a8e591400b0553f4d83390670c1375e2c34d7e6a6db5"
+              },
+              {
+                "alg": "SHA-512",
+                "content": "bf8dcdb812ef36a5f3f042c1ae42c1f810f56df87e58be813dd69fa03e99c4749316df984731214915f0015e8085c6d1513b880b2e4a103658b4e7ddf85fe832"
+              },
+              {
+                "alg": "SHA-384",
+                "content": "488d44bd7c8b74dfbe715618a8d97d32ee4612c24b0e7f5c02c0e2255cae78df9cfc20124319c240cec08d834855297a"
+              },
+              {
+                "alg": "SHA3-384",
+                "content": "c8bcc88b986dd5c751000a8a65614f224bbe3fafa31bf760576f9a7cdfa11e4290b70679dffacd4ede3888467eefaeb0"
+              },
+              {
+                "alg": "SHA3-256",
+                "content": "d46d468a84e0f77781188a143b96884ff52e04f84536dd92e67d869d6c4b30d2"
+              },
+              {
+                "alg": "SHA3-512",
+                "content": "4cb6f42085dd501bdde6a75341686f5b9dc5b20dab44241836bc8a1d8aef55c81950e7a0b66c621179da605b9cac7f8a79cab7495903f22dd9ad484a24dd8bbf"
+              }
+            ],
+            "vendor": "Quarkus Community",
+            "version": "0.0.120"
+          }
+        ],
+        "supplier": {
+          "url": [
+            "https://www.redhat.com"
+          ],
+          "name": "Red Hat"
+        },
+        "component": {
+          "name": "quarkus-bom",
+          "purl": "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom",
+          "type": "framework",
+          "group": "com.redhat.quarkus.platform",
+          "hashes": [
+            {
+              "alg": "MD5",
+              "content": "3f1932932344faa97f55f508f18bcdef"
+            },
+            {
+              "alg": "SHA-1",
+              "content": "c26c80939c257becbad2cd7f29f29318df5a3e91"
+            },
+            {
+              "alg": "SHA-256",
+              "content": "af5f017e2e6a7df2bbde72491d7653a0e5446174da05145964733d8199222b84"
+            }
+          ],
+          "bom-ref": "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?type=pom",
+          "version": "3.20.1.redhat-00003",
+          "evidence": {
+            "identity": [
+              {
+                "field": "purl",
+                "concludedValue": "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom"
+              }
+            ]
+          },
+          "licenses": [
+            {
+              "license": {
+                "id": "Apache-2.0"
+              }
+            }
+          ],
+          "pedigree": {
+            "commits": [
+              {
+                "uid": "b59cfdb5df36387931c6e533dc76c39b1c160606",
+                "url": "https://gitlab.cee.redhat.com/pnc-workspace/quarkusio/quarkus-platform.git#3.20.1.redhat-00003"
+              }
+            ]
+          },
+          "supplier": {
+            "url": [
+              "https://www.redhat.com"
+            ],
+            "name": "Red Hat"
+          },
+          "publisher": "Red Hat",
+          "properties": [
+            {
+              "name": "package:type",
+              "value": "maven"
+            },
+            {
+              "name": "product-id",
+              "value": "quarkus-3"
+            },
+            {
+              "name": "product-stream",
+              "value": "quarkus-3.20"
+            },
+            {
+              "name": "errata-tool-product-name",
+              "value": "RHBQ"
+            },
+            {
+              "name": "errata-tool-product-version",
+              "value": "Middleware-RHBQ-3.20"
+            },
+            {
+              "name": "errata-tool-product-variant",
+              "value": "8Base-MW-RHBQ-3.20"
+            }
+          ],
+          "description": "Red Hat Build of Quarkus - Kubernetes Native Java stack tailored for OpenJDK HotSpot and GraalVM",
+          "releaseNotes": {
+            "type": "Major",
+            "title": "Red Hat Build of Quarkus 3.20.1.redhat-00003",
+            "aliases": [
+              "RHBQ",
+              "Quarkus"
+            ],
+            "properties": [
+              {
+                "name": "product-name",
+                "value": "Red Hat build of Quarkus"
+              },
+              {
+                "name": "product-version",
+                "value": "3.20.1.redhat-00003"
+              }
+            ]
+          },
+          "externalReferences": [
+            {
+              "url": "https://github.com/quarkusio/quarkus-platform/quarkus-platform-config",
+              "type": "website"
+            },
+            {
+              "url": "https://maven.repository.redhat.com/ga/",
+              "type": "distribution"
+            },
+            {
+              "url": "https://github.com/quarkusio/quarkus/issues/",
+              "type": "issue-tracker"
+            },
+            {
+              "url": "https://gitlab.cee.redhat.com/pnc-workspace/quarkusio/quarkus-platform.git",
+              "type": "vcs"
+            },
+            {
+              "url": "https://orch.pnc.engineering.redhat.com/pnc-rest/v2/artifacts/13949585",
+              "type": "build-system",
+              "comment": "pnc-artifact-id"
+            },
+            {
+              "url": "https://orch.pnc.engineering.redhat.com/pnc-rest/v2/builds/BHSYFUKLBSIAA",
+              "type": "build-system",
+              "comment": "pnc-build-id"
+            },
+            {
+              "url": "quay.io/rh-newcastle/builder-rhel-8-j17-mvn3.9.3:1.0.0",
+              "type": "build-meta",
+              "comment": "pnc-environment-image"
+            }
+          ]
+        },
+        "timestamp": "2025-05-21T20:46:30Z",
+        "properties": [
+          {
+            "name": "redhat:advisory_id",
+            "value": "150098"
+          }
+        ]
+      },
+      "bomFormat": "CycloneDX",
+      "components": [
+        {
+          "name": "agroal-api",
+          "purl": "pkg:maven/io.agroal/agroal-api@2.6.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=jar",
+          "type": "library",
+          "group": "io.agroal",
+          "hashes": [
+            {
+              "alg": "MD5",
+              "content": "d515acdb6be6a5d3f12bbe497e641a49"
+            },
+            {
+              "alg": "SHA-1",
+              "content": "6340dcaa9c92e1d2eecec055cbe29d5be40133f2"
+            },
+            {
+              "alg": "SHA-256",
+              "content": "3b5709a43b60a9a33d57fb3bac355d2b831318bb94a4d4412178b318528c0aa3"
+            }
+          ],
+          "bom-ref": "pkg:maven/io.agroal/agroal-api@2.6.0.redhat-00001?type=jar",
+          "version": "2.6.0.redhat-00001",
+          "evidence": {
+            "identity": [
+              {
+                "field": "purl",
+                "concludedValue": "pkg:maven/io.agroal/agroal-api@2.6.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=jar"
+              }
+            ]
+          },
+          "licenses": [
+            {
+              "license": {
+                "id": "Apache-2.0",
+                "url": "https://www.apache.org/licenses/LICENSE-2.0"
+              }
+            }
+          ],
+          "pedigree": {
+            "commits": [
+              {
+                "uid": "f0d8eeb3bd685d23d4d660d015f12b8c28603d3a",
+                "url": "https://gitlab.cee.redhat.com/pnc-workspace/agroal/agroal.git#2.6.0.redhat-00001"
+              },
+              {
+                "uid": "afab5633c7221c5f684241fe7d97dc1ca523d26e",
+                "url": "https://github.com/agroal/agroal.git#2.6"
+              }
+            ]
+          },
+          "supplier": {
+            "url": [
+              "https://www.redhat.com"
+            ],
+            "name": "Red Hat"
+          },
+          "publisher": "Red Hat",
+          "properties": [
+            {
+              "name": "package:type",
+              "value": "maven"
+            },
+            {
+              "name": "package:language",
+              "value": "java"
+            }
+          ],
+          "description": "The natural database connection pool",
+          "externalReferences": [
+            {
+              "url": "https://github.com/agroal",
+              "type": "website"
+            },
+            {
+              "url": "https://issues.jboss.org/projects/AG",
+              "type": "issue-tracker"
+            },
+            {
+              "url": "http://lists.jboss.org/pipermail/jboss-user/",
+              "type": "mailing-list"
+            },
+            {
+              "url": "https://gitlab.cee.redhat.com/pnc-workspace/agroal/agroal.git",
+              "type": "vcs"
+            },
+            {
+              "url": "https://maven.repository.redhat.com/ga/",
+              "type": "distribution"
+            },
+            {
+              "url": "https://orch.pnc.engineering.redhat.com/pnc-rest/v2/artifacts/13894658",
+              "type": "build-system",
+              "comment": "pnc-artifact-id"
+            },
+            {
+              "url": "https://orch.pnc.engineering.redhat.com/pnc-rest/v2/builds/BHMR2HQ3RSIAA",
+              "type": "build-system",
+              "comment": "pnc-build-id"
+            },
+            {
+              "url": "quay.io/rh-newcastle/builder-rhel-8-j21.0.2-13-mx7.4.1-mvn3.9.6:1.0.1",
+              "type": "build-meta",
+              "comment": "pnc-environment-image"
+            }
+          ]
+        }
+      ],
+      "specVersion": "1.6",
+      "dependencies": [
+        {
+          "ref": "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?type=pom",
+          "dependsOn": [
+            "pkg:maven/io.agroal/agroal-api@2.6.0.redhat-00001?type=jar"
+          ]
+        }
+      ],
+      "serialNumber": "urn:uuid:2c34707d-f269-3946-880c-330bb343b775"
+    },
+    "configIndex": 0,
+    "generationRequest": {
+      "id": "82DD1706D5AE4F1",
+      "identifier": "BHSYFUKLBSIAA",
+      "config": {
+    "type": "pnc-build",
+    "apiVersion": "sbomer.jboss.org/v1alpha1",
+    "buildId": "BHSYFUKLBSIAA",
+    "environment": {
+      "java": "17",
+      "maven": "3.9.3"
+    },
+    "products": [
+      {
+        "processors": [
+          {
+            "type": "default"
+          },
+          {
+            "type": "redhat-product",
+            "errata": {
+              "productName": "RHBQ",
+              "productVersion": "Middleware-RHBQ-3.20",
+              "productVariant": "8Base-MW-RHBQ-3.20"
+            }
+          }
+        ],
+        "generator": {
+          "type": "maven-domino",
+          "args": "--config-file .domino/manifest/quarkus-bom-config.json --warn-on-missing-scm --legacy-scm-locator --hashes=false",
+          "version": "0.0.120"
+        }
+      },
+      {
+        "processors": [
+          {
+            "type": "default"
+          },
+          {
+            "type": "redhat-product",
+            "errata": {
+              "productName": "RHBOAC",
+              "productVersion": "RHBOAC CQ 3.20 Text-only",
+              "productVariant": "6Server-RHBOAC-CQ-3.20"
+            }
+          }
+        ],
+        "generator": {
+          "type": "maven-domino",
+          "args": "--config-file .domino/manifest/quarkus-cxf-bom-config.json --warn-on-missing-scm --legacy-scm-locator --hashes=false",
+          "version": "0.0.120"
+        }
+      },
+      {
+        "processors": [
+          {
+            "type": "default"
+          },
+          {
+            "type": "redhat-product",
+            "errata": {
+              "productName": "RHBOAC",
+              "productVersion": "RHBOAC CQ 3.20 Text-only",
+              "productVariant": "6Server-RHBOAC-CQ-3.20"
+                }
+              }
+            ],
+            "generator": {
+              "type": "maven-domino",
+              "args": "--config-file .domino/manifest/quarkus-camel-bom-config.json --warn-on-missing-scm --legacy-scm-locator --hashes=false",
+              "version": "0.0.120"
+            }
+          }
+        ]
+      },
+      "type": "BUILD",
+      "creationTime": "2025-05-21T20:37:34.321134Z",
+      "status": "FINISHED",
+      "result": "SUCCESS",
+      "reason": "Generation finished successfully. Generated SBOMs: 78FB7472C67D41E, 756DFE5B86DF4CD, E57AF3310588424"
+    }
+  }
