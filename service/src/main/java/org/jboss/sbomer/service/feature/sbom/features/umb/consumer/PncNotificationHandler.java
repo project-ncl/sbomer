@@ -253,7 +253,7 @@ public class PncNotificationHandler {
             requestEvent = pendingRequest.getRequest();
             ignoreRequestEvent(
                     requestEventToIgnore,
-                    "Operation belongs to previous request event " + pendingRequest.getRequest().getId()
+                    "Operation belongs to previous request event " + requestEvent.getId()
                             + ". Ignoring UMB event: " + requestEventToIgnore.getId());
         } else {
             // Update the requestEvent with the requestConfig
