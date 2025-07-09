@@ -4,7 +4,6 @@ import static org.jboss.sbomer.service.nextgen.controller.tekton.AbstractTektonC
 import static org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator.ANNOTATION_RETRY_COUNT;
 import static org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator.CPU_OVERRIDE;
 import static org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator.GENERATE_OVERRIDE;
-import static org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator.MAX_RETRIES;
 import static org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator.MEMORY_OVERRIDE;
 import static org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator.PARAM_COMMAND_CONTAINER_IMAGE;
 import static org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator.SA_SUFFIX;
@@ -31,6 +30,9 @@ import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerC
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.nextgen.controller.tekton.GenerationTaskRunEventProvider;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
+import org.jboss.sbomer.service.nextgen.core.dto.api.Generator;
+import org.jboss.sbomer.service.nextgen.core.dto.api.GeneratorConfig;
+import org.jboss.sbomer.service.nextgen.core.dto.api.Retries;
 import org.jboss.sbomer.service.nextgen.core.dto.api.Target;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
@@ -76,6 +78,8 @@ public class SyftGeneratorTest {
 
     private static final String IDENTIFIER = "quay.io/org/image1:tag";
     private static final String RELEASE = "sbomer";
+    private static final String DEFAULT_REQUESTS_MEMORY = "768Mi";
+    private static final String DEFAULT_LIMITS_MEMORY = "1536Mi";
 
     @Vetoed
     static class SyftGeneratorAlt extends SyftGenerator {
@@ -145,7 +149,7 @@ public class SyftGeneratorTest {
     @Test
     void testFailedTask() throws ParseException {
         GenerationRecord generationRecord = createGenerationRecord();
-        TaskRun taskRun = createTaskRun(generationRecord, "0", "768Mi", "1536Mi");
+        TaskRun taskRun = createTaskRun(generationRecord, "0", DEFAULT_REQUESTS_MEMORY, DEFAULT_LIMITS_MEMORY);
         addTaskRunStatus(taskRun, 1, "Error");
 
         syftGenerator.reconcileGenerating(generationRecord, Set.of(taskRun));
@@ -165,7 +169,7 @@ public class SyftGeneratorTest {
     @Test
     void testOomTask() throws ParseException {
         GenerationRecord generationRecord = createGenerationRecord();
-        TaskRun taskRun = createTaskRun(generationRecord, "0", "768Mi", "1536Mi");
+        TaskRun taskRun = createTaskRun(generationRecord, "0", DEFAULT_REQUESTS_MEMORY, DEFAULT_LIMITS_MEMORY);
         addTaskRunStatus(taskRun, 137, IS_OOM_KILLED);
 
         // Simulate delete and create of task runs
@@ -223,17 +227,17 @@ public class SyftGeneratorTest {
                 updatedTaskRun.getMetadata().getName());
         assertEquals(updatedRetryCount, updatedTaskRun.getMetadata().getAnnotations().get(ANNOTATION_RETRY_COUNT));
         assertEquals(
-                new Quantity("1199Mi"),
+                new Quantity("1299Mi"),
                 updatedTaskRun.getSpec().getStepOverrides().get(0).getResources().getRequests().get(MEMORY_OVERRIDE));
         assertEquals(
-                new Quantity("2397Mi"),
+                new Quantity("2597Mi"),
                 updatedTaskRun.getSpec().getStepOverrides().get(0).getResources().getLimits().get(MEMORY_OVERRIDE));
     }
 
     @Test
     void testOomTaskExhaustedRetries() throws ParseException {
         GenerationRecord generationRecord = createGenerationRecord();
-        TaskRun taskRun = createTaskRun(generationRecord, String.valueOf(MAX_RETRIES), "2638Mi", "5274Mi");
+        TaskRun taskRun = createTaskRun(generationRecord, "3", "1689Mi", "3377Mi");
         addTaskRunStatus(taskRun, 137, IS_OOM_KILLED);
 
         // Simulate delete and create of task runs
@@ -260,7 +264,7 @@ public class SyftGeneratorTest {
     @Test
     void testOomTaskRetryScheduleFailure() throws ParseException {
         GenerationRecord generationRecord = createGenerationRecord();
-        TaskRun taskRun = createTaskRun(generationRecord, "0", "768Mi", "1536Mi");
+        TaskRun taskRun = createTaskRun(generationRecord, "0", DEFAULT_REQUESTS_MEMORY, DEFAULT_LIMITS_MEMORY);
         addTaskRunStatus(taskRun, 137, IS_OOM_KILLED);
 
         // Simulate delete and create of task runs
@@ -283,7 +287,13 @@ public class SyftGeneratorTest {
                 Instant.now(),
                 Instant.now(),
                 null,
-                JacksonUtils.toObjectNode(new GenerationRequest(null, new Target("CONTAINER_IMAGE", IDENTIFIER))),
+                JacksonUtils.toObjectNode(
+                        new GenerationRequest(
+                                new Generator(
+                                        "syft",
+                                        "1.0",
+                                        new GeneratorConfig(null, null, null, new Retries(3, 1.3d))),
+                                new Target("CONTAINER_IMAGE", IDENTIFIER))),
                 null,
                 GenerationStatus.GENERATING,
                 null,

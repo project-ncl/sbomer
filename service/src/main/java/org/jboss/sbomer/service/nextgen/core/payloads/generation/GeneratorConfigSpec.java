@@ -27,7 +27,9 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param format The manifest output format.
  * @param resources Resource requirements related to execution phase for a current generation.
  * @param options Custom, generator(version)-specific, options which should be applied to the generation process.
+ * @param retries Generator retry configuration. Usage of these values depend on the generator.
  */
 public record GeneratorConfigSpec(String format, ResourcesSpec resources,
-        @Schema(description = "Specific options for a particular generator version.") Map<String, Object> options) {
+        @Schema(description = "Specific options for a particular generator version.") Map<String, Object> options,
+        RetriesSpec retries) {
 }
