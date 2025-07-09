@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import org.jboss.sbomer.service.nextgen.antlr4.antlr.QueryBaseListener;
-import org.jboss.sbomer.service.nextgen.antlr4.antlr.QueryParser;
-import org.jboss.sbomer.service.nextgen.antlr4.antlr.QueryParser.PredicateContext;
+import org.jboss.sbomer.service.nextgen.antlr.QueryBaseListener;
+import org.jboss.sbomer.service.nextgen.antlr.QueryParser;
+import org.jboss.sbomer.service.nextgen.antlr.QueryParser.PredicateContext;
 
 import lombok.extern.slf4j.Slf4j;
 

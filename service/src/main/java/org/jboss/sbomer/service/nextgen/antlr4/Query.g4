@@ -2,7 +2,7 @@ grammar Query;
 
 
 @header {
-package org.jboss.sbomer.service.nextgen.antlr4.antlr;
+package org.jboss.sbomer.service.nextgen.antlr;
 }
 
 // use 'antlr4 Query.g4 -listener -o antlr' to generate classes
