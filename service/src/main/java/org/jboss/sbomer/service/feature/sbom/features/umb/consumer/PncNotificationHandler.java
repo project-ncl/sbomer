@@ -255,10 +255,12 @@ public class PncNotificationHandler {
                     requestEventToIgnore,
                     "Operation belongs to previous request event " + pendingRequest.getRequest().getId()
                             + ". Ignoring UMB event: " + requestEventToIgnore.getId());
+        } else {
+            // Update the requestEvent with the requestConfig
+            // Leave original request event if related to pending request event
+            requestEvent = addPncOperationRequestConfig(requestEvent, String.valueOf(messageBody.getOperationId()));
         }
 
-        // Update the requestEvent with the requestConfig
-        requestEvent = addPncOperationRequestConfig(requestEvent, String.valueOf(messageBody.getOperationId()));
         // A null pendingRequest getting passed would lead to a new configmap, and lead it to
         // get synced with the UMB request event
         GenerationRequest req = createDelAnalysisGenerationRequest(messageBody, pendingRequest);
