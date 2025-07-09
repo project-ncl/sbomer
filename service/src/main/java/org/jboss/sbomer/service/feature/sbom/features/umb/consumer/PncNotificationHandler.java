@@ -248,13 +248,13 @@ public class PncNotificationHandler {
         if (!pendingRequests.isEmpty()) {
             // Get the oldest pending generation request and create a new ConfigMap with the existing id
             pendingRequest = pendingRequests.get(0);
-            // if we have a pending request, use that request event instead and ignore the one from UMB
+            // If we have a pending request, use that request event instead and ignore the one from UMB
             RequestEvent requestEventToIgnore = requestEvent;
             requestEvent = pendingRequest.getRequest();
             ignoreRequestEvent(
                     requestEventToIgnore,
-                    "Operation belongs to previous request event " + requestEvent.getId()
-                            + ". Ignoring UMB event: " + requestEventToIgnore.getId());
+                    "Operation belongs to previous request event " + requestEvent.getId() + ". Ignoring UMB event: "
+                            + requestEventToIgnore.getId());
         } else {
             // Update the requestEvent with the requestConfig
             // Leave original request event if related to pending request event
@@ -312,25 +312,29 @@ public class PncNotificationHandler {
             PncDelAnalysisNotificationMessageBody messageBody,
             SbomGenerationRequest pendingRequest) {
 
+        // Given that a pending request event could now belong to an advisory, the config that belongs to it
+        // would not reflect the operation, so we create an operation config based on the umb message for
+        // either case of pendingRequest being null or not
+
+        // Create a ProductConfig
+        ProductConfig productConfig = ProductConfig.builder()
+                .withProcessors(List.of(DefaultProcessorConfig.builder().build()))
+                .withGenerator(GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build())
+                .build();
+
+        // Creating a standard OperationConfig from the DeliverableAnalysisConfig and the new operation received
+        OperationConfig operationConfig = OperationConfig.builder()
+                .withDeliverableUrls(List.of(messageBody.getDeliverablesUrls()))
+                .withOperationId(messageBody.getOperationId())
+                .withProduct(productConfig)
+                .build();
+        SbomerConfigProvider.getInstance().adjust(operationConfig);
+
         GenerationRequest generationRequest;
         if (pendingRequest == null) {
             log.info(
                     "No pending requests found for operation {}, creating a new one from the UMB message body!",
                     messageBody.getOperationId());
-
-            // Create a ProductConfig
-            ProductConfig productConfig = ProductConfig.builder()
-                    .withProcessors(List.of(DefaultProcessorConfig.builder().build()))
-                    .withGenerator(GeneratorConfig.builder().type(GeneratorType.CYCLONEDX_OPERATION).build())
-                    .build();
-
-            // Creating a standard OperationConfig from the DeliverableAnalysisConfig and the new operation received
-            OperationConfig operationConfig = OperationConfig.builder()
-                    .withDeliverableUrls(List.of(messageBody.getDeliverablesUrls()))
-                    .withOperationId(messageBody.getOperationId())
-                    .withProduct(productConfig)
-                    .build();
-            SbomerConfigProvider.getInstance().adjust(operationConfig);
 
             generationRequest = new GenerationRequestBuilder(GenerationRequestType.OPERATION)
                     .withIdentifier(messageBody.getOperationId())
@@ -355,7 +359,7 @@ public class PncNotificationHandler {
                     .build();
 
             try {
-                generationRequest.setConfig(ObjectMapperProvider.yaml().writeValueAsString(pendingRequest.getConfig()));
+                generationRequest.setConfig(ObjectMapperProvider.yaml().writeValueAsString(operationConfig));
             } catch (JsonProcessingException e) {
                 throw new ApplicationException("Unable to serialize provided configuration into YAML", e);
             }
