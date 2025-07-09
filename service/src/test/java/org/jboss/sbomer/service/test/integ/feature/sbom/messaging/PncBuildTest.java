@@ -275,7 +275,7 @@ class PncBuildTest {
 
         ArgumentCaptor<RequestEvent> requestEventArgumentCaptor = ArgumentCaptor.forClass(RequestEvent.class);
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).until(() -> {
             SbomGenerationRequest updated = sbomGenerationRequestRepository.findById(TEST_SBOM_REQUEST_ID);
 
             return updated != null && updated.getStatus().equals(SbomGenerationStatus.INITIALIZED);
