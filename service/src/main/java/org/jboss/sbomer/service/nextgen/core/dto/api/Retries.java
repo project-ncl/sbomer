@@ -17,16 +17,11 @@
  */
 package org.jboss.sbomer.service.nextgen.core.dto.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 /**
- * Generator configuration.
+ * Generator retry configuration.
  *
- * @param resources Generator resources in Kubernetes style. This is more a hint than actual values. Usage of these
- *        values depend on the generator
- * @param format Requested manifest format
- * @param options Custom options for generator
- * @param retries Generator retry configuration. Usage of these values depend on the generator
+ * @param maxCount Max number of generator retries
+ * @param memoryMultiplier Amount to compound multiply memory by per generator retry
  */
-public record GeneratorConfig(Resources resources, String format, JsonNode options, Retries retries) {
+public record Retries(Integer maxCount, Double memoryMultiplier) {
 }

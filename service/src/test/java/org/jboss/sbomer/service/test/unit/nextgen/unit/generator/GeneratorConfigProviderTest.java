@@ -18,6 +18,7 @@ import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorConfig
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersionConfigSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.ResourceRequirementSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.ResourcesSpec;
+import org.jboss.sbomer.service.nextgen.core.payloads.generation.RetriesSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.TargetSpec;
 import org.jboss.sbomer.service.nextgen.service.config.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorsConfig;
@@ -120,6 +121,8 @@ public class GeneratorConfigProviderTest {
         assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
         assertEquals("1500m", requestSpec.generator().config().resources().limits().cpu());
         assertEquals("3Gi", requestSpec.generator().config().resources().limits().memory());
+        assertEquals(3, requestSpec.generator().config().retries().maxCount().intValue());
+        assertEquals(1.3d, requestSpec.generator().config().retries().memoryMultiplier().doubleValue(), 0d);
     }
 
     @Test
@@ -143,7 +146,8 @@ public class GeneratorConfigProviderTest {
                                         new ResourcesSpec(
                                                 new ResourceRequirementSpec("800m", "2Gi"),
                                                 new ResourceRequirementSpec("2000m", "4Gi")),
-                                        null))));
+                                        null,
+                                        new RetriesSpec(4, 1.4d)))));
 
         assertEquals("syft", requestSpec.generator().name());
         assertEquals("1.27.1", requestSpec.generator().version());
@@ -152,6 +156,8 @@ public class GeneratorConfigProviderTest {
         assertEquals("2Gi", requestSpec.generator().config().resources().requests().memory());
         assertEquals("2000m", requestSpec.generator().config().resources().limits().cpu());
         assertEquals("4Gi", requestSpec.generator().config().resources().limits().memory());
+        assertEquals(4, requestSpec.generator().config().retries().maxCount().intValue());
+        assertEquals(1.4d, requestSpec.generator().config().retries().memoryMultiplier().doubleValue(), 0d);
 
     }
 
@@ -174,7 +180,8 @@ public class GeneratorConfigProviderTest {
                                 new GeneratorConfigSpec(
                                         null,
                                         new ResourcesSpec(null, new ResourceRequirementSpec("3000m", "4Gi")),
-                                        null))));
+                                        null,
+                                        new RetriesSpec(null, 1.5d)))));
 
         assertEquals("syft", requestSpec.generator().name());
         assertEquals("1.27.1", requestSpec.generator().version());
@@ -183,5 +190,7 @@ public class GeneratorConfigProviderTest {
         assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
         assertEquals("3000m", requestSpec.generator().config().resources().limits().cpu());
         assertEquals("4Gi", requestSpec.generator().config().resources().limits().memory());
+        assertEquals(3, requestSpec.generator().config().retries().maxCount().intValue());
+        assertEquals(1.5d, requestSpec.generator().config().retries().memoryMultiplier().doubleValue(), 0d);
     }
 }
