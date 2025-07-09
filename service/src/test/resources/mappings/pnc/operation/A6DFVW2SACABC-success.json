@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/pnc-rest/v2/operations/deliverable-analyzer/A6DFVW2SACABC"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "A6DFVW2SACABC",
+      "submitTime": "2024-02-05T05:51:29.609Z",
+      "startTime": "2024-02-05T05:51:29.896Z",
+      "endTime": "2024-02-05T06:22:09.452Z",
+      "progressStatus": "FINISHED",
+      "result": "SUCCESSFUL",
+      "user": { "id": "1013", "username": "service-account-rh-messaging-ci" },
+      "parameters": {
+        "url-1": "https://host/broker-7.10.6.CR1/amq-broker-7.10.6.CR1-maven-repository.zip"
+      },
+      "productMilestone": {
+        "id": "2712",
+        "version": "7.10.6.CR1",
+        "endDate": null,
+        "startingDate": "2024-02-02T00:00:00Z",
+        "plannedEndDate": "2024-02-03T00:00:00Z"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
