@@ -248,11 +248,19 @@ public class PncNotificationHandler {
         if (!pendingRequests.isEmpty()) {
             // Get the oldest pending generation request and create a new ConfigMap with the existing id
             pendingRequest = pendingRequests.get(0);
+            // if we have a pending request, use that request event instead and ignore the one from UMB
+            RequestEvent requestEventToIgnore = requestEvent;
+            requestEvent = pendingRequest.getRequest();
+            ignoreRequestEvent(
+                    requestEventToIgnore,
+                    "Operation belongs to previous request event " + pendingRequest.getRequest().getId()
+                            + ". Ignoring UMB event: " + requestEventToIgnore.getId());
         }
 
         // Update the requestEvent with the requestConfig
         requestEvent = addPncOperationRequestConfig(requestEvent, String.valueOf(messageBody.getOperationId()));
-
+        // A null pendingRequest getting passed would lead to a new configmap, and lead it to
+        // get synced with the UMB request event
         GenerationRequest req = createDelAnalysisGenerationRequest(messageBody, pendingRequest);
         SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.sync(requestEvent, req);
 
