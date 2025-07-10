@@ -112,6 +112,8 @@ public class EventsApi {
 
         // todo input and error handling
         if (query != null && !query.isBlank()) {
+
+            // init
             QueryLexer lexer = new QueryLexer(CharStreams.fromString(query));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             QueryParser parser = new QueryParser(tokens);
@@ -121,8 +123,11 @@ public class EventsApi {
 
             JpqlQueryListener listener = new JpqlQueryListener();
             ParseTreeWalker walker = new ParseTreeWalker();
+
+            // walk the tree and build JPQL WHERE clause
             walker.walk(listener, tree);
 
+            // get the JPQL WHERE clause and parameters
             String whereClause = listener.getJpqlWhereClause();
             Map<String, Object> parameters = listener.getParameters();
 
