@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.nextgen.query;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -24,17 +25,21 @@ import java.util.Stack;
 import org.jboss.sbomer.service.nextgen.antlr.QueryBaseListener;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser.PredicateContext;
+import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- * An ANTLR Listener that traverses the parsed query tree and builds a JPQL (Java Persistence Query Language) `WHERE`
- * clause along with a map of named parameters. This is designed to be used with Panache queries.
+ * An ANTLR Listener that traverses the parsed query tree and builds a JPQL
+ * (Java Persistence Query Language) `WHERE`
+ * clause along with a map of named parameters. This is designed to be used with
+ * Panache queries.
  * </p>
  *
  * <p>
- * It uses a stack to construct the query string as the {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
+ * It uses a stack to construct the query string as the
+ * {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
  * enter/exit events.
  * </p>
  */
@@ -60,7 +65,8 @@ public class JpqlQueryListener extends QueryBaseListener {
     /**
      * Returns the map of named parameters collected during the tree traversal.
      *
-     * @return A map where keys are parameter names (e.g., "param0") and values are the corresponding query values.
+     * @return A map where keys are parameter names (e.g., "param0") and values are
+     *         the corresponding query values.
      */
     public Map<String, Object> getParameters() {
         return parameters;
@@ -116,33 +122,39 @@ public class JpqlQueryListener extends QueryBaseListener {
 
     @Override
     public void exitPredicate(QueryParser.PredicateContext ctx) {
-        // todo cleanup and check for empty predicates
         log.info("    <- Exiting Predicate: '{}'", ctx.getText());
 
         String field = mapIdentifierToEntityField(ctx.IDENTIFIER().getText());
         String operator = getOperator(ctx);
 
-        // This is a leaf node in the expression tree, so we process it and push its
-        // string representation to the stack.
-        String rawValue = ctx.value().getText();
-        Object value = rawValue.substring(1, rawValue.length() - 1); // Remove quotes
+        // The 'value' is now always a string, without quotes.
+        String stringValue = parseValue(ctx.value());
+        Object finalValue = stringValue; // Default to string if no case matches
 
-        if ("status".equalsIgnoreCase(field)) {
-            value = org.jboss.sbomer.service.nextgen.core.enums.EventStatus.valueOf(value.toString());
+        // The switch is now responsible for ALL type conversions from the string.
+        switch (field.toLowerCase()) {
+            case "status":
+                finalValue = EventStatus.valueOf(stringValue.toUpperCase());
+                break;
+
+            case "created":
+            case "updated":
+            case "finished":
+                finalValue = Instant.parse(stringValue);
+                break;
+
+            // Example for a numeric field:
+            case "version":
+                finalValue = Long.parseLong(stringValue);
+                break;
         }
 
-        if ("created".equalsIgnoreCase(field) || "updated".equalsIgnoreCase(field)
-                || "finished".equalsIgnoreCase(field)) {
-            value = java.time.Instant.parse(value.toString());
-        }
-
-        if (ctx.CONTAINS() != null) {
-            value = "%" + value + "%";
+        if (" LIKE ".equals(operator)) {
+            finalValue = "%" + finalValue + "%";
         }
 
         String paramName = "param" + paramIndex++;
-        parameters.put(paramName, value);
-
+        parameters.put(paramName, finalValue);
         queryParts.push(field + operator + ":" + paramName);
     }
 
@@ -178,5 +190,15 @@ public class JpqlQueryListener extends QueryBaseListener {
             return " LIKE ";
 
         throw new UnsupportedOperationException("Operator not implemented: " + ctx.getText());
+    }
+
+    /**
+     * Safely extracts the value from the context by checking the actual ANTLR token
+     * type, avoiding errors with
+     * non-string values.
+     */
+    private String parseValue(QueryParser.ValueContext valueCtx) {
+        String rawValue = valueCtx.STRING().getText();
+        return rawValue.substring(1, rawValue.length() - 1);
     }
 }
