@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -33,6 +34,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -46,6 +48,7 @@ import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.query.JpqlQueryListener;
+import org.jboss.sbomer.service.nextgen.query.QueryParseErrorListener;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
@@ -113,21 +116,31 @@ public class EventsApi {
         // todo input and error handling
         if (query != null && !query.isBlank()) {
 
-            // init
             QueryLexer lexer = new QueryLexer(CharStreams.fromString(query));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             QueryParser parser = new QueryParser(tokens);
-            QueryParser.QueryContext tree = parser.query();
 
-            log.info("Parse Tree: " + tree.toStringTree(parser));
+            parser.removeErrorListeners();
+            parser.addErrorListener(new QueryParseErrorListener());
 
             JpqlQueryListener listener = new JpqlQueryListener();
             ParseTreeWalker walker = new ParseTreeWalker();
 
-            // walk the tree and build JPQL WHERE clause
-            walker.walk(listener, tree);
+            try {
+                QueryParser.QueryContext tree = parser.query();
+                walker.walk(listener, tree);
 
-            // get the JPQL WHERE clause and parameters
+                if (tokens.LA(1) != org.antlr.v4.runtime.Token.EOF) {
+                    throw new ParseCancellationException(
+                            "Invalid query syntax. The query could not be fully parsed. Check for errors near token: '"
+                                    + tokens.get(tokens.index()).getText() + "'");
+                }
+            } catch (ParseCancellationException e) {
+                throw new ClientException("Invalid query", List.of(e.getMessage()));
+            } catch (IllegalArgumentException e) {
+                throw new ClientException("Invalid query", List.of(e.getMessage()));
+            }
+
             String whereClause = listener.getJpqlWhereClause();
             Map<String, Object> parameters = listener.getParameters();
 

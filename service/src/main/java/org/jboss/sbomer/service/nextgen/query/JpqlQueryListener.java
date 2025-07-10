@@ -18,10 +18,12 @@
 package org.jboss.sbomer.service.nextgen.query;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+import org.checkerframework.checker.units.qual.t;
 import org.jboss.sbomer.service.nextgen.antlr.QueryBaseListener;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser.PredicateContext;
@@ -91,6 +93,8 @@ public class JpqlQueryListener extends QueryBaseListener {
     public void exitExpression(QueryParser.ExpressionContext ctx) {
         // This is the core logic for the listener. It fires after all children of an
         // expression have been processed.
+        // This is the core logic for the listener. It fires after all children of an
+        // expression have been processed.
         log.info("  <- Exiting Expression: '{}'", ctx.getText());
 
         // If the expression is a logical AND or OR, its two operands will be on the top
@@ -110,6 +114,10 @@ public class JpqlQueryListener extends QueryBaseListener {
         else if (ctx.LPAREN() != null) {
             String expr = queryParts.pop();
             queryParts.push("(" + expr + ")");
+        } else if (ctx.predicate() == null) {
+            // If it's not a logical expression, not a parenthesized expression,
+            // and not a simple predicate, then it's an unsupported operation.
+            throw new UnsupportedOperationException("Unsupported operator in expression: " + ctx.getText());
         }
         // If it's just a simple predicate, its result is already on the stack from
         // exitPredicate, so we do nothing.
@@ -134,18 +142,24 @@ public class JpqlQueryListener extends QueryBaseListener {
         // The switch is now responsible for ALL type conversions from the string.
         switch (field.toLowerCase()) {
             case "status":
-                finalValue = EventStatus.valueOf(stringValue.toUpperCase());
+                try {
+                    finalValue = EventStatus.valueOf(stringValue.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid value for field 'status'. Valid values are: "
+                                    + Arrays.toString(EventStatus.values()));
+                }
                 break;
 
             case "created":
             case "updated":
             case "finished":
-                finalValue = Instant.parse(stringValue);
-                break;
-
-            // Example for a numeric field:
-            case "version":
-                finalValue = Long.parseLong(stringValue);
+                try {
+                    finalValue = Instant.parse(stringValue);
+                } catch (Exception e) {
+                    log.error("Failed to parse date: {}", stringValue, e);
+                    throw new IllegalArgumentException("Invalid date format: " + stringValue);
+                }
                 break;
         }
 
