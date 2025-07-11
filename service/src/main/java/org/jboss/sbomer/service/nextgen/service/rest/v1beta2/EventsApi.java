@@ -122,7 +122,7 @@ public class EventsApi {
             } catch (ClientException e) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("message",
-                        "The provided RSQL query is not valid. Please check the syntax and values.");
+                        "The provided query is not valid. Please check the syntax and values.");
                 errorResponse.put("details", e.getErrors());
 
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
