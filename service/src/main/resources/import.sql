@@ -95,7 +95,7 @@ INSERT INTO request (id, receival_time, event_type, event_status, request_config
 
 -- UMB request event for the pnc operation BDQXCNRZJYYAA
 INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
-  VALUES ('operation_BDQXCNRZJYYAA', '2024-10-14 14:18:45.148407', 'UMB', 'IGNORED', 
+  VALUES ('operation_BDQXCNRZJYYAA', '2024-10-14 14:18:45.148407', 'UMB', 'IGNORED',
   '{
      "type": "pnc-operation",
      "apiVersion": "sbomer.jboss.org/v1alpha1",
@@ -207,7 +207,7 @@ VALUES (
 		'AASSBB',
 		now(),
 		'ARYT3LBXDVYAC',
-		'build_ARYT3LBXDVYAC', 
+		'build_ARYT3LBXDVYAC',
 		'FINISHED',
 		'SUCCESS',
 		'It succeeded',
@@ -260,7 +260,7 @@ VALUES (
 		now(),
 		'ARYT3LBXDVYAC',
 		'AASSBB',
-		0, 
+		0,
 		'{
   "version": 1,
   "metadata": {
@@ -3241,7 +3241,7 @@ VALUES (
       "version": "7.11.5.CR3",
       "description": "SBOM representing the deliverable my-broker-7.11.5.CR3-bin.zip analyzed with operation OPBGCD23DVYAC",
       "licenses": [
-        
+
       ],
       "purl": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
       "type": "file",
@@ -3328,13 +3328,13 @@ VALUES (
     {
       "ref": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
       "dependsOn": [
-        
+
       ]
     },
     {
       "ref": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar",
       "dependsOn": [
-        
+
       ]
     }
   ]
@@ -3438,8 +3438,39 @@ VALUES (
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
         '{}',
-        'PROCESSED',
+        'NEW',
         'Event processed'
+);
+
+INSERT INTO event(
+		id,
+		created,
+        updated,
+        finished,
+        metadata,
+		status,
+        reason
+	)
+VALUES (
+        'E0BBBBB',
+        '2020-12-25T00:00:00.000000Z',
+        '2022-12-25T00:00:00.000000Z',
+        '2024-12-25T00:00:00.000000Z',
+        '{}',
+        'NEW',
+        'Some reason'
+);
+
+
+
+VALUES (
+        'E0CCCCC',
+        '2020-12-25T00:00:00.000000Z',
+        '2022-12-25T00:00:00.000000Z',
+        '2024-12-25T00:00:00.000000Z',
+        '{}',
+        'NEW',
+        'Some reason'
 );
 
 INSERT INTO event(
@@ -3578,7 +3609,7 @@ VALUES (
       "version": "7.11.5.CR3",
       "description": "SBOM representing the deliverable my-broker-7.11.5.CR3-bin.zip analyzed with operation OPBGCD23DVYAC",
       "licenses": [
-        
+
       ],
       "purl": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
       "type": "file",
@@ -3665,13 +3696,13 @@ VALUES (
     {
       "ref": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
       "dependsOn": [
-        
+
       ]
     },
     {
       "ref": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar",
       "dependsOn": [
-        
+
       ]
     }
   ]
