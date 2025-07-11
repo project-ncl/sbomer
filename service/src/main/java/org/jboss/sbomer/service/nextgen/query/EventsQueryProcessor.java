@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j
-public class QueryProcessor {
+public class EventsQueryProcessor {
 
     public EventsQueryListener process(String query) {
         QueryLexer lexer = new QueryLexer(CharStreams.fromString(query));
@@ -23,7 +23,7 @@ public class QueryProcessor {
         QueryParser parser = new QueryParser(tokens);
 
         parser.removeErrorListeners(); // Remove the default console listener
-        parser.addErrorListener(new QueryParseErrorListener()); // Add our custom listener
+        parser.addErrorListener(new EventsQueryParseErrorListener()); // Add our custom listener
 
         EventsQueryListener listener = new EventsQueryListener();
         ParseTreeWalker walker = new ParseTreeWalker();

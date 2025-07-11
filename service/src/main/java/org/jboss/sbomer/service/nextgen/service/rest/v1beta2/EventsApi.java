@@ -49,8 +49,8 @@ import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.query.EventsQueryListener;
-import org.jboss.sbomer.service.nextgen.query.QueryParseErrorListener;
-import org.jboss.sbomer.service.nextgen.query.QueryProcessor;
+import org.jboss.sbomer.service.nextgen.query.EventsQueryParseErrorListener;
+import org.jboss.sbomer.service.nextgen.query.EventsQueryProcessor;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
@@ -99,7 +99,7 @@ public class EventsApi {
     EventBus eventBus;
 
     @Inject
-    QueryProcessor queryProcessor;
+    EventsQueryProcessor queryProcessor;
 
     @GET
     @Operation(summary = "Search events", description = "Performs a query according to the search criteria and returns paginated list of events")
