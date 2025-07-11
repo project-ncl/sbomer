@@ -51,3 +51,6 @@ secret*.json
 .quarkus
 
 .sonarlint/
+
+# antlr
+.antlr
