@@ -22,7 +22,6 @@ public class EventsQueryProcessor {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         QueryParser parser = new QueryParser(tokens);
 
-        parser.removeErrorListeners(); // Remove the default console listener
         parser.addErrorListener(new EventsQueryParseErrorListener()); // Add our custom listener
 
         EventsQueryListener listener = new EventsQueryListener();
