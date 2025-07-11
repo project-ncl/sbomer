@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.nextgen.service.rest.v1beta2;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,8 +48,9 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
-import org.jboss.sbomer.service.nextgen.query.JpqlQueryListener;
+import org.jboss.sbomer.service.nextgen.query.EventsQueryListener;
 import org.jboss.sbomer.service.nextgen.query.QueryParseErrorListener;
+import org.jboss.sbomer.service.nextgen.query.QueryProcessor;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
@@ -56,6 +58,7 @@ import org.jboss.sbomer.service.nextgen.service.rest.RestUtils;
 
 import io.quarkus.arc.Arc;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.hibernate.orm.runtime.dev.HibernateOrmDevInfo.Query;
 import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -95,60 +98,35 @@ public class EventsApi {
     @Inject
     EventBus eventBus;
 
+    @Inject
+    QueryProcessor queryProcessor;
+
     @GET
-    @Operation(
-            summary = "Search events",
-            description = "Performs a query according to the search criteria and returns paginated list of events")
-    @APIResponse(
-            responseCode = "200",
-            description = "Paginated list of events",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(type = SchemaType.OBJECT, implementation = Page.class)))
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @Operation(summary = "Search events", description = "Performs a query according to the search criteria and returns paginated list of events")
+    @APIResponse(responseCode = "200", description = "Paginated list of events", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.OBJECT, implementation = Page.class)))
+    @APIResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     public Response search(@Valid @BeanParam PaginationParameters paginationParams, @QueryParam("query") String query) {
 
         PanacheQuery<Event> panacheQuery;
 
-        // todo input and error handling
-        if (query != null && !query.isBlank()) {
-
-            QueryLexer lexer = new QueryLexer(CharStreams.fromString(query));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            QueryParser parser = new QueryParser(tokens);
-
-            parser.removeErrorListeners();
-            parser.addErrorListener(new QueryParseErrorListener());
-
-            JpqlQueryListener listener = new JpqlQueryListener();
-            ParseTreeWalker walker = new ParseTreeWalker();
-
-            try {
-                QueryParser.QueryContext tree = parser.query();
-                walker.walk(listener, tree);
-
-                if (tokens.LA(1) != org.antlr.v4.runtime.Token.EOF) {
-                    throw new ParseCancellationException(
-                            "Invalid query syntax. The query could not be fully parsed. Check for errors near token: '"
-                                    + tokens.get(tokens.index()).getText() + "'");
-                }
-            } catch (ParseCancellationException e) {
-                throw new ClientException("Invalid query", List.of(e.getMessage()));
-            } catch (IllegalArgumentException e) {
-                throw new ClientException("Invalid query", List.of(e.getMessage()));
-            }
-
-            String whereClause = listener.getJpqlWhereClause();
-            Map<String, Object> parameters = listener.getParameters();
-
-            log.info("Translated JPQL WHERE clause: '{}' with parameters: {}", whereClause, parameters);
-
-            panacheQuery = Event.find(whereClause, parameters);
-        } else {
+        if (query == null || query.isBlank()) {
             panacheQuery = Event.findAll();
+        } else {
+            try {
+                EventsQueryListener listener = queryProcessor.process(query);
+
+                String whereClause = listener.getJpqlWhereClause();
+                Map<String, Object> parameters = listener.getParameters();
+                panacheQuery = Event.find(whereClause, parameters);
+
+            } catch (ClientException e) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message",
+                        "The provided RSQL query is not valid. Please check the syntax and values.");
+                errorResponse.put("details", e.getErrors());
+
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+            }
         }
 
         List<EventRecord> events = panacheQuery.page(paginationParams.getPageIndex(), paginationParams.getPageSize())
@@ -156,7 +134,6 @@ public class EventsApi {
                 .list();
 
         long count = panacheQuery.count();
-
         Page<EventRecord> page = RestUtils.toPage(events, paginationParams, count);
 
         return Response.ok(page)
@@ -169,34 +146,14 @@ public class EventsApi {
     @GET
     @Path("/{id}")
     @Operation(summary = "Get specific event", description = "Get event by the identifier")
-    @Parameter(
-            name = "id",
-            description = "Event identifier",
-            examples = { @ExampleObject(value = "88CA2291D4014C6", name = "Event identifier") })
-    @APIResponse(
-            responseCode = "200",
-            description = "Event content",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class))) // TODO:
-                                                                                                                      // populate
-                                                                                                                      // it
-    @APIResponse(
-            responseCode = "400",
-            description = "Malformed request",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = ErrorResponse.class)))
-    @APIResponse(
-            responseCode = "404",
-            description = "Event could not be found",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = ErrorResponse.class)))
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = ErrorResponse.class)))
+    @Parameter(name = "id", description = "Event identifier", examples = {
+            @ExampleObject(value = "88CA2291D4014C6", name = "Event identifier") })
+    @APIResponse(responseCode = "200", description = "Event content", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class))) // TODO:
+                                                                                                                                                                                // populate
+                                                                                                                                                                                // it
+    @APIResponse(responseCode = "400", description = "Malformed request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(responseCode = "404", description = "Event could not be found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
     public EventRecord getById(@PathParam("id") String eventId) {
         Event event = Event.findById(eventId); // NOSONAR
 
@@ -210,10 +167,7 @@ public class EventsApi {
     @GET
     @Path("/{eventId}/history")
     @Operation(summary = "Get status history of an event")
-    @APIResponse(
-            responseCode = "200",
-            description = "Status history",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(responseCode = "200", description = "Status history", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     @APIResponse(responseCode = "404", description = "Event not found")
     public List<EventStatusRecord> getStatusesForEvent(@PathParam("eventId") String eventId) {
         Event event = Event.findById(eventId); // NOSONAR
@@ -228,10 +182,7 @@ public class EventsApi {
     @GET
     @Path("/{eventId}/generations")
     @Operation(summary = "Get generations related to an event")
-    @APIResponse(
-            responseCode = "200",
-            description = "Generation list",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(responseCode = "200", description = "Generation list", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     @APIResponse(responseCode = "404", description = "Event not found")
     public List<GenerationRecord> getGenerationsForEvent(@PathParam("eventId") String eventId) {
         Event event = Event.findById(eventId); // NOSONAR
@@ -246,12 +197,7 @@ public class EventsApi {
     @PATCH
     @Path("/{id}/status")
     @Operation(summary = "Update status of an event (Worker only)")
-    @APIResponse(
-            responseCode = "200",
-            description = "Event status updated",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = EventRecord.class)))
+    @APIResponse(responseCode = "200", description = "Event status updated", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = EventRecord.class)))
     @APIResponse(responseCode = "404", description = "Event not found")
     @Transactional
     public Response updateEventStatus(
@@ -278,37 +224,13 @@ public class EventsApi {
     @POST
     @Path("/{id}/retry")
     @Operation(summary = "Retry an event", description = "Retry generations assigned to a particular event")
-    @Parameter(
-            name = "id",
-            description = "Event identifier",
-            required = true,
-            examples = { @ExampleObject(value = "88CA2291D4014C6", name = "Event identifier") })
-    @Parameter(
-            name = "force",
-            description = "Whether the retry should be considered a regeneration request (when set to true) or it should just regenerate failed generations and reuse successfully finished ones (when set to false)",
-            schema = @Schema(type = SchemaType.BOOLEAN, defaultValue = "false"))
-    @APIResponse(
-            responseCode = "200",
-            description = "Event content",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
-            responseCode = "400",
-            description = "Malformed request",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = ErrorResponse.class)))
-    @APIResponse(
-            responseCode = "404",
-            description = "Event could not be found",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = ErrorResponse.class)))
-    @APIResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = ErrorResponse.class)))
+    @Parameter(name = "id", description = "Event identifier", required = true, examples = {
+            @ExampleObject(value = "88CA2291D4014C6", name = "Event identifier") })
+    @Parameter(name = "force", description = "Whether the retry should be considered a regeneration request (when set to true) or it should just regenerate failed generations and reuse successfully finished ones (when set to false)", schema = @Schema(type = SchemaType.BOOLEAN, defaultValue = "false"))
+    @APIResponse(responseCode = "200", description = "Event content", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @APIResponse(responseCode = "400", description = "Malformed request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(responseCode = "404", description = "Event could not be found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
+    @APIResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
     @Transactional
     public EventRecord retry(@PathParam("id") String eventId, @QueryParam("force") boolean force) {
         log.info("Received new requested to retry event '{}' with force set to {}", eventId, force);

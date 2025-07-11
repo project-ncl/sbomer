@@ -18,12 +18,12 @@
 package org.jboss.sbomer.service.nextgen.query;
 
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import org.checkerframework.checker.units.qual.t;
 import org.jboss.sbomer.service.nextgen.antlr.QueryBaseListener;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser.PredicateContext;
@@ -46,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @Slf4j
-public class JpqlQueryListener extends QueryBaseListener {
+public class EventsQueryListener extends QueryBaseListener {
 
     private final Stack<String> queryParts = new Stack<>();
     private final Map<String, Object> parameters = new HashMap<>();
@@ -129,47 +129,14 @@ public class JpqlQueryListener extends QueryBaseListener {
         String field = mapIdentifierToEntityField(ctx.IDENTIFIER().getText());
         String operator = getOperator(ctx);
 
-        // The 'value' is now always a string, without quotes.
-        String stringValue = parseValue(ctx.value());
-        Object finalValue = stringValue; // Default to string if no case matches
+        // ** Start of validation logic **
+        validatePredicate(field, operator);
+        // ** End of validation logic **
 
-        // The switch is now responsible for ALL type conversions from the string.
-        switch (field.toLowerCase()) {
-            case "status":
-                try {
-                    finalValue = EventStatus.valueOf(stringValue.toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException(
-                            "Invalid value for field 'status'. Valid values are: "
-                                    + Arrays.toString(EventStatus.values()));
-                }
-                break;
-            case "created":
-            case "updated":
-            case "finished":
-                try {
-                    finalValue = Instant.parse(stringValue);
-                } catch (java.time.format.DateTimeParseException e) {
-                    throw new IllegalArgumentException(
-                            "Invalid timestamp format for field '" + field
-                                    + "'. Expected ISO-8601 format (e.g., \"2023-01-01T12:00:00Z\").");
-                }
-                break;
-            case "version":
-                try {
-                    finalValue = Long.parseLong(stringValue);
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException(
-                            "Invalid number format for field '" + field + "'. Expected an integer value.");
-                }
-                break;
-            case "id":
-            case "reason":
-                finalValue = stringValue;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown field: '" + field + "'");
-        }
+        String stringValue = parseValue(ctx.value());
+
+        // ** Refactored value conversion **
+        Object finalValue = convertValue(field, stringValue);
 
         if (" LIKE ".equals(operator)) {
             finalValue = "%" + finalValue + "%";
@@ -189,6 +156,70 @@ public class JpqlQueryListener extends QueryBaseListener {
     public void exitValue(QueryParser.ValueContext ctx) {
         log.info("      <- Exiting Value: '{}'", ctx.getText());
     }
+
+    /**
+     * Converts the raw string value from the query into the correct Java type based
+     * on the field name.
+     * Also performs validation for the value format.
+     *
+     * @param field       The field name being queried.
+     * @param stringValue The raw string value from the query.
+     * @return A correctly typed object (e.g., Instant, Long, Enum).
+     */
+    private Object convertValue(String field, String stringValue) {
+        switch (field.toLowerCase()) {
+            case "status":
+                try {
+                    return EventStatus.valueOf(stringValue.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid value for field 'status'. Valid values are: "
+                                    + Arrays.toString(EventStatus.values()));
+                }
+            case "created":
+            case "updated":
+            case "finished":
+                try {
+                    return Instant.parse(stringValue);
+                } catch (DateTimeParseException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid timestamp format for field '" + field
+                                    + "'. Expected ISO-8601 format (e.g., \"2023-01-01T12:00:00Z\").");
+                }
+            case "id":
+            case "reason":
+                return stringValue;
+            default:
+                throw new IllegalArgumentException("Unknown field: '" + field + "'");
+        }
+    }
+
+    /**
+     * Validates that the operator is compatible with the field type.
+     *
+     * @param field The field name being queried.
+     * @param operator The operator being used.
+     */
+    private void validatePredicate(String field, String operator) {
+        switch (field.toLowerCase()) {
+            case "id":
+            case "reason":
+                if (operator.equals(" > ") || operator.equals(" < ") || operator.equals(" >= ")
+                        || operator.equals(" <= ")) {
+                    throw new UnsupportedOperationException(
+                            "Operator '" + operator.trim() + "' is not supported for string field '" + field + "'");
+                }
+                break;
+            case "created":
+            case "updated":
+            case "finished":
+                if (operator.equals(" LIKE ")) {
+                    throw new UnsupportedOperationException(
+                            "Operator 'LIKE' is not supported for numeric or date field '" + field + "'");
+                }
+                break;
+            }
+        }
 
     private String mapIdentifierToEntityField(String identifier) {
         // For now, we assume a direct mapping. This can be expanded.
@@ -210,10 +241,8 @@ public class JpqlQueryListener extends QueryBaseListener {
             return " <= ";
         if (ctx.CONTAINS() != null)
             return " LIKE ";
-
         throw new UnsupportedOperationException("Operator not implemented: " + ctx.getText());
     }
-
 
     private String parseValue(QueryParser.ValueContext valueCtx) {
         String rawValue = valueCtx.STRING().getText();
