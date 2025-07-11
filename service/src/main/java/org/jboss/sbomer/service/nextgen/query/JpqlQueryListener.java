@@ -91,10 +91,6 @@ public class JpqlQueryListener extends QueryBaseListener {
 
     @Override
     public void exitExpression(QueryParser.ExpressionContext ctx) {
-        // This is the core logic for the listener. It fires after all children of an
-        // expression have been processed.
-        // This is the core logic for the listener. It fires after all children of an
-        // expression have been processed.
         log.info("  <- Exiting Expression: '{}'", ctx.getText());
 
         // If the expression is a logical AND or OR, its two operands will be on the top
@@ -119,8 +115,6 @@ public class JpqlQueryListener extends QueryBaseListener {
             // and not a simple predicate, then it's an unsupported operation.
             throw new UnsupportedOperationException("Unsupported operator in expression: " + ctx.getText());
         }
-        // If it's just a simple predicate, its result is already on the stack from
-        // exitPredicate, so we do nothing.
     }
 
     @Override
@@ -150,17 +144,31 @@ public class JpqlQueryListener extends QueryBaseListener {
                                     + Arrays.toString(EventStatus.values()));
                 }
                 break;
-
             case "created":
             case "updated":
             case "finished":
                 try {
                     finalValue = Instant.parse(stringValue);
-                } catch (Exception e) {
-                    log.error("Failed to parse date: {}", stringValue, e);
-                    throw new IllegalArgumentException("Invalid date format: " + stringValue);
+                } catch (java.time.format.DateTimeParseException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid timestamp format for field '" + field
+                                    + "'. Expected ISO-8601 format (e.g., \"2023-01-01T12:00:00Z\").");
                 }
                 break;
+            case "version":
+                try {
+                    finalValue = Long.parseLong(stringValue);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid number format for field '" + field + "'. Expected an integer value.");
+                }
+                break;
+            case "id":
+            case "reason":
+                finalValue = stringValue;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown field: '" + field + "'");
         }
 
         if (" LIKE ".equals(operator)) {
@@ -206,13 +214,10 @@ public class JpqlQueryListener extends QueryBaseListener {
         throw new UnsupportedOperationException("Operator not implemented: " + ctx.getText());
     }
 
-    /**
-     * Safely extracts the value from the context by checking the actual ANTLR token
-     * type, avoiding errors with
-     * non-string values.
-     */
+
     private String parseValue(QueryParser.ValueContext valueCtx) {
         String rawValue = valueCtx.STRING().getText();
+        // The STRING has ALWAYS quotes around it per the grammar
         return rawValue.substring(1, rawValue.length() - 1);
     }
 }
