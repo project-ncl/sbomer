@@ -32,5 +32,4 @@ CONTAINS: '~';
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 STRING: '"' ( ~'"' )* '"';
 
-fragment DIGIT: [0-9];
 WS: [ \t\r\n]+ -> skip;
