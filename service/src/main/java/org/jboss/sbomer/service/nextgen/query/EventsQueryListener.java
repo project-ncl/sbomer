@@ -33,15 +33,12 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- * An ANTLR Listener that traverses the parsed query tree and builds a JPQL
- * (Java Persistence Query Language) `WHERE`
- * clause along with a map of named parameters. This is designed to be used with
- * Panache queries.
+ * An ANTLR Listener that traverses the parsed query tree and builds a JPQL (Java Persistence Query Language) `WHERE`
+ * clause along with a map of named parameters. This is designed to be used with Panache queries.
  * </p>
  *
  * <p>
- * It uses a stack to construct the query string as the
- * {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
+ * It uses a stack to construct the query string as the {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
  * enter/exit events.
  * </p>
  */
@@ -67,8 +64,7 @@ public class EventsQueryListener extends QueryBaseListener {
     /**
      * Returns the map of named parameters collected during the tree traversal.
      *
-     * @return A map where keys are parameter names (e.g., "param0") and values are
-     *         the corresponding query values.
+     * @return A map where keys are parameter names (e.g., "param0") and values are the corresponding query values.
      */
     public Map<String, Object> getParameters() {
         return parameters;
@@ -155,11 +151,10 @@ public class EventsQueryListener extends QueryBaseListener {
     }
 
     /**
-     * Converts the raw string value from the query into the correct Java type based
-     * on the field name.
-     * Also performs validation for the value format.
+     * Converts the raw string value from the query into the correct Java type based on the field name. Also performs
+     * validation for the value format.
      *
-     * @param field       The field name being queried.
+     * @param field The field name being queried.
      * @param stringValue The raw string value from the query.
      * @return A correctly typed object (e.g., Instant, Long, Enum).
      */
@@ -194,7 +189,7 @@ public class EventsQueryListener extends QueryBaseListener {
     /**
      * Validates that the operator is compatible with the field type.
      *
-     * @param field    The field name being queried.
+     * @param field The field name being queried.
      * @param operator The operator being used.
      */
     private void validatePredicate(String field, String operator) {
