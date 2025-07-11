@@ -167,7 +167,7 @@ public class EventsQueryListener extends QueryBaseListener {
      * @return A correctly typed object (e.g., Instant, Long, Enum).
      */
     private Object convertValue(String field, String stringValue) {
-        switch (field.toLowerCase()) {
+        switch (field) {
             case "status":
                 try {
                     return EventStatus.valueOf(stringValue.toUpperCase());
@@ -201,7 +201,7 @@ public class EventsQueryListener extends QueryBaseListener {
      * @param operator The operator being used.
      */
     private void validatePredicate(String field, String operator) {
-        switch (field.toLowerCase()) {
+        switch (field) {
             case "id":
             case "reason":
                 if (operator.equals(" > ") || operator.equals(" < ") || operator.equals(" >= ")
