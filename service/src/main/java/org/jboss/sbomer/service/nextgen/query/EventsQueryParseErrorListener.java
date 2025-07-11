@@ -22,7 +22,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
-public class QueryParseErrorListener extends BaseErrorListener {
+public class EventsQueryParseErrorListener extends BaseErrorListener {
 
 
     @Override
