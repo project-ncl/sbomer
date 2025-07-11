@@ -126,16 +126,13 @@ public class EventsQueryListener extends QueryBaseListener {
     public void exitPredicate(QueryParser.PredicateContext ctx) {
         log.info("    <- Exiting Predicate: '{}'", ctx.getText());
 
-        String field = mapIdentifierToEntityField(ctx.IDENTIFIER().getText());
+        String field = ctx.IDENTIFIER().getText();
         String operator = getOperator(ctx);
 
-        // ** Start of validation logic **
         validatePredicate(field, operator);
-        // ** End of validation logic **
 
         String stringValue = parseValue(ctx.value());
 
-        // ** Refactored value conversion **
         Object finalValue = convertValue(field, stringValue);
 
         if (" LIKE ".equals(operator)) {
@@ -197,7 +194,7 @@ public class EventsQueryListener extends QueryBaseListener {
     /**
      * Validates that the operator is compatible with the field type.
      *
-     * @param field The field name being queried.
+     * @param field    The field name being queried.
      * @param operator The operator being used.
      */
     private void validatePredicate(String field, String operator) {
@@ -218,12 +215,7 @@ public class EventsQueryListener extends QueryBaseListener {
                             "Operator 'LIKE' is not supported for numeric or date field '" + field + "'");
                 }
                 break;
-            }
         }
-
-    private String mapIdentifierToEntityField(String identifier) {
-        // For now, we assume a direct mapping. This can be expanded.
-        return identifier;
     }
 
     private String getOperator(PredicateContext ctx) {
