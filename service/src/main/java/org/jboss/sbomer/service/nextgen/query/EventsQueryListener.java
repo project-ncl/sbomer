@@ -237,8 +237,8 @@ public class EventsQueryListener extends QueryBaseListener {
     }
 
     private String parseValue(QueryParser.ValueContext valueCtx) {
-        String rawValue = valueCtx.STRING().getText();
-        // The STRING has ALWAYS quotes around it per the grammar
+        String rawValue = valueCtx.STRING_IN_QUOTES().getText();
+        // The STRING_IN_QUOTES has ALWAYS quotes around it per the grammar
         return rawValue.substring(1, rawValue.length() - 1);
     }
 }
