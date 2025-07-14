@@ -131,10 +131,6 @@ public class EventsQueryListener extends QueryBaseListener {
 
         Object finalValue = convertValue(field, stringValue);
 
-        if (" LIKE ".equals(operator)) {
-            finalValue = "%" + finalValue + "%";
-        }
-
         String paramName = "param" + paramIndex++;
         parameters.put(paramName, finalValue);
         queryParts.push(field + operator + ":" + paramName);
@@ -215,19 +211,19 @@ public class EventsQueryListener extends QueryBaseListener {
 
     private String getOperator(PredicateContext ctx) {
         if (ctx.EQUAL() != null)
-            return " = ";
+            return "=";
         if (ctx.NOT_EQUAL() != null)
-            return " != ";
+            return "!=";
         if (ctx.GREATER_THAN() != null)
-            return " > ";
+            return ">";
         if (ctx.LESS_THAN() != null)
-            return " < ";
+            return "<";
         if (ctx.GREATER_THAN_OR_EQUAL() != null)
-            return " >= ";
+            return ">=";
         if (ctx.LESS_THAN_OR_EQUAL() != null)
-            return " <= ";
+            return "<=";
         if (ctx.CONTAINS() != null)
-            return " LIKE ";
+            return "%LIKE%";
         throw new UnsupportedOperationException("Operator not implemented: " + ctx.getText());
     }
 
