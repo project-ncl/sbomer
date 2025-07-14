@@ -95,7 +95,8 @@
 
   <dependencyManagement>
     <dependencies>
-      <!-- Workaround for: https://github.com/quarkiverse/quarkus-jgit/issues/182 until we upgrade to Quarkus >= 3.21.2-->
+      <!-- Workaround for: https://github.com/quarkiverse/quarkus-jgit/issues/182 until we upgrade
+      to Quarkus >= 3.21.2-->
       <dependency>
         <groupId>org.eclipse.jgit</groupId>
         <artifactId>org.eclipse.jgit</artifactId>
@@ -147,6 +148,11 @@
         <groupId>org.jboss.pnc</groupId>
         <artifactId>rest-client-jakarta</artifactId>
         <version>${version.pnc}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>4.13.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -217,11 +223,11 @@
           </executions>
           <configuration>
             <systemPropertyVariables>
-                <native.image.path>
+              <native.image.path>
                 ${project.build.directory}/${project.build.finalName}
-                </native.image.path>
-                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                <maven.home>${maven.home}</maven.home>
+              </native.image.path>
+              <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+              <maven.home>${maven.home}</maven.home>
             </systemPropertyVariables>
           </configuration>
         </plugin>
@@ -383,6 +389,25 @@
             <goals>
               <goal>report</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>4.13.0</version>
+        <executions>
+          <execution>
+            <id>antlr</id>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>
+                ${project.basedir}/src/main/java/org/jboss/sbomer/service/nextgen/antlr4</sourceDirectory>
+              <outputDirectory>
+                ${project.build.directory}/generated-sources/antlr/org/jboss/sbomer/service/nextgen/antlr</outputDirectory>
+            </configuration>
           </execution>
         </executions>
       </plugin>
