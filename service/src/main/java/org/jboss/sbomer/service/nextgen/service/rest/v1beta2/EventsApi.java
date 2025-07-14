@@ -119,7 +119,10 @@ public class EventsApi {
 
                 String whereClause = listener.getJpqlWhereClause();
                 Map<String, Object> parameters = listener.getParameters();
+                log.info("Using JPQL WHERE clause: '{}'", whereClause);
+                log.info("Using parameters: {}", parameters);
                 panacheQuery = Event.find(whereClause, parameters);
+
 
             } catch (ClientException e) {
                 Map<String, Object> errorResponse = new HashMap<>();
@@ -129,7 +132,6 @@ public class EventsApi {
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
             }
         }
-
         List<EventRecord> events = panacheQuery.page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .project(EventRecord.class)
                 .list();
