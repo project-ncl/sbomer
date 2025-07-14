@@ -54,6 +54,7 @@ public class EventsQueryProcessor {
                         "Invalid query syntax. The query could not be fully parsed. Check for errors near token: '"
                                 + tokens.get(tokens.index()).getText() + "'");
             }
+            log.info("Processed query: {}", query);
 
             return listener;
 
