@@ -289,11 +289,6 @@
       <artifactId>quarkus-test-security</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.antlr</groupId>
-      <artifactId>antlr4-runtime</artifactId>
-      <version>4.13.0</version>
-    </dependency>
   </dependencies>
 
   <build>
@@ -322,23 +317,6 @@
           <argLine>-Xmx1024m</argLine>
           <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.antlr</groupId>
-        <artifactId>antlr4-maven-plugin</artifactId>
-        <version>4.13.0</version>
-        <executions>
-          <execution>
-            <id>antlr</id>
-            <goals>
-              <goal>antlr4</goal>
-            </goals>
-            <configuration>
-              <sourceDirectory>${project.basedir}/src/main/java/org/jboss/sbomer/service/nextgen/antlr4</sourceDirectory>
-              <outputDirectory>${project.build.directory}/generated-sources/antlr/org/jboss/sbomer/service/nextgen/antlr</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
