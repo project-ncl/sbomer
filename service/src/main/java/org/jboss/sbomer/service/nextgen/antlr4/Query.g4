@@ -33,3 +33,5 @@ IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 STRING_IN_QUOTES: '"' ( ~'"' )* '"';
 
 WS: [ \t\r\n]+ -> skip;
+
+UNEXPECTED_CHAR: . ;
