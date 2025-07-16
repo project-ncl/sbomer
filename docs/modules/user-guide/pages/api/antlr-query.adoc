@@ -1,9 +1,7 @@
-# REST API Nextgen Query Language (created with ANTLR)
+## REST API Nextgen Query Language (created with ANTLR)
 
 
-## Query language
-
-This article serves as a guide to the REST API query language. Note that this language is currently in development and used only by the Nextgen REST API.
+This article serves as a guide to the REST API query language for SBOMer. Note that this language is currently in development and used only by the Nextgen REST API.
 
 ## Quick examples
 
@@ -42,7 +40,7 @@ Query using parentheses to group conditions:
 ``(id = "E0AAAAA" OR id = "E0BBBBB") AND status = "NEW"``
 
 
-== Whitespace Handling
+## Whitespace Handling
 
 The query language is flexible when it comes to whitespace (e.g., spaces and tabs). Any extra whitespace between fields, operators, and values is **ignored** by the parser.
 
@@ -55,12 +53,12 @@ id      =       "E0AAAAA"
 ----
 
 
-= Query Language User Guide
+
 :toc: left
 :toclevels: 3
 
 
-== Basic Queries: The Predicate
+## Basic Queries: The Predicate
 
 The most fundamental part of any query is the **predicate**. It's a single condition that checks a field against a value.
 
@@ -74,7 +72,7 @@ field_name operator "value"
 * *operator*: The comparison to perform (see the table below).
 * *value*: The string you are checking against. **It must always be enclosed in double quotes ("")**.
 
-=== Supported Operators
+### Supported Operators
 
 The following table lists all available operators and their meanings.
 
@@ -92,7 +90,7 @@ Note: Not all operators support all field types. For example, `~` (contains) is 
 | `~`      | **Contains**: Checks if the field's text includes the value as a substring.
 |===
 
-==== Examples of Basic Queries
+#### Examples of Basic Queries
 
 [source,subs="quotes"]
 ----
@@ -111,7 +109,7 @@ reason ~ "processed"
 created < "2022-01-01T00:00:00Z"
 ----
 
-== Combining Expressions with `AND` & `OR`
+## Combining Expressions with `AND` & `OR`
 
 You can create more powerful queries by combining multiple predicates using the logical operators `AND` and `OR`. These operators are **case-insensitive**, so `and` and `or` work as well.
 
@@ -133,7 +131,7 @@ The `OR` operator requires **at least one** of the conditions to be true.
 status = "PROCESSED" OR id = "E0BBBBB"
 ----
 
-== Grouping with Parentheses
+## Grouping with Parentheses
 
 Use parentheses `()` to group expressions and control the order of evaluation. This is essential when mixing `AND` and `OR` in the same query. Operations inside parentheses are always evaluated first.
 
@@ -145,11 +143,11 @@ Use parentheses `()` to group expressions and control the order of evaluation. T
 ----
 
 
-== Invalid Queries and Common Mistakes
+### Invalid Queries and Common Mistakes
 
 Below are examples of invalid queries, along with explanations of why they will fail. Understanding these common mistakes can help you write valid queries faster.
 
-=== Grammar Violations
+### Grammar Violations
 
 These queries break the fundamental `field operator "value"` structure of the language.
 
@@ -176,7 +174,7 @@ These queries break the fundamental `field operator "value"` structure of the la
 | **Incorrect Order**: The query must start with the field name, not the value. The correct order is `status = "PROCESSED"`.
 |===
 
-=== Semantic Violations
+## Semantic Violations
 
 These queries are grammatically correct, but they use operators that are not logically applicable to the specific field.
 
@@ -191,7 +189,7 @@ These queries are grammatically correct, but they use operators that are not log
 | **Unsupported Operator for Field**: The `created` timestamp field does not support the contains (`~`) operator. It should be compared using operators like `>`, `<`, or `=`.
 |===
 
-=== Invalid Value Formats
+### Invalid Value Formats
 
 These queries use values that don't match the expected data format for a field.
 
@@ -206,7 +204,7 @@ These queries use values that don't match the expected data format for a field.
 | **Invalid State**: The value `"INCORRECT"` is not a valid choice for the `status` field. It must be one of the predefined values like `"NEW"` or `"PROCESSED"`.
 |===
 
-=== Unknown Fields
+### Unknown Fields
 
 This type of error occurs when the query references a field that does not exist.
 
@@ -219,13 +217,13 @@ This type of error occurs when the query references a field that does not exist.
 |===
 
 
-# Currently Supported Endpoints
+## Currently Supported Endpoints
 
-This section details the fields and query patterns available for the EVENTS API.
+This section details currently supported endpoints and their query capabilities.
 
-## Events `/events`
+### Events `/events`
 
-The following table lists the fields you can use when querying the EVENTS API, along with their data types and example usage.
+The following table lists the fields you can use when querying the Events API, along with their data types and example usage.
 
 |===
 | Field Name | Data Type | Example Query
