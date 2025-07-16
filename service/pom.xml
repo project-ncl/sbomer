@@ -333,14 +333,12 @@
             <goals>
               <goal>antlr4</goal>
             </goals>
-            <configuration>
-              <sourceDirectory>
-                ${project.basedir}/src/main/java/org/jboss/sbomer/service/nextgen/antlr4</sourceDirectory>
-              <outputDirectory>
-                ${project.build.directory}/generated-sources/antlr/org/jboss/sbomer/service/nextgen/antlr</outputDirectory>
-            </configuration>
           </execution>
         </executions>
+        <configuration>
+          <visitor>true</visitor>
+          <listener>true</listener>
+        </configuration>
       </plugin>
     </plugins>
   </build>

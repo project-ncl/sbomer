@@ -123,7 +123,6 @@ public class EventsApi {
                 log.info("Using parameters: {}", parameters);
                 panacheQuery = Event.find(whereClause, parameters);
 
-
             } catch (ClientException e) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("message", "The provided query is not valid. Please check the syntax and values.");
