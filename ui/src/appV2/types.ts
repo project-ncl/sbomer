@@ -173,7 +173,6 @@ export type SbomerApi = {
       pageSize: number;
       pageIndex: number;
     },
-    queryType: RequestsQueryType,
     query: string,
   ): Promise<{ data: SbomerEvent[]; total: number }>;
 

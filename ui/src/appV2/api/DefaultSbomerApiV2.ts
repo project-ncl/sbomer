@@ -19,7 +19,6 @@
 import axios, { Axios, AxiosError } from 'axios';
 import {
   ManifestsQueryType,
-  RequestsQueryType,
   SbomerApi,
   SbomerGeneration,
   SbomerManifest,
@@ -111,6 +110,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       data.content.forEach((sbom: any) => {
         sboms.push(new SbomerManifest(sbom));
       });
+    }else {
     }
 
     return { data: sboms, total: data.totalHits };
@@ -228,43 +228,11 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       pageSize: number;
       pageIndex: number;
     },
-    queryType: string,
     query: string,
   ): Promise<{ data: SbomerEvent[]; total: number }> {
-    let queryPrefix = '';
-    switch (queryType) {
-      case RequestsQueryType.PNCBuild:
-        queryPrefix = 'pnc-build';
-        break;
-      case RequestsQueryType.ContainerImage:
-        queryPrefix = 'image';
-        break;
-      case RequestsQueryType.ErrataAdvisory:
-        queryPrefix = 'errata-advisory';
-        break;
-      case RequestsQueryType.RequestEvent:
-        queryPrefix = 'id';
-        break;
-      case RequestsQueryType.PNCAnalysis:
-        queryPrefix = 'pnc-analysis';
-        break;
-      case RequestsQueryType.PNCOperation:
-        queryPrefix = 'pnc-operation';
-        break;
-      case RequestsQueryType.ErrataReleaseID:
-        queryPrefix = 'release.errata_id';
-        break;
-      case RequestsQueryType.ErrataReleaseFullname:
-        queryPrefix = 'release.errata_fullname';
-        break;
-      default:
-        queryPrefix = '';
-    }
-
-    const queryFullString = queryPrefix == '' ? '' : `${queryPrefix}=${query}`;
 
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta2/events/${encodeURIComponent(queryFullString)}?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta2/events/?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}&query=${encodeURIComponent(query)}`,
     );
 
     if (response.status != 200) {
@@ -288,10 +256,6 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       return { data: requests, total: data.totalHits };
     }
 
-    // filtered response has different format than normal
-    data.forEach((request: any) => {
-      requests.push(new SbomerEvent(request));
-    });
     return { data: requests, total: requests.length || 0 };
   }
 
