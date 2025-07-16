@@ -16,32 +16,21 @@
 /// limitations under the License.
 ///
 
-import { RequestsQueryType } from '@appV2/types';
-import { isRequestsQueryType } from '@appV2/utils/Utils';
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 export function useRequestEventsFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const queryTypeValue = searchParams.get('queryType') as RequestsQueryType;
-  const queryType = isRequestsQueryType(queryTypeValue) ? queryTypeValue : RequestsQueryType.NoFilter;
-  const queryValue = isRequestsQueryType(queryTypeValue) ? (searchParams.get('queryValue') as string) : '';
+  const query = searchParams.get('query') || '';
   const pageIndex = +(searchParams.get('page') || 1);
   const pageSize = +(searchParams.get('pageSize') || 10);
 
   const setFilters = useCallback(
-    (queryType: RequestsQueryType, queryValue: string, pageIndex: number, pageSize: number) => {
+    (query: string, pageIndex: number, pageSize: number) => {
       setSearchParams((params) => {
-        if (queryType) {
-          params.set('queryType', queryType);
-        } else {
-          params.set('queryType', RequestsQueryType.NoFilter);
-        }
-        if (queryValue) {
-          params.set('queryValue', queryValue);
-        } else {
-          params.delete('queryValue');
+        if (query) {
+          params.set('query', query);
         }
 
         if (pageIndex) {
@@ -61,5 +50,5 @@ export function useRequestEventsFilters() {
     [],
   );
 
-  return { queryType, queryValue, pageIndex, pageSize, setFilters };
+  return { query, pageIndex, pageSize, setFilters };
 }
