@@ -1,5 +1,5 @@
 = Environment Setup
-:tekton-version: v0.53.3
+:tekton-version: v0.59.6
 
 This page provides a list of actions that needs to be performed and tools that needs to be installed
 in order to develop SBOMer.
@@ -106,15 +106,21 @@ To prepare minikube just run the `./hack/minikube-setup.sh` command.
 [source,console]
 ----
 $ ./hack/minikube-setup.sh
-😄  [sbomer] minikube v1.32.0 on Arch
+😄  [sbomer] minikube v1.35.0 on Fedora 42
 ✨  Using the kvm2 driver based on user configuration
-👍  Starting control plane node sbomer in cluster sbomer
-💾  Downloading Kubernetes v1.25.16 preload ...
-    > preloaded-images-k8s-v18-v1...:  388.63 MiB / 388.63 MiB  100.00% 38.33 M
+💾  Downloading driver docker-machine-driver-kvm2:
+    > docker-machine-driver-kvm2-...:  65 B / 65 B [---------] 100.00% ? p/s 0s
+    > docker-machine-driver-kvm2-...:  14.14 MiB / 14.14 MiB  100.00% 13.07 MiB
+💿  Downloading VM boot image ...
+    > minikube-v1.35.0-amd64.iso....:  65 B / 65 B [---------] 100.00% ? p/s 0s
+    > minikube-v1.35.0-amd64.iso:  345.38 MiB / 345.38 MiB  100.00% 11.62 MiB p
+👍  Starting "sbomer" primary control-plane node in "sbomer" cluster
+💾  Downloading Kubernetes v1.29.14 preload ...
+    > preloaded-images-k8s-v18-v1...:  352.64 MiB / 352.64 MiB  100.00% 11.69 M
     > kubeadm.sha256:  64 B / 64 B [-------------------------] 100.00% ? p/s 0s
-    > kubeadm:  42.56 MiB / 42.56 MiB [--------------] 100.00% 1.53 MiB p/s 28s
+    > kubeadm:  46.46 MiB / 46.46 MiB [------------] 100.00% 12.59 MiB p/s 3.9s
 
-🐳  Preparing Kubernetes v1.25.16 on Docker 24.0.7 ...
+🐳  Preparing Kubernetes v1.29.14 on Docker 27.4.0 ...
     ▪ Generating certificates and keys ...
     ▪ Booting up control plane ...
     ▪ Configuring RBAC rules ...
