@@ -1,9 +1,5 @@
 grammar Query;
 
-@header {
-package org.jboss.sbomer.service.nextgen.antlr;
-}
-
 query: expression;
 
 expression

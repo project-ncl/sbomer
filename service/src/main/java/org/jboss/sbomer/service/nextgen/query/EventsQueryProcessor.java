@@ -48,7 +48,6 @@ public class EventsQueryProcessor {
             QueryParser.QueryContext tree = parser.query();
             walker.walk(listener, tree);
 
-
             if (tokens.LA(1) != org.antlr.v4.runtime.Token.EOF) {
                 throw new ParseCancellationException(
                         "Invalid query syntax. The query could not be fully parsed. Check for errors near token: '"

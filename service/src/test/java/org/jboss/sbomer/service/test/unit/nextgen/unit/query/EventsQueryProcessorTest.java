@@ -1,4 +1,4 @@
-package org.jboss.sbomer.service.nextgen.query;
+package org.jboss.sbomer.service.test.unit.nextgen.unit.query;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,6 +11,8 @@ import java.util.stream.Stream;
 
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
+import org.jboss.sbomer.service.nextgen.query.EventsQueryListener;
+import org.jboss.sbomer.service.nextgen.query.EventsQueryProcessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
