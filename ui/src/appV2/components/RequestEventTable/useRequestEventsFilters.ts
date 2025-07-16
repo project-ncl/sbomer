@@ -31,8 +31,9 @@ export function useRequestEventsFilters() {
       setSearchParams((params) => {
         if (query) {
           params.set('query', query);
+        }else {
+          params.delete('query');
         }
-
         if (pageIndex) {
           params.set('page', pageIndex.toString());
         } else {

@@ -256,10 +256,6 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       return { data: requests, total: data.totalHits };
     }
 
-    // filtered response has different format than normal
-    data.forEach((request: any) => {
-      requests.push(new SbomerEvent(request));
-    });
     return { data: requests, total: requests.length || 0 };
   }
 

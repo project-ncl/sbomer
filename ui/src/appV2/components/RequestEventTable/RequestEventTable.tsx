@@ -77,15 +77,19 @@ export const RequestEventTable = () => {
     setQuerySearchbarValue(value);
   };
 
-  const querySearchBar = <>
-    <SearchInput
-      placeholder="Enter query"
-      value={querySearchbarValue}
-      onChange={(_event, value) => querySearchBarValueOnChange(value)}
-      onClear={() => querySearchBarValueOnChange('')}
-      onSearch={() => setFilters(querySearchbarValue || '', pageIndex, pageSize)}>
-    </SearchInput>
-  </>
+  const querySearchBar = <Toolbar>
+    <ToolbarItem>
+      <SearchInput
+        placeholder="Enter query"
+        value={querySearchbarValue}
+        onChange={(_event, value) => querySearchBarValueOnChange(value)}
+        onClear={() => querySearchBarValueOnChange('')}
+        onSearch={() => setFilters(querySearchbarValue || '', pageIndex, pageSize)}
+        style={{ width: '600px' }}
+        >
+      </SearchInput>
+    </ToolbarItem>
+  </Toolbar>
 
   const table = <>
     <Table aria-label="Events table" variant="compact">
