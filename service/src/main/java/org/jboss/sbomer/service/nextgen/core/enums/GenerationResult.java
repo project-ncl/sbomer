@@ -32,6 +32,7 @@ public enum GenerationResult {
     ERR_INDEX_INVALID(4),
     ERR_GENERATION(5),
     ERR_POST(6),
+    ERR_OOM(7),
     ERR_SYSTEM(99),
     ERR_MULTI(100);
 

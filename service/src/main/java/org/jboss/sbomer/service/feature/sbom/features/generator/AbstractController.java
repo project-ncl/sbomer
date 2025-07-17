@@ -352,7 +352,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                             term.getExitCode(),
                             reason,
                             term.getReason(),
-                            term.getMessage() != null ? (", message=" + term.getMessage()) : " ");
+                            term.getMessage() != null ? (", message=" + term.getMessage()) : "");
                 }
             }
 
