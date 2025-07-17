@@ -259,15 +259,29 @@ The following table lists the fields you can use when querying the Events API, a
 All `String` and `Enum` values **must** be enclosed in double quotes (`""`). Queries like `id = E0AAAAA` are invalid because the value is not quoted. The correct format is `id = "E0AAAAA"`.
 ====
 
-[NOTE]
-====
+### Supported Timestamp Formats
+
 Timestamp fields (e.g., `created`, `updated`, `finished`) support multiple formats. When a timezone is not specified, UTC is assumed. Partial dates are parsed from the beginning of the period (e.g., `2023` becomes `2023-01-01T00:00:00Z`).
 
-Supported formats include:
-- ISO 8601 (e.g., `"2023-01-01T12:00:00Z"`)
-- `yyyy` (e.g., `"2023"`)
-- `yyyy-MM` (e.g., `"2023-10"`)
-- `yyyy-MM-dd` (e.g., `"2023-10-25"`)
-- `yyyy-MM-dd HH:mm` (e.g., `"2023-10-25 14:30"`)
-- `yyyy-MM-dd HH:mm:ss` (e.g., `"2023-10-25 14:30:15"`)
-====
+
+|===
+| Format | Example
+
+| `yyyy`
+| `"2023"`
+
+| `yyyy-MM`
+| `"2023-10"`
+
+| `yyyy-MM-dd`
+| `"2023-10-25"`
+
+| `yyyy-MM-dd HH:mm`
+| `"2023-10-25 14:30"`
+
+| `yyyy-MM-dd HH:mm:ss`
+| `"2023-10-25 14:30:15"`
+
+| ISO 8601
+| `"2023-01-01T12:00:00Z"`
+|===
