@@ -23,6 +23,22 @@ Query for all entities that were created after or at a specific date:
 
 ``finished > "2024-01-01T00:00:00Z"``
 
+Find all entities created any time during the year 2023. The query parser will interpret `"2023"` as the start of the year (`2023-01-01T00:00:00Z`).
+
+``created >= "2023" AND created < "2024"``
+
+Find all entities that were last updated in May 2024.
+
+``updated >= "2024-05" AND updated < "2024-06"``
+
+Find all entities that finished processing on October 25, 2023.
+
+``finished >= "2023-10-25" AND finished < "2023-10-26"``
+
+Find all entities created on or after 2:30 PM on October 25, 2023.
+
+``created >= "2023-10-25 14:30"``
+
 Query for all entities using operation LIKE to match a substring in a string field:
 
 ``reason ~ "processed"``
@@ -193,12 +209,12 @@ These queries are grammatically correct, but they use operators that are not log
 
 These queries use values that don't match the expected data format for a field.
 
-[cols="1,1"]
+cols="1,1"]
 |===
 | Invalid Query | Explanation
 
 | `updated = "10-25-2023"`
-| **Incorrect Date Format**: Timestamp fields expect the ISO 8601 format (e.g., `"2023-10-25T00:00:00Z"`).
+| **Incorrect Date Format**: The date format `MM-dd-yyyy` is not supported. Please use one of the supported formats, such as `yyyy-MM-dd` or ISO 8601.
 
 | `status="INCORRECT"`
 | **Invalid State**: The value `"INCORRECT"` is not a valid choice for the `status` field. It must be one of the predefined values like `"NEW"` or `"PROCESSED"`.
