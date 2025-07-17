@@ -119,8 +119,8 @@ public class EventsApi {
 
                 String whereClause = listener.getJpqlWhereClause();
                 Map<String, Object> parameters = listener.getParameters();
-                log.info("Using JPQL WHERE clause: '{}'", whereClause);
-                log.info("Using parameters: {}", parameters);
+                log.debug("Using JPQL WHERE clause: '{}'", whereClause);
+                log.debug("Using parameters: {}", parameters);
                 panacheQuery = Event.find(whereClause, parameters);
 
             } catch (ClientException e) {
