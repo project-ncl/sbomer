@@ -282,8 +282,7 @@ public class EventsQueryListener extends QueryBaseListener {
             return Instant.from(customFormatter.parse(stringValue));
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
-                    "Supported formats include ISO-8601 (e.g., '2023-01-01T12:00:00Z'), " +
-                    "'yyyy-MM-dd', 'yyyy-MM-dd HH:mm', 'yyyy-MM-dd HH:mm:ss', 'yyyy-MM', and 'yyyy'.");
+                    "Supported formats include 'yyyy', 'yyyy-MM', 'yyyy-MM-dd', 'yyyy-MM-dd HH:mm', 'yyyy-MM-dd HH:mm:ss', and ISO-8601 (e.g., '2023-01-01T12:00:00Z').");
         }
     }
 }
