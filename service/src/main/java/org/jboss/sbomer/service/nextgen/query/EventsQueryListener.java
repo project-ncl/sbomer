@@ -18,30 +18,31 @@
 package org.jboss.sbomer.service.nextgen.query;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 
-import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 import org.jboss.sbomer.service.nextgen.antlr.QueryBaseListener;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser.PredicateContext;
+import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
- * An ANTLR Listener that traverses the parsed query tree and builds a JPQL
- * (Java Persistence Query Language) `WHERE`
- * clause along with a map of named parameters. This is designed to be used with
- * Panache queries.
+ * An ANTLR Listener that traverses the parsed query tree and builds a JPQL (Java Persistence Query Language) `WHERE`
+ * clause along with a map of named parameters. This is designed to be used with Panache queries.
  * </p>
  *
  * <p>
- * It uses a stack to construct the query string as the
- * {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
+ * It uses a stack to construct the query string as the {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
  * enter/exit events.
  * </p>
  */
@@ -67,8 +68,7 @@ public class EventsQueryListener extends QueryBaseListener {
     /**
      * Returns the map of named parameters collected during the tree traversal.
      *
-     * @return A map where keys are parameter names (e.g., "param0") and values are
-     *         the corresponding query values.
+     * @return A map where keys are parameter names (e.g., "param0") and values are the corresponding query values.
      */
     public Map<String, Object> getParameters() {
         return parameters;
@@ -157,11 +157,10 @@ public class EventsQueryListener extends QueryBaseListener {
     }
 
     /**
-     * Converts the raw string value from the query into the correct Java type based
-     * on the field name. Also performs
+     * Converts the raw string value from the query into the correct Java type based on the field name. Also performs
      * validation for the value format.
      *
-     * @param field       The field name being queried.
+     * @param field The field name being queried.
      * @param stringValue The raw string value from the query.
      * @return A correctly typed object (e.g., Instant, Long, Enum).
      */
@@ -179,11 +178,10 @@ public class EventsQueryListener extends QueryBaseListener {
             case "updated":
             case "finished":
                 try {
-                    return Instant.parse(stringValue);
-                } catch (DateTimeParseException e) {
+                    return parseInstant(stringValue);
+                } catch (IllegalArgumentException e) {
                     throw new IllegalArgumentException(
-                            "Invalid timestamp format for field '" + field
-                                    + "'. Expected ISO-8601 format (e.g., \"2023-01-01T12:00:00Z\").");
+                            "Invalid timestamp format for field '" + field + "'. " + e.getMessage());
                 }
             case "id":
             case "reason":
@@ -196,7 +194,7 @@ public class EventsQueryListener extends QueryBaseListener {
     /**
      * Validates that the operator is compatible with the field type.
      *
-     * @param field    The field name being queried.
+     * @param field The field name being queried.
      * @param operator The operator being used.
      */
     private void validatePredicate(String field, String operator) {
@@ -247,5 +245,37 @@ public class EventsQueryListener extends QueryBaseListener {
         String rawValue = valueCtx.STRING_IN_QUOTES().getText();
         // The STRING_IN_QUOTES has ALWAYS quotes around it per the grammar
         return rawValue.substring(1, rawValue.length() - 1);
+    }
+
+
+    private Instant parseInstant(String stringValue) {
+        try {
+            return Instant.parse(stringValue);
+        } catch (DateTimeParseException e) {
+            // It's not in the standard Instant format
+        }
+
+        DateTimeFormatter customFormatter = new DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd")
+                .optionalStart()
+                    .appendLiteral(' ')
+                    .appendPattern("HH:mm")
+                    .optionalStart()
+                        .appendPattern(":ss")
+                    .optionalEnd()
+                .optionalEnd()
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                .toFormatter(Locale.ROOT)
+                .withZone(java.time.ZoneOffset.UTC);
+
+        try {
+            return Instant.from(customFormatter.parse(stringValue));
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(
+                    "Supported formats include ISO-8601 (e.g., '2023-01-01T12:00:00Z'), " +
+                    "'yyyy-MM-dd', 'yyyy-MM-dd HH:mm', and 'yyyy-MM-dd HH:mm:ss'.");
+        }
     }
 }
