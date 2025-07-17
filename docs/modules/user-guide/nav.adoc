@@ -17,7 +17,7 @@
 //*** xref:api/rsql.adoc[]
 ** xref:api/index.adoc[]
 *** xref:api/examples.adoc[]
-*** xref:api/antlr-query.adoc[]
+*** xref:api/query.adoc[]
 
 
 ** xref:umb.adoc[]
