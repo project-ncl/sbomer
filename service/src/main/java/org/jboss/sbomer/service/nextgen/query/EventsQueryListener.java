@@ -76,22 +76,22 @@ public class EventsQueryListener extends QueryBaseListener {
 
     @Override
     public void enterQuery(QueryParser.QueryContext ctx) {
-        log.info("Entering Query: '{}'", ctx.getText());
+        log.trace("Entering Query: '{}'", ctx.getText());
     }
 
     @Override
     public void exitQuery(QueryParser.QueryContext ctx) {
-        log.info("Exiting Query: '{}'", ctx.getText());
+        log.trace("Exiting Query: '{}'", ctx.getText());
     }
 
     @Override
     public void enterExpression(QueryParser.ExpressionContext ctx) {
-        log.info("  -> Entering Expression: '{}'", ctx.getText());
+        log.trace("  -> Entering Expression: '{}'", ctx.getText());
     }
 
     @Override
     public void exitExpression(QueryParser.ExpressionContext ctx) {
-        log.info("  <- Exiting Expression: '{}'", ctx.getText());
+        log.trace("  <- Exiting Expression: '{}'", ctx.getText());
 
         // If the expression is a logical AND or OR, its two operands will be on the top
         // of the stack.
@@ -119,12 +119,12 @@ public class EventsQueryListener extends QueryBaseListener {
 
     @Override
     public void enterPredicate(QueryParser.PredicateContext ctx) {
-        log.info("    -> Entering Predicate: '{}'", ctx.getText());
+        log.trace("    -> Entering Predicate: '{}'", ctx.getText());
     }
 
     @Override
     public void exitPredicate(QueryParser.PredicateContext ctx) {
-        log.info("    <- Exiting Predicate: '{}'", ctx.getText());
+        log.trace("    <- Exiting Predicate: '{}'", ctx.getText());
 
         String field = ctx.IDENTIFIER().getText();
         String operator = getOperator(ctx);
@@ -148,12 +148,12 @@ public class EventsQueryListener extends QueryBaseListener {
 
     @Override
     public void enterValue(QueryParser.ValueContext ctx) {
-        log.info("      -> Entering Value: '{}'", ctx.getText());
+        log.trace("      -> Entering Value: '{}'", ctx.getText());
     }
 
     @Override
     public void exitValue(QueryParser.ValueContext ctx) {
-        log.info("      <- Exiting Value: '{}'", ctx.getText());
+        log.trace("      <- Exiting Value: '{}'", ctx.getText());
     }
 
     /**
