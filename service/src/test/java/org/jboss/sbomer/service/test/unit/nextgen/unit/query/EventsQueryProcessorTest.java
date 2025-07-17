@@ -91,7 +91,15 @@ class EventsQueryProcessorTest {
                 Arguments.of(
                         "finished >= \"2023-10-25 14:30:15\"",
                         "finished >= :param0",
-                        Map.of("param0", Instant.parse("2023-10-25T14:30:15Z"))));
+                        Map.of("param0", Instant.parse("2023-10-25T14:30:15Z"))),
+                Arguments.of(
+                        "created > \"2023\"",
+                        "created > :param0",
+                        Map.of("param0", Instant.parse("2023-01-01T00:00:00Z"))),
+                Arguments.of(
+                        "updated <= \"2024-05\"",
+                        "updated <= :param0",
+                        Map.of("param0", Instant.parse("2024-05-01T00:00:00Z"))));
     }
 
     @DisplayName("Should reject queries with grammar violations")
@@ -113,11 +121,10 @@ class EventsQueryProcessorTest {
 
     @DisplayName("Should reject queries with invalid value formats")
     @ParameterizedTest
-    @ValueSource(
-            strings = { "updated = \"10-25-2023\"", "status=\"INCORRECT\"", "created = \"2023/10/25\"",
-                    "finished = \"25-10-2023 10:00\"", "updated = \"2023-10-25T10:00:00\"",
-                    "created = \"2023-10-25 10:00:00 AM\"", "finished = \"Friday, 25 October 2023\"",
-                    "updated = \"just text\"" })
+    @ValueSource(strings = { "updated = \"10-25-2023\"", "status=\"INCORRECT\"", "created = \"2023/10/25\"",
+            "finished = \"25-10-2023 10:00\"", "updated = \"2023-10-25T10:00:00\"",
+            "created = \"2023-10-25 10:00:00 AM\"", "finished = \"Friday, 25 October 2023\"",
+            "updated = \"just text\"" })
     void testInvalidFormats(String query) {
         ClientException ex = assertThrows(ClientException.class, () -> eventsQueryProcessor.process(query));
         assertTrue(ex.getMessage().contains("Invalid query"));

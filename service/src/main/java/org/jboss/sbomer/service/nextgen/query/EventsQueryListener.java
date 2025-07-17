@@ -256,7 +256,13 @@ public class EventsQueryListener extends QueryBaseListener {
         }
 
         DateTimeFormatter customFormatter = new DateTimeFormatterBuilder()
-                .appendPattern("yyyy-MM-dd")
+                .appendPattern("yyyy")
+                .optionalStart()
+                    .appendPattern("-MM")
+                    .optionalStart()
+                        .appendPattern("-dd")
+                    .optionalEnd()
+                .optionalEnd()
                 .optionalStart()
                     .appendLiteral(' ')
                     .appendPattern("HH:mm")
@@ -264,6 +270,8 @@ public class EventsQueryListener extends QueryBaseListener {
                         .appendPattern(":ss")
                     .optionalEnd()
                 .optionalEnd()
+                .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
+                .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
                 .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
                 .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
                 .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
@@ -275,7 +283,7 @@ public class EventsQueryListener extends QueryBaseListener {
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
                     "Supported formats include ISO-8601 (e.g., '2023-01-01T12:00:00Z'), " +
-                    "'yyyy-MM-dd', 'yyyy-MM-dd HH:mm', and 'yyyy-MM-dd HH:mm:ss'.");
+                    "'yyyy-MM-dd', 'yyyy-MM-dd HH:mm', 'yyyy-MM-dd HH:mm:ss', 'yyyy-MM', and 'yyyy'.");
         }
     }
 }
