@@ -53,6 +53,7 @@ public abstract class AbstractTektonController extends AbstractGenerator
         implements ResourceEventHandler<TaskRun>, TektonController<GenerationRecord> {
 
     public final static String GENERATION_ID_LABEL = "sbomer.jboss.org/generation-id";
+    public final static String GENERATOR_TYPE = "sbomer.jboss.org/generator-type";
 
     protected KubernetesClient kubernetesClient;
 
@@ -113,6 +114,7 @@ public abstract class AbstractTektonController extends AbstractGenerator
 
         taskRunInformer = kubernetesClient.resources(TaskRun.class)
                 .withLabel(GENERATION_ID_LABEL)
+                .withLabel(GENERATOR_TYPE, getGeneratorName())
                 .inform(this, 60 * 1000L); // TODO: Configure it
 
         taskRunInformer.stopped().whenComplete((v, t) -> {
