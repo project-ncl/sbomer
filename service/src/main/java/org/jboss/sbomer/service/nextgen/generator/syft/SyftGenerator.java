@@ -316,6 +316,7 @@ public class SyftGenerator extends AbstractTektonController {
         Map<String, String> labels = new HashMap<>();
 
         labels.put(AbstractTektonController.GENERATION_ID_LABEL, generation.id());
+        labels.put(AbstractTektonController.GENERATOR_TYPE, getGeneratorName());
 
         Optional.ofNullable(generation.metadata())
                 .map(meta -> meta.get("otelTraceId"))
