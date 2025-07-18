@@ -97,6 +97,7 @@ class ReleaseAdvisoryEventsListenerTest {
     ReleaseAdvisoryEventsListenerMultiContainer listenerMultiContainers;
     ReleaseAdvisoryEventsListenerSingleRPM listenerSingleRpm;
     ReleaseTextOnlyAdvisoryEventsListenerManifests listenerTextOnlyManifests;
+    ReleaseTextOnlyAdvisoryEventsListenerManifestsMissingMainComponent listenerTextOnlyManifestsMissingMainComponent;
     ReleaseTextOnlyAdvisoryEventsListenerDeliverables listenerTextOnlyDeliverables;
     final ErrataClient errataClient = mock(ErrataClient.class);
     final PyxisValidatingClient pyxisClient = mock(PyxisValidatingClient.class);
@@ -528,7 +529,7 @@ class ReleaseAdvisoryEventsListenerTest {
 
             validateComponent(
                     bom.getComponents().get(0),
-                    Component.Type.LIBRARY,
+                    Component.Type.FRAMEWORK,
                     "com.redhat.quarkus.platform",
                     "quarkus-bom",
                     "2.13.9.SP2-redhat-00003",
@@ -591,6 +592,102 @@ class ReleaseAdvisoryEventsListenerTest {
         }
     }
 
+    static class ReleaseTextOnlyAdvisoryEventsListenerManifestsMissingMainComponent
+            extends ReleaseTextOnlyAdvisoryEventsListener {
+        @Override
+        protected List<Sbom> saveReleaseManifestForTextOnlyAdvisories(
+                RequestEvent requestEvent,
+                Errata erratum,
+                String productName,
+                String productVersion,
+                String toolVersion,
+                SbomGenerationRequest releaseGeneration,
+                Bom bom,
+                List<Sbom> sboms) {
+
+            validateComponent(
+                    bom.getMetadata().getComponent(),
+                    Component.Type.FRAMEWORK,
+                    null,
+                    "Red Hat build of Quarkus",
+                    "Red Hat build of Quarkus 3.20.1",
+                    "Red Hat build of Quarkus 3.20.1",
+                    null,
+                    List.of("cpe:/a:redhat:quarkus:3.20::el8"),
+                    Field.CPE);
+
+            assertEquals(1, sboms.size());
+            Bom manifestBom = SbomUtils.fromJsonNode(sboms.get(0).getSbom());
+            String expectedPurl = SbomUtils.addQualifiersToPurlOfComponent(
+                    manifestBom.getMetadata().getComponent(),
+                    Map.of("repository_url", Constants.MRRC_URL),
+                    true);
+
+            validateComponent(
+                    bom.getComponents().get(0),
+                    Component.Type.FRAMEWORK,
+                    "com.redhat.quarkus.platform",
+                    "quarkus-bom",
+                    "3.20.1.redhat-00003",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom",
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom",
+                    List.of(expectedPurl),
+                    Field.PURL);
+
+            validateDependencies(
+                    bom.getDependencies(),
+                    1,
+                    "Red Hat build of Quarkus 3.20.1",
+                    List.of(
+                            "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom"));
+            validateProperty(
+                    bom.getMetadata().getProperties(),
+                    Constants.CONTAINER_PROPERTY_ADVISORY_ID,
+                    String.valueOf(erratum.getDetails().get().getId()));
+
+            printRawBom(bom);
+
+            Sbom sbom = Sbom.builder()
+                    .withIdentifier(releaseGeneration.getIdentifier())
+                    .withSbom(SbomUtils.toJsonNode(bom))
+                    .withGenerationRequest(releaseGeneration)
+                    .withConfigIndex(0)
+                    .build();
+
+            // Add more information for this release so to find manifests more easily
+            ObjectNode metadataNode = collectReleaseInfo(
+                    requestEvent.getId(),
+                    erratum,
+                    productName,
+                    productVersion,
+                    bom);
+            sbom.setReleaseMetadata(metadataNode);
+
+            assertEquals(
+                    "4C51D4F9AA34468",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.REQUEST_ID).asText());
+            assertEquals("RHSA-2025:8258-01", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA).asText());
+            assertEquals("150098", metadataNode.get(ReleaseStandardAdvisoryEventsListener.ERRATA_ID).asText());
+            assertEquals(
+                    "Red Hat build of Quarkus",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT).asText());
+            assertEquals("RHBQ", metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_SHORTNAME).asText());
+            assertEquals(
+                    "Red Hat build of Quarkus 3.20.1",
+                    metadataNode.get(ReleaseStandardAdvisoryEventsListener.PRODUCT_VERSION).asText());
+
+            ArrayNode arrayNode = (ArrayNode) metadataNode.get(ReleaseStandardAdvisoryEventsListener.PURL_LIST);
+            List<String> allPurls = List.of(
+                    "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom");
+
+            for (int i = 0; i < arrayNode.size(); i++) {
+                JsonNode node = arrayNode.get(i);
+                assertEquals(node.asText(), allPurls.get(i));
+            }
+            return List.of(sbom);
+        }
+    }
+
     static class ReleaseTextOnlyAdvisoryEventsListenerDeliverables extends ReleaseTextOnlyAdvisoryEventsListener {
         @Override
         protected List<Sbom> saveReleaseManifestForTextOnlyAdvisories(
@@ -629,7 +726,7 @@ class ReleaseAdvisoryEventsListenerTest {
                     true);
             validateComponent(
                     bom.getComponents().get(0),
-                    Component.Type.LIBRARY,
+                    Component.Type.FRAMEWORK,
                     "com.redhat.quarkus.platform",
                     "quarkus-bom",
                     "3.2.11.Final-redhat-00001",
@@ -765,6 +862,59 @@ class ReleaseAdvisoryEventsListenerTest {
         MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
 
         listenerTextOnlyManifests.onReleaseAdvisoryEvent(wrapper);
+        event.getReleaseGenerations()
+                .values()
+                .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
+    }
+
+    @Test
+    void testTextOnlyReleaseErrataWithManifestsMissingMainComponent() throws IOException {
+        listenerTextOnlyManifestsMissingMainComponent = new ReleaseTextOnlyAdvisoryEventsListenerManifestsMissingMainComponent();
+        listenerTextOnlyManifestsMissingMainComponent.setErrataClient(errataClient);
+        listenerTextOnlyManifestsMissingMainComponent.setStatsService(statsService);
+        listenerTextOnlyManifestsMissingMainComponent.setSbomService(sbomService);
+        listenerTextOnlyManifestsMissingMainComponent.setGenerationRequestRepository(generationRequestRepository);
+        listenerTextOnlyManifestsMissingMainComponent.setRequestEventRepository(requestEventRepository);
+        listenerTextOnlyManifestsMissingMainComponent.setAtlasHandler(atlasHandler);
+        listenerTextOnlyManifestsMissingMainComponent.setGenerationRequestRepository(generationRequestRepository);
+
+        String productVersionText = "Red Hat build of Quarkus 3.20.1";
+        Errata errata = loadErrata("textOnly/manifestsMissingMainComponent/errata.json");
+        RequestEvent requestEvent = loadRequestEvent("textOnly/manifestsMissingMainComponent/request_event.json");
+        Sbom sbom = loadSbom("textOnly/manifestsMissingMainComponent/78FB7472C67D41E.json");
+
+        Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
+        Map<String, SbomGenerationRequest> generationsMap = new HashMap<>();
+        assertTrue(errata.getDetails().isPresent());
+        SbomGenerationRequest sbomGenerationRequest = SbomGenerationRequest.builder()
+                .withId(RandomStringIdGenerator.generate())
+                .withIdentifier(errata.getDetails().get().getFulladvisory() + "#" + productVersionText)
+                .withType(GenerationRequestType.BUILD)
+                .withStatus(SbomGenerationStatus.GENERATING)
+                .withConfig(null) // I really don't know what to put here
+                .withRequest(requestEvent)
+                .build();
+        generationsMap.put(sbomGenerationRequest.getId(), sbomGenerationRequest);
+        pvToGenerations.put(productVersionText, sbomGenerationRequest);
+
+        when(errataClient.getErratum(String.valueOf(errata.getDetails().get().getId()))).thenReturn(errata);
+        when(statsService.getStats())
+                .thenReturn(Stats.builder().withVersion("ReleaseAdvisoryEventsListenerTest_1.0.0").build());
+        when(generationRequestRepository.findById(anyString())).thenAnswer(invocation -> {
+            String generationId = invocation.getArgument(0);
+            return generationsMap.get(generationId);
+        });
+        when(requestEventRepository.findById(anyString())).thenReturn(requestEvent);
+        String purlRef = "pkg:maven/com.redhat.quarkus.platform/quarkus-bom@3.20.1.redhat-00003?repository_url=https://maven.repository.redhat.com/ga/&type=pom";
+        when(sbomService.findByPurl(purlRef)).thenReturn(sbom);
+
+        TextOnlyAdvisoryReleaseEvent event = TextOnlyAdvisoryReleaseEvent.builder()
+                .withRequestEventId(requestEvent.getId())
+                .withReleaseGenerations(pvToGenerations)
+                .build();
+        MdcEventWrapper wrapper = new MdcEventWrapper(event, MDC.getCopyOfContextMap());
+
+        listenerTextOnlyManifestsMissingMainComponent.onReleaseAdvisoryEvent(wrapper);
         event.getReleaseGenerations()
                 .values()
                 .forEach(request -> assertNotEquals(RequestEventStatus.FAILED, request.getRequest().getEventStatus()));
