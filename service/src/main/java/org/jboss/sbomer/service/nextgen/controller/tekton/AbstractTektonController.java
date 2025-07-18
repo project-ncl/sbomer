@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -29,6 +31,7 @@ import java.util.stream.Stream;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
+import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
@@ -38,12 +41,19 @@ import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
 import io.fabric8.knative.pkg.apis.Condition;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
+import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractTektonController extends AbstractGenerator implements TektonController<GenerationRecord> {
+public abstract class AbstractTektonController extends AbstractGenerator
+        implements ResourceEventHandler<TaskRun>, TektonController<GenerationRecord> {
+
+    public final static String GENERATION_ID_LABEL = "sbomer.jboss.org/generation-id";
+
     protected KubernetesClient kubernetesClient;
 
     protected GenerationRequestControllerConfig controllerConfig;
@@ -52,18 +62,145 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
 
     EntityMapper mapper;
 
+    LeaderManager leaderManager;
+
+    SharedIndexInformer<TaskRun> taskRunInformer;
+
     public AbstractTektonController(
             SBOMerClient sbomerClient,
             KubernetesClient kubernetesClient,
             GenerationRequestControllerConfig controllerConfig,
             ManagedExecutor managedExecutor,
-            EntityMapper mapper) {
+            EntityMapper mapper,
+            LeaderManager leaderManager) {
         super(sbomerClient, managedExecutor);
 
         this.kubernetesClient = kubernetesClient;
         this.release = ConfigUtils.getRelease();
         this.controllerConfig = controllerConfig;
         this.mapper = mapper;
+        this.leaderManager = leaderManager;
+    }
+
+    /**
+     * <p>
+     * Ensure that we run the informer in case we are the leader. If we are not, stop any informer.
+     * </p>
+     * <p>
+     * To properly function it is required that this method is run periodically.
+     * </p>
+     */
+    protected void ensureInformer() {
+        if (!leaderManager.isLeader()) {
+            log.info("Current instance is not the leader, skipping instantiating TaskRun informer for this instance");
+
+            if (taskRunInformer != null) {
+                log.info("Cleaning up resources related to the informer");
+                taskRunInformer.stop();
+                taskRunInformer.close();
+                taskRunInformer = null;
+            }
+
+            return;
+        }
+
+        if (taskRunInformer != null && taskRunInformer.isRunning()) {
+            log.debug("Reusing current TaskRun informer");
+            return;
+        }
+
+        log.info("Instantiating informer for TaskRun");
+
+        taskRunInformer = kubernetesClient.resources(TaskRun.class)
+                .withLabel(GENERATION_ID_LABEL)
+                .inform(this, 60 * 1000L); // TODO: Configure it
+
+        taskRunInformer.stopped().whenComplete((v, t) -> {
+            if (t != null) {
+                log.error("Exception occurred, caught: {}", t.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void onAdd(TaskRun taskRun) {
+        log.debug("{} TaskRun added", taskRun.getMetadata().getName());
+        handle(taskRun);
+    }
+
+    @Override
+    public void onUpdate(TaskRun oldTaskRun, TaskRun newTaskRun) {
+        log.debug("{} TaskRun updated", newTaskRun.getMetadata().getName());
+        handle(newTaskRun);
+    }
+
+    @Override
+    public void onDelete(TaskRun taskRun, boolean deletedFinalStateUnknown) {
+        log.info("{} TaskRun deleted", taskRun.getMetadata().getName());
+        // TODO: setting generation status? Potentially to FAILED state.
+    }
+
+    /**
+     * <p>
+     * Read the Generation identifier from the TaskRun label {@link AbstractTektonController#GENERATION_ID_LABEL}.
+     * </p>
+     *
+     * <p>
+     * It will return {@code null} in case the label cannot be found.
+     * </p>
+     *
+     * @param taskRun
+     * @return The Generation identifier.
+     */
+    private String obtainGenerationId(TaskRun taskRun) {
+        if (taskRun.getMetadata() == null || taskRun.getMetadata().getLabels() == null) {
+            log.info(
+                    "Task run '{}' does not have required '{}' annotations, skipping",
+                    taskRun.getMetadata().getName(),
+                    AbstractTektonController.GENERATION_ID_LABEL);
+            return null;
+        }
+
+        return taskRun.getMetadata().getLabels().get(AbstractTektonController.GENERATION_ID_LABEL);
+    }
+
+    @ActivateRequestContext
+    public void handle(TaskRun taskRun) {
+        log.info("Handling TaskRun '{}'", taskRun.getMetadata().getName());
+
+        // Get Generation identifier from the TaskRun label
+        String generationId = obtainGenerationId(taskRun);
+
+        // This TaskRun is not related to any Generation
+        if (generationId == null) {
+            log.warn(
+                    "TaskRun '{}' is not related to any generation, it does not have required label: '{}', skipping",
+                    taskRun.getMetadata().getName(),
+                    AbstractTektonController.GENERATION_ID_LABEL);
+            return;
+        }
+
+        GenerationRecord generationRecord = null;
+
+        // Fetch Generation from the API
+        try {
+            generationRecord = sbomerClient.getGeneration(generationId);
+        } catch (Exception e) {
+            log.warn("Unable to fetch Generation with ID '{}', skipping", generationId, e);
+
+            return;
+        }
+
+        log.debug("Finding TaskRuns related to Generation '{}'", generationId);
+
+        // Find all TaskRuns that are related to this generation.
+        List<TaskRun> relatedTaskRuns = kubernetesClient.resources(TaskRun.class)
+                .withLabel(AbstractTektonController.GENERATION_ID_LABEL, generationId)
+                .list()
+                .getItems();
+
+        // Reconcile!
+        reconcile(generationRecord, new HashSet<>(relatedTaskRuns));
     }
 
     @Override
@@ -93,11 +230,11 @@ public abstract class AbstractTektonController extends AbstractGenerator impleme
     }
 
     /**
-     * Logic that should be performed when the status of the main resource is {@link GenerationStatus.GENERATING}.
+     * Logic that should be performed when the status of the main resource is {@link GenerationStatus#GENERATING}.
      *
-     * @see GenerationStatus
      * @param generation
      * @param relatedTaskRuns
+     * @see GenerationStatus
      */
     abstract protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns);
 

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -38,8 +39,8 @@ import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
+import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.nextgen.controller.tekton.AbstractTektonController;
-import org.jboss.sbomer.service.nextgen.controller.tekton.GenerationTaskRunEventProvider;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
@@ -69,6 +70,7 @@ import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverride;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverrideBuilder;
 import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
+import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.ValidationException;
@@ -89,7 +91,7 @@ public class SyftGenerator extends AbstractTektonController {
     public static final String GENERATOR_NAME = "syft";
 
     private SyftGenerator() {
-        super(null, null, null, null, null);
+        super(null, null, null, null, null, null);
     }
 
     @Inject
@@ -98,8 +100,9 @@ public class SyftGenerator extends AbstractTektonController {
             KubernetesClient kubernetesClient,
             GenerationRequestControllerConfig controllerConfig,
             ManagedExecutor managedExecutor,
-            EntityMapper mapper) {
-        super(sbomerClient, kubernetesClient, controllerConfig, managedExecutor, mapper);
+            EntityMapper mapper,
+            LeaderManager leaderManager) {
+        super(sbomerClient, kubernetesClient, controllerConfig, managedExecutor, mapper, leaderManager);
     }
 
     @Override
@@ -139,6 +142,16 @@ public class SyftGenerator extends AbstractTektonController {
 
             return;
         }
+    }
+
+    @Scheduled(
+            every = "20s",
+            delay = 10,
+            delayUnit = TimeUnit.SECONDS,
+            concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Override
+    protected void ensureInformer() {
+        super.ensureInformer();
     }
 
     @Override
@@ -302,7 +315,7 @@ public class SyftGenerator extends AbstractTektonController {
         // TODO: make this a utility maybe
         Map<String, String> labels = new HashMap<>();
 
-        labels.put(GenerationTaskRunEventProvider.GENERATION_ID_LABEL, generation.id());
+        labels.put(AbstractTektonController.GENERATION_ID_LABEL, generation.id());
 
         Optional.ofNullable(generation.metadata())
                 .map(meta -> meta.get("otelTraceId"))
