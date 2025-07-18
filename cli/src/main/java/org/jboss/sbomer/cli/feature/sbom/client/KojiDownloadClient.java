@@ -43,7 +43,7 @@ import jakarta.ws.rs.core.Response;
 public interface KojiDownloadClient {
 
     @GET
-    @Path("/{name}/{version}/{release}/files/remote-sources/{remoteSourcesName}.tar.gz")
+    @Path("/{name}/{version}/{release}/files/remote-sources/{remoteSourcesFileName}")
     @Retry(
             maxRetries = KOJI_DOWNLOAD_CLIENT_MAX_RETRIES,
             delay = KOJI_DOWNLOAD_CLIENT_DELAY,
@@ -54,5 +54,5 @@ public interface KojiDownloadClient {
             @PathParam("name") String name,
             @PathParam("version") String version,
             @PathParam("release") String release,
-            @PathParam("remoteSourcesName") String remoteSourcesName);
+            @PathParam("remoteSourcesFileName") String remoteSourcesFileName);
 }

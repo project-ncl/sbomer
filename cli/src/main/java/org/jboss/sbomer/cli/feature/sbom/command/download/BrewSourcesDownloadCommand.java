@@ -48,7 +48,7 @@ import picocli.CommandLine.Option;
 @Command(
         mixinStandardHelpOptions = true,
         name = "brew-sources",
-        description = "Download the sources for a container image from Brew")
+        description = "Download the sources archive and metadata for a container image from Brew")
 @Slf4j
 @Setter
 public class BrewSourcesDownloadCommand extends AbstractDownloadCommand {
@@ -91,10 +91,10 @@ public class BrewSourcesDownloadCommand extends AbstractDownloadCommand {
         String nvr = findNvr(bom);
         KojiBuildInfo buildInfo = findBuildInfo(nvr);
         if (buildInfo == null) {
-            log.warn("No Brew build information was retrieved, unable to download remote sources");
+            log.warn("No Brew build information was retrieved, unable to download sources archive and metadata");
             return;
         }
-        kojiService.downloadSourcesFile(buildInfo, outputDir);
+        kojiService.downloadSourcesFiles(buildInfo, outputDir);
     }
 
     protected String findNvr(Bom bom) {
@@ -119,7 +119,7 @@ public class BrewSourcesDownloadCommand extends AbstractDownloadCommand {
         if (!missingProps.isEmpty()) {
             throw new ApplicationException(
                     "Missing required properties in main component: " + String.join(", ", missingProps)
-                            + ". Unable to download sources for this container image");
+                            + ". Unable to download sources archive and metadata for this container image");
         }
         return String.join(
                 NVR_DELIMITER,

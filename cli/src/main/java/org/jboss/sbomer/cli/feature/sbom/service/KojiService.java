@@ -80,7 +80,8 @@ public class KojiService {
     private static final KojiObjectMapper MAPPER = new KojiObjectMapper();
     public static final String REMOTE_SOURCE_PREFIX = "remote-source";
     public static final String REMOTE_SOURCE_DELIMITER = "-";
-    public static final String SOURCES_FILE_SUFFIX = ".tar.gz";
+    public static final String SOURCES_FILE_ARCHIVE_SUFFIX = ".tar.gz";
+    public static final String SOURCES_FILE_METADATA_SUFFIX = ".json";
 
     @Inject
     ManagedExecutor executor;
@@ -313,38 +314,43 @@ public class KojiService {
         return null;
     }
 
-    public void downloadSourcesFile(KojiBuildInfo buildInfo, Path outputDir) {
+    public void downloadSourcesFiles(KojiBuildInfo buildInfo, Path outputDir) {
         try {
             Files.createDirectories(outputDir);
             String remoteSourcesName = retrieveRemoteSourcesName(buildInfo);
             if (remoteSourcesName == null) {
-                log.warn("Unable to download sources file due to no remote sources name");
+                log.warn("Unable to download sources archive and metadata files due to no remote sources name");
                 return;
             }
-            String sourcesFileName = remoteSourcesName + SOURCES_FILE_SUFFIX;
-            Path sourcesFile = outputDir.resolve(sourcesFileName);
-            log.info("Downloading sources file '{}'", sourcesFile.toAbsolutePath());
-            try (Response response = kojiDownloadClient.downloadSourcesFile(
-                    buildInfo.getName(),
-                    buildInfo.getVersion(),
-                    buildInfo.getRelease(),
-                    remoteSourcesName)) {
-                if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-                    throw new ApplicationException("Failed to download sources file: HTTP " + response.getStatus());
-                }
-                try (InputStream in = response.readEntity(InputStream.class);
-                        OutputStream out = Files.newOutputStream(
-                                sourcesFile,
-                                StandardOpenOption.CREATE,
-                                StandardOpenOption.TRUNCATE_EXISTING)) {
-                    in.transferTo(out);
-                }
-                log.info("Successfully downloaded sources file");
-            }
+            downloadSourcesFile(remoteSourcesName + SOURCES_FILE_ARCHIVE_SUFFIX, buildInfo, outputDir);
+            downloadSourcesFile(remoteSourcesName + SOURCES_FILE_METADATA_SUFFIX, buildInfo, outputDir);
         } catch (ApplicationException e) {
             throw e;
         } catch (Exception e) {
-            throw new ApplicationException("Failed to download sources file", e);
+            throw new ApplicationException("Failed to download sources archive or metadata file", e);
+        }
+    }
+
+    private void downloadSourcesFile(String sourcesFileName, KojiBuildInfo buildInfo, Path outputDir)
+            throws IOException {
+        Path sourcesFile = outputDir.resolve(sourcesFileName);
+        log.info("Downloading sources file '{}'", sourcesFile.toAbsolutePath());
+        try (Response response = kojiDownloadClient.downloadSourcesFile(
+                buildInfo.getName(),
+                buildInfo.getVersion(),
+                buildInfo.getRelease(),
+                sourcesFileName)) {
+            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                throw new ApplicationException("Failed to download sources file: HTTP " + response.getStatus());
+            }
+            try (InputStream in = response.readEntity(InputStream.class);
+                    OutputStream out = Files.newOutputStream(
+                            sourcesFile,
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING)) {
+                in.transferTo(out);
+            }
+            log.info("Successfully downloaded sources file");
         }
     }
 

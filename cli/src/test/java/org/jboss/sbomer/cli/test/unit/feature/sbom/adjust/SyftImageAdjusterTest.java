@@ -39,82 +39,109 @@ class SyftImageAdjusterTest {
     @TempDir
     Path tmpDir;
     Bom bom = null;
-    Path sources = null;
+    Path sourcesManifestPath = null;
+    Path sourcesMetadataPath = null;
 
-    static final String SKOPEO = "skopeo.json";
-    static final String IMAGE = "image.json";
-    static final String IMAGE_SOURCES = "image-sources.json";
+    static final String GO_IMAGE_SKOPEO = "go-image-skopeo.json";
+    static final String GO_IMAGE = "go-image.json";
+    static final String GO_IMAGE_SOURCES = "go-image-sources.json";
+    static final String GO_IMAGE_SOURCES_METADATA = "go-image-sources-metadata.json";
     static final String BOMS = "boms/";
+    static final String SKOPEO = "skopeo.json";
 
     SyftImageAdjuster createDefaultAdjuster() {
-        return new SyftImageAdjuster(tmpDir, null, true, sources);
+        return new SyftImageAdjuster(tmpDir, null, true, sourcesManifestPath, sourcesMetadataPath);
     }
 
     @BeforeEach
     void init() throws IOException {
-        this.sources = tmpDir.resolve(IMAGE_SOURCES);
-        this.bom = SbomUtils.fromString(TestResources.asString(BOMS + IMAGE));
-        Files.writeString(tmpDir.resolve(SKOPEO), TestResources.asString(SKOPEO));
-        Files.writeString(this.sources, TestResources.asString(BOMS + IMAGE_SOURCES));
+        this.sourcesManifestPath = tmpDir.resolve(GO_IMAGE_SOURCES);
+        this.sourcesMetadataPath = tmpDir.resolve(GO_IMAGE_SOURCES_METADATA);
+        this.bom = SbomUtils.fromString(TestResources.asString(BOMS + GO_IMAGE));
+        Files.writeString(tmpDir.resolve(SKOPEO), TestResources.asString(GO_IMAGE_SKOPEO));
+        Files.writeString(this.sourcesManifestPath, TestResources.asString(BOMS + GO_IMAGE_SOURCES));
+        Files.writeString(this.sourcesMetadataPath, TestResources.asString(GO_IMAGE_SOURCES_METADATA));
     }
 
     @Test
     void removeAllRpms() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, false, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                tmpDir,
+                null,
+                false,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
         assertEquals(
-                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
+                "pkg:oci/ose-cluster-cloud-controller-manager-operator@sha256%3A0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61?arch=amd64&os=linux&tag=v4.14.0-202411130434.p0.ga0b9c0d.assembly.stream.el8",
                 adjusted.getMetadata().getComponent().getPurl());
-        assertEquals("amq-streams/console-ui-rhel9", adjusted.getMetadata().getComponent().getName());
-        assertEquals(687, adjusted.getComponents().size());
-        assertEquals(687, adjusted.getDependencies().size());
+        assertEquals(
+                "openshift/ose-cluster-cloud-controller-manager-operator",
+                adjusted.getMetadata().getComponent().getName());
+        assertEquals(14, adjusted.getComponents().size());
+        assertEquals(14, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
     void removeAllRpmsLeaveImagePrefix() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of("/app"), false, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                tmpDir,
+                List.of("/azure-config-credentials-injector"),
+                false,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(24, adjusted.getComponents().size());
-        assertEquals(24, adjusted.getDependencies().size());
+        assertEquals(6, adjusted.getComponents().size());
+        assertEquals(6, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
     void removeAllRpmsLeaveSourcesPrefix() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of("app"), false, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                tmpDir,
+                List.of("app"),
+                false,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(655, adjusted.getComponents().size());
-        assertEquals(655, adjusted.getDependencies().size());
+        assertEquals(4, adjusted.getComponents().size());
+        assertEquals(4, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
     void removeAllRpmsLeavePrefixes() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of("/app", "app"), false, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                tmpDir,
+                List.of("/azure-config-credentials-injector", "app"),
+                false,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(678, adjusted.getComponents().size());
-        assertEquals(678, adjusted.getDependencies().size());
+        assertEquals(9, adjusted.getComponents().size());
+        assertEquals(9, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
@@ -122,92 +149,185 @@ class SyftImageAdjusterTest {
     void preserveRpms() throws IOException {
         SyftImageAdjuster adjuster = createDefaultAdjuster();
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(846, adjusted.getComponents().size());
-        assertEquals(846, adjusted.getDependencies().size());
+        assertEquals(16, adjusted.getComponents().size());
+        assertEquals(16, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
     void preserveRpmsWithImagePrefix() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of("/app"), true, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                tmpDir,
+                List.of("/azure-config-credentials-injector"),
+                true,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(183, adjusted.getComponents().size());
-        assertEquals(183, adjusted.getDependencies().size());
+        assertEquals(8, adjusted.getComponents().size());
+        assertEquals(8, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
     void preserveRpmsWithSourcesPrefix() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of("app"), true, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                tmpDir,
+                List.of("app"),
+                true,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(814, adjusted.getComponents().size());
-        assertEquals(814, adjusted.getDependencies().size());
+        assertEquals(6, adjusted.getComponents().size());
+        assertEquals(6, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
     void preserveRpmsWithPrefixes() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of("/app", "app"), true, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                tmpDir,
+                List.of("/azure-config-credentials-injector", "app"),
+                true,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(837, adjusted.getComponents().size());
-        assertEquals(837, adjusted.getDependencies().size());
+        assertEquals(11, adjusted.getComponents().size());
+        assertEquals(11, adjusted.getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+    }
+
+    @Test
+    void noSourcesManifest() throws IOException {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, false, null, sourcesMetadataPath);
+
+        assertEquals(7, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        assertEquals(11, adjusted.getComponents().size());
+        assertEquals(11, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+    }
+
+    @Test
+    void noSourcesMetadata() throws IOException {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, false, sourcesManifestPath, null);
+
+        assertEquals(7, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        assertEquals(9, adjusted.getComponents().size());
+        assertEquals(9, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+    }
+
+    @Test
+    void noSources() throws IOException {
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, false, null, null);
+
+        assertEquals(7, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        assertEquals(6, adjusted.getComponents().size());
+        assertEquals(6, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+    }
+
+    @Test
+    void hasSourcesManifestComponent() throws IOException {
+        SyftImageAdjuster adjuster = createDefaultAdjuster();
+
+        assertEquals(7, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        assertEquals(16, adjusted.getComponents().size());
+        assertEquals(16, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+        assertNotNull(
+                adjusted.getComponents()
+                        .stream()
+                        .filter(c -> c.getBomRef().equals("pkg:golang/4d63.com/gocheckcompilerdirectives@v1.2.1"))
+                        .findFirst()
+                        .orElse(null));
+    }
+
+    @Test
+    void hasSourcesMetadataComponent() throws IOException {
+        SyftImageAdjuster adjuster = createDefaultAdjuster();
+
+        assertEquals(7, bom.getComponents().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
+
+        Bom adjusted = adjuster.adjust(bom);
+
+        assertEquals(16, adjusted.getComponents().size());
+        assertEquals(16, adjusted.getDependencies().size());
+        assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
+        assertNotNull(
+                adjusted.getComponents()
+                        .stream()
+                        .filter(c -> c.getBomRef().equals("pkg:golang/bufio@go1.20.12"))
+                        .findFirst()
+                        .orElse(null));
     }
 
     @Test
     void shouldLeaveOnlyArchAndEpochQualifiers() throws IOException {
         SyftImageAdjuster adjuster = createDefaultAdjuster();
 
+        assertEquals("pkg:golang/github.com/spf13/cobra@v1.8.0", bom.getComponents().get(2).getPurl());
         assertEquals(
-                "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64&upstream=bzip2-1.0.8-8.el9.src.rpm&distro=rhel-9.2",
-                bom.getComponents().get(10).getPurl());
-        assertEquals(
-                "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1&upstream=dbus-1.12.20-7.el9_2.1.src.rpm&distro=rhel-9.2",
-                bom.getComponents().get(21).getPurl());
+                "pkg:rpm/redhat/subscription-manager-rhsm-certificates@20220623-1.el8?arch=noarch&distro=rhel-8.10&upstream=subscription-manager-rhsm-certificates-20220623-1.el8.src.rpm",
+                bom.getComponents().get(6).getPurl());
 
         assertEquals(
-                "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64&upstream=bzip2-1.0.8-8.el9.src.rpm&distro=rhel-9.2&package-id=b2b140771748e045",
-                bom.getComponents().get(10).getBomRef());
+                "pkg:golang/github.com/spf13/cobra@v1.8.0?package-id=62fa7d3ce006f31d",
+                bom.getComponents().get(2).getBomRef());
         assertEquals(
-                "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1&upstream=dbus-1.12.20-7.el9_2.1.src.rpm&distro=rhel-9.2&package-id=55a4fbd380f817ef",
-                bom.getComponents().get(21).getBomRef());
+                "pkg:rpm/redhat/subscription-manager-rhsm-certificates@20220623-1.el8?arch=noarch&distro=rhel-8.10&package-id=d9c9f52a5046ede8&upstream=subscription-manager-rhsm-certificates-20220623-1.el8.src.rpm",
+                bom.getComponents().get(6).getBomRef());
 
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        // 11th component before adjustment becomes 178th after adding main component and sources
-        assertEquals("pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64", adjusted.getComponents().get(178).getPurl());
+        // 2nd component before adjustment becomes 7th after adding main component and sources
+        assertEquals("pkg:golang/github.com/spf13/cobra@v1.8.0", adjusted.getComponents().get(6).getPurl());
         assertEquals(
-                "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
-                adjusted.getComponents().get(386).getPurl());
+                "pkg:rpm/redhat/subscription-manager-rhsm-certificates@20220623-1.el8?arch=noarch",
+                adjusted.getComponents().get(1).getPurl());
 
+        assertEquals("pkg:golang/github.com/spf13/cobra@v1.8.0", adjusted.getComponents().get(6).getBomRef());
         assertEquals(
-                "pkg:rpm/redhat/bzip2-libs@1.0.8-8.el9?arch=x86_64",
-                adjusted.getComponents().get(178).getBomRef());
-        assertEquals(
-                "pkg:rpm/redhat/dbus@1.12.20-7.el9_2.1?arch=x86_64&epoch=1",
-                adjusted.getComponents().get(386).getBomRef());
+                "pkg:rpm/redhat/subscription-manager-rhsm-certificates@20220623-1.el8?arch=noarch",
+                adjusted.getComponents().get(1).getBomRef());
 
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
@@ -216,15 +336,19 @@ class SyftImageAdjusterTest {
     void shouldAdjustNameAndPurl() throws IOException {
         SyftImageAdjuster adjuster = createDefaultAdjuster();
 
-        assertEquals("registry.com/rh-osbs/amq-streams-console-ui-rhel9", bom.getMetadata().getComponent().getName());
+        assertEquals(
+                "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-cloud-controller-manager-operator",
+                bom.getMetadata().getComponent().getName());
         assertNull(bom.getMetadata().getComponent().getPurl());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals("amq-streams/console-ui-rhel9", adjusted.getMetadata().getComponent().getName());
         assertEquals(
-                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
+                "openshift/ose-cluster-cloud-controller-manager-operator",
+                adjusted.getMetadata().getComponent().getName());
+        assertEquals(
+                "pkg:oci/ose-cluster-cloud-controller-manager-operator@sha256%3A0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61?arch=amd64&os=linux&tag=v4.14.0-202411130434.p0.ga0b9c0d.assembly.stream.el8",
                 adjusted.getMetadata().getComponent().getPurl());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
@@ -233,22 +357,22 @@ class SyftImageAdjusterTest {
     void generatedDependenciesShouldHaveProperDependsOn() throws IOException {
         SyftImageAdjuster adjuster = createDefaultAdjuster();
 
-        assertEquals(192, bom.getComponents().size());
+        assertEquals(7, bom.getComponents().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(846, bom.getComponents().size());
+        assertEquals(16, bom.getComponents().size());
         // Main component + all of it's components
-        assertEquals(846, adjusted.getDependencies().size());
+        assertEquals(16, adjusted.getDependencies().size());
         // Main component dependencies
-        assertEquals(845, adjusted.getDependencies().get(0).getDependencies().size());
+        assertEquals(15, adjusted.getDependencies().get(0).getDependencies().size());
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
 
     @Test
     void depsShouldPointToComponents() throws Exception {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of(), true, null);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, List.of(), true, null, null);
 
         this.bom = SbomUtils.fromString(TestResources.asString("boms/shaded.json"));
 
@@ -274,7 +398,12 @@ class SyftImageAdjusterTest {
     // https://issues.redhat.com/browse/SBOMER-197
     @Test
     void metadataComponentShouldBeBareRepresentationOfMainComponent() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, true, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                tmpDir,
+                null,
+                true,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
         assertFalse(bom.getMetadata().getProperties().isEmpty());
 
@@ -284,12 +413,12 @@ class SyftImageAdjusterTest {
 
         // Has purl
         assertEquals(
-                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
+                "pkg:oci/ose-cluster-cloud-controller-manager-operator@sha256%3A0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61?arch=amd64&os=linux&tag=v4.14.0-202411130434.p0.ga0b9c0d.assembly.stream.el8",
                 metadataComponent.getPurl());
         // Has type
         assertEquals(Component.Type.CONTAINER, metadataComponent.getType());
         // Has name
-        assertEquals("amq-streams/console-ui-rhel9", metadataComponent.getName());
+        assertEquals("openshift/ose-cluster-cloud-controller-manager-operator", metadataComponent.getName());
         // No properties
         assertNull(metadataComponent.getProperties());
 
@@ -299,15 +428,15 @@ class SyftImageAdjusterTest {
         assertFalse(mainComponent.getProperties().isEmpty());
         // Has purl
         assertEquals(
-                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
+                "pkg:oci/ose-cluster-cloud-controller-manager-operator@sha256%3A0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61?arch=amd64&os=linux&tag=v4.14.0-202411130434.p0.ga0b9c0d.assembly.stream.el8",
                 mainComponent.getPurl());
         // Has type
         assertEquals(Component.Type.CONTAINER, mainComponent.getType());
         // Has name
-        assertEquals("amq-streams/console-ui-rhel9", mainComponent.getName());
+        assertEquals("openshift/ose-cluster-cloud-controller-manager-operator", mainComponent.getName());
         // Other things, for example bom-ref
         assertEquals(
-                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3?arch=amd64&os=linux&tag=2.7.0-8.1718294415",
+                "pkg:oci/ose-cluster-cloud-controller-manager-operator@sha256%3A0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61?arch=amd64&os=linux&tag=v4.14.0-202411130434.p0.ga0b9c0d.assembly.stream.el8",
                 mainComponent.getBomRef());
 
         // Is valid
@@ -316,16 +445,16 @@ class SyftImageAdjusterTest {
 
     @Test
     void removeExternalReferencesWithBadURI() throws IOException {
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(tmpDir, null, false, sources);
-        final String badUrl = "https://github.com:facebook/regenerator/tree/master/packages/regenerator-runtime";
+        SyftImageAdjuster adjuster = createDefaultAdjuster();
+        final String badUrl = "https://www:redhat.com/";
 
-        assertEquals(24, getExternalReferenceStream(bom).count());
+        assertEquals(2, getExternalReferenceStream(bom).count());
         assertTrue(getExternalReferenceStream(bom).anyMatch(r -> badUrl.endsWith(r.getUrl())));
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(bom)).size());
 
         Bom adjusted = adjuster.adjust(bom);
 
-        assertEquals(21, getExternalReferenceStream(adjusted).count());
+        assertEquals(1, getExternalReferenceStream(adjusted).count());
         assertFalse(getExternalReferenceStream(adjusted).anyMatch(r -> badUrl.endsWith(r.getUrl())));
         assertEquals(0, SbomUtils.validate(SbomUtils.toJsonNode(adjusted)).size());
     }
@@ -345,7 +474,7 @@ class SyftImageAdjusterTest {
         Optional<Component> bogusComponent = bom.getComponents()
                 .stream()
                 .filter(
-                        component -> "pkg:rpm/redhat/alternatives@1.20-2.el9?arch=x86_64&upstream=chkconfig-1.20-2.el9.src.rpm&distro=rhel-9.2"
+                        component -> "pkg:rpm/redhat/subscription-manager@1.28.42-1.el8?arch=x86_64&distro=rhel-8.10&upstream=subscription-manager-1.28.42-1.el8.src.rpm"
                                 .equals(component.getPurl()))
                 .findFirst();
         assertTrue(bogusComponent.isPresent());
@@ -396,7 +525,7 @@ class SyftImageAdjusterTest {
         assertEquals(1, adjusted.getComponents().get(0).getHashes().size());
         Hash hash = adjusted.getComponents().get(0).getHashes().get(0);
         assertEquals(Hash.Algorithm.SHA_256.getSpec(), hash.getAlgorithm());
-        assertEquals("a43c117701dd6d012bb9da8974d2d332f70a688944ed19280a020d5357f8b22e", hash.getValue());
+        assertEquals("0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61", hash.getValue());
     }
 
     private Stream<ExternalReference> getExternalReferenceStream(Bom bom) {

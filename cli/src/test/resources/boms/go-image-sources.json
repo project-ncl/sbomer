@@ -1,0 +1,136 @@
+{
+    "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:fa035fc9-c171-4059-8f9c-a78f242f7bbe",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2025-07-17T08:42:05Z",
+        "tools": {
+            "components": [
+                {
+                    "type": "application",
+                    "author": "anchore",
+                    "name": "syft",
+                    "version": "1.27.1"
+                }
+            ]
+        },
+        "component": {
+            "bom-ref": "9a50970ee1bcd28d",
+            "type": "file",
+            "name": "remote-source-cachito-gomod-with-deps.tar.gz",
+            "version": "sha256:488d126d633d9b477af209bc61105c265213e14f1251e92ade20089ade507710"
+        }
+    },
+    "components": [
+        {
+            "bom-ref": "pkg:golang/4d63.com/gocheckcompilerdirectives@v1.2.1?package-id=da7c80a2a109bb23",
+            "type": "library",
+            "name": "4d63.com/gocheckcompilerdirectives",
+            "version": "v1.2.1",
+            "purl": "pkg:golang/4d63.com/gocheckcompilerdirectives@v1.2.1",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "go-module-file-cataloger"
+                },
+                {
+                    "name": "syft:package:language",
+                    "value": "go"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "go-module"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "go-module-entry"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "app/go.mod"
+                },
+                {
+                    "name": "syft:metadata:h1Digest",
+                    "value": "h1:AHcMYuw56NPjq/2y615IGg2kYkBdTvOaojYCBcRE7MA="
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:golang/4d63.com/gochecknoglobals@v0.2.1?package-id=6e9b2282e0d91c8d",
+            "type": "library",
+            "name": "4d63.com/gochecknoglobals",
+            "version": "v0.2.1",
+            "purl": "pkg:golang/4d63.com/gochecknoglobals@v0.2.1",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "go-module-file-cataloger"
+                },
+                {
+                    "name": "syft:package:language",
+                    "value": "go"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "go-module"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "go-module-entry"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "app/go.mod"
+                },
+                {
+                    "name": "syft:metadata:h1Digest",
+                    "value": "h1:1eiorGsgHOFOuoOiJDy2psSrQbRdIHrlge0IJIkUgDc="
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:golang/command-line-arguments?package-id=f6e37f4d7d001c86",
+            "type": "library",
+            "name": "command-line-arguments",
+            "version": "UNKNOWN",
+            "purl": "pkg:golang/command-line-arguments",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "go-module-binary-cataloger"
+                },
+                {
+                    "name": "syft:package:language",
+                    "value": "go"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "go-module"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "go-module-buildinfo-entry"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "app/main"
+                },
+                {
+                    "name": "syft:metadata:architecture",
+                    "value": "arm64"
+                },
+                {
+                    "name": "syft:metadata:goCompiledVersion",
+                    "value": "go1.21.6"
+                },
+                {
+                    "name": "syft:metadata:mainModule",
+                    "value": "command-line-arguments"
+                }
+            ]
+        }
+    ],
+    "dependencies": []
+}
