@@ -22,7 +22,8 @@ import static org.jboss.sbomer.cli.feature.sbom.command.download.BrewSourcesDown
 import static org.jboss.sbomer.cli.feature.sbom.command.download.BrewSourcesDownloadCommand.CONTAINER_PROPERTY_SYFT_IMAGE_LABEL_VERSION;
 import static org.jboss.sbomer.cli.feature.sbom.service.KojiService.REMOTE_SOURCE_DELIMITER;
 import static org.jboss.sbomer.cli.feature.sbom.service.KojiService.REMOTE_SOURCE_PREFIX;
-import static org.jboss.sbomer.cli.feature.sbom.service.KojiService.SOURCES_FILE_SUFFIX;
+import static org.jboss.sbomer.cli.feature.sbom.service.KojiService.SOURCES_FILE_ARCHIVE_SUFFIX;
+import static org.jboss.sbomer.cli.feature.sbom.service.KojiService.SOURCES_FILE_METADATA_SUFFIX;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -113,39 +114,67 @@ class BrewSourcesDownloadCommandTest {
     @Test
     void testDownload() throws KojiClientException, IOException {
         KojiBuildInfo buildInfo = createBuildInfo(SOURCES_NAME);
-        byte[] downloadFileContent = "foo".getBytes();
-        Response response = Response
-                .ok(new ByteArrayInputStream(downloadFileContent), MediaType.APPLICATION_OCTET_STREAM)
+        byte[] archiveContent = "foo".getBytes();
+        Response archiveResponse = Response
+                .ok(new ByteArrayInputStream(archiveContent), MediaType.APPLICATION_OCTET_STREAM)
+                .build();
+        byte[] metadataContent = "bar".getBytes();
+        Response metadataResponse = Response
+                .ok(new ByteArrayInputStream(metadataContent), MediaType.APPLICATION_OCTET_STREAM)
                 .build();
         String remoteSourcesName = REMOTE_SOURCE_PREFIX + REMOTE_SOURCE_DELIMITER + SOURCES_NAME;
 
         when(kojiSession.getBuild(any())).thenReturn(List.of(buildInfo));
-        when(kojiDownloadClient.downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName)).thenReturn(response);
+        when(
+                kojiDownloadClient
+                        .downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName + SOURCES_FILE_ARCHIVE_SUFFIX))
+                .thenReturn(archiveResponse);
+        when(
+                kojiDownloadClient
+                        .downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName + SOURCES_FILE_METADATA_SUFFIX))
+                .thenReturn(metadataResponse);
 
         brewSourcesDownloadCommand.doDownload(tmpDir);
-        Path downloadedFile = tmpDir.resolve(remoteSourcesName + SOURCES_FILE_SUFFIX);
+        Path archivePath = tmpDir.resolve(remoteSourcesName + SOURCES_FILE_ARCHIVE_SUFFIX);
+        Path metadataPath = tmpDir.resolve(remoteSourcesName + SOURCES_FILE_METADATA_SUFFIX);
 
-        assertTrue(Files.exists(downloadedFile));
-        assertArrayEquals(downloadFileContent, Files.readAllBytes(downloadedFile));
+        assertTrue(Files.exists(archivePath));
+        assertTrue(Files.exists(metadataPath));
+        assertArrayEquals(archiveContent, Files.readAllBytes(archivePath));
+        assertArrayEquals(metadataContent, Files.readAllBytes(metadataPath));
     }
 
     @Test
     void testDownloadNoRemoteSourcesName() throws KojiClientException, IOException {
         KojiBuildInfo buildInfo = createBuildInfo(null);
-        byte[] downloadFileContent = "bar".getBytes();
-        Response response = Response
-                .ok(new ByteArrayInputStream(downloadFileContent), MediaType.APPLICATION_OCTET_STREAM)
+        byte[] archiveContent = "123".getBytes();
+        Response archiveResponse = Response
+                .ok(new ByteArrayInputStream(archiveContent), MediaType.APPLICATION_OCTET_STREAM)
+                .build();
+        byte[] metadataContent = "abc".getBytes();
+        Response metadataResponse = Response
+                .ok(new ByteArrayInputStream(metadataContent), MediaType.APPLICATION_OCTET_STREAM)
                 .build();
         String remoteSourcesName = REMOTE_SOURCE_PREFIX;
 
         when(kojiSession.getBuild(any())).thenReturn(List.of(buildInfo));
-        when(kojiDownloadClient.downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName)).thenReturn(response);
+        when(
+                kojiDownloadClient
+                        .downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName + SOURCES_FILE_ARCHIVE_SUFFIX))
+                .thenReturn(archiveResponse);
+        when(
+                kojiDownloadClient
+                        .downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName + SOURCES_FILE_METADATA_SUFFIX))
+                .thenReturn(metadataResponse);
 
         brewSourcesDownloadCommand.doDownload(tmpDir);
-        Path downloadedFile = tmpDir.resolve(remoteSourcesName + SOURCES_FILE_SUFFIX);
+        Path archivePath = tmpDir.resolve(remoteSourcesName + SOURCES_FILE_ARCHIVE_SUFFIX);
+        Path metadataPath = tmpDir.resolve(remoteSourcesName + SOURCES_FILE_METADATA_SUFFIX);
 
-        assertTrue(Files.exists(downloadedFile));
-        assertArrayEquals(downloadFileContent, Files.readAllBytes(downloadedFile));
+        assertTrue(Files.exists(archivePath));
+        assertTrue(Files.exists(metadataPath));
+        assertArrayEquals(archiveContent, Files.readAllBytes(archivePath));
+        assertArrayEquals(metadataContent, Files.readAllBytes(metadataPath));
     }
 
     @Test
@@ -158,7 +187,10 @@ class BrewSourcesDownloadCommandTest {
 
         try (Stream<Path> files = Files.list(tmpDir)) {
             boolean fileExists = files.filter(Files::isRegularFile)
-                    .anyMatch(path -> path.toString().endsWith(SOURCES_FILE_SUFFIX));
+                    .anyMatch(
+                            path -> path.toString().endsWith(SOURCES_FILE_ARCHIVE_SUFFIX)
+                                    || (!path.toString().endsWith(IMAGE)
+                                            && path.toString().endsWith(SOURCES_FILE_METADATA_SUFFIX)));
             assertFalse(fileExists);
         }
     }
@@ -169,15 +201,27 @@ class BrewSourcesDownloadCommandTest {
         Response response = Response
                 .status(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase())
                 .build();
-        String remoteSourcesName = REMOTE_SOURCE_PREFIX + REMOTE_SOURCE_DELIMITER + SOURCES_NAME;
 
         when(kojiSession.getBuild(any())).thenReturn(List.of(buildInfo));
-        when(kojiDownloadClient.downloadSourcesFile(NAME, VERSION, RELEASE, remoteSourcesName)).thenReturn(response);
+        when(kojiDownloadClient.downloadSourcesFile(any(), any(), any(), any())).thenReturn(response);
 
         ApplicationException ex = assertThrows(
                 ApplicationException.class,
                 () -> brewSourcesDownloadCommand.doDownload(tmpDir));
         assertEquals("Failed to download sources file: HTTP 404", ex.getMessage());
+    }
+
+    @Test
+    void testErrorDownloading() throws KojiClientException {
+        KojiBuildInfo buildInfo = createBuildInfo(SOURCES_NAME);
+
+        when(kojiSession.getBuild(any())).thenReturn(List.of(buildInfo));
+        when(kojiDownloadClient.downloadSourcesFile(any(), any(), any(), any())).thenThrow(new RuntimeException());
+
+        ApplicationException ex = assertThrows(
+                ApplicationException.class,
+                () -> brewSourcesDownloadCommand.doDownload(tmpDir));
+        assertEquals("Failed to download sources archive or metadata file", ex.getMessage());
     }
 
     @Test
@@ -199,7 +243,7 @@ class BrewSourcesDownloadCommandTest {
                                         CONTAINER_PROPERTY_SYFT_IMAGE_LABEL_COMPONENT,
                                         CONTAINER_PROPERTY_SYFT_IMAGE_LABEL_VERSION,
                                         CONTAINER_PROPERTY_SYFT_IMAGE_LABEL_RELEASE))
-                        + ". Unable to download sources for this container image",
+                        + ". Unable to download sources archive and metadata for this container image",
                 ex.getMessage());
     }
 
@@ -211,7 +255,10 @@ class BrewSourcesDownloadCommandTest {
 
         try (Stream<Path> files = Files.list(tmpDir)) {
             boolean fileExists = files.filter(Files::isRegularFile)
-                    .anyMatch(path -> path.toString().endsWith(SOURCES_FILE_SUFFIX));
+                    .anyMatch(
+                            path -> path.toString().endsWith(SOURCES_FILE_ARCHIVE_SUFFIX)
+                                    || (!path.toString().endsWith(IMAGE)
+                                            && path.toString().endsWith(SOURCES_FILE_METADATA_SUFFIX)));
             assertFalse(fileExists);
         }
     }

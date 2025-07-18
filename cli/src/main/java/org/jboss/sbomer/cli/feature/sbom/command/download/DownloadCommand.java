@@ -30,7 +30,7 @@ import picocli.CommandLine.ScopeType;
 @Command(
         mixinStandardHelpOptions = true,
         name = "download",
-        description = "Download a file",
+        description = "Download files",
         subcommands = { BrewSourcesDownloadCommand.class },
         subcommandsRepeatable = true)
 public class DownloadCommand {
@@ -39,7 +39,7 @@ public class DownloadCommand {
             names = { "-o", "--output-dir" },
             required = true,
             paramLabel = "DIR",
-            description = "The directory where the file should be downloaded to",
+            description = "The directory where the files should be downloaded to",
             converter = PathConverter.class,
             scope = ScopeType.INHERIT)
     Path outputDir;

@@ -33,8 +33,9 @@ public class Constants {
     public static final String CONTAINER_PROPERTY_SYFT_PREFIX = "syft:";
     public static final String CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX = // REDHAT_PROPERTY_NAMESPACE_PREFIX +
             "sbomer:";
+    public static final String PACKAGE_LANGUAGE = "package:language";
     public static final String CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
-            + "package:language";
+            + PACKAGE_LANGUAGE;
     public static final String CONTAINER_PROPERTY_PACKAGE_TYPE_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
             + "package:type";
     public static final String CONTAINER_PROPERTY_LOCATION_PATH_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
