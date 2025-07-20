@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.nextgen.core.dto.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Generator configuration.
@@ -27,5 +27,5 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @param format Requested manifest format
  * @param options Custom options for generator
  */
-public record GeneratorConfig(Resources resources, String format, JsonNode options) {
+public record GeneratorConfig(Resources resources, String format, ObjectNode options) {
 }

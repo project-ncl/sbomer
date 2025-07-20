@@ -35,7 +35,6 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
-import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
@@ -50,7 +49,6 @@ import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.Duration;
@@ -338,19 +336,8 @@ public class SyftGenerator extends AbstractTektonController {
 
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
 
-        SyftContainerImageOptions options = null;
-
-        try {
-            options = ObjectMapperProvider.json()
-                    .treeToValue(request.generator().config().options(), SyftContainerImageOptions.class);
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException(
-                    "Unexpected options provided, expected Syft generator options, but got: {}",
-                    request.generator().config().options(),
-                    e);
-        }
-
-        // SyftOptions options = (SyftOptions) request.generator().config().options();
+        SyftContainerImageOptions options = JacksonUtils
+                .parse(SyftContainerImageOptions.class, request.generator().config().options());
 
         Duration timeout;
 
