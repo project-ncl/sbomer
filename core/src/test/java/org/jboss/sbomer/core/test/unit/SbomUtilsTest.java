@@ -17,12 +17,15 @@
  */
 package org.jboss.sbomer.core.test.unit;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getDistroHashesFromAnalyzedArtifact;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,6 +46,8 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.dto.response.AnalyzedArtifact;
+import org.jboss.pnc.dto.response.AnalyzedDistribution;
 import org.jboss.pnc.enums.SystemImageType;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -438,5 +443,40 @@ class SbomUtilsTest {
         assertEquals("pkg:maven/org.objectweb.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(0).getRef());
         assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(1).getRef());
         assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", productDeps.get(2).getRef());
+    }
+
+    @Test
+    void shouldMapHashesWithGetDistroHashesFromAnalyzedArtifact() {
+        // Hashes are all generated on "" (empty)
+        AnalyzedDistribution mockedDistribution = mock(AnalyzedDistribution.class);
+        when(mockedDistribution.getMd5()).thenReturn("68b329da9893e34099c7d8ad5cb9c940");
+        when(mockedDistribution.getSha1()).thenReturn("adc83b19e793491b1c6ea0fd8b46cd9f32e592fc");
+        when(mockedDistribution.getSha256())
+                .thenReturn("01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b");
+
+        AnalyzedArtifact mockedArtifact = mock(AnalyzedArtifact.class);
+        when(mockedArtifact.getDistribution()).thenReturn(mockedDistribution);
+
+        List<Hash> hashes = getDistroHashesFromAnalyzedArtifact(mockedArtifact);
+        assertNotNull(hashes);
+
+        // We've set 3 hash types we should get
+        assertEquals(3, hashes.size());
+        assertTrue(hashes.contains(new Hash(Hash.Algorithm.MD5, "68b329da9893e34099c7d8ad5cb9c940")));
+        assertTrue(hashes.contains(new Hash(Hash.Algorithm.SHA1, "adc83b19e793491b1c6ea0fd8b46cd9f32e592fc")));
+        assertTrue(
+                hashes.contains(
+                        new Hash(
+                                Hash.Algorithm.SHA_256,
+                                "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b")));
+
+        // If we ever add more hash types in the future we might get null from records
+        when(mockedDistribution.getSha256()).thenReturn(null);
+        List<Hash> hasheswnull = getDistroHashesFromAnalyzedArtifact(mockedArtifact);
+        assertNotNull(hasheswnull);
+        assertEquals(2, hasheswnull.size());
+        assertTrue(hasheswnull.contains(new Hash(Hash.Algorithm.MD5, "68b329da9893e34099c7d8ad5cb9c940")));
+        assertTrue(hasheswnull.contains(new Hash(Hash.Algorithm.SHA1, "adc83b19e793491b1c6ea0fd8b46cd9f32e592fc")));
+
     }
 }

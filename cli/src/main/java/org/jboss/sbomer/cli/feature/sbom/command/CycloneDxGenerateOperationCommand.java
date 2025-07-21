@@ -24,6 +24,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createBom;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getDistroHashesFromAnalyzedArtifact;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
@@ -48,6 +49,7 @@ import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
 import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.Hash;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
@@ -154,6 +156,8 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                         .toList();
 
         Optional<String> distributionSha256;
+        Optional<List<Hash>> distributionHashes = Optional.empty();
+
         if (isLegacyAnalysis) {
             log.info(
                     "The deliverable analysis operation '{}' seems to be old because it does not have the distribution metadata and all the filename match info; filtering cannot be done so the final manifest will contain ALL the content of ALL the deliverable urls (if multiple). Total analyzed artifacts in the operation: '{}'",
@@ -169,6 +173,11 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                     config.getOperationId());
             distributionSha256 = artifactsToManifest.stream()
                     .map(a -> a.getDistribution().getSha256())
+                    .filter(Objects::nonNull)
+                    .findFirst();
+
+            distributionHashes = artifactsToManifest.stream()
+                    .map(a -> getDistroHashesFromAnalyzedArtifact(a))
                     .filter(Objects::nonNull)
                     .findFirst();
         }
@@ -193,6 +202,11 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                 desc,
                 distributionPurl,
                 Type.FILE);
+
+        if (distributionHashes.isPresent() && !distributionHashes.isEmpty()) {
+            mainComponent.setHashes(distributionHashes.get());
+        }
+
         Dependency mainDependency = createDependency(distributionPurl);
 
         setProductMetadata(mainComponent, config);
