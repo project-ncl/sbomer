@@ -19,6 +19,7 @@ package org.jboss.sbomer.service.nextgen.service.rest.v1beta2;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
@@ -40,12 +42,15 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
+import org.jboss.sbomer.service.nextgen.query.EventsQueryListener;
+import org.jboss.sbomer.service.nextgen.query.EventsQueryProcessor;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.jboss.sbomer.service.nextgen.service.model.Event;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.nextgen.service.rest.RestUtils;
 
 import io.quarkus.arc.Arc;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.vertx.core.eventbus.EventBus;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -85,6 +90,9 @@ public class EventsApi {
     @Inject
     EventBus eventBus;
 
+    @Inject
+    EventsQueryProcessor queryProcessor;
+
     @GET
     @Operation(
             summary = "Search events",
@@ -99,14 +107,35 @@ public class EventsApi {
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    public Response search(@Valid @BeanParam PaginationParameters paginationParams) {
-        List<EventRecord> events = Event.findAll()
+    public Response search(@Valid @BeanParam PaginationParameters paginationParams, @QueryParam("query") String query) {
+
+        PanacheQuery<Event> panacheQuery;
+
+        if (query == null || query.isBlank()) {
+            panacheQuery = Event.findAll();
+        } else {
+            try {
+                EventsQueryListener listener = queryProcessor.process(query);
+
+                String whereClause = listener.getJpqlWhereClause();
+                Map<String, Object> parameters = listener.getParameters();
+                log.debug("Using JPQL WHERE clause: '{}'", whereClause);
+                log.debug("Using parameters: {}", parameters);
+                panacheQuery = Event.find(whereClause, parameters);
+
+            } catch (ClientException e) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message", "The provided query is not valid. Please check the syntax and values.");
+                errorResponse.put("details", e.getErrors());
+
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+            }
+        }
+        List<EventRecord> events = panacheQuery.page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .project(EventRecord.class)
-                .page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .list();
 
-        long count = Event.findAll().count();
-
+        long count = panacheQuery.count();
         Page<EventRecord> page = RestUtils.toPage(events, paginationParams, count);
 
         return Response.ok(page)

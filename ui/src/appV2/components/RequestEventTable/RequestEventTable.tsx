@@ -39,120 +39,29 @@ const columnNames = {
 };
 
 export const RequestEventTable = () => {
-  const { queryType, queryValue, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
+  const { query, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
 
   // todo enable when searching is implemented
   const enableSearching = false;
   // enable when pagination is implemented
   const enablePagination = true;
 
-  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
-  const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
 
-  const [paginationVisible, setPaginationVisible] = React.useState<boolean>(queryType == RequestsQueryType.NoFilter);
 
-  const [selectIsOpen, setSelectIsOpen] = React.useState<boolean>(false);
-  const [selectValue, setSelectValue] = React.useState<RequestsQueryType>(queryType);
+  const [querySearchbarValue, setQuerySearchbarValue] = React.useState<string>();
 
-  const [isButtonVisible, setButtonVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
+
 
   const [{ value, loading, total, error },] = useRequestEvents();
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
-    setFilters(queryType, queryValue, newPage, pageSize)
+    setFilters(query, newPage, pageSize)
   };
 
   const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
-    setFilters(queryType, queryValue, pageIndex, newPerPage)
+    setFilters(query, pageIndex, newPerPage)
   };
 
-
-  const onToggleClick = () => {
-    setSelectIsOpen(!selectIsOpen);
-  };
-
-  const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setSelectValue(value as RequestsQueryType)
-    setSelectIsOpen(false);
-    switch (value) {
-      case RequestsQueryType.NoFilter:
-        setSearchBarVisible(false);
-        setButtonVisible(false)
-        setSearchBarValue('')
-        setFilters(RequestsQueryType.NoFilter, '', pageIndex, pageSize)
-        setPaginationVisible(true)
-        break;
-      default:
-        setSearchBarVisible(true);
-        setButtonVisible(true);
-    }
-  };
-
-  const onSearchCall = () => {
-    setFilters(selectValue, searchBarValue, 1, pageSize)
-    setPaginationVisible(selectValue == RequestsQueryType.NoFilter)
-  }
-
-
-  const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
-    <MenuToggle
-      ref={toggleRef}
-      onClick={onToggleClick}
-      isExpanded={selectIsOpen}
-      style={
-        {
-          width: '300px'
-        } as React.CSSProperties
-      }
-    >
-      {selectValue}
-    </MenuToggle>
-  );
-
-
-  const select = <Select
-    id="single-select"
-    isOpen={selectIsOpen}
-    selected={selectValue as RequestsQueryType}
-    onSelect={onSelect}
-    onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
-    toggle={toggle}
-    shouldFocusToggleOnSelect
-  >
-    <SelectList>
-      <SelectGroup>
-        <SelectOption value={RequestsQueryType.NoFilter}>{RequestsQueryType.NoFilter}</SelectOption>
-      </SelectGroup>
-      <SelectGroup>
-        <SelectOption value={RequestsQueryType.PNCBuild}>{RequestsQueryType.PNCBuild}</SelectOption>
-        <SelectOption value={RequestsQueryType.ContainerImage}>{RequestsQueryType.ContainerImage}</SelectOption>
-        <SelectOption value={RequestsQueryType.ErrataAdvisory}>{RequestsQueryType.ErrataAdvisory}</SelectOption>
-        <SelectOption value={RequestsQueryType.RequestEvent}>{RequestsQueryType.RequestEvent}</SelectOption>
-        <SelectOption value={RequestsQueryType.PNCAnalysis}>{RequestsQueryType.PNCAnalysis}</SelectOption>
-        <SelectOption value={RequestsQueryType.PNCOperation}>{RequestsQueryType.PNCOperation}</SelectOption>
-        <SelectOption value={RequestsQueryType.ErrataReleaseID}>{RequestsQueryType.ErrataReleaseID}</SelectOption>
-        <SelectOption value={RequestsQueryType.ErrataReleaseFullname}>{RequestsQueryType.ErrataReleaseFullname}</SelectOption>
-      </SelectGroup>
-    </SelectList>
-  </Select>
-
-  const searchBar = <SearchInput
-    placeholder="Enter selected id"
-    value={searchBarValue}
-    onChange={(_event, value) => setSearchBarValue(value)}
-    onClear={() => setSearchBarValue('')}
-    isAdvancedSearchOpen={!searchBarVisible}
-    onKeyDown={(event: React.KeyboardEvent) => {
-      if (event.key == 'Enter') {
-        onSearchCall();
-      }
-    }
-    }
-  />
-
-  const searchButton = <Button
-    variant='primary'
-    onClick={() => onSearchCall()}>Search</Button>
 
   const pagination = <Pagination
     itemCount={total}
@@ -164,9 +73,27 @@ export const RequestEventTable = () => {
     onPerPageSelect={onPerPageSelect}
   />
 
+  const querySearchBarValueOnChange = (value: string) => {
+    setQuerySearchbarValue(value);
+  };
+
+  const querySearchBar = <Toolbar>
+    <ToolbarItem>
+      <SearchInput
+        placeholder="Enter query"
+        value={querySearchbarValue}
+        onChange={(_event, value) => querySearchBarValueOnChange(value)}
+        onClear={() => querySearchBarValueOnChange('')}
+        onSearch={() => setFilters(querySearchbarValue || '', pageIndex, pageSize)}
+        style={{ width: '600px' }}
+        >
+      </SearchInput>
+    </ToolbarItem>
+  </Toolbar>
+
   const table = <>
     <Table aria-label="Events table" variant="compact">
-      <Caption>{queryType != RequestsQueryType.NoFilter ? "Latest filtered events" : "Latest events"}</Caption>
+      <Caption>Latest events</Caption>
       <Thead>
         <Tr>
           <Th>{columnNames.id}</Th>
@@ -217,26 +144,11 @@ export const RequestEventTable = () => {
         ))}
       </Tbody>
     </Table>
-    {enablePagination && paginationVisible && pagination}
+    {enablePagination && pagination}
   </>
   const noResults = <NoResultsSection />
   const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
 
-  const filtersBar = <>
-    <Toolbar>
-      <ToolbarContent>
-        <ToolbarItem>
-          {select}
-        </ToolbarItem>
-        <ToolbarItem>
-          {searchBarVisible && searchBar}
-        </ToolbarItem>
-        <ToolbarItem>
-          {isButtonVisible && searchButton}
-        </ToolbarItem>
-      </ToolbarContent>
-    </Toolbar>
-  </>
 
   const tableArea =
     error ? <ErrorSection error={error} /> :
@@ -245,7 +157,7 @@ export const RequestEventTable = () => {
 
   return (
     <>
-      {enableSearching && filtersBar}
+      {querySearchBar}
       {tableArea}
     </>
   );
