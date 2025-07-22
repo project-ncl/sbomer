@@ -91,16 +91,12 @@ public class SyftGenerator extends AbstractTektonController {
     public static final String SA_SUFFIX = "-sa";
     public static final String TASK_SUFFIX = "-generator-syft";
     public static final String ANNOTATION_RETRY_COUNT = "sbomer.jboss.org/retry-count";
-    public static final int MAX_RETRIES = 4;
     public static final String GENERATE_OVERRIDE = "generate";
     public static final String CPU_OVERRIDE = "cpu";
     public static final String MEMORY_OVERRIDE = "memory";
     public static final String SERVICE_SUFFIX = "-service";
     public static final String RETRY_SUFFIX = "-retry-";
     public static final String GENERATOR_NAME = "syft";
-    // Gradual compounding memory increase, with doubling being last ditch effort
-    // Do we need this to be configurable?
-    public static final Map<Integer, Double> RETRY_MULTIPLYERS = Map.of(1, 1.30d, 2, 1.20d, 3, 1.10d, 4, 2.0d);
 
     private SyftGenerator() {
         super(null, null, null, null, null, null);
@@ -200,8 +196,11 @@ public class SyftGenerator extends AbstractTektonController {
             GenerationResult result = isOomKilled(erroredTaskRun) ? GenerationResult.ERR_OOM
                     : GenerationResult.ERR_GENERAL;
             int retryCount = Integer.parseInt(erroredAnnotations.getOrDefault(ANNOTATION_RETRY_COUNT, "0"));
+            GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
+            SyftContainerImageOptions options = retrieveOptions(request);
+            int maxCount = options.retries().maxCount();
 
-            if (result == GenerationResult.ERR_GENERAL || ++retryCount > MAX_RETRIES) {
+            if (result == GenerationResult.ERR_GENERAL || ++retryCount > maxCount) {
                 String detailedFailureMessage = getDetailedFailureMessage(erroredTaskRun);
                 updateStatus(
                         generation.id(),
@@ -211,7 +210,8 @@ public class SyftGenerator extends AbstractTektonController {
                         detailedFailureMessage);
             } else {
                 log.info("Retrying Tekton Task Run for generation '{}', count '{}'", generation.id(), retryCount);
-                TaskRun taskRun = createRetry(erroredTaskRun, retryCount);
+                double memoryMultiplier = options.retries().memoryMultiplier();
+                TaskRun taskRun = createRetry(erroredTaskRun, retryCount, memoryMultiplier);
 
                 try {
                     // Prevent last task run continuously being rescheduled
@@ -384,15 +384,13 @@ public class SyftGenerator extends AbstractTektonController {
         }
     }
 
-    private TaskRun createRetry(TaskRun originalTaskRun, int retryCount) {
+    private TaskRun createRetry(TaskRun originalTaskRun, int retryCount, double memoryMultiplier) {
         ObjectMeta originalMetadata = originalTaskRun.getMetadata();
         TaskRunSpec originalSpec = originalTaskRun.getSpec();
         TaskRunStepOverride originalStepOverride = originalTaskRun.getSpec().getStepOverrides().get(0);
         String originalName = originalMetadata.getName();
 
-        TaskRunStepOverride stepOverride = multiplyMemoryOverrides(
-                originalStepOverride,
-                RETRY_MULTIPLYERS.get(retryCount));
+        TaskRunStepOverride stepOverride = multiplyMemoryOverrides(originalStepOverride, memoryMultiplier);
 
         String name = originalName.replaceFirst(RETRY_SUFFIX + "\\d+$", "") + RETRY_SUFFIX + retryCount;
 
@@ -454,17 +452,7 @@ public class SyftGenerator extends AbstractTektonController {
 
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
 
-        SyftContainerImageOptions options = null;
-
-        try {
-            options = ObjectMapperProvider.json()
-                    .treeToValue(request.generator().config().options(), SyftContainerImageOptions.class);
-        } catch (JsonProcessingException e) {
-            throw new ApplicationException(
-                    "Unexpected options provided, expected Syft generator options, but got: {}",
-                    request.generator().config().options(),
-                    e);
-        }
+        SyftContainerImageOptions options = retrieveOptions(request);
 
         // SyftOptions options = (SyftOptions) request.generator().config().options();
 
@@ -546,5 +534,17 @@ public class SyftGenerator extends AbstractTektonController {
         configureOwner(taskRun);
 
         return taskRun;
+    }
+
+    private SyftContainerImageOptions retrieveOptions(GenerationRequest request) {
+        JsonNode jsonNode = request.generator().config().options();
+        try {
+            return ObjectMapperProvider.json().treeToValue(jsonNode, SyftContainerImageOptions.class);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException(
+                    "Unexpected options provided, expected Syft generator options, but got: {}",
+                    jsonNode,
+                    e);
+        }
     }
 }
