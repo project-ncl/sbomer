@@ -247,7 +247,6 @@ public class EventsQueryListener extends QueryBaseListener {
         return rawValue.substring(1, rawValue.length() - 1);
     }
 
-
     private Instant parseInstant(String stringValue) {
         try {
             return Instant.parse(stringValue);
@@ -255,20 +254,19 @@ public class EventsQueryListener extends QueryBaseListener {
             // It's not in the standard Instant format
         }
 
-        DateTimeFormatter customFormatter = new DateTimeFormatterBuilder()
-                .appendPattern("yyyy")
+        DateTimeFormatter customFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy")
                 .optionalStart()
-                    .appendPattern("-MM")
-                    .optionalStart()
-                        .appendPattern("-dd")
-                    .optionalEnd()
+                .appendPattern("-MM")
+                .optionalStart()
+                .appendPattern("-dd")
+                .optionalEnd()
                 .optionalEnd()
                 .optionalStart()
-                    .appendLiteral(' ')
-                    .appendPattern("HH:mm")
-                    .optionalStart()
-                        .appendPattern(":ss")
-                    .optionalEnd()
+                .appendLiteral(' ')
+                .appendPattern("HH:mm")
+                .optionalStart()
+                .appendPattern(":ss")
+                .optionalEnd()
                 .optionalEnd()
                 .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
                 .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)

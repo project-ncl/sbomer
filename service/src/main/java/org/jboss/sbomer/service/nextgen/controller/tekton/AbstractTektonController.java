@@ -40,9 +40,11 @@ import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
 import io.fabric8.knative.pkg.apis.Condition;
+import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
+import io.fabric8.tekton.v1beta1.StepState;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
 import jakarta.enterprise.context.control.ActivateRequestContext;
@@ -52,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractTektonController extends AbstractGenerator
         implements ResourceEventHandler<TaskRun>, TektonController<GenerationRecord> {
 
+    public static final String IS_OOM_KILLED = "OOMKilled";
     public final static String GENERATION_ID_LABEL = "sbomer.jboss.org/generation-id";
     public final static String GENERATOR_TYPE = "sbomer.jboss.org/generator-type";
 
@@ -351,7 +354,7 @@ public abstract class AbstractTektonController extends AbstractGenerator
         return taskRun.getStatus().getSteps().stream().map(step -> {
             var term = step.getTerminated();
             if (term != null) {
-                boolean isOomKilled = "OOMKilled".equals(term.getReason());
+                boolean isOomKilled = IS_OOM_KILLED.equals(term.getReason());
                 boolean isFailedExit = term.getExitCode() != 0;
 
                 if (isFailedExit || isOomKilled) {
@@ -362,7 +365,7 @@ public abstract class AbstractTektonController extends AbstractGenerator
                             term.getExitCode(),
                             reason,
                             term.getReason(),
-                            term.getMessage() != null ? (", message=" + term.getMessage()) : " ");
+                            term.getMessage() != null ? (", message=" + term.getMessage()) : "");
                 }
             }
 
@@ -371,6 +374,21 @@ public abstract class AbstractTektonController extends AbstractGenerator
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse("TaskRun failed, but no step had non-zero exit code or OOMKilled reason.");
+    }
+
+    public boolean isOomKilled(TaskRun taskRun) {
+        if (taskRun.getStatus() == null || taskRun.getStatus().getSteps() == null) {
+            return false;
+        }
+
+        for (StepState step : taskRun.getStatus().getSteps()) {
+            ContainerStateTerminated term = step.getTerminated();
+            if (term != null && IS_OOM_KILLED.equals(term.getReason())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

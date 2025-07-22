@@ -17,20 +17,11 @@
  */
 package org.jboss.sbomer.service.nextgen.generator.syft;
 
-import java.util.List;
-
-import org.jboss.sbomer.service.nextgen.core.dto.api.GeneratorConfig;
-
 /**
- * Representation of configuration options related to Syft generator. This is the representation of the {@code options}
- * field in {@link GeneratorConfig}.
+ * Syft generator retry configuration.
  *
- * @see GeneratorConfig
- * @param includeRpms Whether to include RPMs in the manifest.
- * @param paths List of paths within the container image that should be scanned by Syft.
- * @param timeout The timeout after which the generation should be terminated.
- * @param retries Generator retry configuration.
+ * @param maxCount Max number of generator retries
+ * @param memoryMultiplier Amount to compound multiply memory by per generator retry
  */
-public record SyftContainerImageOptions(boolean includeRpms, List<String> paths, String timeout,
-        SyftContainerImageRetries retries) {
+public record SyftContainerImageRetries(Integer maxCount, Double memoryMultiplier) {
 }

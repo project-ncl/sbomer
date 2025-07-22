@@ -9,9 +9,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.test.TestResources;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationRequestSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorConfigSpec;
@@ -19,6 +21,7 @@ import org.jboss.sbomer.service.nextgen.core.payloads.generation.GeneratorVersio
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.ResourceRequirementSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.ResourcesSpec;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.TargetSpec;
+import org.jboss.sbomer.service.nextgen.generator.syft.SyftContainerImageRetries;
 import org.jboss.sbomer.service.nextgen.service.config.GeneratorConfigProvider;
 import org.jboss.sbomer.service.nextgen.service.config.mapping.GeneratorsConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,6 +116,10 @@ public class GeneratorConfigProviderTest {
         GenerationRequestSpec requestSpec = generatorConfigProvider
                 .buildEffectiveRequest(new GenerationRequestSpec(new TargetSpec("image", "CONTAINER_IMAGE"), null));
 
+        SyftContainerImageRetries retries = ObjectMapperProvider.json()
+                .convertValue(
+                        requestSpec.generator().config().options().get("retries"),
+                        SyftContainerImageRetries.class);
         assertEquals("syft", requestSpec.generator().name());
         assertEquals("1.27.1", requestSpec.generator().version());
         assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
@@ -120,6 +127,8 @@ public class GeneratorConfigProviderTest {
         assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
         assertEquals("1500m", requestSpec.generator().config().resources().limits().cpu());
         assertEquals("3Gi", requestSpec.generator().config().resources().limits().memory());
+        assertEquals(3, retries.maxCount().intValue());
+        assertEquals(1.3d, retries.memoryMultiplier().doubleValue(), 0d);
     }
 
     @Test
@@ -143,8 +152,12 @@ public class GeneratorConfigProviderTest {
                                         new ResourcesSpec(
                                                 new ResourceRequirementSpec("800m", "2Gi"),
                                                 new ResourceRequirementSpec("2000m", "4Gi")),
-                                        null))));
+                                        Map.of("retries", new SyftContainerImageRetries(4, 1.4d))))));
 
+        SyftContainerImageRetries retries = ObjectMapperProvider.json()
+                .convertValue(
+                        requestSpec.generator().config().options().get("retries"),
+                        SyftContainerImageRetries.class);
         assertEquals("syft", requestSpec.generator().name());
         assertEquals("1.27.1", requestSpec.generator().version());
         assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
@@ -152,6 +165,8 @@ public class GeneratorConfigProviderTest {
         assertEquals("2Gi", requestSpec.generator().config().resources().requests().memory());
         assertEquals("2000m", requestSpec.generator().config().resources().limits().cpu());
         assertEquals("4Gi", requestSpec.generator().config().resources().limits().memory());
+        assertEquals(4, retries.maxCount().intValue());
+        assertEquals(1.4d, retries.memoryMultiplier().doubleValue(), 0d);
 
     }
 
@@ -174,8 +189,12 @@ public class GeneratorConfigProviderTest {
                                 new GeneratorConfigSpec(
                                         null,
                                         new ResourcesSpec(null, new ResourceRequirementSpec("3000m", "4Gi")),
-                                        null))));
+                                        Map.of("retries", new SyftContainerImageRetries(null, 1.5d))))));
 
+        SyftContainerImageRetries retries = ObjectMapperProvider.json()
+                .convertValue(
+                        requestSpec.generator().config().options().get("retries"),
+                        SyftContainerImageRetries.class);
         assertEquals("syft", requestSpec.generator().name());
         assertEquals("1.27.1", requestSpec.generator().version());
         assertEquals("CYCLONEDX_1.6_JSON", requestSpec.generator().config().format());
@@ -183,5 +202,7 @@ public class GeneratorConfigProviderTest {
         assertEquals("1Gi", requestSpec.generator().config().resources().requests().memory());
         assertEquals("3000m", requestSpec.generator().config().resources().limits().cpu());
         assertEquals("4Gi", requestSpec.generator().config().resources().limits().memory());
+        assertEquals(3, retries.maxCount().intValue());
+        assertEquals(1.5d, retries.memoryMultiplier().doubleValue(), 0d);
     }
 }
