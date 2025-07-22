@@ -37,8 +37,13 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
+import org.cyclonedx.model.License;
+import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.model.Metadata;
+import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Property;
+import org.cyclonedx.model.Service;
+import org.cyclonedx.model.metadata.ToolInformation;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
@@ -252,7 +257,7 @@ class SbomUtilsTest {
         }
 
         @Test
-        void shouldCreateMetadata() {
+        void shouldCreateDependency() {
             String ref = "pkg:generic/broker@7.11.5.CR3?download_url=https://download.com/my-7.11.5.CR3-maven-repository.zip";
             Dependency dependency = SbomUtils.createDependency(ref);
             assertEquals(ref, dependency.getRef());
@@ -439,4 +444,32 @@ class SbomUtilsTest {
         assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(1).getRef());
         assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", productDeps.get(2).getRef());
     }
+
+    @Test
+    void testCreateToolInformation() {
+        ToolInformation information = SbomUtils.createToolInformation("dev");
+        assertNotNull(information);
+        List<Service> services = information.getServices();
+        assertNotNull(services);
+        assertEquals(1, services.size());
+        Service service = services.get(0);
+        assertEquals("SBOMer", service.getName());
+        assertEquals("dev", service.getVersion());
+        LicenseChoice licenseChoice = service.getLicenses();
+        List<License> licenses = licenseChoice.getLicenses();
+        assertEquals(1, licenses.size());
+        License license = licenses.get(0);
+        assertNull(license.getName());
+        assertEquals("Apache-2.0", license.getId());
+        assertEquals("https://www.apache.org/licenses/LICENSE-2.0.html", license.getUrl());
+        assertEquals("declared", license.getAcknowledgement());
+        OrganizationalEntity provider = service.getProvider();
+        assertNotNull(provider);
+        assertEquals("Red Hat", provider.getName());
+        List<String> urls = provider.getUrls();
+        assertNotNull(urls);
+        assertEquals(1, urls.size());
+        assertEquals("https://www.redhat.com", urls.get(0));
+    }
+
 }
