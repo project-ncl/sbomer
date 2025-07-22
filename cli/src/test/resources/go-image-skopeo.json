@@ -1,0 +1,92 @@
+{
+    "Name": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-cloud-controller-manager-operator",
+    "Digest": "sha256:0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61",
+    "RepoTags": [],
+    "Created": "2024-11-13T06:32:16.978319424Z",
+    "DockerVersion": "",
+    "Labels": {
+        "License": "GPLv2+",
+        "architecture": "x86_64",
+        "build-date": "2024-11-13T06:24:41",
+        "com.redhat.component": "ose-cluster-cloud-controller-manager-operator-container",
+        "com.redhat.license_terms": "https://www.redhat.com/agreements",
+        "description": "This is the base image from which all OpenShift Container Platform images inherit.",
+        "distribution-scope": "public",
+        "io.buildah.version": "1.33.8",
+        "io.k8s.description": "This is the base image from which all OpenShift Container Platform images inherit.",
+        "io.k8s.display-name": "OpenShift Container Platform RHEL 8 Base",
+        "io.openshift.build.commit.id": "a0b9c0d70748ff24de5a40874207de3ea5bfa91e",
+        "io.openshift.build.commit.url": "https://github.com/openshift/cluster-cloud-controller-manager-operator/commit/a0b9c0d70748ff24de5a40874207de3ea5bfa91e",
+        "io.openshift.build.source-location": "https://github.com/openshift/cluster-cloud-controller-manager-operator",
+        "io.openshift.expose-services": "",
+        "io.openshift.maintainer.component": "Cloud Compute / Cloud Controller Manager",
+        "io.openshift.maintainer.project": "OCPBUGS",
+        "io.openshift.release.operator": "true",
+        "io.openshift.tags": "openshift,base",
+        "maintainer": "Red Hat, Inc.",
+        "name": "openshift/ose-cluster-cloud-controller-manager-operator",
+        "release": "202411130434.p0.ga0b9c0d.assembly.stream.el8",
+        "summary": "Provides the latest release of Red Hat Universal Base Image 8.",
+        "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift/ose-cluster-cloud-controller-manager-operator/images/v4.14.0-202411130434.p0.ga0b9c0d.assembly.stream.el8",
+        "vcs-ref": "8a4559dd22257ed70022838ef0df242622da92c5",
+        "vcs-type": "git",
+        "vendor": "Red Hat, Inc.",
+        "version": "v4.14.0"
+    },
+    "Architecture": "amd64",
+    "Os": "linux",
+    "Layers": [
+        "sha256:c7965aa7086045a59bdb113a1fb8a19d7ccf7af4133e59af8ecefd39cda8e0b1",
+        "sha256:e755c7665c5a726a32127738604e6857602e4ecfac32566a8410c93aa3731a0a",
+        "sha256:52787d62a77a771b80088085588a8fb50468dd406190ffaf1f28927588c15b68",
+        "sha256:da2c8990b4fb90eb140cc624fe4831016df723d1684d900f47b6367c72a158e9"
+    ],
+    "LayersData": [
+        {
+            "MIMEType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+            "Digest": "sha256:c7965aa7086045a59bdb113a1fb8a19d7ccf7af4133e59af8ecefd39cda8e0b1",
+            "Size": 78964242,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+            "Digest": "sha256:e755c7665c5a726a32127738604e6857602e4ecfac32566a8410c93aa3731a0a",
+            "Size": 57920416,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+            "Digest": "sha256:52787d62a77a771b80088085588a8fb50468dd406190ffaf1f28927588c15b68",
+            "Size": 10730645,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+            "Digest": "sha256:da2c8990b4fb90eb140cc624fe4831016df723d1684d900f47b6367c72a158e9",
+            "Size": 59329601,
+            "Annotations": null
+        }
+    ],
+    "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "container=oci",
+        "GODEBUG=x509ignoreCN=0,madvdontneed=1",
+        "__doozer=merge",
+        "BUILD_RELEASE=202411130434.p0.ga0b9c0d.assembly.stream.el8",
+        "BUILD_VERSION=v4.14.0",
+        "OS_GIT_MAJOR=4",
+        "OS_GIT_MINOR=14",
+        "OS_GIT_PATCH=0",
+        "OS_GIT_TREE_STATE=clean",
+        "OS_GIT_VERSION=4.14.0-202411130434.p0.ga0b9c0d.assembly.stream.el8-a0b9c0d",
+        "SOURCE_GIT_TREE_STATE=clean",
+        "__doozer_group=openshift-4.14",
+        "__doozer_key=ose-cluster-cloud-controller-manager-operator",
+        "__doozer_version=v4.14.0",
+        "OS_GIT_COMMIT=a0b9c0d",
+        "SOURCE_DATE_EPOCH=1717058906",
+        "SOURCE_GIT_COMMIT=a0b9c0d70748ff24de5a40874207de3ea5bfa91e",
+        "SOURCE_GIT_TAG=a0b9c0d7",
+        "SOURCE_GIT_URL=https://github.com/openshift/cluster-cloud-controller-manager-operator"
+    ]
+}

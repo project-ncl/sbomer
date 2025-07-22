@@ -19,7 +19,9 @@ package org.jboss.sbomer.core.features.sbom.utils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import static org.jboss.sbomer.core.features.sbom.Constants.CONTAINER_PROPERTY_SYFT_PREFIX;
 import static org.jboss.sbomer.core.features.sbom.Constants.MRRC_URL;
+import static org.jboss.sbomer.core.features.sbom.Constants.PACKAGE_LANGUAGE;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VERSION;
@@ -48,6 +50,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -97,6 +100,7 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
@@ -1475,13 +1479,13 @@ public class SbomUtils {
     }
 
     /**
-     * Verify if list is populated
+     * Verify if collection is populated
      *
-     * @param list the list
-     * @return {@code true} if list is populated, {@code false} otherwise
+     * @param collection the collection
+     * @return {@code true} if collection is populated, {@code false} otherwise
      */
-    public static <T> boolean isNotEmpty(List<T> list) {
-        return list != null && !list.isEmpty();
+    public static <T> boolean isNotEmpty(Collection<T> collection) {
+        return collection != null && !collection.isEmpty();
     }
 
     /**
@@ -1622,6 +1626,95 @@ public class SbomUtils {
     private static void adjustEmptySubProvides(Dependency dependency) {
         if (dependency.getProvides() == null) {
             dependency.setProvides(new ArrayList<>());
+        }
+    }
+
+    /**
+     * Find Golang standard library component in BOM
+     *
+     * @param bom the bom to search
+     * @return The component
+     */
+    public static Component findGolangStandardLibraryComponent(Bom bom) {
+        return bom.getComponents()
+                .stream()
+                .filter(c -> c.getBomRef().startsWith("pkg:golang/stdlib@"))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Read Cachito dependencies from sources metadata
+     *
+     * @param sourcesMetadataPath path to the sources metadata
+     */
+    public static Set<Map> readCachitoDependencies(Path sourcesMetadataPath) {
+        Set<Map> cachitoDependencies = new HashSet<>();
+        try {
+            Map sourcesMetadata = ObjectMapperProvider.json().readValue(sourcesMetadataPath.toFile(), Map.class);
+            List<Map> rootDependencies = (List<Map>) sourcesMetadata.get("dependencies");
+            if (isNotEmpty(rootDependencies)) {
+                log.debug("Reading Cachito root dependencies from sources metadata");
+                cachitoDependencies.addAll(rootDependencies);
+            }
+            List<Map> packages = (List<Map>) sourcesMetadata.get("packages");
+            if (packages != null) {
+                for (Map pkg : packages) {
+                    if (pkg != null && !pkg.isEmpty()) {
+                        List<Map> dependencies = (List<Map>) pkg.get("dependencies");
+                        if (dependencies != null) {
+                            log.debug(
+                                    "Reading Cachito package dependencies from sources metadata for {}",
+                                    pkg.get("name"));
+                            cachitoDependencies.addAll(dependencies);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new ApplicationException("Could not read sources metadata", e);
+        }
+        return cachitoDependencies;
+    }
+
+    /**
+     * Add any Golang standard library features detected in Cachito dependencies
+     *
+     * @param bom the bom to add standard library features to
+     * @param standardLibraryComponent the standard library component
+     * @param cachitoDependencies the Cachito dependencies
+     */
+    public static void addGolangStandardLibraryFeatures(
+            Bom bom,
+            Component standardLibraryComponent,
+            Set<Map> cachitoDependencies) {
+        // Pointless proceeding unless there are Cachito dependencies
+        if (isNotEmpty(cachitoDependencies)) {
+            List<Component> components = bom.getComponents();
+            Map<String, Component> mergedComponents = new HashMap<>();
+            for (Component component : components) {
+                mergedComponents.put(component.getBomRef(), component);
+            }
+            components.clear();
+            for (Map dep : cachitoDependencies) {
+                // Only standard library features have missing version
+                if (dep.get("version") == null && dep.get("type").equals("go-package")) {
+                    String name = (String) dep.get("name");
+                    String version = standardLibraryComponent.getVersion();
+                    String purl = String.format("pkg:%s/%s@%s", PackageURL.StandardTypes.GOLANG, name, version);
+                    if (mergedComponents.containsKey(purl)) {
+                        log.debug(
+                                "Golang standard library feature component (with bom-ref: '{}') already exists, skipping",
+                                purl);
+                    } else {
+                        log.debug("Adding Golang standard library feature component (with bom-ref: '{}')", purl);
+                        Component component = createComponent(null, name, version, null, purl, Component.Type.LIBRARY);
+                        addProperty(component, CONTAINER_PROPERTY_SYFT_PREFIX + PACKAGE_LANGUAGE, "go");
+                        mergedComponents.put(purl, component);
+                    }
+                }
+            }
+            components.addAll(mergedComponents.values());
         }
     }
 }

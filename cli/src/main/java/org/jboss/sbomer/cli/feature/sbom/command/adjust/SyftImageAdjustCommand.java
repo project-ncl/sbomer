@@ -43,11 +43,18 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
     boolean rpms;
 
     @Option(
-            names = { "--sources" },
+            names = { "--sources-manifest" },
             paramLabel = "FILE",
             description = "Location of the sources manifest",
             converter = PathConverter.class)
-    Path sources;
+    Path sourcesManifestPath;
+
+    @Option(
+            names = { "--sources-metadata" },
+            paramLabel = "FILE",
+            description = "Location of the sources metadata",
+            converter = PathConverter.class)
+    Path sourcesMetadataPath;
 
     @Override
     protected String getAdjusterType() {
@@ -58,9 +65,15 @@ public class SyftImageAdjustCommand extends AbstractAdjustCommand {
     protected Bom doAdjust(Bom bom, Path workDir) {
         log.debug("Paths: {}", paths);
         log.debug("RPMs: {}", rpms);
-        log.debug("Sources: {}", sources != null ? sources.toAbsolutePath() : null);
+        log.debug("Sources manifest: {}", sourcesManifestPath != null ? sourcesManifestPath.toAbsolutePath() : null);
+        log.debug("Sources metadata: {}", sourcesMetadataPath != null ? sourcesMetadataPath.toAbsolutePath() : null);
 
-        SyftImageAdjuster adjuster = new SyftImageAdjuster(workDir, paths, rpms, sources);
+        SyftImageAdjuster adjuster = new SyftImageAdjuster(
+                workDir,
+                paths,
+                rpms,
+                sourcesManifestPath,
+                sourcesMetadataPath);
 
         return adjuster.adjust(bom);
     }
