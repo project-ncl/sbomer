@@ -41,7 +41,6 @@ import java.util.TreeMap;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
-import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.Property;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
@@ -160,7 +159,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         cleanupComponents(bom);
 
-        adjustComponents(bom);
+        adjustMainComponent(bom);
 
         // Populate the dependencies section with components
         adjustDependencies(bom);
@@ -255,33 +254,6 @@ public class SyftImageAdjuster extends AbstractAdjuster {
 
         // Go deep
         components.forEach(c -> filterComponents(c.getComponents()));
-    }
-
-    /**
-     * <p>
-     * Ensures that the main component is present in the {@link Bom#getComponents()} list.
-     * </p>
-     *
-     * <p>
-     * At the same time it cleans up the main component available in the {@link Metadata#getComponent()}.
-     * </p>
-     *
-     * @param bom the manifest to adjust
-     */
-    private void adjustComponents(Bom bom) {
-        Component mainComponent = bom.getMetadata().getComponent();
-
-        // Create a new component out of the current main component which will replace it.
-        Component metadataComponent = new Component();
-        metadataComponent.setType(mainComponent.getType());
-        metadataComponent.setName(mainComponent.getName());
-        metadataComponent.setPurl(mainComponent.getPurl());
-
-        // Set main component
-        bom.getMetadata().setComponent(metadataComponent);
-
-        // Set the main component
-        bom.getComponents().add(0, mainComponent);
     }
 
     /**

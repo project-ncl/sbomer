@@ -34,6 +34,7 @@ public class PncBuildAdjuster extends AbstractAdjuster {
         addMissingMetadataSupplier(bom);
         addMissingSerialNumber(bom);
         cleanupComponents(bom);
+        adjustMainComponent(bom);
 
         return bom;
     }
