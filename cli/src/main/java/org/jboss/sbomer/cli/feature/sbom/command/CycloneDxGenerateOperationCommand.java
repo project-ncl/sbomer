@@ -175,8 +175,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
 
             // Return optional list of hashes from the first artifact (distro)
             distributionHashes = !artifactsToManifest.isEmpty()
-                    ? Optional.ofNullable(
-                            getHashesFromAnalyzedDistribution(artifactsToManifest.get(0).getDistribution()))
+                    ? Optional.of(getHashesFromAnalyzedDistribution(artifactsToManifest.get(0).getDistribution()))
                     : Optional.empty();
 
             distributionSha256 = distributionHashes.stream()
