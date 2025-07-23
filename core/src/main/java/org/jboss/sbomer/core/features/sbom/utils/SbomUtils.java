@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -96,6 +97,7 @@ import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
+import org.jboss.pnc.dto.response.AnalyzedDistribution;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.Config;
@@ -118,6 +120,21 @@ public class SbomUtils {
     public static final String COMPONENT_LICENSE_ACKNOWLEDGEMENT = "concluded";
 
     public static final String EVIDENCE_LICENSE_ACKNOWLEDGEMENT = "declared";
+
+    private static class HashAlgorithmMapping<T> {
+        final Hash.Algorithm algorithm;
+        final Function<T, String> getter; // Function takes T and returns String
+
+        HashAlgorithmMapping(Hash.Algorithm algorithm, Function<T, String> getter) {
+            this.algorithm = algorithm;
+            this.getter = getter;
+        }
+    }
+
+    private static final List<HashAlgorithmMapping<AnalyzedDistribution>> DIST_HASH_DEFINITIONS = List.of(
+            new HashAlgorithmMapping<>(Hash.Algorithm.MD5, AnalyzedDistribution::getMd5),
+            new HashAlgorithmMapping<>(Hash.Algorithm.SHA1, AnalyzedDistribution::getSha1),
+            new HashAlgorithmMapping<>(Hash.Algorithm.SHA_256, AnalyzedDistribution::getSha256));
 
     private SbomUtils() {
         // This is a utility class
@@ -410,6 +427,26 @@ public class SbomUtils {
                         .toList());
         evidence.setLicenses(licenseChoice);
         component.setEvidence(evidence);
+    }
+
+    public static List<Hash> getHashesFromAnalyzedDistribution(AnalyzedDistribution analyzedDistribution) {
+        List<Hash> hashes = new ArrayList<>();
+
+        if (analyzedDistribution == null) {
+            return hashes;
+        }
+
+        // Use our pre-defined Algo to getter mapper here (DIST_HASH_DEFINTIONS)
+        for (HashAlgorithmMapping m : DIST_HASH_DEFINITIONS) {
+
+            // eg. Call analyzedArtifact.getDistribution.getSha256 and return a cdx Hash of type SHA_256
+            String hashValue = (String) m.getter.apply(analyzedDistribution);
+
+            if (Objects.nonNull(hashValue)) {
+                hashes.add(new Hash(m.algorithm, hashValue));
+            }
+        }
+        return hashes;
     }
 
     public static Component createComponent(AnalyzedArtifact analyzedArtifact, Scope scope, Type type) {
