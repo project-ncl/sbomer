@@ -24,7 +24,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createBom;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHashesFromAnalyzedDistroribution;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHashesFromAnalyzedDistribution;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
@@ -176,7 +176,7 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
             // Return optional list of hashes from the first artifact (distro)
             distributionHashes = !artifactsToManifest.isEmpty()
                     ? Optional.ofNullable(
-                            getHashesFromAnalyzedDistroribution(artifactsToManifest.get(0).getDistribution()))
+                            getHashesFromAnalyzedDistribution(artifactsToManifest.get(0).getDistribution()))
                     : Optional.empty();
 
             distributionSha256 = distributionHashes.stream()

@@ -429,7 +429,7 @@ public class SbomUtils {
         component.setEvidence(evidence);
     }
 
-    public static List<Hash> getHashesFromAnalyzedDistroribution(AnalyzedDistribution analyzedDistribution) {
+    public static List<Hash> getHashesFromAnalyzedDistribution(AnalyzedDistribution analyzedDistribution) {
         List<Hash> hashes = new ArrayList<>();
 
         if (analyzedDistribution == null) {

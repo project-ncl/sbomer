@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.core.test.unit;
 
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHashesFromAnalyzedDistroribution;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHashesFromAnalyzedDistribution;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -457,7 +457,7 @@ class SbomUtilsTest {
         when(mockedDistribution.getSha256())
                 .thenReturn("01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b");
 
-        List<Hash> hashes = getHashesFromAnalyzedDistroribution(mockedDistribution);
+        List<Hash> hashes = getHashesFromAnalyzedDistribution(mockedDistribution);
         assertNotNull(hashes);
 
         // We've set 3 hash types we should get
@@ -472,14 +472,14 @@ class SbomUtilsTest {
 
         // If we ever add more hash types in the future we might get null from records
         when(mockedDistribution.getSha256()).thenReturn(null);
-        List<Hash> hasheswnull = getHashesFromAnalyzedDistroribution(mockedDistribution);
+        List<Hash> hasheswnull = getHashesFromAnalyzedDistribution(mockedDistribution);
         assertNotNull(hasheswnull);
         assertEquals(2, hasheswnull.size());
         assertTrue(hasheswnull.contains(new Hash(Hash.Algorithm.MD5, "68b329da9893e34099c7d8ad5cb9c940")));
         assertTrue(hasheswnull.contains(new Hash(Hash.Algorithm.SHA1, "adc83b19e793491b1c6ea0fd8b46cd9f32e592fc")));
 
         // Finally what if an artifact has no distro
-        List<Hash> hashesnullobj = getHashesFromAnalyzedDistroribution(null);
+        List<Hash> hashesnullobj = getHashesFromAnalyzedDistribution(null);
         assertNotNull(hashesnullobj);
     }
 
@@ -501,12 +501,12 @@ class SbomUtilsTest {
         Optional<String> distributionSha256;
         Optional<String> distributionSha2562;
 
-        // IF OLD DELA 
+        // IF OLD DELA
         distributionHashes2 = Optional.empty();
         distributionSha2562 = Optional.empty();
 
         distributionHashes = !artifactsToManifest.isEmpty()
-                ? Optional.ofNullable(getHashesFromAnalyzedDistroribution(artifactsToManifest.get(0).getDistribution()))
+                ? Optional.of(getHashesFromAnalyzedDistribution(artifactsToManifest.get(0).getDistribution()))
                 : Optional.empty();
 
         distributionSha256 = distributionHashes.stream()
