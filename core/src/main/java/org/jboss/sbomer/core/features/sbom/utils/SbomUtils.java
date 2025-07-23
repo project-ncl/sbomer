@@ -429,10 +429,10 @@ public class SbomUtils {
         component.setEvidence(evidence);
     }
 
-    public static List<Hash> getDistroHashesFromAnalyzedArtifact(AnalyzedArtifact analyzedArtifact) {
+    public static List<Hash> getHashesFromAnalyzedDistroribution(AnalyzedDistribution analyzedDistribution) {
         List<Hash> hashes = new ArrayList<>();
 
-        if (analyzedArtifact.getDistribution() == null) {
+        if (analyzedDistribution == null) {
             return hashes;
         }
 
@@ -440,9 +440,9 @@ public class SbomUtils {
         for (HashAlgorithmMapping m : DIST_HASH_DEFINITIONS) {
 
             // eg. Call analyzedArtifact.getDistribution.getSha256 and return a cdx Hash of type SHA_256
-            String hashValue = (String) m.getter.apply(analyzedArtifact.getDistribution());
+            String hashValue = (String) m.getter.apply(analyzedDistribution);
 
-            if (Objects.nonNull(hashValue) && !hashValue.isEmpty()) {
+            if (Objects.nonNull(hashValue)) {
                 hashes.add(new Hash(m.algorithm, hashValue));
             }
         }

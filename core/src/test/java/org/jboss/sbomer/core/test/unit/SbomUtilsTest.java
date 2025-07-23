@@ -17,13 +17,16 @@
  */
 package org.jboss.sbomer.core.test.unit;
 
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getDistroHashesFromAnalyzedArtifact;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHashesFromAnalyzedDistroribution;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -446,7 +449,7 @@ class SbomUtilsTest {
     }
 
     @Test
-    void shouldMapHashesWithGetDistroHashesFromAnalyzedArtifact() {
+    void shouldMapHashesWithGetDistroHashes() {
         // Hashes are all generated on "" (empty)
         AnalyzedDistribution mockedDistribution = mock(AnalyzedDistribution.class);
         when(mockedDistribution.getMd5()).thenReturn("68b329da9893e34099c7d8ad5cb9c940");
@@ -454,10 +457,7 @@ class SbomUtilsTest {
         when(mockedDistribution.getSha256())
                 .thenReturn("01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b");
 
-        AnalyzedArtifact mockedArtifact = mock(AnalyzedArtifact.class);
-        when(mockedArtifact.getDistribution()).thenReturn(mockedDistribution);
-
-        List<Hash> hashes = getDistroHashesFromAnalyzedArtifact(mockedArtifact);
+        List<Hash> hashes = getHashesFromAnalyzedDistroribution(mockedDistribution);
         assertNotNull(hashes);
 
         // We've set 3 hash types we should get
@@ -472,11 +472,57 @@ class SbomUtilsTest {
 
         // If we ever add more hash types in the future we might get null from records
         when(mockedDistribution.getSha256()).thenReturn(null);
-        List<Hash> hasheswnull = getDistroHashesFromAnalyzedArtifact(mockedArtifact);
+        List<Hash> hasheswnull = getHashesFromAnalyzedDistroribution(mockedDistribution);
         assertNotNull(hasheswnull);
         assertEquals(2, hasheswnull.size());
         assertTrue(hasheswnull.contains(new Hash(Hash.Algorithm.MD5, "68b329da9893e34099c7d8ad5cb9c940")));
         assertTrue(hasheswnull.contains(new Hash(Hash.Algorithm.SHA1, "adc83b19e793491b1c6ea0fd8b46cd9f32e592fc")));
 
+        // Finally what if an artifact has no distro
+        List<Hash> hashesnullobj = getHashesFromAnalyzedDistroribution(null);
+        assertNotNull(hashesnullobj);
+    }
+
+    // Double check Optional logic for hashes
+    // See
+    // https://github.com/project-ncl/sbomer/blob/9d0da6c49ec38583a5cbccf55a0d4dfd1057c205/cli/src/main/java/org/jboss/sbomer/cli/feature/sbom/command/CycloneDxGenerateOperationCommand.java#L156
+    @Test
+    void optionalSanityTestCycloneDxGenerateOperationCommand() {
+        // Sanity check of in function logic
+        AnalyzedArtifact artifactWithNullDistro = mock(AnalyzedArtifact.class);
+        Component dummyComponent = mock(Component.class);
+
+        doThrow(NullPointerException.class).when(dummyComponent).setHashes(anyList());
+        when(artifactWithNullDistro.getDistribution()).thenReturn(null);
+
+        List<AnalyzedArtifact> artifactsToManifest = List.of(artifactWithNullDistro);
+        Optional<List<Hash>> distributionHashes;
+        Optional<List<Hash>> distributionHashes2;
+        Optional<String> distributionSha256;
+        Optional<String> distributionSha2562;
+
+        // IF OLD DELA 
+        distributionHashes2 = Optional.empty();
+        distributionSha2562 = Optional.empty();
+
+        distributionHashes = !artifactsToManifest.isEmpty()
+                ? Optional.ofNullable(getHashesFromAnalyzedDistroribution(artifactsToManifest.get(0).getDistribution()))
+                : Optional.empty();
+
+        distributionSha256 = distributionHashes.stream()
+                .flatMap(List::stream)
+                .filter(hash -> hash.getAlgorithm() == Hash.Algorithm.SHA_256.toString())
+                .map(Hash::getValue)
+                .findFirst();
+
+        if (!distributionSha256.isEmpty() || !distributionSha2562.isEmpty()) {
+            fail("distributionSha256 should be empty");
+        }
+        if (!distributionHashes.isEmpty() && !distributionHashes.get().isEmpty()) {
+            dummyComponent.setHashes(distributionHashes.get());
+        }
+        if (!distributionHashes2.isEmpty() && !distributionHashes2.get().isEmpty()) {
+            dummyComponent.setHashes(distributionHashes2.get());
+        }
     }
 }

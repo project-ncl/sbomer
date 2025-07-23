@@ -24,7 +24,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createBom;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getDistroHashesFromAnalyzedArtifact;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHashesFromAnalyzedDistroribution;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
@@ -40,7 +40,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 
@@ -155,14 +154,16 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                         .filter(a -> deliverableUrl.equals(a.getDistribution().getDistributionUrl()))
                         .toList();
 
+        Optional<List<Hash>> distributionHashes;
         Optional<String> distributionSha256;
-        Optional<List<Hash>> distributionHashes = Optional.empty();
 
         if (isLegacyAnalysis) {
             log.info(
                     "The deliverable analysis operation '{}' seems to be old because it does not have the distribution metadata and all the filename match info; filtering cannot be done so the final manifest will contain ALL the content of ALL the deliverable urls (if multiple). Total analyzed artifacts in the operation: '{}'",
                     config.getOperationId(),
                     allAnalyzedArtifacts.size());
+            // If its legacy analysis do not attempt to set distro hashes
+            distributionHashes = Optional.empty();
             distributionSha256 = Optional.empty();
         } else {
             log.info(
@@ -171,14 +172,17 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                     deliverableUrl,
                     allAnalyzedArtifacts.size(),
                     config.getOperationId());
-            distributionSha256 = artifactsToManifest.stream()
-                    .map(a -> a.getDistribution().getSha256())
-                    .filter(Objects::nonNull)
-                    .findFirst();
 
-            distributionHashes = artifactsToManifest.stream()
-                    .map(a -> getDistroHashesFromAnalyzedArtifact(a))
-                    .filter(Objects::nonNull)
+            // Return optional list of hashes from the first artifact (distro)
+            distributionHashes = !artifactsToManifest.isEmpty()
+                    ? Optional.ofNullable(
+                            getHashesFromAnalyzedDistroribution(artifactsToManifest.get(0).getDistribution()))
+                    : Optional.empty();
+
+            distributionSha256 = distributionHashes.stream()
+                    .flatMap(List::stream)
+                    .filter(hash -> hash.getAlgorithm() == Hash.Algorithm.SHA_256.toString())
+                    .map(Hash::getValue)
                     .findFirst();
         }
 
@@ -203,7 +207,8 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                 distributionPurl,
                 Type.FILE);
 
-        if (distributionHashes.isPresent() && !distributionHashes.isEmpty()) {
+        // If there are no hashes then dont attempt to set them
+        if (!distributionHashes.isEmpty() && !distributionHashes.get().isEmpty()) {
             mainComponent.setHashes(distributionHashes.get());
         }
 
