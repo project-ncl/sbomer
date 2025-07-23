@@ -259,11 +259,9 @@ public class DefaultProcessor implements Processor {
         // If there are any purl relocations, process these.
         purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
-        if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-            Component mainComponent = bom.getMetadata().getComponent();
-
+        if (SbomUtils.isNotEmpty(bom.getComponents())) {
             WorkaroundMissingNpmDependencies workaround = new WorkaroundMissingNpmDependencies(pncService);
-            workaround.analyzeComponentsBuild(mainComponent);
+            workaround.analyzeComponentsBuild(bom.getComponents().get(0));
             workaround.addMissingDependencies(bom);
         }
 
