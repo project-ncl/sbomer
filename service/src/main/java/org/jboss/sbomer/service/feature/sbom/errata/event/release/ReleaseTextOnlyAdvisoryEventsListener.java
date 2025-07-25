@@ -242,9 +242,8 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         Bom manifestBom = SbomUtils.fromJsonNode(sbom.getSbom());
         Component manifestMainComponent;
         Component metadataComponent = manifestBom.getMetadata().getComponent();
-        // If there are no components or the manifest is a ZIP manifest, get the main component from the metadata
-        if (!SbomUtils.isNotEmpty(manifestBom.getComponents())
-                || SbomUtils.hasProperty(metadataComponent, Constants.SBOM_RED_HAT_DELIVERABLE_URL)) {
+        // If there are no components get the main component from the metadata
+        if (!SbomUtils.isNotEmpty(manifestBom.getComponents())) {
             manifestMainComponent = metadataComponent;
         } else {
             manifestMainComponent = manifestBom.getComponents().get(0);

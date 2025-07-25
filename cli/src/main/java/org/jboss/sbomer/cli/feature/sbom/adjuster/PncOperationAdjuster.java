@@ -47,6 +47,7 @@ public class PncOperationAdjuster extends AbstractAdjuster {
             }
         }
         cleanupComponents(bom);
+        adjustMainComponent(bom);
 
         return bom;
     }

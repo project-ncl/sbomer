@@ -202,7 +202,7 @@ class DefaultProcessorTest {
         Bom processed = defaultProcessor.process(bom);
 
         // Then
-        assertEquals(10, processed.getComponents().size());
+        assertEquals(11, processed.getComponents().size());
         verifyAddedNpmDependencies(processed);
     }
 
