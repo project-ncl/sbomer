@@ -102,6 +102,7 @@ public abstract class AbstractAdjuster implements Adjuster {
         metadataComponent.setType(mainComponent.getType());
         metadataComponent.setName(mainComponent.getName());
         metadataComponent.setPurl(mainComponent.getPurl());
+        metadataComponent.setHashes(mainComponent.getHashes());
 
         // Set main component
         bom.getMetadata().setComponent(metadataComponent);
