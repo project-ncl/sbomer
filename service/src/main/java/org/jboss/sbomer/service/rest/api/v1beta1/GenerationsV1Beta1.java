@@ -140,7 +140,7 @@ public class GenerationsV1Beta1 {
                                     value = "{\"type\": \"pnc-analysis\", \"milestoneId\": \"1234\", \"urls\": [\"https://download.host.com/staging/product-a/release-b/first.zip\", \"https://download.host.com/staging/product-a/release-b/second.zip\"]}"),
                             @ExampleObject(
                                     name = "Errata Tool advisory",
-                                    description = "Requests manifest generation for the 12345 advisory",
+                                    description = "Requests manifest generation for the 12345 advisory. Can also take an optional forceBuild boolean field (defaults to false) to force build manifests to be generated for the advisory.",
                                     value = "{\"type\": \"errata-advisory\", \"advisoryId\": 12345}"),
                             @ExampleObject(
                                     name = "Container image",

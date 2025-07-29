@@ -40,13 +40,20 @@ public class ErrataAdvisoryRequestConfig extends RequestConfig {
 
     public static final String IDENTIFIER_KEY = "advisoryId";
 
+    public static final String FORCE_BUILD = "forceBuild";
+
     /**
      * Advisory identifier (number or name).
      */
     private String advisoryId;
+    /**
+     * Boolean to force build manifest generation for the advisory
+     */
+    private boolean forceBuild;
 
     @Override
     public String getType() {
         return TYPE_NAME;
     }
+
 }

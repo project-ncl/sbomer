@@ -117,6 +117,15 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                 V1Beta1RequestRecord advisoryManifestsRecord = sbomService
                         .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
 
+                if (config.isForceBuild()) {
+                    advisoryManifestsRecord = null;
+                    log.debug(
+                            "forceBuild has been set to true in request for advisory: '{}'[{}]. "
+                                    + "Ignoring latest generations and generating build manifests again",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
+                }
+
                 String toolVersion = statsService.getStats().getVersion();
                 // FIXME: 'Optional.get()' without 'isPresent()' check
                 Component.Type productType = AdvisoryEventUtils
