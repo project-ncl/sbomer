@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.BuildClient;
 import org.jboss.pnc.client.BuildConfigurationClient;
@@ -49,9 +50,11 @@ import org.jboss.pnc.dto.ProductVersion;
 import org.jboss.pnc.dto.ProductVersionRef;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
-import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.pnc.rest.api.swagger.response.SwaggerPages.AnalyzedArtifactPage;
 import org.jboss.sbomer.core.errors.ClientException;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,7 +62,12 @@ import lombok.extern.slf4j.Slf4j;
  * A service to interact with the PNC build system.
  */
 @Slf4j
+@ApplicationScoped
 public class PncService {
+
+    @Inject
+    @RestClient
+    PncClient pncClient;
 
     @Getter
     final String apiUrl;
@@ -316,7 +324,8 @@ public class PncService {
             return List.of(productVersion);
         }
 
-        // So, the product version is not assigned to the build configuration. We need to check whether this build
+        // So, the product version is not assigned to the build configuration. We need
+        // to check whether this build
         // config is part of a group config which has the product versions assigned.
 
         log.warn(
@@ -332,7 +341,8 @@ public class PncService {
             return Collections.emptyList();
         }
 
-        // In case there are some group configs, let's iterate over these and find out whether these are related to
+        // In case there are some group configs, let's iterate over these and find out
+        // whether these are related to
         // a product version
         groupConfigs.values().forEach(groupConfigRef -> {
             GroupConfiguration groupConfig = getGroupConfig(groupConfigRef.getId());
@@ -363,10 +373,12 @@ public class PncService {
 
         List<String> query = new ArrayList<>();
 
-        // Purl was provided, so let's use it, hashes will be used to filter out results, if there are multiple
+        // Purl was provided, so let's use it, hashes will be used to filter out
+        // results, if there are multiple
         // artifacts returned
         if (purl != null) {
-            // We need to make a small tweak to find the NPM purls because PNC does not like the % in the purl
+            // We need to make a small tweak to find the NPM purls because PNC does not like
+            // the % in the purl
             if (purl.startsWith("pkg:npm/%40redhat/")) {
                 query.add("purl=like=\"" + purl.replace("pkg:npm/%40redhat/", "pkg:npm/?40redhat/") + "\"");
             } else {
@@ -421,24 +433,20 @@ public class PncService {
      * @param reportId the report identifier
      * @return The {@link AnalyzedArtifact}s
      */
-    public List<AnalyzedArtifact> getAllAnalyzedArtifacts(String reportId) {
+    public List<AnalyzedArtifact> getAllAnalyzedArtifacts(
+            String reportId,
+            Optional<Integer> pageIndex,
+            Optional<Integer> pageSize,
+            Optional<String> sort,
+            Optional<String> query) {
         log.debug("Fetching analyzed artifacts from PNC for DeliverableAnalyzerReport '{}'", reportId);
 
-        try {
-            RemoteCollection<AnalyzedArtifact> analyzedArtifact = deliverableAnalyzerReportClient
-                    .getAnalyzedArtifacts(reportId);
-            return new ArrayList<>(analyzedArtifact.getAll());
-        } catch (RemoteResourceNotFoundException ex) {
-            throw new ApplicationException(
-                    "Analyzed Artifacts for the DeliverableAnalyzerReport '{}' were not found in PNC",
-                    reportId,
-                    ex);
-        } catch (RemoteResourceException ex) {
-            throw new ClientException(
-                    "Analyzed Artifacts for the DeliverableAnalyzerReport '{}' could not be retrieved because PNC responded with an error",
-                    reportId,
-                    ex);
-        }
+        AnalyzedArtifactPage analyzedArtifact = pncClient
+                .getAnalyzedArtifacts(reportId, pageIndex, pageSize, sort, query);
+
+        Collection<AnalyzedArtifact> artifacts = analyzedArtifact.getContent();
+
+        return new ArrayList<>(artifacts);
     }
 
     /**
