@@ -115,6 +115,16 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
                     // the request event
                     V1Beta1RequestRecord advisoryManifestsRecord = sbomService
                             .searchLastSuccessfulAdvisoryRequestRecord(requestEvent.getId(), config.getAdvisoryId());
+
+                    if (config.isForceBuild()) {
+                        advisoryManifestsRecord = null;
+                        log.debug(
+                                "forceBuild has been set to true in request for advisory: '{}'[{}]. "
+                                        + "Ignoring latest generations and generating build manifests again",
+                                erratum.getDetails().get().getFulladvisory(),
+                                erratum.getDetails().get().getId());
+                    }
+
                     manifestsPurls = advisoryManifestsRecord.manifests()
                             .stream()
                             .map(V1Beta1RequestManifestRecord::rootPurl)
