@@ -316,14 +316,16 @@ public class AdvisoryService {
 
             // If the forceBuild flag is enabled on incoming requestConfig, we ignore any successful records found
             // in the previous code block to force a build manifest generation instead of a release.
-            if (requestEvent.getRequestConfig() != null && requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
-                ErrataAdvisoryRequestConfig advisoryConfig = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+            if (requestEvent.getRequestConfig() != null
+                    && requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
+                ErrataAdvisoryRequestConfig advisoryConfig = (ErrataAdvisoryRequestConfig) requestEvent
+                        .getRequestConfig();
                 if (advisoryConfig.isForceBuild()) {
                     successfulRequestRecord = null;
                     log.debug(
-                "forceBuild has been set to true in request for advisory: '{}'[{}]. Ignoring latest generations and generating build manifests again",
-                        erratum.getDetails().get().getFulladvisory(),
-                        erratum.getDetails().get().getId());
+                            "forceBuild has been set to true in request for advisory: '{}'[{}]. Ignoring latest generations and generating build manifests again",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
                 }
             }
 
@@ -460,14 +462,15 @@ public class AdvisoryService {
 
         // If the forceBuild flag is enabled on incoming requestConfig, we ignore any successful records found
         // in the previous code block to force a build manifest generation instead of a release.
-        if (requestEvent.getRequestConfig() != null && requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
+        if (requestEvent.getRequestConfig() != null
+                && requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
             ErrataAdvisoryRequestConfig advisoryConfig = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
             if (advisoryConfig.isForceBuild()) {
                 successfulRequestRecord = null;
                 log.debug(
-                "forceBuild has been set to true in request for advisory: '{}'[{}]. Ignoring latest generations and generating build manifests again",
-                    erratum.getDetails().get().getFulladvisory(),
-                    erratum.getDetails().get().getId());
+                        "forceBuild has been set to true in request for advisory: '{}'[{}]. Ignoring latest generations and generating build manifests again",
+                        erratum.getDetails().get().getFulladvisory(),
+                        erratum.getDetails().get().getId());
             }
         }
 
