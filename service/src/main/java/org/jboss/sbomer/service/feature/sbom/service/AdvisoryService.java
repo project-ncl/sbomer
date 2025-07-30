@@ -314,6 +314,19 @@ public class AdvisoryService {
                         String.valueOf(erratum.getDetails().get().getId()));
             }
 
+            // If the forceBuild flag is enabled on incoming requestConfig, we ignore any successful records found
+            // in the previous code block to force a build manifest generation instead of a release.
+            if (requestEvent.getRequestConfig() != null && requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
+                ErrataAdvisoryRequestConfig advisoryConfig = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+                if (advisoryConfig.isForceBuild()) {
+                    successfulRequestRecord = null;
+                    log.debug(
+                "forceBuild has been set to true in request for advisory: '{}'[{}]. Ignoring latest generations and generating build manifests again",
+                        erratum.getDetails().get().getFulladvisory(),
+                        erratum.getDetails().get().getId());
+                }
+            }
+
             if (successfulRequestRecord == null) {
                 List<RequestConfig> requestConfigsWithinNotes = parseRequestConfigsFromJsonNotes(
                         notes,
@@ -443,6 +456,19 @@ public class AdvisoryService {
             successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryRequestRecord(
                     requestEvent.getId(),
                     String.valueOf(erratum.getDetails().get().getId()));
+        }
+
+        // If the forceBuild flag is enabled on incoming requestConfig, we ignore any successful records found
+        // in the previous code block to force a build manifest generation instead of a release.
+        if (requestEvent.getRequestConfig() != null && requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
+            ErrataAdvisoryRequestConfig advisoryConfig = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+            if (advisoryConfig.isForceBuild()) {
+                successfulRequestRecord = null;
+                log.debug(
+                "forceBuild has been set to true in request for advisory: '{}'[{}]. Ignoring latest generations and generating build manifests again",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+            }
         }
 
         if (details.getContentTypes().contains("docker")) {
