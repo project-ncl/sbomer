@@ -156,7 +156,7 @@ public class NotificationService {
             org.jboss.sbomer.service.feature.sbom.model.Sbom sbom,
             org.cyclonedx.model.Bom bom) {
 
-        Component component = bom.getMetadata().getComponent();
+        Component component = bom.getComponents().get(0);
         BomFormat bomFormat = null;
 
         try {
