@@ -43,65 +43,23 @@
         }
       ],
       "component": {
-        "name": "empty",
-        "purl": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
-        "type": "library",
-        "group": "com.github.michalszynkiewicz.test",
-        "bom-ref": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
-        "version": "1.0.0.redhat-00271",
-        "licenses": [
-          
-        ],
-        "pedigree": {
-          "commits": [
-            {
-              "uid": "2289cb2006d878e421c65b3707f7b4bb42bafb39",
-              "url": "https://code.engineering.redhat.com/gerrit/michalszynkiewicz/empty.git#1.0.0.redhat-00271"
-            }
+          "name": "empty",
+          "purl": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+          "type": "library",
+          "properties": [
+              {
+                  "name": "errata-tool-product-name",
+                  "value": "RHTESTPRODUCT"
+              },
+              {
+                  "name": "errata-tool-product-version",
+                  "value": "RHEL-8-RHTESTPRODUCT-1.1"
+              },
+              {
+                  "name": "errata-tool-product-variant",
+                  "value": "8Base-RHTESTPRODUCT-1.1"
+              }
           ]
-        },
-        "supplier": {
-          "url": [
-            "https://www.redhat.com"
-          ],
-          "name": "Red Hat"
-        },
-        "publisher": "Red Hat",
-        "properties": [
-          {
-            "name": "errata-tool-product-name",
-            "value": "RHTESTPRODUCT"
-          },
-          {
-            "name": "errata-tool-product-version",
-            "value": "RHEL-8-RHTESTPRODUCT-1.1"
-          },
-          {
-            "name": "errata-tool-product-variant",
-            "value": "8Base-RHTESTPRODUCT-1.1"
-          }
-        ],
-        "externalReferences": [
-          {
-            "url": "https://maven.repository.redhat.com/ga/",
-            "type": "distribution"
-          },
-          {
-            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/AY2GVQCXDRQAA",
-            "type": "build-system",
-            "comment": "pnc-build-id"
-          },
-          {
-            "url": "quay.io/rh-newcastle/builder-rhel-7-j8-mvn3.3.9:1.0.0",
-            "type": "build-meta",
-            "comment": "pnc-environment-image"
-          },
-          {
-            "url": "https://github.com/michalszynkiewicz/empty.git",
-            "type": "vcs",
-            "comment": ""
-          }
-        ]
       },
       "timestamp": "2023-07-07T17:29:00Z",
       "properties": [
@@ -117,11 +75,58 @@
     },
     "bomFormat": "CycloneDX",
     "specVersion": "1.6",
+    "components": [
+        {
+            "name": "empty",
+            "purl": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+            "type": "library",
+            "group": "com.github.michalszynkiewicz.test",
+            "bom-ref": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+            "version": "1.0.0.redhat-00271",
+            "licenses": [
+            ],
+            "pedigree": {
+                "commits": [
+                    {
+                        "uid": "2289cb2006d878e421c65b3707f7b4bb42bafb39",
+                        "url": "https://code.engineering.redhat.com/gerrit/michalszynkiewicz/empty.git#1.0.0.redhat-00271"
+                    }
+                ]
+            },
+            "supplier": {
+                "url": [
+                    "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+            },
+            "publisher": "Red Hat",
+            "externalReferences": [
+                {
+                    "url": "https://maven.repository.redhat.com/ga/",
+                    "type": "distribution"
+                },
+                {
+                    "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/AY2GVQCXDRQAA",
+                    "type": "build-system",
+                    "comment": "pnc-build-id"
+                },
+                {
+                    "url": "quay.io/rh-newcastle/builder-rhel-7-j8-mvn3.3.9:1.0.0",
+                    "type": "build-meta",
+                    "comment": "pnc-environment-image"
+                },
+                {
+                    "url": "https://github.com/michalszynkiewicz/empty.git",
+                    "type": "vcs",
+                    "comment": ""
+                }
+            ]
+        }
+    ],
     "dependencies": [
       {
         "ref": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
         "dependsOn": [
-          
         ]
       }
     ],

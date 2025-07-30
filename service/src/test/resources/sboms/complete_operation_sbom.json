@@ -6,41 +6,48 @@
     "timestamp": "2024-02-14T17:42:25Z",
     "component": {
       "name": "my-broker-7.11.5.CR3-bin.zip",
-      "version": "7.11.5.CR3",
-      "description": "SBOM representing the deliverable my-broker-7.11.5.CR3-bin.zip analyzed with operation A5RPHL7Y3AIAA",
-      "licenses": [],
-      "purl": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=A5RPHL7Y3AIAA",
-      "type": "file",
-      "bom-ref": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=A5RPHL7Y3AIAA",
-      "externalReferences": [
-        {
-          "type": "build-system",
-          "url": "http://orch.com/pnc-rest/v2/operations/deliverable-analyzer/A5RPHL7Y3AIAA",
-          "comment": "pnc-operation-id"
-        }
-      ],
-      "supplier": {
-        "url": ["https://www.redhat.com"],
-        "name": "Red Hat"
-      },
-      "publisher": "Red Hat",
-      "properties": [
-        {
-          "name": "errata-tool-product-name",
-          "value": "RHTESTPRODUCT"
-        },
-        {
-          "name": "errata-tool-product-version",
-          "value": "RHEL-8-RHTESTPRODUCT-1.1"
-        },
-        {
-          "name": "errata-tool-product-variant",
-          "value": "8Base-RHTESTPRODUCT-1.1"
-        }
-      ]
+        "purl": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=A5RPHL7Y3AIAA",
+        "type": "file",
+        "properties": [
+            {
+                "name": "errata-tool-product-name",
+                "value": "RHTESTPRODUCT"
+            },
+            {
+                "name": "errata-tool-product-version",
+                "value": "RHEL-8-RHTESTPRODUCT-1.1"
+            },
+            {
+                "name": "errata-tool-product-variant",
+                "value": "8Base-RHTESTPRODUCT-1.1"
+            }
+        ]
     }
   },
-  "components": [
+    "components": [
+        {
+            "name": "my-broker-7.11.5.CR3-bin.zip",
+            "version": "7.11.5.CR3",
+            "description": "SBOM representing the deliverable my-broker-7.11.5.CR3-bin.zip analyzed with operation A5RPHL7Y3AIAA",
+            "licenses": [],
+            "purl": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=A5RPHL7Y3AIAA",
+            "type": "file",
+            "bom-ref": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=A5RPHL7Y3AIAA",
+            "externalReferences": [
+                {
+                    "type": "build-system",
+                    "url": "http://orch.com/pnc-rest/v2/operations/deliverable-analyzer/A5RPHL7Y3AIAA",
+                    "comment": "pnc-operation-id"
+                }
+            ],
+            "supplier": {
+                "url": [
+                    "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+            },
+            "publisher": "Red Hat"
+        },
     {
       "group": "com.google.errorprone",
       "name": "error_prone_annotations",
