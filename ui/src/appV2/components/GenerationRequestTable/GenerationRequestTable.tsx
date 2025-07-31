@@ -84,7 +84,7 @@ export const GenerationRequestTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(({ id, cells }) => {
+              {rows.map(({ id }) => {
                 const generation = value?.find(g => g.id === id);
                 return (
                   <TableRow key={id}>
@@ -106,7 +106,7 @@ export const GenerationRequestTable = () => {
                         }
                       >
                         <Tag>
-                          someTag
+                          {generation?.status || 'unknown'}
                         </Tag>
                       </Tooltip>
                     </TableCell>

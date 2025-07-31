@@ -2,29 +2,13 @@ import { useManifests } from '@appV2/components/ManifestsTableTable/useSboms';
 import { useManifestsFilters } from '@appV2/components/ManifestsTableTable/useManifestsFilters';
 import { ManifestsQueryType } from '@appV2/types';
 import { timestampToHumanReadable } from '@appV2/utils/Utils';
-import {
-  Pagination,
-  PaginationVariant,
-  Skeleton,
-  Timestamp,
-  TimestampTooltipVariant,
-  ToolbarItem,
-  Toolbar,
-  Select,
-  SearchInput,
-  SelectOption,
-  ToolbarContent,
-  SelectList,
-  MenuToggleElement,
-  MenuToggle,
-  SelectGroup,
-  Button
-} from '@patternfly/react-core';
-import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
+import { DataTable, Pagination, SkeletonPlaceholder, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@carbon/react';
 
 
 const columnNames = {
@@ -85,125 +69,76 @@ export const ManifestsTable = () => {
     setFilters(selectValue, searchBarValue, 1, pageSize)
   }
 
-  const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
-    <MenuToggle
-      ref={toggleRef}
-      onClick={onToggleClick}
-      isExpanded={selectIsOpen}
-      style={
-        {
-          width: '200px'
-        } as React.CSSProperties
-      }
-    >
-      {selectValue}
-    </MenuToggle>
-  );
-
-  const select = <Select
-    id="single-select"
-    isOpen={selectIsOpen}
-    selected={selectValue as ManifestsQueryType}
-    onSelect={onSelect}
-    onOpenChange={(isOpen) => setSelectIsOpen(isOpen)}
-    toggle={toggle}
-    shouldFocusToggleOnSelect
-  >
-    <SelectList>
-      <SelectGroup>
-        <SelectOption value={ManifestsQueryType.NoFilter}>{ManifestsQueryType.NoFilter}</SelectOption>
-      </SelectGroup>
-      <SelectGroup>
-        <SelectOption value={ManifestsQueryType.Purl}>{ManifestsQueryType.Purl}</SelectOption>
-      </SelectGroup>
-    </SelectList>
-  </Select>
 
 
-  const onChange = (value: string) => {
-    setSearchBarValue(value)
-  };
+  const pagination = (
+      <Pagination
+        backwardText="Previous page"
+        forwardText="Next page"
+        itemsPerPageText="Items per page:"
+        itemRangeText={(min: number, max: number, total: number) => `${min}–${max} of ${total} items`}
+        page={pageIndex + 1}
+        pageNumberText="Page Number"
+        pageSize={pageSize}
+        pageSizes={[
+          { text: '10', value: 10 },
+          { text: '20', value: 20 },
+          { text: '50', value: 50 },
+          { text: '100', value: 100 },
+        ]}
+        totalItems={total || 0}
+      />
+    );
 
-  const searchBar = <SearchInput
-    placeholder="Enter selected id"
-    value={searchBarValue}
-    onChange={(_event, value) => onChange(value)}
-    onClear={() => onChange('')}
-    isAdvancedSearchOpen={!searchBarVisible}
-    onKeyDown={(event: React.KeyboardEvent) => {
-      if (event.key == 'Enter') {
-        onSearchCall();
-      }
-    }
-    }
+
+  const table = (
+  <DataTable
+    rows={value || []}
+    headers={[
+      { key: 'id', header: columnNames.id },
+      { key: 'creationTime', header: columnNames.creationTime },
+    ]}
+    render={({ rows, headers }) => (
+      <TableContainer title="Latest manifests">
+        <Table aria-label="Manifests Table">
+          <TableHead>
+            <TableRow>
+              {headers.map(header => (
+                <TableHeader key={header.key}>{header.header}</TableHeader>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map(({ id }) => {
+              const manifest = value?.find(m => m.id === id);
+              return (
+                <TableRow key={id}>
+                  <TableCell>
+                    <Link to={`/manifests/${id}`}>
+                      <pre>{id}</pre>
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <span>
+                      {manifest?.creationTime
+                        ? timestampToHumanReadable(Date.now() - new Date(manifest.creationTime).getTime(), false, 'ago')
+                        : ''}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+        {enablePagination && pagination}
+      </TableContainer>
+    )}
   />
+);
 
-  const searchButton = <Button
-    variant='primary'
-    onClick={() => onSearchCall()}>Search</Button>
-
-  const pagination = <Pagination
-      itemCount={total}
-      widgetId="manifests-table-pagination"
-      perPage={pageSize}
-      page={pageIndex}
-      variant={PaginationVariant.bottom}
-      onSetPage={onSetPage}
-      onPerPageSelect={onPerPageSelect}
-    />
-
-
-  const table = <>
-    <Table aria-label="Manifests table" variant="compact">
-      <Caption>Latest manifests</Caption>
-      <Thead>
-        <Tr>
-          <Th>{columnNames.id}</Th>
-
-          <Th>{columnNames.creationTime}</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {value && value.map((manifest) => (
-          <Tr
-            key={manifest.id}
-            isClickable
-            style={{ cursor: 'auto' }}
-          >
-            <Td dataLabel={columnNames.id}>
-              <Link to={`/manifests/${manifest.id}`}>
-                <pre>{manifest.id}</pre>
-              </Link>
-            </Td>
-            <Td dataLabel={columnNames.creationTime}>
-              <Timestamp date={manifest.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                {timestampToHumanReadable(Date.now() - manifest.creationTime.getTime(), false, 'ago')}
-              </Timestamp>
-            </Td>
-          </Tr>
-        ))}
-      </Tbody>
-    </Table>
-    {enablePagination && pagination}
-  </>
   const noResults = <NoResultsSection />
-  const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
+  const loadingSkeleton = <SkeletonPlaceholder />;
 
-  const filtersBar = <>
-    <Toolbar>
-      <ToolbarContent>
-        <ToolbarItem>
-          {select}
-        </ToolbarItem>
-        <ToolbarItem>
-          {searchBarVisible && searchBar}
-        </ToolbarItem>
-        <ToolbarItem>
-          {isButtonVisible && searchButton}
-        </ToolbarItem>
-      </ToolbarContent>
-    </Toolbar>
-  </>
 
   const tableArea =
     error ? <ErrorSection error={error} /> :
@@ -212,7 +147,6 @@ export const ManifestsTable = () => {
 
 
   return <>
-    {enableFiltering && filtersBar}
     {tableArea}
   </>
 
