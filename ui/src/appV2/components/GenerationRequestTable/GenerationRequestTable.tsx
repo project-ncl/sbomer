@@ -1,14 +1,5 @@
 import { statusToColor, statusToDescription, timestampToHumanReadable } from '@appV2/utils/Utils';
-import {
-  Label,
-  Pagination,
-  PaginationVariant,
-  Skeleton,
-  Timestamp,
-  TimestampTooltipVariant,
-  Tooltip,
-} from '@patternfly/react-core';
-import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
@@ -16,6 +7,7 @@ import { useSearchParam } from 'react-use';
 import { useGenerationRequests } from '@appV2/components/GenerationRequestTable/useGenerationRequests';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
+import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination } from '@carbon/react';
 
 const columnNames = {
   id: 'ID',
@@ -51,89 +43,109 @@ export const GenerationRequestTable = () => {
     navigate({ search: `?page=1&pageSize=${newPerPage}` });
   };
 
-  const pagination =  <Pagination
-      itemCount={total}
-      widgetId="request-table-pagination"
-      perPage={pageSize}
+  const pagination = (
+    <Pagination
+      backwardText="Previous page"
+      forwardText="Next page"
+      itemsPerPageText="Items per page:"
+      itemRangeText={(min: number, max: number, total: number) => `${min}–${max} of ${total} items`}
       page={pageIndex + 1}
-      variant={PaginationVariant.bottom}
-      onSetPage={onSetPage}
-      onPerPageSelect={onPerPageSelect}
+      pageNumberText="Page Number"
+      pageSize={pageSize}
+      pageSizes={[
+        { text: '10', value: 10 },
+        { text: '20', value: 20 },
+        { text: '50', value: 50 },
+        { text: '100', value: 100 },
+      ]}
+      totalItems={total || 0}
+
     />
+  );
 
-  const table = <>
-    <Table aria-label="Generation request table" variant="compact">
-      <Caption>Latest manifest generations</Caption>
-      <Thead>
-        <Tr>
-          <Th>{columnNames.id}</Th>
-          <Th>{columnNames.status}</Th>
-          <Th>{columnNames.creationTime}</Th>
-          <Th>{columnNames.updatedTime}</Th>
-          <Th>{columnNames.finishedTime}</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {value && value.map((generation) => (
-          <Tr
-            key={generation.id}
-            isClickable
-            style={{ cursor: 'auto' }}
-          >
-            <Td dataLabel={columnNames.id}>
-              <Link to={`/generations/${generation.id}`}>
-                <pre>{generation.id}</pre>
-              </Link>
-            </Td>
-            <Td dataLabel={columnNames.status}>
-              <Tooltip
-                isContentLeftAligned={true}
-                content={
-                  <div>
-                    <div>
-                      <strong>{generation.result}</strong>
-                    </div>
-                    <div>{generation.reason}</div>
-                  </div>
-                }
-              >
-                <Label color={statusToColor(generation)}>
-                  {statusToDescription(generation)}
-                </Label>
-
-                {/* <span className="pf-v5-c-timestamp pf-m-help-text">{request.status}</span> */}
-              </Tooltip>
-            </Td>
-            <Td dataLabel={columnNames.creationTime}>
-              <Timestamp date={generation.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                {timestampToHumanReadable(Date.now() - generation.creationTime.getTime(), false, 'ago')}
-              </Timestamp>
-            </Td>
-            <Td dataLabel={columnNames.updatedTime}>
-              {generation.updatedTime && (
-                <Timestamp date={generation.updatedTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - generation.updatedTime.getTime(), false, 'ago')}
-                </Timestamp>
-              )}
-            </Td>
-            <Td dataLabel={columnNames.finishedTime}>
-              {generation.finishedTime ? (
-                <Timestamp date={generation.finishedTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - generation.finishedTime.getTime(), false, 'ago')}
-                </Timestamp>
-              ) : (
-                <span className="pf-v5-c-timestamp pf-m-help-text">N/A</span>
-              )}
-            </Td>
-          </Tr>
-        ))}
-      </Tbody>
-    </Table>
-   {paginationEnabled && pagination}
-  </>
+  const table = (
+    <DataTable
+      rows={value || []}
+      headers={[
+        { key: 'id', header: columnNames.id },
+        { key: 'status', header: columnNames.status },
+        { key: 'creationTime', header: columnNames.creationTime },
+        { key: 'updatedTime', header: columnNames.updatedTime },
+        { key: 'finishedTime', header: columnNames.finishedTime },
+      ]}
+      render={({ rows, headers }) => (
+        <TableContainer title="Latest manifest generations">
+          <Table aria-label="Generation request table">
+            <TableHead>
+              <TableRow>
+                {headers.map(header => (
+                  <TableHeader key={header.key}>{header.header}</TableHeader>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map(({ id, cells }) => {
+                const generation = value?.find(g => g.id === id);
+                return (
+                  <TableRow key={id}>
+                    <TableCell>
+                      <Link to={`/generations/${id}`}>
+                        <pre>{id}</pre>
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip
+                        isContentLeftAligned={true}
+                        content={
+                          <div>
+                            <div>
+                              <strong>{generation?.result}</strong>
+                            </div>
+                            <div>{generation?.reason}</div>
+                          </div>
+                        }
+                      >
+                        <Tag>
+                          someTag
+                        </Tag>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <span>
+                        {generation
+                          ? timestampToHumanReadable(Date.now() - generation.creationTime.getTime(), false, 'ago')
+                          : ''}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {generation?.updatedTime && (
+                        <span>
+                          {timestampToHumanReadable(Date.now() - generation.updatedTime.getTime(), false, 'ago')}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {generation?.finishedTime ? (
+                        <span>
+                          {timestampToHumanReadable(Date.now() - generation.finishedTime.getTime(), false, 'ago')}
+                        </span>
+                      ) : (
+                        <span className="pf-v5-c-timestamp pf-m-help-text">N/A</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          {paginationEnabled && pagination}
+        </TableContainer>
+      )}
+    />
+  );
 
   const noResults = <NoResultsSection />
-  const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
+  const loadingSkeleton = <SkeletonText />;
 
   const tableArea =
     error ? <ErrorSection error={error} /> :
