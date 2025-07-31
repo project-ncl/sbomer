@@ -1,8 +1,8 @@
+import { Button } from '@carbon/react';
 import rhlogo from '../../../../assets/Logo-Red_Hat-A-Standard-RGB.svg';
 import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
 import {
   Brand,
-  Button,
   Masthead,
   MastheadLogo,
   MastheadMain,
@@ -35,7 +35,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <div
       style={{
         width: '100%',
-        background: '#2196f3',
+        background: '#0f62fe',
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'center',
@@ -44,12 +44,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         zIndex: 2000,
       }}
     >
-      <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.1rem', letterSpacing: '1px', marginRight: '1rem' }}>
+      <span style={{ color: '#fff', fontWeight: 600, fontSize: '1rem', letterSpacing: '0.5px', marginRight: '1rem' }}>
         SBOMER NEXT GEN
       </span>
       <Button
-        variant="primary"
-        style={{ color: '#2196f3', backgroundColor: '#fff', borderColor: '#fff' }}
+        kind="secondary"
+        size="sm"
+        style={{ marginLeft: '0.5rem' }}
         onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
       >
         Go to Classic
