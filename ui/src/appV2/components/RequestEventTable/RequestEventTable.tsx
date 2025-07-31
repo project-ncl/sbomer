@@ -1,26 +1,19 @@
 import { requestEventStatusToColor, requestEventStatusToDescription, timestampToHumanReadable } from '@appV2/utils/Utils';
 import {
-  Label,
   Pagination,
-  PaginationVariant,
-  Skeleton,
-  Timestamp,
-  TimestampTooltipVariant,
+  Search,
+  DataTable,
+  Table,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  Tag,
   Tooltip,
-  ToolbarContent,
-  ToolbarItem,
-  Toolbar,
-  Select,
-  SelectList,
-  SelectOption,
-  SelectGroup,
-  MenuToggle,
-  MenuToggleElement,
-  SearchInput,
-  Button,
-  ClipboardCopy,
-} from '@patternfly/react-core';
-import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+  SkeletonPlaceholder,
+} from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { RequestsQueryType } from '@appV2/types';
@@ -28,7 +21,6 @@ import { useRequestEventsFilters } from '@appV2/components/RequestEventTable/use
 import { useRequestEvents } from '@appV2/components/RequestEventTable/useRequestEvents';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
-
 
 const columnNames = {
   id: 'ID',
@@ -42,113 +34,152 @@ export const RequestEventTable = () => {
   const { query, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
 
   // todo enable when searching is implemented
-  const enableSearching = false;
+  const enableSearching = true;
   // enable when pagination is implemented
   const enablePagination = true;
 
+  const [querySearchbarValue, setQuerySearchbarValue] = React.useState<string>('');
 
+  const [{ value, loading, total, error }] = useRequestEvents();
 
-  const [querySearchbarValue, setQuerySearchbarValue] = React.useState<string>();
-
-
-
-  const [{ value, loading, total, error },] = useRequestEvents();
-
-  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
-    setFilters(query, newPage, pageSize)
+  const onSetPage = (newPage: number) => {
+    setFilters(query, newPage - 1, pageSize);
   };
 
-  const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
-    setFilters(query, pageIndex, newPerPage)
+  const onPerPageSelect = (newPerPage: number) => {
+    setFilters(query, 0, newPerPage);
   };
 
+  const pagination = (
+    <Pagination
+      backwardText="Previous page"
+      forwardText="Next page"
+      itemsPerPageText="Items per page:"
+      itemRangeText={(min: number, max: number, total: number) => `${min}–${max} of ${total} items`}
+      page={pageIndex + 1}
+      pageNumberText="Page Number"
+      pageSize={pageSize}
+      pageSizes={[
+        { text: '10', value: 10 },
+        { text: '20', value: 20 },
+        { text: '50', value: 50 },
+        { text: '100', value: 100 },
+      ]}
+      totalItems={total || 0}
+      onChange={({ page, pageSize: newPageSize }) => {
+        if (page !== pageIndex + 1) {
+          onSetPage(page);
+        }
+        if (newPageSize !== pageSize) {
+          onPerPageSelect(newPageSize);
+        }
+      }}
+    />
+  );
 
-  const pagination = <Pagination
-    itemCount={total}
-    widgetId="request-table-pagination"
-    perPage={pageSize}
-    page={pageIndex}
-    variant={PaginationVariant.bottom}
-    onSetPage={onSetPage}
-    onPerPageSelect={onPerPageSelect}
-  />
-
-  const querySearchBarValueOnChange = (value: string) => {
-    setQuerySearchbarValue(value);
+  const querySearchBarValueOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuerySearchbarValue(event.target.value);
   };
 
-  const querySearchBar = <Toolbar>
-    <ToolbarItem>
-      <SearchInput
+  const querySearchBar = (
+    <div style={{ marginBottom: 'var(--cds-spacing-05)' }}>
+      <Search
         placeholder="Enter query"
         value={querySearchbarValue}
-        onChange={(_event, value) => querySearchBarValueOnChange(value)}
-        onClear={() => querySearchBarValueOnChange('')}
-        onSearch={() => setFilters(querySearchbarValue || '', pageIndex, pageSize)}
-        style={{ width: '600px' }}
-        >
-      </SearchInput>
-    </ToolbarItem>
-  </Toolbar>
+        onChange={querySearchBarValueOnChange}
+        onClear={() => setQuerySearchbarValue('')}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            setFilters(querySearchbarValue || '', pageIndex, pageSize);
+          }
+        }}
+        size="lg" labelText={undefined} />
+    </div>
+  );
 
-  const table = <>
-    <Table aria-label="Events table" variant="compact">
-      <Caption>Latest events</Caption>
-      <Thead>
-        <Tr>
-          <Th>{columnNames.id}</Th>
-          <Th>{columnNames.status}</Th>
-          <Th>{columnNames.created}</Th>
-          <Th>{columnNames.updated}</Th>
-          <Th>{columnNames.finished}</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {value && value.map((requestEvent) => (
-          <Tr
-            key={requestEvent.id}
-            isClickable
-            style={{ cursor: 'auto' }}
-          >
-            <Td dataLabel={columnNames.id}>
-              <Link to={`/events/${requestEvent.id}`}>
-                <pre>{requestEvent.id}</pre>
-              </Link>
-            </Td>
+  const table = (
+    <DataTable
+      rows={value || []}
+      headers={[
+        { key: 'id', header: columnNames.id },
+        { key: 'status', header: columnNames.status },
+        { key: 'created', header: columnNames.created },
+        { key: 'updated', header: columnNames.updated },
+        { key: 'finished', header: columnNames.finished },
+      ]}
+      render={({ rows, headers }) => (
+        <TableContainer title="Latest events">
+          <Table aria-label="Events table">
+            <TableHead>
+              <TableRow>
+                {headers.map(header => (
+                  <TableHeader key={header.key}>{header.header}</TableHeader>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map(({ id }) => {
+                const requestEvent = value?.find(e => e.id === id);
+                return (
+                  <TableRow key={id}>
+                    <TableCell>
+                      <Link to={`/events/${id}`}>
+                        <pre>{id}</pre>
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip
+                        isContentLeftAligned={true}
+                        content={
+                          <div>
+                            <div>
+                              <strong>{requestEvent?.status}</strong>
+                            </div>
+                            <div>{requestEvent?.status}</div>
+                          </div>
+                        }
+                      >
+                        <Tag>
+                          {requestEvent?.status}
+                        </Tag>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <span>
+                        {requestEvent?.created
+                          ? timestampToHumanReadable(Date.now() - requestEvent.created.getTime(), false, 'ago')
+                          : ''}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span>
+                        {requestEvent?.updated
+                          ? timestampToHumanReadable(Date.now() - requestEvent.updated.getTime(), false, 'ago')
+                          : ''}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {requestEvent?.finished ? (
+                        <span>
+                          {timestampToHumanReadable(Date.now() - requestEvent.finished.getTime(), false, 'ago')}
+                        </span>
+                      ) : (
+                        <span style={{ color: 'var(--cds-text-helper)' }}>N/A</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          {enablePagination && pagination}
+        </TableContainer>
+      )}
+    />
+  );
 
-            <Td dataLabel={columnNames.status}>
-              <Label color="yellow">
-                {requestEvent.status}
-              </Label>
-            </Td>
-            <Td dataLabel={columnNames.created}>
-              <Timestamp date={requestEvent.created} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                {timestampToHumanReadable(Date.now() - requestEvent.created.getTime(), false, 'ago')}
-              </Timestamp>
-            </Td>
-            <Td dataLabel={columnNames.updated}>
-              <Timestamp date={requestEvent.updated} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                {timestampToHumanReadable(Date.now() - requestEvent.updated.getTime(), false, 'ago')}
-              </Timestamp>
-            </Td>
-            <Td dataLabel={columnNames.finished}>
-              {requestEvent.finished ? (
-                <Timestamp date={requestEvent.finished} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - requestEvent.finished.getTime(), false, 'ago')}
-                </Timestamp>
-              ) : (
-                <span className="pf-v5-c-timestamp pf-m-help-text">N/A</span>
-              )}
-            </Td>
-          </Tr>
-        ))}
-      </Tbody>
-    </Table>
-    {enablePagination && pagination}
-  </>
-  const noResults = <NoResultsSection />
-  const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
-
+  const noResults = <NoResultsSection />;
+  const loadingSkeleton = <SkeletonPlaceholder />;
 
   const tableArea =
     error ? <ErrorSection error={error} /> :
@@ -157,7 +188,7 @@ export const RequestEventTable = () => {
 
   return (
     <>
-      {querySearchBar}
+      {enableSearching && querySearchBar}
       {tableArea}
     </>
   );
