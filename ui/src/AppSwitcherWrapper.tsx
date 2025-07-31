@@ -1,26 +1,21 @@
-import React from "react";
-import App from './app/index';
-import AppV2 from './appV2/index';
+import React, { Suspense, lazy } from 'react';
 
-import '@carbon/styles/css/styles.css';
-import './appV2/styles.scss';
+const App = lazy(() => import('./app/index'));
+const AppV2 = lazy(() => import('./appV2/index'));
 
+const LoadingScreen = () => <div>Loading...</div>;
 
 const AppSwitcherWrapper = () => {
   const useV2 = window.location.pathname.startsWith('/nextgen');
 
   return (
-    <>
+    <Suspense fallback={<LoadingScreen />}>
       {useV2 ? (
-        <div className="carbon-styles-scope">
           <AppV2 basename="/nextgen" />
-        </div>
       ) : (
-        <div className="patternfly-app">
-          <App />
-        </div>
+        <App />
       )}
-    </>
+    </Suspense>
   );
 };
 
