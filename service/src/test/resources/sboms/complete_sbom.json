@@ -42,11 +42,26 @@
         "component": {
             "name": "microprofile-graphql-parent",
             "purl": "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
+            "type": "library"
+        },
+        "timestamp": "2023-04-21T08:19:06Z"
+    },
+    "bomFormat": "CycloneDX",
+    "components": [
+        {
+            "name": "microprofile-graphql-parent",
+            "purl": "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
             "type": "library",
             "group": "org.eclipse.microprofile.graphql",
             "bom-ref": "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-parent@1.1.0.redhat-00008?type=pom",
             "version": "1.1.0.redhat-00008",
-            "licenses": [{ "license": { "id": "Apache-2.0" } }],
+            "licenses": [
+                {
+                    "license": {
+                        "id": "Apache-2.0"
+                    }
+                }
+            ],
             "pedigree": {
                 "commits": [
                     {
@@ -55,11 +70,19 @@
                     }
                 ]
             },
-            "supplier": { "url": ["https://www.redhat.com"], "name": "Red Hat" },
+            "supplier": {
+                "url": [
+                    "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+            },
             "publisher": "Red Hat",
             "description": "Code-first API for developing GraphQL services in MicroProfile",
             "externalReferences": [
-                { "url": "http://microprofile.io", "type": "website" },
+                {
+                    "url": "http://microprofile.io",
+                    "type": "website"
+                },
                 {
                     "url": "https://maven.repository.redhat.com/ga/",
                     "type": "distribution"
@@ -82,19 +105,30 @@
                     "type": "build-meta",
                     "comment": "pnc-environment-image"
                 }
+            ],
+            "properties": [
+                {
+                    "name": "maven.goal",
+                    "value": "makeAggregateBom"
+                },
+                {
+                    "name": "maven.scopes",
+                    "value": "compile,provided,runtime,system"
+                },
+                {
+                    "name": "errata-tool-product-name",
+                    "value": "RHBQ"
+                },
+                {
+                    "name": "errata-tool-product-version",
+                    "value": "8Base-RHBQ-2.13"
+                },
+                {
+                    "name": "errata-tool-product-variant",
+                    "value": "RHEL-8-RHBQ-2.13"
+                }
             ]
         },
-        "timestamp": "2023-04-21T08:19:06Z",
-        "properties": [
-            { "name": "maven.goal", "value": "makeAggregateBom" },
-            { "name": "maven.scopes", "value": "compile,provided,runtime,system" },
-            { "name": "errata-tool-product-name", "value": "RHBQ" },
-            { "name": "errata-tool-product-version", "value": "8Base-RHBQ-2.13" },
-            { "name": "errata-tool-product-variant", "value": "RHEL-8-RHBQ-2.13" }
-        ]
-    },
-    "bomFormat": "CycloneDX",
-    "components": [
         {
             "name": "microprofile-graphql-spec",
             "purl": "pkg:maven/org.eclipse.microprofile.graphql/microprofile-graphql-spec@1.1.0.redhat-00008?type=pom",

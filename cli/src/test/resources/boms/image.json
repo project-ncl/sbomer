@@ -20,7 +20,27 @@
       "bom-ref": "3893910a10b83660",
       "type": "container",
       "name": "registry.com/rh-osbs/amq-streams-console-ui-rhel9",
-      "version": "sha256:a43c117701dd6d012bb9da8974d2d332f70a688944ed19280a020d5357f8b22e"
+      "version": "sha256:a43c117701dd6d012bb9da8974d2d332f70a688944ed19280a020d5357f8b22e",
+      "hashes": [
+        {
+            "alg": "SHA-256",
+            "content": "a43c117701dd6d012bb9da8974d2d332f70a688944ed19280a020d5357f8b22e"
+        }
+      ],
+      "evidence": {
+        "identity": [
+            {
+                "field": "name",
+                "concludedValue": "registry.com/rh-osbs/amq-streams-console-ui-rhel9"
+            }
+        ],
+        "identity": [
+            {
+                "field": "purl",
+                "concludedValue": "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3"
+            }
+        ]
+      }
     },
     "properties": [
       { "name": "syft:image:labels:architecture", "value": "x86_64" },
