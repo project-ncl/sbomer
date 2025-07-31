@@ -1,9 +1,8 @@
 import { AboutSection } from '@appV2/components/Sections/AboutSection/AboutSection';
-import { StatsSection } from '@appV2/components/Sections/StatsSection/StatsSection';
-import { Alert, Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
 import * as React from 'react';
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
+import { Column, Grid, InlineNotification, Tile, ToastNotification } from '@carbon/react';
 
 const Dashboard: React.FunctionComponent = () => {
 
@@ -11,27 +10,19 @@ const Dashboard: React.FunctionComponent = () => {
 
   return (
     <AppLayout>
-      <PageSection hasBodyWrapper={false}>
-        <Grid hasGutter span={12}>
-          <GridItem span={12}>
-            <Title headingLevel="h1" size="4xl">
-              SBOMer Next Generation
-            </Title>
-
-          </GridItem>
-          <GridItem span={12}>
-             <Alert
-              variant="warning"
-              title="IN DEVELOPMENT" >
-              </Alert>
-          </GridItem>
-
-
-          <GridItem span={6}>
+        <Grid>
+          <Column span={12}>
+            <h1>SBOMer Next Generation</h1>
+          </Column>
+          <Column span={8}>
+            <Tile>
+              IN DEVELOPMENT
+            </Tile>
+          </Column>
+          <Column span={6}>
             <AboutSection />
-          </GridItem>
+          </Column>
         </Grid>
-      </PageSection>
     </AppLayout>
   );
 };

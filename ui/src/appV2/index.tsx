@@ -2,10 +2,13 @@ import * as React from 'react';
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 
 import { IAppRoute, routes } from './routes';
+import './carbon-styles.scss';
+import { Theme } from '@carbon/react';
 
 const AppV2 = ({ basename }: { basename: string }) => {
   return (
     <>
+    <Theme theme="g10">
       <RouterProvider
         router={createBrowserRouter(
           routes
@@ -14,6 +17,7 @@ const AppV2 = ({ basename }: { basename: string }) => {
           { basename: basename }
         )}
       />
+    </Theme>
     </>
   );
 };
