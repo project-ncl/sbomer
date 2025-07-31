@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.io.IOException;
 
 import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
 import org.jboss.sbomer.cli.feature.sbom.command.RedHatProductProcessCommand;
 import org.jboss.sbomer.cli.test.utils.PncWireMock;
 import org.jboss.sbomer.core.features.sbom.enums.ProcessorType;
@@ -79,10 +80,11 @@ class RedHatProductProcessCommandIT {
     @Test
     void generatedSbomShouldNotHaveProductMetadata() throws IOException {
         Bom bom = SbomUtils.fromJsonNode(generateBom());
+        Component component = bom.getComponents().get(0);
 
-        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME));
-        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION));
-        assertFalse(SbomUtils.hasProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT));
+        assertFalse(SbomUtils.hasProperty(component, PROPERTY_ERRATA_PRODUCT_NAME));
+        assertFalse(SbomUtils.hasProperty(component, PROPERTY_ERRATA_PRODUCT_VERSION));
+        assertFalse(SbomUtils.hasProperty(component, PROPERTY_ERRATA_PRODUCT_VARIANT));
     }
 
     // @Test

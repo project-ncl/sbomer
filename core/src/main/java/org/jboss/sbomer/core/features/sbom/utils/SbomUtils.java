@@ -1230,7 +1230,7 @@ public class SbomUtils {
 
     /**
      * Given a raw {@link JsonNode}, converts it to a CycloneDX {@link Bom} object, and removes any Errata information
-     * from the root component properties.
+     * from the main component properties.
      *
      * @param jsonNode The {@link JsonNode} to convert.
      */
@@ -1243,13 +1243,14 @@ public class SbomUtils {
     /**
      * Removes any Errata information from the provided CycloneDX {@link Bom} object.
      *
-     * @param bom The {@link Bom} containing the root component to be cleaned up from its Errata properties.
+     * @param bom The {@link Bom} containing the main component to be cleaned up from its Errata properties.
      */
     public static void removeErrataProperties(Bom bom) {
-        if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME);
-            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION);
-            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT);
+        if (bom != null && isNotEmpty(bom.getComponents())) {
+            Component component = bom.getComponents().get(0);
+            removeProperty(component, PROPERTY_ERRATA_PRODUCT_NAME);
+            removeProperty(component, PROPERTY_ERRATA_PRODUCT_VERSION);
+            removeProperty(component, PROPERTY_ERRATA_PRODUCT_VARIANT);
         }
     }
 

@@ -116,22 +116,18 @@ class SbomUtilsTest {
         void shouldRemoveErrataPropertiesFromBom() {
             Bom bom = SbomUtils.fromPath(sbomPath("sbom_with_errata.json"));
             assertNotNull(bom);
-            assertNotNull(bom.getMetadata().getComponent());
+            Component component = bom.getComponents().get(0);
+            assertNotNull(component);
 
-            assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME));
-            assertTrue(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
-            assertTrue(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
+            assertTrue(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_NAME));
+            assertTrue(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
+            assertTrue(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
 
             SbomUtils.removeErrataProperties(bom);
 
-            assertFalse(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME));
-            assertFalse(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
-            assertFalse(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
+            assertFalse(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_NAME));
+            assertFalse(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
+            assertFalse(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
         }
 
         @Test
@@ -139,7 +135,7 @@ class SbomUtilsTest {
             Bom bom = SbomUtils.fromPath(sbomPath("sbom_with_errata.json"));
             JsonNode jsonNode = SbomUtils.toJsonNode(bom);
 
-            JsonNode properties = jsonNode.get("metadata").get("component").get("properties");
+            JsonNode properties = jsonNode.get("components").get(0).get("properties");
             assertNotNull(properties);
             assertEquals(JsonNodeType.ARRAY, properties.getNodeType());
 
@@ -168,7 +164,7 @@ class SbomUtilsTest {
 
             jsonNode = SbomUtils.removeErrataProperties(jsonNode);
 
-            properties = jsonNode.get("metadata").get("component").get("properties");
+            properties = jsonNode.get("components").get(0).get("properties");
             assertNull(properties);
         }
 

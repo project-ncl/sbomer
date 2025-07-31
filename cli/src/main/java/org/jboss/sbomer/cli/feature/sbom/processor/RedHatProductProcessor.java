@@ -47,7 +47,7 @@ public class RedHatProductProcessor implements Processor {
 
     @Override
     public Bom process(Bom bom) {
-        Component component = bom.getMetadata().getComponent();
+        Component component = bom.getComponents().get(0);
 
         addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_NAME, productName);
         addPropertyIfMissing(component, PROPERTY_ERRATA_PRODUCT_VERSION, productVersion);

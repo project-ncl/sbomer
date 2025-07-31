@@ -108,11 +108,9 @@ public class NotificationService {
                         sbom.getId());
             }
 
-            Component component = bom.getMetadata().getComponent();
-
-            if (component == null) {
+            if (bom.getComponents().isEmpty()) {
                 throw new NotificationException(
-                        "Could not find root metadata component for SBOM id '{}', skipping sending UMB notification",
+                        "Could not find main component for SBOM id '{}', skipping sending UMB notification",
                         sbom.getId());
             }
 

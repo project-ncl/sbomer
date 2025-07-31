@@ -22,6 +22,7 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Property;
+import org.cyclonedx.model.component.evidence.Identity;
 import org.jboss.sbomer.cli.feature.sbom.adjuster.SyftImageAdjuster;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.PurlSanitizer;
@@ -292,6 +293,18 @@ class SyftImageAdjusterTest {
         assertEquals("amq-streams/console-ui-rhel9", metadataComponent.getName());
         // No properties
         assertNull(metadataComponent.getProperties());
+        // Has hash
+        assertEquals(1, metadataComponent.getHashes().size());
+        Hash hash = metadataComponent.getHashes().get(0);
+        assertEquals(Hash.Algorithm.SHA_256.getSpec(), hash.getAlgorithm());
+        assertEquals("a43c117701dd6d012bb9da8974d2d332f70a688944ed19280a020d5357f8b22e", hash.getValue());
+        // Has identity purl
+        assertEquals(1, metadataComponent.getEvidence().getIdentities().size());
+        Identity identity = metadataComponent.getEvidence().getIdentities().get(0);
+        assertEquals(Identity.Field.PURL, identity.getField());
+        assertEquals(
+                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3",
+                identity.getConcludedValue());
 
         // The main component is the first one
         Component mainComponent = adjusted.getComponents().get(0);

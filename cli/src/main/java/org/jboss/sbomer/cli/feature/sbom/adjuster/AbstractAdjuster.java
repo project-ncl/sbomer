@@ -19,11 +19,15 @@ package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Evidence;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Metadata;
+import org.cyclonedx.model.component.evidence.Identity;
+import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.cli.feature.sbom.utils.UriValidator;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -103,6 +107,20 @@ public abstract class AbstractAdjuster implements Adjuster {
         metadataComponent.setName(mainComponent.getName());
         metadataComponent.setPurl(mainComponent.getPurl());
         metadataComponent.setHashes(mainComponent.getHashes());
+
+        Evidence mainEvidence = mainComponent.getEvidence();
+        // Copy any additional purls if they exist
+        if (mainEvidence != null && mainEvidence.getIdentities() != null && !mainEvidence.getIdentities().isEmpty()) {
+            List<Identity> purlIdentities = mainEvidence.getIdentities()
+                    .stream()
+                    .filter(identity -> Field.PURL.equals(identity.getField()))
+                    .collect(Collectors.toList());
+            if (!purlIdentities.isEmpty()) {
+                Evidence metadataEvidence = new Evidence();
+                metadataEvidence.setIdentities(purlIdentities);
+                metadataComponent.setEvidence(metadataEvidence);
+            }
+        }
 
         // Set main component
         bom.getMetadata().setComponent(metadataComponent);
