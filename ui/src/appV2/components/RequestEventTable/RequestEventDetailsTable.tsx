@@ -1,17 +1,17 @@
 import { useRequestEventManifest } from '@appV2/components/RequestEventTable/useRequestEventManifest';
 import {
-  CodeBlock,
-  CodeBlockCode,
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
   Grid,
-  GridItem,
-  Timestamp,
-  TimestampTooltipVariant,
-  Title,
-} from '@patternfly/react-core';
+  Column,
+  SkeletonText,
+  CodeSnippet,
+  StructuredListWrapper,
+  StructuredListHead,
+  StructuredListBody,
+  StructuredListRow,
+  StructuredListCell,
+  Content,
+  Heading,
+} from '@carbon/react';
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -25,47 +25,55 @@ export const RequestEventDetailsTable = () => {
     return <ErrorSection error={error} />;
   }
 
+  if (loading) {
+    return <SkeletonText />;
+  }
+
+  if (!request) {
+    return null;
+  }
+
   return (
-    <Grid hasGutter span={12}>
-      <GridItem span={12}>
-        <Title headingLevel="h1" size="4xl">
-          Event {id}
-        </Title>
-      </GridItem>
-      <GridItem span={12}>
-        <DescriptionList columnModifier={{ default: '2Col' }}>
-          <DescriptionListGroup>
-            <DescriptionListTerm>Event ID</DescriptionListTerm>
-            <DescriptionListDescription>
-              <pre>{id}</pre>
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>Event Received At</DescriptionListTerm>
-            <DescriptionListDescription>
-              <Timestamp date={request?.created} tooltip={{ variant: TimestampTooltipVariant.default }} />
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-        </DescriptionList>
-      </GridItem>
-      <GridItem>
-        <DescriptionList >
-          <DescriptionListGroup>
-            <DescriptionListTerm>Attributes</DescriptionListTerm>
-            <DescriptionListDescription>
-              {request ? (
-                <CodeBlock>
-                  <CodeBlockCode>
-                    {JSON.stringify(request, null, 2)}
-                  </CodeBlockCode>
-                </CodeBlock>
-              ) : (
-                <span>No request attributes available</span>
-              )}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-        </DescriptionList>
-      </GridItem>
-    </Grid>
+    <Content>
+      <Grid>
+        <Column sm={4} md={8} lg={16}>
+          <Heading style={{ marginBottom: '2rem' }}>
+            Event {id}
+          </Heading>
+        </Column>
+
+        <Column sm={4} md={8} lg={16}>
+          <StructuredListWrapper>
+            <StructuredListHead>
+              <StructuredListRow head>
+                <StructuredListCell head>Property</StructuredListCell>
+                <StructuredListCell head>Value</StructuredListCell>
+              </StructuredListRow>
+            </StructuredListHead>
+            <StructuredListBody>
+              <StructuredListRow>
+                <StructuredListCell>Event ID</StructuredListCell>
+                <StructuredListCell>
+                  <code style={{ fontFamily: 'monospace' }}>{id}</code>
+                </StructuredListCell>
+              </StructuredListRow>
+              <StructuredListRow>
+                <StructuredListCell>Event Received At</StructuredListCell>
+                <StructuredListCell>
+                  {request.created}
+                </StructuredListCell>
+              </StructuredListRow>
+            </StructuredListBody>
+          </StructuredListWrapper>
+        </Column>
+
+        <Column sm={4} md={8} lg={16} style={{ marginTop: '2rem' }}>
+          <Heading style={{ marginBottom: '1rem' }}>Attributes</Heading>
+          <CodeSnippet type="multi">
+            {JSON.stringify(request, null, 2)}
+          </CodeSnippet>
+        </Column>
+      </Grid>
+    </Content>
   );
 };
