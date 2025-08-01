@@ -32,12 +32,12 @@ export const GenerationRequestTable = () => {
     +paramPageSize,
   );
 
-  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
+  const onSetPage = (newPage: number) => {
     setPageIndex(newPage - 1);
     navigate({ search: `?page=${newPage}&pageSize=${pageSize}` });
   };
 
-  const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
+  const onPerPageSelect = (newPerPage: number) => {
     setPageSize(newPerPage);
     setPageIndex(0);
     navigate({ search: `?page=1&pageSize=${newPerPage}` });
@@ -59,7 +59,10 @@ export const GenerationRequestTable = () => {
         { text: '100', value: 100 },
       ]}
       totalItems={total || 0}
-
+      onChange={({ page, pageSize: newPageSize }) => {
+          onSetPage(page);
+          onPerPageSelect(newPageSize);
+      }}
     />
   );
 

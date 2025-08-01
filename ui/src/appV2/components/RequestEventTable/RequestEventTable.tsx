@@ -16,7 +16,6 @@ import {
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { RequestsQueryType } from '@appV2/types';
 import { useRequestEventsFilters } from '@appV2/components/RequestEventTable/useRequestEventsFilters';
 import { useRequestEvents } from '@appV2/components/RequestEventTable/useRequestEvents';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
@@ -67,12 +66,8 @@ export const RequestEventTable = () => {
       ]}
       totalItems={total || 0}
       onChange={({ page, pageSize: newPageSize }) => {
-        if (page !== pageIndex + 1) {
           onSetPage(page);
-        }
-        if (newPageSize !== pageSize) {
           onPerPageSelect(newPageSize);
-        }
       }}
     />
   );
