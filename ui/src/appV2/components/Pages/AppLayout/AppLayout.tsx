@@ -117,7 +117,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           >
             {Navigation}
           </SideNav>
-          <Content id="main-content">
+          <Content id="main-content" style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            minHeight: 'calc(100vh - 48px)',
+            flex: 1 
+          }}>
             {children}
           </Content>
         </>
