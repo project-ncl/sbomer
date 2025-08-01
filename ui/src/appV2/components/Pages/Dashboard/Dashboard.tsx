@@ -19,7 +19,6 @@ const Dashboard: React.FunctionComponent = () => {
   useDocumentTitle("SBOMER | Dashboard");
 
   return (
-    <Theme theme="g10">
       <AppLayout>
         <Content>
           <Stack gap={7}>
@@ -54,7 +53,6 @@ const Dashboard: React.FunctionComponent = () => {
           </Stack>
         </Content>
       </AppLayout>
-    </Theme>
   );
 };
 
