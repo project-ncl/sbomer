@@ -95,12 +95,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             />
             <HeaderName prefix="">
               <img src={rhlogo} alt="Red Hat Logo" height={32} style={{ marginRight: '0.5rem' }} />
-              <h4>SBOMER NEXT GEN</h4>
+              <h3>SBOMER NEXT GEN</h3>
             </HeaderName>
 
             <div style={{ marginLeft: 'auto' }}>
               <Button
-                kind="secondary"
+                kind="primary"
                 size="sm"
                 onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
               >
