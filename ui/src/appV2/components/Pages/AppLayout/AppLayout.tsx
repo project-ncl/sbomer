@@ -115,7 +115,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           >
             {Navigation}
           </SideNav>
-          <Content id="main-content" style={{ padding: '1rem', overflow: 'auto', flex: 1 }}>
+          <Content id="main-content">
             {children}
           </Content>
         </>
