@@ -28,18 +28,14 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
-  const [isSideNavExpanded, setIsSideNavExpanded] = React.useState(true); // Start expanded
-
-  const toggleSideNav = () => {
-    setIsSideNavExpanded(!isSideNavExpanded);
-  };
+  const [sideNavExpanded, setSideNavExpanded] = React.useState(true); // Default to true
 
   const getRouteIcon = (path: string, label?: string) => {
     if (path === '/' || label === 'Dashboard') return Dashboard;
     if (path.includes('/generations') || label === 'Generations') return Application;
     if (path.includes('/manifests') || label === 'Manifests') return DocumentMultiple_02;
     if (path.includes('/events') || label === 'Events') return Events;
-    return ChevronRight; // Default icon
+    return ChevronRight;
   };
 
   const isRouteActive = (routePath: string) => {
@@ -81,43 +77,50 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   return (
-    <>
-      <Header aria-label="SBOMER NEXT GEN">
-        <HeaderMenuButton
-          aria-label={isSideNavExpanded ? 'Close menu' : 'Open menu'}
-          onClick={toggleSideNav}
-          isActive={isSideNavExpanded}
-          isCollapsible={true}
-        />
-        <HeaderName prefix="">
-          <img src={rhlogo} alt="Red Hat Logo" height={32} style={{ marginRight: '0.5rem' }} />
-          <h4>SBOMER NEXT GEN</h4>
-        </HeaderName>
+    <HeaderContainer
+      render={({ onClickSideNavExpand }) => (
+        <>
+          <Header aria-label="SBOMER NEXT GEN">
+            <HeaderMenuButton
+              aria-label={sideNavExpanded ? 'Close menu' : 'Open menu'}
+              onClick={() => {
+                setSideNavExpanded(!sideNavExpanded);
+                onClickSideNavExpand(); // Still call the original handler
+              }}
+              isActive={sideNavExpanded}
+              isCollapsible={true}
+            />
+            <HeaderName prefix="">
+              <img src={rhlogo} alt="Red Hat Logo" height={32} style={{ marginRight: '0.5rem' }} />
+              <h4>SBOMER NEXT GEN</h4>
+            </HeaderName>
 
-        <div style={{ marginLeft: 'auto' }}>
-          <Button
-            kind="secondary"
-            size="sm"
-            onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
+            <div style={{ marginLeft: 'auto' }}>
+              <Button
+                kind="secondary"
+                size="sm"
+                onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
+              >
+                Go to Classic
+              </Button>
+            </div>
+          </Header>
+          <SideNav
+            aria-label="Side navigation"
+            expanded={sideNavExpanded} // Use our state instead
+            isFixedNav={true}
+            isPersistent={true} // Change to true for better persistence
+            isRail={false} // Set to false when expanded by default
+            addFocusListeners={false}
           >
-            Go to Classic
-          </Button>
-        </div>
-      </Header>
-      <SideNav
-        aria-label="Side navigation"
-        expanded={isSideNavExpanded}
-        isFixedNav={true}
-        isPersistent={true}
-        isRail={true}
-        addFocusListeners={false}
-      >
-        {Navigation}
-      </SideNav>
-      <Content id="main-content">
-        {children}
-      </Content>
-    </>
+            {Navigation}
+          </SideNav>
+          <Content id="main-content">
+            {children}
+          </Content>
+        </>
+      )}
+    />
   );
 };
 
