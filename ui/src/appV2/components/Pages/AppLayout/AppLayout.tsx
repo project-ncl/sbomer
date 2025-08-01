@@ -19,7 +19,8 @@ import {
   Application,
   DocumentMultiple_02,
   Events,
-  ChevronRight
+  ChevronRight,
+  EventChange
 } from '@carbon/icons-react';
 
 interface IAppLayout {
@@ -34,7 +35,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     if (path === '/' || label === 'Dashboard') return Dashboard;
     if (path.includes('/generations') || label === 'Generations') return Application;
     if (path.includes('/manifests') || label === 'Manifests') return DocumentMultiple_02;
-    if (path.includes('/events') || label === 'Events') return Events;
+    if (path.includes('/events') || label === 'Events') return EventChange;
     return ChevronRight;
   };
 
@@ -52,6 +53,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       isActive={isRouteActive(route.path)}
       as={NavLink}
       to={route.path}
+      large
     >
       {route.label}
     </SideNavLink>
