@@ -1,143 +1,122 @@
-import { Button } from '@carbon/react';
+import {
+  Button,
+  Content,
+  Header,
+  HeaderContainer,
+  HeaderMenuButton,
+  HeaderName,
+  SideNav,
+  SideNavHeader,
+  SideNavItems,
+  SideNavLink,
+} from '@carbon/react';
 import rhlogo from '../../../../assets/Logo-Red_Hat-A-Standard-RGB.svg';
 import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
-import {
-  Brand,
-  Masthead,
-  MastheadLogo,
-  MastheadMain,
-  MastheadToggle, MastheadBrand,
-  Nav,
-  NavExpandable,
-  NavItem,
-  NavList,
-  Page,
-  PageSidebar,
-  PageSidebarBody,
-  SkipToContent,
-  Flex,
-  MastheadContent,
-  FlexItem,
-} from '@patternfly/react-core';
-import { BarsIcon } from '@patternfly/react-icons';
 import * as React from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+  Dashboard,
+  Application,
+  DocumentMultiple_02,
+  Events,
+  ChevronRight
+} from '@carbon/icons-react';
 
 interface IAppLayout {
   children: React.ReactNode;
 }
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(true);
-
-  // Bar above the app with the button
-  const TopBar = (
-    <div
-      style={{
-        width: '100%',
-        background: '#0f62fe',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        padding: '0.5rem 1rem',
-        boxSizing: 'border-box',
-        zIndex: 2000,
-      }}
-    >
-      <span style={{ color: '#fff', fontWeight: 600, fontSize: '1rem', letterSpacing: '0.5px', marginRight: '1rem' }}>
-        SBOMER NEXT GEN
-      </span>
-      <Button
-        kind="secondary"
-        size="sm"
-        style={{ marginLeft: '0.5rem' }}
-        onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
-      >
-        Go to Classic
-      </Button>
-    </div>
-  );
-
-  const Header = (
-    <Masthead>
-      <MastheadMain>
-        <MastheadToggle>
-          <Button
-            icon={<BarsIcon />}
-            variant="plain"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label="Global navigation"
-          />
-        </MastheadToggle>
-        <MastheadBrand data-codemods>
-          <MastheadLogo data-codemods component="a">
-            <Link to="/">
-              <Brand src={rhlogo} alt="Red Hat" widths={{ default: '150px' }} />
-            </Link>
-          </MastheadLogo>
-        </MastheadBrand>
-      </MastheadMain>
-    </Masthead>
-  );
-
   const location = useLocation();
+  const [isSideNavExpanded, setIsSideNavExpanded] = React.useState(true); // Start expanded
 
-  const renderNavItem = (route: IAppRoute, index: number) => (
-    <NavItem key={`${route.label}-${index}`} id={`${route.label}-${index}`} isActive={route.path === location.pathname}>
-      <NavLink to={route.path}>
-        {route.label}
-      </NavLink>
-    </NavItem>
+  const toggleSideNav = () => {
+    setIsSideNavExpanded(!isSideNavExpanded);
+  };
+
+  const getRouteIcon = (path: string, label?: string) => {
+    if (path === '/' || label === 'Dashboard') return Dashboard;
+    if (path.includes('/generations') || label === 'Generations') return Application;
+    if (path.includes('/manifests') || label === 'Manifests') return DocumentMultiple_02;
+    if (path.includes('/events') || label === 'Events') return Events;
+    return ChevronRight; // Default icon
+  };
+
+  const isRouteActive = (routePath: string) => {
+    if (routePath === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(routePath);
+  };
+
+  const renderSideNavLink = (route: IAppRoute, index: number) => (
+    <SideNavLink
+      key={`${route.label}-${index}`}
+      renderIcon={getRouteIcon(route.path, route.label)}
+      isActive={isRouteActive(route.path)}
+      as={NavLink}
+      to={route.path}
+    >
+      {route.label}
+    </SideNavLink>
   );
 
-  const renderNavGroup = (group: IAppRouteGroup, groupIndex: number) => (
-    <NavExpandable
-      key={`${group.label}-${groupIndex}`}
-      id={`${group.label}-${groupIndex}`}
-      title={group.label}
-      isActive={group.routes.some((route) => route.path === location.pathname)}
-    >
-      {group.routes.map((route, idx) => route.label && renderNavItem(route, idx))}
-    </NavExpandable>
+  const renderSideNavGroup = (group: IAppRouteGroup, groupIndex: number) => (
+    <React.Fragment key={`${group.label}-${groupIndex}`}>
+      <SideNavHeader renderIcon={ChevronRight}>{group.label}</SideNavHeader>
+      {group.routes.map((route, idx) => route.label && renderSideNavLink(route, idx))}
+    </React.Fragment>
   );
 
   const Navigation = (
-    <Nav id="nav-primary-simple">
-      <NavList id="nav-list-simple">
-        {routes.map(
-          (route, idx) => route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx)),
+    <SideNavItems>
+      {routes
+        .filter(route => route.label)
+        .map((route, idx) =>
+          !route.routes
+            ? renderSideNavLink(route, idx)
+            : renderSideNavGroup(route, idx)
         )}
-      </NavList>
-    </Nav>
-  );
-
-  const Sidebar = (
-    <PageSidebar>
-      <PageSidebarBody>{Navigation}</PageSidebarBody>
-    </PageSidebar>
-  );
-
-  const pageId = 'primary-app-container';
-
-  const PageSkipToContent = (
-    <SkipToContent
-      onClick={(event) => {
-        event.preventDefault();
-        const primaryContentContainer = document.getElementById(pageId);
-        primaryContentContainer && primaryContentContainer.focus();
-      }}
-      href={`#${pageId}`}
-    >
-      Skip to Content
-    </SkipToContent>
+    </SideNavItems>
   );
 
   return (
     <>
-      {TopBar}
-      <Page mainContainerId={pageId} masthead={Header} sidebar={sidebarOpen && Sidebar} skipToContent={PageSkipToContent}>
+      <Header aria-label="SBOMER NEXT GEN">
+        <HeaderMenuButton
+          aria-label={isSideNavExpanded ? 'Close menu' : 'Open menu'}
+          onClick={toggleSideNav}
+          isActive={isSideNavExpanded}
+          isCollapsible={true}
+        />
+        <HeaderName prefix="">
+          <img src={rhlogo} alt="Red Hat Logo" height={32} style={{ marginRight: '0.5rem' }} />
+          <h4>SBOMER NEXT GEN</h4>
+        </HeaderName>
+
+        <div style={{ marginLeft: 'auto' }}>
+          <Button
+            kind="secondary"
+            size="sm"
+            onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
+          >
+            Go to Classic
+          </Button>
+        </div>
+      </Header>
+      <SideNav
+        aria-label="Side navigation"
+        expanded={isSideNavExpanded}
+        isFixedNav={true}
+        isPersistent={true}
+        isRail={true}
+        addFocusListeners={false}
+      >
+        {Navigation}
+      </SideNav>
+      <Content id="main-content">
         {children}
-      </Page>
+      </Content>
     </>
   );
 };
