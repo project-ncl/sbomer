@@ -13,6 +13,7 @@ import {
   Tag,
   Tooltip,
   SkeletonText,
+  Stack,
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -182,9 +183,9 @@ export const RequestEventTable = () => {
         total === 0 ? noResults : table;
 
   return (
-    <>
+    <Stack gap={4}>
       {enableSearching && querySearchBar}
       {tableArea}
-    </>
+    </Stack>
   );
 };
