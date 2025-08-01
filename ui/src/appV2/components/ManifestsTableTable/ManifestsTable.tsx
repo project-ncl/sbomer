@@ -36,11 +36,11 @@ export const ManifestsTable = () => {
   // getting the data and applying the filters sent to the backend here
   const [{ value, loading, total, error }] = useManifests();
 
-  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
+  const onSetPage = (newPage: number) => {
     setFilters(queryType, queryValue, newPage, pageSize)
   };
 
-  const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
+  const onPerPageSelect = (newPerPage: number) => {
     setFilters(queryType, queryValue, pageIndex, newPerPage)
   };
 
@@ -87,6 +87,10 @@ export const ManifestsTable = () => {
           { text: '100', value: 100 },
         ]}
         totalItems={total || 0}
+        onChange={({ page, pageSize: newPageSize }) => {
+            onSetPage(page);
+            onPerPageSelect(newPageSize);
+        }}
       />
     );
 

@@ -28,7 +28,7 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
-  const [sideNavExpanded, setSideNavExpanded] = React.useState(true); // Default to true
+  const [sideNavExpanded, setSideNavExpanded] = React.useState(true);
 
   const getRouteIcon = (path: string, label?: string) => {
     if (path === '/' || label === 'Dashboard') return Dashboard;
@@ -85,7 +85,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               aria-label={sideNavExpanded ? 'Close menu' : 'Open menu'}
               onClick={() => {
                 setSideNavExpanded(!sideNavExpanded);
-                onClickSideNavExpand(); // Still call the original handler
+                onClickSideNavExpand();
               }}
               isActive={sideNavExpanded}
               isCollapsible={true}
@@ -107,15 +107,15 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </Header>
           <SideNav
             aria-label="Side navigation"
-            expanded={sideNavExpanded} // Use our state instead
-            isFixedNav={true}
-            isPersistent={true} // Change to true for better persistence
-            isRail={false} // Set to false when expanded by default
-            addFocusListeners={false}
+            expanded={sideNavExpanded}
+            isFixedNav
+            isPersistent
+            isRail
+            isChildOfHeader
           >
             {Navigation}
           </SideNav>
-          <Content id="main-content">
+          <Content id="main-content" style={{ padding: '1rem', overflow: 'auto', flex: 1 }}>
             {children}
           </Content>
         </>
