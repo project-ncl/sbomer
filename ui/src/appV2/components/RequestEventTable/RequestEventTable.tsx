@@ -12,7 +12,7 @@ import {
   TableCell,
   Tag,
   Tooltip,
-  SkeletonPlaceholder,
+  SkeletonText,
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -174,7 +174,7 @@ export const RequestEventTable = () => {
   );
 
   const noResults = <NoResultsSection />;
-  const loadingSkeleton = <SkeletonPlaceholder />;
+  const loadingSkeleton = <SkeletonText />;
 
   const tableArea =
     error ? <ErrorSection error={error} /> :

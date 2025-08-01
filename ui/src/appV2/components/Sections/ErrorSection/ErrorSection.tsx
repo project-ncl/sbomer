@@ -1,17 +1,15 @@
-import { Card, CardBody, CardTitle, Grid, GridItem } from '@patternfly/react-core';
+import { Tile, Grid, Column } from '@carbon/react';
 import React from 'react';
 
 export const ErrorSection = ({ error }: { error: Error }) => {
   return (
-    <Card>
-      <CardTitle size={10}>An error occurred: {error.name}</CardTitle>
-      <CardBody>
-        <Grid cellSpacing={3} span={12}>
-          <GridItem span={12}>
-            {error.message}
-          </GridItem>
-        </Grid>
-      </CardBody>
-    </Card>
+    <Tile>
+      <Grid>
+        <Column sm={4} md={8} lg={16}>
+          <h3 style={{ marginBottom: '1rem' }}>An error occurred: {error.name}</h3>
+          <p>{error.message}</p>
+        </Column>
+      </Grid>
+    </Tile>
   );
 };

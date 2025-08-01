@@ -8,7 +8,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
-import { DataTable, Pagination, SkeletonPlaceholder, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@carbon/react';
+import { DataTable, Pagination, SkeletonText, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@carbon/react';
 
 
 const columnNames = {
@@ -141,7 +141,7 @@ export const ManifestsTable = () => {
 );
 
   const noResults = <NoResultsSection />
-  const loadingSkeleton = <SkeletonPlaceholder />;
+  const loadingSkeleton = <SkeletonText />;
 
 
   const tableArea =
