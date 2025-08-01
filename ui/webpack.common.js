@@ -128,6 +128,25 @@ module.exports = (env) => {
             },
           ],
         },
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader'],
+        },
+        {
+        test: /\.scss$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                quietDeps: true, // Suppress deprecation warnings from dependencies
+              },
+            },
+          },
+        ],
+      },
       ],
     },
     output: {

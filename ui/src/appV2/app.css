@@ -20,9 +20,3 @@ body,
 #root {
   height: 100%;
 }
-
-.pf-v5-c-content {
-  --pf-v5-c-content--small--Color: var(--pf-v5-global--palette--green-500); /* changes all <small> color to --pf-v5-global--palette--green-500 */
-  --pf-v5-c-content--blockquote--BorderLeftColor: var(--pf-v5-global--palette--cyan-600); /* changes all <blockquote> left border color to --pf-v5-global--palette--cyan-600 */
-  --pf-v5-c-content--hr--BackgroundColor: var(--pf-v5-global--palette--gold-500); /* changes a <hr> color to --pf-v5-global--palette--gold-500 */
-}
