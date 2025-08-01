@@ -79,6 +79,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   return (
+    <>
     <HeaderContainer
       render={({ onClickSideNavExpand }) => (
         <>
@@ -117,7 +118,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           >
             {Navigation}
           </SideNav>
-          <Content id="main-content" style={{ 
+          
+        </>
+      )}
+    />
+    <Content id="main-content" style={{ 
             display: 'flex', 
             flexDirection: 'column', 
             minHeight: 'calc(100vh - 48px)',
@@ -125,9 +130,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           }}>
             {children}
           </Content>
-        </>
-      )}
-    />
+          </>
+    
   );
 };
 
