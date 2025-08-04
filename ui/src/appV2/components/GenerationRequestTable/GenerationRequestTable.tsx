@@ -60,8 +60,11 @@ export const GenerationRequestTable = () => {
       ]}
       totalItems={total || 0}
       onChange={({ page, pageSize: newPageSize }) => {
+        if (page !== pageIndex + 1) {
           onSetPage(page);
+        } else if (newPageSize !== pageSize) {
           onPerPageSelect(newPageSize);
+        }
       }}
     />
   );
