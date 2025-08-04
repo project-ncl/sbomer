@@ -18,57 +18,21 @@ const columnNames = {
 
 export const ManifestsTable = () => {
 
-  const { queryType, queryValue, pageIndex, pageSize, setFilters } = useManifestsFilters();
+  const { pageIndex, pageSize, setFilters } = useManifestsFilters();
 
-  // enable when pagination is implemented
-  const enableFiltering = false
   // enable when pagination is implemented
   const enablePagination = true;
-
-  const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
-  const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
-
-  const [selectIsOpen, setSelectIsOpen] = React.useState<boolean>(false);
-  const [selectValue, setSelectValue] = React.useState<ManifestsQueryType>(queryType)
-
-  const [isButtonVisible, setButtonVisible] = React.useState<boolean>(queryType != ManifestsQueryType.NoFilter);
 
   // getting the data and applying the filters sent to the backend here
   const [{ value, loading, total, error }] = useManifests();
 
   const onSetPage = (newPage: number) => {
-    setFilters(queryType, queryValue, newPage, pageSize)
+    setFilters(newPage, pageSize)
   };
 
   const onPerPageSelect = (newPerPage: number) => {
-    setFilters(queryType, queryValue, pageIndex, newPerPage)
+    setFilters(pageIndex, newPerPage)
   };
-
-  const onToggleClick = () => {
-    setSelectIsOpen(!selectIsOpen);
-  };
-
-  const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    setSelectValue(value as ManifestsQueryType)
-    setSelectIsOpen(false);
-    switch (value) {
-      case ManifestsQueryType.NoFilter:
-        setSearchBarVisible(false);
-        setButtonVisible(false);
-        setSearchBarValue('')
-        setFilters(ManifestsQueryType.NoFilter, '', pageIndex, pageSize)
-        break;
-      default:
-        setSearchBarVisible(true);
-        setButtonVisible(true);
-    }
-
-  };
-
-  const onSearchCall = () => {
-    setFilters(selectValue, searchBarValue, 1, pageSize)
-  }
-
 
 
   const pagination = (
@@ -77,7 +41,7 @@ export const ManifestsTable = () => {
         forwardText="Next page"
         itemsPerPageText="Items per page:"
         itemRangeText={(min: number, max: number, total: number) => `${min}–${max} of ${total} items`}
-        page={pageIndex + 1}
+        page={pageIndex}
         pageNumberText="Page Number"
         pageSize={pageSize}
         pageSizes={[
@@ -88,8 +52,11 @@ export const ManifestsTable = () => {
         ]}
         totalItems={total || 0}
         onChange={({ page, pageSize: newPageSize }) => {
+          if (page !== pageIndex) {
             onSetPage(page);
+          }else if (newPageSize !== pageSize) {
             onPerPageSelect(newPageSize);
+          }
         }}
       />
     );
@@ -153,6 +120,4 @@ export const ManifestsTable = () => {
   return <>
     {tableArea}
   </>
-
-
 };
