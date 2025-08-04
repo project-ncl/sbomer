@@ -25,26 +25,12 @@ import { useSearchParams } from 'react-router-dom';
 export function useManifestsFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const queryTypeValue = searchParams.get('queryType') as ManifestsQueryType;
-  const queryType = isManifestsQueryType(queryTypeValue) ? queryTypeValue : ManifestsQueryType.NoFilter;
-  const queryValue = isManifestsQueryType(queryTypeValue) ? (searchParams.get('queryValue') as string) : '';
   const pageIndex = +(searchParams.get('page') || 1);
   const pageSize = +(searchParams.get('pageSize') || 10);
 
   const setFilters = useCallback(
-    (queryType: ManifestsQueryType, queryValue: string, pageIndex: number, pageSize: number) => {
+    (pageIndex: number, pageSize: number) => {
       setSearchParams((params) => {
-        if (queryType) {
-          params.set('queryType', queryType);
-        } else {
-          params.set('queryType', ManifestsQueryType.NoFilter);
-        }
-        if (queryValue) {
-          params.set('queryValue', queryValue);
-        } else {
-          params.delete('queryValue');
-        }
-
         if (pageIndex) {
           params.set('page', pageIndex.toString());
         } else {
@@ -55,12 +41,11 @@ export function useManifestsFilters() {
         } else {
           params.delete('pageSize');
         }
-
         return params;
       });
     },
     [],
   );
 
-  return { queryType, queryValue, pageIndex, pageSize, setFilters };
+  return { pageIndex, pageSize, setFilters };
 }
