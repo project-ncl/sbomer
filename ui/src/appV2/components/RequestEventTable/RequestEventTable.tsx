@@ -43,11 +43,11 @@ export const RequestEventTable = () => {
   const [{ value, loading, total, error }] = useRequestEvents();
 
   const onSetPage = (newPage: number) => {
-    setFilters(query, newPage - 1, pageSize);
+    setFilters(query, newPage, pageSize);
   };
 
   const onPerPageSelect = (newPerPage: number) => {
-    setFilters(query, 0, newPerPage);
+    setFilters(query, pageIndex, newPerPage);
   };
 
   const pagination = (
@@ -56,9 +56,9 @@ export const RequestEventTable = () => {
       forwardText="Next page"
       itemsPerPageText="Items per page:"
       itemRangeText={(min: number, max: number, total: number) => `${min}–${max} of ${total} items`}
-      page={pageIndex + 1}
+      page={pageIndex}
       pageNumberText="Page Number"
-      pageSize={pageSize}
+      pageSize={pageSize} // todo update from url 
       pageSizes={[
         { text: '10', value: 10 },
         { text: '20', value: 20 },
@@ -67,8 +67,11 @@ export const RequestEventTable = () => {
       ]}
       totalItems={total || 0}
       onChange={({ page, pageSize: newPageSize }) => {
+        if (page !== pageIndex) {
           onSetPage(page);
+        } else if (newPageSize !== pageSize) {
           onPerPageSelect(newPageSize);
+        }
       }}
     />
   );
