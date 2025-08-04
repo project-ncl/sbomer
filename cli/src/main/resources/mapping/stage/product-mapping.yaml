@@ -37,7 +37,7 @@
       generator:
         type: maven-domino
         args: "--warn-on-missing-scm --legacy-scm-locator --hashes=false"
-"283":
+"532":
   type: pnc-build
   products:
     - processors:

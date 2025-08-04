@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.service;
 
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACEPARENT_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
 import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyAdvisoryRelease;
 import static org.jboss.sbomer.service.feature.sbom.errata.event.EventNotificationFiringUtil.notifyRequestEventStatusUpdate;
 
@@ -36,7 +39,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.koji.KojiClientSession;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.core.SchemaValidator.ValidationResult;
@@ -56,6 +58,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.provider.KojiProvider;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataNotesSchemaValidator;
@@ -77,10 +80,12 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.jboss.sbomer.service.rest.otel.TracingRestClient;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
@@ -99,7 +104,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AdvisoryService {
 
     @Inject
-    @RestClient
+    @TracingRestClient
     @Setter
     ErrataClient errataClient;
 
@@ -309,6 +314,21 @@ public class AdvisoryService {
                         String.valueOf(erratum.getDetails().get().getId()));
             }
 
+            // If the forceBuild flag is enabled on incoming requestConfig, we ignore any successful records found
+            // in the previous code block to force a build manifest generation instead of a release.
+            if (requestEvent.getRequestConfig() != null
+                    && requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
+                ErrataAdvisoryRequestConfig advisoryConfig = (ErrataAdvisoryRequestConfig) requestEvent
+                        .getRequestConfig();
+                if (advisoryConfig.isForceBuild()) {
+                    successfulRequestRecord = null;
+                    log.debug(
+                            "forceBuild has been set to true in request for advisory: '{}'[{}]. Ignoring latest generations and generating build manifests again",
+                            erratum.getDetails().get().getFulladvisory(),
+                            erratum.getDetails().get().getId());
+                }
+            }
+
             if (successfulRequestRecord == null) {
                 List<RequestConfig> requestConfigsWithinNotes = parseRequestConfigsFromJsonNotes(
                         notes,
@@ -440,6 +460,20 @@ public class AdvisoryService {
                     String.valueOf(erratum.getDetails().get().getId()));
         }
 
+        // If the forceBuild flag is enabled on incoming requestConfig, we ignore any successful records found
+        // in the previous code block to force a build manifest generation instead of a release.
+        if (requestEvent.getRequestConfig() != null
+                && requestEvent.getRequestConfig() instanceof ErrataAdvisoryRequestConfig) {
+            ErrataAdvisoryRequestConfig advisoryConfig = (ErrataAdvisoryRequestConfig) requestEvent.getRequestConfig();
+            if (advisoryConfig.isForceBuild()) {
+                successfulRequestRecord = null;
+                log.debug(
+                        "forceBuild has been set to true in request for advisory: '{}'[{}]. Ignoring latest generations and generating build manifests again",
+                        erratum.getDetails().get().getFulladvisory(),
+                        erratum.getDetails().get().getId());
+            }
+        }
+
         if (details.getContentTypes().contains("docker")) {
             log.debug("Successful request records found: {}", successfulRequestRecord);
 
@@ -566,6 +600,11 @@ public class AdvisoryService {
             Set<String> productVersions,
             GenerationRequestType type) {
 
+        ObjectNode otelMetadata = ObjectMapperProvider.json().createObjectNode();
+        otelMetadata.put(MDC_TRACE_ID_KEY, MDC.get(MDC_TRACE_ID_KEY));
+        otelMetadata.put(MDC_SPAN_ID_KEY, MDC.get(MDC_SPAN_ID_KEY));
+        otelMetadata.put(MDC_TRACEPARENT_KEY, MDC.get(MDC_TRACEPARENT_KEY));
+
         // We need to create 1 release manifest per ProductVersion
         // We will identify the Generation with the {Errata}#{ProductVersion} identifier
         Map<String, SbomGenerationRequest> pvToGenerations = new HashMap<>();
@@ -577,6 +616,7 @@ public class AdvisoryService {
                     .withStatus(SbomGenerationStatus.GENERATING)
                     .withConfig(null) // I really don't know what to put here
                     .withRequest(requestEvent)
+                    .withOtelMetadata(otelMetadata)
                     .build();
 
             pvToGenerations.put(pvName, generationRequestRepository.save(sbomGenerationRequest));
@@ -600,6 +640,18 @@ public class AdvisoryService {
             return doIgnoreRequest(requestEvent, "Standard Errata RPM release manifest generation is disabled");
         }
 
+        // SBOMER-401: Verify if there are CPEs associated, some very specific standard advisories do not have them
+        Set<String> allCPEs = getAllCPEsOfBuilds(buildDetails);
+
+        if (allCPEs.isEmpty()) {
+            String reason = String.format(
+                    "The Standard Advisory '%s'(%s) does not have any CPE configured, ignoring the generation of the release manifest",
+                    erratum.getDetails().get().getFulladvisory(),
+                    erratum.getDetails().get().getId());
+
+            return doIgnoreRequest(requestEvent, reason);
+        }
+
         Map<String, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
                 erratum,
                 requestEvent,
@@ -614,6 +666,22 @@ public class AdvisoryService {
                         .build());
 
         return releaseGenerations.values();
+    }
+
+    private Set<String> getAllCPEsOfBuilds(Map<ProductVersionEntry, List<BuildItem>> buildDetails) {
+        Set<String> allCPEs = new HashSet<>();
+        buildDetails.forEach((productVersionEntry, buildItems) -> {
+            // Map all VariantArch to ErrataVariant and collect distinct ErrataVariant objects
+            Set<String> productVersionCPEs = buildItems.stream()
+                    .flatMap(buildItem -> buildItem.getVariantArch().keySet().stream())
+                    .map(variantArch -> errataClient.getVariant(variantArch))
+                    .filter(Objects::nonNull)
+                    .map(errataVariant -> errataVariant.getData().getAttributes().getCpe())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            allCPEs.addAll(productVersionCPEs);
+        });
+        return allCPEs;
     }
 
     @Transactional

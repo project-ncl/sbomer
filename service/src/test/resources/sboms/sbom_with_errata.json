@@ -1,129 +1,134 @@
 {
     "version": 1,
     "metadata": {
-      "tools": [
-        {
-          "name": "CycloneDX Maven plugin",
-          "hashes": [
+        "tools": [
             {
-              "alg": "MD5",
-              "content": "8e595cdb67f17e4b41e046456970591d"
-            },
-            {
-              "alg": "SHA-1",
-              "content": "69e8ca804520d09ce4657e7235bae84d01cbffa6"
-            },
-            {
-              "alg": "SHA-256",
-              "content": "aa09074fe5aa403c008cd4fc7ef8ce41cd244489337f16b3e91a3914158a4db8"
-            },
-            {
-              "alg": "SHA-512",
-              "content": "1488a8112da8e675813d7585f57c5efb178aed32901118186ee12d0e4ae3d19c53774c7f860bf70d17d70f050119b69443a2637cf641675b4b5d9cdcdd69b89b"
-            },
-            {
-              "alg": "SHA-384",
-              "content": "b097295dfbf10887abc6eec58d4d0822cde5a73d1f5c1cf183a57bf569016ad5ced9d34efae3e574d82bb62837540c6c"
-            },
-            {
-              "alg": "SHA3-384",
-              "content": "289f9520bd73a2031276248a6ef8f0891c691062c2d1ea86a2bc9ea8db2c52377d92a53be9957179e71aee3deda26a8c"
-            },
-            {
-              "alg": "SHA3-256",
-              "content": "32b50a7efe5d491a4039c0017eca3cf49d98b55fc66d06b3dd06209487323474"
-            },
-            {
-              "alg": "SHA3-512",
-              "content": "1daf813da53e5d5cda4d0302ff3a5e388aa45d96ebe6dcbe240f35d33f14b1e6390f6bbe7f21f3ed8cf96ebd9f5516a08b18487b7339715109c81cebfc1563df"
+                "name": "CycloneDX Maven plugin",
+                "hashes": [
+                    {
+                        "alg": "MD5",
+                        "content": "8e595cdb67f17e4b41e046456970591d"
+                    },
+                    {
+                        "alg": "SHA-1",
+                        "content": "69e8ca804520d09ce4657e7235bae84d01cbffa6"
+                    },
+                    {
+                        "alg": "SHA-256",
+                        "content": "aa09074fe5aa403c008cd4fc7ef8ce41cd244489337f16b3e91a3914158a4db8"
+                    },
+                    {
+                        "alg": "SHA-512",
+                        "content": "1488a8112da8e675813d7585f57c5efb178aed32901118186ee12d0e4ae3d19c53774c7f860bf70d17d70f050119b69443a2637cf641675b4b5d9cdcdd69b89b"
+                    },
+                    {
+                        "alg": "SHA-384",
+                        "content": "b097295dfbf10887abc6eec58d4d0822cde5a73d1f5c1cf183a57bf569016ad5ced9d34efae3e574d82bb62837540c6c"
+                    },
+                    {
+                        "alg": "SHA3-384",
+                        "content": "289f9520bd73a2031276248a6ef8f0891c691062c2d1ea86a2bc9ea8db2c52377d92a53be9957179e71aee3deda26a8c"
+                    },
+                    {
+                        "alg": "SHA3-256",
+                        "content": "32b50a7efe5d491a4039c0017eca3cf49d98b55fc66d06b3dd06209487323474"
+                    },
+                    {
+                        "alg": "SHA3-512",
+                        "content": "1daf813da53e5d5cda4d0302ff3a5e388aa45d96ebe6dcbe240f35d33f14b1e6390f6bbe7f21f3ed8cf96ebd9f5516a08b18487b7339715109c81cebfc1563df"
+                    }
+                ],
+                "vendor": "OWASP Foundation",
+                "version": "2.7.9"
             }
-          ],
-          "vendor": "OWASP Foundation",
-          "version": "2.7.9"
-        }
-      ],
-      "component": {
-        "name": "empty",
-        "purl": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
-        "type": "library",
-        "group": "com.github.michalszynkiewicz.test",
-        "bom-ref": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
-        "version": "1.0.0.redhat-00271",
-        "licenses": [
-          
         ],
-        "pedigree": {
-          "commits": [
-            {
-              "uid": "2289cb2006d878e421c65b3707f7b4bb42bafb39",
-              "url": "https://code.engineering.redhat.com/gerrit/michalszynkiewicz/empty.git#1.0.0.redhat-00271"
-            }
-          ]
+        "component": {
+            "name": "empty",
+            "purl": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+            "type": "library"
         },
-        "supplier": {
-          "url": [
-            "https://www.redhat.com"
-          ],
-          "name": "Red Hat"
-        },
-        "publisher": "Red Hat",
+        "timestamp": "2023-07-07T17:29:00Z",
         "properties": [
-          {
-            "name": "errata-tool-product-name",
-            "value": "RHTESTPRODUCT"
-          },
-          {
-            "name": "errata-tool-product-version",
-            "value": "RHEL-8-RHTESTPRODUCT-1.1"
-          },
-          {
-            "name": "errata-tool-product-variant",
-            "value": "8Base-RHTESTPRODUCT-1.1"
-          }
-        ],
-        "externalReferences": [
-          {
-            "url": "https://maven.repository.redhat.com/ga/",
-            "type": "distribution"
-          },
-          {
-            "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/AY2GVQCXDRQAA",
-            "type": "build-system",
-            "comment": "pnc-build-id"
-          },
-          {
-            "url": "quay.io/rh-newcastle/builder-rhel-7-j8-mvn3.3.9:1.0.0",
-            "type": "build-meta",
-            "comment": "pnc-environment-image"
-          },
-          {
-            "url": "https://github.com/michalszynkiewicz/empty.git",
-            "type": "vcs",
-            "comment": ""
-          }
+            {
+                "name": "maven.goal",
+                "value": "makeAggregateBom"
+            },
+            {
+                "name": "maven.scopes",
+                "value": "compile,provided,runtime,system"
+            }
         ]
-      },
-      "timestamp": "2023-07-07T17:29:00Z",
-      "properties": [
-        {
-          "name": "maven.goal",
-          "value": "makeAggregateBom"
-        },
-        {
-          "name": "maven.scopes",
-          "value": "compile,provided,runtime,system"
-        }
-      ]
     },
     "bomFormat": "CycloneDX",
     "specVersion": "1.6",
+    "components": [
+        {
+            "name": "empty",
+            "purl": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+            "type": "library",
+            "group": "com.github.michalszynkiewicz.test",
+            "bom-ref": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+            "version": "1.0.0.redhat-00271",
+            "licenses": [
+            ],
+            "pedigree": {
+                "commits": [
+                    {
+                        "uid": "2289cb2006d878e421c65b3707f7b4bb42bafb39",
+                        "url": "https://code.engineering.redhat.com/gerrit/michalszynkiewicz/empty.git#1.0.0.redhat-00271"
+                    }
+                ]
+            },
+            "supplier": {
+                "url": [
+                    "https://www.redhat.com"
+                ],
+                "name": "Red Hat"
+            },
+            "publisher": "Red Hat",
+            "externalReferences": [
+                {
+                    "url": "https://maven.repository.redhat.com/ga/",
+                    "type": "distribution"
+                },
+                {
+                    "url": "https://orch.psi.redhat.com/pnc-rest/v2/builds/AY2GVQCXDRQAA",
+                    "type": "build-system",
+                    "comment": "pnc-build-id"
+                },
+                {
+                    "url": "quay.io/rh-newcastle/builder-rhel-7-j8-mvn3.3.9:1.0.0",
+                    "type": "build-meta",
+                    "comment": "pnc-environment-image"
+                },
+                {
+                    "url": "https://github.com/michalszynkiewicz/empty.git",
+                    "type": "vcs",
+                    "comment": ""
+                }
+            ],
+            "properties": [
+                {
+                    "name": "errata-tool-product-name",
+                    "value": "RHTESTPRODUCT"
+                },
+                {
+                    "name": "errata-tool-product-version",
+                    "value": "RHEL-8-RHTESTPRODUCT-1.1"
+                },
+                {
+                    "name": "errata-tool-product-variant",
+                    "value": "8Base-RHTESTPRODUCT-1.1"
+                }
+            ]
+        }
+    ],
     "dependencies": [
-      {
-        "ref": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
-        "dependsOn": [
-          
-        ]
-      }
+        {
+            "ref": "pkg:maven/com.github.michalszynkiewicz.test/empty@1.0.0.redhat-00271?type=jar",
+            "dependsOn": [
+            ]
+        }
     ],
     "serialNumber": "urn:uuid:85a216f1-af8d-4da0-b9b3-d525e635e02e"
-  }
+}

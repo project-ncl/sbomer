@@ -18,6 +18,7 @@
 package org.jboss.sbomer.core.features.sbom.utils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+
 import static org.jboss.sbomer.core.features.sbom.Constants.MRRC_URL;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_NAME;
 import static org.jboss.sbomer.core.features.sbom.Constants.PROPERTY_ERRATA_PRODUCT_VARIANT;
@@ -46,6 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,6 +56,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -75,8 +78,6 @@ import org.cyclonedx.model.Evidence;
 import org.cyclonedx.model.ExternalReference;
 import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Hash.Algorithm;
-import org.cyclonedx.model.component.evidence.Identity;
-import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.cyclonedx.model.License;
 import org.cyclonedx.model.LicenseChoice;
 import org.cyclonedx.model.Metadata;
@@ -84,16 +85,19 @@ import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Property;
 import org.cyclonedx.model.Tool;
+import org.cyclonedx.model.component.evidence.Identity;
+import org.cyclonedx.model.component.evidence.Identity.Field;
+import org.cyclonedx.model.license.Expression;
 import org.cyclonedx.model.metadata.ToolInformation;
 import org.cyclonedx.parsers.JsonParser;
 import org.jboss.pnc.api.deliverablesanalyzer.dto.LicenseInfo;
-import org.jboss.pnc.api.enums.LicenseSource;
 import org.jboss.pnc.build.finder.core.SpdxLicenseUtils;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.response.AnalyzedArtifact;
+import org.jboss.pnc.dto.response.AnalyzedDistribution;
 import org.jboss.pnc.restclient.util.ArtifactUtil;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.config.Config;
@@ -112,6 +116,25 @@ import com.github.packageurl.PackageURLBuilder;
 
 public class SbomUtils {
     public static final String PROTOCOL = "https://";
+
+    public static final String COMPONENT_LICENSE_ACKNOWLEDGEMENT = "concluded";
+
+    public static final String EVIDENCE_LICENSE_ACKNOWLEDGEMENT = "declared";
+
+    private static class HashAlgorithmMapping<T> {
+        final Hash.Algorithm algorithm;
+        final Function<T, String> getter; // Function takes T and returns String
+
+        HashAlgorithmMapping(Hash.Algorithm algorithm, Function<T, String> getter) {
+            this.algorithm = algorithm;
+            this.getter = getter;
+        }
+    }
+
+    private static final List<HashAlgorithmMapping<AnalyzedDistribution>> DIST_HASH_DEFINITIONS = List.of(
+            new HashAlgorithmMapping<>(Hash.Algorithm.MD5, AnalyzedDistribution::getMd5),
+            new HashAlgorithmMapping<>(Hash.Algorithm.SHA1, AnalyzedDistribution::getSha1),
+            new HashAlgorithmMapping<>(Hash.Algorithm.SHA_256, AnalyzedDistribution::getSha256));
 
     private SbomUtils() {
         // This is a utility class
@@ -348,16 +371,6 @@ public class SbomUtils {
         }
     }
 
-    public static String licenseSourceToDescription(LicenseSource source) {
-        return switch (source) {
-            case UNKNOWN -> "unknown";
-            case POM -> ".pom file of artifact";
-            case POM_XML -> "pom.xml file inside artifact";
-            case BUNDLE_LICENSE -> "Bundle-License header inside MANIFEST.MF of artifact";
-            case TEXT -> "license text file inside artifact";
-        };
-    }
-
     private static void addLicenseEvidence(Component component, List<LicenseInfo> licenseInfos) {
         if (licenseInfos.isEmpty()) {
             return;
@@ -365,41 +378,75 @@ public class SbomUtils {
 
         Evidence evidence = new Evidence();
         LicenseChoice licenseChoice = new LicenseChoice();
-        licenseChoice.setLicenses(licenseInfos.stream().map(licenseInfo -> {
-            License license = new License();
-            license.setId(licenseInfo.getSpdxLicenseId());
-            license.setAcknowledgement("declared");
-            List<Property> properties = new ArrayList<>();
-            Property sourceProperty = new Property();
-            sourceProperty.setName("source");
-            sourceProperty.setValue(licenseInfo.getSource().toString());
-            properties.add(sourceProperty);
-            Property sourceDescriptionProperty = new Property();
-            sourceDescriptionProperty.setName("source-description");
-            sourceDescriptionProperty.setValue(licenseSourceToDescription(licenseInfo.getSource()));
-            properties.add(sourceDescriptionProperty);
-            String url = licenseInfo.getUrl();
-            Optional<URI> optionalURI = getNormalizedUrl(url);
+        List<String> spdxLicenseIds = licenseInfos.stream()
+                .map(LicenseInfo::getSpdxLicenseId)
+                .filter(spdxLicenseId -> !SpdxLicenseUtils.isUnknownLicenseId(spdxLicenseId))
+                .toList();
 
-            if (optionalURI.isPresent()) {
-                URI uri = optionalURI.get();
-                String normalizedUri = uri.toASCIIString();
+        if (SpdxLicenseUtils.containsExpression(spdxLicenseIds)) {
+            Expression expression = new Expression();
+            String value = SpdxLicenseUtils.toExpression(spdxLicenseIds);
+            expression.setValue(value);
+            expression.setAcknowledgement(EVIDENCE_LICENSE_ACKNOWLEDGEMENT);
+            licenseChoice.setExpression(expression);
+            evidence.setLicenses(licenseChoice);
+            component.setEvidence(evidence);
+            return;
+        }
 
-                if (uri.isAbsolute()) {
-                    license.setUrl(normalizedUri);
-                } else {
-                    Property relativeUrlProperty = new Property();
-                    relativeUrlProperty.setName("relative-url");
-                    relativeUrlProperty.setValue(normalizedUri);
-                    properties.add(relativeUrlProperty);
-                }
-            }
+        licenseChoice.setLicenses(
+                licenseInfos.stream()
+                        .filter(licenseInfo -> !SpdxLicenseUtils.isUnknownLicenseId(licenseInfo.getSpdxLicenseId()))
+                        .map(licenseInfo -> {
+                            License license = new License();
+                            license.setId(licenseInfo.getSpdxLicenseId());
+                            license.setAcknowledgement(EVIDENCE_LICENSE_ACKNOWLEDGEMENT);
+                            String sourceUrl = licenseInfo.getSourceUrl();
 
-            license.setProperties(properties);
-            return license;
-        }).toList());
+                            if (!Strings.isEmpty(sourceUrl)) {
+                                Property sourceProperty = new Property();
+                                sourceProperty.setName("sourceUrl");
+                                sourceProperty.setValue(sourceUrl);
+                                license.setProperties(List.of(sourceProperty));
+                            }
+
+                            String url = licenseInfo.getUrl();
+                            Optional<URI> optionalURI = getNormalizedUrl(url);
+
+                            if (optionalURI.isPresent()) {
+                                URI uri = optionalURI.get();
+                                String normalizedUri = uri.toASCIIString();
+
+                                if (uri.isAbsolute()) {
+                                    license.setUrl(normalizedUri);
+                                }
+                            }
+
+                            return license;
+                        })
+                        .toList());
         evidence.setLicenses(licenseChoice);
         component.setEvidence(evidence);
+    }
+
+    public static List<Hash> getHashesFromAnalyzedDistribution(AnalyzedDistribution analyzedDistribution) {
+        List<Hash> hashes = new ArrayList<>();
+
+        if (analyzedDistribution == null) {
+            return hashes;
+        }
+
+        // Use our pre-defined Algo to getter mapper here (DIST_HASH_DEFINTIONS)
+        for (HashAlgorithmMapping m : DIST_HASH_DEFINITIONS) {
+
+            // eg. Call analyzedArtifact.getDistribution.getSha256 and return a cdx Hash of type SHA_256
+            String hashValue = (String) m.getter.apply(analyzedDistribution);
+
+            if (Objects.nonNull(hashValue)) {
+                hashes.add(new Hash(m.algorithm, hashValue));
+            }
+        }
+        return hashes;
     }
 
     public static Component createComponent(AnalyzedArtifact analyzedArtifact, Scope scope, Type type) {
@@ -409,12 +456,23 @@ public class SbomUtils {
                 .filter(licenseInfo -> !SpdxLicenseUtils.isUnknownLicenseId(licenseInfo.getSpdxLicenseId()))
                 .collect(Collectors.groupingBy(LicenseInfo::getSpdxLicenseId));
         LicenseChoice licenseChoice = new LicenseChoice();
-        licenseChoice.setLicenses(uniqueLicensesMap.keySet().stream().map(spdxLicenseId -> {
-            License license = new License();
-            license.setId(spdxLicenseId);
-            license.setAcknowledgement("concluded");
-            return license;
-        }).toList());
+        List<String> spdxLicenseIds = uniqueLicensesMap.keySet().stream().sorted().toList();
+
+        if (SpdxLicenseUtils.containsExpression(spdxLicenseIds)) {
+            Expression expression = new Expression();
+            String value = SpdxLicenseUtils.toExpression(spdxLicenseIds);
+            expression.setValue(value);
+            expression.setAcknowledgement(COMPONENT_LICENSE_ACKNOWLEDGEMENT);
+            licenseChoice.setExpression(expression);
+        } else {
+            licenseChoice.setLicenses(spdxLicenseIds.stream().map(spdxLicenseId -> {
+                License license = new License();
+                license.setId(spdxLicenseId);
+                license.setAcknowledgement(COMPONENT_LICENSE_ACKNOWLEDGEMENT);
+                return license;
+            }).toList());
+        }
+
         component.setLicenses(licenseChoice);
         Set<Map.Entry<String, List<LicenseInfo>>> entries = uniqueLicensesMap.entrySet();
 
@@ -582,15 +640,15 @@ public class SbomUtils {
             if (bom.getDependencies() != null) {
                 List<Dependency> updatedDependencies = new ArrayList<>(bom.getDependencies().size());
                 for (Dependency dependency : bom.getDependencies()) {
-                    updateDependencyRef(dependency, oldRef, newRef);
-                    updatedDependencies.add(dependency);
+                    Dependency updatedDependency = updateDependencyRef(dependency, oldRef, newRef);
+                    updatedDependencies.add(updatedDependency);
                 }
                 bom.setDependencies(updatedDependencies);
             }
         }
     }
 
-    public static void updateDependencyRef(Dependency dependency, String oldRef, String newRef) {
+    public static Dependency updateDependencyRef(Dependency dependency, String oldRef, String newRef) {
         // If the current dependency has the oldRef, replace it with newRef
         if (dependency.getRef().equals(oldRef)) {
             Dependency updatedDependency = new Dependency(newRef);
@@ -603,39 +661,58 @@ public class SbomUtils {
 
         // Recursively update sub-dependencies
         if (dependency.getDependencies() != null) {
+            List<Dependency> subDependencies = new ArrayList<>(dependency.getDependencies().size());
             for (Dependency subDependency : dependency.getDependencies()) {
-                updateDependencyRef(subDependency, oldRef, newRef);
+                Dependency updatedSubDependency = updateDependencyRef(subDependency, oldRef, newRef);
+                subDependencies.add(updatedSubDependency);
             }
+            dependency.setDependencies(subDependencies);
         }
 
         // Recursively update provided dependencies
         if (dependency.getProvides() != null) {
+            List<Dependency> subProvides = new ArrayList<>(dependency.getProvides().size());
             for (Dependency subProvide : dependency.getProvides()) {
-                updateDependencyRef(subProvide, oldRef, newRef);
+                Dependency updatedSubProvide = updateDependencyRef(subProvide, oldRef, newRef);
+                subProvides.add(updatedSubProvide);
             }
+            dependency.setProvides(subProvides);
         }
+
+        return dependency;
     }
 
-    public static Dependency updateDependencyRef(Dependency dependency, String newRef) {
-        // If the current dependency has the oldRef, replace it with newRef
-        Dependency updatedDependency = new Dependency(newRef);
-        updatedDependency.setDependencies(dependency.getDependencies());
-        updatedDependency.setProvides(dependency.getProvides());
+    public static Dependency updateDependencyRef(Dependency dependency, Pattern pattern, String newRef) {
+        // If the current dependency ref matches pattern, replace it with newRef
+        if (pattern.matcher(dependency.getRef()).matches()) {
+            Dependency updatedDependency = new Dependency(newRef);
+            updatedDependency.setDependencies(dependency.getDependencies());
+            updatedDependency.setProvides(dependency.getProvides());
+
+            // Replace the old dependency with the updated one
+            dependency = updatedDependency;
+        }
 
         // Recursively update sub-dependencies
-        if (updatedDependency.getDependencies() != null) {
-            for (Dependency subDependency : updatedDependency.getDependencies()) {
-                updateDependencyRef(subDependency, newRef);
+        if (dependency.getDependencies() != null) {
+            List<Dependency> subDependencies = new ArrayList<>(dependency.getDependencies().size());
+            for (Dependency subDependency : dependency.getDependencies()) {
+                Dependency updatedSubDependency = updateDependencyRef(subDependency, pattern, newRef);
+                subDependencies.add(updatedSubDependency);
             }
+            dependency.setDependencies(subDependencies);
         }
 
         // Recursively update provided dependencies
-        if (updatedDependency.getProvides() != null) {
-            for (Dependency subProvide : updatedDependency.getProvides()) {
-                updateDependencyRef(subProvide, newRef);
+        if (dependency.getProvides() != null) {
+            List<Dependency> subProvides = new ArrayList<>(dependency.getProvides().size());
+            for (Dependency subProvide : dependency.getProvides()) {
+                Dependency updatedSubProvide = updateDependencyRef(subProvide, pattern, newRef);
+                subProvides.add(updatedSubProvide);
             }
+            dependency.setProvides(subProvides);
         }
-        return updatedDependency;
+        return dependency;
     }
 
     public static ToolInformation createToolInformation(String version) {
@@ -977,7 +1054,7 @@ public class SbomUtils {
 
     public static List<String> computeNVRFromContainerManifest(JsonNode jsonNode) {
         Bom bom = fromJsonNode(jsonNode);
-        if (bom == null || bom.getComponents() == null || bom.getComponents().isEmpty()) {
+        if (bom == null || !isNotEmpty(bom.getComponents())) {
             return List.of();
         }
         Component mainComponent = bom.getComponents().get(0);
@@ -1153,7 +1230,7 @@ public class SbomUtils {
 
     /**
      * Given a raw {@link JsonNode}, converts it to a CycloneDX {@link Bom} object, and removes any Errata information
-     * from the root component properties.
+     * from the main component properties.
      *
      * @param jsonNode The {@link JsonNode} to convert.
      */
@@ -1166,13 +1243,14 @@ public class SbomUtils {
     /**
      * Removes any Errata information from the provided CycloneDX {@link Bom} object.
      *
-     * @param bom The {@link Bom} containing the root component to be cleaned up from its Errata properties.
+     * @param bom The {@link Bom} containing the main component to be cleaned up from its Errata properties.
      */
     public static void removeErrataProperties(Bom bom) {
-        if (bom != null && bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_NAME);
-            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VERSION);
-            removeProperty(bom.getMetadata().getComponent(), PROPERTY_ERRATA_PRODUCT_VARIANT);
+        if (bom != null && isNotEmpty(bom.getComponents())) {
+            Component component = bom.getComponents().get(0);
+            removeProperty(component, PROPERTY_ERRATA_PRODUCT_NAME);
+            removeProperty(component, PROPERTY_ERRATA_PRODUCT_VERSION);
+            removeProperty(component, PROPERTY_ERRATA_PRODUCT_VARIANT);
         }
     }
 
@@ -1242,7 +1320,7 @@ public class SbomUtils {
     }
 
     public static void addMissingContainerHash(Bom bom) {
-        if (bom.getComponents() == null || bom.getComponents().isEmpty()) {
+        if (!isNotEmpty(bom.getComponents())) {
             return;
         }
 
@@ -1432,5 +1510,156 @@ public class SbomUtils {
                 .collect(Collectors.toSet());
         allPurls.addAll(purls);
         return allPurls;
+    }
+
+    /**
+     * Verify if list is populated
+     *
+     * @param list the list
+     * @return {@code true} if list is populated, {@code false} otherwise
+     */
+    public static <T> boolean isNotEmpty(List<T> list) {
+        return list != null && !list.isEmpty();
+    }
+
+    /**
+     * Add missing components from one manifest to another
+     *
+     * @param targetComponents the target manifest components
+     * @param sourceComponents the source manifest components
+     */
+    private static void addMissingComponents(List<Component> targetComponents, List<Component> sourceComponents) {
+        Map<String, Component> mergedComponents = new HashMap<>();
+        for (Component component : targetComponents) {
+            // Skip if can't uniquely identify component
+            if (bomRefExists(component)) {
+                mergedComponents.put(component.getBomRef(), component);
+            }
+        }
+        targetComponents.clear();
+        for (Component component : sourceComponents) {
+            // Skip if can't uniquely identify component
+            if (bomRefExists(component)) {
+                String bomRef = component.getBomRef();
+                Component existingComponent = mergedComponents.get(bomRef);
+                // Duplicate found, see if we have any missing subcomponents
+                if (existingComponent != null) {
+                    log.debug("Component (with bom-ref: '{}') already exists, adding missing subcomponents", bomRef);
+                    List<Component> subComponents = component.getComponents();
+                    // Pointless proceeding unless there are subcomponents from the source manifest
+                    if (isNotEmpty(subComponents)) {
+                        adjustEmptySubComponents(existingComponent);
+                        addMissingComponents(existingComponent.getComponents(), subComponents);
+                    }
+                } else {
+                    log.debug("Adding missing component (with bom-ref: '{}')", bomRef);
+                    mergedComponents.put(bomRef, component);
+                }
+            }
+        }
+        targetComponents.addAll(mergedComponents.values());
+    }
+
+    /**
+     * Add missing dependencies from one manifest to another
+     *
+     * @param targetDependencies the target manifest dependencies
+     * @param sourceDependencies the source manifest dependencies
+     */
+    private static void addMissingDependencies(
+            List<Dependency> targetDependencies,
+            List<Dependency> sourceDependencies) {
+        Map<String, Dependency> mergedDependencies = new HashMap<>();
+        for (Dependency dependency : targetDependencies) {
+            mergedDependencies.put(dependency.getRef(), dependency);
+        }
+        targetDependencies.clear();
+        for (Dependency dependency : sourceDependencies) {
+            String ref = dependency.getRef();
+            Dependency existingDependency = mergedDependencies.get(ref);
+            // Duplicate found, see if we have any missing sub-dependencies
+            if (existingDependency != null) {
+                log.debug("Dependency (with ref: '{}') already exists, adding missing sub-dependencies", ref);
+                List<Dependency> subDependencies = dependency.getDependencies();
+                // Pointless proceeding unless there are sub-dependencies from source manifest
+                if (isNotEmpty(subDependencies)) {
+                    adjustEmptySubDependencies(existingDependency);
+                    addMissingDependencies(existingDependency.getDependencies(), subDependencies);
+                }
+                List<Dependency> subProvides = dependency.getProvides();
+                // Pointless proceeding unless there are sub-provides from source manifest
+                if (isNotEmpty(subProvides)) {
+                    adjustEmptySubProvides(existingDependency);
+                    addMissingDependencies(existingDependency.getProvides(), subProvides);
+                }
+            } else {
+                log.debug("Adding missing dependency (with ref: '{}')", ref);
+                mergedDependencies.put(ref, dependency);
+            }
+        }
+        targetDependencies.addAll(mergedDependencies.values());
+    }
+
+    public static void addMissingComponentsAndDependencies(Bom targetBom, Bom sourceBom) {
+        List<Component> sourcesComponents = sourceBom.getComponents();
+        // Pointless proceeding unless there are components in source manifest
+        if (isNotEmpty(sourcesComponents)) {
+            addMissingComponents(targetBom.getComponents(), sourcesComponents);
+        }
+        List<Dependency> sourcesDependencies = sourceBom.getDependencies();
+        // Pointless proceeding unless there are dependencies in source manifest
+        if (isNotEmpty(sourcesDependencies)) {
+            addMissingDependencies(targetBom.getDependencies(), sourcesDependencies);
+        }
+    }
+
+    /**
+     * Verify if component bom-ref exists
+     *
+     * @param component the component
+     * @return {@code true} if bom-ref exists, {@code false} otherwise
+     */
+    private static boolean bomRefExists(Component component) {
+        if (component.getBomRef() == null) {
+            log.debug(
+                    "Component (of type '{}', cpe: '{}') does not have bom-ref assigned, skipping",
+                    component.getType(),
+                    component.getCpe());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * If the subcomponents are null, initialize an empty list
+     *
+     * @param component the component to adjust
+     */
+    private static void adjustEmptySubComponents(Component component) {
+        if (component.getComponents() == null) {
+            component.setComponents(new ArrayList<>());
+        }
+    }
+
+    /**
+     * If the sub-dependencies are null, initialize an empty list
+     *
+     * @param dependency the dependency to adjust
+     */
+    private static void adjustEmptySubDependencies(Dependency dependency) {
+        if (dependency.getDependencies() == null) {
+            dependency.setDependencies(new ArrayList<>());
+        }
+    }
+
+    /**
+     * If the sub-provides are null, initialize an empty list
+     *
+     * @param dependency the dependency to adjust
+     */
+    private static void adjustEmptySubProvides(Dependency dependency) {
+        if (dependency.getProvides() == null) {
+            dependency.setProvides(new ArrayList<>());
+        }
     }
 }

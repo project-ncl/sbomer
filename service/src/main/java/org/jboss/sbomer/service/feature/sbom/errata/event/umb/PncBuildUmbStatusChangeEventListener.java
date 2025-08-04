@@ -59,13 +59,17 @@ public class PncBuildUmbStatusChangeEventListener {
             pncNotificationHandler.handle(event.getRequestEventId());
         } catch (JsonProcessingException e) {
             log.error("Unable to deserialize PNC message for request '{}'.", event.getRequestEventId(), e);
-            requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
+            requestEventRepository
+                    .updateWithFailure(event.getRequestEventId(), "Unable to deserialize the PNC UMB message");
         } catch (ApplicationException e) {
             log.error("Application error while handling request '{}': {}", event.getRequestEventId(), e.getMessage());
-            requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
+            requestEventRepository.updateWithFailure(
+                    event.getRequestEventId(),
+                    "Application error occurred while processing the PNC UMB message: " + e.getMessage());
         } catch (RuntimeException e) {
             log.error("Unexpected error while handling request '{}'", event.getRequestEventId(), e);
-            requestEventRepository.updateWithGenericFailure(event.getRequestEventId());
+            requestEventRepository
+                    .updateWithFailure(event.getRequestEventId(), "Unexpected error occurred: " + e.getMessage());
         } finally {
             MDC.clear();
         }

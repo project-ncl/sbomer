@@ -48,6 +48,8 @@ quarkus:
       "org.jboss.resteasy.reactive.client.logging":
         level: TRACE
         min-level: TRACE
+    console:
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
 
   rest-client:
     logging:
@@ -56,6 +58,10 @@ quarkus:
 
   oidc-client:
     client-enabled: true
+
+  operator-sdk:
+    namespaces: default
+    enable-ssa: false
 
 kerberos-client:
   user-principal-name: principal
@@ -74,6 +80,11 @@ sbomer:
     #  url:
     #web:
     #  url:
+
+  service:
+    generation-scheduler:
+      max-concurrent-generations: 4
+      sync-batch: 5
 
   purl-qualifiers-allow-list:
     - repository_url

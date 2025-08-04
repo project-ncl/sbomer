@@ -28,17 +28,17 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRefBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.WorkspaceBindingBuilder;
+import io.fabric8.tekton.v1beta1.ParamBuilder;
+import io.fabric8.tekton.v1beta1.TaskRefBuilder;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.CRUDNoGCKubernetesDependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.KubernetesDependent;
 import lombok.extern.slf4j.Slf4j;
 
-@KubernetesDependent(resourceDiscriminator = InitResourceDiscriminator.class)
+@KubernetesDependent
 @Slf4j
 public class TaskRunInitDependentResource extends CRUDNoGCKubernetesDependentResource<TaskRun, GenerationRequest> {
 

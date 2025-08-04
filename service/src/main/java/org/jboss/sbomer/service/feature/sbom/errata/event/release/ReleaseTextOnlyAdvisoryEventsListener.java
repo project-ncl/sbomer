@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.event.AdvisoryEventUtils;
 import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
@@ -47,7 +49,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -193,7 +194,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         SbomUtils.addMissingSerialNumber(productVersionBom);
 
         SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion);
-        Sbom sbom = saveReleaseManifestForTextOnlyAdvisories(
+        List<Sbom> sbomsToUpload = saveReleaseManifestForTextOnlyAdvisories(
                 requestEvent,
                 erratum,
                 productName,
@@ -205,12 +206,12 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
 
         log.info(
                 "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}'",
-                sbom,
+                sbomsToUpload.get(sbomsToUpload.size() - 1), // Will always be release SBOM
                 releaseGeneration.getId(),
                 productVersion,
                 erratum.getDetails().get().getFulladvisory());
 
-        performPost(List.of(sbom));
+        performPost(sbomsToUpload);
     }
 
     // FIXME: 'Optional.get()' without 'isPresent()' check
@@ -243,9 +244,8 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         Bom manifestBom = SbomUtils.fromJsonNode(sbom.getSbom());
         Component manifestMainComponent;
         Component metadataComponent = manifestBom.getMetadata().getComponent();
-        // If there are no components or the manifest is a ZIP manifest, get the main component from the metadata
-        if (manifestBom.getComponents() == null || manifestBom.getComponents().isEmpty()
-                || SbomUtils.hasProperty(metadataComponent, "deliverable-url")) {
+        // If there are no components get the main component from the metadata
+        if (!SbomUtils.isNotEmpty(manifestBom.getComponents())) {
             manifestMainComponent = metadataComponent;
         } else {
             manifestMainComponent = manifestBom.getComponents().get(0);
@@ -253,7 +253,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
                 manifestMainComponent,
                 Map.of("repository_url", Constants.MRRC_URL),
-                !SbomUtils.hasProperty(manifestMainComponent, "deliverable-url"));
+                !SbomUtils.hasProperty(manifestMainComponent, Constants.SBOM_RED_HAT_DELIVERABLE_URL));
 
         // Finally, create the root component for this build (NVR) from the manifest
         Component sbomRootComponent = SbomUtils.createComponent(manifestMainComponent);
@@ -270,7 +270,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     @BeforeRetry(RetryLogger.class)
-    protected Sbom saveReleaseManifestForTextOnlyAdvisories(
+    protected List<Sbom> saveReleaseManifestForTextOnlyAdvisories(
             RequestEvent requestEvent,
             Errata erratum,
             String productName,
@@ -281,6 +281,7 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
             List<Sbom> sboms) {
 
         try {
+            List<Sbom> sbomsToUpload = new ArrayList<>();
             QuarkusTransaction.begin(QuarkusTransaction.beginOptions().timeout(INCREASED_TIMEOUT_SEC));
 
             // 1 - Save the release generation with the release manifest
@@ -342,13 +343,15 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
                         productVersion,
                         manifestBom);
                 buildManifest.setReleaseMetadata(buildManifestMetadataNode);
+                sbomsToUpload.add(buildManifest);
             }
 
             requestEvent = requestEventRepository.findById(requestEvent.getId());
             requestEvent.setEventStatus(RequestEventStatus.SUCCESS);
             QuarkusTransaction.commit();
+            sbomsToUpload.add(releaseSbom); // For consistency upload release after build SBOMs
 
-            return releaseSbom;
+            return sbomsToUpload;
         } catch (Exception e) {
             try {
                 QuarkusTransaction.rollback();
@@ -395,12 +398,12 @@ public class ReleaseTextOnlyAdvisoryEventsListener extends AbstractEventsListene
         return releaseMetadata;
     }
 
-    private void adjustComponent(Component component) {
+    protected void adjustComponent(Component component) {
 
         String evidencePurl = SbomUtils.addQualifiersToPurlOfComponent(
                 component,
                 Map.of("repository_url", Constants.MRRC_URL),
-                !SbomUtils.hasProperty(component, "deliverable-url"));
+                SbomUtils.hasProperty(component, Constants.SBOM_RED_HAT_DELIVERABLE_URL));
         log.debug("Calculated evidence purl: {}", evidencePurl);
         component.setPurl(evidencePurl);
         SbomUtils.setEvidenceIdentities(component, Set.of(evidencePurl), Field.PURL);

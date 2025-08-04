@@ -1,12 +1,14 @@
 import '@app/app.css';
 import '@patternfly/react-core/dist/styles/base.css';
 import * as React from 'react';
-import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouteObject, RouterProvider, useNavigate } from 'react-router-dom';
 
 import { IAppRoute, routes } from './routes';
 
+
 const App = () => {
   return (
+
     <RouterProvider
       router={createBrowserRouter(
         routes

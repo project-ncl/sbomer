@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata;
 
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.ERRATA_CLIENT_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.ERRATA_CLIENT_MAX_RETRIES;
+
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +37,7 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.UnauthorizedException;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepo;
@@ -43,7 +47,8 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataProduct;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataRelease;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
 import org.jboss.sbomer.service.feature.sbom.kerberos.ErrataKrb5ClientRequestFilter;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.jboss.sbomer.service.rest.otel.SpanName;
+import org.jboss.sbomer.service.rest.otel.Traced;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.faulttolerance.api.BeforeRetry;
@@ -61,9 +66,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ERRATA_CLIENT_MAX_RETRIES;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ERRATA_CLIENT_DELAY;
-
 /**
  * A client for Errata
  */
@@ -77,65 +79,113 @@ import static org.jboss.sbomer.service.rest.faulttolerance.Constants.ERRATA_CLIE
 public interface ErrataClient {
 
     // Retrieve the advisory data, the id could be advisory id or advisory name.
+    @Traced
+    @SpanName("errata.get")
     @GET
     @Path("/erratum/{id}")
-    @Retry(maxRetries = ERRATA_CLIENT_MAX_RETRIES, delay = ERRATA_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = ERRATA_CLIENT_MAX_RETRIES,
+            delay = ERRATA_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     Errata getErratum(@PathParam("id") String erratumId);
 
     // Get the details of a product by its id or short name
+    @Traced
+    @SpanName("errata.product.get")
     @GET
     @Path("/products/{id}")
-    @Retry(maxRetries = ERRATA_CLIENT_MAX_RETRIES, delay = ERRATA_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = ERRATA_CLIENT_MAX_RETRIES,
+            delay = ERRATA_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     ErrataProduct getProduct(@PathParam("id") String productId);
 
     // Get the details of a release by its id or name
+    @Traced
+    @SpanName("errata.release.get")
     @GET
     @Path("/releases/{id}")
-    @Retry(maxRetries = ERRATA_CLIENT_MAX_RETRIES, delay = ERRATA_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = ERRATA_CLIENT_MAX_RETRIES,
+            delay = ERRATA_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     ErrataRelease getRelease(@PathParam("id") String releaseId);
 
     // Get the details of a variant by its name or id
+    @Traced
+    @SpanName("errata.variant.get")
     @GET
     @Path("/variants/{id}")
-    @Retry(maxRetries = ERRATA_CLIENT_MAX_RETRIES, delay = ERRATA_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = ERRATA_CLIENT_MAX_RETRIES,
+            delay = ERRATA_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     ErrataVariant getVariant(@PathParam("id") String variantId);
 
     // Get the details of a variant by its name or id
+    @Traced
+    @SpanName("errata.variants.get")
     @GET
     @Path("/variants")
-    @Retry(maxRetries = ERRATA_CLIENT_MAX_RETRIES, delay = ERRATA_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = ERRATA_CLIENT_MAX_RETRIES,
+            delay = ERRATA_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     ErrataPage<ErrataVariant.VariantData> getAllVariants(@Valid @BeanParam ErrataQueryParameters pageParameters);
 
     // Add a comment to an advisory. Example request body: {"comment": "This is my comment"}
+    @Traced
+    @SpanName("errata.comment.add")
     @POST
     @Path("/erratum/{id}/add_comment")
-    @Retry(maxRetries = ERRATA_CLIENT_MAX_RETRIES, delay = ERRATA_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = ERRATA_CLIENT_MAX_RETRIES,
+            delay = ERRATA_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     Errata addCommentToErratum(@PathParam("id") String erratumId, String comment);
 
     // Fetch the Brew builds associated with an advisory.
+    @Traced
+    @SpanName("errata.build_list.get")
     @GET
     @Path("/erratum/{id}/builds_list")
-    @Retry(maxRetries = ERRATA_CLIENT_MAX_RETRIES, delay = ERRATA_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = ERRATA_CLIENT_MAX_RETRIES,
+            delay = ERRATA_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     ErrataBuildList getBuildsList(@PathParam("id") String erratumId);
 
     // Get the CDN repositories
+    @Traced
+    @SpanName("errata.cdn_repos.get")
     @GET
     @Path("/cdn_repos")
-    @Retry(maxRetries = ERRATA_CLIENT_MAX_RETRIES, delay = ERRATA_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = ERRATA_CLIENT_MAX_RETRIES,
+            delay = ERRATA_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     ErrataPage<ErrataCDNRepo> getAllCDNRepos(@Valid @BeanParam ErrataQueryParameters pageParameters);

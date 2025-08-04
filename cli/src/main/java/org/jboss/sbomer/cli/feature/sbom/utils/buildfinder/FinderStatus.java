@@ -21,9 +21,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
-
 import org.jboss.pnc.build.finder.core.BuildCheckedEvent;
 import org.jboss.pnc.build.finder.core.BuildFinderListener;
 import org.jboss.pnc.build.finder.core.ChecksumsComputedEvent;
@@ -31,6 +28,8 @@ import org.jboss.pnc.build.finder.core.DistributionAnalyzerListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

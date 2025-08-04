@@ -1,0 +1,5 @@
+{
+  "type": "errata-advisory",
+  "advisoryId": 12345,
+  "forceBuild": true
+}

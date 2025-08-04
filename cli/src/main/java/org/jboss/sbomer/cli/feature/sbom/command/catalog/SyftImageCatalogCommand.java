@@ -64,8 +64,7 @@ public class SyftImageCatalogCommand extends AbstractCatalogCommand {
                 imageName,
                 imageDigest);
 
-        if (boms.isEmpty()
-                || boms.stream().anyMatch(bom -> bom.getComponents() == null || bom.getComponents().isEmpty())) {
+        if (boms.isEmpty() || boms.stream().anyMatch(bom -> !SbomUtils.isNotEmpty(bom.getComponents()))) {
             throw new ApplicationException("One or more BOMs lack components. Cannot proceed with cataloging.");
         }
 

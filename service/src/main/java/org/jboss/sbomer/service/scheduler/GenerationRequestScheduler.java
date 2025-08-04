@@ -17,11 +17,17 @@
  */
 package org.jboss.sbomer.service.scheduler;
 
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_FLAGS_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_STATE_KEY;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.pnc.common.otel.OtelUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequestBuilder;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
@@ -44,12 +50,6 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_FLAGS_KEY;
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_STATE_KEY;
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_IDENTIFIER_KEY;
 
 @ApplicationScoped
 @Slf4j
@@ -127,6 +127,7 @@ public class GenerationRequestScheduler {
 
         log.debug("There is space in the cluster to process new generations, fetching them now...");
 
+        @SuppressWarnings("unchecked")
         List<SbomGenerationRequest> oldestResultsBatch = requestRepository.getEntityManager()
                 .createNativeQuery(
                         String.format(
@@ -158,9 +159,8 @@ public class GenerationRequestScheduler {
     public void schedule(SbomGenerationRequest sbomGenerationRequest) {
         log.debug("Scheduling Generation Request '{}'...", sbomGenerationRequest.getId());
 
-        GenerationRequest request = (GenerationRequest) kubernetesClient.configMaps()
-                .withName("sbom-request-" + sbomGenerationRequest.getId().toLowerCase())
-                .get();
+        String configMapName = "sbom-request-" + sbomGenerationRequest.getId().toLowerCase();
+        GenerationRequest request = (GenerationRequest) kubernetesClient.configMaps().withName(configMapName).get();
 
         if (request != null) {
             log.warn(
@@ -169,18 +169,31 @@ public class GenerationRequestScheduler {
             return;
         }
 
+        Map<String, String> attributes = Map.of(
+                "generation.id",
+                sbomGenerationRequest.getId(),
+                "generation.identifier",
+                sbomGenerationRequest.getIdentifier(),
+                "generation.config",
+                sbomGenerationRequest.getConfig() != null ? sbomGenerationRequest.getConfig().toJson() : "{}",
+                "generation.type",
+                sbomGenerationRequest.getType().toString(),
+                "generation.resource",
+                configMapName);
+
         // Create a parent child span with values from MDC. This is to differentiate each generationRequest with its own
         // span
         SpanBuilder spanBuilder = OtelUtils.buildChildSpan(
                 GlobalOpenTelemetry.get().getTracer(""),
-                "GenerationRequestScheduler.schedule",
+                OtelHelper.getEffectiveClassName(this.getClass()) + ".schedule",
                 SpanKind.CLIENT,
                 MDC.get(MDC_TRACE_ID_KEY),
                 MDC.get(MDC_SPAN_ID_KEY),
                 MDC.get(MDC_TRACE_FLAGS_KEY),
                 MDC.get(MDC_TRACE_STATE_KEY),
                 Span.current().getSpanContext(),
-                Map.of(MDC_IDENTIFIER_KEY, sbomGenerationRequest.getIdentifier()));
+                attributes);
+
         Span span = spanBuilder.startSpan();
 
         log.debug(
@@ -207,7 +220,7 @@ public class GenerationRequestScheduler {
                                     span.getSpanContext().getTraceFlags().asHex()))
                     .build();
 
-            ConfigMap cm = kubernetesClient.configMaps().resource(request).create();
+            ConfigMap cm = kubernetesClient.configMaps().resource(request).createOrReplace();
 
             log.debug(
                     "ConfigMap '{}' created as a representation of the Generation Request '{}'...",
@@ -216,6 +229,5 @@ public class GenerationRequestScheduler {
         } finally {
             span.end(); // closing the scope does not end the span, this has to be done manually
         }
-
     }
 }

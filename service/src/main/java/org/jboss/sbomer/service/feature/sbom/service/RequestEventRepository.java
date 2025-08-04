@@ -110,10 +110,10 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
     }
 
     @Transactional
-    public RequestEvent updateWithGenericFailure(String requestEventId) {
+    public RequestEvent updateWithFailure(String requestEventId, String reason) {
         RequestEvent requestEvent = RequestEvent.findById(requestEventId); // NOSONAR
         requestEvent.setEventStatus(RequestEventStatus.FAILED);
-        requestEvent.setReason(RequestEvent.FAILED_GENERIC_REASON);
+        requestEvent.setReason(reason);
         return requestEvent.save();
     }
 

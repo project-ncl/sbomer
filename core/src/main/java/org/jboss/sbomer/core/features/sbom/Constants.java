@@ -30,6 +30,7 @@ public class Constants {
 
     // Introduced as part of SBOMER-236
     public static final String REDHAT_PROPERTY_NAMESPACE_PREFIX = "redhat:";
+    public static final String CONTAINER_PROPERTY_SYFT_PREFIX = "syft:";
     public static final String CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX = // REDHAT_PROPERTY_NAMESPACE_PREFIX +
             "sbomer:";
     public static final String CONTAINER_PROPERTY_PACKAGE_LANGUAGE_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
@@ -40,19 +41,23 @@ public class Constants {
             + "location:0:path";
     public static final String CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
             + "metadata:virtualPath";
+    public static final String IMAGE_LABELS = "image:labels";
     public static final String CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX = CONTAINER_PROPERTY_SYFT_REPLACEMENT_PREFIX
-            + "image:labels";
+            + IMAGE_LABELS;
+    public static final String VERSION = ":version";
     public static final String CONTAINER_PROPERTY_IMAGE_LABEL_VERSION = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
-            + ":version";
+            + VERSION;
+    public static final String RELEASE = ":release";
     public static final String CONTAINER_PROPERTY_IMAGE_LABEL_RELEASE = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
-            + ":release";
+            + RELEASE;
     public static final String CONTAINER_PROPERTY_IMAGE_LABEL_VENDOR = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
             + ":vendor";
     public static final String CONTAINER_PROPERTY_IMAGE_LABEL_MANTAINER = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
             + ":maintainer";
     public static final String CONTAINER_PROPERTY_IMAGE_LABEL_NAME = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX + ":name";
+    public static final String COM_REDHAT_COMPONENT = ":com.redhat.component";
     public static final String CONTAINER_PROPERTY_IMAGE_LABEL_COMPONENT = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
-            + ":com.redhat.component";
+            + COM_REDHAT_COMPONENT;
     public static final String CONTAINER_PROPERTY_IMAGE_LABEL_ARCHITECTURE = CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX
             + ":architecture";
     public static final String CONTAINER_PROPERTY_ADVISORY_ID = REDHAT_PROPERTY_NAMESPACE_PREFIX + "advisory_id";

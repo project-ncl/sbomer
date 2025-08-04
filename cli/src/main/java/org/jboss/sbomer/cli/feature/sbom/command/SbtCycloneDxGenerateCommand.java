@@ -178,11 +178,8 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
         if (bom.getDependencies() != null) {
             List<Dependency> updatedDependencies = new ArrayList<>(bom.getDependencies().size());
             for (Dependency dependency : bom.getDependencies()) {
-                Matcher matcher = pattern.matcher(dependency.getRef());
-                if (matcher.matches()) {
-                    dependency = SbomUtils.updateDependencyRef(dependency, newRef);
-                }
-                updatedDependencies.add(dependency);
+                Dependency updatedDependency = SbomUtils.updateDependencyRef(dependency, pattern, newRef);
+                updatedDependencies.add(updatedDependency);
             }
             bom.setDependencies(updatedDependencies);
         }
@@ -242,7 +239,7 @@ public class SbtCycloneDxGenerateCommand extends AbstractSbtGenerateCommand {
         } else {
             // Fallback: use the first component from the bom if available
             List<Component> components = rootBom.getComponents();
-            if (components != null && !components.isEmpty()) {
+            if (SbomUtils.isNotEmpty(components)) {
                 metadata.setComponent(components.get(0));
             }
         }

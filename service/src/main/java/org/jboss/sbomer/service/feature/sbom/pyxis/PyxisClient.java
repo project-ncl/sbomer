@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.pyxis;
 
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PYXIS_CLIENT_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PYXIS_CLIENT_MAX_RETRIES;
+
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -28,10 +31,12 @@ import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ForbiddenException;
 import org.jboss.sbomer.core.errors.NotFoundException;
 import org.jboss.sbomer.core.errors.UnauthorizedException;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.kerberos.PyxisKrb5ClientRequestFilter;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
+import org.jboss.sbomer.service.rest.otel.SpanName;
+import org.jboss.sbomer.service.rest.otel.Traced;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.faulttolerance.api.BeforeRetry;
@@ -46,9 +51,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIENT_MAX_RETRIES;
-import static org.jboss.sbomer.service.rest.faulttolerance.Constants.PYXIS_CLIENT_DELAY;
 
 /**
  * A client for Pyxis
@@ -69,18 +71,30 @@ public interface PyxisClient {
             "data.repositories.published");
     List<String> REPOSITORIES_REGISTRY_INCLUDES = List.of("_id", "registry", "repository", "requires_terms");
 
+    @Traced
+    @SpanName("pyxis.repository.details.get")
     @GET
     @Path("/images/nvr/{nvr}")
-    @Retry(maxRetries = PYXIS_CLIENT_MAX_RETRIES, delay = PYXIS_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = PYXIS_CLIENT_MAX_RETRIES,
+            delay = PYXIS_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     PyxisRepositoryDetails getRepositoriesDetails(
             @PathParam("nvr") String nvr,
             @QueryParam("include") List<String> includes);
 
+    @Traced
+    @SpanName("pyxis.repository.get")
     @GET
     @Path("/repositories/registry/{registry}/repository/{repository}")
-    @Retry(maxRetries = PYXIS_CLIENT_MAX_RETRIES, delay = PYXIS_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @Retry(
+            maxRetries = PYXIS_CLIENT_MAX_RETRIES,
+            delay = PYXIS_CLIENT_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            abortOn = UnauthorizedException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     PyxisRepository getRepository(

@@ -44,15 +44,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
-import io.fabric8.knative.internal.pkg.apis.ConditionBuilder;
+import io.fabric8.knative.pkg.apis.ConditionBuilder;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminatedBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.ParamValue;
-import io.fabric8.tekton.pipeline.v1beta1.StepStateBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunResultBuilder;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRunStatusBuilder;
+import io.fabric8.tekton.v1beta1.ParamBuilder;
+import io.fabric8.tekton.v1beta1.ParamValue;
+import io.fabric8.tekton.v1beta1.StepStateBuilder;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.v1beta1.TaskRunResultBuilder;
+import io.fabric8.tekton.v1beta1.TaskRunStatusBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.quarkus.test.junit.QuarkusTest;
@@ -135,12 +135,12 @@ class InitializationPhaseGenerationRequestReconcilerTest {
         UpdateControl<GenerationRequest> updateControl = controller
                 .reconcile(request, mockContext(Collections.emptySet()));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.NEW, updateControl.getResource().getStatus());
-        assertNull(updateControl.getResource().getReason());
-        assertNull(updateControl.getResource().getResult());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.NEW, updateControl.getResource().get().getStatus());
+        assertNull(updateControl.getResource().get().getReason());
+        assertNull(updateControl.getResource().get().getResult());
 
-        assertEquals("NEW", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+        assertEquals("NEW", updateControl.getResource().get().getMetadata().getLabels().get(Labels.LABEL_STATUS));
     }
 
     @Test
@@ -150,11 +150,11 @@ class InitializationPhaseGenerationRequestReconcilerTest {
         UpdateControl<GenerationRequest> updateControl = controller
                 .reconcile(request, mockContext(Collections.emptySet()));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.SCHEDULED, updateControl.getResource().getStatus());
-        assertNull(updateControl.getResource().getReason());
-        assertNull(updateControl.getResource().getResult());
-        assertEquals("SCHEDULED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.SCHEDULED, updateControl.getResource().get().getStatus());
+        assertNull(updateControl.getResource().get().getReason());
+        assertNull(updateControl.getResource().get().getResult());
+        assertEquals("SCHEDULED", updateControl.getResource().get().getMetadata().getLabels().get(Labels.LABEL_STATUS));
     }
 
     @Test
@@ -180,11 +180,11 @@ class InitializationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(Set.of(taskRun)));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.SCHEDULED, updateControl.getResource().getStatus());
-        assertNull(updateControl.getResource().getReason());
-        assertNull(updateControl.getResource().getResult());
-        assertEquals("SCHEDULED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.SCHEDULED, updateControl.getResource().get().getStatus());
+        assertNull(updateControl.getResource().get().getReason());
+        assertNull(updateControl.getResource().get().getResult());
+        assertEquals("SCHEDULED", updateControl.getResource().get().getMetadata().getLabels().get(Labels.LABEL_STATUS));
     }
 
     @Test
@@ -194,14 +194,14 @@ class InitializationPhaseGenerationRequestReconcilerTest {
         UpdateControl<GenerationRequest> updateControl = controller
                 .reconcile(request, mockContext(Collections.emptySet()));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
         assertEquals(
                 "Configuration initialization failed. Unable to find related TaskRun. See logs for more information.",
-                updateControl.getResource().getReason());
-        assertEquals(GenerationResult.ERR_SYSTEM, updateControl.getResource().getResult());
-        assertEquals("FAILED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
-        assertEquals("init", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_PHASE));
+                updateControl.getResource().get().getReason());
+        assertEquals(GenerationResult.ERR_SYSTEM, updateControl.getResource().get().getResult());
+        assertEquals("FAILED", updateControl.getResource().get().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+        assertEquals("init", updateControl.getResource().get().getMetadata().getLabels().get(Labels.LABEL_PHASE));
     }
 
     @Test
@@ -216,13 +216,15 @@ class InitializationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(Set.of(taskRun)));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.INITIALIZED, updateControl.getResource().getStatus());
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.INITIALIZED, updateControl.getResource().get().getStatus());
 
         // For in-progress generation, we don't set reason nor result
-        assertNull(updateControl.getResource().getReason());
-        assertNull(updateControl.getResource().getResult());
-        assertEquals("INITIALIZED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+        assertNull(updateControl.getResource().get().getReason());
+        assertNull(updateControl.getResource().get().getResult());
+        assertEquals(
+                "INITIALIZED",
+                updateControl.getResource().get().getMetadata().getLabels().get(Labels.LABEL_STATUS));
     }
 
     @Test
@@ -255,10 +257,10 @@ class InitializationPhaseGenerationRequestReconcilerTest {
 
         UpdateControl<GenerationRequest> updateControl = controller.reconcile(request, mockContext(Set.of(taskRun)));
 
-        assertTrue(updateControl.isUpdateResource());
-        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().getStatus());
-        assertEquals(reason, updateControl.getResource().getReason());
-        assertEquals(result, updateControl.getResource().getResult());
-        assertEquals("FAILED", updateControl.getResource().getMetadata().getLabels().get(Labels.LABEL_STATUS));
+        assertTrue(updateControl.isPatchResource());
+        assertEquals(SbomGenerationStatus.FAILED, updateControl.getResource().get().getStatus());
+        assertEquals(reason, updateControl.getResource().get().getReason());
+        assertEquals(result, updateControl.getResource().get().getResult());
+        assertEquals("FAILED", updateControl.getResource().get().getMetadata().getLabels().get(Labels.LABEL_STATUS));
     }
 }

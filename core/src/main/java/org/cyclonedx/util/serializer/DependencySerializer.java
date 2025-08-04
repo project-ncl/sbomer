@@ -35,24 +35,26 @@
  */
 package org.cyclonedx.util.serializer;
 
-import java.io.IOException;
-import java.util.List;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.JsonSerializer;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cyclonedx.CycloneDxSchema;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.DependencyList;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.ContextualSerializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 
 /*
  * Modified by Andrea Vibelli to temporarily fix https://github.com/CycloneDX/cyclonedx-core-java/issues/565.
@@ -132,7 +134,7 @@ public class DependencySerializer extends StdSerializer<DependencyList> implemen
     private void writeXMLDependenciesWithGenerator(
             final ToXmlGenerator toXmlGenerator,
             final List<Dependency> dependencies) throws IOException, XMLStreamException {
-        if (dependencies != null && !dependencies.isEmpty()) {
+        if (SbomUtils.isNotEmpty(dependencies)) {
             processNamespace(toXmlGenerator, parentTagName);
             toXmlGenerator.writeStartArray();
 

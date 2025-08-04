@@ -1,5 +1,5 @@
 import { RequestEventDetailsTable } from '@app/components/RequestEventTable/RequestEventDetailsTable';
-import { Grid, GridItem, PageSection, Title } from '@patternfly/react-core';
+import { Grid, GridItem, PageSection } from '@patternfly/react-core';
 import * as React from 'react';
 import { AppLayout } from '../AppLayout/AppLayout';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';

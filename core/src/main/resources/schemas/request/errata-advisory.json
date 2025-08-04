@@ -9,10 +9,14 @@
         "type": {
             "const": "errata-advisory"
         },
-
         "advisoryId": {
             "description": "Errata Tool advisory identifier",
             "type": "string"
+        },
+        "forceBuild": {
+            "description": "Force a new build manifest generation for advisory",
+            "type": "boolean",
+            "default": false
         }
     },
     "required": ["advisoryId", "type"],

@@ -17,8 +17,22 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.processor;
 
-import com.github.packageurl.PackageURL;
-import lombok.extern.slf4j.Slf4j;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.BomReference;
 import org.cyclonedx.model.Component;
@@ -29,21 +43,9 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.enums.BuildType;
 import org.jboss.sbomer.core.pnc.PncService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.github.packageurl.PackageURL;
 
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_PNC_BUILD_ID;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getExternalReferences;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Class for working around problem with missing NPM dependencies in manifest. For every component produced by a non-NPM
@@ -57,12 +59,12 @@ public class WorkaroundMissingNpmDependencies {
 
     // Map Build ID -> list of the build's NPM dependencies
     // We will add these dependencies as new components
-    private final Map<String, List<Artifact>> buildsWithNpmDependencies = new HashMap<>();
+    private final Map<String, List<Artifact>> buildsWithNpmDependencies = new LinkedHashMap<>();
     // Map Build ID -> components that were built by the build
     // These components will get new dependency components added to them
-    private final Map<String, List<Component>> componentsToAddNpmDependencies = new HashMap<>();
+    private final Map<String, List<Component>> componentsToAddNpmDependencies = new LinkedHashMap<>();
     // Map PNC artifact -> the artifact transformed as a new manifest component
-    private final Map<Artifact, Component> newComponents = new HashMap<>();
+    private final Map<Artifact, Component> newComponents = new LinkedHashMap<>();
 
     public WorkaroundMissingNpmDependencies(PncService pncService) {
         this.pncService = pncService;
@@ -128,7 +130,7 @@ public class WorkaroundMissingNpmDependencies {
                 .stream()
                 .map(DefaultProcessor::getPackageURL)
                 .map(PackageURL::getCoordinates)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         Iterator<Map.Entry<String, List<Artifact>>> it = buildsWithNpmDependencies.entrySet().iterator();
 
@@ -144,7 +146,7 @@ public class WorkaroundMissingNpmDependencies {
     }
 
     private void generateNewComponents(Bom bom) {
-        Set<Artifact> artifacts = new HashSet<>();
+        Set<Artifact> artifacts = new LinkedHashSet<>();
         buildsWithNpmDependencies.values().forEach(artifacts::addAll);
 
         for (Artifact artifact : artifacts) {
@@ -160,9 +162,11 @@ public class WorkaroundMissingNpmDependencies {
     private void addDependencies(Bom bom) {
         Map<String, Dependency> bomDependencies;
         if (bom.getDependencies() == null) {
-            bomDependencies = new HashMap<>();
+            bomDependencies = new LinkedHashMap<>();
         } else {
-            bomDependencies = bom.getDependencies().stream().collect(Collectors.toMap(BomReference::getRef, c -> c));
+            bomDependencies = bom.getDependencies()
+                    .stream()
+                    .collect(Collectors.toMap(BomReference::getRef, c -> c, (d1, d2) -> d1, LinkedHashMap::new));
         }
 
         for (Map.Entry<String, List<Artifact>> e : buildsWithNpmDependencies.entrySet()) {

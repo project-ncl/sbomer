@@ -5,6 +5,13 @@
   "version": 1,
   "metadata": {
     "component": {
+      "name": "log4j",
+      "purl": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
+      "type": "library"
+    }
+  },
+  "components": [
+    {
       "publisher": "The Apache Software Foundation",
       "group": "org.apache.logging.log4j",
       "name": "log4j",
@@ -47,5 +54,5 @@
       "type": "library",
       "bom-ref": "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom"
     }
-  }
+  ]
 }

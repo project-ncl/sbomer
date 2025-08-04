@@ -21,10 +21,9 @@ import {
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useManifests } from './useSboms';
-import { openInNewTab } from '@app/utils/openInNewTab';
 import { ManifestsQueryType } from '@app/types';
 import { useManifestsFilters } from './useManifestsFilters';
 import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
@@ -38,8 +37,6 @@ const columnNames = {
 };
 
 export const ManifestsTable = () => {
-
-  const navigate = useNavigate();
 
   const { queryType, queryValue, pageIndex, pageSize, setFilters } = useManifestsFilters();
 
@@ -209,7 +206,6 @@ export const ManifestsTable = () => {
   </>
   const noResults = <NoResultsSection />
   const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
-  const errorSection = <ErrorSection />
 
   const filtersBar = <>
     <Toolbar>
@@ -228,7 +224,7 @@ export const ManifestsTable = () => {
   </>
 
   const tableArea =
-    error ? errorSection :
+    error ? <ErrorSection error={error} /> :
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 

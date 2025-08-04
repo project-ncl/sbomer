@@ -17,14 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.runtime;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-
 import org.jboss.sbomer.service.feature.FeatureFlags;
 
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 /**

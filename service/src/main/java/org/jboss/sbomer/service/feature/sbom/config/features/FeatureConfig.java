@@ -17,9 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.config.features;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 import io.smallrye.config.ConfigMapping;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * @author Marek Goldmann

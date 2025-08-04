@@ -45,6 +45,7 @@ mp:
         enabled: ${sbomer.features.umb.enabled}
         client-options-name: umb
         failure-strategy: reject
+
     outgoing:
       finished:
         port: ${UMB_BROKER_PORT}
@@ -56,7 +57,7 @@ mp:
 
 quarkus:
   application:
-    version: ${buildNumber:dev}
+    version: ${buildNumber}
 
   # Make the startup a bit nicer
   banner:
@@ -80,10 +81,15 @@ quarkus:
       url: "https://${sbomer.atlas.release.host}"
     "pnc":
       url: "https://${sbomer.pnc.host}"
+    "sbomer":
+      url: "https://${sbomer.host}"
     "errata":
       url: "https://${sbomer.errata.host}"
     "pyxis":
       url: "https://${sbomer.pyxis.host}"
+      logging:
+        scope: request-response
+        body-limit: 500
 
   # Support for feature-flags
   unleash:
@@ -112,6 +118,8 @@ quarkus:
         level: INFO
       "io.quarkiverse.kerberos.runtime.KerberosIdentityProvider":
         level: TRACE
+      "org.jboss.resteasy.reactive.client.logging":
+        level: DEBUG
 
     console:
       # Enable console logging
@@ -149,7 +157,10 @@ quarkus:
       max-size: 10
       min-size: 0
       initial-size: 1
-      acquisition-timeout: 10
+      acquisition-timeout: 30
+      additional-jdbc-properties:
+        connectTimeout: 15
+        socketTimeout: 30
 
   # https://quarkus.io/guides/hibernate-orm
   hibernate-orm:
@@ -165,6 +176,7 @@ quarkus:
       generate: false
       apply: false
       validate: false
+    enable-ssa: false
 
   ## https://quarkus.io/guides/security-oidc-configuration-properties-reference
   ## OpenID Connect (OIDC) configuration

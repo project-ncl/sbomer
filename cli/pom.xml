@@ -48,14 +48,12 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.pnc</groupId>
-      <artifactId>rest-client-jakarta</artifactId>
-      <version>${version.pnc-rest}</version>
+      <artifactId>dto</artifactId>
+      <classifier>patch-builders</classifier>
     </dependency>
     <dependency>
-      <groupId>org.jboss.pnc</groupId>
-      <artifactId>pnc-api</artifactId>
-      <classifier>jakarta</classifier>
-      <version>${version.pnc-api}</version>
+      <groupId>com.redhat.resilience.otel</groupId>
+      <artifactId>opentelemetry-ext-cli-java</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -116,7 +114,7 @@
     <dependency>
       <groupId>org.wiremock</groupId>
       <artifactId>wiremock</artifactId>
-      <version>3.13.0</version>
+      <version>3.13.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

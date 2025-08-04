@@ -39,8 +39,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.github.packageurl.MalformedPackageURLException;
-import com.github.packageurl.PackageURL;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.ExternalReference;
@@ -56,6 +54,8 @@ import org.jboss.sbomer.core.features.sbom.utils.RhVersionPattern;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.pnc.PncService;
 
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
@@ -146,7 +146,6 @@ public class DefaultProcessor implements Processor {
                     // It looks like we found the artifact with a hash-only query, but the purl query failed on us.
                     // This means that the purl most probably is incorrect in the manifest, so let's update it.
                     log.debug("Updating component's purl from '{}' to '{}'", oldPurl, newPurl);
-                    component.setPurl(newPurl);
 
                     purlRelocations.put(oldPurl, newPurl);
                 }
@@ -260,11 +259,9 @@ public class DefaultProcessor implements Processor {
         // If there are any purl relocations, process these.
         purlRelocations.forEach((oldPurl, newPurl) -> updatePurl(bom, oldPurl, newPurl));
 
-        if (bom.getMetadata() != null && bom.getMetadata().getComponent() != null) {
-            Component mainComponent = bom.getMetadata().getComponent();
-
+        if (SbomUtils.isNotEmpty(bom.getComponents())) {
             WorkaroundMissingNpmDependencies workaround = new WorkaroundMissingNpmDependencies(pncService);
-            workaround.analyzeComponentsBuild(mainComponent);
+            workaround.analyzeComponentsBuild(bom.getComponents().get(0));
             workaround.addMissingDependencies(bom);
         }
 

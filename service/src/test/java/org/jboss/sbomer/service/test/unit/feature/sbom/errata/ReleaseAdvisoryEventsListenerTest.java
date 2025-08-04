@@ -58,18 +58,18 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.ProductV
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepo;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataCDNRepoNormalized;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataVariant;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseStandardAdvisoryEventsListener;
+import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseTextOnlyAdvisoryEventsListener;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.StandardAdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.release.TextOnlyAdvisoryReleaseEvent;
 import org.jboss.sbomer.service.feature.sbom.errata.event.util.MdcEventWrapper;
-import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseStandardAdvisoryEventsListener;
-import org.jboss.sbomer.service.feature.sbom.errata.event.release.ReleaseTextOnlyAdvisoryEventsListener;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
+import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
-import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient;
+import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
 import org.jboss.sbomer.service.feature.sbom.service.RequestEventRepository;
@@ -99,7 +99,7 @@ class ReleaseAdvisoryEventsListenerTest {
     ReleaseTextOnlyAdvisoryEventsListenerManifests listenerTextOnlyManifests;
     ReleaseTextOnlyAdvisoryEventsListenerDeliverables listenerTextOnlyDeliverables;
     final ErrataClient errataClient = mock(ErrataClient.class);
-    final PyxisClient pyxisClient = mock(PyxisClient.class);
+    final PyxisValidatingClient pyxisClient = mock(PyxisValidatingClient.class);
     final StatsService statsService = mock(StatsService.class);
     final SbomService sbomService = mock(SbomService.class);
     final SbomGenerationRequestRepository generationRequestRepository = mock(SbomGenerationRequestRepository.class);
@@ -170,7 +170,7 @@ class ReleaseAdvisoryEventsListenerTest {
     static class ReleaseAdvisoryEventsListenerSingleContainer extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForDockerGeneration(
+        protected List<Sbom> saveReleaseManifestForDockerGeneration(
                 RequestEvent requestEvent,
                 Errata erratum,
                 ProductVersionEntry productVersion,
@@ -220,14 +220,14 @@ class ReleaseAdvisoryEventsListenerTest {
                     Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                     String.valueOf(erratum.getDetails().get().getId()));
             printRawBom(bom);
-            return null;
+            return List.of(new Sbom());
         }
     }
 
     static class ReleaseAdvisoryEventsListenerMultiContainer extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForDockerGeneration(
+        protected List<Sbom> saveReleaseManifestForDockerGeneration(
                 RequestEvent requestEvent,
                 Errata erratum,
                 ProductVersionEntry productVersion,
@@ -403,14 +403,14 @@ class ReleaseAdvisoryEventsListenerTest {
                     bom.getMetadata().getProperties(),
                     Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                     String.valueOf(erratum.getDetails().get().getId()));
-            return sbom;
+            return List.of(sbom);
         }
     }
 
     static class ReleaseAdvisoryEventsListenerSingleRPM extends ReleaseStandardAdvisoryEventsListener {
 
         @Override
-        protected Sbom saveReleaseManifestForRPMGeneration(
+        protected List<Sbom> saveReleaseManifestForRPMGeneration(
                 RequestEvent requestEvent,
                 Errata erratum,
                 ProductVersionEntry productVersion,
@@ -492,13 +492,13 @@ class ReleaseAdvisoryEventsListenerTest {
                     bom.getMetadata().getProperties(),
                     Constants.CONTAINER_PROPERTY_ADVISORY_ID,
                     String.valueOf(erratum.getDetails().get().getId()));
-            return sbom;
+            return List.of(sbom);
         }
     }
 
     static class ReleaseTextOnlyAdvisoryEventsListenerManifests extends ReleaseTextOnlyAdvisoryEventsListener {
         @Override
-        protected Sbom saveReleaseManifestForTextOnlyAdvisories(
+        protected List<Sbom> saveReleaseManifestForTextOnlyAdvisories(
                 RequestEvent requestEvent,
                 Errata erratum,
                 String productName,
@@ -587,13 +587,13 @@ class ReleaseAdvisoryEventsListenerTest {
                 JsonNode node = arrayNode.get(i);
                 assertEquals(node.asText(), allPurls.get(i));
             }
-            return sbom;
+            return List.of(sbom);
         }
     }
 
     static class ReleaseTextOnlyAdvisoryEventsListenerDeliverables extends ReleaseTextOnlyAdvisoryEventsListener {
         @Override
-        protected Sbom saveReleaseManifestForTextOnlyAdvisories(
+        protected List<Sbom> saveReleaseManifestForTextOnlyAdvisories(
                 RequestEvent requestEvent,
                 Errata erratum,
                 String productName,
@@ -705,7 +705,16 @@ class ReleaseAdvisoryEventsListenerTest {
                 assertEquals(node.asText(), allPurls.get(i));
             }
             printRawBom(bom);
-            return sbom;
+
+            // for each build manifest component in componets[], test component adjustment
+            for (Sbom buildSbom : sboms) {
+                Bom manifestBom = SbomUtils.fromJsonNode(buildSbom.getSbom());
+                for (Component component : manifestBom.getComponents()) {
+                    adjustComponent(component);
+                }
+            }
+
+            return List.of(sbom);
         }
     }
 

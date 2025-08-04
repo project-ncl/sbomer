@@ -14,8 +14,7 @@ import {
   Skeleton,
 } from '@patternfly/react-core';
 import { InfoIcon } from '@patternfly/react-icons';
-import axios from 'axios';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { ErrorSection } from '../ErrorSection/ErrorSection';
 import { useAsyncRetry } from 'react-use';
 
@@ -113,7 +112,7 @@ export const StatsSection = () => {
   );
 
   if (error) {
-    return <ErrorSection />;
+    return <ErrorSection error={error} />;
   }
 
   return value ? (

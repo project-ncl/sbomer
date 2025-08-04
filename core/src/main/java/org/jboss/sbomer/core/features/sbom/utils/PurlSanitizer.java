@@ -17,13 +17,13 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Map;
-import java.util.TreeMap;
 
 @Slf4j
 public class PurlSanitizer {

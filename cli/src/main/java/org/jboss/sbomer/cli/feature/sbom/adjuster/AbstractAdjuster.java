@@ -17,15 +17,22 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.adjuster;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Evidence;
 import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.Metadata;
+import org.cyclonedx.model.component.evidence.Identity;
+import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.jboss.pnc.common.Strings;
 import org.jboss.sbomer.cli.feature.sbom.utils.UriValidator;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractAdjuster implements Adjuster {
@@ -73,6 +80,61 @@ public abstract class AbstractAdjuster implements Adjuster {
     protected void cleanupExternalReferences(List<ExternalReference> externalReferences) {
         if (externalReferences != null) {
             externalReferences.removeIf(er -> !Strings.isEmpty(er.getUrl()) && !UriValidator.isUriValid(er.getUrl()));
+        }
+    }
+
+    /**
+     * <p>
+     * Ensures that the main component is present in the {@link Bom#getComponents()} list.
+     * </p>
+     *
+     * <p>
+     * At the same time it cleans up the main component available in the {@link Metadata#getComponent()}.
+     * </p>
+     *
+     * @param bom the manifest to adjust
+     */
+    protected void adjustMainComponent(Bom bom) {
+        Component mainComponent = bom.getMetadata().getComponent();
+        // Skip main component if it doesn't exist or has already been adjusted
+        if (mainComponent == null || mainComponent.getBomRef() == null) {
+            return;
+        }
+
+        // Create a new component out of the current main component which will replace it.
+        Component metadataComponent = new Component();
+        metadataComponent.setType(mainComponent.getType());
+        metadataComponent.setName(mainComponent.getName());
+        metadataComponent.setPurl(mainComponent.getPurl());
+        metadataComponent.setHashes(mainComponent.getHashes());
+
+        Evidence mainEvidence = mainComponent.getEvidence();
+        // Copy any additional purls if they exist
+        if (mainEvidence != null && mainEvidence.getIdentities() != null && !mainEvidence.getIdentities().isEmpty()) {
+            List<Identity> purlIdentities = mainEvidence.getIdentities()
+                    .stream()
+                    .filter(identity -> Field.PURL.equals(identity.getField()))
+                    .collect(Collectors.toList());
+            if (!purlIdentities.isEmpty()) {
+                Evidence metadataEvidence = new Evidence();
+                metadataEvidence.setIdentities(purlIdentities);
+                metadataComponent.setEvidence(metadataEvidence);
+            }
+        }
+
+        // Set main component
+        bom.getMetadata().setComponent(metadataComponent);
+
+        List<Component> components = bom.getComponents();
+
+        if (components == null) {
+            components = new ArrayList<>();
+            bom.setComponents(components);
+        }
+
+        // Set the main component
+        if (components.isEmpty() || !mainComponent.getBomRef().equals(components.get(0).getBomRef())) {
+            components.add(0, mainComponent);
         }
     }
 }

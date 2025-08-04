@@ -17,19 +17,24 @@
  */
 package org.jboss.sbomer.core.test.unit;
 
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHashesFromAnalyzedDistribution;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
@@ -44,6 +49,8 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfigurationRevision;
 import org.jboss.pnc.dto.Environment;
 import org.jboss.pnc.dto.SCMRepository;
+import org.jboss.pnc.dto.response.AnalyzedArtifact;
+import org.jboss.pnc.dto.response.AnalyzedDistribution;
 import org.jboss.pnc.enums.SystemImageType;
 import org.jboss.sbomer.core.features.sbom.Constants;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
@@ -109,22 +116,18 @@ class SbomUtilsTest {
         void shouldRemoveErrataPropertiesFromBom() {
             Bom bom = SbomUtils.fromPath(sbomPath("sbom_with_errata.json"));
             assertNotNull(bom);
-            assertNotNull(bom.getMetadata().getComponent());
+            Component component = bom.getComponents().get(0);
+            assertNotNull(component);
 
-            assertTrue(SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME));
-            assertTrue(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
-            assertTrue(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
+            assertTrue(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_NAME));
+            assertTrue(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
+            assertTrue(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
 
             SbomUtils.removeErrataProperties(bom);
 
-            assertFalse(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_NAME));
-            assertFalse(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
-            assertFalse(
-                    SbomUtils.hasProperty(bom.getMetadata().getComponent(), Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
+            assertFalse(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_NAME));
+            assertFalse(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_VARIANT));
+            assertFalse(SbomUtils.hasProperty(component, Constants.PROPERTY_ERRATA_PRODUCT_VERSION));
         }
 
         @Test
@@ -132,7 +135,7 @@ class SbomUtilsTest {
             Bom bom = SbomUtils.fromPath(sbomPath("sbom_with_errata.json"));
             JsonNode jsonNode = SbomUtils.toJsonNode(bom);
 
-            JsonNode properties = jsonNode.get("metadata").get("component").get("properties");
+            JsonNode properties = jsonNode.get("components").get(0).get("properties");
             assertNotNull(properties);
             assertEquals(JsonNodeType.ARRAY, properties.getNodeType());
 
@@ -161,7 +164,7 @@ class SbomUtilsTest {
 
             jsonNode = SbomUtils.removeErrataProperties(jsonNode);
 
-            properties = jsonNode.get("metadata").get("component").get("properties");
+            properties = jsonNode.get("components").get(0).get("properties");
             assertNull(properties);
         }
 
@@ -439,5 +442,83 @@ class SbomUtilsTest {
         assertEquals("pkg:maven/org.objectweb.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(0).getRef());
         assertEquals("pkg:maven/org.ow2.asm/asm@9.1.0.redhat-00002?type=jar", productDeps.get(1).getRef());
         assertEquals("pkg:maven/custom@1.1.0.redhat-00002?type=jar", productDeps.get(2).getRef());
+    }
+
+    @Test
+    void shouldMapHashesWithGetDistroHashes() {
+        // Hashes are all generated on "" (empty)
+        AnalyzedDistribution mockedDistribution = mock(AnalyzedDistribution.class);
+        when(mockedDistribution.getMd5()).thenReturn("68b329da9893e34099c7d8ad5cb9c940");
+        when(mockedDistribution.getSha1()).thenReturn("adc83b19e793491b1c6ea0fd8b46cd9f32e592fc");
+        when(mockedDistribution.getSha256())
+                .thenReturn("01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b");
+
+        List<Hash> hashes = getHashesFromAnalyzedDistribution(mockedDistribution);
+        assertNotNull(hashes);
+
+        // We've set 3 hash types we should get
+        assertEquals(3, hashes.size());
+        assertTrue(hashes.contains(new Hash(Hash.Algorithm.MD5, "68b329da9893e34099c7d8ad5cb9c940")));
+        assertTrue(hashes.contains(new Hash(Hash.Algorithm.SHA1, "adc83b19e793491b1c6ea0fd8b46cd9f32e592fc")));
+        assertTrue(
+                hashes.contains(
+                        new Hash(
+                                Hash.Algorithm.SHA_256,
+                                "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b")));
+
+        // If we ever add more hash types in the future we might get null from records
+        when(mockedDistribution.getSha256()).thenReturn(null);
+        List<Hash> hasheswnull = getHashesFromAnalyzedDistribution(mockedDistribution);
+        assertNotNull(hasheswnull);
+        assertEquals(2, hasheswnull.size());
+        assertTrue(hasheswnull.contains(new Hash(Hash.Algorithm.MD5, "68b329da9893e34099c7d8ad5cb9c940")));
+        assertTrue(hasheswnull.contains(new Hash(Hash.Algorithm.SHA1, "adc83b19e793491b1c6ea0fd8b46cd9f32e592fc")));
+
+        // Finally what if an artifact has no distro
+        List<Hash> hashesnullobj = getHashesFromAnalyzedDistribution(null);
+        assertNotNull(hashesnullobj);
+    }
+
+    // Double check Optional logic for hashes
+    // See
+    // https://github.com/project-ncl/sbomer/blob/9d0da6c49ec38583a5cbccf55a0d4dfd1057c205/cli/src/main/java/org/jboss/sbomer/cli/feature/sbom/command/CycloneDxGenerateOperationCommand.java#L156
+    @Test
+    void optionalSanityTestCycloneDxGenerateOperationCommand() {
+        // Sanity check of in function logic
+        AnalyzedArtifact artifactWithNullDistro = mock(AnalyzedArtifact.class);
+        Component dummyComponent = mock(Component.class);
+
+        doThrow(NullPointerException.class).when(dummyComponent).setHashes(anyList());
+        when(artifactWithNullDistro.getDistribution()).thenReturn(null);
+
+        List<AnalyzedArtifact> artifactsToManifest = List.of(artifactWithNullDistro);
+        Optional<List<Hash>> distributionHashes;
+        Optional<List<Hash>> distributionHashes2;
+        Optional<String> distributionSha256;
+        Optional<String> distributionSha2562;
+
+        // IF OLD DELA
+        distributionHashes2 = Optional.empty();
+        distributionSha2562 = Optional.empty();
+
+        distributionHashes = !artifactsToManifest.isEmpty()
+                ? Optional.of(getHashesFromAnalyzedDistribution(artifactsToManifest.get(0).getDistribution()))
+                : Optional.empty();
+
+        distributionSha256 = distributionHashes.stream()
+                .flatMap(List::stream)
+                .filter(hash -> hash.getAlgorithm() == Hash.Algorithm.SHA_256.toString())
+                .map(Hash::getValue)
+                .findFirst();
+
+        if (!distributionSha256.isEmpty() || !distributionSha2562.isEmpty()) {
+            fail("distributionSha256 should be empty");
+        }
+        if (!distributionHashes.isEmpty() && !distributionHashes.get().isEmpty()) {
+            dummyComponent.setHashes(distributionHashes.get());
+        }
+        if (!distributionHashes2.isEmpty() && !distributionHashes2.get().isEmpty()) {
+            dummyComponent.setHashes(distributionHashes2.get());
+        }
     }
 }

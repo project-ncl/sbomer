@@ -20,6 +20,7 @@ package org.jboss.sbomer.cli.feature.sbom.adjuster;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,12 +41,13 @@ public class PncOperationAdjuster extends AbstractAdjuster {
                 String parentRef = dependency.getRef();
 
                 // Get the dependsOn list and remove entries that match the parent ref
-                if (dependency.getDependencies() != null && !dependency.getDependencies().isEmpty()) {
+                if (SbomUtils.isNotEmpty(dependency.getDependencies())) {
                     dependency.getDependencies().removeIf(dependRef -> dependRef.getRef().equals(parentRef));
                 }
             }
         }
         cleanupComponents(bom);
+        adjustMainComponent(bom);
 
         return bom;
     }

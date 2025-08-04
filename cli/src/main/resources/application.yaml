@@ -34,6 +34,9 @@ quarkus:
       url: "https://${sbomer.gitlab.host}"
     "sbomer":
       url: "${sbomer.host}"
+    "koji-download":
+      url: "https://${sbomer.koji.download.host}"
+      follow-redirects: true
 
   log:
     level: INFO
@@ -43,7 +46,7 @@ quarkus:
     console:
       json:
         ~: false
-      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
+      format: "%d{HH:mm:ss,SSS} %-5p traceId=%X{traceId} parentId=%X{parentId} spanId=%X{spanId} [%c{3.}] (%t) %s%e mdc:[%X]%n"
       stderr: true
     file:
       json:

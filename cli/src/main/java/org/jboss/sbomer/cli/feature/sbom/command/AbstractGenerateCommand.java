@@ -25,6 +25,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
@@ -41,6 +42,7 @@ import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
 import org.jboss.sbomer.cli.feature.sbom.command.mixin.GeneratorToolMixin;
 import org.jboss.sbomer.cli.feature.sbom.model.Sbom;
 import org.jboss.sbomer.cli.feature.sbom.model.SbomGenerationRequest;
+import org.jboss.sbomer.cli.feature.sbom.utils.otel.OtelCLIUtils;
 import org.jboss.sbomer.core.config.DefaultGenerationConfig.DefaultGeneratorConfig;
 import org.jboss.sbomer.core.config.SbomerConfigProvider;
 import org.jboss.sbomer.core.errors.ApplicationException;
@@ -50,6 +52,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.features.sbom.utils.commandline.CommandLineParserUtil;
 import org.jboss.sbomer.core.pnc.PncService;
@@ -124,170 +127,197 @@ public abstract class AbstractGenerateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        // Make sure there is no context
-        MDCUtils.removeContext();
-        MDCUtils.addIdentifierContext(parent.getBuildId());
-
-        // Fetch build information
-        Build build = pncService.getBuild(parent.getBuildId());
-
-        if (build == null) {
-            throw new MissingPncBuildException("Could not fetch the PNC build with id '{}'", parent.getBuildId());
-        }
-
-        // Filter only valid PNC builds
-        if (!isValidBuild(build)) {
-            throw new InvalidPncBuildStateException(
-                    "Build '{}' is not valid! Build cannot be temporary and progress needs to be 'FINISHED' with status 'SUCCESS' or 'NO_REBUILD_REQUIRED'. Currently: temporary: {}, progress: '{}', status: '{}'",
-                    parent.getBuildId(),
-                    build.getTemporaryBuild(),
-                    build.getProgress(),
-                    build.getStatus());
-        }
-
-        // Filter only valid PNC build types
-        if (!isValidBuildType(build)) {
-            throw new UnsupportedPncBuildException(
-                    "The generation of SBOMs for the build type '{}' is not yet implemented!",
-                    build.getBuildConfigRevision().getBuildType());
-        }
-
-        // Get the correct scm information for builds which have either SUCCESS or NO_REBUILD_REQUIRED status
-        String scmUrl = build.getScmUrl();
-        String scmTag = build.getScmTag();
-
-        JsonNode bom = null;
-
-        if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
-            // The source code details are inside the noRebuildCause build
-            scmUrl = build.getNoRebuildCause().getScmUrl();
-            scmTag = build.getNoRebuildCause().getScmTag();
-
-            // Let's see if there noRebuildCause build has been already generated.
-
-            // Find the last successful SbomGenerationRequest for this build
-            SbomGenerationRequest sbomRequest = sbomerClientFacade
-                    .searchLastSuccessfulGeneration(build.getNoRebuildCause().getId());
-            if (sbomRequest != null) {
-                try {
-                    // The workdir name has the format "product-{index}". Extract the index
-                    String numericPart = parent.getWorkdir()
-                            .toAbsolutePath()
-                            .toString()
-                            .replaceAll(".*/[^-]*-(\\d+)$", "$1"); // NOSONAR We control the path, it's safe
-                    int productIndex = Integer.parseInt(numericPart);
-
-                    // Get the runtime configuration related to the ProductConfig with the current index being processed
-                    // here
-                    List<ProductConfig> productConfigs = ((PncBuildConfig) sbomRequest.getConfig()).getProducts();
-                    if (productConfigs != null && productIndex >= 0 && productIndex < productConfigs.size()) {
-
-                        // Let's verify that the configuration provided to the generator is the same, otherwise do the
-                        // generation again
-                        ProductConfig productConfig = productConfigs.get(productIndex);
-
-                        String toolVersion = toolVersion();
-                        String generatorArgs = generatorArgs();
-                        GeneratorType type = generatorType();
-
-                        log.debug(
-                                "Comparing current toolVersion: '{}', generatorArgs: '{}', generatorType: '{}' with the values retrieved from the past generation in DB: toolVersion: '{}', generatorArgs: '{}', generatorType: '{}'...",
-                                toolVersion,
-                                generatorArgs,
-                                type,
-                                productConfig.getGenerator().getVersion(),
-                                productConfig.getGenerator().getArgs(),
-                                productConfig.getGenerator().getType());
-
-                        if (Objects.equals(productConfig.getGenerator().getVersion(), toolVersion())
-                                && Objects.equals(productConfig.getGenerator().getArgs(), generatorArgs())
-                                && Objects.equals(productConfig.getGenerator().getType(), generatorType())) {
-
-                            // Find the corresponding SBOM generated from the request for the product index
-                            Sbom sbom = sbomerClientFacade.searchSbomsOfRequest(sbomRequest.getId(), productIndex);
-                            if (sbom != null) {
-                                bom = sbom.getSbom();
-                                log.info(
-                                        "Found compatible generated SBOM with id: '{}' from generation request: '{}', from previous build '{}'. Reusing it!",
-                                        sbom.getId(),
-                                        sbomRequest.getId(),
-                                        sbom.getIdentifier());
-                            }
-                        }
-                    } else {
-                        log.warn(
-                                "Could not find the runtime product config related to index '{}', will regenerate the SBOM...",
-                                productIndex);
-                    }
-                } catch (NumberFormatException ex) {
-                    log.warn(
-                            "Could not find extract product index from workDir path '{}', will regenerate the SBOM...",
-                            parent.getWorkdir().toAbsolutePath());
-                }
-
-            } else {
-                log.warn(
-                        "Could not find existing successful SBOM Generation Requests for PNC build '{}', will regenerate the SBOM...",
-                        build.getNoRebuildCause().getId());
-            }
-        }
-
-        Path sbomPath = null;
-        boolean isForce = parent.isForce();
-
-        if (bom != null) {
-            // I have retrieved an SBOM generated previously with the same configuration, I can reuse it!
-            sbomPath = parent.getWorkdir().resolve("_bom.json");
-            try {
-                if (!Files.exists(sbomPath)) {
-                    Files.createDirectories(parent.getWorkdir());
-                    Files.createFile(sbomPath);
-                    // At this point I have created the file and dir, so in case I have an error while saving the file
-                    // content below, I can tell the doClone to clean everything up
-                    isForce = true;
-                }
-                // Remove the Errata properties so that they can be changed if needed (override is not possible)
-                bom = SbomUtils.removeErrataProperties(bom);
-
-                // Write the JsonNode to the source file
-                ObjectMapperProvider.json().writeValue(sbomPath.toFile(), bom);
-            } catch (IOException e) {
-                sbomPath = null;
-                log.warn("Could not copy reused bom, will regenerate the SBOM...", e);
-            }
-        }
-
-        if (sbomPath == null) {
-
-            try {
-                // Clone the source code related to the build
-                doClone(scmUrl, scmTag, parent.getWorkdir(), isForce);
-            } catch (ApplicationException e) {
-                throw new GitCloneException("Unable to clone repository '{}'", scmUrl, e);
-            }
-
-            // In case the original build command script contains profiles, projects list or system properties
-            // definitions, get them as a best effort and pass them to the SBOM generation to try to resolve the same
-            // dependency tree.
-            String buildCmdOptions = CommandLineParserUtil.getLaunderedCommandScript(build);
-            log.info("buildCmdOptions: '{}'", buildCmdOptions);
-
-            // Generate the SBOM
-            sbomPath = doGenerate(buildCmdOptions);
-        }
-
         try {
-            Files.copy(sbomPath, parent.getOutput(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new ApplicationException(
-                    "Could not move the generated SBOM from '{}' to target location: '{}'",
-                    sbomPath,
-                    parent.getOutput().toAbsolutePath(),
-                    e);
-        }
+            // Make sure there is no context
+            MDCUtils.removeContext();
+            MDCUtils.addIdentifierContext(parent.getBuildId());
+            MDCUtils.addOtelContext(OtelCLIUtils.getOtelContextFromEnvVariables());
 
-        log.info("Generation finished, SBOM available at: '{}'", parent.getOutput().toFile().getAbsolutePath());
-        return 0;
+            Map<String, String> attributes = Map.of(
+                    "params.generator.type",
+                    generatorType().toString(),
+                    "params.generator.args",
+                    generatorArgs(),
+                    "params.tool.version",
+                    toolVersion(),
+                    "params.identifier",
+                    parent.getBuildId(),
+                    "params.destination",
+                    parent.getOutput().toFile().getAbsolutePath());
+
+            OtelCLIUtils.startOtel(
+                    OtelCLIUtils.SBOMER_CLI_NAME,
+                    OtelHelper.getEffectiveClassName(this.getClass()) + ".generate",
+                    attributes);
+
+            // Fetch build information
+            Build build = pncService.getBuild(parent.getBuildId());
+
+            if (build == null) {
+                throw new MissingPncBuildException("Could not fetch the PNC build with id '{}'", parent.getBuildId());
+            }
+
+            // Filter only valid PNC builds
+            if (!isValidBuild(build)) {
+                throw new InvalidPncBuildStateException(
+                        "Build '{}' is not valid! Build cannot be temporary and progress needs to be 'FINISHED' with status 'SUCCESS' or 'NO_REBUILD_REQUIRED'. Currently: temporary: {}, progress: '{}', status: '{}'",
+                        parent.getBuildId(),
+                        build.getTemporaryBuild(),
+                        build.getProgress(),
+                        build.getStatus());
+            }
+
+            // Filter only valid PNC build types
+            if (!isValidBuildType(build)) {
+                throw new UnsupportedPncBuildException(
+                        "The generation of SBOMs for the build type '{}' is not yet implemented!",
+                        build.getBuildConfigRevision().getBuildType());
+            }
+
+            // Get the correct scm information for builds which have either SUCCESS or NO_REBUILD_REQUIRED status
+            String scmUrl = build.getScmUrl();
+            String scmTag = build.getScmTag();
+
+            JsonNode bom = null;
+
+            if (org.jboss.pnc.enums.BuildStatus.NO_REBUILD_REQUIRED.equals(build.getStatus())) {
+                // The source code details are inside the noRebuildCause build
+                scmUrl = build.getNoRebuildCause().getScmUrl();
+                scmTag = build.getNoRebuildCause().getScmTag();
+
+                // Let's see if there noRebuildCause build has been already generated.
+
+                // Find the last successful SbomGenerationRequest for this build
+                SbomGenerationRequest sbomRequest = sbomerClientFacade
+                        .searchLastSuccessfulGeneration(build.getNoRebuildCause().getId());
+                if (sbomRequest != null) {
+                    try {
+                        // The workdir name has the format "product-{index}". Extract the index
+                        String numericPart = parent.getWorkdir()
+                                .toAbsolutePath()
+                                .toString()
+                                .replaceAll(".*/[^-]*-(\\d+)$", "$1"); // NOSONAR We control the path, it's safe
+                        int productIndex = Integer.parseInt(numericPart);
+
+                        // Get the runtime configuration related to the ProductConfig with the current index being
+                        // processed
+                        // here
+                        List<ProductConfig> productConfigs = ((PncBuildConfig) sbomRequest.getConfig()).getProducts();
+                        if (productConfigs != null && productIndex >= 0 && productIndex < productConfigs.size()) {
+
+                            // Let's verify that the configuration provided to the generator is the same, otherwise do
+                            // the
+                            // generation again
+                            ProductConfig productConfig = productConfigs.get(productIndex);
+
+                            String toolVersion = toolVersion();
+                            String generatorArgs = generatorArgs();
+                            GeneratorType type = generatorType();
+
+                            log.debug(
+                                    "Comparing current toolVersion: '{}', generatorArgs: '{}', generatorType: '{}' with the values retrieved from the past generation in DB: toolVersion: '{}', generatorArgs: '{}', generatorType: '{}'...",
+                                    toolVersion,
+                                    generatorArgs,
+                                    type,
+                                    productConfig.getGenerator().getVersion(),
+                                    productConfig.getGenerator().getArgs(),
+                                    productConfig.getGenerator().getType());
+
+                            if (Objects.equals(productConfig.getGenerator().getVersion(), toolVersion())
+                                    && Objects.equals(productConfig.getGenerator().getArgs(), generatorArgs())
+                                    && Objects.equals(productConfig.getGenerator().getType(), generatorType())) {
+
+                                // Find the corresponding SBOM generated from the request for the product index
+                                Sbom sbom = sbomerClientFacade.searchSbomsOfRequest(sbomRequest.getId(), productIndex);
+                                if (sbom != null) {
+                                    bom = sbom.getSbom();
+                                    log.info(
+                                            "Found compatible generated SBOM with id: '{}' from generation request: '{}', from previous build '{}'. Reusing it!",
+                                            sbom.getId(),
+                                            sbomRequest.getId(),
+                                            sbom.getIdentifier());
+                                }
+                            }
+                        } else {
+                            log.warn(
+                                    "Could not find the runtime product config related to index '{}', will regenerate the SBOM...",
+                                    productIndex);
+                        }
+                    } catch (NumberFormatException ex) {
+                        log.warn(
+                                "Could not find extract product index from workDir path '{}', will regenerate the SBOM...",
+                                parent.getWorkdir().toAbsolutePath());
+                    }
+
+                } else {
+                    log.warn(
+                            "Could not find existing successful SBOM Generation Requests for PNC build '{}', will regenerate the SBOM...",
+                            build.getNoRebuildCause().getId());
+                }
+            }
+
+            Path sbomPath = null;
+            boolean isForce = parent.isForce();
+
+            if (bom != null) {
+                // I have retrieved an SBOM generated previously with the same configuration, I can reuse it!
+                sbomPath = parent.getWorkdir().resolve("_bom.json");
+                try {
+                    if (!Files.exists(sbomPath)) {
+                        Files.createDirectories(parent.getWorkdir());
+                        Files.createFile(sbomPath);
+                        // At this point I have created the file and dir, so in case I have an error while saving the
+                        // file
+                        // content below, I can tell the doClone to clean everything up
+                        isForce = true;
+                    }
+                    // Remove the Errata properties so that they can be changed if needed (override is not possible)
+                    bom = SbomUtils.removeErrataProperties(bom);
+
+                    // Write the JsonNode to the source file
+                    ObjectMapperProvider.json().writeValue(sbomPath.toFile(), bom);
+                } catch (IOException e) {
+                    sbomPath = null;
+                    log.warn("Could not copy reused bom, will regenerate the SBOM...", e);
+                }
+            }
+
+            if (sbomPath == null) {
+
+                try {
+                    // Clone the source code related to the build
+                    doClone(scmUrl, scmTag, parent.getWorkdir(), isForce);
+                } catch (ApplicationException e) {
+                    throw new GitCloneException("Unable to clone repository '{}'", scmUrl, e);
+                }
+
+                // In case the original build command script contains profiles, projects list or system properties
+                // definitions, get them as a best effort and pass them to the SBOM generation to try to resolve the
+                // same
+                // dependency tree.
+                String buildCmdOptions = CommandLineParserUtil.getLaunderedCommandScript(build);
+                log.info("buildCmdOptions: '{}'", buildCmdOptions);
+
+                // Generate the SBOM
+                sbomPath = doGenerate(buildCmdOptions);
+            }
+
+            try {
+                Files.copy(sbomPath, parent.getOutput(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new ApplicationException(
+                        "Could not move the generated SBOM from '{}' to target location: '{}'",
+                        sbomPath,
+                        parent.getOutput().toAbsolutePath(),
+                        e);
+            }
+
+            log.info("Generation finished, SBOM available at: '{}'", parent.getOutput().toFile().getAbsolutePath());
+            return 0;
+        } finally {
+            MDCUtils.removeContext();
+            OtelCLIUtils.stopOTel();
+        }
     }
 
     protected void doClone(String url, String tag, Path path, boolean force) {

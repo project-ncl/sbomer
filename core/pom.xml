@@ -55,12 +55,15 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-fault-tolerance</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-openapi-spi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.pnc</groupId>
       <artifactId>rest-client-jakarta</artifactId>
-      <version>${version.pnc-rest}</version>
       <exclusions>
         <exclusion>
           <groupId>org.jboss.resteasy</groupId>
@@ -137,6 +140,7 @@
       <plugin>
         <groupId>io.smallrye</groupId>
         <artifactId>jandex-maven-plugin</artifactId>
+        <version>${version.jandex}</version>
         <executions>
           <execution>
             <id>make-index</id>

@@ -17,6 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.atlas;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,9 +25,11 @@ import java.util.stream.Collectors;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.errors.ClientException;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.service.feature.FeatureFlags;
 import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
+import org.slf4j.MDC;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -91,18 +94,28 @@ public class AtlasHandler {
     protected void uploadManifest(Sbom sbom, AtlasClient atlasClient) {
         log.info("Uploading manifest '{}' (purl: '{}')...", sbom.getId(), sbom.getRootPurl());
 
-        try {
-            // Store it!
-            atlasClient.upload(LABELS, sbom.getSbom());
-        } catch (ClientException e) {
-            throw new ApplicationException(
-                    "Unable to store '{}' manifest in Atlas, purl: '{}': {}",
-                    sbom.getId(),
-                    sbom.getRootPurl(),
-                    e.getMessage(),
-                    e);
-        }
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("params.atlas.client.name", OtelHelper.getEffectiveClassName(atlasClient.getClass()));
+        attributes.put("params.sbom.id", sbom.getId());
+        attributes.put("params.sbom.rootpurl", sbom.getRootPurl());
+        LABELS.forEach((k, v) -> attributes.put("params.atlas.label." + k, v));
 
-        log.info("Manifest {} uploaded!", sbom.getId());
+        OtelHelper.withSpan(this.getClass(), ".upload-manifest", attributes, MDC.getCopyOfContextMap(), () -> {
+
+            try {
+                // Store it!
+                atlasClient.upload(LABELS, sbom.getSbom());
+            } catch (ClientException e) {
+                throw new ApplicationException(
+                        "Unable to store '{}' manifest in Atlas, purl: '{}': {}",
+                        sbom.getId(),
+                        sbom.getRootPurl(),
+                        e.getMessage(),
+                        e);
+            }
+
+            log.info("Manifest {} uploaded!", sbom.getId());
+            return null;
+        });
     }
 }

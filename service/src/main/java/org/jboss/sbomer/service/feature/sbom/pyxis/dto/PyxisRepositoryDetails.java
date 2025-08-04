@@ -17,16 +17,38 @@
  */
 package org.jboss.sbomer.service.feature.sbom.pyxis.dto;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PyxisRepositoryDetails {
-    private List<DataSection> data;
+
+    // data=[] should give a constraint error
+    @NotEmpty(message = "Pyxis registry looks to be empty")
+    private List<DataSection> data = new ArrayList<>();
+
+    // TIL AssertTrue expects method must start with is, get or has
+    @AssertTrue(message = "At least one Pyxis repository must be published")
+    public boolean hasAtLeastOnePublishedRepository() {
+        return data != null && data.stream()
+                .filter(Objects::nonNull)
+                .map(DataSection::getRepositories)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .filter(Objects::nonNull)
+                .anyMatch(Repository::isPublished);
+    }
 
     @Data
     public static class DataSection {
@@ -50,4 +72,45 @@ public class PyxisRepositoryDetails {
             private String name;
         }
     }
+
+    @Override
+    public String toString() {
+        StringJoiner mainJoiner = new StringJoiner("\n", "PyxisRepositoryDetails {\n", "\n}");
+
+        if (data != null && !data.isEmpty()) {
+            for (DataSection section : data) {
+                StringJoiner sectionJoiner = new StringJoiner("\n", "", "");
+                List<Repository> repositories = section.getRepositories();
+
+                if (repositories != null && !repositories.isEmpty()) {
+                    for (Repository repo : repositories) {
+                        String tagsStr = Optional.ofNullable(repo.getTags())
+                                .orElse(List.of())
+                                .stream()
+                                .map(Repository.Tag::getName)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.joining(", ", "[", "]"));
+
+                        String repoStr = String.format(
+                                "  Repository: published=%s, registry=%s, repository=%s%s",
+                                repo.isPublished(),
+                                repo.getRegistry(),
+                                repo.getRepository(),
+                                tagsStr.equals("[]") ? "" : ", tags=" + tagsStr);
+
+                        sectionJoiner.add(repoStr);
+                    }
+                } else {
+                    sectionJoiner.add("    No repositories");
+                }
+
+                mainJoiner.add(sectionJoiner.toString());
+            }
+        } else {
+            mainJoiner.add("  No data");
+        }
+
+        return mainJoiner.toString();
+    }
+
 }

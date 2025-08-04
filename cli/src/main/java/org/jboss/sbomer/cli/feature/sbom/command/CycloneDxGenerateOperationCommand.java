@@ -17,6 +17,20 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.command;
 
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_CHECKSUM;
+import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_URL;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createBom;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.getHashesFromAnalyzedDistribution;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setProductMetadata;
+import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.toJsonNode;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -26,17 +40,15 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import com.redhat.red.build.koji.KojiClientException;
-import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
-import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Component.Scope;
 import org.cyclonedx.model.Component.Type;
+import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.Hash;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.ProductMilestone;
 import org.jboss.pnc.dto.ProductVersion;
@@ -47,6 +59,7 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.OperationConfig;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
+import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;
@@ -54,24 +67,11 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.github.packageurl.PackageURLBuilder;
+import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import picocli.CommandLine.Command;
-
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createBom;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createComponent;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDependency;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.createDefaultSbomerMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setArtifactMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncBuildMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setPncOperationMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.setProductMetadata;
-import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.toJsonNode;
-
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_CHECKSUM;
-import static org.jboss.sbomer.core.features.sbom.Constants.SBOM_RED_HAT_DELIVERABLE_URL;
 
 @Slf4j
 @Command(
@@ -154,12 +154,16 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                         .filter(a -> deliverableUrl.equals(a.getDistribution().getDistributionUrl()))
                         .toList();
 
+        Optional<List<Hash>> distributionHashes;
         Optional<String> distributionSha256;
+
         if (isLegacyAnalysis) {
             log.info(
                     "The deliverable analysis operation '{}' seems to be old because it does not have the distribution metadata and all the filename match info; filtering cannot be done so the final manifest will contain ALL the content of ALL the deliverable urls (if multiple). Total analyzed artifacts in the operation: '{}'",
                     config.getOperationId(),
                     allAnalyzedArtifacts.size());
+            // If its legacy analysis do not attempt to set distro hashes
+            distributionHashes = Optional.empty();
             distributionSha256 = Optional.empty();
         } else {
             log.info(
@@ -168,9 +172,16 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                     deliverableUrl,
                     allAnalyzedArtifacts.size(),
                     config.getOperationId());
-            distributionSha256 = artifactsToManifest.stream()
-                    .map(a -> a.getDistribution().getSha256())
-                    .filter(Objects::nonNull)
+
+            // Return optional list of hashes from the first artifact (distro)
+            distributionHashes = !artifactsToManifest.isEmpty()
+                    ? Optional.of(getHashesFromAnalyzedDistribution(artifactsToManifest.get(0).getDistribution()))
+                    : Optional.empty();
+
+            distributionSha256 = distributionHashes.stream()
+                    .flatMap(List::stream)
+                    .filter(hash -> hash.getAlgorithm() == Hash.Algorithm.SHA_256.toString())
+                    .map(Hash::getValue)
                     .findFirst();
         }
 
@@ -194,6 +205,12 @@ public class CycloneDxGenerateOperationCommand extends AbstractGenerateOperation
                 desc,
                 distributionPurl,
                 Type.FILE);
+
+        // If there are no hashes then dont attempt to set them
+        if (!distributionHashes.isEmpty() && !distributionHashes.get().isEmpty()) {
+            mainComponent.setHashes(distributionHashes.get());
+        }
+
         Dependency mainDependency = createDependency(distributionPurl);
 
         setProductMetadata(mainComponent, config);

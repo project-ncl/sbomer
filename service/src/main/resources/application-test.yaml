@@ -31,12 +31,18 @@ quarkus:
     database:
       generation: drop-and-create
     log:
-      sql: true
+      sql: false
+
+  log:
+    console:
+      format: "%d{HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e mdc:[%X]%n"
 
   rest-client:
     "errata":
       url: "https://dummy"
     "pyxis":
+      url: "https://dummy"
+    "sbomer":
       url: "https://dummy"
 
   operator-sdk:

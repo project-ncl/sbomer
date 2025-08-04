@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 #
 # JBoss, Home of Professional Open Source.
@@ -27,4 +27,4 @@ set -e
 #
 # See: minikube profile list
 
-exec minikube start -p sbomer --driver=kvm2 --cpus=4 --memory=4g --disk-size=20GB --kubernetes-version=v1.25.16 --embed-certs
+exec minikube start -p sbomer --driver=kvm2 --cpus=4 --memory=4g --disk-size=20GB --kubernetes-version=v1.29.14 --embed-certs

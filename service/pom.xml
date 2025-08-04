@@ -46,6 +46,11 @@
       <version>${version.aws}</version>
     </dependency>
     <dependency>
+      <groupId>com.github.f4b6a3</groupId>
+      <artifactId>tsid-creator</artifactId>
+      <version>${version.tsid}</version>
+    </dependency>
+    <dependency>
       <groupId>software.amazon.awssdk</groupId>
       <artifactId>aws-crt-client</artifactId>
       <version>${version.aws}</version>
@@ -86,7 +91,11 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-rest</artifactId>
+      <artifactId>quarkus-rest-links</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-hal</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -123,10 +132,6 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-context-propagation</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-smallrye-fault-tolerance</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -270,7 +275,7 @@
     <dependency>
       <groupId>org.wiremock</groupId>
       <artifactId>wiremock</artifactId>
-      <version>3.13.0</version>
+      <version>3.13.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -278,6 +283,16 @@
       <artifactId>quarkus-kerberos-test-util</artifactId>
       <version>${version.quarkus-kerberos}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-test-security</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>${version.antlr}</version>
     </dependency>
   </dependencies>
 
@@ -306,6 +321,23 @@
           <reuseForks>false</reuseForks>
           <argLine>-Xmx1024m</argLine>
           <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>${version.antlr}</version>
+        <executions>
+          <execution>
+            <id>antlr</id>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <visitor>true</visitor>
+          <listener>true</listener>
         </configuration>
       </plugin>
     </plugins>

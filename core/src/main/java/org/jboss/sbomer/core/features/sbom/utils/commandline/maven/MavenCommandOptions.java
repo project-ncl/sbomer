@@ -17,10 +17,10 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils.commandline.maven;
 
+import java.util.List;
+
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-
-import java.util.List;
 
 public class MavenCommandOptions {
 

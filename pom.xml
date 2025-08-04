@@ -58,27 +58,30 @@
     See https://github.com/quarkiverse/quarkus-operator-sdk/blob/main/pom.xml#L15 for the Quarkus
     Operator SDK extension version defined below ("version.quarkus-operator-sdk").
     -->
-    <version.quarkus-platform>3.17.8</version.quarkus-platform>
-    <version.quarkus-operator-sdk>6.9.3</version.quarkus-operator-sdk>
+    <version.quarkus-platform>3.20.2</version.quarkus-platform>
+    <version.quarkus-operator-sdk>7.1.4</version.quarkus-operator-sdk>
 
     <version.cyclonedx>9.1.0-patch</version.cyclonedx>
     <version.lombok>1.18.32</version.lombok>
-    <version.pnc-rest>3.1.5</version.pnc-rest>
+    <version.pnc>3.1.5</version.pnc>
     <version.pnc-api>3.0.7</version.pnc-api>
-    <version.quarkus-jgit>3.3.3</version.quarkus-jgit>
+    <version.quarkus-jgit>3.5.2</version.quarkus-jgit>
     <version.quarkus-kerberos>2.2.0</version.quarkus-kerberos>
     <version.sonar>4.0.0.4121</version.sonar>
-    <version.quarkus-unleash>1.8.0</version.quarkus-unleash>
-    <version.aws>2.31.31</version.aws>
+    <version.quarkus-unleash>1.10.0</version.quarkus-unleash>
+    <version.aws>2.32.14</version.aws>
     <version.lombok>1.18.38</version.lombok>
-    <version.tekton-client>1.1.0</version.tekton-client>
+    <version.tekton-client>1.3.0</version.tekton-client>
     <version.rsql-parser>2.1.0</version.rsql-parser>
     <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
     <version.commons-cli>1.9.0</version.commons-cli>
     <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
-    <version.build-finder>2.6.2</version.build-finder>
+    <version.build-finder>2.6.5</version.build-finder>
     <version.mapstruct>1.6.3</version.mapstruct>
-    <version.jandex-maven-plugin>3.2.7</version.jandex-maven-plugin>
+    <version.jandex>3.3.2</version.jandex>
+    <version.tsid>5.2.6</version.tsid>
+    <version.opentelemetry-ext-cli-java>1.3.0</version.opentelemetry-ext-cli-java>
+    <version.antlr>4.13.2</version.antlr>
 
     <!-- Sonar -->
     <sonar.java.source>17</sonar.java.source>
@@ -93,6 +96,13 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Workaround for: https://github.com/quarkiverse/quarkus-jgit/issues/182 until we upgrade
+      to Quarkus >= 3.21.2-->
+      <dependency>
+        <groupId>org.eclipse.jgit</groupId>
+        <artifactId>org.eclipse.jgit</artifactId>
+        <version>7.3.0.202506031305-r</version>
+      </dependency>
       <dependency>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-bom</artifactId>
@@ -106,6 +116,39 @@
         <version>${version.quarkus-operator-sdk}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.smallrye</groupId>
+        <artifactId>jandex</artifactId>
+        <version>${version.jandex}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.redhat.resilience.otel</groupId>
+        <artifactId>opentelemetry-ext-cli-java</artifactId>
+        <version>${version.opentelemetry-ext-cli-java}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.pnc</groupId>
+        <artifactId>dto</artifactId>
+        <version>${version.pnc}</version>
+        <classifier>patch-builders</classifier>
+        <exclusions>
+          <exclusion>
+            <groupId>org.jboss.pnc</groupId>
+            <artifactId>pnc-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.pnc</groupId>
+        <artifactId>pnc-api</artifactId>
+        <version>${version.pnc-api}</version>
+        <classifier>jakarta</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.pnc</groupId>
+        <artifactId>rest-client-jakarta</artifactId>
+        <version>${version.pnc}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -151,7 +194,7 @@
         <plugin>
           <groupId>io.smallrye</groupId>
           <artifactId>jandex-maven-plugin</artifactId>
-          <version>${version.jandex-maven-plugin}</version>
+          <version>${version.jandex}</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -172,17 +215,17 @@
                 <goal>integration-test</goal>
                 <goal>verify</goal>
               </goals>
-              <configuration>
-                <systemPropertyVariables>
-                  <native.image.path>
-                    ${project.build.directory}/${project.build.finalName}
-                  </native.image.path>
-                  <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                  <maven.home>${maven.home}</maven.home>
-                </systemPropertyVariables>
-              </configuration>
             </execution>
           </executions>
+          <configuration>
+            <systemPropertyVariables>
+              <native.image.path>
+                ${project.build.directory}/${project.build.finalName}
+              </native.image.path>
+              <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+              <maven.home>${maven.home}</maven.home>
+            </systemPropertyVariables>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-release-plugin</artifactId>
@@ -211,6 +254,26 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>net.revelc.code</groupId>
+        <artifactId>impsort-maven-plugin</artifactId>
+        <version>1.12.0</version>
+        <configuration>
+          <groups>javax.,java.,org.,com.</groups>
+          <lineEnding>LF</lineEnding>
+          <staticGroups>java,*</staticGroups>
+          <removeUnused>true</removeUnused>
+          <staticAfter>false</staticAfter>
+        </configuration>
+        <executions>
+          <execution>
+            <id>sort-imports</id>
+            <goals>
+              <goal>sort</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>

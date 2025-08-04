@@ -1,14 +1,9 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": ["config:recommended", ":automergePatch", ":automergeDigest"],
-    "username": "renovate-release",
     "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
-    "onboarding": false,
-    "platform": "github",
     "forkProcessing": "disabled",
-    "requireConfig": "ignored",
     "branchPrefix": "renovate-bot/",
-    "repositories": ["project-ncl/sbomer"],
     "rebaseWhen": "behind-base-branch",
     "timezone": "Europe/Warsaw",
     "labels": ["dependencies"],
@@ -18,6 +13,14 @@
     },
     "prConcurrentLimit": 20,
     "packageRules": [
+        {
+            "matchFileNames": ["**/pom.xml"],
+            "addLabels": ["deps:java"]
+        },
+        {
+            "matchFileNames": ["**/package.json"],
+            "addLabels": ["deps:javascript"]
+        },
         {
             "description": "lockFileMaintenance",
             "matchUpdateTypes": ["pin", "digest", "patch", "minor", "major", "lockFileMaintenance"],
@@ -42,12 +45,18 @@
             "enabled": false
         },
         {
-            "extends": ["monorepo:aws-java-sdk-v2", "monorepo:typescript-eslint", "monorepo:mapstruct", "monorepo:commitlint", "group:postcss"]
+            "groupName": "ESLint dependencies",
+            "groupSlug": "eslint",
+            "matchPackageNames": ["eslint", "eslint-*","@eslint/*"]
+        },
+
+        {
+            "extends": ["monorepo:aws-java-sdk-v2", "monorepo:typescript-eslint", "monorepo:mapstruct", "monorepo:commitlint"]
         },
         {
-            "groupName": "Pattenfly React",
+            "groupName": "Patternfly React",
             "groupSlug": "patternfly-react",
-            "matchPackageNames": ["^@patternfly/react-"]
+            "matchPackageNames": ["@patternfly/react-*"]
         }
     ],
     "platformAutomerge": true

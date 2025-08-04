@@ -33,6 +33,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- UMB request event for the pnc build ARYT3LBXDVYAC
 INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
   VALUES ('build_ARYT3LBXDVYAC', '2024-10-14 14:18:45.148407', 'UMB', 'SUCCESS',
@@ -94,7 +95,7 @@ INSERT INTO request (id, receival_time, event_type, event_status, request_config
 
 -- UMB request event for the pnc operation BDQXCNRZJYYAA
 INSERT INTO request (id, receival_time, event_type, event_status, request_config, event)
-  VALUES ('operation_BDQXCNRZJYYAA', '2024-10-14 14:18:45.148407', 'UMB', 'IGNORED', 
+  VALUES ('operation_BDQXCNRZJYYAA', '2024-10-14 14:18:45.148407', 'UMB', 'IGNORED',
   '{
      "type": "pnc-operation",
      "apiVersion": "sbomer.jboss.org/v1alpha1",
@@ -259,7 +260,7 @@ VALUES (
 		now(),
 		'ARYT3LBXDVYAC',
 		'AASSBB',
-		0, 
+		0,
 		'{
   "version": 1,
   "metadata": {
@@ -3240,7 +3241,7 @@ VALUES (
       "version": "7.11.5.CR3",
       "description": "SBOM representing the deliverable my-broker-7.11.5.CR3-bin.zip analyzed with operation OPBGCD23DVYAC",
       "licenses": [
-        
+
       ],
       "purl": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
       "type": "file",
@@ -3327,13 +3328,381 @@ VALUES (
     {
       "ref": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
       "dependsOn": [
-        
+
       ]
     },
     {
       "ref": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar",
       "dependsOn": [
-        
+
+      ]
+    }
+  ]
+}');
+
+-- NEXTGEN example content
+
+INSERT INTO generation(
+		id,
+		created,
+        updated,
+        finished,
+        request,
+		status,
+        result,
+        reason
+	)
+VALUES (
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '{"target":{"identifier":"quay.io/pct-security/mequal:latest","type":"CONTAINER_IMAGE"},"generator":{"name":"syft","version":"1.26.1","config":{"format":"CYCLONEDX_1.6_JSON","resources":{"requests":{"cpu":"100m","memory":"300Mi"},"limits":{"cpu":"1000m","memory":"1Gi"}},"options":{}}}}',
+        'FINISHED',
+        'SUCCESS',
+        'Generation successfully finished'
+);
+
+INSERT INTO generation_status_history(
+		id,
+        generation_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S1AAAAA',
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'NEW',
+        'Initial state'
+);
+
+INSERT INTO generation_status_history(
+		id,
+        generation_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S2AAAAA',
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'SCHEDULED',
+        'WAiting to be picked up'
+);
+
+INSERT INTO generation_status_history(
+		id,
+        generation_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S3AAAAA',
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'GENERATING',
+        'In progress'
+);
+
+INSERT INTO generation_status_history(
+		id,
+        generation_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S4AAAAA',
+        'G1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'FINISHED',
+        'Generation successfully finished'
+);
+
+INSERT INTO event(
+		id,
+		created,
+        updated,
+        finished,
+        metadata,
+		status,
+        reason
+	)
+VALUES (
+        'E0AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '{}',
+        'NEW',
+        'Event processed'
+);
+
+INSERT INTO event(
+		id,
+		created,
+        updated,
+        finished,
+        metadata,
+		status,
+        reason
+	)
+VALUES (
+        'E0BBBBB',
+        '2020-12-25T00:00:00.000000Z',
+        '2022-12-25T00:00:00.000000Z',
+        '2024-12-25T00:00:00.000000Z',
+        '{}',
+        'NEW',
+        'Some reason'
+);
+
+
+
+VALUES (
+        'E0CCCCC',
+        '2020-12-25T00:00:00.000000Z',
+        '2022-12-25T00:00:00.000000Z',
+        '2024-12-25T00:00:00.000000Z',
+        '{}',
+        'NEW',
+        'Some reason'
+);
+
+INSERT INTO event(
+		id,
+        parent_id,
+		created,
+        updated,
+        finished,
+        metadata,
+		status,
+        reason
+	)
+VALUES (
+        'E1AAAAA',
+        'E0AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '2023-12-25T00:00:00.000000Z',
+        '{}',
+        'PROCESSED',
+        'Event processed'
+);
+
+INSERT INTO event_generation(
+		event_id,
+		generation_id
+	) VALUES (
+		'E1AAAAA',
+		'G1AAAAA'
+);
+
+INSERT INTO event_status_history(
+		id,
+        event_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S1AAAAA',
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'NEW',
+        'Initial state'
+);
+
+INSERT INTO event_status_history(
+		id,
+        event_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S2AAAAA',
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'RESOLVING',
+        'Being resolved'
+);
+
+INSERT INTO event_status_history(
+		id,
+        event_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S3AAAAA',
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'RESOLVED',
+        ''
+);
+
+INSERT INTO event_status_history(
+		id,
+        event_id,
+		timestamp,
+		status,
+        reason
+	)
+VALUES (
+        'S4AAAAA',
+        'E1AAAAA',
+        '2023-12-25T00:00:00.000000Z',
+        'PROCESSED',
+        'Event successfully finished'
+);
+
+INSERT INTO manifest(
+		id,
+		created,
+        generation_id,
+        metadata,
+		bom
+	)
+VALUES (
+		'816640206274228223',
+		'2023-12-25T00:00:00.000000Z',
+        'G1AAAAA',
+        '{"sha256": "0f632851ad89b7897c37020326fe511f608b36b1124143376d4d413522612c6f"}',
+    '{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-02-14T17:42:25Z",
+    "tools": [
+      {
+        "vendor": "Red Hat",
+        "name": "sbomer",
+        "version": "1.0.0"
+      }
+    ],
+    "licenses": [
+      {
+        "license": {
+          "id": "Apache-2.0"
+        }
+      }
+    ],
+    "properties": [
+      {
+        "name": "vcs",
+        "value": "git@github.com:project-ncl/sbomer.git"
+      },
+      {
+        "name": "website",
+        "value": "https://github.com/project-ncl/sbomer"
+      }
+    ],
+    "component": {
+      "name": "my-broker-7.11.5.CR3-bin.zip",
+      "version": "7.11.5.CR3",
+      "description": "SBOM representing the deliverable my-broker-7.11.5.CR3-bin.zip analyzed with operation OPBGCD23DVYAC",
+      "licenses": [
+
+      ],
+      "purl": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
+      "type": "file",
+      "bom-ref": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
+      "externalReferences": [
+        {
+          "type": "build-system",
+          "url": "http://orch.com/pnc-rest/v2/operations/deliverable-analyzer/OPBGCD23DVYAC",
+          "comment": "pnc-operation-id"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "group": "com.google.errorprone",
+      "name": "error_prone_annotations",
+      "version": "2.2.0",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "416757b9e6ba0563368ab59e668b3225"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "88e3c593e9b3586e1c6177f89267da6fc6986f0c"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "6ebd22ca1b9d8ec06d41de8d64e0596981d9607b42035f9ed374f9de271a481a"
+        }
+      ],
+      "purl": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
+      "externalReferences": [
+        {
+          "type": "build-system",
+          "url": "https://brewweb.com/buildinfo?buildID=649279",
+          "comment": "brew-build-id"
+        }
+      ],
+      "type": "library",
+      "bom-ref": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar"
+    },
+    {
+      "group": "org.codehaus.mojo",
+      "name": "animal-sniffer-annotations",
+      "version": "1.17",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "MD5",
+          "content": "7ca108b790cf6ab5dbf5422cc79f0d89"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "f97ce6decaea32b36101e37979f8b647f00681fb"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "92654f493ecfec52082e76354f0ebf87648dc3d5cec2e3c3cdb947c016747a53"
+        }
+      ],
+      "purl": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar",
+      "externalReferences": [
+        {
+          "type": "build-system",
+          "url": "https://brewweb.com/buildinfo?buildID=848654",
+          "comment": "brew-build-id"
+        }
+      ],
+      "type": "library",
+      "bom-ref": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:generic/my-broker-7.11.5.CR3-bin.zip@7.11.5.CR3?operation=OPBGCD23DVYAC",
+      "dependsOn": [
+        "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
+        "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar"
+      ]
+    },
+    {
+      "ref": "pkg:maven/com.google.errorprone/error_prone_annotations@2.2.0?type=jar",
+      "dependsOn": [
+
+      ]
+    },
+    {
+      "ref": "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.17?type=jar",
+      "dependsOn": [
+
       ]
     }
   ]

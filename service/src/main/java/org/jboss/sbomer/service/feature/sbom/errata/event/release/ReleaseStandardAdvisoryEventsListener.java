@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errata.event.release;
 
+import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_DETAILS_INCLUDES;
+import static org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient.REPOSITORIES_REGISTRY_INCLUDES;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -26,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -36,7 +40,6 @@ import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Metadata;
 import org.cyclonedx.model.component.evidence.Identity.Field;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestManifestRecord;
@@ -48,6 +51,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.enums.RequestEventStatus;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.Errata;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList.BuildItem;
@@ -59,11 +63,10 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
-import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisClient;
+import org.jboss.sbomer.service.feature.sbom.pyxis.PyxisValidatingClient;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepository;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.PyxisRepositoryDetails;
 import org.jboss.sbomer.service.feature.sbom.pyxis.dto.RepositoryCoordinates;
-import org.jboss.sbomer.service.rest.faulttolerance.RetryLogger;
 import org.slf4j.MDC;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -84,9 +87,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListener {
 
     @Inject
-    @RestClient
     @Setter
-    PyxisClient pyxisClient;
+    PyxisValidatingClient pyxisClient;
 
     private static final String NVR_STANDARD_SEPARATOR = "-";
 
@@ -167,10 +169,9 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                         "An error occurred during the creation of release manifests for event '{}'",
                         requestEvent.getId(),
                         e);
-                markRequestFailed(
-                        requestEvent,
-                        event.getReleaseGenerations().values(),
-                        "An error occurred during the creation of the release manifest");
+                String reason = (e instanceof ApplicationException) ? e.getMessage()
+                        : "An error occurred during the creation of the release manifest";
+                markRequestFailed(requestEvent, event.getReleaseGenerations().values(), reason);
             }
 
             // Let's trigger the update of statuses and advisory comments
@@ -190,8 +191,6 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Component.Type productType,
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
-
-        List<Sbom> sboms = new ArrayList<>();
 
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
@@ -234,7 +233,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             SbomUtils.addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
-            Sbom sbom = saveReleaseManifestForRPMGeneration(
+            List<Sbom> sboms = saveReleaseManifestForRPMGeneration(
                     requestEvent,
                     erratum,
                     productVersion,
@@ -246,15 +245,13 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             // FIXME: 'Optional.get()' without 'isPresent()' check
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}' for RPM builds",
-                    sbom,
+                    sboms.get(sboms.size() - 1), // Will always be release SBOM
                     releaseGeneration.getId(),
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
 
-            sboms.add(sbom);
+            performPost(sboms);
         });
-
-        performPost(sboms);
     }
 
     protected void releaseManifestsForDockerBuilds(
@@ -267,8 +264,6 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Component.Type productType,
             Map<ProductVersionEntry, Set<String>> productVersionToCPEs,
             Map<String, V1Beta1GenerationRecord> nvrToBuildGeneration) {
-
-        List<Sbom> sboms = new ArrayList<>();
 
         advisoryBuildDetails.forEach((productVersion, buildItems) -> {
 
@@ -310,7 +305,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             SbomUtils.addMissingSerialNumber(productVersionBom);
 
             SbomGenerationRequest releaseGeneration = releaseGenerations.get(productVersion.getName());
-            Sbom sbom = saveReleaseManifestForDockerGeneration(
+            List<Sbom> sboms = saveReleaseManifestForDockerGeneration(
                     requestEvent,
                     erratum,
                     productVersion,
@@ -322,15 +317,13 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             // FIXME: 'Optional.get()' without 'isPresent()' check
             log.info(
                     "Saved and modified SBOM '{}' for generation '{}' for ProductVersion '{}' of errata '{}' for Docker builds",
-                    sbom,
+                    sboms.get(sboms.size() - 1), // Will always be release SBOM
                     releaseGeneration.getId(),
                     productVersion.getName(),
                     erratum.getDetails().get().getFulladvisory());
 
-            sboms.add(sbom);
+            performPost(sboms);
         });
-
-        performPost(sboms);
     }
 
     private Bom createProductVersionBom(
@@ -425,8 +418,13 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
         generationToRepositories.put(generation.id(), repositories);
 
         // Create summary (pick the longest value) and evidence purl
-        RepositoryCoordinates preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
-        String summaryPurl = AdvisoryEventUtils.createPurl(preferredRepo, imageIndexMainComponent.getVersion(), false);
+        Optional<RepositoryCoordinates> preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+        if (preferredRepo.isEmpty()) {
+            throw new ApplicationException("No published repositories found in Pyxis for nvr '{}'", generationNVR);
+        }
+
+        String summaryPurl = AdvisoryEventUtils
+                .createPurl(preferredRepo.get(), imageIndexMainComponent.getVersion(), false);
         Set<String> evidencePurls = AdvisoryEventUtils
                 .createPurls(repositories, imageIndexMainComponent.getVersion(), true);
 
@@ -451,7 +449,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     @BeforeRetry(RetryLogger.class)
-    protected Sbom saveReleaseManifestForRPMGeneration(
+    protected List<Sbom> saveReleaseManifestForRPMGeneration(
             RequestEvent requestEvent,
             Errata erratum,
             ProductVersionEntry productVersion,
@@ -462,6 +460,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Map<String, List<ErrataCDNRepoNormalized>> generationToCDNs) {
 
         try {
+            List<Sbom> sboms = new ArrayList<>();
             QuarkusTransaction.begin(QuarkusTransaction.beginOptions().timeout(INCREASED_TIMEOUT_SEC));
 
             // 1 - Save the release generation with the release manifest
@@ -542,14 +541,16 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                             productVersion,
                             manifestBom);
                     buildManifest.setReleaseMetadata(buildManifestMetadataNode);
+                    sboms.add(buildManifest);
                 }
             }
 
             requestEvent = requestEventRepository.findById(requestEvent.getId());
             requestEvent.setEventStatus(RequestEventStatus.SUCCESS);
             QuarkusTransaction.commit();
+            sboms.add(sbom); // For consistency upload release after build SBOMs
 
-            return sbom;
+            return sboms;
         } catch (Exception e) {
             try {
                 QuarkusTransaction.rollback();
@@ -567,7 +568,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
     // Add a very long timeout because this method could potentially need to update hundreds of manifests
     @Retry(maxRetries = 10)
     @BeforeRetry(RetryLogger.class)
-    protected Sbom saveReleaseManifestForDockerGeneration(
+    protected List<Sbom> saveReleaseManifestForDockerGeneration(
             RequestEvent requestEvent,
             Errata erratum,
             ProductVersionEntry productVersion,
@@ -578,6 +579,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
             Map<String, List<RepositoryCoordinates>> generationToRepositories) {
 
         try {
+            List<Sbom> sboms = new ArrayList<>();
             QuarkusTransaction.begin(QuarkusTransaction.beginOptions().timeout(INCREASED_TIMEOUT_SEC));
 
             // 1 - Save the release generation with the release manifest
@@ -609,7 +611,10 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                 String generationId = entry.getKey();
                 // 2.1 - Select the repository with longest repoFragment + tag
                 List<RepositoryCoordinates> repositories = entry.getValue();
-                RepositoryCoordinates preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+                Optional<RepositoryCoordinates> preferredRepo = AdvisoryEventUtils.findPreferredRepo(repositories);
+                if (preferredRepo.isEmpty()) {
+                    throw new ApplicationException("No published repositories found in Pyxis");
+                }
 
                 // 2.2 - Regenerate the manifest purls using the preferredRepo and keep track of the updates.
                 // We need them to update the index manifest variants
@@ -619,7 +624,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                         .toList();
                 Map<String, String> originalToRebuiltPurl = new HashMap<>();
                 buildManifests.forEach(manifestRecord -> {
-                    String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo);
+                    String rebuiltPurl = AdvisoryEventUtils.rebuildPurl(manifestRecord.rootPurl(), preferredRepo.get());
                     originalToRebuiltPurl.put(manifestRecord.rootPurl(), rebuiltPurl);
                     log.debug("Regenerated rootPurl '{}' to '{}'", manifestRecord.rootPurl(), rebuiltPurl);
                 });
@@ -632,7 +637,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                     SbomUtils.addMissingMetadataSupplier(manifestBom);
 
                     // 2.4 Update rootPurl, metadata.component.purl, bom.component[0].purl with the rebuiltPurl
-                    String rebuiltPurl = originalToRebuiltPurl.get(buildManifest.getRootPurl());
+                    String rebuiltPurl = originalToRebuiltPurl.get(buildManifestRecord.rootPurl());
                     buildManifest.setRootPurl(rebuiltPurl);
                     log.debug("Updated manifest '{}' to rootPurl '{}'", buildManifestRecord.id(), rebuiltPurl);
 
@@ -651,7 +656,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                                     .setDescription(desc.replace(buildManifest.getRootPurl(), rebuiltPurl));
                         }
                     }
-                    if (manifestBom.getComponents() != null && !manifestBom.getComponents().isEmpty()) {
+                    if (SbomUtils.isNotEmpty(manifestBom.getComponents())) {
                         manifestBom.getComponents().get(0).setPurl(rebuiltPurl);
 
                         // 2.5 - If there are variants (this is an index image) update also the purls with the rebuilt
@@ -692,14 +697,16 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
                             productVersion,
                             manifestBom);
                     buildManifest.setReleaseMetadata(buildManifestMetadataNode);
+                    sboms.add(buildManifest);
                 }
             }
 
             requestEvent = requestEventRepository.findById(requestEvent.getId());
             requestEvent.setEventStatus(RequestEventStatus.SUCCESS);
             QuarkusTransaction.commit();
+            sboms.add(sbom); // For consistency upload release after build SBOMs
 
-            return sbom;
+            return sboms;
         } catch (Exception e) {
             try {
                 QuarkusTransaction.rollback();
@@ -750,8 +757,9 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
 
     protected List<RepositoryCoordinates> getRepositoriesDetails(String nvr) {
         log.debug("Getting repositories details from Pyxis for NVR '{}'", nvr);
+
         PyxisRepositoryDetails repositoriesDetails = pyxisClient
-                .getRepositoriesDetails(nvr, PyxisClient.REPOSITORIES_DETAILS_INCLUDES);
+                .getRepositoriesDetails(nvr, REPOSITORIES_DETAILS_INCLUDES);
         return repositoriesDetails.getData()
                 .stream()
                 .flatMap(dataSection -> dataSection.getRepositories().stream())
@@ -783,7 +791,7 @@ public class ReleaseStandardAdvisoryEventsListener extends AbstractEventsListene
      * accessible without authentication
      */
     protected PyxisRepository getRepository(String registry, String repository) {
-        return pyxisClient.getRepository(registry, repository, PyxisClient.REPOSITORIES_REGISTRY_INCLUDES);
+        return pyxisClient.getRepository(registry, repository, REPOSITORIES_REGISTRY_INCLUDES);
     }
 
     protected ObjectNode collectReleaseInfo(

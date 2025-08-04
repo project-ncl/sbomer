@@ -18,14 +18,17 @@
 package org.jboss.sbomer.cli.feature.sbom.command;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.sbomer.cli.feature.sbom.client.facade.SBOMerClientFacade;
 import org.jboss.sbomer.cli.feature.sbom.command.mixin.GeneratorToolMixin;
 import org.jboss.sbomer.cli.feature.sbom.service.KojiService;
+import org.jboss.sbomer.cli.feature.sbom.utils.otel.OtelCLIUtils;
 import org.jboss.sbomer.core.features.sbom.enums.GeneratorType;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.pnc.PncService;
 
 import jakarta.inject.Inject;
@@ -66,20 +69,43 @@ public abstract class AbstractGenerateOperationCommand implements Callable<Integ
 
     @Override
     public Integer call() {
-        // Make sure there is no context
-        MDCUtils.removeContext();
+        try {
+            // Make sure there is no context
+            MDCUtils.removeContext();
+            MDCUtils.addOtelContext(OtelCLIUtils.getOtelContextFromEnvVariables());
 
-        // Fetch operation information
-        DeliverableAnalyzerOperation operation = pncService.getDeliverableAnalyzerOperation(parent.getOperationId());
+            Map<String, String> attributes = Map.of(
+                    "params.generator.type",
+                    generatorType().toString(),
+                    "params.identifier",
+                    parent.getOperationId(),
+                    "params.destination",
+                    Path.of(
+                            parent.getWorkdir().toAbsolutePath().toString(),
+                            String.valueOf(parent.getIndex()),
+                            "bom.json").toFile().getAbsolutePath());
 
-        if (operation == null) {
-            log.error("Could not fetch the PNC operation with id '{}'", parent.getOperationId());
-            return CommandLine.ExitCode.SOFTWARE;
+            OtelCLIUtils.startOtel(
+                    OtelCLIUtils.SBOMER_CLI_NAME,
+                    OtelHelper.getEffectiveClassName(this.getClass()) + ".generateOperation",
+                    attributes);
+
+            // Fetch operation information
+            DeliverableAnalyzerOperation operation = pncService
+                    .getDeliverableAnalyzerOperation(parent.getOperationId());
+
+            if (operation == null) {
+                log.error("Could not fetch the PNC operation with id '{}'", parent.getOperationId());
+                return CommandLine.ExitCode.SOFTWARE;
+            }
+
+            Path sbomPath = doGenerate();
+            log.info("Generation finished, SBOM available at: '{}'", sbomPath.toAbsolutePath());
+            return 0;
+        } finally {
+            MDCUtils.removeContext();
+            OtelCLIUtils.stopOTel();
         }
-
-        Path sbomPath = doGenerate();
-        log.info("Generation finished, SBOM available at: '{}'", sbomPath.toAbsolutePath());
-        return 0;
     }
 
 }

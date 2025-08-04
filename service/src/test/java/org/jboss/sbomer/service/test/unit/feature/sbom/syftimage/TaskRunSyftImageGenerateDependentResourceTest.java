@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import io.fabric8.kubernetes.api.model.Duration;
-import io.fabric8.tekton.pipeline.v1beta1.Param;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.Param;
+import io.fabric8.tekton.v1beta1.TaskRun;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 
 @SuppressWarnings("unchecked")

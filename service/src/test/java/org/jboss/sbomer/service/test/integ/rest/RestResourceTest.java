@@ -191,11 +191,11 @@ class RestResourceTest {
                 .request("GET", String.format("%s/12345/bom", apiVersion.manifestsPath()))
                 .then()
                 .statusCode(200)
-                .body("metadata.component.name", CoreMatchers.equalTo("microprofile-graphql-parent"))
+                .body("components[0].name", CoreMatchers.equalTo("microprofile-graphql-parent"))
                 .and()
-                .body("metadata.component.version", CoreMatchers.equalTo("1.1.0.redhat-00008"))
+                .body("components[0].version", CoreMatchers.equalTo("1.1.0.redhat-00008"))
                 .and()
-                .body("metadata.component.licenses[0].license.id", CoreMatchers.equalTo("Apache-2.0"));
+                .body("components[0].licenses[0].license.id", CoreMatchers.equalTo("Apache-2.0"));
     }
 
     @Nested

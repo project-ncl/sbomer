@@ -17,11 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.generator.rpm.controller;
 
-import static org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController.EVENT_SOURCE_NAME;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,18 +29,24 @@ import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
-import org.slf4j.helpers.MessageFormatter;
+import org.slf4j.MDC;
 
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
+import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
+import io.fabric8.tekton.v1beta1.StepState;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunStatus;
+import io.javaoperatorsdk.operator.api.config.informer.Informer;
 import io.javaoperatorsdk.operator.api.reconciler.Constants;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.javaoperatorsdk.operator.api.reconciler.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -64,36 +69,30 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @ControllerConfiguration(
-        labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/component=sbom,app.kubernetes.io/managed-by=sbom,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=brew-rpm",
-        namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
+        informer = @Informer(
+                namespaces = { Constants.WATCH_CURRENT_NAMESPACE },
+                labelSelector = "app.kubernetes.io/part-of=sbomer,app.kubernetes.io/managed-by=sbomer,app.kubernetes.io/component=generator,sbomer.jboss.org/type=generation-request,sbomer.jboss.org/generation-request-type=brew-rpm"))
+@Workflow(
         dependents = { @Dependent(
-                type = TaskRunBrewRPMGenerateDependentResource.class,
-                useEventSourceWithName = EVENT_SOURCE_NAME) })
+                useEventSourceWithName = "tekton-generation-request-brew-rpm",
+                type = TaskRunBrewRPMGenerateDependentResource.class) })
 @Slf4j
 public class BrewRPMController extends AbstractController {
 
+    private static Integer UNSUPPORTED_EXIT_CODE = 10;
+
     @Override
-    protected UpdateControl<GenerationRequest> updateRequest(
-            GenerationRequest generationRequest,
-            SbomGenerationStatus status,
-            GenerationResult result,
-            String reason,
-            Object... params) {
+    protected GenerationRequestType generationRequestType() {
+        return GenerationRequestType.BREW_RPM;
+    }
 
-        if (generationRequest.getStatus() != null) {
-            String label = generationRequest.getStatus() == SbomGenerationStatus.GENERATING
-                    ? SbomGenerationPhase.GENERATE.name().toLowerCase()
-                    : null;
-
-            if (label != null) {
-                generationRequest.getMetadata().getLabels().put(Labels.LABEL_PHASE, label);
-            }
+    @Override
+    protected void setPhaseLabel(GenerationRequest generationRequest) {
+        if (SbomGenerationStatus.GENERATING.equals(generationRequest.getStatus())) {
+            generationRequest.getMetadata()
+                    .getLabels()
+                    .put(Labels.LABEL_PHASE, SbomGenerationPhase.GENERATE.name().toLowerCase());
         }
-
-        generationRequest.setStatus(status);
-        generationRequest.setResult(result);
-        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
-        return UpdateControl.updateResource(generationRequest);
     }
 
     /**
@@ -111,111 +110,146 @@ public class BrewRPMController extends AbstractController {
             Set<TaskRun> secondaryResources) {
 
         log.debug("Reconcile GENERATING for '{}'...", generationRequest.getName());
+        Map<String, String> attributes = createBaseGenerationSpanAttibutes(generationRequest);
 
-        TaskRun generateTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.GENERATE);
+        return OtelHelper
+                .withSpan(this.getClass(), ".reconcile-generating", attributes, MDC.getCopyOfContextMap(), () -> {
+                    TaskRun generateTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.GENERATE);
 
-        if (generateTaskRun == null) {
-            log.error("There is no generation TaskRun related to GenerationRequest '{}'", generationRequest.getName());
+                    if (generateTaskRun == null) {
+                        log.error(
+                                "There is no generation TaskRun related to GenerationRequest '{}'",
+                                generationRequest.getName());
 
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. Unable to find related TaskRun. See logs for more information.");
-        }
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_SYSTEM,
+                                "Generation failed. Unable to find related TaskRun. See logs for more information.");
+                    }
 
-        // In case the TaskRun hasn't finished yet, wait for the next update.
-        if (!isFinished(generateTaskRun)) {
-            return UpdateControl.noUpdate();
-        }
+                    // In case the TaskRun hasn't finished yet, wait for the next update.
+                    if (!isFinished(generateTaskRun)) {
+                        return UpdateControl.noUpdate();
+                    }
 
-        // In case the Task Run is not successful, fail the generation
-        if (!Boolean.TRUE.equals(isSuccessful(generateTaskRun))) {
-            log.error("Generation failed, the TaskRun returned failure");
+                    // In case the Task Run is not successful, fail the generation
+                    if (!Boolean.TRUE.equals(isSuccessful(generateTaskRun))) {
+                        String detailedFailureMessage = getDetailedFailureMessage(generateTaskRun);
 
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. TaskRun responsible for generation failed. See logs for more information.");
-        }
+                        log.error("Generation failed, the TaskRun returned failure: {}", detailedFailureMessage);
 
-        // Construct the path to the working directory of the generator
-        Path generationDir = Path.of(controllerConfig.sbomDir(), generationRequest.getMetadata().getName());
+                        // If we get return code 10 then its going to be related to unsupported
+                        if (UNSUPPORTED_EXIT_CODE.equals(getFirstFailedStepExitCode(generateTaskRun))) {
+                            return updateRequest(
+                                    generationRequest,
+                                    SbomGenerationStatus.FAILED,
+                                    GenerationResult.ERR_GENERATION,
+                                    "Generation failed. TaskRun responsible for generation failed: {}",
+                                    detailedFailureMessage);
 
-        log.debug("Reading manifests from '{}'...", generationDir.toAbsolutePath());
+                        }
 
-        List<Path> manifestPaths;
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_SYSTEM,
+                                "Generation failed. TaskRun responsible for generation failed: {}",
+                                detailedFailureMessage);
+                    }
 
-        try {
-            manifestPaths = FileUtils.findManifests(generationDir);
-        } catch (IOException e) {
-            log.error("Unexpected IO exception occurred while trying to find generated manifests", e);
+                    // Construct the path to the working directory of the generator
+                    Path generationDir = Path.of(controllerConfig.sbomDir(), generationRequest.getMetadata().getName());
 
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation succeeded, but reading generated SBOMs failed due IO exception. See logs for more information.");
-        }
+                    log.debug("Reading manifests from '{}'...", generationDir.toAbsolutePath());
 
-        if (manifestPaths.isEmpty()) {
-            log.error("No manifests found, this is unexpected");
+                    List<Path> manifestPaths;
 
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.");
-        }
+                    try {
+                        manifestPaths = FileUtils.findManifests(generationDir);
+                    } catch (IOException e) {
+                        log.error("Unexpected IO exception occurred while trying to find generated manifests", e);
 
-        List<Bom> boms;
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_SYSTEM,
+                                "Generation succeeded, but reading generated SBOMs failed due IO exception. See logs for more information.");
+                    }
 
-        try {
-            boms = readManifests(manifestPaths);
-        } catch (Exception e) {
-            log.error("Unable to read one or more manifests", e);
+                    if (manifestPaths.isEmpty()) {
+                        log.error("No manifests found, this is unexpected");
 
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation succeeded, but reading generated manifests failed was not successful. See logs for more information.");
-        }
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_SYSTEM,
+                                "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.");
+                    }
 
-        List<Sbom> sboms;
+                    List<Bom> boms;
 
-        try {
-            sboms = storeBoms(generationRequest, boms);
-        } catch (ValidationException e) {
-            // There was an error when validating the entity, most probably the SBOM is not valid
-            log.error("Unable to validate generated SBOMs: {}", e.getMessage(), e);
+                    try {
+                        boms = readManifests(manifestPaths);
+                    } catch (Exception e) {
+                        log.error("Unable to read one or more manifests", e);
 
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_GENERATION,
-                    "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.",
-                    e.getMessage());
-        }
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_SYSTEM,
+                                "Generation succeeded, but reading generated manifests failed was not successful. See logs for more information.");
+                    }
 
-        try {
-            performPost(sboms);
-        } catch (ApplicationException e) {
-            return updateRequest(
-                    generationRequest,
-                    SbomGenerationStatus.FAILED,
-                    GenerationResult.ERR_POST,
-                    e.getMessage());
-        }
+                    List<Sbom> sboms;
 
-        return updateRequest(
-                generationRequest,
-                SbomGenerationStatus.FINISHED,
-                GenerationResult.SUCCESS,
-                String.format(
-                        "Generation finished successfully. Generated SBOMs: %s",
-                        sboms.stream().map(Sbom::getId).collect(Collectors.joining(", "))));
+                    try {
+                        sboms = storeBoms(generationRequest, boms);
+                    } catch (ValidationException e) {
+                        // There was an error when validating the entity, most probably the SBOM is not valid
+                        log.error("Unable to validate generated SBOMs: {}", e.getMessage(), e);
+
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_GENERATION,
+                                "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.",
+                                e.getMessage());
+                    }
+
+                    try {
+                        performPost(sboms);
+                    } catch (ApplicationException e) {
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_POST,
+                                e.getMessage());
+                    }
+
+                    return updateRequest(
+                            generationRequest,
+                            SbomGenerationStatus.FINISHED,
+                            GenerationResult.SUCCESS,
+                            String.format(
+                                    "Generation finished successfully. Generated SBOMs: %s",
+                                    sboms.stream().map(Sbom::getId).collect(Collectors.joining(", "))));
+                });
     }
 
+    public static Integer getFirstFailedStepExitCode(TaskRun taskRun) {
+        TaskRunStatus status = taskRun.getStatus();
+
+        for (StepState stepState : status.getSteps()) {
+            ContainerStateTerminated terminatedState = stepState.getTerminated();
+            if (terminatedState != null) {
+                Integer exitCode = terminatedState.getExitCode();
+                // We only want failed non-zero exit code
+                if (exitCode != null && exitCode != 0) {
+                    return exitCode;
+                }
+            }
+        }
+        return null;
+    }
 }

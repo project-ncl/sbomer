@@ -66,7 +66,7 @@ public class ProductConfig {
          * @return The {@link ErrataProductConfig} object or {@code null} if data cannot be found.
          */
         public static ErrataProductConfig fromBom(Bom bom) {
-            Component component = bom.getMetadata().getComponent();
+            Component component = bom.getComponents().get(0);
 
             Optional<Property> productName = SbomUtils
                     .findPropertyWithNameInComponent(PROPERTY_ERRATA_PRODUCT_NAME, component);

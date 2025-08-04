@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.cli.feature.sbom.client;
 
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -24,8 +26,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 /**
  * Client used to interact with the SCM (Gerrit) to fetch the config file for a particular build.

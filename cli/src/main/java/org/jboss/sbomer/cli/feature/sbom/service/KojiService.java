@@ -18,20 +18,25 @@
 package org.jboss.sbomer.cli.feature.sbom.service;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
-import lombok.Getter;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.pnc.build.finder.core.BuildConfig;
 import org.jboss.pnc.build.finder.core.BuildFinder;
 import org.jboss.pnc.build.finder.core.BuildFinderListener;
@@ -44,14 +49,24 @@ import org.jboss.pnc.build.finder.core.LocalFile;
 import org.jboss.pnc.build.finder.koji.ClientSession;
 import org.jboss.pnc.build.finder.koji.KojiBuild;
 import org.jboss.pnc.dto.Artifact;
+import org.jboss.sbomer.cli.feature.sbom.client.KojiDownloadClient;
 import org.jboss.sbomer.cli.feature.sbom.utils.buildfinder.FinderStatus;
+import org.jboss.sbomer.core.errors.ApplicationException;
 
 import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.json.BuildExtraInfo;
+import com.redhat.red.build.koji.model.json.RemoteSourcesExtraInfo;
+import com.redhat.red.build.koji.model.json.TypeInfoExtraInfo;
+import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -62,6 +77,10 @@ import lombok.extern.slf4j.Slf4j;
 public class KojiService {
 
     private static final Long MAX_BREW_WAIT_5_MIN = 5 * 60 * 1000L;
+    private static final KojiObjectMapper MAPPER = new KojiObjectMapper();
+    public static final String REMOTE_SOURCE_PREFIX = "remote-source";
+    public static final String REMOTE_SOURCE_DELIMITER = "-";
+    public static final String SOURCES_FILE_SUFFIX = ".tar.gz";
 
     @Inject
     ManagedExecutor executor;
@@ -71,7 +90,13 @@ public class KojiService {
     BuildConfig config;
 
     @Inject
+    @Setter
     ClientSession kojiSession;
+
+    @Inject
+    @RestClient
+    @Setter
+    KojiDownloadClient kojiDownloadClient;
 
     /**
      * Executes analysis of the provided archives identified by URLs, which must be downloadable using HTTP(S). The
@@ -287,4 +312,60 @@ public class KojiService {
 
         return null;
     }
+
+    public void downloadSourcesFile(KojiBuildInfo buildInfo, Path outputDir) {
+        try {
+            Files.createDirectories(outputDir);
+            String remoteSourcesName = retrieveRemoteSourcesName(buildInfo);
+            if (remoteSourcesName == null) {
+                log.warn("Unable to download sources file due to no remote sources name");
+                return;
+            }
+            String sourcesFileName = remoteSourcesName + SOURCES_FILE_SUFFIX;
+            Path sourcesFile = outputDir.resolve(sourcesFileName);
+            log.info("Downloading sources file '{}'", sourcesFile.toAbsolutePath());
+            try (Response response = kojiDownloadClient.downloadSourcesFile(
+                    buildInfo.getName(),
+                    buildInfo.getVersion(),
+                    buildInfo.getRelease(),
+                    remoteSourcesName)) {
+                if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                    throw new ApplicationException("Failed to download sources file: HTTP " + response.getStatus());
+                }
+                try (InputStream in = response.readEntity(InputStream.class);
+                        OutputStream out = Files.newOutputStream(
+                                sourcesFile,
+                                StandardOpenOption.CREATE,
+                                StandardOpenOption.TRUNCATE_EXISTING)) {
+                    in.transferTo(out);
+                }
+                log.info("Successfully downloaded sources file");
+            }
+        } catch (ApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ApplicationException("Failed to download sources file", e);
+        }
+    }
+
+    private String retrieveRemoteSourcesName(KojiBuildInfo buildInfo) {
+        BuildExtraInfo buildExtraInfo = MAPPER.convertValue(buildInfo.getExtra(), BuildExtraInfo.class);
+        // Sometimes remote sources might not exist
+        List<RemoteSourcesExtraInfo> remoteSourcesExtraInfos = Optional.ofNullable(buildExtraInfo)
+                .map(BuildExtraInfo::getTypeInfo)
+                .map(TypeInfoExtraInfo::getRemoteSourcesExtraInfo)
+                .orElse(Collections.emptyList());
+        if (remoteSourcesExtraInfos.isEmpty()) {
+            log.warn("Unable to retrieve remote sources name");
+            return null;
+        }
+        String name = remoteSourcesExtraInfos.get(0).getName();
+        // Sometimes remote sources might have no name
+        if (name == null) {
+            return REMOTE_SOURCE_PREFIX;
+        } else {
+            return REMOTE_SOURCE_PREFIX + REMOTE_SOURCE_DELIMITER + name;
+        }
+    }
+
 }

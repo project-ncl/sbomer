@@ -18,15 +18,13 @@ import {
   MenuToggleElement,
   SearchInput,
   Button,
-  Spinner,
   ClipboardCopy,
 } from '@patternfly/react-core';
 import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ErrorSection } from '../Sections/ErrorSection/ErrorSection';
 import { useRequestEvents } from './useRequestEvents';
-import { openInNewTab } from '@app/utils/openInNewTab';
 import { RequestsQueryType } from '@app/types';
 import { useRequestEventsFilters } from './useRequestEventsFilters';
 import { NoResultsSection } from '../Sections/NoResultsSection/NoResultSection';
@@ -42,12 +40,12 @@ const columnNames = {
 };
 
 export const RequestEventTable = () => {
-  const navigate = useNavigate();
-
   const { queryType, queryValue, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
 
   const [searchBarVisible, setSearchBarVisible] = React.useState<boolean>(queryType != RequestsQueryType.NoFilter);
   const [searchBarValue, setSearchBarValue] = React.useState<string>(queryValue);
+
+  const [paginationVisible, setPaginationVisible] = React.useState<boolean>(queryType == RequestsQueryType.NoFilter);
 
   const [selectIsOpen, setSelectIsOpen] = React.useState<boolean>(false);
   const [selectValue, setSelectValue] = React.useState<RequestsQueryType>(queryType);
@@ -78,6 +76,7 @@ export const RequestEventTable = () => {
         setButtonVisible(false)
         setSearchBarValue('')
         setFilters(RequestsQueryType.NoFilter, '', pageIndex, pageSize)
+        setPaginationVisible(true)
         break;
       default:
         setSearchBarVisible(true);
@@ -87,6 +86,7 @@ export const RequestEventTable = () => {
 
   const onSearchCall = () => {
     setFilters(selectValue, searchBarValue, 1, pageSize)
+    setPaginationVisible(selectValue == RequestsQueryType.NoFilter)
   }
 
 
@@ -150,9 +150,19 @@ export const RequestEventTable = () => {
     variant='primary'
     onClick={() => onSearchCall()}>Search</Button>
 
+  const pagination = <Pagination
+    itemCount={total}
+    widgetId="request-table-pagination"
+    perPage={pageSize}
+    page={pageIndex}
+    variant={PaginationVariant.bottom}
+    onSetPage={onSetPage}
+    onPerPageSelect={onPerPageSelect}
+  />
+
   const table = <>
     <Table aria-label="Request events table" variant="compact">
-      <Caption>Latest request events</Caption>
+      <Caption>{queryType != RequestsQueryType.NoFilter ? "Latest filtered request events" : "Latest request events"}</Caption>
       <Thead>
         <Tr>
           <Th>{columnNames.id}</Th>
@@ -228,19 +238,10 @@ export const RequestEventTable = () => {
         ))}
       </Tbody>
     </Table>
-    <Pagination
-      itemCount={total}
-      widgetId="request-table-pagination"
-      perPage={pageSize}
-      page={pageIndex}
-      variant={PaginationVariant.bottom}
-      onSetPage={onSetPage}
-      onPerPageSelect={onPerPageSelect}
-    />
+    {paginationVisible && pagination}
   </>
   const noResults = <NoResultsSection />
   const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
-  const errorSection = <ErrorSection />
 
   const filtersBar = <>
     <Toolbar>
@@ -259,7 +260,7 @@ export const RequestEventTable = () => {
   </>
 
   const tableArea =
-    error ? errorSection :
+    error ? <ErrorSection error={error} /> :
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 

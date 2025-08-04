@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.core.features.sbom.utils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
@@ -25,8 +27,6 @@ import java.util.TreeMap;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class UrlUtils {
 

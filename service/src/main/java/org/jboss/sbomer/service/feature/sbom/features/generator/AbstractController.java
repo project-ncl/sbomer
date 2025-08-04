@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +41,10 @@ import org.cyclonedx.model.Bom;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
+import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
@@ -51,25 +54,31 @@ import org.jboss.sbomer.service.feature.sbom.features.umb.producer.NotificationS
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationStatus;
+import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.feature.sbom.model.RandomStringIdGenerator;
 import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.service.SbomRepository;
+import org.slf4j.MDC;
+import org.slf4j.helpers.MessageFormatter;
 
+import io.fabric8.knative.pkg.apis.Condition;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.tekton.pipeline.v1beta1.TaskRun;
-import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
+import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunStatus;
+import io.javaoperatorsdk.operator.api.config.informer.InformerEventSourceConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.EventSourceContext;
-import io.javaoperatorsdk.operator.api.reconciler.EventSourceInitializer;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -77,10 +86,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractController implements Reconciler<GenerationRequest>,
-        EventSourceInitializer<GenerationRequest>, Cleaner<GenerationRequest> {
-
-    public static final String EVENT_SOURCE_NAME = "GenerationRequestEventSource";
+public abstract class AbstractController implements Reconciler<GenerationRequest>, Cleaner<GenerationRequest> {
 
     @Inject
     @Setter
@@ -104,13 +110,60 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     @Setter
     AtlasHandler atlasHandler;
 
-    // TODO: Refactor this to have it's implementation shared
-    protected abstract UpdateControl<GenerationRequest> updateRequest(
+    protected abstract GenerationRequestType generationRequestType();
+
+    protected String labelSelector() {
+        return Labels.defaultLabelsToMap(generationRequestType())
+                .entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(","));
+    }
+
+    @Override
+    public List<EventSource<?, GenerationRequest>> prepareEventSources(EventSourceContext<GenerationRequest> context) {
+        String eventSourceName = "tekton-generation-request-" + generationRequestType().toName();
+
+        log.info(
+                "Preparing event source '{}' to handle generation requests with type '{}'...",
+                eventSourceName,
+                generationRequestType());
+
+        InformerEventSource<TaskRun, GenerationRequest> ies = new InformerEventSource<>(
+                InformerEventSourceConfiguration.from(TaskRun.class, GenerationRequest.class)
+                        .withName(eventSourceName)
+                        .withLabelSelector(labelSelector())
+                        .withNamespacesInheritedFromController()
+                        .withFollowControllerNamespacesChanges(true)
+                        .build(),
+                context);
+
+        log.info("Event source '{}' prepared", eventSourceName);
+
+        return List.of(ies);
+    }
+
+    protected void setPhaseLabel(GenerationRequest generationRequest) {
+        // Default: do nothing; subclasses can override this
+    }
+
+    protected UpdateControl<GenerationRequest> updateRequest(
             GenerationRequest generationRequest,
             SbomGenerationStatus status,
             GenerationResult result,
             String reason,
-            Object... params);
+            Object... params) {
+
+        setPhaseLabel(generationRequest);
+
+        generationRequest.setStatus(status);
+        generationRequest.setResult(result);
+        generationRequest.setReason(MessageFormatter.arrayFormat(reason, params).getMessage());
+
+        handleSpanFailure(status, generationRequest);
+
+        return UpdateControl.patchResource(generationRequest);
+    }
 
     /**
      * Returns the {@link TaskRun} having the specified {@link SbomGenerationPhase} from the given {@link TaskRun}
@@ -159,7 +212,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return the list of stored {@link Sbom}s
      */
     @Transactional
-    protected List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
+    public List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
         MDCUtils.removeOtelContext();
         MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
         MDCUtils.addOtelContext(generationRequest.getMDCOtel());
@@ -210,7 +263,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param taskRun The {@link TaskRun} to check
      * @return {@code true} if the {@link TaskRun} finished, {@code false} otherwise
      */
-    protected boolean isFinished(TaskRun taskRun) {
+    public boolean isFinished(TaskRun taskRun) {
         if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
                 && !taskRun.getStatus().getConditions().isEmpty()
                 && (Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")
@@ -231,32 +284,83 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return {@code true} if the {@link TaskRun} finished successfully, {@code false} otherwise or {@code null} in
      *         case it is still in progress.
      */
-    protected Boolean isSuccessful(TaskRun taskRun) {
+    public Boolean isSuccessful(TaskRun taskRun) {
         if (!isFinished(taskRun)) {
             log.trace("TaskRun '{}' still in progress", taskRun.getMetadata().getName());
             return null; // FIXME: This is not really binary, but trinary state
         }
 
-        if (taskRun.getStatus() != null && taskRun.getStatus().getConditions() != null
-                && !taskRun.getStatus().getConditions().isEmpty()
-                && Objects.equals(taskRun.getStatus().getConditions().get(0).getStatus(), "True")) {
-            log.trace("TaskRun '{}' finished successfully", taskRun.getMetadata().getName());
-            return true;
+        TaskRunStatus status = taskRun.getStatus();
+        if (status != null && status.getConditions() != null && !status.getConditions().isEmpty()) {
+            Condition condition = status.getConditions().get(0);
+
+            String taskRunName = taskRun.getMetadata().getName();
+            String conditionStatus = condition.getStatus();
+            String reason = condition.getReason();
+            String message = condition.getMessage();
+            String podName = status.getPodName();
+
+            if (Objects.equals(conditionStatus, "True")) {
+                log.trace("TaskRun '{}' finished successfully (Reason: '{}')", taskRunName, reason);
+                return true;
+            } else {
+                log.warn(
+                        "TaskRun '{}' failed (Reason: '{}', Message: '{}', Pod: '{}')",
+                        taskRunName,
+                        reason,
+                        message,
+                        podName);
+
+                if (status.getSteps() != null) {
+                    status.getSteps().forEach(step -> {
+                        var term = step.getTerminated();
+                        if (term != null) {
+                            String exitCodeReason = TektonExitCodeUtils.interpretExitCode(term.getExitCode());
+                            log.warn(
+                                    "  Step '{}': ExitCode={} ({}), Reason={}, Message={}",
+                                    step.getName(),
+                                    term.getExitCode(),
+                                    exitCodeReason,
+                                    term.getReason(),
+                                    term.getMessage());
+                        }
+                    });
+                }
+            }
         }
 
         log.trace("TaskRun '{}' failed", taskRun.getMetadata().getName());
         return false;
     }
 
-    @Override
-    public Map<String, EventSource> prepareEventSources(EventSourceContext<GenerationRequest> context) {
-        InformerEventSource<TaskRun, GenerationRequest> ies = new InformerEventSource<>(
-                InformerConfiguration.from(TaskRun.class, context)
-                        .withNamespacesInheritedFromController(context)
-                        .build(),
-                context);
+    public String getDetailedFailureMessage(TaskRun taskRun) {
+        if (taskRun.getStatus() == null || taskRun.getStatus().getSteps() == null) {
+            return "TaskRun failed with no step information available.";
+        }
 
-        return Map.of(EVENT_SOURCE_NAME, ies);
+        return taskRun.getStatus().getSteps().stream().map(step -> {
+            var term = step.getTerminated();
+            if (term != null) {
+                boolean isOomKilled = "OOMKilled".equals(term.getReason());
+                boolean isFailedExit = term.getExitCode() != 0;
+
+                if (isFailedExit || isOomKilled) {
+                    String reason = TektonExitCodeUtils.interpretExitCode(term.getExitCode());
+                    return String.format(
+                            "Step '%s' failed: exitCode=%d (%s), reason=%s%s",
+                            step.getName(),
+                            term.getExitCode(),
+                            reason,
+                            term.getReason(),
+                            term.getMessage() != null ? (", message=" + term.getMessage()) : "");
+                }
+            }
+
+            return null;
+        })
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse("TaskRun failed, but no step had non-zero exit code or OOMKilled reason.");
     }
 
     @Override
@@ -323,7 +427,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         }
 
         // In case resource gets an update, update th DB entity as well
-        if (action.isUpdateResource()) {
+        if (action.isPatchResource()) {
             SbomGenerationRequest.sync(generationRequest);
         }
 
@@ -339,9 +443,17 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     protected UpdateControl<GenerationRequest> reconcileNew(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
-        log.debug("Reconcile NEW for '{}'...", generationRequest.getName());
 
-        return updateRequest(generationRequest, SbomGenerationStatus.SCHEDULED, null, null);
+        log.debug("Reconcile NEW for '{}'...", generationRequest.getName());
+        Map<String, String> attributes = createBaseGenerationSpanAttibutes(generationRequest);
+
+        return OtelHelper.withSpan(
+                this.getClass(),
+                ".reconcile-new",
+                attributes,
+                MDC.getCopyOfContextMap(),
+                () -> updateRequest(generationRequest, SbomGenerationStatus.SCHEDULED, null, null));
+
     }
 
     /**
@@ -354,15 +466,48 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
     protected UpdateControl<GenerationRequest> reconcileScheduled(
             GenerationRequest generationRequest,
             Set<TaskRun> secondaryResources) {
+
         log.debug("Reconcile SCHEDULED for '{}'...", generationRequest.getName());
+        Map<String, String> attributes = createBaseGenerationSpanAttibutes(generationRequest);
 
-        TaskRun generateTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.GENERATE);
+        return OtelHelper
+                .withSpan(this.getClass(), ".reconcile-scheduled", attributes, MDC.getCopyOfContextMap(), () -> {
+                    TaskRun generateTaskRun = findTaskRun(secondaryResources, SbomGenerationPhase.GENERATE);
+                    if (generateTaskRun == null) {
+                        return UpdateControl.noUpdate();
+                    }
+                    return updateRequest(generationRequest, SbomGenerationStatus.GENERATING, null, null);
+                });
+    }
 
-        if (generateTaskRun == null) {
-            return UpdateControl.noUpdate();
+    protected void handleSpanFailure(SbomGenerationStatus status, GenerationRequest generationRequest) {
+        // Register the span as failed and add the reason
+        if (SbomGenerationStatus.FAILED.equals(status)) {
+            Span.current().setStatus(StatusCode.ERROR, generationRequest.getReason());
         }
+    }
 
-        return updateRequest(generationRequest, SbomGenerationStatus.GENERATING, null, null);
+    protected Map<String, String> createBaseGenerationSpanAttibutes(GenerationRequest generationRequest) {
+        Map<String, String> attributes = new HashMap<>();
+        if (generationRequest.getId() != null) {
+            attributes.put("generation.id", generationRequest.getId());
+        }
+        if (generationRequest.getIdentifier() != null) {
+            attributes.put("generation.identifier", generationRequest.getIdentifier());
+        }
+        if (generationRequest.getConfig() != null) {
+            attributes.put("generation.config", generationRequest.getConfig().toJson());
+        }
+        if (generationRequest.getType() != null) {
+            attributes.put("generation.type", generationRequest.getType().toString());
+        }
+        if (generationRequest.getName() != null) {
+            attributes.put("generation.resource", generationRequest.getName());
+        }
+        if (generationRequest.getStatus() != null) {
+            attributes.put("generation.status", generationRequest.getStatus().toString());
+        }
+        return attributes;
     }
 
     /**
@@ -372,15 +517,19 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return the update control for the generation request
      */
     protected UpdateControl<GenerationRequest> reconcileFailed(GenerationRequest generationRequest) {
+
         log.debug("Reconcile FAILED for '{}'...", generationRequest.getName());
+        Map<String, String> attributes = createBaseGenerationSpanAttibutes(generationRequest);
 
-        s3LogHandler.storeFiles(generationRequest);
+        return OtelHelper.withSpan(this.getClass(), ".reconcile-failed", attributes, MDC.getCopyOfContextMap(), () -> {
+            s3LogHandler.storeFiles(generationRequest);
 
-        // In case the generation request failed, we need to clean up resources so that these are not left forever.
-        // We have all the data elsewhere (logs, cause) so it's safe to do so.
-        cleanupFinishedGenerationRequest(generationRequest);
+            // In case the generation request failed, we need to clean up resources so that these are not left forever.
+            // We have all the data elsewhere (logs, cause) so it's safe to do so.
+            cleanupFinishedGenerationRequest(generationRequest);
 
-        return UpdateControl.noUpdate();
+            return UpdateControl.noUpdate();
+        });
     }
 
     /**
@@ -393,23 +542,28 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      */
     @ActivateRequestContext
     protected UpdateControl<GenerationRequest> reconcileFinished(GenerationRequest generationRequest) {
+
         log.debug("Reconcile FINISHED for '{}'...", generationRequest.getName());
+        Map<String, String> attributes = createBaseGenerationSpanAttibutes(generationRequest);
 
-        // Store files in S3
-        try {
-            s3LogHandler.storeFiles(generationRequest);
-        } catch (Exception e) {
-            // This is not fatal
-            log.warn("Storing files in S3 failed", e);
-        }
+        return OtelHelper
+                .withSpan(this.getClass(), ".reconcile-finished", attributes, MDC.getCopyOfContextMap(), () -> {
+                    // Store files in S3
+                    try {
+                        s3LogHandler.storeFiles(generationRequest);
+                    } catch (Exception e) {
+                        // This is not fatal
+                        log.warn("Storing files in S3 failed", e);
+                    }
 
-        // We're good, remove all files now!
-        cleanupFinishedGenerationRequest(generationRequest);
+                    // We're good, remove all files now!
+                    cleanupFinishedGenerationRequest(generationRequest);
 
-        return UpdateControl.noUpdate();
+                    return UpdateControl.noUpdate();
+                });
     }
 
-    protected void performPost(List<Sbom> sboms) {
+    public void performPost(List<Sbom> sboms) {
         CompletableFuture<Void> publishToUmb = CompletableFuture.runAsync(() -> {
             try {
                 notificationService.notifyCompleted(sboms);
@@ -417,6 +571,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 log.warn(e.getMessage(), e);
             }
         }).exceptionally(e -> {
+            log.error("An error occurred while sending UMB notification", e);
             throw new ApplicationException("UMB notification failed: {}", e.getMessage(), e);
         });
 
@@ -427,6 +582,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
                 log.warn(e.getMessage(), e);
             }
         }).exceptionally(e -> {
+            log.error("An error occurred while uploading manifests to Atlas", e);
             throw new ApplicationException("Atlas upload failed: {}", e.getMessage(), e);
         });
 
@@ -469,28 +625,33 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
         }
 
         Path workdirPath = Path.of(controllerConfig.sbomDir(), generationRequest.getMetadata().getName());
-
         log.debug(
                 "Removing '{}' path being the working directory for the finished '{}' GenerationRequest",
                 workdirPath.toAbsolutePath(),
                 generationRequest.getName());
 
-        // It should, but...
-        if (Files.exists(workdirPath)) {
-            try (Stream<Path> stream = Files.walk(workdirPath)) {
-                stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-            } catch (IOException e) {
-                log.error("An error occurred while removing the '{}' directory", workdirPath.toAbsolutePath(), e);
+        Map<String, String> attributes = createBaseGenerationSpanAttibutes(generationRequest);
+        attributes.put("workdir.to.remove", workdirPath.toFile().getAbsolutePath());
+
+        OtelHelper.withSpan(this.getClass(), ".reconcile-cleanup", attributes, MDC.getCopyOfContextMap(), () -> {
+            // It should, but...
+            if (Files.exists(workdirPath)) {
+                try (Stream<Path> stream = Files.walk(workdirPath)) {
+                    stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+                } catch (IOException e) {
+                    log.error("An error occurred while removing the '{}' directory", workdirPath.toAbsolutePath(), e);
+                }
             }
-        }
 
-        if (Files.exists(workdirPath)) {
-            log.warn("Directory '{}' still exists", workdirPath.toAbsolutePath());
-        } else {
-            log.debug("Directory '{}' removed", workdirPath.toAbsolutePath());
-        }
+            if (Files.exists(workdirPath)) {
+                log.warn("Directory '{}' still exists", workdirPath.toAbsolutePath());
+            } else {
+                log.debug("Directory '{}' removed", workdirPath.toAbsolutePath());
+            }
 
-        kubernetesClient.configMaps().withName(generationRequest.getMetadata().getName()).delete();
+            kubernetesClient.configMaps().withName(generationRequest.getMetadata().getName()).delete();
+            return null;
+        });
     }
 
     /**
@@ -499,7 +660,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param manifestPaths List of {@link Path}s to manifests in JSON format.
      * @return List of {@link Bom}s.
      */
-    protected List<Bom> readManifests(List<Path> manifestPaths) {
+    public List<Bom> readManifests(List<Path> manifestPaths) {
         List<Bom> boms = new ArrayList<>();
 
         log.info("Reading {} manifests...", manifestPaths.size());
