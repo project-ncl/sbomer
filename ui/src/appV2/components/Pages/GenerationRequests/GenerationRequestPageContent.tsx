@@ -1,5 +1,4 @@
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
-import { timestampToHumanReadable } from '@appV2/utils/timestampToHumanReadable';
 import {
   Grid,
   Column,
@@ -70,7 +69,7 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
               <StructuredListRow>
                 <StructuredListCell>Created</StructuredListCell>
                 <StructuredListCell>
-                  {request.created}
+                  {request.created ? request.created.toLocaleString() : 'N/A'}
                 </StructuredListCell>
               </StructuredListRow>
             </StructuredListBody>

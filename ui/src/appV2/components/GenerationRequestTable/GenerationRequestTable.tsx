@@ -116,21 +116,21 @@ export const GenerationRequestTable = () => {
                     <TableCell>
                       <span>
                         {generation
-                          ? timestampToHumanReadable(Date.now() - generation.creationTime.getTime(), false, 'ago')
+                          ? timestampToHumanReadable(Date.now() - generation.created.getTime(), false, 'ago')
                           : ''}
                       </span>
                     </TableCell>
                     <TableCell>
-                      {generation?.updatedTime && (
+                      {generation?.updated && (
                         <span>
-                          {timestampToHumanReadable(Date.now() - generation.updatedTime.getTime(), false, 'ago')}
+                          {timestampToHumanReadable(Date.now() - generation.updated.getTime(), false, 'ago')}
                         </span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {generation?.finishedTime ? (
+                      {generation?.finished ? (
                         <span>
-                          {timestampToHumanReadable(Date.now() - generation.finishedTime.getTime(), false, 'ago')}
+                          {timestampToHumanReadable(Date.now() - generation.finished.getTime(), false, 'ago')}
                         </span>
                       ) : (
                         <span className="pf-v5-c-timestamp pf-m-help-text">N/A</span>

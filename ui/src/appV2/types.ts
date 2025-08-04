@@ -61,24 +61,23 @@ export class SbomerGeneration {
   public status: string;
   public result: string;
   public reason: string;
-  public creationTime: Date;
-  public updatedTime?: Date;
-  public finishedTime?: Date;
+  public created: Date;
+  public updated?: Date;
+  public finished?: Date;
   public request?: object;
   public metadata?: object;
 
-   constructor(payload: any) {
+  constructor(payload: any) {
     this.id = payload.id;
     this.status = payload.status;
     this.result = payload.result;
     this.reason = payload.reason;
 
-    this.creationTime = new Date(payload.created);
+    this.created = new Date(payload.created);
 
-    this.updatedTime = new Date(payload.updated);
+    this.updated = payload.updated ? new Date(payload.updated) : undefined;
 
-
-    this.finishedTime = payload.finished ? new Date(payload.finished) : undefined;
+    this.finished = payload.finished ? new Date(payload.finished) : undefined;
 
     this.request = payload.request;
     this.metadata = payload.metadata;
@@ -87,16 +86,13 @@ export class SbomerGeneration {
 
 export class SbomerManifest {
   public id: string;
-  public creationTime: Date;
-
+  public created: Date;
 
   constructor(payload: any) {
     this.id = payload.id;
-    this.creationTime = new Date(payload.created);
+    this.created = new Date(payload.created);
   }
 }
-
-
 
 export class SbomerEvent {
   public id: string;
