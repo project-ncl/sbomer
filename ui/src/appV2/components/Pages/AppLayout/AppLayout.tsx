@@ -9,9 +9,7 @@ import {
   SideNavHeader,
   SideNavItems,
   SideNavLink,
-} from '@carbon/react';
-import rhlogo from '../../../../assets/Logo-Red_Hat-A-Standard-RGB.svg';
-import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
+} from '@carbon/react';import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
@@ -94,7 +92,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               isCollapsible={true}
             />
             <HeaderName prefix="">
-              <img src={rhlogo} alt="Red Hat Logo" height={32} style={{ marginRight: '0.5rem' }} />
               <h3>SBOMER NEXT GEN</h3>
             </HeaderName>
 
@@ -118,20 +115,20 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           >
             {Navigation}
           </SideNav>
-          
+
         </>
       )}
     />
-    <Content id="main-content" style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
+    <Content id="main-content" style={{
+            display: 'flex',
+            flexDirection: 'column',
             minHeight: 'calc(100vh - 48px)',
-            flex: 1 
+            flex: 1
           }}>
             {children}
           </Content>
           </>
-    
+
   );
 };
 
