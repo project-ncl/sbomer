@@ -141,11 +141,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
   }
 
   async getManifest(id: string): Promise<SbomerManifest> {
-    const request = await this.client.get<SbomerManifest>(`/api/v1beta2/manifests/${id}`).then((response) => {
-      return response.data as SbomerManifest;
-    });
-
-    return request;
+    const response = await this.client.get(`/api/v1beta2/manifests/${id}`);
+    return new SbomerManifest(response.data);
   }
 
   async getManifestJson(id: string): Promise<any> {
@@ -216,11 +213,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
   }
 
   async getGeneration(id: string): Promise<SbomerGeneration> {
-    const request = await this.client.get<SbomerGeneration>(`/api/v1beta2/generations/${id}`).then((response) => {
-      return response.data as SbomerGeneration;
-    });
-
-    return request;
+    const response = await this.client.get(`/api/v1beta2/generations/${id}`);
+    return new SbomerGeneration(response.data);
   }
 
   async getEvents(
@@ -260,11 +254,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
   }
 
   async getRequestEvent(id: string): Promise<SbomerEvent> {
-    const request  = await this.client.get<SbomerEvent>(`/api/v1beta2/events/${id}`).then((response) => {
-      return response.data as SbomerEvent;
-    });
-
-    return request;
+    const response = await this.client.get(`/api/v1beta2/events/${id}`);
+    return new SbomerEvent(response.data);
   }
 
   async getRequestEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }> {

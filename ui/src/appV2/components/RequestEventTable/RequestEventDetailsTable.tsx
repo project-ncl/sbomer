@@ -60,7 +60,7 @@ export const RequestEventDetailsTable = () => {
               <StructuredListRow>
                 <StructuredListCell>Event Received At</StructuredListCell>
                 <StructuredListCell>
-                  {request.created}
+                  {request.created ? request.created.toLocaleString() : 'N/A'}
                 </StructuredListCell>
               </StructuredListRow>
             </StructuredListBody>

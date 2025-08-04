@@ -124,8 +124,8 @@ export const ManifestsTable = () => {
                   </TableCell>
                   <TableCell>
                     <span>
-                      {manifest?.creationTime
-                        ? timestampToHumanReadable(Date.now() - new Date(manifest.creationTime).getTime(), false, 'ago')
+                      {manifest?.created
+                        ? timestampToHumanReadable(Date.now() - new Date(manifest.created).getTime(), false, 'ago')
                         : ''}
                     </span>
                   </TableCell>
