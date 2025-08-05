@@ -29,15 +29,22 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.sbomer.core.errors.ApplicationException;
+import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.reconciler.TektonExitCodeUtils;
 import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
+import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
+import org.jboss.sbomer.service.nextgen.core.enums.GenerationResult;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.generator.AbstractGenerator;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
+import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.knative.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
@@ -48,6 +55,7 @@ import io.fabric8.tekton.v1beta1.StepState;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
 import jakarta.enterprise.context.control.ActivateRequestContext;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -241,7 +249,129 @@ public abstract class AbstractTektonController extends AbstractGenerator
      * @param relatedTaskRuns
      * @see GenerationStatus
      */
-    abstract protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns);
+    protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
+        log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.GENERATING, generation.id());
+
+        boolean inProgress = false;
+        boolean success = true;
+        TaskRun erroredTaskRun = null;
+
+        for (TaskRun tr : relatedTaskRuns) {
+
+            if (!isFinished(tr)) {
+                inProgress = true;
+                break;
+            }
+
+            if (!Boolean.TRUE.equals(isSuccessful(tr))) {
+                erroredTaskRun = tr;
+                inProgress = false;
+                success = false;
+                break;
+            }
+        }
+
+        // Still in progress
+        if (inProgress) {
+            log.info("Generation '{}' is still in progress", generation.id());
+            return;
+        }
+
+        if (!success) {
+            String detailedFailureMessage = getDetailedFailureMessage(erroredTaskRun);
+            updateStatus(
+                    generation.id(),
+                    GenerationStatus.FAILED,
+                    GenerationResult.ERR_GENERAL,
+                    "Generation failed, the TaskRun returned failure: {}",
+                    detailedFailureMessage);
+
+            return;
+        }
+
+        // Construct the path to the working directory of the generator
+        Path generationDir = Path.of(controllerConfig.sbomDir(), generation.id());
+
+        log.debug("Reading manifests from '{}'...", generationDir.toAbsolutePath());
+
+        List<Path> manifestPaths;
+
+        try {
+            manifestPaths = FileUtils.findManifests(generationDir);
+        } catch (IOException e) {
+            log.error("Unexpected IO exception occurred while trying to find generated manifests", e);
+
+            updateStatus(
+                    generation.id(),
+                    GenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Generation succeeded, but reading generated SBOMs failed due IO exception. See logs for more information.");
+
+            return;
+        }
+
+        if (manifestPaths.isEmpty()) {
+            log.error("No manifests found, this is unexpected");
+
+            updateStatus(
+                    generation.id(),
+                    GenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.");
+            return;
+        }
+
+        // Read manifests
+        List<JsonNode> boms;
+
+        try {
+            boms = JacksonUtils.readBoms(manifestPaths);
+        } catch (Exception e) {
+            log.error("Unable to read one or more manifests", e);
+
+            updateStatus(
+                    generation.id(),
+                    GenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Generation succeeded, but reading generated manifests failed was not successful. See logs for more information.");
+
+            return;
+        }
+
+        // TODO: Validate manifests
+
+        // Store manifests
+        List<ManifestRecord> manifests;
+
+        try {
+            manifests = storeBoms(generation, boms);
+        } catch (ValidationException e) {
+            // There was an error when validating the entity, most probably the SBOM is not valid
+            log.error("Unable to validate generated SBOMs: {}", e.getMessage(), e);
+
+            updateStatus(
+                    generation.id(),
+                    GenerationStatus.FAILED,
+                    GenerationResult.ERR_SYSTEM,
+                    "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.",
+                    e.getMessage());
+
+            return;
+        }
+
+        try {
+            // syftImageController.performPost(sboms); // TODO: add this back
+        } catch (ApplicationException e) {
+            updateStatus(generation.id(), GenerationStatus.FAILED, GenerationResult.ERR_POST, e.getMessage());
+            return;
+        }
+
+        updateStatus(
+                generation.id(),
+                GenerationStatus.FINISHED,
+                GenerationResult.SUCCESS,
+                "Generation finished successfully");
+    }
 
     protected void reconcileNew(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.NEW, generation.id());

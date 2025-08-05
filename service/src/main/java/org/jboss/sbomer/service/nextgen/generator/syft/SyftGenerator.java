@@ -41,6 +41,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.nextgen.controller.tekton.AbstractTektonController;
+import org.jboss.sbomer.service.nextgen.controller.tekton.TektonUtilities;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
@@ -427,29 +428,7 @@ public class SyftGenerator extends AbstractTektonController {
                 generation.id());
 
         // TODO: populate traces when we create generations
-        // TODO: make this a utility maybe
-        Map<String, String> labels = new HashMap<>();
-
-        labels.put(AbstractTektonController.GENERATION_ID_LABEL, generation.id());
-        labels.put(AbstractTektonController.GENERATOR_TYPE, getGeneratorName());
-
-        Optional.ofNullable(generation.metadata())
-                .map(meta -> meta.get("otelTraceId"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
-                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_TRACE_ID, traceId));
-
-        Optional.ofNullable(generation.metadata())
-                .map(meta -> meta.get("otelSpanId"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
-                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_SPAN_ID, traceId));
-
-        Optional.ofNullable(generation.metadata())
-                .map(meta -> meta.get("otelTraceParent"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
-                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_TRACEPARENT, traceId));
+        Map<String, String> labels = TektonUtilities.createBasicGenerationLabels(generation, getGeneratorName());
 
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
 
@@ -521,7 +500,7 @@ public class SyftGenerator extends AbstractTektonController {
                 .withTimeout(timeout)
                 .withParams(params)
                 .withTaskRef(new TaskRefBuilder().withName(release + taskSuffix).build())
-                .withStepOverrides(resourceOverrides(request))
+                .withStepOverrides(TektonUtilities.resourceOverrides(request))
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withSubPath(generation.id())
                                 .withName("data")

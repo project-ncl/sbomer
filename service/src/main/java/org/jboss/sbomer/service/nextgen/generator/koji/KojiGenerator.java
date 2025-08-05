@@ -38,6 +38,7 @@ import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.leader.LeaderManager;
 import org.jboss.sbomer.service.nextgen.controller.tekton.AbstractTektonController;
+import org.jboss.sbomer.service.nextgen.controller.tekton.TektonUtilities;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.dto.model.ManifestRecord;
@@ -137,153 +138,6 @@ public class KojiGenerator extends AbstractTektonController {
     }
 
     @Override
-    protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
-        log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.GENERATING, generation.id());
-
-        boolean inProgress = false;
-        boolean success = true;
-        TaskRun erroredTaskRun = null;
-
-        for (TaskRun tr : relatedTaskRuns) {
-
-            if (!isFinished(tr)) {
-                inProgress = true;
-                break;
-            }
-
-            if (!Boolean.TRUE.equals(isSuccessful(tr))) {
-                erroredTaskRun = tr;
-                inProgress = false;
-                success = false;
-                break;
-            }
-        }
-
-        // Still in progress
-        if (inProgress) {
-            log.info("Generation '{}' is still in progress", generation.id());
-            return;
-        }
-
-        if (!success) {
-            String detailedFailureMessage = getDetailedFailureMessage(erroredTaskRun);
-            updateStatus(
-                    generation.id(),
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_GENERAL,
-                    "Generation failed, the TaskRun returned failure: {}",
-                    detailedFailureMessage);
-
-            return;
-        }
-
-        // Construct the path to the working directory of the generator
-        Path generationDir = Path.of(controllerConfig.sbomDir(), generation.id());
-
-        log.debug("Reading manifests from '{}'...", generationDir.toAbsolutePath());
-
-        List<Path> manifestPaths;
-
-        try {
-            manifestPaths = FileUtils.findManifests(generationDir);
-        } catch (IOException e) {
-            log.error("Unexpected IO exception occurred while trying to find generated manifests", e);
-
-            updateStatus(
-                    generation.id(),
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation succeeded, but reading generated SBOMs failed due IO exception. See logs for more information.");
-
-            return;
-        }
-
-        if (manifestPaths.isEmpty()) {
-            log.error("No manifests found, this is unexpected");
-
-            updateStatus(
-                    generation.id(),
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation succeed, but no manifests could be found. At least one was expected. See logs for more information.");
-            return;
-        }
-
-        // Read manifests
-        List<JsonNode> boms;
-
-        try {
-            boms = JacksonUtils.readBoms(manifestPaths);
-        } catch (Exception e) {
-            log.error("Unable to read one or more manifests", e);
-
-            updateStatus(
-                    generation.id(),
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation succeeded, but reading generated manifests failed was not successful. See logs for more information.");
-
-            return;
-        }
-
-        // TODO: Validate manifests
-
-        // Store manifests
-        List<ManifestRecord> manifests;
-
-        try {
-            manifests = storeBoms(generation, boms);
-        } catch (ValidationException e) {
-            // There was an error when validating the entity, most probably the SBOM is not valid
-            log.error("Unable to validate generated SBOMs: {}", e.getMessage(), e);
-
-            updateStatus(
-                    generation.id(),
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_SYSTEM,
-                    "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.",
-                    e.getMessage());
-
-            return;
-        }
-
-        try {
-            // syftImageController.performPost(sboms); // TODO: add this back
-        } catch (ApplicationException e) {
-            updateStatus(generation.id(), GenerationStatus.FAILED, GenerationResult.ERR_POST, e.getMessage());
-            return;
-        }
-
-        updateStatus(
-                generation.id(),
-                GenerationStatus.FINISHED,
-                GenerationResult.SUCCESS,
-                "Generation finished successfully");
-
-    }
-
-    private TaskRunStepOverride resourceOverrides(GenerationRequest request) {
-
-        return new TaskRunStepOverrideBuilder().withName("generate")
-                .withNewResources()
-                .withRequests(
-                        Map.of(
-                                "cpu",
-                                new Quantity(request.generator().config().resources().requests().cpu()),
-                                "memory",
-                                new Quantity(request.generator().config().resources().requests().memory())))
-                .withLimits(
-                        Map.of(
-                                "cpu",
-                                new Quantity(request.generator().config().resources().limits().cpu()),
-                                "memory",
-                                new Quantity(request.generator().config().resources().limits().memory())))
-                .endResources()
-                .build();
-
-    }
-
-    @Override
     public TaskRun desired(GenerationRecord generation) {
 
         MDCUtils.removeOtelContext();
@@ -294,29 +148,7 @@ public class KojiGenerator extends AbstractTektonController {
                 generation.id());
 
         // TODO: populate traces when we create generations
-        // TODO: make this a utility maybe
-        Map<String, String> labels = Labels.defaultLabelsToMap(GenerationRequestType.BREW_RPM);
-
-        labels.put(AbstractTektonController.GENERATION_ID_LABEL, generation.id());
-        labels.put(AbstractTektonController.GENERATOR_TYPE, getGeneratorName());
-
-        Optional.ofNullable(generation.metadata())
-                .map(meta -> meta.get("otelTraceId"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
-                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_TRACE_ID, traceId));
-
-        Optional.ofNullable(generation.metadata())
-                .map(meta -> meta.get("otelSpanId"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
-                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_SPAN_ID, traceId));
-
-        Optional.ofNullable(generation.metadata())
-                .map(meta -> meta.get("otelTraceParent"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
-                .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_TRACEPARENT, traceId));
+        Map<String, String> labels = TektonUtilities.createBasicGenerationLabels(generation, getGeneratorName());
 
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
 
@@ -361,7 +193,7 @@ public class KojiGenerator extends AbstractTektonController {
                 .withTimeout(timeout)
                 .withParams(params)
                 .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
-                .withStepOverrides(resourceOverrides(request))
+                .withStepOverrides(TektonUtilities.resourceOverrides(request))
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withSubPath(generation.id())
                                 .withName("data")
