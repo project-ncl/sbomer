@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.feature.sbom.errors;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ClientExceptionMapper extends AbstractExceptionMapper<ClientException> {
 
+    @WithSpan
     @Override
     public Response toResponse(ClientException ex) {
         ErrorResponse error = ErrorResponse.builder()
