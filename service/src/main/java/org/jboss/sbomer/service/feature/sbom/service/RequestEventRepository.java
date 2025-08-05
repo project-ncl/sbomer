@@ -95,7 +95,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
             + "sgr.creation_time AS generation_request_creation_time, sgr.status AS generation_request_status, "
             + "sgr.result AS generation_request_result, sgr.reason AS generation_request_reason "
             + "FROM request re LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id "
-            + "LEFT JOIN sbom s ON sgr.id = s.generationrequest_id";
+            + "LEFT JOIN sbom s ON sgr.id = s.generationrequest_id ";
 
     private static final String FIND_MINIMIZED_GENERATION_REQUEST_MANIFESTS_NATIVE_QUERY = "SELECT re.id AS request_id, "
             + "re.receival_time AS receival_time, re.event_status AS event_status, "
@@ -103,7 +103,7 @@ public class RequestEventRepository extends CriteriaAwareRepository<RequestEvent
             + "sgr.id AS generation_request_id, sgr.identifier AS generation_request_identifier, "
             + "sgr.config AS generation_request_config, sgr.type AS generation_request_type, sgr.status AS generation_request_status "
             + "FROM request re LEFT JOIN sbom_generation_request sgr ON re.id = sgr.request_id "
-            + "LEFT JOIN sbom s ON sgr.id = s.generationrequest_id";
+            + "LEFT JOIN sbom s ON sgr.id = s.generationrequest_id ";
 
     public RequestEventRepository() {
         super(RequestEvent.class);
