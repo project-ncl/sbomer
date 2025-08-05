@@ -90,13 +90,12 @@ export const GenerationRequestTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(({ id }) => {
-                const generation = value?.find(g => g.id === id);
+              {value && value.map((generation) => {
                 return (
-                  <TableRow key={id}>
+                  <TableRow key={generation.id}>
                     <TableCell>
-                      <Link to={`/generations/${id}`}>
-                        <pre>{id}</pre>
+                      <Link to={`/generations/${generation.id}`}>
+                        <pre>{generation.id}</pre>
                       </Link>
                     </TableCell>
                     <TableCell>

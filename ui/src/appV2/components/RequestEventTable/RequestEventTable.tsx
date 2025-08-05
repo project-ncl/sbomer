@@ -126,13 +126,12 @@ export const RequestEventTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(({ id }) => {
-                const requestEvent = value?.find(e => e.id === id);
+              {value && value.map((requestEvent) => {
                 return (
-                  <TableRow key={id}>
+                  <TableRow key={requestEvent.id}>
                     <TableCell>
-                      <Link to={`/events/${id}`}>
-                        <pre>{id}</pre>
+                      <Link to={`/events/${requestEvent.id}`}>
+                        <pre>{requestEvent.id}</pre>
                       </Link>
                     </TableCell>
                     <TableCell>

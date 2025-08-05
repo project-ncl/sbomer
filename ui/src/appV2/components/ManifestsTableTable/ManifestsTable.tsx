@@ -85,13 +85,12 @@ export const ManifestsTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(({ id }) => {
-                const manifest = value?.find(m => m.id === id);
+              {value && value.map((manifest) => {
                 return (
-                  <TableRow key={id}>
+                  <TableRow key={manifest.id}>
                     <TableCell>
-                      <Link to={`/manifests/${id}`}>
-                        <pre>{id}</pre>
+                      <Link to={`/manifests/${manifest.id}`}>
+                        <pre>{manifest.id}</pre>
                       </Link>
                     </TableCell>
                     <TableCell>
