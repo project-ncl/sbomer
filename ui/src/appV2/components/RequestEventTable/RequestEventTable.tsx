@@ -14,6 +14,7 @@ import {
   Tooltip,
   SkeletonText,
   Stack,
+  DataTableSkeleton,
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -29,6 +30,14 @@ const columnNames = {
   finished: 'Finished',
   status: 'Status',
 };
+
+const headers = [
+  { key: 'id', header: columnNames.id },
+  { key: 'status', header: columnNames.status },
+  { key: 'created', header: columnNames.created },
+  { key: 'updated', header: columnNames.updated },
+  { key: 'finished', header: columnNames.finished },
+];
 
 export const RequestEventTable = () => {
   const { query, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
@@ -58,7 +67,7 @@ export const RequestEventTable = () => {
       itemRangeText={(min: number, max: number, total: number) => `${min}–${max} of ${total} items`}
       page={pageIndex}
       pageNumberText="Page Number"
-      pageSize={pageSize} // todo update from url 
+      pageSize={pageSize} // todo update from url
       pageSizes={[
         { text: '10', value: 10 },
         { text: '20', value: 20 },
@@ -178,7 +187,17 @@ export const RequestEventTable = () => {
   );
 
   const noResults = <NoResultsSection />;
-  const loadingSkeleton = <SkeletonText />;
+  const loadingSkeleton = (
+    <TableContainer title="Latest events">
+      <DataTableSkeleton
+        columnCount={Object.keys(headers).length}
+        showHeader={false}
+        showToolbar={false}
+        rowCount={10}
+      />
+      {enablePagination && pagination}
+    </TableContainer>
+  );
 
   const tableArea =
     error ? <ErrorSection error={error} /> :
