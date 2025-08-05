@@ -2,18 +2,14 @@ import { AboutSection } from '@appV2/components/Sections/AboutSection/AboutSecti
 import * as React from 'react';
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
-import { 
-  Column, 
-  Grid, 
-  InlineNotification, 
-  Tile, 
+import {
+  Column,
+  Grid,
+  InlineNotification,
   Content,
   Heading,
   Stack,
-  Theme,
-  Tag
 } from '@carbon/react';
-import { Development, Rocket } from '@carbon/icons-react';
 
 const Dashboard: React.FunctionComponent = () => {
   useDocumentTitle("SBOMER | Dashboard");
@@ -37,7 +33,7 @@ const Dashboard: React.FunctionComponent = () => {
                 <InlineNotification
                   kind="info"
                   title="In Development"
-                  subtitle="This is a preview of the next generation SBOMer platform. Features are actively being developed and may change."
+                  subtitle="Features are actively being developed and may change."
                   hideCloseButton
                 />
               </Column>
@@ -49,7 +45,7 @@ const Dashboard: React.FunctionComponent = () => {
               </Column>
             </Grid>
 
-            
+
           </Stack>
         </Content>
       </AppLayout>
