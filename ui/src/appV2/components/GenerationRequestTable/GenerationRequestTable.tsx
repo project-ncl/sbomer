@@ -7,17 +7,23 @@ import { useSearchParam } from 'react-use';
 import { useGenerationRequests } from '@appV2/components/GenerationRequestTable/useGenerationRequests';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
-import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination } from '@carbon/react';
+import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination, DataTableSkeleton } from '@carbon/react';
 
 const columnNames = {
   id: 'ID',
-  type: 'Type',
-  identifier: 'Identifier',
   status: 'Status',
   creationTime: 'Created',
   updatedTime: 'Updated',
   finishedTime: 'Finished',
 };
+
+const headers = [
+        { key: 'id', header: columnNames.id},
+        { key: 'status', header: columnNames.status},
+        { key: 'creationTime', header: columnNames.creationTime},
+        { key: 'updatedTime', header: columnNames.updatedTime},
+        { key: 'finishedTime', header: columnNames.finishedTime},
+      ];
 
 export const GenerationRequestTable = () => {
   const navigate = useNavigate();
@@ -72,13 +78,7 @@ export const GenerationRequestTable = () => {
   const table = (
     <DataTable
       rows={value || []}
-      headers={[
-        { key: 'id', header: columnNames.id },
-        { key: 'status', header: columnNames.status },
-        { key: 'creationTime', header: columnNames.creationTime },
-        { key: 'updatedTime', header: columnNames.updatedTime },
-        { key: 'finishedTime', header: columnNames.finishedTime },
-      ]}
+      headers={headers}
       render={({ rows, headers }) => (
         <TableContainer title="Latest manifest generations">
           <Table aria-label="Generation request table">
@@ -151,7 +151,17 @@ export const GenerationRequestTable = () => {
   );
 
   const noResults = <NoResultsSection />
-  const loadingSkeleton = <SkeletonText />;
+  const loadingSkeleton = (
+    <TableContainer title="Latest manifest generations">
+      <DataTableSkeleton
+        columnCount={Object.keys(columnNames).length}
+        showHeader={false}
+        showToolbar={false}
+        rowCount={10}
+      />
+      {paginationEnabled && pagination}
+    </TableContainer>
+  );
 
   const tableArea =
     error ? <ErrorSection error={error} /> :
