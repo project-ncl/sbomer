@@ -17,7 +17,6 @@
 ///
 
 import { useManifestsFilters } from '@appV2/components/ManifestsTableTable/useManifestsFilters';
-import { ManifestsQueryType } from '@appV2/types';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { DefaultSbomerApiV2 } from 'src/appV2/api/DefaultSbomerApiV2';
@@ -26,28 +25,24 @@ export function useManifests() {
   const sbomerApi = DefaultSbomerApiV2.getInstance();
   const [total, setTotal] = useState(0);
 
-  const { queryType, queryValue, pageIndex, pageSize } = useManifestsFilters();
+  const { pageIndex, pageSize } = useManifestsFilters();
 
   const getManifests = useCallback(
     async ({
       pageSize,
       pageIndex,
-      queryType: queryType,
-      queryValue,
     }: {
       pageSize: number;
       pageIndex: number;
-      queryType: ManifestsQueryType;
-      queryValue: string;
     }) => {
       try {
         const pageIndexOffsetted = pageIndex - 1;
-        return await sbomerApi.getManifests({ pageSize, pageIndex: pageIndexOffsetted }, queryType, queryValue);
+        return await sbomerApi.getManifests({ pageSize, pageIndex: pageIndexOffsetted });
       } catch (e) {
         return Promise.reject(e);
       }
     },
-    [pageIndex, pageSize, queryType, queryValue],
+    [pageIndex, pageSize],
   );
 
   const { loading, value, error, retry } = useAsyncRetry(
@@ -55,13 +50,11 @@ export function useManifests() {
       getManifests({
         pageSize: +pageSize,
         pageIndex: +pageIndex,
-        queryType: queryType,
-        queryValue: queryValue,
       }).then((data) => {
         setTotal(data.total);
         return data.data;
       }),
-    [pageIndex, pageSize, queryType, queryValue],
+    [pageIndex, pageSize],
   );
 
   return [
