@@ -69,7 +69,7 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
               <StructuredListRow>
                 <StructuredListCell>Created</StructuredListCell>
                 <StructuredListCell>
-                  {request.created ? request.created.toLocaleString() : 'N/A'}
+                  {request.created ? request.created.toISOString() : 'N/A'}
                 </StructuredListCell>
               </StructuredListRow>
             </StructuredListBody>

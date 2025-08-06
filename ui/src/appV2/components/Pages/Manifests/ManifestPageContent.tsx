@@ -90,7 +90,7 @@ const ManifestPageContent: React.FunctionComponent = () => {
               <StructuredListRow>
                 <StructuredListCell>Created</StructuredListCell>
                 <StructuredListCell>
-                  {manifest.created ? manifest.created.toLocaleString() : 'N/A'}
+                  {manifest.created ? manifest.created.toISOString() : 'N/A'}
                 </StructuredListCell>
               </StructuredListRow>
             </StructuredListBody>
