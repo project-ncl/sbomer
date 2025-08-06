@@ -100,7 +100,7 @@ export const GenerationRequestTable = () => {
                     </TableCell>
                     <TableCell>
                       <Tooltip
-                        isContentLeftAligned={true}
+                        align='left'
                         content={
                           <div>
                             <div>

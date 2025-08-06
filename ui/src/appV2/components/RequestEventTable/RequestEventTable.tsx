@@ -137,7 +137,7 @@ export const RequestEventTable = () => {
                     </TableCell>
                     <TableCell>
                       <Tooltip
-                        isContentLeftAligned={true}
+                        align="left"
                         content={
                           <div>
                             <div>
