@@ -92,6 +92,7 @@ export const RequestEventTable = () => {
   const querySearchBar = (
     <div style={{ marginBottom: 'var(--cds-spacing-05)' }}>
       <Search
+        labelText="Search request events"
         placeholder="Enter query"
         value={querySearchbarValue}
         onChange={querySearchBarValueOnChange}
@@ -101,7 +102,7 @@ export const RequestEventTable = () => {
             setFilters(querySearchbarValue || '', pageIndex, pageSize);
           }
         }}
-        size="lg" labelText={undefined} />
+        size="lg" />
     </div>
   );
 
