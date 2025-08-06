@@ -28,6 +28,7 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverride;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverrideBuilder;
 
@@ -85,6 +86,38 @@ public class TektonUtilities {
 
         return labels;
 
+    }
+
+    public static TaskRunStepOverride multiplyMemoryOverrides(
+            TaskRunStepOverride originalStepOverride,
+            double multiplier) {
+        ResourceRequirements resources = originalStepOverride.getResources();
+        Quantity cpuRequestsQuantity = resources.getRequests().get(AbstractTektonController.CPU_OVERRIDE);
+        Quantity memoryRequestsQuantity = resources.getRequests().get(AbstractTektonController.MEMORY_OVERRIDE);
+        Quantity cpuLimitsQuantity = resources.getLimits().get(AbstractTektonController.CPU_OVERRIDE);
+        Quantity memoryLimitsQuantity = resources.getLimits().get(AbstractTektonController.MEMORY_OVERRIDE);
+
+        return new TaskRunStepOverrideBuilder().withName(AbstractTektonController.GENERATE_OVERRIDE)
+                .withNewResources()
+                .withRequests(
+                        Map.of(
+                                AbstractTektonController.CPU_OVERRIDE,
+                                new Quantity(cpuRequestsQuantity.getAmount(), cpuRequestsQuantity.getFormat()),
+                                AbstractTektonController.MEMORY_OVERRIDE,
+                                multiplyMemory(memoryRequestsQuantity, multiplier)))
+                .withLimits(
+                        Map.of(
+                                AbstractTektonController.CPU_OVERRIDE,
+                                new Quantity(cpuLimitsQuantity.getAmount(), cpuLimitsQuantity.getFormat()),
+                                AbstractTektonController.MEMORY_OVERRIDE,
+                                multiplyMemory(memoryLimitsQuantity, multiplier)))
+                .endResources()
+                .build();
+    }
+
+    private static Quantity multiplyMemory(Quantity originalQuantity, double multiplier) {
+        int value = Integer.parseInt(originalQuantity.getAmount());
+        return new Quantity((int) Math.ceil(value * multiplier) + originalQuantity.getFormat());
     }
 
 }

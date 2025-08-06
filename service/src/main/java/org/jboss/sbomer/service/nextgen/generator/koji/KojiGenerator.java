@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +30,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.FileUtils;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
+import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.service.feature.sbom.config.GenerationRequestControllerConfig;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
 import org.jboss.sbomer.service.leader.LeaderManager;
@@ -45,13 +45,11 @@ import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.Duration;
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.Param;
@@ -72,7 +70,6 @@ public class KojiGenerator extends AbstractTektonController {
     public static final String PARAM_BREW_BUILD_ID = "build-id";
 
     public static final String TASK_SUFFIX = "-generator-brew-rpm";
-    public static final String SA_SUFFIX = "-sa";
 
     public static final String GENERATOR_NAME = "koji";
     public static final String GENERATOR_VERSION = "0.1.0";
@@ -161,13 +158,42 @@ public class KojiGenerator extends AbstractTektonController {
         }
 
         if (!success) {
-            String detailedFailureMessage = getDetailedFailureMessage(erroredTaskRun);
-            updateStatus(
-                    generation.id(),
-                    GenerationStatus.FAILED,
-                    GenerationResult.ERR_GENERAL,
-                    "Generation failed, the TaskRun returned failure: {}",
-                    detailedFailureMessage);
+            Map<String, String> erroredAnnotations = erroredTaskRun.getMetadata().getAnnotations();
+            GenerationResult result = isOomKilled(erroredTaskRun) ? GenerationResult.ERR_OOM
+                    : GenerationResult.ERR_GENERAL;
+            int retryCount = Integer.parseInt(erroredAnnotations.getOrDefault(ANNOTATION_RETRY_COUNT, "0"));
+            GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
+            KojiBrewRpmOptions options = retrieveOptions(request);
+            int maxCount = options.retries().maxCount();
+
+            if (result == GenerationResult.ERR_GENERAL || ++retryCount > maxCount) {
+                String detailedFailureMessage = getDetailedFailureMessage(erroredTaskRun);
+                updateStatus(
+                        generation.id(),
+                        GenerationStatus.FAILED,
+                        result,
+                        "Generation failed, the TaskRun returned failure: {}",
+                        detailedFailureMessage);
+            } else {
+                log.info("Retrying Tekton Task Run for generation '{}', count '{}'", generation.id(), retryCount);
+                double memoryMultiplier = options.retries().memoryMultiplier();
+                TaskRun taskRun = createRetry(erroredTaskRun, retryCount, memoryMultiplier);
+
+                try {
+                    // Prevent last task run continuously being rescheduled
+                    kubernetesClient.resources(TaskRun.class).resource(erroredTaskRun).delete();
+                    kubernetesClient.resources(TaskRun.class).resource(taskRun).create();
+                } catch (KubernetesClientException e) {
+                    log.warn("Unable to schedule Tekton TaskRun retry", e);
+
+                    updateStatus(
+                            generation.id(),
+                            GenerationStatus.FAILED,
+                            GenerationResult.ERR_SYSTEM,
+                            "Unable to schedule Tekton TaskRun retry: {}",
+                            e.getMessage());
+                }
+            }
 
             return;
         }
@@ -322,21 +348,22 @@ public class KojiGenerator extends AbstractTektonController {
                                 .build())
                 .endSpec()
                 .build();
-        Deployment deployment = kubernetesClient.apps().deployments().withName(release + "-service").get();
 
-        if (deployment != null) {
-            log.debug("Setting SBOMer deployment as the owner for the newly created TaskRun");
+        configureOwner(taskRun);
 
-            taskRun.getMetadata()
-                    .setOwnerReferences(
-                            Collections.singletonList(
-                                    new OwnerReferenceBuilder().withKind(HasMetadata.getKind(Deployment.class))
-                                            .withApiVersion(HasMetadata.getApiVersion(Deployment.class))
-                                            .withName(release + "-service")
-                                            .withUid(deployment.getMetadata().getUid())
-                                            .build()));
-        }
         return taskRun;
+    }
+
+    private KojiBrewRpmOptions retrieveOptions(GenerationRequest request) {
+        JsonNode jsonNode = request.generator().config().options();
+        try {
+            return ObjectMapperProvider.json().treeToValue(jsonNode, KojiBrewRpmOptions.class);
+        } catch (JsonProcessingException e) {
+            throw new ApplicationException(
+                    "Unexpected options provided, expected Syft generator options, but got: {}",
+                    jsonNode,
+                    e);
+        }
     }
 
 }

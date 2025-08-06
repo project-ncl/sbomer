@@ -41,8 +41,8 @@ import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.GenerationStatusUpdatePayload;
 import org.jboss.sbomer.service.nextgen.core.rest.SBOMerClient;
 import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
+import org.jboss.sbomer.service.nextgen.generator.GeneratorRetries;
 import org.jboss.sbomer.service.nextgen.generator.syft.SyftContainerImageOptions;
-import org.jboss.sbomer.service.nextgen.generator.syft.SyftContainerImageRetries;
 import org.jboss.sbomer.service.nextgen.generator.syft.SyftGenerator;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -305,7 +305,7 @@ public class SyftGeneratorTest {
                                                                         false,
                                                                         null,
                                                                         "6h",
-                                                                        new SyftContainerImageRetries(3, 1.3d))))),
+                                                                        new GeneratorRetries(3, 1.3d))))),
                                 new Target("CONTAINER_IMAGE", IDENTIFIER))),
                 null,
                 GenerationStatus.GENERATING,
