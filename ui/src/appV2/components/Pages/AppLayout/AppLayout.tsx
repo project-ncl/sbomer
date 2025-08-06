@@ -1,25 +1,26 @@
+import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
+import {
+  Application,
+  ChevronRight,
+  Dashboard,
+  DocumentMultiple_02,
+  EventChange
+} from '@carbon/icons-react';
 import {
   Button,
   Content,
   Header,
   HeaderContainer,
+  HeaderGlobalBar,
   HeaderMenuButton,
   HeaderName,
   SideNav,
   SideNavHeader,
   SideNavItems,
-  SideNavLink,
-} from '@carbon/react';import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
+  SideNavLink
+} from '@carbon/react';
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import {
-  Dashboard,
-  Application,
-  DocumentMultiple_02,
-  Events,
-  ChevronRight,
-  EventChange
-} from '@carbon/icons-react';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -78,56 +79,56 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   return (
     <>
-    <HeaderContainer
-      render={({ onClickSideNavExpand }) => (
-        <>
-          <Header aria-label="SBOMER NEXT GEN">
-            <HeaderMenuButton
-              aria-label={sideNavExpanded ? 'Close menu' : 'Open menu'}
-              onClick={() => {
-                setSideNavExpanded(!sideNavExpanded);
-                onClickSideNavExpand();
-              }}
-              isActive={sideNavExpanded}
-              isCollapsible={true}
-            />
-            <HeaderName prefix="">
-              <h3>SBOMER NEXT GEN</h3>
-            </HeaderName>
+      <HeaderContainer
+        render={({ onClickSideNavExpand }) => (
+          <>
+            <Header aria-label="SBOMER">
+              <HeaderMenuButton
+                aria-label={sideNavExpanded ? 'Close menu' : 'Open menu'}
+                onClick={() => {
+                  setSideNavExpanded(!sideNavExpanded);
+                  onClickSideNavExpand();
+                }}
+                isActive={sideNavExpanded}
+                isCollapsible={true}
+              />
+              <HeaderName prefix=''>
+                  SBOMer
+              </HeaderName>
 
-            <div style={{ marginLeft: 'auto' }}>
-              <Button
-                kind="primary"
-                size="sm"
-                onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
-              >
-                Go to Classic
-              </Button>
-            </div>
-          </Header>
-          <SideNav
-            aria-label="Side navigation"
-            expanded={sideNavExpanded}
-            isFixedNav
-            isPersistent
-            isRail
-            isChildOfHeader
-          >
-            {Navigation}
-          </SideNav>
+              <HeaderGlobalBar>
+               <Button
+                 size='lg'
+                 onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
+               >
+                 Go to Classic
+               </Button>
+              </HeaderGlobalBar>
 
-        </>
-      )}
-    />
-    <Content id="main-content" style={{
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 'calc(100vh - 48px)',
-            flex: 1
-          }}>
-            {children}
-          </Content>
+            </Header>
+            <SideNav
+              aria-label="Side navigation"
+              expanded={sideNavExpanded}
+              isFixedNav
+              isPersistent
+              isRail
+              isChildOfHeader
+            >
+              {Navigation}
+            </SideNav>
+
           </>
+        )}
+      />
+      <Content id="main-content" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 'calc(100vh - 48px)',
+        flex: 1
+      }}>
+        {children}
+      </Content>
+    </>
 
   );
 };
