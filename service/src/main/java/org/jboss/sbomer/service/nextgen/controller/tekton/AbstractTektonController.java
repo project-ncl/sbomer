@@ -241,7 +241,7 @@ public abstract class AbstractTektonController extends AbstractGenerator
      * @param relatedTaskRuns
      * @see GenerationStatus
      */
-    protected abstract void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns);
+    abstract protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns);
 
     protected void reconcileNew(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.NEW, generation.id());

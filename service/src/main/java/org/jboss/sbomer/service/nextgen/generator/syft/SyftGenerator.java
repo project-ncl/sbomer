@@ -316,27 +316,6 @@ public class SyftGenerator extends AbstractTektonController {
                 "Generation finished successfully");
     }
 
-    private TaskRunStepOverride resourceOverrides(GenerationRequest request) {
-
-        return new TaskRunStepOverrideBuilder().withName(GENERATE_OVERRIDE)
-                .withNewResources()
-                .withRequests(
-                        Map.of(
-                                CPU_OVERRIDE,
-                                new Quantity(request.generator().config().resources().requests().cpu()),
-                                MEMORY_OVERRIDE,
-                                new Quantity(request.generator().config().resources().requests().memory())))
-                .withLimits(
-                        Map.of(
-                                CPU_OVERRIDE,
-                                new Quantity(request.generator().config().resources().limits().cpu()),
-                                MEMORY_OVERRIDE,
-                                new Quantity(request.generator().config().resources().limits().memory())))
-                .endResources()
-                .build();
-
-    }
-
     private TaskRunStepOverride multiplyMemoryOverrides(TaskRunStepOverride originalStepOverride, double multiplier) {
         ResourceRequirements resources = originalStepOverride.getResources();
         Quantity cpuRequestsQuantity = resources.getRequests().get(CPU_OVERRIDE);
