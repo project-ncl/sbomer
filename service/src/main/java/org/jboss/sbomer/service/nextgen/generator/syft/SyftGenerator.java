@@ -53,13 +53,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.fabric8.kubernetes.api.model.Duration;
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
-import io.fabric8.kubernetes.api.model.Quantity;
-import io.fabric8.kubernetes.api.model.ResourceRequirements;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.Param;
@@ -68,9 +62,6 @@ import io.fabric8.tekton.v1beta1.ParamValue;
 import io.fabric8.tekton.v1beta1.TaskRefBuilder;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunBuilder;
-import io.fabric8.tekton.v1beta1.TaskRunSpec;
-import io.fabric8.tekton.v1beta1.TaskRunStepOverride;
-import io.fabric8.tekton.v1beta1.TaskRunStepOverrideBuilder;
 import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -87,14 +78,7 @@ public class SyftGenerator extends AbstractTektonController {
     public static final String PARAM_PATHS = "paths";
     public static final String PARAM_RPMS = "rpms";
     public static final String PARAM_PROCESSORS = "processors";
-    public static final String SA_SUFFIX = "-sa";
     public static final String TASK_SUFFIX = "-generator-syft";
-    public static final String ANNOTATION_RETRY_COUNT = "sbomer.jboss.org/retry-count";
-    public static final String GENERATE_OVERRIDE = "generate";
-    public static final String CPU_OVERRIDE = "cpu";
-    public static final String MEMORY_OVERRIDE = "memory";
-    public static final String SERVICE_SUFFIX = "-service";
-    public static final String RETRY_SUFFIX = "-retry-";
     public static final String GENERATOR_NAME = "syft";
     public static final String GENERATOR_VERSION = "1.27.1";
 
@@ -314,83 +298,6 @@ public class SyftGenerator extends AbstractTektonController {
                 GenerationStatus.FINISHED,
                 GenerationResult.SUCCESS,
                 "Generation finished successfully");
-    }
-
-    private TaskRunStepOverride multiplyMemoryOverrides(TaskRunStepOverride originalStepOverride, double multiplier) {
-        ResourceRequirements resources = originalStepOverride.getResources();
-        Quantity cpuRequestsQuantity = resources.getRequests().get(CPU_OVERRIDE);
-        Quantity memoryRequestsQuantity = resources.getRequests().get(MEMORY_OVERRIDE);
-        Quantity cpuLimitsQuantity = resources.getLimits().get(CPU_OVERRIDE);
-        Quantity memoryLimitsQuantity = resources.getLimits().get(MEMORY_OVERRIDE);
-
-        return new TaskRunStepOverrideBuilder().withName(GENERATE_OVERRIDE)
-                .withNewResources()
-                .withRequests(
-                        Map.of(
-                                CPU_OVERRIDE,
-                                new Quantity(cpuRequestsQuantity.getAmount(), cpuRequestsQuantity.getFormat()),
-                                MEMORY_OVERRIDE,
-                                multiplyMemory(memoryRequestsQuantity, multiplier)))
-                .withLimits(
-                        Map.of(
-                                CPU_OVERRIDE,
-                                new Quantity(cpuLimitsQuantity.getAmount(), cpuLimitsQuantity.getFormat()),
-                                MEMORY_OVERRIDE,
-                                multiplyMemory(memoryLimitsQuantity, multiplier)))
-                .endResources()
-                .build();
-    }
-
-    private Quantity multiplyMemory(Quantity originalQuantity, double multiplier) {
-        int value = Integer.parseInt(originalQuantity.getAmount());
-        return new Quantity((int) Math.ceil(value * multiplier) + originalQuantity.getFormat());
-    }
-
-    private void configureOwner(TaskRun taskRun) {
-        Deployment deployment = kubernetesClient.apps().deployments().withName(release + SERVICE_SUFFIX).get();
-
-        if (deployment != null) {
-            log.debug("Setting SBOMer deployment as the owner for the newly created TaskRun");
-
-            taskRun.getMetadata()
-                    .setOwnerReferences(
-                            Collections.singletonList(
-                                    new OwnerReferenceBuilder().withKind(HasMetadata.getKind(Deployment.class))
-                                            .withApiVersion(HasMetadata.getApiVersion(Deployment.class))
-                                            .withName(release + SERVICE_SUFFIX)
-                                            .withUid(deployment.getMetadata().getUid())
-                                            .build()));
-        }
-    }
-
-    private TaskRun createRetry(TaskRun originalTaskRun, int retryCount, double memoryMultiplier) {
-        ObjectMeta originalMetadata = originalTaskRun.getMetadata();
-        TaskRunSpec originalSpec = originalTaskRun.getSpec();
-        TaskRunStepOverride originalStepOverride = originalTaskRun.getSpec().getStepOverrides().get(0);
-        String originalName = originalMetadata.getName();
-
-        TaskRunStepOverride stepOverride = multiplyMemoryOverrides(originalStepOverride, memoryMultiplier);
-
-        String name = originalName.replaceFirst(RETRY_SUFFIX + "\\d+$", "") + RETRY_SUFFIX + retryCount;
-
-        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
-                .withLabels(originalMetadata.getLabels())
-                .withName(name)
-                .addToAnnotations(ANNOTATION_RETRY_COUNT, String.valueOf(retryCount))
-                .endMetadata()
-                .withNewSpec()
-                .withServiceAccountName(originalSpec.getServiceAccountName())
-                .withTimeout(originalSpec.getTimeout())
-                .withParams(originalSpec.getParams())
-                .withTaskRef(originalSpec.getTaskRef())
-                .withStepOverrides(stepOverride)
-                .withWorkspaces(originalSpec.getWorkspaces())
-                .endSpec()
-                .build();
-
-        configureOwner(taskRun);
-
-        return taskRun;
     }
 
     @Override
