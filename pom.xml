@@ -74,7 +74,7 @@
     <version.tekton-client>1.3.0</version.tekton-client>
     <version.rsql-parser>2.1.0</version.rsql-parser>
     <version.rsql-jpa>v2023.35.5</version.rsql-jpa>
-    <version.commons-cli>1.9.0</version.commons-cli>
+    <version.commons-cli>1.10.0</version.commons-cli>
     <version.quarkus-test-artemis>3.1.2</version.quarkus-test-artemis>
     <version.build-finder>2.6.5</version.build-finder>
     <version.mapstruct>1.6.3</version.mapstruct>
