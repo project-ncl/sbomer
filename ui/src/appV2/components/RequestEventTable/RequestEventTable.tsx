@@ -47,7 +47,7 @@ export const RequestEventTable = () => {
   // enable when pagination is implemented
   const enablePagination = true;
 
-  const [querySearchbarValue, setQuerySearchbarValue] = React.useState<string>('');
+  const [querySearchbarValue, setQuerySearchbarValue] = React.useState<string>(query || '');
 
   const [{ value, loading, total, error }] = useRequestEvents();
 
