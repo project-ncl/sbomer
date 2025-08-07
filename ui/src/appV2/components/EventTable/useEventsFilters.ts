@@ -19,7 +19,7 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-export function useRequestEventsFilters() {
+export function useEventsFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const query = searchParams.get('query') || '';

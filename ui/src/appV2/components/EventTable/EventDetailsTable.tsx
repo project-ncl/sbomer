@@ -1,4 +1,4 @@
-import { useRequestEventManifest } from '@appV2/components/RequestEventTable/useRequestEventManifest';
+import { useRequestEventManifest } from '@appV2/components/EventTable/useEventManifest';
 import {
   Grid,
   Column,
@@ -18,7 +18,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 
-export const RequestEventDetailsTable = () => {
+export const EventDetailsTable = () => {
   const { id } = useParams<{ id: string }>();
   const [{ request, loading, error }] = useRequestEventManifest(id!);
 

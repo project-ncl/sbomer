@@ -16,7 +16,7 @@
 /// limitations under the License.
 ///
 
-import { useRequestEventsFilters } from '@appV2/components/RequestEventTable/useRequestEventsFilters';
+import { useEventsFilters } from '@appV2/components/EventTable/useEventsFilters';
 import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
@@ -26,7 +26,7 @@ export function useRequestEvents() {
   const sbomerApi = DefaultSbomerApiV2.getInstance();
   const [total, setTotal] = useState(0);
 
-  const {query, pageIndex, pageSize } = useRequestEventsFilters();
+  const {query, pageIndex, pageSize } = useEventsFilters();
 
   const getRequestEvents = useCallback(
     async ({

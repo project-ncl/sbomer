@@ -1,5 +1,5 @@
-import { useRequestEvents } from '@appV2/components/RequestEventTable/useRequestEvents';
-import { useRequestEventsFilters } from '@appV2/components/RequestEventTable/useRequestEventsFilters';
+import { useRequestEvents } from '@appV2/components/EventTable/useEvents';
+import { useEventsFilters } from '@appV2/components/EventTable/useEventsFilters';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import {
@@ -37,8 +37,8 @@ const headers = [
   { key: 'finished', header: columnNames.finished },
 ];
 
-export const RequestEventTable = () => {
-  const { query, pageIndex, pageSize, setFilters } = useRequestEventsFilters();
+export const EventTable = () => {
+  const { query, pageIndex, pageSize, setFilters } = useEventsFilters();
 
   // todo enable when searching is implemented
   const enableSearching = true;
@@ -90,7 +90,7 @@ export const RequestEventTable = () => {
   const querySearchBar = (
     <div style={{ marginBottom: 'var(--cds-spacing-05)' }}>
       <Search
-        labelText="Search request events"
+        labelText="Search events"
         placeholder="Enter query"
         value={querySearchbarValue}
         onChange={querySearchBarValueOnChange}

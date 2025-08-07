@@ -26,7 +26,7 @@ export function useRequestEventManifest(id: string) {
   const getRequestEvent = useCallback(
     async (id: string) => {
       try {
-        return await sbomerApi.getRequestEvent(id);
+        return await sbomerApi.getEvent(id);
       } catch (e) {
         return Promise.reject(e);
       }
