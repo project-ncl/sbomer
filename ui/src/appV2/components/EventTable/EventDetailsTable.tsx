@@ -12,11 +12,13 @@ import {
   Content,
   Heading,
   Stack,
+  Tag,
 } from '@carbon/react';
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import { eventStatusToColor } from '@appV2/utils/Utils';
 
 export const EventDetailsTable = () => {
   const { id } = useParams<{ id: string }>();
@@ -62,9 +64,29 @@ export const EventDetailsTable = () => {
                   </StructuredListCell>
                 </StructuredListRow>
                 <StructuredListRow>
-                  <StructuredListCell>Event Received At</StructuredListCell>
+                  <StructuredListCell>Created</StructuredListCell>
                   <StructuredListCell>
                     {request.created ? request.created.toISOString() : 'N/A'}
+                  </StructuredListCell>
+                </StructuredListRow>
+                <StructuredListRow>
+                  <StructuredListCell>Updated</StructuredListCell>
+                  <StructuredListCell>
+                    {request.updated ? request.updated.toISOString() : 'N/A'}
+                  </StructuredListCell>
+                </StructuredListRow>
+                <StructuredListRow>
+                  <StructuredListCell>Finished</StructuredListCell>
+                  <StructuredListCell>
+                    {request.finished ? request.finished.toISOString() : 'N/A'}
+                  </StructuredListCell>
+                </StructuredListRow>
+                <StructuredListRow>
+                  <StructuredListCell>Status</StructuredListCell>
+                  <StructuredListCell>
+                    <Tag size='md' type={eventStatusToColor(request.status)}>
+                      {request.status}
+                    </Tag>
                   </StructuredListCell>
                 </StructuredListRow>
               </StructuredListBody>
