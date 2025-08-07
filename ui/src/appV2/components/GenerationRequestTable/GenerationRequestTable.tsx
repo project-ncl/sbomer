@@ -20,12 +20,12 @@ const columnNames = {
 };
 
 const headers = [
-        { key: 'id', header: columnNames.id},
-        { key: 'status', header: columnNames.status},
-        { key: 'creationTime', header: columnNames.creationTime},
-        { key: 'updatedTime', header: columnNames.updatedTime},
-        { key: 'finishedTime', header: columnNames.finishedTime},
-      ];
+  { key: 'id', header: columnNames.id },
+  { key: 'status', header: columnNames.status },
+  { key: 'creationTime', header: columnNames.creationTime },
+  { key: 'updatedTime', header: columnNames.updatedTime },
+  { key: 'finishedTime', header: columnNames.finishedTime },
+];
 
 export const GenerationRequestTable = () => {
   const navigate = useNavigate();
@@ -101,21 +101,9 @@ export const GenerationRequestTable = () => {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Tooltip
-                        align='left'
-                        content={
-                          <div>
-                            <div>
-                              <strong>{generation?.result}</strong>
-                            </div>
-                            <div>{generation?.reason}</div>
-                          </div>
-                        }
-                      >
-                        <Tag>
-                          {generation?.status || 'unknown'}
-                        </Tag>
-                      </Tooltip>
+                      <Tag size='md'>
+                        {generation?.status || 'unknown'}
+                      </Tag>
                     </TableCell>
                     <TableCell>
                       <RelativeTimestamp date={generation.created} />
