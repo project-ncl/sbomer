@@ -19,6 +19,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { eventStatusToColor } from '@appV2/utils/Utils';
+import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
 export const EventDetailsTable = () => {
   const { id } = useParams<{ id: string }>();
@@ -66,19 +67,34 @@ export const EventDetailsTable = () => {
                 <StructuredListRow>
                   <StructuredListCell>Created</StructuredListCell>
                   <StructuredListCell>
-                    {request.created ? request.created.toISOString() : 'N/A'}
+                    {request.created ? (
+                      <Stack gap={2}>
+                        <RelativeTimestamp date={request.created} />
+                        <p>{request.created.toISOString()}</p>
+                      </Stack>
+                    ) : 'N/A'}
                   </StructuredListCell>
                 </StructuredListRow>
                 <StructuredListRow>
                   <StructuredListCell>Updated</StructuredListCell>
                   <StructuredListCell>
-                    {request.updated ? request.updated.toISOString() : 'N/A'}
+                    {request.updated ? (
+                      <Stack gap={2}>
+                        <RelativeTimestamp date={request.updated} />
+                        <p>{request.updated.toISOString()}</p>
+                      </Stack>
+                    ) : 'N/A'}
                   </StructuredListCell>
                 </StructuredListRow>
                 <StructuredListRow>
                   <StructuredListCell>Finished</StructuredListCell>
                   <StructuredListCell>
-                    {request.finished ? request.finished.toISOString() : 'N/A'}
+                    {request.finished ? (
+                      <Stack gap={2}>
+                        <RelativeTimestamp date={request.finished} />
+                        <p>{request.finished.toISOString()}</p>
+                      </Stack>
+                    ) : 'N/A'}
                   </StructuredListCell>
                 </StructuredListRow>
                 <StructuredListRow>
