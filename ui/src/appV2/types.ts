@@ -124,23 +124,6 @@ export type GenerateParams = {
   config: string;
 };
 
-export enum ManifestsQueryType {
-  NoFilter = 'No filter',
-  Purl = 'Purl',
-}
-
-export enum RequestsQueryType {
-  NoFilter = 'No filter',
-  PNCBuild = 'PNC Build',
-  ContainerImage = 'Container Image',
-  ErrataAdvisory = 'Errata Advisory',
-  RequestEvent = 'Request Event',
-  PNCAnalysis = 'PNC Analysis',
-  PNCOperation = 'PNC Operation',
-  ErrataReleaseID = 'Errata Release Id',
-  ErrataReleaseFullname = 'Errata Release Fullname',
-}
-
 export type SbomerApi = {
   getBaseUrl(): string;
   stats(): Promise<SbomerStats>;
