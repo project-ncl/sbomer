@@ -47,7 +47,7 @@ const GenerationRequestResults = new Map<
   ['SUCCESS', { description: 'Success', color: 'green' }],
 ]);
 
-const RequestEventStatuses = new Map<
+const EventStatuses = new Map<
   string,
   { description?: string; color: React.ComponentProps<typeof Label>['color'] }
 >([
@@ -115,8 +115,8 @@ export function statusToDescription(request: SbomerGeneration): string {
   return resolved?.description ?? request.status;
 }
 
-export function requestEventStatusToDescription(eventStatus: string): string {
-  var resolved = RequestEventStatuses.get(eventStatus);
+export function eventStatusToDescription(eventStatus: string): string {
+  var resolved = EventStatuses.get(eventStatus);
 
   return resolved?.description ?? eventStatus;
 }
@@ -139,7 +139,7 @@ export function statusToColor(request: SbomerGeneration): React.ComponentProps<t
   return 'grey';
 }
 
-export function requestEventStatusToColor(status: string): React.ComponentProps<typeof Label>['color'] {
+export function eventStatusToColor(status: string): React.ComponentProps<typeof Label>['color'] {
   if (status == 'FAILED') {
     return 'red';
   } else if (status == 'IN_PROGRESS') {

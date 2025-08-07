@@ -217,7 +217,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       const body = await response.text();
 
       throw new Error(
-        'Failed fetching request events from SBOMer, got: ' + response.status + " response: '" + body + "'",
+        'Failed fetching events from SBOMer, got: ' + response.status + " response: '" + body + "'",
       );
     }
 
@@ -237,12 +237,12 @@ export class DefaultSbomerApiV2 implements SbomerApi {
     return { data: requests, total: requests.length || 0 };
   }
 
-  async getRequestEvent(id: string): Promise<SbomerEvent> {
+  async getEvent(id: string): Promise<SbomerEvent> {
     const response = await this.client.get(`/api/v1beta2/events/${id}`);
     return new SbomerEvent(response.data);
   }
 
-  async getRequestEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }> {
+  async getEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }> {
     let pageIndex = 0;
     let totalHits = 0;
     const pageSize = 200;

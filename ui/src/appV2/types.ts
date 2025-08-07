@@ -170,7 +170,7 @@ export type SbomerApi = {
     query: string,
   ): Promise<{ data: SbomerEvent[]; total: number }>;
 
-  getRequestEvent(id: string): Promise<SbomerEvent>;
+  getEvent(id: string): Promise<SbomerEvent>;
 
-  getRequestEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }>;
+  getEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }>;
 };
