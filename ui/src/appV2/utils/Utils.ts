@@ -17,12 +17,12 @@
 ///
 
 import { SbomerGeneration } from '@appV2/types';
-import { Label } from '@patternfly/react-core';
 
+type CarbonTagType = 'red' | 'green' | 'blue' | 'gray' | 'magenta' | 'purple' | 'cyan' | 'teal' | 'cool-gray' | 'warm-gray' | 'high-contrast' | 'outline';
 
 const GenerationRequestStatuses = new Map<
   string,
-  { description?: string; color: React.ComponentProps<typeof Label>['color'] }
+  { description?: string; color: CarbonTagType }
 >([
   ['FAILED', { description: 'Failed', color: 'red' }],
   ['GENERATING', { description: 'In progress', color: 'blue' }],
@@ -31,7 +31,7 @@ const GenerationRequestStatuses = new Map<
 
 const GenerationRequestResults = new Map<
   string,
-  { description?: string; color: React.ComponentProps<typeof Label>['color'] }
+  { description?: string; color: CarbonTagType }
 >([
   ['ERR_CONFIG_MISSING', { description: 'Missing configuration', color: 'red' }],
   ['ERR_GENERAL', { description: 'General error', color: 'red' }],
@@ -45,12 +45,14 @@ const GenerationRequestResults = new Map<
 
 const EventStatuses = new Map<
   string,
-  { description?: string; color: React.ComponentProps<typeof Label>['color'] }
+  { description?: string; color: CarbonTagType }
 >([
   ['FAILED', { description: 'Failed', color: 'red' }],
-  ['IGNORED', { description: 'Ignored', color: 'grey' }],
+  ['IGNORED', { description: 'Ignored', color: 'gray' }],
   ['IN_PROGRESS', { description: 'In progress', color: 'blue' }],
   ['SUCCESS', { description: 'Successfully finished', color: 'green' }],
+  ['NEW', { description: 'New', color: 'teal' }],
+  ['PROCESSED', { description: 'Processed', color: 'purple' }],
 ]);
 
 /**
@@ -127,27 +129,21 @@ export function resultToDescription(request: SbomerGeneration): string {
   return resolved?.description ?? request.result;
 }
 
-export function statusToColor(request: SbomerGeneration): React.ComponentProps<typeof Label>['color'] {
+export function statusToColor(request: SbomerGeneration): CarbonTagType {
   if (!isInProgress(request)) {
     return isSuccess(request) ? 'green' : 'red';
   }
 
-  return 'grey';
+  return 'gray';
 }
 
-export function eventStatusToColor(status: string): React.ComponentProps<typeof Label>['color'] {
-  if (status == 'FAILED') {
-    return 'red';
-  } else if (status == 'IN_PROGRESS') {
-    return 'blue';
-  } else if (status == 'SUCCESS') {
-    return 'green';
-  } else {
-    return 'grey';
-  }
+export function eventStatusToColor(status: string): CarbonTagType {
+  var resolved = EventStatuses.get(status);
+
+  return resolved?.color ?? 'gray';
 }
 
-export function resultToColor(request: SbomerGeneration): React.ComponentProps<typeof Label>['color'] {
+export function resultToColor(request: SbomerGeneration): CarbonTagType {
   var resolved = GenerationRequestResults.get(request.result);
 
   return resolved?.color ?? 'blue';

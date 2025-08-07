@@ -10,6 +10,7 @@ import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSecti
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination, DataTableSkeleton } from '@carbon/react';
 import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
+import { SbomerGeneration } from '@appV2/types';
 
 const columnNames = {
   id: 'ID',
@@ -90,7 +91,7 @@ export const GenerationRequestTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {value && value.map((generation) => {
+              {value && value.map((generation: SbomerGeneration) => {
                 return (
                   <TableRow key={generation.id}>
                     <TableCell>
@@ -99,7 +100,7 @@ export const GenerationRequestTable = () => {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Tag size='md'>
+                      <Tag size='md' type={statusToColor(generation)}>
                         {generation?.status || 'unknown'}
                       </Tag>
                     </TableCell>
