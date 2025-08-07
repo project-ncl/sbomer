@@ -1,0 +1,595 @@
+{
+    "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:79d912ef-facc-458a-9f3e-d585ed8e51a8",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2025-07-17T08:39:56Z",
+        "tools": {
+            "components": [
+                {
+                    "type": "application",
+                    "author": "anchore",
+                    "name": "syft",
+                    "version": "1.27.1"
+                }
+            ]
+        },
+        "component": {
+            "bom-ref": "ea054d4a6f83f6ec",
+            "type": "container",
+            "name": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-cloud-controller-manager-operator",
+            "version": "sha256:0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61"
+        },
+        "properties": [
+            {
+                "name": "syft:image:labels:License",
+                "value": "GPLv2+"
+            },
+            {
+                "name": "syft:image:labels:architecture",
+                "value": "x86_64"
+            },
+            {
+                "name": "syft:image:labels:build-date",
+                "value": "2024-11-13T06:24:41"
+            },
+            {
+                "name": "syft:image:labels:com.redhat.component",
+                "value": "ose-cluster-cloud-controller-manager-operator-container"
+            },
+            {
+                "name": "syft:image:labels:com.redhat.license_terms",
+                "value": "https://www.redhat.com/agreements"
+            },
+            {
+                "name": "syft:image:labels:description",
+                "value": "This is the base image from which all OpenShift Container Platform images inherit."
+            },
+            {
+                "name": "syft:image:labels:distribution-scope",
+                "value": "public"
+            },
+            {
+                "name": "syft:image:labels:io.buildah.version",
+                "value": "1.33.8"
+            },
+            {
+                "name": "syft:image:labels:io.k8s.description",
+                "value": "This is the base image from which all OpenShift Container Platform images inherit."
+            },
+            {
+                "name": "syft:image:labels:io.k8s.display-name",
+                "value": "OpenShift Container Platform RHEL 8 Base"
+            },
+            {
+                "name": "syft:image:labels:io.openshift.build.commit.id",
+                "value": "a0b9c0d70748ff24de5a40874207de3ea5bfa91e"
+            },
+            {
+                "name": "syft:image:labels:io.openshift.build.commit.url",
+                "value": "https://github.com/openshift/cluster-cloud-controller-manager-operator/commit/a0b9c0d70748ff24de5a40874207de3ea5bfa91e"
+            },
+            {
+                "name": "syft:image:labels:io.openshift.build.source-location",
+                "value": "https://github.com/openshift/cluster-cloud-controller-manager-operator"
+            },
+            {
+                "name": "syft:image:labels:io.openshift.maintainer.component",
+                "value": "Cloud Compute / Cloud Controller Manager"
+            },
+            {
+                "name": "syft:image:labels:io.openshift.maintainer.project",
+                "value": "OCPBUGS"
+            },
+            {
+                "name": "syft:image:labels:io.openshift.release.operator",
+                "value": "true"
+            },
+            {
+                "name": "syft:image:labels:io.openshift.tags",
+                "value": "openshift,base"
+            },
+            {
+                "name": "syft:image:labels:maintainer",
+                "value": "Red Hat, Inc."
+            },
+            {
+                "name": "syft:image:labels:name",
+                "value": "openshift/ose-cluster-cloud-controller-manager-operator"
+            },
+            {
+                "name": "syft:image:labels:release",
+                "value": "202411130434.p0.ga0b9c0d.assembly.stream.el8"
+            },
+            {
+                "name": "syft:image:labels:summary",
+                "value": "Provides the latest release of Red Hat Universal Base Image 8."
+            },
+            {
+                "name": "syft:image:labels:url",
+                "value": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift/ose-cluster-cloud-controller-manager-operator/images/v4.14.0-202411130434.p0.ga0b9c0d.assembly.stream.el8"
+            },
+            {
+                "name": "syft:image:labels:vcs-ref",
+                "value": "8a4559dd22257ed70022838ef0df242622da92c5"
+            },
+            {
+                "name": "syft:image:labels:vcs-type",
+                "value": "git"
+            },
+            {
+                "name": "syft:image:labels:vendor",
+                "value": "Red Hat, Inc."
+            },
+            {
+                "name": "syft:image:labels:version",
+                "value": "v4.14.0"
+            }
+        ]
+    },
+    "components": [
+        {
+            "bom-ref": "pkg:golang/command-line-arguments?package-id=7fa76eeab6b5f612",
+            "type": "library",
+            "name": "command-line-arguments",
+            "version": "UNKNOWN",
+            "purl": "pkg:golang/command-line-arguments",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "go-module-binary-cataloger"
+                },
+                {
+                    "name": "syft:package:language",
+                    "value": "go"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "go-module"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "go-module-buildinfo-entry"
+                },
+                {
+                    "name": "syft:location:0:layerID",
+                    "value": "sha256:6cc728a0e7effb0a588c3738648963a340deb852c98cd65a55c33606b38b136b"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "/azure-config-credentials-injector"
+                },
+                {
+                    "name": "syft:metadata:architecture",
+                    "value": "amd64"
+                },
+                {
+                    "name": "syft:metadata:goCompiledVersion",
+                    "value": "go1.20.12"
+                },
+                {
+                    "name": "syft:metadata:goExperiments:0",
+                    "value": "strictfipsruntime"
+                },
+                {
+                    "name": "syft:metadata:mainModule",
+                    "value": "command-line-arguments"
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:golang/github.com/go-logr/logr@v1.3.0?package-id=3b1ae91943862ea8",
+            "type": "library",
+            "name": "github.com/go-logr/logr",
+            "version": "v1.3.0",
+            "cpe": "cpe:2.3:a:go-logr:logr:v1.3.0:*:*:*:*:*:*:*",
+            "purl": "pkg:golang/github.com/go-logr/logr@v1.3.0",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "go-module-binary-cataloger"
+                },
+                {
+                    "name": "syft:package:language",
+                    "value": "go"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "go-module"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "go-module-buildinfo-entry"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:go_logr:logr:v1.3.0:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:go:logr:v1.3.0:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:location:0:layerID",
+                    "value": "sha256:6cc728a0e7effb0a588c3738648963a340deb852c98cd65a55c33606b38b136b"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "/azure-config-credentials-injector"
+                },
+                {
+                    "name": "syft:metadata:architecture",
+                    "value": "amd64"
+                },
+                {
+                    "name": "syft:metadata:goCompiledVersion",
+                    "value": "go1.20.12"
+                },
+                {
+                    "name": "syft:metadata:goExperiments:0",
+                    "value": "strictfipsruntime"
+                },
+                {
+                    "name": "syft:metadata:mainModule",
+                    "value": "command-line-arguments"
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:golang/github.com/spf13/cobra@v1.8.0?package-id=62fa7d3ce006f31d",
+            "type": "library",
+            "name": "github.com/spf13/cobra",
+            "version": "v1.8.0",
+            "cpe": "cpe:2.3:a:spf13:cobra:v1.8.0:*:*:*:*:*:*:*",
+            "purl": "pkg:golang/github.com/spf13/cobra@v1.8.0",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "go-module-binary-cataloger"
+                },
+                {
+                    "name": "syft:package:language",
+                    "value": "go"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "go-module"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "go-module-buildinfo-entry"
+                },
+                {
+                    "name": "syft:location:0:layerID",
+                    "value": "sha256:6cc728a0e7effb0a588c3738648963a340deb852c98cd65a55c33606b38b136b"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "/azure-config-credentials-injector"
+                },
+                {
+                    "name": "syft:metadata:architecture",
+                    "value": "amd64"
+                },
+                {
+                    "name": "syft:metadata:goCompiledVersion",
+                    "value": "go1.20.12"
+                },
+                {
+                    "name": "syft:metadata:goExperiments:0",
+                    "value": "strictfipsruntime"
+                },
+                {
+                    "name": "syft:metadata:mainModule",
+                    "value": "command-line-arguments"
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:golang/github.com/spf13/pflag@v1.0.5?package-id=5553aa50a4b91187",
+            "type": "library",
+            "name": "github.com/spf13/pflag",
+            "version": "v1.0.5",
+            "cpe": "cpe:2.3:a:spf13:pflag:v1.0.5:*:*:*:*:*:*:*",
+            "purl": "pkg:golang/github.com/spf13/pflag@v1.0.5",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "go-module-binary-cataloger"
+                },
+                {
+                    "name": "syft:package:language",
+                    "value": "go"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "go-module"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "go-module-buildinfo-entry"
+                },
+                {
+                    "name": "syft:location:0:layerID",
+                    "value": "sha256:6cc728a0e7effb0a588c3738648963a340deb852c98cd65a55c33606b38b136b"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "/azure-config-credentials-injector"
+                },
+                {
+                    "name": "syft:metadata:architecture",
+                    "value": "amd64"
+                },
+                {
+                    "name": "syft:metadata:goCompiledVersion",
+                    "value": "go1.20.12"
+                },
+                {
+                    "name": "syft:metadata:goExperiments:0",
+                    "value": "strictfipsruntime"
+                },
+                {
+                    "name": "syft:metadata:mainModule",
+                    "value": "command-line-arguments"
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:golang/stdlib@1.20.12?package-id=8b5afd8cfc14ba24",
+            "type": "library",
+            "name": "stdlib",
+            "version": "go1.20.12",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ],
+            "cpe": "cpe:2.3:a:golang:go:1.20.12:-:*:*:*:*:*:*",
+            "purl": "pkg:golang/stdlib@1.20.12",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "go-module-binary-cataloger"
+                },
+                {
+                    "name": "syft:package:language",
+                    "value": "go"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "go-module"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "go-module-buildinfo-entry"
+                },
+                {
+                    "name": "syft:location:0:layerID",
+                    "value": "sha256:6cc728a0e7effb0a588c3738648963a340deb852c98cd65a55c33606b38b136b"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "/azure-config-credentials-injector"
+                },
+                {
+                    "name": "syft:metadata:goCompiledVersion",
+                    "value": "go1.20.12"
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:rpm/redhat/subscription-manager@1.28.42-1.el8?arch=x86_64&distro=rhel-8.10&package-id=0ba592ab21b1c74b&upstream=subscription-manager-1.28.42-1.el8.src.rpm",
+            "type": "library",
+            "publisher": "Red Hat, Inc.",
+            "name": "subscription-manager",
+            "version": "1.28.42-1.el8",
+            "licenses": [
+                {
+                    "license": {
+                        "name": "GPLv2"
+                    }
+                }
+            ],
+            "cpe": "cpe:2.3:a:subscription-manager:subscription-manager:1.28.42-1.el8:*:*:*:*:*:*:*",
+            "purl": "pkg:rpm/redhat/subscription-manager@1.28.42-1.el8?arch=x86_64&distro=rhel-8.10&upstream=subscription-manager-1.28.42-1.el8.src.rpm",
+            "externalReferences": [
+                {
+                    "url": "https://issues.redhat.com/",
+                    "type": "issue-tracker"
+                },
+                {
+                    "url": "https://www:redhat.com/",
+                    "type": "website"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "rpm-db-cataloger"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "rpm"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "rpm-db-entry"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription-manager:subscription_manager:1.28.42-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription_manager:subscription-manager:1.28.42-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription_manager:subscription_manager:1.28.42-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription:subscription-manager:1.28.42-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription:subscription_manager:1.28.42-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:redhat:subscription-manager:1.28.42-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:redhat:subscription_manager:1.28.42-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:location:0:layerID",
+                    "value": "sha256:e0ee0c9e764a25066fc4db27168fea4d145a226931447d72f39b83ee583773a6"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "/var/lib/rpm/Packages"
+                },
+                {
+                    "name": "syft:metadata:release",
+                    "value": "1.el8"
+                },
+                {
+                    "name": "syft:metadata:size",
+                    "value": "4324855"
+                },
+                {
+                    "name": "syft:metadata:sourceRpm",
+                    "value": "subscription-manager-1.28.42-1.el8.src.rpm"
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:rpm/redhat/subscription-manager-rhsm-certificates@20220623-1.el8?arch=noarch&distro=rhel-8.10&package-id=d9c9f52a5046ede8&upstream=subscription-manager-rhsm-certificates-20220623-1.el8.src.rpm",
+            "type": "library",
+            "publisher": "Red Hat, Inc.",
+            "name": "subscription-manager-rhsm-certificates",
+            "version": "20220623-1.el8",
+            "licenses": [
+                {
+                    "license": {
+                        "name": "GPLv2"
+                    }
+                }
+            ],
+            "cpe": "cpe:2.3:a:subscription-manager-rhsm-certificates:subscription-manager-rhsm-certificates:20220623-1.el8:*:*:*:*:*:*:*",
+            "purl": "pkg:rpm/redhat/subscription-manager-rhsm-certificates@20220623-1.el8?arch=noarch&distro=rhel-8.10&upstream=subscription-manager-rhsm-certificates-20220623-1.el8.src.rpm",
+            "properties": [
+                {
+                    "name": "syft:package:foundBy",
+                    "value": "rpm-db-cataloger"
+                },
+                {
+                    "name": "syft:package:type",
+                    "value": "rpm"
+                },
+                {
+                    "name": "syft:package:metadataType",
+                    "value": "rpm-db-entry"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription-manager-rhsm-certificates:subscription_manager_rhsm_certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription_manager_rhsm_certificates:subscription-manager-rhsm-certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription_manager_rhsm_certificates:subscription_manager_rhsm_certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription-manager-rhsm:subscription-manager-rhsm-certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription-manager-rhsm:subscription_manager_rhsm_certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription_manager_rhsm:subscription-manager-rhsm-certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription_manager_rhsm:subscription_manager_rhsm_certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription-manager:subscription-manager-rhsm-certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription-manager:subscription_manager_rhsm_certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription_manager:subscription-manager-rhsm-certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription_manager:subscription_manager_rhsm_certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription:subscription-manager-rhsm-certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:subscription:subscription_manager_rhsm_certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:redhat:subscription-manager-rhsm-certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:cpe23",
+                    "value": "cpe:2.3:a:redhat:subscription_manager_rhsm_certificates:20220623-1.el8:*:*:*:*:*:*:*"
+                },
+                {
+                    "name": "syft:location:0:layerID",
+                    "value": "sha256:e0ee0c9e764a25066fc4db27168fea4d145a226931447d72f39b83ee583773a6"
+                },
+                {
+                    "name": "syft:location:0:path",
+                    "value": "/var/lib/rpm/Packages"
+                },
+                {
+                    "name": "syft:metadata:release",
+                    "value": "1.el8"
+                },
+                {
+                    "name": "syft:metadata:size",
+                    "value": "27808"
+                },
+                {
+                    "name": "syft:metadata:sourceRpm",
+                    "value": "subscription-manager-rhsm-certificates-20220623-1.el8.src.rpm"
+                }
+            ]
+        }
+    ],
+    "dependencies": [
+        {
+            "ref": "pkg:golang/command-line-arguments?package-id=7fa76eeab6b5f612",
+            "dependsOn": [
+                "pkg:golang/github.com/go-logr/logr@v1.3.0?package-id=3b1ae91943862ea8",
+                "pkg:golang/github.com/spf13/cobra@v1.8.0?package-id=62fa7d3ce006f31d",
+                "pkg:golang/github.com/spf13/pflag@v1.0.5?package-id=5553aa50a4b91187",
+                "pkg:golang/stdlib@1.20.12?package-id=8b5afd8cfc14ba24"
+            ]
+        }
+    ]
+}

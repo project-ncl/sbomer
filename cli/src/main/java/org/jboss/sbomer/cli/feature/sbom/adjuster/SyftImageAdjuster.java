@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.cyclonedx.model.Bom;
@@ -86,10 +87,16 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     final Path workDir;
 
     /**
-     * Location of the sources manifest. Any components or dependencies missing from the container image manifest are
-     * merged into the generated manifest.
+     * Location of sources manifest. Any components or dependencies missing from the container image manifest are merged
+     * into the generated manifest.
      */
-    final Path sources;
+    final Path sourcesManifestPath;
+
+    /**
+     * Location of sources metadata. Lists Golang standard library features used in the container image, to be merged
+     * into the generated manifest.
+     */
+    final Path sourcesMetadataPath;
 
     /**
      * <p>
@@ -105,11 +112,17 @@ public class SyftImageAdjuster extends AbstractAdjuster {
             CONTAINER_PROPERTY_METADATA_VIRTUALPATH_PREFIX,
             CONTAINER_PROPERTY_IMAGE_LABELS_PREFIX);
 
-    public SyftImageAdjuster(Path workDir, List<String> paths, boolean includeRpms, Path sources) {
+    public SyftImageAdjuster(
+            Path workDir,
+            List<String> paths,
+            boolean includeRpms,
+            Path sourcesManifestPath,
+            Path sourcesMetadataPath) {
         this.workDir = workDir;
         this.paths = paths;
         this.includeRpms = includeRpms;
-        this.sources = sources;
+        this.sourcesManifestPath = sourcesManifestPath;
+        this.sourcesMetadataPath = sourcesMetadataPath;
     }
 
     /**
@@ -131,23 +144,40 @@ public class SyftImageAdjuster extends AbstractAdjuster {
     @Override
     public Bom adjust(Bom bom) {
         log.debug(
-                "Starting adjustment of the manifest, parameters: configuration paths: [{}], includeRpms: [{}], sources manifest: {}",
+                "Starting adjustment of the manifest, parameters: configuration paths: [{}], includeRpms: [{}], sources manifest: {}, sources metadata: {}",
                 paths,
                 includeRpms,
-                sources != null ? sources.toAbsolutePath() : null);
+                sourcesManifestPath != null ? sourcesManifestPath.toAbsolutePath() : null,
+                sourcesMetadataPath != null ? sourcesMetadataPath.toAbsolutePath() : null);
 
         // Add missing components and dependencies from sources manifest
         adjustEmptyComponents(bom);
         adjustEmptyDependencies(bom);
-        if (sources != null) {
+        if (sourcesManifestPath != null) {
             log.debug(
                     "Adding any missing component or dependency to the main manifest, from sources manifest {}",
-                    sources.toAbsolutePath());
-            Bom sourcesBom = SbomUtils.fromPath(sources);
+                    sourcesManifestPath.toAbsolutePath());
+            Bom sourcesBom = SbomUtils.fromPath(sourcesManifestPath);
             SbomUtils.addMissingComponentsAndDependencies(bom, sourcesBom);
         } else {
             log.warn(
-                    "The sources manifest is empty, there are no components nor dependencies to add to the main manifest...");
+                    "Sources manifest is empty, there are no components nor dependencies to add to the main manifest...");
+        }
+        if (sourcesMetadataPath != null) {
+            log.debug(
+                    "Adding any Golang standard library feature components to the main manifest, from sources metadata {}",
+                    sourcesMetadataPath.toAbsolutePath());
+            Component standardLibraryComponent = SbomUtils.findGolangStandardLibraryComponent(bom);
+            if (standardLibraryComponent != null) {
+                Set<Map> cachitoDependencies = SbomUtils.readCachitoDependencies(sourcesMetadataPath);
+                SbomUtils.addGolangStandardLibraryFeatures(bom, standardLibraryComponent, cachitoDependencies);
+            } else {
+                log.warn(
+                        "Golang standard library component is not present, there are no Golang standard library feature components to add to the main manifest...");
+            }
+        } else {
+            log.warn(
+                    "Sources metadata is empty, there are no Golang standard library feature components to add to the main manifest...");
         }
 
         // Remove components from manifest according to 'paths' and 'includeRpms' parameters

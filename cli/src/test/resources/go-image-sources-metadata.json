@@ -1,0 +1,94 @@
+{
+    "configuration_files": "https://cachito.engineering.redhat.com/api/v1/requests/1755373/configuration-files",
+    "content_manifest": "https://cachito.engineering.redhat.com/api/v1/requests/1755373/content-manifest",
+    "dependencies": [
+        {
+            "name": "bufio",
+            "replaces": null,
+            "type": "go-package",
+            "version": null
+        },
+        {
+            "name": "bytes",
+            "replaces": null,
+            "type": "go-package",
+            "version": null
+        },
+        {
+            "name": "compress/flate",
+            "replaces": null,
+            "type": "go-package",
+            "version": null
+        },
+        {
+            "name": "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2022-03-01/compute",
+            "replaces": null,
+            "type": "go-package",
+            "version": "v68.0.0+incompatible"
+        }
+    ],
+    "environment_variables": {
+        "GOCACHE": "deps/gomod",
+        "GOMODCACHE": "deps/gomod/pkg/mod",
+        "GOPATH": "deps/gomod",
+        "GOSUMDB": "off"
+    },
+    "flags": [],
+    "packages": [
+        {
+            "dependencies": [
+                {
+                    "name": "bufio",
+                    "replaces": null,
+                    "type": "go-package",
+                    "version": null
+                },
+                {
+                    "name": "bytes",
+                    "replaces": null,
+                    "type": "go-package",
+                    "version": null
+                },
+                {
+                    "name": "context",
+                    "replaces": null,
+                    "type": "go-package",
+                    "version": null
+                },
+                {
+                    "name": "encoding",
+                    "replaces": null,
+                    "type": "go-package",
+                    "version": null
+                },
+                {
+                    "name": "github.com/spf13/cobra",
+                    "replaces": null,
+                    "type": "go-package",
+                    "version": "v1.8.0"
+                },
+                {
+                    "name": "github.com/spf13/pflag",
+                    "replaces": null,
+                    "type": "go-package",
+                    "version": "v1.0.5"
+                },
+                {
+                    "name": "k8s.io/klog/v2/internal/buffer",
+                    "replaces": null,
+                    "type": "go-package",
+                    "version": "v2.100.1"
+                }
+            ],
+            "name": "github.com/openshift/cluster-cloud-controller-manager-operator/cmd/azure-config-credentials-injector",
+            "path": "cmd/azure-config-credentials-injector",
+            "type": "go-package",
+            "version": "v0.0.0-20240530084826-a0b9c0d70748"
+        }
+    ],
+    "pkg_managers": [
+        "gomod"
+    ],
+    "ref": "a0b9c0d70748ff24de5a40874207de3ea5bfa91e",
+    "repo": "https://github.com/openshift-priv/cluster-cloud-controller-manager-operator"
+}
