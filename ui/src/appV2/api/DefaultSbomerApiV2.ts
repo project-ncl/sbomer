@@ -179,7 +179,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       const body = await response.text();
 
       throw new Error(
-        'Failed fetching generation requests from SBOMer, got: ' + response.status + " response: '" + body + "'",
+        'Failed fetching generations from SBOMer, got: ' + response.status + " response: '" + body + "'",
       );
     }
 
@@ -257,7 +257,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       if (response.status !== 200) {
         const body = await response.text();
         throw new Error(
-          'Failed fetching generation requests from SBOMer, got: ' + response.status + " response: '" + body + "'",
+          'Failed fetching generations from SBOMer, got: ' + response.status + " response: '" + body + "'",
         );
       }
 

@@ -82,7 +82,7 @@ export const GenerationRequestTable = () => {
       headers={headers}
       render={({ rows, headers }) => (
         <TableContainer title="Latest manifest generations">
-          <Table aria-label="Generation request table">
+          <Table aria-label="Generation table">
             <TableHead>
               <TableRow>
                 {headers.map(header => (
