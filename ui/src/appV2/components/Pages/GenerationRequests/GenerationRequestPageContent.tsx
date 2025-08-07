@@ -44,7 +44,7 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
       <Stack gap={7}>
         <Grid>
           <Column sm={4} md={8} lg={16}>
-            <Heading>Generation Request {id}</Heading>
+            <Heading>Generation {id}</Heading>
           </Column>
         </Grid>
 
