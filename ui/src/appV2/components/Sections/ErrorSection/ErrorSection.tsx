@@ -1,15 +1,25 @@
-import { Tile, Grid, Column } from '@carbon/react';
+import { InlineNotification } from '@carbon/react';
 import React from 'react';
 
-export const ErrorSection = ({ error }: { error: Error }) => {
+type NotificationKind = 'error' | 'warning';
+
+interface ErrorSectionProps {
+  error: Error;
+  kind?: NotificationKind;
+}
+
+export const ErrorSection = ({ error, kind = 'error' }: ErrorSectionProps) => {
+  const getTitle = (notificationKind: NotificationKind) => {
+    return notificationKind === 'error' ? 'An error occurred' : 'Warning';
+  };
+
   return (
-    <Tile>
-      <Grid>
-        <Column sm={4} md={8} lg={16}>
-          <h3 style={{ marginBottom: '1rem' }}>An error occurred: {error.name}</h3>
-          <p>{error.message}</p>
-        </Column>
-      </Grid>
-    </Tile>
+    <InlineNotification
+      kind={kind}
+      title={getTitle(kind)}
+      subtitle={error.message}
+      hideCloseButton
+      lowContrast
+    />
   );
 };
