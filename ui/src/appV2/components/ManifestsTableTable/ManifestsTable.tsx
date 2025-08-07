@@ -1,6 +1,5 @@
 import { useManifests } from '@appV2/components/ManifestsTableTable/useSboms';
 import { useManifestsFilters } from '@appV2/components/ManifestsTableTable/useManifestsFilters';
-import { ManifestsQueryType } from '@appV2/types';
 
 
 import React from 'react';
