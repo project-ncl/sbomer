@@ -20,6 +20,7 @@ import {
 import React from 'react';
 import { Link } from 'react-router-dom';
 import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
+import { eventStatusToColor } from '@appV2/utils/Utils';
 
 const columnNames = {
   id: 'ID',
@@ -129,7 +130,7 @@ export const EventTable = () => {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Tag size='md' >
+                      <Tag size='md' type={eventStatusToColor(requestEvent.status)}>
                         {requestEvent?.status}
                       </Tag>
                     </TableCell>
