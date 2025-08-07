@@ -1,7 +1,6 @@
 import { useManifests } from '@appV2/components/ManifestsTableTable/useSboms';
 import { useManifestsFilters } from '@appV2/components/ManifestsTableTable/useManifestsFilters';
 import { ManifestsQueryType } from '@appV2/types';
-import { timestampToHumanReadable } from '@appV2/utils/Utils';
 
 
 import React from 'react';
@@ -9,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import { DataTable, DataTableSkeleton, Pagination, SkeletonText, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@carbon/react';
+import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
 
 
 const columnNames = {
@@ -94,11 +94,7 @@ export const ManifestsTable = () => {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <span>
-                        {manifest?.created
-                          ? timestampToHumanReadable(Date.now() - new Date(manifest.created).getTime(), false, 'ago')
-                          : ''}
-                      </span>
+                      <RelativeTimestamp date={manifest?.created} />
                     </TableCell>
                   </TableRow>
                 );

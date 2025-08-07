@@ -70,16 +70,31 @@ export function timestampToHumanReadable(millis: number, seconds?: false, suffix
   var m = Math.floor((secs % 3600) / 60);
   var s = Math.floor((secs % 3600) % 60);
 
-  var dDisplay = d > 0 ? d + (d == 1 ? ' day ' : ' days ') : '';
-  var hDisplay = h > 0 ? h + (h == 1 ? ' hour ' : ' hours ') : '';
-  var mDisplay = m > 0 ? m + (m == 1 ? ' minute ' : ' minutes ') : '';
-  var sDisplay = s > 0 ? s + (s == 1 ? ' second' : ' seconds') : '';
-
   if (secs < 60) {
     return 'just now';
   }
 
-  var hrd = dDisplay + hDisplay + mDisplay;
+  var hrd = '';
+
+  if (d > 3) {
+    // More than 3 days: only show days
+    hrd = d + (d == 1 ? ' day' : ' days');
+  } else if (d >= 1) {
+    // 1-3 days: show days and hours
+    var dDisplay = d + (d == 1 ? ' day' : ' days');
+    var hDisplay = h > 0 ? ' ' + h + (h == 1 ? ' hour' : ' hours') : '';
+    hrd = dDisplay + hDisplay;
+  } else {
+    // Less than 1 day: show hours and minutes
+    var hDisplay = h > 0 ? h + (h == 1 ? ' hour' : ' hours') : '';
+    var mDisplay = m > 0 ? (h > 0 ? ' ' : '') + m + (m == 1 ? ' minute' : ' minutes') : '';
+    hrd = hDisplay + mDisplay;
+
+    // If no hours or minutes, show "just now"
+    if (!hDisplay && !mDisplay) {
+      return 'just now';
+    }
+  }
 
   if (seconds) {
     hrd += seconds;
