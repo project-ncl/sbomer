@@ -1,28 +1,25 @@
-import { requestEventStatusToColor, requestEventStatusToDescription } from '@appV2/utils/Utils';
-import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
+import { useRequestEvents } from '@appV2/components/RequestEventTable/useRequestEvents';
+import { useRequestEventsFilters } from '@appV2/components/RequestEventTable/useRequestEventsFilters';
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import {
+  DataTable,
+  DataTableSkeleton,
   Pagination,
   Search,
-  DataTable,
+  Stack,
   Table,
+  TableBody,
+  TableCell,
   TableContainer,
   TableHead,
   TableHeader,
-  TableBody,
   TableRow,
-  TableCell,
-  Tag,
-  Tooltip,
-  SkeletonText,
-  Stack,
-  DataTableSkeleton,
+  Tag
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useRequestEventsFilters } from '@appV2/components/RequestEventTable/useRequestEventsFilters';
-import { useRequestEvents } from '@appV2/components/RequestEventTable/useRequestEvents';
-import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
-import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
+import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
 
 const columnNames = {
   id: 'ID',
@@ -137,21 +134,9 @@ export const RequestEventTable = () => {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Tooltip
-                        align="left"
-                        content={
-                          <div>
-                            <div>
-                              <strong>{requestEvent?.status}</strong>
-                            </div>
-                            <div>{requestEvent?.status}</div>
-                          </div>
-                        }
-                      >
-                        <Tag>
-                          {requestEvent?.status}
-                        </Tag>
-                      </Tooltip>
+                      <Tag size='md' >
+                        {requestEvent?.status}
+                      </Tag>
                     </TableCell>
                     <TableCell>
                       <RelativeTimestamp date={requestEvent?.created} />
