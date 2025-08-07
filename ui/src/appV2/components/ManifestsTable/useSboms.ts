@@ -16,7 +16,7 @@
 /// limitations under the License.
 ///
 
-import { useManifestsFilters } from '@appV2/components/ManifestsTableTable/useManifestsFilters';
+import { useManifestsFilters } from '@appV2/components/ManifestsTable/useManifestsFilters';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { DefaultSbomerApiV2 } from 'src/appV2/api/DefaultSbomerApiV2';
