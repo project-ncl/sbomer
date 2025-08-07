@@ -32,8 +32,6 @@ export const GenerationRequestTable = () => {
   const paramPage = useSearchParam('page') || 1;
   const paramPageSize = useSearchParam('pageSize') || 10;
 
-  // enable when pagination is implemented
-  const paginationEnabled = true;
 
   const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useGenerationRequests(
     +paramPage - 1,
@@ -119,7 +117,7 @@ export const GenerationRequestTable = () => {
               })}
             </TableBody>
           </Table>
-          {paginationEnabled && pagination}
+          {pagination}
         </TableContainer>
       )}
     />
@@ -134,7 +132,7 @@ export const GenerationRequestTable = () => {
         showToolbar={false}
         rowCount={10}
       />
-      {paginationEnabled && pagination}
+      {pagination}
     </TableContainer>
   );
 

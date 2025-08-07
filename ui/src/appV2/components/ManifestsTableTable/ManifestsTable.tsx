@@ -24,9 +24,6 @@ export const ManifestsTable = () => {
 
   const { pageIndex, pageSize, setFilters } = useManifestsFilters();
 
-  // enable when pagination is implemented
-  const enablePagination = true;
-
   // getting the data and applying the filters sent to the backend here
   const [{ value, loading, total, error }] = useManifests();
 
@@ -100,7 +97,7 @@ export const ManifestsTable = () => {
               })}
             </TableBody>
           </Table>
-          {enablePagination && pagination}
+          {pagination}
         </TableContainer>
       )}
     />
