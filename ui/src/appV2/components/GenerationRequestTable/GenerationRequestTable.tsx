@@ -1,6 +1,7 @@
-import { statusToColor, statusToDescription, timestampToHumanReadable } from '@appV2/utils/Utils';
+import { statusToColor, statusToDescription } from '@appV2/utils/Utils';
 
 import React from 'react';
+export default RelativeTimestamp;
 import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 
@@ -8,6 +9,7 @@ import { useGenerationRequests } from '@appV2/components/GenerationRequestTable/
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination, DataTableSkeleton } from '@carbon/react';
+import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
 
 const columnNames = {
   id: 'ID',
@@ -116,27 +118,13 @@ export const GenerationRequestTable = () => {
                       </Tooltip>
                     </TableCell>
                     <TableCell>
-                      <span>
-                        {generation
-                          ? timestampToHumanReadable(Date.now() - generation.created.getTime(), false, 'ago')
-                          : ''}
-                      </span>
+                      <RelativeTimestamp date={generation.created} />
                     </TableCell>
                     <TableCell>
-                      {generation?.updated && (
-                        <span>
-                          {timestampToHumanReadable(Date.now() - generation.updated.getTime(), false, 'ago')}
-                        </span>
-                      )}
+                      <RelativeTimestamp date={generation.updated} />
                     </TableCell>
                     <TableCell>
-                      {generation?.finished ? (
-                        <span>
-                          {timestampToHumanReadable(Date.now() - generation.finished.getTime(), false, 'ago')}
-                        </span>
-                      ) : (
-                        <span className="pf-v5-c-timestamp pf-m-help-text">N/A</span>
-                      )}
+                      <RelativeTimestamp date={generation.finished} />
                     </TableCell>
                   </TableRow>
                 );

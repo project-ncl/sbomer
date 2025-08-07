@@ -1,4 +1,5 @@
-import { requestEventStatusToColor, requestEventStatusToDescription, timestampToHumanReadable } from '@appV2/utils/Utils';
+import { requestEventStatusToColor, requestEventStatusToDescription } from '@appV2/utils/Utils';
+import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
 import {
   Pagination,
   Search,
@@ -153,27 +154,13 @@ export const RequestEventTable = () => {
                       </Tooltip>
                     </TableCell>
                     <TableCell>
-                      <span>
-                        {requestEvent?.created
-                          ? timestampToHumanReadable(Date.now() - requestEvent.created.getTime(), false, 'ago')
-                          : ''}
-                      </span>
+                      <RelativeTimestamp date={requestEvent?.created} />
                     </TableCell>
                     <TableCell>
-                      <span>
-                        {requestEvent?.updated
-                          ? timestampToHumanReadable(Date.now() - requestEvent.updated.getTime(), false, 'ago')
-                          : ''}
-                      </span>
+                      <RelativeTimestamp date={requestEvent?.updated} />
                     </TableCell>
                     <TableCell>
-                      {requestEvent?.finished ? (
-                        <span>
-                          {timestampToHumanReadable(Date.now() - requestEvent.finished.getTime(), false, 'ago')}
-                        </span>
-                      ) : (
-                        <span style={{ color: 'var(--cds-text-helper)' }}>N/A</span>
-                      )}
+                      <RelativeTimestamp date={requestEvent?.finished} />
                     </TableCell>
                   </TableRow>
                 );
