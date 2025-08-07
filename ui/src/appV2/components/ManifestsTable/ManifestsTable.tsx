@@ -1,5 +1,5 @@
-import { useManifests } from '@appV2/components/ManifestsTableTable/useSboms';
-import { useManifestsFilters } from '@appV2/components/ManifestsTableTable/useManifestsFilters';
+import { useManifests } from '@appV2/components/ManifestsTable/useSboms';
+import { useManifestsFilters } from '@appV2/components/ManifestsTable/useManifestsFilters';
 
 
 import React from 'react';

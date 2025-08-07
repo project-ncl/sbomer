@@ -1,8 +1,8 @@
-import { ManifestsTable } from '@appV2/components/ManifestsTableTable/ManifestsTable';
+import { ManifestsTable } from '@appV2/components/ManifestsTable/ManifestsTable';
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { Stack } from '@carbon/react';
 import * as React from 'react';
 import { AppLayout } from '../AppLayout/AppLayout';
-import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
-import { Column, Grid, Stack } from '@carbon/react';
 
 const ManifestsPage: React.FunctionComponent = () => {
   useDocumentTitle('SBOMer | Manifests');
