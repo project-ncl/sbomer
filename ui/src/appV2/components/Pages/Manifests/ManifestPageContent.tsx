@@ -21,6 +21,7 @@ import {
 import { Download } from '@carbon/icons-react';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
+import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
 const ManifestPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();
@@ -79,7 +80,7 @@ const ManifestPageContent: React.FunctionComponent = () => {
                 <StructuredListRow>
                   <StructuredListCell>ID</StructuredListCell>
                   <StructuredListCell>
-                    <CodeSnippet type="inline" hideCopyButton>
+                    <CodeSnippet type="inline" hideCopyButton >
                       {manifest.id}
                     </CodeSnippet>
                   </StructuredListCell>
@@ -87,7 +88,12 @@ const ManifestPageContent: React.FunctionComponent = () => {
                 <StructuredListRow>
                   <StructuredListCell>Created</StructuredListCell>
                   <StructuredListCell>
-                    {manifest.created ? manifest.created.toISOString() : 'N/A'}
+                    {manifest.created ? (
+                      <Stack gap={2}>
+                        <RelativeTimestamp date={manifest.created} />
+                        <p>{manifest.created.toISOString()}</p>
+                      </Stack>
+                    ) : 'N/A'}
                   </StructuredListCell>
                 </StructuredListRow>
               </StructuredListBody>
