@@ -1,8 +1,8 @@
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import {
   Grid,
   Column,
-  InlineNotification,
   SkeletonText,
   CodeSnippet,
   StructuredListWrapper,
@@ -12,6 +12,7 @@ import {
   StructuredListCell,
   Content,
   Heading,
+  Stack,
 } from '@carbon/react';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
@@ -24,14 +25,7 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
   useDocumentTitle('SBOMer | Generations | ' + id);
 
   if (error) {
-    return (
-      <InlineNotification
-        kind="warning"
-        title="Cannot retrieve Generation Request"
-        subtitle={error.message}
-        hideCloseButton
-      />
-    );
+    return <ErrorSection error={error} />;
   }
 
   if (loading) {
@@ -44,43 +38,53 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
 
   return (
     <Content>
-      <Grid>
-        <Column sm={4} md={8} lg={16}>
-          <Heading style={{ marginBottom: '2rem' }}>
-            Generation Request {id}
-          </Heading>
-        </Column>
+      <Stack gap={7}>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <Heading>Generation Request {id}</Heading>
+          </Column>
+        </Grid>
 
-        <Column sm={4} md={8} lg={16}>
-          <StructuredListWrapper>
-            <StructuredListHead>
-              <StructuredListRow head>
-                <StructuredListCell head>Property</StructuredListCell>
-                <StructuredListCell head>Value</StructuredListCell>
-              </StructuredListRow>
-            </StructuredListHead>
-            <StructuredListBody>
-              <StructuredListRow>
-                <StructuredListCell>ID</StructuredListCell>
-                <StructuredListCell>
-                  <code style={{ fontFamily: 'monospace' }}>{request.id}</code>
-                </StructuredListCell>
-              </StructuredListRow>
-              <StructuredListRow>
-                <StructuredListCell>Created</StructuredListCell>
-                <StructuredListCell>
-                  {request.created ? request.created.toISOString() : 'N/A'}
-                </StructuredListCell>
-              </StructuredListRow>
-            </StructuredListBody>
-          </StructuredListWrapper>
-        </Column>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <StructuredListWrapper>
+              <StructuredListHead>
+                <StructuredListRow head>
+                  <StructuredListCell head>Property</StructuredListCell>
+                  <StructuredListCell head>Value</StructuredListCell>
+                </StructuredListRow>
+              </StructuredListHead>
+              <StructuredListBody>
+                <StructuredListRow>
+                  <StructuredListCell>ID</StructuredListCell>
+                  <StructuredListCell>
+                    <CodeSnippet type="inline" hideCopyButton>
+                      {request.id}
+                    </CodeSnippet>
+                  </StructuredListCell>
+                </StructuredListRow>
+                <StructuredListRow>
+                  <StructuredListCell>Created</StructuredListCell>
+                  <StructuredListCell>
+                    {request.created ? request.created.toISOString() : 'N/A'}
+                  </StructuredListCell>
+                </StructuredListRow>
+              </StructuredListBody>
+            </StructuredListWrapper>
+          </Column>
+        </Grid>
 
-        <Column sm={4} md={8} lg={16} style={{ marginTop: '2rem' }}>
-          <Heading style={{ marginBottom: '1rem' }}>Attributes</Heading>
-          <CodeSnippet type="multi">{JSON.stringify(request, null, 2)}</CodeSnippet>
-        </Column>
-      </Grid>
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            <Stack gap={5}>
+              <Heading>Attributes</Heading>
+              <CodeSnippet type="multi">
+                {JSON.stringify(request, null, 2)}
+              </CodeSnippet>
+            </Stack>
+          </Column>
+        </Grid>
+      </Stack>
     </Content>
   );
 };
