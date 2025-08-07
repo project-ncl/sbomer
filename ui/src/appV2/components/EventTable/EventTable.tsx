@@ -40,11 +40,6 @@ const headers = [
 export const EventTable = () => {
   const { query, pageIndex, pageSize, setFilters } = useEventsFilters();
 
-  // todo enable when searching is implemented
-  const enableSearching = true;
-  // enable when pagination is implemented
-  const enablePagination = true;
-
   const [querySearchbarValue, setQuerySearchbarValue] = React.useState<string>(query || '');
 
   const [{ value, loading, total, error }] = useRequestEvents();
@@ -65,7 +60,7 @@ export const EventTable = () => {
       itemRangeText={(min: number, max: number, total: number) => `${min}–${max} of ${total} items`}
       page={pageIndex}
       pageNumberText="Page Number"
-      pageSize={pageSize} // todo update from url
+      pageSize={pageSize}
       pageSizes={[
         { text: '10', value: 10 },
         { text: '20', value: 20 },
@@ -152,7 +147,7 @@ export const EventTable = () => {
               })}
             </TableBody>
           </Table>
-          {enablePagination && pagination}
+          {pagination}
         </TableContainer>
       )}
     />
@@ -167,7 +162,7 @@ export const EventTable = () => {
         showToolbar={false}
         rowCount={10}
       />
-      {enablePagination && pagination}
+      {pagination}
     </TableContainer>
   );
 
@@ -178,7 +173,7 @@ export const EventTable = () => {
 
   return (
     <Stack gap={4}>
-      {enableSearching && querySearchBar}
+      {querySearchBar}
       {tableArea}
     </Stack>
   );
