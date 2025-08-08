@@ -71,8 +71,8 @@ export const ManifestsTable = () => {
         { key: 'creationTime', header: columnNames.creationTime },
       ]}
       render={({ rows, headers }) => (
-        <TableContainer title="Latest manifests">
-          <Table aria-label="Manifests Table">
+        <TableContainer title="Manifests" description="Latest manifests">
+          <Table>
             <TableHead>
               <TableRow>
                 {headers.map(header => (
@@ -105,7 +105,7 @@ export const ManifestsTable = () => {
 
   const noResults = <NoResultsSection />
   const loadingSkeleton = (
-    <TableContainer title="Latest manifests">
+    <TableContainer title="Manifests">
       <DataTableSkeleton
         columnCount={Object.keys(headers).length}
         showHeader={false}

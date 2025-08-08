@@ -10,7 +10,6 @@ export function EventsPage() {
   return (
     <AppLayout>
       <Stack gap={4}>
-        <h1>Events</h1>
         <EventTable />
       </Stack>
     </AppLayout>

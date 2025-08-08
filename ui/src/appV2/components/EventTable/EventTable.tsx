@@ -111,8 +111,8 @@ export const EventTable = () => {
         { key: 'finished', header: columnNames.finished },
       ]}
       render={({ rows, headers }) => (
-        <TableContainer title="Latest events">
-          <Table aria-label="Events table">
+        <TableContainer title="Events" description="Latest events">
+          <Table>
             <TableHead>
               <TableRow>
                 {headers.map(header => (
@@ -156,7 +156,7 @@ export const EventTable = () => {
 
   const noResults = <NoResultsSection />;
   const loadingSkeleton = (
-    <TableContainer title="Latest events">
+    <TableContainer title="Events">
       <DataTableSkeleton
         columnCount={Object.keys(headers).length}
         showHeader={false}
