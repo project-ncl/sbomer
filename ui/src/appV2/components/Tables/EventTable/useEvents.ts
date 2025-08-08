@@ -16,45 +16,52 @@
 /// limitations under the License.
 ///
 
-import { useManifestsFilters } from '@appV2/components/ManifestsTable/useManifestsFilters';
+import { useEventsFilters } from '@appV2/components/Tables/EventTable/useEventsFilters';
+import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
-import { DefaultSbomerApiV2 } from 'src/appV2/api/DefaultSbomerApiV2';
 
-export function useManifests() {
+
+export function useRequestEvents() {
   const sbomerApi = DefaultSbomerApiV2.getInstance();
   const [total, setTotal] = useState(0);
 
-  const { pageIndex, pageSize } = useManifestsFilters();
+  const {query, pageIndex, pageSize } = useEventsFilters();
 
-  const getManifests = useCallback(
+  const getRequestEvents = useCallback(
     async ({
       pageSize,
       pageIndex,
     }: {
       pageSize: number;
       pageIndex: number;
+      query: string;
     }) => {
       try {
         const pageIndexOffsetted = pageIndex - 1;
-        return await sbomerApi.getManifests({ pageSize, pageIndex: pageIndexOffsetted });
+        const response = await sbomerApi.getEvents(
+          { pageSize, pageIndex: pageIndexOffsetted },
+          query,
+        );
+        return response;
       } catch (e) {
         return Promise.reject(e);
       }
     },
-    [pageIndex, pageSize],
+    [pageIndex, pageSize, query],
   );
 
   const { loading, value, error, retry } = useAsyncRetry(
     () =>
-      getManifests({
+      getRequestEvents({
         pageSize: +pageSize,
         pageIndex: +pageIndex,
+        query: query,
       }).then((data) => {
         setTotal(data.total);
         return data.data;
       }),
-    [pageIndex, pageSize],
+    [pageIndex, pageSize, query],
   );
 
   return [

@@ -1,5 +1,5 @@
-import { useRequestEvents } from '@appV2/components/EventTable/useEvents';
-import { useEventsFilters } from '@appV2/components/EventTable/useEventsFilters';
+import { useRequestEvents } from '@appV2/components/Tables/EventTable/useEvents';
+import { useEventsFilters } from '@appV2/components/Tables/EventTable/useEventsFilters';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import {
@@ -19,7 +19,7 @@ import {
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
+import { RelativeTimestamp } from '@appV2/components/UtilsComponents/RelativeTimestamp';
 import { eventStatusToColor } from '@appV2/utils/Utils';
 
 const columnNames = {
@@ -156,7 +156,7 @@ export const EventTable = () => {
 
   const noResults = <NoResultsSection />;
   const loadingSkeleton = (
-    <TableContainer title="Events">
+    <TableContainer title="Events" description="Latest events">
       <DataTableSkeleton
         columnCount={Object.keys(headers).length}
         showHeader={false}

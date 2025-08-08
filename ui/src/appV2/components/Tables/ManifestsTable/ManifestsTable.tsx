@@ -1,5 +1,5 @@
-import { useManifests } from '@appV2/components/ManifestsTable/useSboms';
-import { useManifestsFilters } from '@appV2/components/ManifestsTable/useManifestsFilters';
+import { useManifests } from '@appV2/components/Tables/ManifestsTable/useSboms';
+import { useManifestsFilters } from '@appV2/components/Tables/ManifestsTable/useManifestsFilters';
 
 
 import React from 'react';
@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import { DataTable, DataTableSkeleton, Pagination, SkeletonText, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@carbon/react';
-import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
+import { RelativeTimestamp } from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
 
 const columnNames = {
@@ -105,7 +105,7 @@ export const ManifestsTable = () => {
 
   const noResults = <NoResultsSection />
   const loadingSkeleton = (
-    <TableContainer title="Manifests">
+    <TableContainer title="Manifests" description="Latest manifests">
       <DataTableSkeleton
         columnCount={Object.keys(headers).length}
         showHeader={false}

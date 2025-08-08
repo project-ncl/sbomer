@@ -5,11 +5,11 @@ export default RelativeTimestamp;
 import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 
-import { useGenerationRequests } from '@appV2/components/GenerationRequestTable/useGenerationRequests';
+import { useGenerationRequests } from '@appV2/components/Tables/GenerationRequestTable/useGenerationRequests';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination, DataTableSkeleton } from '@carbon/react';
-import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
+import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 import { SbomerGeneration } from '@appV2/types';
 
 const columnNames = {
@@ -126,7 +126,7 @@ export const GenerationRequestTable = () => {
 
   const noResults = <NoResultsSection />
   const loadingSkeleton = (
-    <TableContainer title="Generations">
+    <TableContainer title="Generations" description="Latest generations">
       <DataTableSkeleton
         columnCount={Object.keys(columnNames).length}
         showHeader={false}
