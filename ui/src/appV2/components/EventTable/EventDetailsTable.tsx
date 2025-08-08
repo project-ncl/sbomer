@@ -46,7 +46,7 @@ export const EventDetailsTable = () => {
               </StructuredListHead>
               <StructuredListBody>
                 <StructuredListRow>
-                  <StructuredListCell>Event ID</StructuredListCell>
+                  <StructuredListCell>ID</StructuredListCell>
                   <StructuredListCell>
                     <span>
                       {id}
