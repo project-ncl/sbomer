@@ -1,4 +1,4 @@
-import { GenerationRequestTable } from '@appV2/components/GenerationRequestTable/GenerationRequestTable';
+import { GenerationRequestTable } from '@appV2/components/Tables/GenerationRequestTable/GenerationRequestTable';
 import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { Column, Grid, Stack } from '@carbon/react';

@@ -1,4 +1,4 @@
-import { useRequestEventManifest } from '@appV2/components/EventTable/useEventManifest';
+import { useRequestEventManifest } from '@appV2/components/Tables/EventTable/useEventManifest';
 import {
   SkeletonText,
   CodeSnippet,
