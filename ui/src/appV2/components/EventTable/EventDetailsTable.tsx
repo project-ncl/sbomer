@@ -1,7 +1,5 @@
 import { useRequestEventManifest } from '@appV2/components/EventTable/useEventManifest';
 import {
-  Grid,
-  Column,
   SkeletonText,
   CodeSnippet,
   StructuredListWrapper,
@@ -9,7 +7,6 @@ import {
   StructuredListBody,
   StructuredListRow,
   StructuredListCell,
-  Content,
   Heading,
   Stack,
   Tag,
@@ -38,17 +35,9 @@ export const EventDetailsTable = () => {
   }
 
   return (
-    <Content>
-      <Stack gap={7}>
-        <Grid>
-          <Column sm={4} md={8} lg={16}>
-            <Heading>Event {id}</Heading>
-          </Column>
-        </Grid>
-
-        <Grid>
-          <Column sm={4} md={8} lg={16}>
-            <StructuredListWrapper>
+    <Stack gap={7}>
+      <Heading>Event {id}</Heading>
+        <StructuredListWrapper>
               <StructuredListHead>
                 <StructuredListRow head>
                   <StructuredListCell head>Property</StructuredListCell>
@@ -59,9 +48,9 @@ export const EventDetailsTable = () => {
                 <StructuredListRow>
                   <StructuredListCell>Event ID</StructuredListCell>
                   <StructuredListCell>
-                    <CodeSnippet type="inline" hideCopyButton>
+                    <span>
                       {id}
-                    </CodeSnippet>
+                    </span>
                   </StructuredListCell>
                 </StructuredListRow>
                 <StructuredListRow>
@@ -70,7 +59,7 @@ export const EventDetailsTable = () => {
                     {request.created ? (
                       <Stack gap={2}>
                         <RelativeTimestamp date={request.created} />
-                        <p>{request.created.toISOString()}</p>
+                        <span>{request.created.toISOString()}</span>
                       </Stack>
                     ) : 'N/A'}
                   </StructuredListCell>
@@ -81,7 +70,7 @@ export const EventDetailsTable = () => {
                     {request.updated ? (
                       <Stack gap={2}>
                         <RelativeTimestamp date={request.updated} />
-                        <p>{request.updated.toISOString()}</p>
+                        <span>{request.updated.toISOString()}</span>
                       </Stack>
                     ) : 'N/A'}
                   </StructuredListCell>
@@ -107,20 +96,12 @@ export const EventDetailsTable = () => {
                 </StructuredListRow>
               </StructuredListBody>
             </StructuredListWrapper>
-          </Column>
-        </Grid>
-
-        <Grid>
-          <Column sm={4} md={8} lg={16}>
-            <Stack gap={5}>
-              <Heading>Attributes</Heading>
-              <CodeSnippet type="multi">
-                {JSON.stringify(request, null, 2)}
-              </CodeSnippet>
-            </Stack>
-          </Column>
-        </Grid>
+        <Stack gap={5}>
+          <Heading>Attributes</Heading>
+          <CodeSnippet type="multi">
+            {JSON.stringify(request, null, 2)}
+          </CodeSnippet>
+        </Stack>
       </Stack>
-    </Content>
   );
 };
