@@ -17,10 +17,15 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
+import java.util.Map;
+
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
+import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
+import org.slf4j.MDC;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -31,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ClientExceptionMapper extends AbstractExceptionMapper<ClientException> {
 
-    @WithSpan
     @Override
     public Response toResponse(ClientException ex) {
         ErrorResponse error = ErrorResponse.builder()
@@ -42,7 +46,13 @@ public class ClientExceptionMapper extends AbstractExceptionMapper<ClientExcepti
                 .errors(ex.getErrors())
                 .build();
 
-        log.error(error.toString(), ex);
+        OtelHelper.withSpan(this.getClass(), ".toResponse", Map.of(), MDC.getCopyOfContextMap(), () -> {
+            log.error(error.toString(), ex);
+            Span span = Span.current();
+            span.recordException(ex);
+            span.setStatus(StatusCode.ERROR, ex.getMessage());
+            return null;
+        });
 
         return Response.status(ex.getCode()).entity(error).type(MediaType.APPLICATION_JSON).build();
     }
