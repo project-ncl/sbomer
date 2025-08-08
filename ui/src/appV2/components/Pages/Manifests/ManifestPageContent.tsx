@@ -3,8 +3,6 @@ import { useManifest } from '@appV2/components/Pages/Manifests/useManifest';
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import {
-  Grid,
-  Column,
   Button,
   SkeletonText,
   CodeSnippet,
@@ -13,7 +11,6 @@ import {
   StructuredListBody,
   StructuredListRow,
   StructuredListCell,
-  Content,
   Heading,
   ButtonSet,
   Stack,
@@ -59,74 +56,56 @@ const ManifestPageContent: React.FunctionComponent = () => {
   }
 
   return (
-    <Content>
-      <Stack gap={7}>
-        <Grid>
-          <Column sm={4} md={8} lg={16}>
-            <Heading>Manifest {id}</Heading>
-          </Column>
-        </Grid>
+    <Stack gap={7}>
+      <Heading>Manifest {id}</Heading>
 
-        <Grid>
-          <Column sm={4} md={8} lg={16}>
-            <StructuredListWrapper>
-              <StructuredListHead>
-                <StructuredListRow head>
-                  <StructuredListCell head>Property</StructuredListCell>
-                  <StructuredListCell head>Value</StructuredListCell>
-                </StructuredListRow>
-              </StructuredListHead>
-              <StructuredListBody>
-                <StructuredListRow>
-                  <StructuredListCell>ID</StructuredListCell>
-                  <StructuredListCell>
-                    <CodeSnippet type="inline" hideCopyButton >
-                      {manifest.id}
-                    </CodeSnippet>
-                  </StructuredListCell>
-                </StructuredListRow>
-                <StructuredListRow>
-                  <StructuredListCell>Created</StructuredListCell>
-                  <StructuredListCell>
-                    {manifest.created ? (
-                      <Stack gap={2}>
-                        <RelativeTimestamp date={manifest.created} />
-                        <p>{manifest.created.toISOString()}</p>
-                      </Stack>
-                    ) : 'N/A'}
-                  </StructuredListCell>
-                </StructuredListRow>
-              </StructuredListBody>
-            </StructuredListWrapper>
-          </Column>
-        </Grid>
+        <StructuredListWrapper>
+          <StructuredListHead>
+            <StructuredListRow head>
+              <StructuredListCell head>Property</StructuredListCell>
+              <StructuredListCell head>Value</StructuredListCell>
+            </StructuredListRow>
+          </StructuredListHead>
+          <StructuredListBody>
+            <StructuredListRow>
+              <StructuredListCell>ID</StructuredListCell>
+              <StructuredListCell>
+                <span >
+                  {manifest.id}
+                </span>
+              </StructuredListCell>
+            </StructuredListRow>
+            <StructuredListRow>
+              <StructuredListCell>Created</StructuredListCell>
+              <StructuredListCell>
+                {manifest.created ? (
+                  <Stack gap={2}>
+                    <RelativeTimestamp date={manifest.created} />
+                    <span>{manifest.created.toISOString()}</span>
+                  </Stack>
+                ) : 'N/A'}
+              </StructuredListCell>
+            </StructuredListRow>
+          </StructuredListBody>
+        </StructuredListWrapper>
 
-        <Grid>
-          <Column sm={4} md={8} lg={16}>
-            <ButtonSet>
-              <Button
-                kind="primary"
-                renderIcon={Download}
-                onClick={(e) => downloadManifest(manifest)}
-              >
-                Download
-              </Button>
-            </ButtonSet>
-          </Column>
-        </Grid>
+        <ButtonSet>
+          <Button
+            kind="primary"
+            renderIcon={Download}
+            onClick={(e) => downloadManifest(manifest)}
+          >
+            Download
+          </Button>
+        </ButtonSet>
 
-        <Grid>
-          <Column sm={4} md={8} lg={16}>
-            <Stack gap={5}>
-              <Heading>Attributes</Heading>
-              <CodeSnippet type="multi">
-                {JSON.stringify(manifest, null, 2)}
-              </CodeSnippet>
-            </Stack>
-          </Column>
-        </Grid>
+        <Stack gap={5}>
+          <Heading>Attributes</Heading>
+          <CodeSnippet type="multi">
+            {JSON.stringify(manifest, null, 2)}
+          </CodeSnippet>
+        </Stack>
       </Stack>
-    </Content>
   );
 };
 
