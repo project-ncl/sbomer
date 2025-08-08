@@ -10,7 +10,6 @@ const ManifestsPage: React.FunctionComponent = () => {
   return (
     <AppLayout>
       <Stack gap={4}>
-      <h1>Manifests</h1>
       <ManifestsTable />
       </Stack>
     </AppLayout>

@@ -10,7 +10,6 @@ export function GenerationRequestsPage() {
   return (
     <AppLayout>
             <Stack gap={4}>
-              <h1>Generations</h1>
               <GenerationRequestTable />
             </Stack>
     </AppLayout>

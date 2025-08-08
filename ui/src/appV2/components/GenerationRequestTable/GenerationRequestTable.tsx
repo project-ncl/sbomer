@@ -81,8 +81,8 @@ export const GenerationRequestTable = () => {
       rows={value || []}
       headers={headers}
       render={({ rows, headers }) => (
-        <TableContainer title="Latest manifest generations">
-          <Table aria-label="Generation table">
+        <TableContainer title="Generations" description="Latest generations">
+          <Table aria-label="Generations">
             <TableHead>
               <TableRow>
                 {headers.map(header => (
@@ -126,7 +126,7 @@ export const GenerationRequestTable = () => {
 
   const noResults = <NoResultsSection />
   const loadingSkeleton = (
-    <TableContainer title="Latest manifest generations">
+    <TableContainer title="Generations">
       <DataTableSkeleton
         columnCount={Object.keys(columnNames).length}
         showHeader={false}
