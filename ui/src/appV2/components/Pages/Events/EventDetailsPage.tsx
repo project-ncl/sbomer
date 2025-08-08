@@ -9,13 +9,7 @@ const EventDetailsPage: React.FunctionComponent = () => {
 
   return (
     <AppLayout>
-      <Content>
-        <Grid>
-          <Column span={16}>
-            <EventDetailsTable />
-          </Column>
-        </Grid>
-      </Content>
+      <EventDetailsTable />
     </AppLayout>
   );
 };
