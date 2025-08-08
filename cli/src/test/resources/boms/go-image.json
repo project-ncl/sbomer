@@ -20,7 +20,27 @@
             "bom-ref": "ea054d4a6f83f6ec",
             "type": "container",
             "name": "registry-proxy.engineering.redhat.com/rh-osbs/openshift-ose-cluster-cloud-controller-manager-operator",
-            "version": "sha256:0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61"
+            "version": "sha256:0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61",
+            "hashes": [
+                {
+                    "alg": "SHA-256",
+                    "content": "0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61"
+                }
+            ],
+            "evidence": {
+                "identity": [
+                    {
+                        "field": "name",
+                        "concludedValue": "registry.com/rh-osbs/openshift-ose-cluster-cloud-controller-manager-operator"
+                    }
+                ],
+                "identity": [
+                    {
+                        "field": "purl",
+                        "concludedValue": "pkg:oci/ose-cluster-cloud-controller-manager-operator@sha256%3A0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61"
+                    }
+                ]
+            }
         },
         "properties": [
             {

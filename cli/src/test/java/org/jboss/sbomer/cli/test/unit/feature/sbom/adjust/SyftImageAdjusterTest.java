@@ -426,13 +426,13 @@ class SyftImageAdjusterTest {
         assertEquals(1, metadataComponent.getHashes().size());
         Hash hash = metadataComponent.getHashes().get(0);
         assertEquals(Hash.Algorithm.SHA_256.getSpec(), hash.getAlgorithm());
-        assertEquals("a43c117701dd6d012bb9da8974d2d332f70a688944ed19280a020d5357f8b22e", hash.getValue());
+        assertEquals("0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61", hash.getValue());
         // Has identity purl
         assertEquals(1, metadataComponent.getEvidence().getIdentities().size());
         Identity identity = metadataComponent.getEvidence().getIdentities().get(0);
         assertEquals(Identity.Field.PURL, identity.getField());
         assertEquals(
-                "pkg:oci/console-ui-rhel9@sha256%3Aee4e27734a21cc6b8a8597ef2af32822ad0b4677dbde0a794509f55cbaff5ab3",
+                "pkg:oci/ose-cluster-cloud-controller-manager-operator@sha256%3A0897e7dcf7a971b493755010b7893b4a44800fe5032463676d016e3fe3b42d61",
                 identity.getConcludedValue());
 
         // The main component is the first one
