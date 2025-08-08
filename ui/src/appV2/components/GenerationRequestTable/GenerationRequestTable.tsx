@@ -126,7 +126,7 @@ export const GenerationRequestTable = () => {
 
   const noResults = <NoResultsSection />
   const loadingSkeleton = (
-    <TableContainer title="Generations">
+    <TableContainer title="Generations" description="Latest generations">
       <DataTableSkeleton
         columnCount={Object.keys(columnNames).length}
         showHeader={false}

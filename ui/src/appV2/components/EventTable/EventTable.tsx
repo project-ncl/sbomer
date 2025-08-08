@@ -156,7 +156,7 @@ export const EventTable = () => {
 
   const noResults = <NoResultsSection />;
   const loadingSkeleton = (
-    <TableContainer title="Events">
+    <TableContainer title="Events" description="Latest events">
       <DataTableSkeleton
         columnCount={Object.keys(headers).length}
         showHeader={false}

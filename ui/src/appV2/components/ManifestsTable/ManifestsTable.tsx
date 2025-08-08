@@ -105,7 +105,7 @@ export const ManifestsTable = () => {
 
   const noResults = <NoResultsSection />
   const loadingSkeleton = (
-    <TableContainer title="Manifests">
+    <TableContainer title="Manifests" description="Latest manifests">
       <DataTableSkeleton
         columnCount={Object.keys(headers).length}
         showHeader={false}
