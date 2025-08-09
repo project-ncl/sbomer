@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.generator.syft;
+package org.jboss.sbomer.service.nextgen.generator;
 
 /**
- * Syft generator retry configuration.
+ * Generator retry configuration.
  *
  * @param maxCount Max number of generator retries
  * @param memoryMultiplier Amount to compound multiply memory by per generator retry
  */
-public record SyftContainerImageRetries(Integer maxCount, Double memoryMultiplier) {
+public record GeneratorRetries(Integer maxCount, Double memoryMultiplier) {
 }

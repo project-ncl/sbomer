@@ -15,19 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.generator.syft;
+package org.jboss.sbomer.service.nextgen.generator.koji;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -58,12 +54,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.tekton.v1beta1.Param;
 import io.fabric8.tekton.v1beta1.ParamBuilder;
-import io.fabric8.tekton.v1beta1.ParamValue;
 import io.fabric8.tekton.v1beta1.TaskRefBuilder;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
-import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.ValidationException;
@@ -71,23 +65,21 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ApplicationScoped
-public class SyftGenerator extends AbstractTektonController {
-    public static final String PARAM_COMMAND_CONTAINER_IMAGE = "image";
-    public static final String PARAM_COMMAND_TYPE = "type";
-    public static final String PARAM_COMMAND_IDENTIFIER = "identifier";
-    public static final String PARAM_PATHS = "paths";
-    public static final String PARAM_RPMS = "rpms";
-    public static final String PARAM_PROCESSORS = "processors";
-    public static final String TASK_SUFFIX = "-generator-syft";
-    public static final String GENERATOR_NAME = "syft";
-    public static final String GENERATOR_VERSION = "1.27.1";
+public class KojiGenerator extends AbstractTektonController {
 
-    private SyftGenerator() {
+    public static final String PARAM_BREW_BUILD_ID = "build-id";
+
+    public static final String TASK_SUFFIX = "-generator-brew-rpm";
+
+    public static final String GENERATOR_NAME = "koji";
+    public static final String GENERATOR_VERSION = "0.1.0";
+
+    private KojiGenerator() {
         super(null, null, null, null, null, null);
     }
 
     @Inject
-    public SyftGenerator(
+    public KojiGenerator(
             @RestClient SBOMerClient sbomerClient,
             KubernetesClient kubernetesClient,
             GenerationRequestControllerConfig controllerConfig,
@@ -99,7 +91,7 @@ public class SyftGenerator extends AbstractTektonController {
 
     @Override
     public Set<String> getSupportedTypes() {
-        return Set.of("CONTAINER_IMAGE");
+        return Set.of("BREW_RPM");
     }
 
     @Override
@@ -134,16 +126,6 @@ public class SyftGenerator extends AbstractTektonController {
 
             return;
         }
-    }
-
-    @Scheduled(
-            every = "20s",
-            delay = 10,
-            delayUnit = TimeUnit.SECONDS,
-            concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
-    @Override
-    protected void ensureInformer() {
-        super.ensureInformer();
     }
 
     @Override
@@ -181,7 +163,7 @@ public class SyftGenerator extends AbstractTektonController {
                     : GenerationResult.ERR_GENERAL;
             int retryCount = Integer.parseInt(erroredAnnotations.getOrDefault(ANNOTATION_RETRY_COUNT, "0"));
             GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
-            SyftContainerImageOptions options = retrieveOptions(request);
+            KojiBrewRpmOptions options = retrieveOptions(request);
             int maxCount = options.retries().maxCount();
 
             if (result == GenerationResult.ERR_GENERAL || ++retryCount > maxCount) {
@@ -304,7 +286,6 @@ public class SyftGenerator extends AbstractTektonController {
     public TaskRun desired(GenerationRecord generation) {
 
         MDCUtils.removeOtelContext();
-        // MDCUtils.addOtelContext(generationRequest.getMDCOtel()); TODO: add this
 
         log.debug(
                 "Preparing dependent resource for the '{}' phase related to Generation with id '{}'",
@@ -316,22 +297,12 @@ public class SyftGenerator extends AbstractTektonController {
 
         GenerationRequest request = JacksonUtils.parse(GenerationRequest.class, generation.request());
 
-        SyftContainerImageOptions options = retrieveOptions(request);
-
-        // SyftOptions options = (SyftOptions) request.generator().config().options();
-
         Duration timeout;
 
-        String timeoutSetting = Optional.ofNullable(options.timeout()).orElse("6h");
-
-        // Parse duration
         try {
-            timeout = Duration.parse(timeoutSetting);
+            timeout = Duration.parse("6h");
         } catch (ParseException e) {
-            throw new ApplicationException(
-                    "Cannot set timeout, provided value: '{}' is invalid duration",
-                    timeoutSetting,
-                    e);
+            throw new ApplicationException("Cannot set timeout", e);
         }
 
         String taskSuffix = null;
@@ -339,27 +310,12 @@ public class SyftGenerator extends AbstractTektonController {
 
         // Select Tekton Task and set parameters depending on the type of the target
         switch (request.target().type()) {
-            case "CONTAINER_IMAGE":
+            case "BREW_RPM":
                 taskSuffix = TASK_SUFFIX;
 
                 params.add(
-                        new ParamBuilder().withName(PARAM_COMMAND_CONTAINER_IMAGE)
+                        new ParamBuilder().withName(PARAM_BREW_BUILD_ID)
                                 .withNewValue(request.target().identifier())
-                                .build());
-                params.add(
-                        new ParamBuilder().withName(PARAM_PATHS)
-                                .withValue(
-                                        new ParamValue(
-                                                Objects.requireNonNullElse(options.paths(), Collections.emptyList())))
-                                .build());
-                /*
-                 * TODO: We use a hardcoded value here. This will be externalized to a custom processor listening on
-                 * generation finished event.
-                 */
-                params.add(new ParamBuilder().withName(PARAM_PROCESSORS).withNewValue("default").build());
-                params.add(
-                        new ParamBuilder().withName(PARAM_RPMS)
-                                .withValue(new ParamValue(Boolean.toString(options.includeRpms())))
                                 .build());
                 break;
 
@@ -373,17 +329,15 @@ public class SyftGenerator extends AbstractTektonController {
 
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withLabels(labels)
-                // TODO: this should be a method
                 .withName(
                         "generation-" + generation.id().toLowerCase() + "-" + SbomGenerationPhase.GENERATE.ordinal()
                                 + "-" + SbomGenerationPhase.GENERATE.name().toLowerCase())
-                .addToAnnotations(ANNOTATION_RETRY_COUNT, "0")
                 .endMetadata()
                 .withNewSpec()
                 .withServiceAccountName(release + SA_SUFFIX)
                 .withTimeout(timeout)
                 .withParams(params)
-                .withTaskRef(new TaskRefBuilder().withName(release + taskSuffix).build())
+                .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
                 .withStepOverrides(TektonUtilities.resourceOverrides(request))
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withSubPath(generation.id())
@@ -400,10 +354,10 @@ public class SyftGenerator extends AbstractTektonController {
         return taskRun;
     }
 
-    private SyftContainerImageOptions retrieveOptions(GenerationRequest request) {
+    private KojiBrewRpmOptions retrieveOptions(GenerationRequest request) {
         JsonNode jsonNode = request.generator().config().options();
         try {
-            return ObjectMapperProvider.json().treeToValue(jsonNode, SyftContainerImageOptions.class);
+            return ObjectMapperProvider.json().treeToValue(jsonNode, KojiBrewRpmOptions.class);
         } catch (JsonProcessingException e) {
             throw new ApplicationException(
                     "Unexpected options provided, expected Syft generator options, but got: {}",
@@ -411,4 +365,5 @@ public class SyftGenerator extends AbstractTektonController {
                     e);
         }
     }
+
 }

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -41,12 +42,19 @@ import org.jboss.sbomer.service.nextgen.service.EntityMapper;
 
 import io.fabric8.knative.pkg.apis.Condition;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.tekton.v1beta1.StepState;
 import io.fabric8.tekton.v1beta1.TaskRun;
+import io.fabric8.tekton.v1beta1.TaskRunBuilder;
+import io.fabric8.tekton.v1beta1.TaskRunSpec;
 import io.fabric8.tekton.v1beta1.TaskRunStatus;
+import io.fabric8.tekton.v1beta1.TaskRunStepOverride;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,6 +65,15 @@ public abstract class AbstractTektonController extends AbstractGenerator
     public static final String IS_OOM_KILLED = "OOMKilled";
     public final static String GENERATION_ID_LABEL = "sbomer.jboss.org/generation-id";
     public final static String GENERATOR_TYPE = "sbomer.jboss.org/generator-type";
+    public static final String ANNOTATION_RETRY_COUNT = "sbomer.jboss.org/retry-count";
+
+    public static final String SA_SUFFIX = "-sa";
+    public static final String SERVICE_SUFFIX = "-service";
+
+    public static final String GENERATE_OVERRIDE = "generate";
+    public static final String CPU_OVERRIDE = "cpu";
+    public static final String MEMORY_OVERRIDE = "memory";
+    public static final String RETRY_SUFFIX = "-retry-";
 
     protected KubernetesClient kubernetesClient;
 
@@ -434,4 +451,53 @@ public abstract class AbstractTektonController extends AbstractGenerator
             kubernetesClient.resource(tr).delete();
         });
     }
+
+    protected void configureOwner(TaskRun taskRun) {
+        Deployment deployment = kubernetesClient.apps().deployments().withName(release + SERVICE_SUFFIX).get();
+
+        if (deployment != null) {
+            log.debug("Setting SBOMer deployment as the owner for the newly created TaskRun");
+
+            taskRun.getMetadata()
+                    .setOwnerReferences(
+                            Collections.singletonList(
+                                    new OwnerReferenceBuilder().withKind(HasMetadata.getKind(Deployment.class))
+                                            .withApiVersion(HasMetadata.getApiVersion(Deployment.class))
+                                            .withName(release + SERVICE_SUFFIX)
+                                            .withUid(deployment.getMetadata().getUid())
+                                            .build()));
+        }
+    }
+
+    protected TaskRun createRetry(TaskRun originalTaskRun, int retryCount, double memoryMultiplier) {
+        ObjectMeta originalMetadata = originalTaskRun.getMetadata();
+        TaskRunSpec originalSpec = originalTaskRun.getSpec();
+        TaskRunStepOverride originalStepOverride = originalTaskRun.getSpec().getStepOverrides().get(0);
+        String originalName = originalMetadata.getName();
+
+        TaskRunStepOverride stepOverride = TektonUtilities
+                .multiplyMemoryOverrides(originalStepOverride, memoryMultiplier);
+
+        String name = originalName.replaceFirst(RETRY_SUFFIX + "\\d+$", "") + RETRY_SUFFIX + retryCount;
+
+        TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
+                .withLabels(originalMetadata.getLabels())
+                .withName(name)
+                .addToAnnotations(ANNOTATION_RETRY_COUNT, String.valueOf(retryCount))
+                .endMetadata()
+                .withNewSpec()
+                .withServiceAccountName(originalSpec.getServiceAccountName())
+                .withTimeout(originalSpec.getTimeout())
+                .withParams(originalSpec.getParams())
+                .withTaskRef(originalSpec.getTaskRef())
+                .withStepOverrides(stepOverride)
+                .withWorkspaces(originalSpec.getWorkspaces())
+                .endSpec()
+                .build();
+
+        configureOwner(taskRun);
+
+        return taskRun;
+    }
+
 }

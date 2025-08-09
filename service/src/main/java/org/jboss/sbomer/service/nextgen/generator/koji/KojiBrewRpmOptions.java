@@ -15,23 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.sbomer.service.nextgen.generator.syft;
+package org.jboss.sbomer.service.nextgen.generator.koji;
 
-import java.util.List;
-
-import org.jboss.sbomer.service.nextgen.core.dto.api.GeneratorConfig;
 import org.jboss.sbomer.service.nextgen.generator.GeneratorRetries;
 
 /**
- * Representation of configuration options related to Syft generator. This is the representation of the {@code options}
+ * Representation of configuration options related to Koji generator. This is the representation of the {@code options}
  * field in {@link GeneratorConfig}.
  *
  * @see GeneratorConfig
- * @param includeRpms Whether to include RPMs in the manifest.
- * @param paths List of paths within the container image that should be scanned by Syft.
  * @param timeout The timeout after which the generation should be terminated.
  * @param retries Generator retry configuration.
  */
-public record SyftContainerImageOptions(boolean includeRpms, List<String> paths, String timeout,
-        GeneratorRetries retries) {
+public record KojiBrewRpmOptions(String timeout, GeneratorRetries retries) {
 }
