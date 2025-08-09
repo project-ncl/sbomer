@@ -21,12 +21,14 @@ import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PNC_CLIENT_DEL
 import static org.jboss.sbomer.core.rest.faulttolerance.Constants.PNC_CLIENT_MAX_RETRIES;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.annotation.ClientHeaderParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.pnc.dto.DeliverableAnalyzerOperation;
 import org.jboss.pnc.dto.requests.DeliverablesAnalysisRequest;
+import org.jboss.pnc.rest.api.swagger.response.SwaggerPages.AnalyzedArtifactPage;
 import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 
 import io.quarkus.oidc.client.filter.OidcClientFilter;
@@ -39,6 +41,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 @ApplicationScoped
@@ -65,5 +68,16 @@ public interface PncClient {
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     DeliverableAnalyzerOperation getDeliverableAnalyzerOperation(@PathParam("id") String operationId);
+
+    @GET
+    @Path("/deliverable-analyses/{id}/analyzed-artifacts")
+    @Retry(maxRetries = PNC_CLIENT_MAX_RETRIES, delay = PNC_CLIENT_DELAY, delayUnit = ChronoUnit.SECONDS)
+    @ExponentialBackoff
+    AnalyzedArtifactPage getAnalyzedArtifacts(
+            @PathParam("id") String deliverableAnalysisReportId,
+            @QueryParam("pageIndex") Optional<Integer> pageIndex,
+            @QueryParam("pageSize") Optional<Integer> pageSize,
+            @QueryParam("sort") Optional<String> sort,
+            @QueryParam("query") Optional<String> query);
 
 }
