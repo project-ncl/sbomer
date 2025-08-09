@@ -1,38 +1,41 @@
-import { ActionList, ActionListItem, Button, Card, CardBody, CardTitle, Grid, GridItem } from '@patternfly/react-core';
+import { Button, Tile, Stack, Heading, ButtonSet } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 export const AboutSection = () => {
   return (
-    <Card isLarge>
-      <CardTitle size={20}>About</CardTitle>
-      <CardBody>
-        <Grid cellSpacing={3} span={12}>
-          <GridItem span={12}>
+    <Tile>
+      <Stack gap={5}>
+        <div>
+          <Heading>About SBOMer</Heading>
+          <p>
             A service to generate <strong>manifests</strong> in the <strong>CycloneDX</strong> format for products.
-          </GridItem>
-          <GridItem>
-            <br />
-            <ActionList>
-              {/* <ActionListItem>
-                <Button variant="primary" size="lg" component={(props: any) => <Link {...props} to="manifests" />}>
-                  Manifests
-                </Button>
-              </ActionListItem> */}
-              <ActionListItem>
-                <Button variant="primary" size="lg" component={(props: any) => <Link {...props} to="generations" />}>
-                  Generations
-                </Button>
-              </ActionListItem>
-              <ActionListItem>
-                <Button variant="secondary" size="lg" component={(props: any) => <Link {...props} to="manifests" />}>
-                  Manifests
-                </Button>
-              </ActionListItem>
-            </ActionList>
-          </GridItem>
-        </Grid>
-      </CardBody>
-    </Card>
+          </p>
+        </div>
+        <ButtonSet>
+          <Button
+            kind="primary"
+            as={Link}
+            to="generations"
+          >
+            Generations
+          </Button>
+          <Button
+            kind="secondary"
+            as={Link}
+            to="manifests"
+          >
+            Manifests
+          </Button>
+          <Button
+            kind="tertiary"
+            as={Link}
+            to="events"
+          >
+            Events
+          </Button>
+        </ButtonSet>
+      </Stack>
+    </Tile>
   );
 };

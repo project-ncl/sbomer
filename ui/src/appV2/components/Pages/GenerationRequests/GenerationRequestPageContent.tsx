@@ -1,23 +1,22 @@
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import {
-  CodeBlock,
-  CodeBlockCode,
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-  Grid,
-  GridItem,
-  Skeleton,
-  Timestamp,
-  TimestampTooltipVariant,
-  Title,
-  Alert,
-  PageSection,
-} from '@patternfly/react-core';
+  SkeletonText,
+  CodeSnippet,
+  StructuredListWrapper,
+  StructuredListHead,
+  StructuredListBody,
+  StructuredListRow,
+  StructuredListCell,
+  Heading,
+  Stack,
+  Tag,
+} from '@carbon/react';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { useGenerationRequest } from './useGenerationRequest';
+import { statusToColor, resultToColor } from '@appV2/utils/Utils';
+import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
 const GenerationRequestPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,15 +25,11 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
   useDocumentTitle('SBOMer | Generations | ' + id);
 
   if (error) {
-    return (
-      <Alert isExpandable variant="warning" title="Cannot retrieve Generation Request">
-        <p>{error.message}.</p>
-      </Alert>
-    );
+    return <ErrorSection error={error} />;
   }
 
   if (loading) {
-    return <Skeleton screenreaderText="Loading..." />;
+    return <SkeletonText />;
   }
 
   if (!request) {
@@ -42,43 +37,82 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
   }
 
   return (
-    <PageSection hasBodyWrapper={false}>
-      <Grid hasGutter span={12}>
-        <GridItem span={12}>
-          <Title headingLevel="h1" size="4xl">
-            Generation Request {id}
-          </Title>
-        </GridItem>
-        <GridItem span={12}>
-          <DescriptionList columnModifier={{ default: '2Col' }}>
-            <DescriptionListGroup>
-              <DescriptionListTerm>ID</DescriptionListTerm>
-              <DescriptionListDescription>
-                <pre>{request.id}</pre>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Created</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Timestamp date={request.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }} />
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          </DescriptionList>
-        </GridItem>
-        <GridItem span={12}>
-          <DescriptionList>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Attributes</DescriptionListTerm>
-              <DescriptionListDescription>
-                <CodeBlock>
-                  <CodeBlockCode>{JSON.stringify(request, null, 2)}</CodeBlockCode>
-                </CodeBlock>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          </DescriptionList>
-        </GridItem>
-      </Grid>
-    </PageSection>
+    <Stack gap={7}>
+      <Heading>Generation {id}</Heading>
+      <StructuredListWrapper>
+        <StructuredListHead>
+          <StructuredListRow head>
+            <StructuredListCell head>Property</StructuredListCell>
+            <StructuredListCell head>Value</StructuredListCell>
+          </StructuredListRow>
+        </StructuredListHead>
+        <StructuredListBody>
+          <StructuredListRow>
+            <StructuredListCell>ID</StructuredListCell>
+            <StructuredListCell>
+              <span>
+                {request.id}
+              </span>
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Created</StructuredListCell>
+            <StructuredListCell>
+              {request.created ? (
+                <Stack gap={2}>
+                  <RelativeTimestamp date={request.created} />
+                  <span>{request.created.toISOString()}</span>
+                </Stack>
+              ) : 'N/A'}
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Updated</StructuredListCell>
+            <StructuredListCell>
+              {request.updated ? (
+                <Stack gap={2}>
+                  <RelativeTimestamp date={request.updated} />
+                  <span>{request.updated.toISOString()}</span>
+                </Stack>
+              ) : 'N/A'}
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Finished</StructuredListCell>
+            <StructuredListCell>
+              {request.finished ? (
+                <Stack gap={2}>
+                  <RelativeTimestamp date={request.finished} />
+                  <p>{request.finished.toISOString()}</p>
+                </Stack>
+              ) : 'N/A'}
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Status</StructuredListCell>
+            <StructuredListCell>
+              <Tag size='md' type={statusToColor(request)}>
+                {request.status}
+              </Tag>
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Result</StructuredListCell>
+            <StructuredListCell>
+              <Tag size='md' type={resultToColor(request)}>
+                {request.result || 'In progress'}
+              </Tag>
+            </StructuredListCell>
+          </StructuredListRow>
+        </StructuredListBody>
+      </StructuredListWrapper>
+        <Stack gap={5}>
+          <Heading>Attributes</Heading>
+          <CodeSnippet type="multi">
+            {JSON.stringify(request, null, 2)}
+          </CodeSnippet>
+        </Stack>
+    </Stack>
   );
 };
 

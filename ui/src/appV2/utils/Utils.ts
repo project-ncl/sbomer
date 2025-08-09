@@ -16,17 +16,13 @@
 /// limitations under the License.
 ///
 
-import { ManifestsQueryType, RequestsQueryType, SbomerGeneration } from '@appV2/types';
-import { Label } from '@patternfly/react-core';
+import { SbomerGeneration } from '@appV2/types';
 
-const GenerationRequestTypes = new Map<string, { description?: string }>([
-  ['CONTAINERIMAGE', { description: 'Container image' }],
-  ['BUILD', { description: 'PNC build' }],
-]);
+type CarbonTagType = 'red' | 'green' | 'blue' | 'gray' | 'magenta' | 'purple' | 'cyan' | 'teal' | 'cool-gray' | 'warm-gray' | 'high-contrast' | 'outline';
 
 const GenerationRequestStatuses = new Map<
   string,
-  { description?: string; color: React.ComponentProps<typeof Label>['color'] }
+  { description?: string; color: CarbonTagType }
 >([
   ['FAILED', { description: 'Failed', color: 'red' }],
   ['GENERATING', { description: 'In progress', color: 'blue' }],
@@ -35,7 +31,7 @@ const GenerationRequestStatuses = new Map<
 
 const GenerationRequestResults = new Map<
   string,
-  { description?: string; color: React.ComponentProps<typeof Label>['color'] }
+  { description?: string; color: CarbonTagType }
 >([
   ['ERR_CONFIG_MISSING', { description: 'Missing configuration', color: 'red' }],
   ['ERR_GENERAL', { description: 'General error', color: 'red' }],
@@ -47,14 +43,16 @@ const GenerationRequestResults = new Map<
   ['SUCCESS', { description: 'Success', color: 'green' }],
 ]);
 
-const RequestEventStatuses = new Map<
+const EventStatuses = new Map<
   string,
-  { description?: string; color: React.ComponentProps<typeof Label>['color'] }
+  { description?: string; color: CarbonTagType }
 >([
   ['FAILED', { description: 'Failed', color: 'red' }],
-  ['IGNORED', { description: 'Ignored', color: 'grey' }],
+  ['IGNORED', { description: 'Ignored', color: 'gray' }],
   ['IN_PROGRESS', { description: 'In progress', color: 'blue' }],
   ['SUCCESS', { description: 'Successfully finished', color: 'green' }],
+  ['NEW', { description: 'New', color: 'teal' }],
+  ['PROCESSED', { description: 'Processed', color: 'purple' }],
 ]);
 
 /**
@@ -70,16 +68,31 @@ export function timestampToHumanReadable(millis: number, seconds?: false, suffix
   var m = Math.floor((secs % 3600) / 60);
   var s = Math.floor((secs % 3600) % 60);
 
-  var dDisplay = d > 0 ? d + (d == 1 ? ' day ' : ' days ') : '';
-  var hDisplay = h > 0 ? h + (h == 1 ? ' hour ' : ' hours ') : '';
-  var mDisplay = m > 0 ? m + (m == 1 ? ' minute ' : ' minutes ') : '';
-  var sDisplay = s > 0 ? s + (s == 1 ? ' second' : ' seconds') : '';
-
   if (secs < 60) {
     return 'just now';
   }
 
-  var hrd = dDisplay + hDisplay + mDisplay;
+  var hrd = '';
+
+  if (d > 3) {
+    // More than 3 days: only show days
+    hrd = d + (d == 1 ? ' day' : ' days');
+  } else if (d >= 1) {
+    // 1-3 days: show days and hours
+    var dDisplay = d + (d == 1 ? ' day' : ' days');
+    var hDisplay = h > 0 ? ' ' + h + (h == 1 ? ' hour' : ' hours') : '';
+    hrd = dDisplay + hDisplay;
+  } else {
+    // Less than 1 day: show hours and minutes
+    var hDisplay = h > 0 ? h + (h == 1 ? ' hour' : ' hours') : '';
+    var mDisplay = m > 0 ? (h > 0 ? ' ' : '') + m + (m == 1 ? ' minute' : ' minutes') : '';
+    hrd = hDisplay + mDisplay;
+
+    // If no hours or minutes, show "just now"
+    if (!hDisplay && !mDisplay) {
+      return 'just now';
+    }
+  }
 
   if (seconds) {
     hrd += seconds;
@@ -100,8 +113,8 @@ export function statusToDescription(request: SbomerGeneration): string {
   return resolved?.description ?? request.status;
 }
 
-export function requestEventStatusToDescription(eventStatus: string): string {
-  var resolved = RequestEventStatuses.get(eventStatus);
+export function eventStatusToDescription(eventStatus: string): string {
+  var resolved = EventStatuses.get(eventStatus);
 
   return resolved?.description ?? eventStatus;
 }
@@ -116,27 +129,21 @@ export function resultToDescription(request: SbomerGeneration): string {
   return resolved?.description ?? request.result;
 }
 
-export function statusToColor(request: SbomerGeneration): React.ComponentProps<typeof Label>['color'] {
+export function statusToColor(request: SbomerGeneration): CarbonTagType {
   if (!isInProgress(request)) {
     return isSuccess(request) ? 'green' : 'red';
   }
 
-  return 'grey';
+  return 'gray';
 }
 
-export function requestEventStatusToColor(status: string): React.ComponentProps<typeof Label>['color'] {
-  if (status == 'FAILED') {
-    return 'red';
-  } else if (status == 'IN_PROGRESS') {
-    return 'blue';
-  } else if (status == 'SUCCESS') {
-    return 'green';
-  } else {
-    return 'grey';
-  }
+export function eventStatusToColor(status: string): CarbonTagType {
+  var resolved = EventStatuses.get(status);
+
+  return resolved?.color ?? 'gray';
 }
 
-export function resultToColor(request: SbomerGeneration): React.ComponentProps<typeof Label>['color'] {
+export function resultToColor(request: SbomerGeneration): CarbonTagType {
   var resolved = GenerationRequestResults.get(request.result);
 
   return resolved?.color ?? 'blue';
@@ -152,11 +159,4 @@ export function isInProgress(request: SbomerGeneration): boolean {
 
 export function isSuccess(request: SbomerGeneration): boolean {
   return request.result == 'SUCCESS' ? true : false;
-}
-
-export function isManifestsQueryType(value: string): value is ManifestsQueryType {
-  return Object.values<string>(ManifestsQueryType).includes(value);
-}
-export function isRequestsQueryType(value: string): value is RequestsQueryType {
-  return Object.values<string>(RequestsQueryType).includes(value);
 }

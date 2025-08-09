@@ -4,8 +4,8 @@ import { GenerationRequestPage } from './components/Pages/GenerationRequests/Gen
 import { GenerationRequestsPage } from './components/Pages/GenerationRequests/GenerationRequestsPage';
 import { ManifestPage } from './components/Pages/Manifests/ManifestPage';
 import { ManifestsPage } from './components/Pages/Manifests/ManifestsPage';
-import { RequestEventsPage } from './components/Pages/RequestEvents/RequestEventsPage';
-import { RequestEventDetailsPage } from './components/Pages/RequestEvents/RequestEventDetailsPage';
+import { EventsPage } from './components/Pages/Events/EventsPage';
+import { EventDetailsPage } from './components/Pages/Events/EventDetailsPage';
 import { NotFoundPage } from './components/Pages/NotFound/NotFoundPage';
 
 let routeFocusTimer: number;
@@ -56,12 +56,12 @@ const routes: AppRouteConfig[] = [
     path: '/manifests/:id',
   },
   {
-    element: <RequestEventsPage />,
+    element: <EventsPage />,
     label: 'Events',
     path: '/events',
   },
   {
-    element: <RequestEventDetailsPage />,
+    element: <EventDetailsPage />,
     path: '/events/:id',
   },
   {

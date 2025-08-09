@@ -1,36 +1,30 @@
 import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useManifest } from '@appV2/components/Pages/Manifests/useManifest';
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import {
-  ActionList,
-  ActionListItem,
-  Alert,
   Button,
-  CodeBlock,
-  CodeBlockCode,
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-  Grid,
-  GridItem,
-  PageSection,
-  Skeleton,
-  Timestamp,
-  TimestampTooltipVariant,
-  Title,
-} from '@patternfly/react-core';
-import { DownloadIcon } from '@patternfly/react-icons';
+  SkeletonText,
+  CodeSnippet,
+  StructuredListWrapper,
+  StructuredListHead,
+  StructuredListBody,
+  StructuredListRow,
+  StructuredListCell,
+  Heading,
+  ButtonSet,
+  Stack,
+} from '@carbon/react';
+import { Download } from '@carbon/icons-react';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-
+import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
 const ManifestPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();
   const [{ request: manifest, error, loading }] = useManifest(id!);
 
   useDocumentTitle('SBOMer | Manifests | ' + id);
-
 
   const downloadManifest = async (manifest: any) => {
     try {
@@ -49,19 +43,12 @@ const ManifestPageContent: React.FunctionComponent = () => {
     }
   };
 
-
-
-
   if (error) {
-    return (
-      <Alert isExpandable variant="warning" title="Cannot retrieve manifest">
-        <p>{error.message}.</p>
-      </Alert>
-    );
+    return <ErrorSection error={error} />;
   }
 
   if (loading) {
-    return <Skeleton screenreaderText="Loading..." />;
+    return <SkeletonText />;
   }
 
   if (!manifest) {
@@ -69,62 +56,56 @@ const ManifestPageContent: React.FunctionComponent = () => {
   }
 
   return (
-    <PageSection hasBodyWrapper={false}>
-      <Grid hasGutter span={12}>
-        <GridItem span={12}>
-          <Title headingLevel="h1" size="4xl">
-            Manifest {id}
-          </Title>
-        </GridItem>
-        <GridItem span={12}>
-          <DescriptionList
-            columnModifier={{
-              default: '2Col',
-            }}
+    <Stack gap={7}>
+      <Heading>Manifest {id}</Heading>
+
+        <StructuredListWrapper>
+          <StructuredListHead>
+            <StructuredListRow head>
+              <StructuredListCell head>Property</StructuredListCell>
+              <StructuredListCell head>Value</StructuredListCell>
+            </StructuredListRow>
+          </StructuredListHead>
+          <StructuredListBody>
+            <StructuredListRow>
+              <StructuredListCell>ID</StructuredListCell>
+              <StructuredListCell>
+                <span >
+                  {manifest.id}
+                </span>
+              </StructuredListCell>
+            </StructuredListRow>
+            <StructuredListRow>
+              <StructuredListCell>Created</StructuredListCell>
+              <StructuredListCell>
+                {manifest.created ? (
+                  <Stack gap={2}>
+                    <RelativeTimestamp date={manifest.created} />
+                    <span>{manifest.created.toISOString()}</span>
+                  </Stack>
+                ) : 'N/A'}
+              </StructuredListCell>
+            </StructuredListRow>
+          </StructuredListBody>
+        </StructuredListWrapper>
+
+        <ButtonSet>
+          <Button
+            kind="primary"
+            renderIcon={Download}
+            onClick={(e) => downloadManifest(manifest)}
           >
-            <DescriptionListGroup>
-              <DescriptionListTerm>ID</DescriptionListTerm>
-              <DescriptionListDescription>
-                <pre>{manifest.id}</pre>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Created</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Timestamp date={manifest.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {/* {timestampToHumanReadable(Date.now() - request.creationTime.getTime(), false, 'ago')} */}
-                </Timestamp>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
+            Download
+          </Button>
+        </ButtonSet>
 
-          </DescriptionList>
-
-        </GridItem>
-
-        <ActionList>
-          <ActionListItem>
-            <Button variant="primary" icon={<DownloadIcon />} onClick={(e) => downloadManifest(manifest)}>
-              {' '}
-              Download
-            </Button>
-          </ActionListItem>
-        </ActionList>
-        <GridItem span={12}>
-          <DescriptionList>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Attributes</DescriptionListTerm>
-              <DescriptionListDescription>
-                <CodeBlock >
-                  <CodeBlockCode>
-                    {JSON.stringify(manifest, null, 2)}
-                  </CodeBlockCode>
-                </CodeBlock>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          </DescriptionList>
-        </GridItem>
-      </Grid>
-    </PageSection>
+        <Stack gap={5}>
+          <Heading>Attributes</Heading>
+          <CodeSnippet type="multi">
+            {JSON.stringify(manifest, null, 2)}
+          </CodeSnippet>
+        </Stack>
+      </Stack>
   );
 };
 
