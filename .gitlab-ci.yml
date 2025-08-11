@@ -92,7 +92,7 @@ build:
 
 build-ui:
   image:
-    name: registry.access.redhat.com/ubi9/nodejs-20-minimal@sha256:550397db3b3f03d800655ed18b89afb4e5df328769b45e12821be31add37f026
+    name: registry.access.redhat.com/ubi9/nodejs-20-minimal@sha256:ab22c3543283c4f41a94c525c1482c9bc4b3a3fac75b897308a0be1097b0ea4f
     entrypoint: [""]
   stage: build
   cache:
