@@ -18,14 +18,16 @@
 package org.jboss.sbomer.service.feature.sbom.runtime;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.pnc.common.log.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.slf4j.MDC;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.context.Scope;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
@@ -48,15 +50,19 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        requestContext.setProperty(REQUEST_EXECUTION_START, System.currentTimeMillis());
-        MDCUtils.setMDCFromRequestContext(requestContext);
-        MDCUtils.addMDCFromOtelHeadersWithFallback(requestContext, Span.current().getSpanContext(), false);
+        Span span = GlobalOpenTelemetry.get()
+                .getTracer("")
+                .spanBuilder(OtelHelper.getEffectiveClassName(this.getClass()) + ".filter-request")
+                .startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            requestContext.setProperty(REQUEST_EXECUTION_START, System.currentTimeMillis());
+            MDCUtils.setMDCFromRequestContext(requestContext);
+            MDCUtils.addMDCFromOtelHeadersWithFallback(requestContext, Span.current().getSpanContext(), false);
 
-        UriInfo uriInfo = requestContext.getUriInfo();
-        Request request = requestContext.getRequest();
+            UriInfo uriInfo = requestContext.getUriInfo();
+            Request request = requestContext.getRequest();
 
-        String forwardedFor = requestContext.getHeaderString("X-FORWARDED-FOR");
-        OtelHelper.withSpan(this.getClass(), ".filter-request", Map.of(), MDC.getCopyOfContextMap(), () -> {
+            String forwardedFor = requestContext.getHeaderString("X-FORWARDED-FOR");
             if (forwardedFor != null) {
                 MDC.put(MDCKeys.X_FORWARDED_FOR_KEY, forwardedFor);
                 log.info(
@@ -67,29 +73,43 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
             } else {
                 log.info("Requested {} {}.", request.getMethod(), uriInfo.getRequestUri());
             }
-            return null;
-        });
+        } catch (Throwable t) {
+            span.recordException(t);
+            span.setStatus(StatusCode.ERROR, t.getMessage());
+            throw t;
+        } finally {
+            span.end();
+        }
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        Long startTime = (Long) requestContext.getProperty(REQUEST_EXECUTION_START);
+        Span span = GlobalOpenTelemetry.get()
+                .getTracer("")
+                .spanBuilder(OtelHelper.getEffectiveClassName(this.getClass()) + ".filter-response")
+                .startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            Long startTime = (Long) requestContext.getProperty(REQUEST_EXECUTION_START);
 
-        String took;
-        if (startTime == null) {
-            took = "-1";
-        } else {
-            took = Long.toString(System.currentTimeMillis() - startTime);
-        }
+            String took;
+            if (startTime == null) {
+                took = "-1";
+            } else {
+                took = Long.toString(System.currentTimeMillis() - startTime);
+            }
 
-        try (MDC.MDCCloseable mdcTook = MDC.putCloseable(MDCKeys.REQUEST_TOOK, took);
-                MDC.MDCCloseable mdcStatus = MDC
-                        .putCloseable(MDCKeys.RESPONSE_STATUS, Integer.toString(responseContext.getStatus()))) {
-            OtelHelper.withSpan(this.getClass(), ".filter-response", Map.of(), MDC.getCopyOfContextMap(), () -> {
+            try (MDC.MDCCloseable mdcTook = MDC.putCloseable(MDCKeys.REQUEST_TOOK, took);
+                    MDC.MDCCloseable mdcStatus = MDC
+                            .putCloseable(MDCKeys.RESPONSE_STATUS, Integer.toString(responseContext.getStatus()))) {
                 log.info("Completed {}, took: {}ms.", requestContext.getUriInfo().getPath(), took);
-                return null;
-            });
+            }
+        } catch (Throwable t) {
+            span.recordException(t);
+            span.setStatus(StatusCode.ERROR, t.getMessage());
+            throw t;
+        } finally {
+            span.end();
         }
     }
 
