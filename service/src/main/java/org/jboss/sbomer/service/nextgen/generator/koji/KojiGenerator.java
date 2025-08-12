@@ -143,7 +143,7 @@ public class KojiGenerator extends AbstractTektonController {
     @Override
     protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.GENERATING, generation.id());
-        
+
         boolean inProgress = false;
         boolean success = true;
         TaskRun erroredTaskRun = null;
@@ -341,15 +341,17 @@ public class KojiGenerator extends AbstractTektonController {
 
         TaskRun taskRun = new TaskRunBuilder().withNewMetadata()
                 .withLabels(labels)
+                // TODO: this should be a method
                 .withName(
                         "generation-" + generation.id().toLowerCase() + "-" + SbomGenerationPhase.GENERATE.ordinal()
                                 + "-" + SbomGenerationPhase.GENERATE.name().toLowerCase())
+                .addToAnnotations(ANNOTATION_RETRY_COUNT, "0")
                 .endMetadata()
                 .withNewSpec()
                 .withServiceAccountName(release + SA_SUFFIX)
                 .withTimeout(timeout)
                 .withParams(params)
-                .withTaskRef(new TaskRefBuilder().withName(release + TASK_SUFFIX).build())
+                .withTaskRef(new TaskRefBuilder().withName(release + taskSuffix).build())
                 .withStepOverrides(TektonUtilities.resourceOverrides(request))
                 .withWorkspaces(
                         new WorkspaceBindingBuilder().withSubPath(generation.id())
