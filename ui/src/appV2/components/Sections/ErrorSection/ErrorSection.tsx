@@ -1,17 +1,25 @@
-import { Card, CardBody, CardTitle, Grid, GridItem } from '@patternfly/react-core';
+import { InlineNotification } from '@carbon/react';
 import React from 'react';
 
-export const ErrorSection = ({ error }: { error: Error }) => {
+type NotificationKind = 'error' | 'warning';
+
+interface ErrorSectionProps {
+  error: Error;
+  kind?: NotificationKind;
+}
+
+export const ErrorSection = ({ error, kind = 'error' }: ErrorSectionProps) => {
+  const getTitle = (notificationKind: NotificationKind) => {
+    return notificationKind === 'error' ? 'An error occurred' : 'Warning';
+  };
+
   return (
-    <Card>
-      <CardTitle size={10}>An error occurred: {error.name}</CardTitle>
-      <CardBody>
-        <Grid cellSpacing={3} span={12}>
-          <GridItem span={12}>
-            {error.message}
-          </GridItem>
-        </Grid>
-      </CardBody>
-    </Card>
+    <InlineNotification
+      kind={kind}
+      title={getTitle(kind)}
+      subtitle={error.message}
+      hideCloseButton
+      lowContrast
+    />
   );
 };

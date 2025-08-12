@@ -20,12 +20,12 @@ import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useCallback } from 'react';
 import { useAsyncRetry } from 'react-use';
 
-export function useRequestEventGeneration(id: string) {
+export function useEventGeneration(id: string) {
   const sbomerApi = DefaultSbomerApiV2.getInstance();
   const getRequestEventGenerations = useCallback(
     async (id: string) => {
       try {
-        return await sbomerApi.getRequestEventGenerations(id);
+        return await sbomerApi.getEventGenerations(id);
       } catch (e) {
         return Promise.reject(e);
       }

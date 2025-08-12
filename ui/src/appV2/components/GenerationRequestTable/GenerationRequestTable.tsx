@@ -1,139 +1,141 @@
-import { statusToColor, statusToDescription, timestampToHumanReadable } from '@appV2/utils/Utils';
-import {
-  Label,
-  Pagination,
-  PaginationVariant,
-  Skeleton,
-  Timestamp,
-  TimestampTooltipVariant,
-  Tooltip,
-} from '@patternfly/react-core';
-import { Caption, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { statusToColor, statusToDescription } from '@appV2/utils/Utils';
+
 import React from 'react';
+export default RelativeTimestamp;
 import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 
 import { useGenerationRequests } from '@appV2/components/GenerationRequestTable/useGenerationRequests';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
+import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination, DataTableSkeleton } from '@carbon/react';
+import RelativeTimestamp from '../UtilsComponents/RelativeTimestamp';
+import { SbomerGeneration } from '@appV2/types';
 
 const columnNames = {
   id: 'ID',
-  type: 'Type',
-  identifier: 'Identifier',
   status: 'Status',
   creationTime: 'Created',
   updatedTime: 'Updated',
   finishedTime: 'Finished',
 };
 
+const headers = [
+  { key: 'id', header: columnNames.id },
+  { key: 'status', header: columnNames.status },
+  { key: 'creationTime', header: columnNames.creationTime },
+  { key: 'updatedTime', header: columnNames.updatedTime },
+  { key: 'finishedTime', header: columnNames.finishedTime },
+];
+
 export const GenerationRequestTable = () => {
   const navigate = useNavigate();
   const paramPage = useSearchParam('page') || 1;
   const paramPageSize = useSearchParam('pageSize') || 10;
 
-  // enable when pagination is implemented
-  const paginationEnabled = true;
 
   const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useGenerationRequests(
     +paramPage - 1,
     +paramPageSize,
   );
 
-  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
+  const onSetPage = (newPage: number) => {
     setPageIndex(newPage - 1);
     navigate({ search: `?page=${newPage}&pageSize=${pageSize}` });
   };
 
-  const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number) => {
+  const onPerPageSelect = (newPerPage: number) => {
     setPageSize(newPerPage);
     setPageIndex(0);
     navigate({ search: `?page=1&pageSize=${newPerPage}` });
   };
 
-  const pagination =  <Pagination
-      itemCount={total}
-      widgetId="request-table-pagination"
-      perPage={pageSize}
+  const pagination = (
+    <Pagination
+      backwardText="Previous page"
+      forwardText="Next page"
+      itemsPerPageText="Items per page:"
+      itemRangeText={(min: number, max: number, total: number) => `${min}–${max} of ${total} items`}
       page={pageIndex + 1}
-      variant={PaginationVariant.bottom}
-      onSetPage={onSetPage}
-      onPerPageSelect={onPerPageSelect}
+      pageNumberText="Page Number"
+      pageSize={pageSize}
+      pageSizes={[
+        { text: '10', value: 10 },
+        { text: '20', value: 20 },
+        { text: '50', value: 50 },
+        { text: '100', value: 100 },
+      ]}
+      totalItems={total || 0}
+      onChange={({ page, pageSize: newPageSize }) => {
+        if (page !== pageIndex + 1) {
+          onSetPage(page);
+        } else if (newPageSize !== pageSize) {
+          onPerPageSelect(newPageSize);
+        }
+      }}
     />
+  );
 
-  const table = <>
-    <Table aria-label="Generation request table" variant="compact">
-      <Caption>Latest manifest generations</Caption>
-      <Thead>
-        <Tr>
-          <Th>{columnNames.id}</Th>
-          <Th>{columnNames.status}</Th>
-          <Th>{columnNames.creationTime}</Th>
-          <Th>{columnNames.updatedTime}</Th>
-          <Th>{columnNames.finishedTime}</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {value && value.map((generation) => (
-          <Tr
-            key={generation.id}
-            isClickable
-            style={{ cursor: 'auto' }}
-          >
-            <Td dataLabel={columnNames.id}>
-              <Link to={`/generations/${generation.id}`}>
-                <pre>{generation.id}</pre>
-              </Link>
-            </Td>
-            <Td dataLabel={columnNames.status}>
-              <Tooltip
-                isContentLeftAligned={true}
-                content={
-                  <div>
-                    <div>
-                      <strong>{generation.result}</strong>
-                    </div>
-                    <div>{generation.reason}</div>
-                  </div>
-                }
-              >
-                <Label color={statusToColor(generation)}>
-                  {statusToDescription(generation)}
-                </Label>
-
-                {/* <span className="pf-v5-c-timestamp pf-m-help-text">{request.status}</span> */}
-              </Tooltip>
-            </Td>
-            <Td dataLabel={columnNames.creationTime}>
-              <Timestamp date={generation.creationTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                {timestampToHumanReadable(Date.now() - generation.creationTime.getTime(), false, 'ago')}
-              </Timestamp>
-            </Td>
-            <Td dataLabel={columnNames.updatedTime}>
-              {generation.updatedTime && (
-                <Timestamp date={generation.updatedTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - generation.updatedTime.getTime(), false, 'ago')}
-                </Timestamp>
-              )}
-            </Td>
-            <Td dataLabel={columnNames.finishedTime}>
-              {generation.finishedTime ? (
-                <Timestamp date={generation.finishedTime} tooltip={{ variant: TimestampTooltipVariant.default }}>
-                  {timestampToHumanReadable(Date.now() - generation.finishedTime.getTime(), false, 'ago')}
-                </Timestamp>
-              ) : (
-                <span className="pf-v5-c-timestamp pf-m-help-text">N/A</span>
-              )}
-            </Td>
-          </Tr>
-        ))}
-      </Tbody>
-    </Table>
-   {paginationEnabled && pagination}
-  </>
+  const table = (
+    <DataTable
+      rows={value || []}
+      headers={headers}
+      render={({ rows, headers }) => (
+        <TableContainer title="Generations" description="Latest generations">
+          <Table aria-label="Generations">
+            <TableHead>
+              <TableRow>
+                {headers.map(header => (
+                  <TableHeader key={header.key}>{header.header}</TableHeader>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {value && value.map((generation: SbomerGeneration) => {
+                return (
+                  <TableRow key={generation.id}>
+                    <TableCell>
+                      <Link to={`/generations/${generation.id}`}>
+                        <pre>{generation.id}</pre>
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Tag size='md' type={statusToColor(generation)}>
+                        {generation?.status || 'unknown'}
+                      </Tag>
+                    </TableCell>
+                    <TableCell>
+                      <RelativeTimestamp date={generation.created} />
+                    </TableCell>
+                    <TableCell>
+                      <RelativeTimestamp date={generation.updated} />
+                    </TableCell>
+                    <TableCell>
+                      <RelativeTimestamp date={generation.finished} />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          {pagination}
+        </TableContainer>
+      )}
+    />
+  );
 
   const noResults = <NoResultsSection />
-  const loadingSkeleton = <Skeleton screenreaderText="Loading data..." />;
+  const loadingSkeleton = (
+    <TableContainer title="Generations" description="Latest generations">
+      <DataTableSkeleton
+        columnCount={Object.keys(columnNames).length}
+        showHeader={false}
+        showToolbar={false}
+        rowCount={10}
+      />
+      {pagination}
+    </TableContainer>
+  );
 
   const tableArea =
     error ? <ErrorSection error={error} /> :

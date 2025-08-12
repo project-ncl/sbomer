@@ -18,12 +18,11 @@
 
 import axios, { Axios, AxiosError } from 'axios';
 import {
-  ManifestsQueryType,
   SbomerApi,
+  SbomerEvent,
   SbomerGeneration,
   SbomerManifest,
-  SbomerEvent,
-  SbomerStats,
+  SbomerStats
 } from '../types';
 
 type Options = {
@@ -75,25 +74,10 @@ export class DefaultSbomerApiV2 implements SbomerApi {
   }
 
   async getManifests(
-    pagination: { pageSize: number; pageIndex: number },
-    queryOption: ManifestsQueryType,
-    query: string,
+    pagination: { pageSize: number; pageIndex: number }
   ): Promise<{ data: SbomerManifest[]; total: number }> {
-    let queryPrefix = '';
-    switch (queryOption) {
-      case ManifestsQueryType.Purl:
-        queryPrefix = 'rootPurl';
-        break;
-      default:
-        queryPrefix = '';
-    }
-
-    const isQueryInputInvalid = !queryPrefix || !query ;
-    const queryStringValue = isQueryInputInvalid ? '' : `${queryPrefix}=like='%${query}%'`;
-    const queryFullString = `${isQueryInputInvalid ? '' : 'query='}${encodeURIComponent(queryStringValue)}${isQueryInputInvalid ? '' : '&'}`;
-
     const response = await fetch(
-      `${this.baseUrl}/api/v1beta2/manifests?${queryFullString}pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
+      `${this.baseUrl}/api/v1beta2/manifests?pageSize=${pagination.pageSize}&pageIndex=${pagination.pageIndex}`,
     );
 
     if (response.status != 200) {
@@ -141,11 +125,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
   }
 
   async getManifest(id: string): Promise<SbomerManifest> {
-    const request = await this.client.get<SbomerManifest>(`/api/v1beta2/manifests/${id}`).then((response) => {
-      return response.data as SbomerManifest;
-    });
-
-    return request;
+    const response = await this.client.get(`/api/v1beta2/manifests/${id}`);
+    return new SbomerManifest(response.data);
   }
 
   async getManifestJson(id: string): Promise<any> {
@@ -198,7 +179,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       const body = await response.text();
 
       throw new Error(
-        'Failed fetching generation requests from SBOMer, got: ' + response.status + " response: '" + body + "'",
+        'Failed fetching generations from SBOMer, got: ' + response.status + " response: '" + body + "'",
       );
     }
 
@@ -216,11 +197,8 @@ export class DefaultSbomerApiV2 implements SbomerApi {
   }
 
   async getGeneration(id: string): Promise<SbomerGeneration> {
-    const request = await this.client.get<SbomerGeneration>(`/api/v1beta2/generations/${id}`).then((response) => {
-      return response.data as SbomerGeneration;
-    });
-
-    return request;
+    const response = await this.client.get(`/api/v1beta2/generations/${id}`);
+    return new SbomerGeneration(response.data);
   }
 
   async getEvents(
@@ -239,7 +217,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       const body = await response.text();
 
       throw new Error(
-        'Failed fetching request events from SBOMer, got: ' + response.status + " response: '" + body + "'",
+        'Failed fetching events from SBOMer, got: ' + response.status + " response: '" + body + "'",
       );
     }
 
@@ -259,15 +237,12 @@ export class DefaultSbomerApiV2 implements SbomerApi {
     return { data: requests, total: requests.length || 0 };
   }
 
-  async getRequestEvent(id: string): Promise<SbomerEvent> {
-    const request  = await this.client.get<SbomerEvent>(`/api/v1beta2/events/${id}`).then((response) => {
-      return response.data as SbomerEvent;
-    });
-
-    return request;
+  async getEvent(id: string): Promise<SbomerEvent> {
+    const response = await this.client.get(`/api/v1beta2/events/${id}`);
+    return new SbomerEvent(response.data);
   }
 
-  async getRequestEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }> {
+  async getEventGenerations(id: string): Promise<{ data: SbomerGeneration[]; total: number }> {
     let pageIndex = 0;
     let totalHits = 0;
     const pageSize = 200;
@@ -282,7 +257,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
       if (response.status !== 200) {
         const body = await response.text();
         throw new Error(
-          'Failed fetching generation requests from SBOMer, got: ' + response.status + " response: '" + body + "'",
+          'Failed fetching generations from SBOMer, got: ' + response.status + " response: '" + body + "'",
         );
       }
 

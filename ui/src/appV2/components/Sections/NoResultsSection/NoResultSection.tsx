@@ -1,13 +1,15 @@
-import { Card, CardBody, CardTitle } from '@patternfly/react-core';
+import { Tile } from '@carbon/react';
 import React from 'react';
 
 export const NoResultsSection = () => {
   return (
-    <Card>
-      <CardTitle>No Results Found</CardTitle>
-      <CardBody>
+    <Tile>
+      <h3>
+        No Results Found
+      </h3>
+      <p>
         No results found for the applied filters.
-      </CardBody>
-    </Card>
+      </p>
+    </Tile>
   );
 };
