@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -58,6 +59,7 @@ import io.fabric8.tekton.v1beta1.TaskRefBuilder;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 import io.fabric8.tekton.v1beta1.WorkspaceBindingBuilder;
+import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.ValidationException;
@@ -128,10 +130,20 @@ public class KojiGenerator extends AbstractTektonController {
         }
     }
 
+    @Scheduled(
+            every = "20s",
+            delay = 10,
+            delayUnit = TimeUnit.SECONDS,
+            concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Override
+    protected void ensureInformer() {
+        super.ensureInformer();
+    }
+
     @Override
     protected void reconcileGenerating(GenerationRecord generation, Set<TaskRun> relatedTaskRuns) {
         log.debug("Reconcile '{}' for Generation '{}'...", GenerationStatus.GENERATING, generation.id());
-
+        
         boolean inProgress = false;
         boolean success = true;
         TaskRun erroredTaskRun = null;
