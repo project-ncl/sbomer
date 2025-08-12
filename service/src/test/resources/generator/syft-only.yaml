@@ -48,7 +48,7 @@ generatorProfiles:
               required:
                 - requests
                 - limits
-            SyftRetries:
+            Retries:
               type: object
               properties:
                 maxCount:
@@ -70,7 +70,7 @@ generatorProfiles:
                 timeout:
                   type: string
                 retries:
-                  $ref: "#/$defs/SyftRetries"
+                  $ref: "#/$defs/Retries"
               required:
                 - includeRpms
                 - paths
