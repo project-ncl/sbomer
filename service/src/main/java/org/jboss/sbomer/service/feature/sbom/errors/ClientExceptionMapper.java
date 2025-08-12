@@ -17,15 +17,14 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
-import java.util.Map;
-
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
-import org.slf4j.MDC;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.context.Scope;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -38,22 +37,31 @@ public class ClientExceptionMapper extends AbstractExceptionMapper<ClientExcepti
 
     @Override
     public Response toResponse(ClientException ex) {
-        ErrorResponse error = ErrorResponse.builder()
-                .resource(uriInfo.getPath())
-                .errorId(ex.getErrorId())
-                .error(Status.fromStatusCode(ex.getCode()).getReasonPhrase())
-                .message(ex.getMessage())
-                .errors(ex.getErrors())
-                .build();
-
-        OtelHelper.withSpan(this.getClass(), ".toResponse", Map.of(), MDC.getCopyOfContextMap(), () -> {
-            log.error(error.toString(), ex);
-            Span span = Span.current();
+        Span span = GlobalOpenTelemetry.get()
+                .getTracer("")
+                .spanBuilder(OtelHelper.getEffectiveClassName(this.getClass()) + ".toResponse")
+                .startSpan();
+        try (Scope scope = span.makeCurrent()) {
             span.recordException(ex);
             span.setStatus(StatusCode.ERROR, ex.getMessage());
-            return null;
-        });
 
-        return Response.status(ex.getCode()).entity(error).type(MediaType.APPLICATION_JSON).build();
+            ErrorResponse error = ErrorResponse.builder()
+                    .resource(uriInfo.getPath())
+                    .errorId(ex.getErrorId())
+                    .error(Status.fromStatusCode(ex.getCode()).getReasonPhrase())
+                    .message(ex.getMessage())
+                    .errors(ex.getErrors())
+                    .build();
+
+            log.error(error.toString(), ex);
+
+            return Response.status(ex.getCode()).entity(error).type(MediaType.APPLICATION_JSON).build();
+        } catch (Throwable t) {
+            span.recordException(t);
+            span.setStatus(StatusCode.ERROR, t.getMessage());
+            throw t;
+        } finally {
+            span.end();
+        }
     }
 }
