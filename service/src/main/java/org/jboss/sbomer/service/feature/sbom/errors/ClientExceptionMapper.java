@@ -17,12 +17,22 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_FLAGS_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
+import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_STATE_KEY;
+
+import java.util.Map;
+
+import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
+import org.slf4j.MDC;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Scope;
 import jakarta.ws.rs.core.MediaType;
@@ -37,9 +47,17 @@ public class ClientExceptionMapper extends AbstractExceptionMapper<ClientExcepti
 
     @Override
     public Response toResponse(ClientException ex) {
-        Span span = GlobalOpenTelemetry.get()
-                .getTracer("")
-                .spanBuilder(OtelHelper.getEffectiveClassName(this.getClass()) + ".toResponse")
+        Span span = OtelUtils
+                .buildChildSpan(
+                        GlobalOpenTelemetry.get().getTracer(""),
+                        OtelHelper.getEffectiveClassName(this.getClass()) + ".toResponse",
+                        SpanKind.CLIENT,
+                        MDC.get(MDC_TRACE_ID_KEY),
+                        MDC.get(MDC_SPAN_ID_KEY),
+                        MDC.get(MDC_TRACE_FLAGS_KEY),
+                        MDC.get(MDC_TRACE_STATE_KEY),
+                        Span.current().getSpanContext(),
+                        Map.of())
                 .startSpan();
         try (Scope scope = span.makeCurrent()) {
             span.recordException(ex);
