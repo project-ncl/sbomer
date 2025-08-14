@@ -154,7 +154,7 @@ quarkus:
   datasource:
     db-kind: postgresql
     jdbc:
-      max-size: 15
+      max-size: 20
       min-size: 0
       initial-size: 1
       acquisition-timeout: 45
@@ -238,7 +238,7 @@ sbomer:
     generation-scheduler:
       # Defines how many requests can be handled concurrently within the namespace
       # If the capacity is lower than what we have in the DB -- the ones in DB will wait
-      max-concurrent-generations: 15
+      max-concurrent-generations: 10
 
       # Maximum number of generations that will fetched from the database to be scheduled within the namespace.
       sync-batch: 5
