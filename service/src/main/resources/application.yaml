@@ -238,10 +238,10 @@ sbomer:
     generation-scheduler:
       # Defines how many requests can be handled concurrently within the namespace
       # If the capacity is lower than what we have in the DB -- the ones in DB will wait
-      max-concurrent-generations: 10
+      max-concurrent-generations: 20
 
       # Maximum number of generations that will fetched from the database to be scheduled within the namespace.
-      sync-batch: 5
+      sync-batch: 10
 
       # The interval on which the scheduler will run.
       sync-interval: 15s
