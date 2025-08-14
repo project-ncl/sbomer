@@ -154,12 +154,12 @@ quarkus:
   datasource:
     db-kind: postgresql
     jdbc:
-      max-size: 10
+      max-size: 15
       min-size: 0
       initial-size: 1
-      acquisition-timeout: 30
+      acquisition-timeout: 45
       additional-jdbc-properties:
-        connectTimeout: 15
+        connectTimeout: 20
         socketTimeout: 30
 
   # https://quarkus.io/guides/hibernate-orm
@@ -238,10 +238,10 @@ sbomer:
     generation-scheduler:
       # Defines how many requests can be handled concurrently within the namespace
       # If the capacity is lower than what we have in the DB -- the ones in DB will wait
-      max-concurrent-generations: 20
+      max-concurrent-generations: 15
 
       # Maximum number of generations that will fetched from the database to be scheduled within the namespace.
-      sync-batch: 10
+      sync-batch: 5
 
       # The interval on which the scheduler will run.
       sync-interval: 15s
