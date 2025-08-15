@@ -34,14 +34,14 @@ class UrlUtilsTest {
 
         @Test
         void testHandleNullValues() {
-            assertNull(UrlUtils.removeAllowedQualifiersFromPurl(null, null));
+            assertNull(UrlUtils.removeQualifiersFromPurl(null, null));
         }
 
         @Test
         void testHandleNullAllowList() {
             assertEquals(
                     "pkg:maven/org.jboss.arquillian.container/arquillian-container-impl-base@1.6.0.Final?type=jar",
-                    UrlUtils.removeAllowedQualifiersFromPurl(
+                    UrlUtils.removeQualifiersFromPurl(
                             "pkg:maven/org.jboss.arquillian.container/arquillian-container-impl-base@1.6.0.Final?type=jar",
                             null));
         }
@@ -50,7 +50,7 @@ class UrlUtilsTest {
         void testHandleEmptyAllowList() {
             assertEquals(
                     "pkg:maven/org.jboss.arquillian.container/arquillian-container-impl-base@1.6.0.Final?type=jar",
-                    UrlUtils.removeAllowedQualifiersFromPurl(
+                    UrlUtils.removeQualifiersFromPurl(
                             "pkg:maven/org.jboss.arquillian.container/arquillian-container-impl-base@1.6.0.Final?type=jar",
                             Collections.emptyList()));
         }
@@ -59,7 +59,7 @@ class UrlUtilsTest {
         void testHandleAllowList() {
             assertEquals(
                     "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?type=pom",
-                    UrlUtils.removeAllowedQualifiersFromPurl(
+                    UrlUtils.removeQualifiersFromPurl(
                             "pkg:maven/org.apache.logging.log4j/log4j@2.19.0.redhat-00001?repository_url=https%3A%2F%2Fmaven.repository.redhat.com%2Fga%2F&type=pom",
                             List.of("repository_url")));
         }

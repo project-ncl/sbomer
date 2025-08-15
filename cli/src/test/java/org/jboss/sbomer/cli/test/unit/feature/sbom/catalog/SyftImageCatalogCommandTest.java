@@ -1,7 +1,9 @@
 package org.jboss.sbomer.cli.test.unit.feature.sbom.catalog;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +18,7 @@ import org.cyclonedx.model.Hash;
 import org.cyclonedx.model.Pedigree;
 import org.cyclonedx.model.Variants;
 import org.jboss.sbomer.cli.feature.sbom.command.catalog.SyftImageCatalogCommand;
+import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
 import org.jboss.sbomer.core.test.TestResources;
 import org.junit.jupiter.api.Test;
@@ -142,4 +145,32 @@ class SyftImageCatalogCommandTest {
                 .orElse(null);
     }
 
+    @Test
+    void missingContainerArch() throws IOException {
+        Bom noarch = SbomUtils.fromString(TestResources.asString("boms/catalog/amd64.json"));
+        assertNotNull(noarch);
+        List<Bom> boms = List.of(noarch);
+
+        String imageName = "rh-osbs/ubi9-ubi-micro";
+        String imageDigest = "sha256:1c8483e0fda0e990175eb9855a5f15e0910d2038dd397d9e2b357630f0321e6d";
+
+        // Set PURL without arch
+        boms.get(0)
+                .getComponents()
+                .get(0)
+                .setPurl(
+                        "pkg:oci/ubi-micro@sha256%3A213fd2a0116a76eaa274fee20c86eef4dfba9f311784e8fb7d7f5fc38b32f3ef?os=linux&tag=9.4-6.1716471860");
+
+        SyftImageCatalogCommandAlt cataloger = new SyftImageCatalogCommandAlt();
+        // We should still be able to progress with just the sbomer:image:labels:architecture property
+        assertDoesNotThrow(() -> {
+            cataloger.doCatalog(imageName, imageDigest, boms);
+        });
+
+        // We should throw an application exception if its missing both
+        boms.get(0).getComponents().get(0).setProperties(null);
+        assertThrows(ApplicationException.class, () -> {
+            cataloger.doCatalog(imageName, imageDigest, boms);
+        });
+    }
 }
