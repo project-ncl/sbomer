@@ -23,10 +23,10 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
+import com.github.packageurl.PackageURLBuilder;
 
 public class UrlUtils {
 
@@ -43,39 +43,26 @@ public class UrlUtils {
     }
 
     /**
-     * Removes from the provided purl the qualifiers that are present (if any) in the allowList. If the purl does not
+     * Removes from the provided purl the qualifiers that are present (if any) in the removeList. If the purl does not
      * contain any qualifier that needs to be removed, the original purl is returned, otherwise a new purl is built and
      * returned.
      *
      * @param purl the purl from which the qualifiers should be removed
-     * @param allowList the list of qualifiers which should be removed from the purl
+     * @param removeList the list of qualifiers which should be removed from the purl
      * @return the purl with the qualifiers removed
      */
-    public static String removeAllowedQualifiersFromPurl(String purl, List<String> allowList) {
+    public static String removeQualifiersFromPurl(String purl, List<String> removeList) {
         try {
             PackageURL packageURL = new PackageURL(purl);
             Map<String, String> qualifiers = packageURL.getQualifiers();
-            if (qualifiers == null || qualifiers.isEmpty() || allowList == null || allowList.isEmpty()) {
+            if (qualifiers == null || qualifiers.isEmpty() || removeList == null || removeList.isEmpty()) {
                 // Nothing to remove!
                 return purl;
             }
 
-            if (allowList.stream().noneMatch(qualifiers::containsKey)) {
-                // The qualifiers do not include any allowedQualifier
-                return purl;
-            }
-
-            // Qualifiers are not modifiable, we need to recreate the purl with the new map of qualifiers
-            TreeMap<String, String> modifiableQualifiers = new TreeMap<>(qualifiers);
-            allowList.forEach(modifiableQualifiers.keySet()::remove);
-
-            return new PackageURL(
-                    packageURL.getType(),
-                    packageURL.getNamespace(),
-                    packageURL.getName(),
-                    packageURL.getVersion(),
-                    modifiableQualifiers,
-                    packageURL.getSubpath()).toString();
+            PackageURLBuilder builder = packageURL.toBuilder();
+            removeList.forEach(builder::withoutQualifier);
+            return builder.build().toString();
         } catch (MalformedPackageURLException e) {
             // Just return the originally provided purl
             return purl;

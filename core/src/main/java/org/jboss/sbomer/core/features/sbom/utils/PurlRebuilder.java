@@ -36,6 +36,7 @@ public class PurlRebuilder {
     private static final String SYFT_ALPMPKG = "alpm";
     private static final String SYFT_APKPKG = "apk";
     private static final String SYFT_BINARYPKG = "binary";
+    private static final String SYFT_BITNAMIPKG = "bitnami";
     private static final String SYFT_COCOAPODSPKG = "pod";
     private static final String SYFT_CONANPKG = "conan";
     private static final String SYFT_DARTPUBPKG = "dart-pub";
@@ -49,6 +50,7 @@ public class PurlRebuilder {
     private static final String SYFT_GRAALVMNATIVEIMAGEPKG = "graalvm-native-image";
     private static final String SYFT_HACKAGEPKG = "hackage";
     private static final String SYFT_HEXPKG = "hex";
+    private static final String SYFT_HOMEBREWPKG = "homebrew";
     private static final String SYFT_JAVAPKG = "java-archive";
     private static final String SYFT_JENKINSPACKAGE = "jenkins-plugin";
     private static final String SYFT_KBPKG = "msrc-kb";
@@ -56,7 +58,9 @@ public class PurlRebuilder {
     private static final String SYFT_LINUXKERNELMODULEPKG = "linux-kernel-module";
     private static final String SYFT_NIXPKG = "nix";
     private static final String SYFT_NPMPKG = "npm";
+    private static final String SYFT_OPAMPKG = "opam";
     private static final String SYFT_PHPCOMPOSERPKG = "php-composer";
+    private static final String SYFT_PHPPEARPKG = "php-pear";
     private static final String SYFT_PHPPECLPKG = "php-pecl";
     private static final String SYFT_PORTAGEPKG = "portage";
     private static final String SYFT_PYTHONPKG = "python";
@@ -66,17 +70,19 @@ public class PurlRebuilder {
     private static final String SYFT_RUSTPKG = "rust-crate";
     private static final String SYFT_SWIFTPKG = "swift";
     private static final String SYFT_SWIPLPACKPKG = "swiplpack";
-    private static final String SYFT_OPAMPKG = "opam";
+    private static final String SYFT_TERRAFORMPKG = "terraform";
     private static final String SYFT_WORDPRESSPLUGINPKG = "wordpress-plugin";
 
     // Associations taken from https://github.com/anchore/syft/blob/main/syft/pkg/type.go#L91
     private static final Map<String, String> SYFT_PACKAGE_2_PURL_TYPE_MAP = new HashMap<>();
     static {
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_ALPMPKG, "alpm");
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_APKPKG, "apk");
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_COCOAPODSPKG, "cocoapods");
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_CONANPKG, "conan");
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_DARTPUBPKG, "pub");
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_ALPMPKG, "alpm"); // standard
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_APKPKG, "apk"); // standard
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_BINARYPKG, "binary");
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_BITNAMIPKG, "bitnami"); // standard
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_COCOAPODSPKG, "cocoapods"); // standard
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_CONANPKG, "conan"); // standard
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_DARTPUBPKG, "pub"); // standard
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_DEBPKG, PackageURL.StandardTypes.DEBIAN);
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_DOTNETPKG, "dotnet");
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_ERLANGOTPPKG, "otp");
@@ -84,26 +90,31 @@ public class PurlRebuilder {
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_GITHUBACTIONPKG, PackageURL.StandardTypes.GITHUB);
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_GITHUBACTIONWORKFLOWPKG, PackageURL.StandardTypes.GITHUB);
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_GOMODULEPKG, PackageURL.StandardTypes.GOLANG);
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_GRAALVMNATIVEIMAGEPKG, "graalvm-native-image");
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_HACKAGEPKG, "hackage");
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_HEXPKG, PackageURL.StandardTypes.HEX);
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_HOMEBREWPKG, "brew"); // candidate
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_JAVAPKG, PackageURL.StandardTypes.MAVEN);
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_JENKINSPACKAGE, PackageURL.StandardTypes.MAVEN);
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_KBPKG, "msrc-kb");
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_LINUXKERNELPKG, "generic/linux-kernel");
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_LINUXKERNELMODULEPKG, PackageURL.StandardTypes.GENERIC);
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_NIXPKG, "nix");
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_NIXPKG, "nix"); // candidate
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_NPMPKG, PackageURL.StandardTypes.NPM);
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_OPAMPKG, "opam"); // candidate
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_PHPCOMPOSERPKG, PackageURL.StandardTypes.COMPOSER);
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_PHPPECLPKG, "pecl");
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_PHPPEARPKG, "pear"); // candidate
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_PHPPECLPKG, "pecl"); // candidate
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_PORTAGEPKG, "portage");
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_PYTHONPKG, PackageURL.StandardTypes.PYPI);
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_RPKG, "cran");
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_LUAROCKSPKG, "luarocks");
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_RPKG, "cran"); // standard
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_LUAROCKSPKG, "luarocks"); // standard
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_RPMPKG, PackageURL.StandardTypes.RPM);
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_RUSTPKG, PackageURL.StandardTypes.CARGO);
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_SWIFTPKG, "swift");
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_SWIFTPKG, "swift"); // standard
         SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_SWIPLPACKPKG, "swiplpack");
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_OPAMPKG, "opam");
-        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_WORDPRESSPLUGINPKG, "wordpress-plugin");
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_TERRAFORMPKG, "terraform"); // candidate
+        SYFT_PACKAGE_2_PURL_TYPE_MAP.put(SYFT_WORDPRESSPLUGINPKG, "wordpress"); // candidate
     }
 
     private PurlRebuilder() {
@@ -141,7 +152,7 @@ public class PurlRebuilder {
         String version = PurlSanitizer.sanitizeVersion(component.getVersion());
 
         PackageURL purl = new PackageURL(type, namespace, name, version, null, null);
-        return purl.canonicalize();
+        return purl.toString();
     }
 
 }

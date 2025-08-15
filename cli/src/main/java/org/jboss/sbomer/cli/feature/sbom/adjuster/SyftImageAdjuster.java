@@ -253,33 +253,37 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                 return true;
             }
 
-            log.debug("Handling component '{}'", c.getPurl());
-
             // Handle RPMs
-            if (c.getPurl().startsWith("pkg:" + PackageURL.StandardTypes.RPM)) {
-                // Remove all components that are RPMs if the includeRpms is not set to true
-                log.debug("Component is of type RPM, to be removed: {} (includeRpms: {})", c.getPurl(), includeRpms);
-                return !includeRpms;
-            } else {
-                // Handle everything else
-
-                // If paths are not specified, include everything
-                if (paths == null || paths.isEmpty()) {
-                    log.debug("No paths provided, component won't be removed");
-                    return false;
+            try {
+                PackageURL purl = new PackageURL(c.getPurl());
+                log.debug("Handling component '{}'", purl);
+                if (PackageURL.StandardTypes.RPM.equals(purl.getType())) {
+                    // Remove all components that are RPMs if the includeRpms is not set to true
+                    log.debug("Component is of type RPM, to be removed: '{}' (includeRpms: {})", purl, includeRpms);
+                    return !includeRpms;
                 }
-
-                // Remove all components that are not on the paths we are interested in
-                boolean onPath = c.getProperties()
-                        .stream()
-                        .filter(p -> p.getName().equals("syft:location:0:path") && isOnPath(p.getValue()))
-                        .findAny()
-                        .isEmpty();
-
-                log.debug("Component on path: {}", onPath);
-
-                return onPath;
+            } catch (MalformedPackageURLException e) {
+                log.warn("Could not parse the PURL: '{}'", c.getPurl(), e);
             }
+
+            // Handle everything else
+
+            // If paths are not specified, include everything
+            if (paths == null || paths.isEmpty()) {
+                log.debug("No paths provided, component won't be removed");
+                return false;
+            }
+
+            // Remove all components that are not on the paths we are interested in
+            boolean onPath = c.getProperties()
+                    .stream()
+                    .filter(p -> p.getName().equals("syft:location:0:path") && isOnPath(p.getValue()))
+                    .findAny()
+                    .isEmpty();
+
+            log.debug("Component on path: {}", onPath);
+
+            return onPath;
         });
 
         // Go deep
@@ -626,7 +630,7 @@ public class SyftImageAdjuster extends AbstractAdjuster {
                     packageURL.getName(),
                     packageURL.getVersion(),
                     qualifiers,
-                    packageURL.getSubpath()).canonicalize();
+                    packageURL.getSubpath()).toString();
         }
         return packageURL.toString();
     }
