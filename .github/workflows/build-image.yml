@@ -49,7 +49,7 @@ jobs:
           openssl x509 -in certs/2015-IT-Root-CA.pem -text > /dev/null
       - name: Download ${{ inputs.artifact }}
         if: "${{ inputs.artifact != 'false' }}"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: dist-${{ inputs.artifact }}
           path: ${{ inputs.path }}
