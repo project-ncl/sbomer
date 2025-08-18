@@ -35,7 +35,7 @@ runs:
         echo "Current permission level is ${{ steps.checkAccess.outputs.user-permission }}"
         exit 1
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         ref: ${{ inputs.repo-ref }}
         repository: ${{ inputs.repo-full-name }}
