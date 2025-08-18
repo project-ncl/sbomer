@@ -4,11 +4,13 @@ import {
   ChevronRight,
   Dashboard,
   DocumentMultiple_02,
-  EventChange
+  EventChange,
 } from '@carbon/icons-react';
 import {
   Button,
+  Column,
   Content,
+  Grid,
   Header,
   HeaderContainer,
   HeaderGlobalBar,
@@ -120,13 +122,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </>
         )}
       />
-      <Content id="main-content" style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: 'calc(100vh - 48px)',
-        flex: 1
-      }}>
-        {children}
+       <Content id="main-content">
+        <Grid>
+          <Column sm={4} md={8} lg={16}>
+            {children}
+          </Column>
+        </Grid>
       </Content>
     </>
 
