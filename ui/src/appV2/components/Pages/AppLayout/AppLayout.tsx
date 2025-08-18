@@ -1,6 +1,7 @@
 import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
 import {
   Application,
+  Asleep,
   ChevronRight,
   Dashboard,
   DocumentMultiple_02,
@@ -19,11 +20,14 @@ import {
   HeaderMenuButton,
   HeaderName,
   HeaderPanel,
+  Select,
+  SelectItem,
   SideNav,
   SideNavHeader,
   SideNavItems,
   SideNavLink,
-  SwitcherItem
+  SwitcherItem,
+  Theme
 } from '@carbon/react';
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -36,6 +40,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
   const [sideNavExpanded, setSideNavExpanded] = React.useState(true);
   const [menuPanelExpanded, setMenuPanelExpanded] = React.useState(false);
+
+  const [currentTheme, setCurrentTheme] = React.useState<'white' | 'g100'>(() => {
+    const savedTheme = localStorage.getItem('sbomer-theme');
+    return (savedTheme as 'white' | 'g100') || 'g100';
+  });
+
+  const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newTheme = event.target.value as 'white' | 'g100';
+    setCurrentTheme(newTheme);
+    localStorage.setItem('sbomer-theme', newTheme);
+  };
 
   const getRouteIcon = (path: string, label?: string) => {
     if (path === '/' || label === 'Dashboard') return Dashboard;
@@ -85,7 +100,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   return (
-    <>
+    <Theme theme={currentTheme}>
       <HeaderContainer
         render={({ onClickSideNavExpand }) => (
           <>
@@ -104,6 +119,18 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </HeaderName>
 
               <HeaderGlobalBar>
+                <HeaderGlobalAction
+                  aria-label="Theme switcher"
+                  onClick={() => {
+                    setCurrentTheme(prevTheme => {
+                      const newTheme = prevTheme === 'g100' ? 'white' : 'g100';
+                      localStorage.setItem('sbomer-theme', newTheme);
+                      return newTheme as 'white' | 'g100';
+                    });
+                  }}
+                >
+                  <Asleep size={20} />
+                </HeaderGlobalAction>
                 <HeaderGlobalAction
                   aria-label="App switcher"
                   isActive={menuPanelExpanded}
@@ -156,7 +183,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </Column>
         </Grid>
       </Content>
-    </>
+
+    </Theme>
 
   );
 };
