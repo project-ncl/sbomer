@@ -5,21 +5,25 @@ import {
   Dashboard,
   DocumentMultiple_02,
   EventChange,
+  Switcher as SwitcherIcon
 } from '@carbon/icons-react';
 import {
-  Button,
+  Switcher as CarbonSwitcher,
   Column,
   Content,
   Grid,
   Header,
   HeaderContainer,
+  HeaderGlobalAction,
   HeaderGlobalBar,
   HeaderMenuButton,
   HeaderName,
+  HeaderPanel,
   SideNav,
   SideNavHeader,
   SideNavItems,
-  SideNavLink
+  SideNavLink,
+  SwitcherItem
 } from '@carbon/react';
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -31,6 +35,7 @@ interface IAppLayout {
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
   const [sideNavExpanded, setSideNavExpanded] = React.useState(true);
+  const [menuPanelExpanded, setMenuPanelExpanded] = React.useState(false);
 
   const getRouteIcon = (path: string, label?: string) => {
     if (path === '/' || label === 'Dashboard') return Dashboard;
@@ -95,19 +100,41 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 isCollapsible={true}
               />
               <HeaderName prefix=''>
-                  SBOMer
+                SBOMer
               </HeaderName>
 
               <HeaderGlobalBar>
-               <Button
-                 size='lg'
-                 onClick={() => window.location.pathname !== '/' && (window.location.href = '/')}
-               >
-                 Go to Classic
-               </Button>
+                <HeaderGlobalAction
+                  aria-label="App switcher"
+                  isActive={menuPanelExpanded}
+                  onClick={() => setMenuPanelExpanded(!menuPanelExpanded)}
+                  tooltipAlignment="end"
+                >
+                  <SwitcherIcon size={20} />
+                </HeaderGlobalAction>
               </HeaderGlobalBar>
 
             </Header>
+
+            <HeaderPanel
+              aria-label="Application Switcher"
+              expanded={menuPanelExpanded}
+            >
+              <CarbonSwitcher aria-label="Switcher Container">
+                <SwitcherItem
+                  aria-label="Switch to SBOMer Classic"
+                  href="/"
+                  onClick={() => {
+                    if (window.location.pathname !== '/') {
+                      window.location.href = '/';
+                    }
+                    setMenuPanelExpanded(false);
+                  }}
+                >
+                  Switch to SBOMer Classic
+                </SwitcherItem>
+              </CarbonSwitcher>
+            </HeaderPanel>
             <SideNav
               aria-label="Side navigation"
               expanded={sideNavExpanded}
@@ -122,7 +149,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </>
         )}
       />
-       <Content id="main-content">
+      <Content id="main-content">
         <Grid>
           <Column sm={4} md={8} lg={16}>
             {children}
