@@ -1,12 +1,12 @@
-import { Tile } from '@carbon/react';
+import { Heading, Tile } from '@carbon/react';
 import React from 'react';
 
 export const NoResultsSection = () => {
   return (
     <Tile>
-      <h3>
+      <Heading>
         No Results Found
-      </h3>
+      </Heading>
       <p>
         No results found for the applied filters.
       </p>
