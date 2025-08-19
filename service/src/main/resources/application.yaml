@@ -153,6 +153,7 @@ quarkus:
   # Database configuration
   datasource:
     db-kind: postgresql
+    metrics: true
     jdbc:
       max-size: 20
       min-size: 0
