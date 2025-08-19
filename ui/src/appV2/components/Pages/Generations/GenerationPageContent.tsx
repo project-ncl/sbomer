@@ -1,22 +1,22 @@
-import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { resultToColor, statusToColor } from '@appV2/utils/Utils';
 import {
-  SkeletonText,
   CodeSnippet,
-  StructuredListWrapper,
-  StructuredListHead,
-  StructuredListBody,
-  StructuredListRow,
-  StructuredListCell,
   Heading,
+  SkeletonText,
   Stack,
+  StructuredListBody,
+  StructuredListCell,
+  StructuredListHead,
+  StructuredListRow,
+  StructuredListWrapper,
   Tag,
 } from '@carbon/react';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { useGeneration } from './useGeneration';
-import { statusToColor, resultToColor } from '@appV2/utils/Utils';
-import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
 const GenerationPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();

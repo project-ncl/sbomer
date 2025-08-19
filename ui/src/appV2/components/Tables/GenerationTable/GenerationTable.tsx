@@ -1,16 +1,16 @@
-import { statusToColor, statusToDescription } from '@appV2/utils/Utils';
+import { statusToColor } from '@appV2/utils/Utils';
 
 import React from 'react';
-export default RelativeTimestamp;
 import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
+export default RelativeTimestamp;
 
-import { useGenerations as useGenerations } from '@appV2/components/Tables/GenerationTable/useGenerations';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
-import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination, DataTableSkeleton } from '@carbon/react';
+import { useGenerations } from '@appV2/components/Tables/GenerationTable/useGenerations';
 import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 import { SbomerGeneration } from '@appV2/types';
+import { DataTable, DataTableSkeleton, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow, Tag } from '@carbon/react';
 
 const columnNames = {
   id: 'ID',

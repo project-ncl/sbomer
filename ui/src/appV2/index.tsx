@@ -4,7 +4,6 @@ import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-d
 import { IAppRoute, routes } from './routes';
 import './app.css';
 import './carbon-styles.scss';
-import { Theme } from '@carbon/react';
 
 const AppV2 = ({ basename }: { basename: string }) => {
   return (
