@@ -14,13 +14,13 @@ import {
 } from '@carbon/react';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { useGenerationRequest } from './useGenerationRequest';
+import { useGeneration } from './useGeneration';
 import { statusToColor, resultToColor } from '@appV2/utils/Utils';
 import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
-const GenerationRequestPageContent: React.FunctionComponent = () => {
+const GenerationPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();
-  const [{ request, error, loading }] = useGenerationRequest(id!);
+  const [{ request, error, loading }] = useGeneration(id!);
 
   useDocumentTitle('SBOMer | Generations | ' + id);
 
@@ -116,4 +116,4 @@ const GenerationRequestPageContent: React.FunctionComponent = () => {
   );
 };
 
-export { GenerationRequestPageContent };
+export { GenerationPageContent as GenerationPageContent };

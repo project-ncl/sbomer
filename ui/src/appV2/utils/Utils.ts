@@ -20,7 +20,7 @@ import { SbomerGeneration } from '@appV2/types';
 
 type CarbonTagType = 'red' | 'green' | 'blue' | 'gray' | 'magenta' | 'purple' | 'cyan' | 'teal' | 'cool-gray' | 'warm-gray' | 'high-contrast' | 'outline';
 
-const GenerationRequestStatuses = new Map<
+const GenerationStatuses = new Map<
   string,
   { description?: string; color: CarbonTagType }
 >([
@@ -29,7 +29,7 @@ const GenerationRequestStatuses = new Map<
   ['FINISHED', { description: 'Successfully finished', color: 'green' }],
 ]);
 
-const GenerationRequestResults = new Map<
+const GenerationResults = new Map<
   string,
   { description?: string; color: CarbonTagType }
 >([
@@ -108,7 +108,7 @@ export function timestampToHumanReadable(millis: number, seconds?: false, suffix
 
 
 export function statusToDescription(request: SbomerGeneration): string {
-  var resolved = GenerationRequestStatuses.get(request.status);
+  var resolved = GenerationStatuses.get(request.status);
 
   return resolved?.description ?? request.status;
 }
@@ -124,7 +124,7 @@ export function resultToDescription(request: SbomerGeneration): string {
     return 'In progress';
   }
 
-  var resolved = GenerationRequestResults.get(request.result);
+  var resolved = GenerationResults.get(request.result);
 
   return resolved?.description ?? request.result;
 }
@@ -144,7 +144,7 @@ export function eventStatusToColor(status: string): CarbonTagType {
 }
 
 export function resultToColor(request: SbomerGeneration): CarbonTagType {
-  var resolved = GenerationRequestResults.get(request.result);
+  var resolved = GenerationResults.get(request.result);
 
   return resolved?.color ?? 'blue';
 }

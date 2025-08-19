@@ -5,7 +5,7 @@ export default RelativeTimestamp;
 import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
 
-import { useGenerationRequests } from '@appV2/components/Tables/GenerationRequestTable/useGenerationRequests';
+import { useGenerations as useGenerations } from '@appV2/components/Tables/GenerationTable/useGenerations';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
 import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination, DataTableSkeleton } from '@carbon/react';
@@ -28,13 +28,13 @@ const headers = [
   { key: 'finishedTime', header: columnNames.finishedTime },
 ];
 
-export const GenerationRequestTable = () => {
+export const GenerationTable = () => {
   const navigate = useNavigate();
   const paramPage = useSearchParam('page') || 1;
   const paramPageSize = useSearchParam('pageSize') || 10;
 
 
-  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useGenerationRequests(
+  const [{ pageIndex, pageSize, value, loading, total, error }, { setPageIndex, setPageSize }] = useGenerations(
     +paramPage - 1,
     +paramPageSize,
   );

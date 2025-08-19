@@ -22,7 +22,7 @@ import { useCallback } from 'react';
 import { useAsync, useAsyncRetry } from 'react-use';
 
 
-export function useGenerationRequestManifests(id: string) {
+export function useGenerationManifests(id: string) {
   const sbomerApi = DefaultSbomerApiV2.getInstance();
   const getManifests = useCallback(
     async (id: string) => {

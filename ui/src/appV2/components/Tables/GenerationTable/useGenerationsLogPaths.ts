@@ -21,7 +21,7 @@ import { useCallback } from 'react';
 import { useAsync } from 'react-use';
 import { DefaultSbomerApiV2 } from 'src/appV2/api/DefaultSbomerApiV2';
 
-export function useGenerationRequestsLogPaths(request: SbomerGeneration) {
+export function useGenerationLogPaths(request: SbomerGeneration) {
   const sbomerApi = DefaultSbomerApiV2.getInstance();
 
   const getLogPaths = useCallback(
