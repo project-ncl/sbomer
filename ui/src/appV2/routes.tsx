@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Dashboard } from './components/Pages/Dashboard/Dashboard';
-import { GenerationRequestPage } from './components/Pages/GenerationRequests/GenerationRequestPage';
-import { GenerationRequestsPage } from './components/Pages/GenerationRequests/GenerationRequestsPage';
+import { GenerationPage } from './components/Pages/Generations/GenerationPage';
+import { GenerationsPage } from './components/Pages/Generations/GenerationsPage';
 import { ManifestPage } from './components/Pages/Manifests/ManifestPage';
 import { ManifestsPage } from './components/Pages/Manifests/ManifestsPage';
 import { EventsPage } from './components/Pages/Events/EventsPage';
@@ -30,20 +30,20 @@ const routes: AppRouteConfig[] = [
     path: '/',
   },
   {
-    element: <GenerationRequestsPage />,
+    element: <GenerationsPage />,
     path: '/requests',
   },
   {
-    element: <GenerationRequestPage />,
+    element: <GenerationPage />,
     path: '/requests/:id',
   },
   {
-    element: <GenerationRequestsPage />,
+    element: <GenerationsPage />,
     label: 'Generations',
     path: '/generations',
   },
   {
-    element: <GenerationRequestPage />,
+    element: <GenerationPage />,
     path: '/generations/:id',
   },
   {

@@ -143,7 +143,7 @@ export class DefaultSbomerApiV2 implements SbomerApi {
 
     if (response.status != 200) {
       throw new Error(
-        'Failed to retrieve log paths for GenerationRequest ' +
+        'Failed to retrieve log paths for Generation ' +
           generationId +
           ', got ' +
           response.status +
