@@ -1,5 +1,5 @@
-import { GenerationPageContent } from '@appV2/components/Pages/Generations/GenerationPageContent';
 import { AppLayout } from '@appV2/components/Pages/AppLayout/AppLayout';
+import { GenerationPageContent } from '@appV2/components/Pages/Generations/GenerationPageContent';
 import * as React from 'react';
 
 

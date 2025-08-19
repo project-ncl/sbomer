@@ -1,7 +1,9 @@
-import { useRequestEvents } from '@appV2/components/Tables/EventTable/useEvents';
-import { useEventsFilters } from '@appV2/components/Tables/EventTable/useEventsFilters';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
+import { useRequestEvents } from '@appV2/components/Tables/EventTable/useEvents';
+import { useEventsFilters } from '@appV2/components/Tables/EventTable/useEventsFilters';
+import { RelativeTimestamp } from '@appV2/components/UtilsComponents/RelativeTimestamp';
+import { eventStatusToColor } from '@appV2/utils/Utils';
 import {
   DataTable,
   DataTableSkeleton,
@@ -19,8 +21,6 @@ import {
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { RelativeTimestamp } from '@appV2/components/UtilsComponents/RelativeTimestamp';
-import { eventStatusToColor } from '@appV2/utils/Utils';
 
 const columnNames = {
   id: 'ID',

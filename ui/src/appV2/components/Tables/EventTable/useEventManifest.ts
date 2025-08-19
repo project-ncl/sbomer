@@ -17,7 +17,6 @@
 ///
 
 import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
-import { SbomerEvent } from '@appV2/types';
 import { useCallback } from 'react';
 import { useAsyncRetry } from 'react-use';
 
