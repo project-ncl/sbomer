@@ -177,6 +177,10 @@
       <artifactId>quarkus-opentelemetry</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-jdbc</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.quarkiverse.tektonclient</groupId>
       <artifactId>quarkus-tekton-client</artifactId>
       <version>${version.tekton-client}</version>

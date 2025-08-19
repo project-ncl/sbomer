@@ -156,6 +156,7 @@ quarkus:
     metrics:
       enabled: true
     jdbc:
+      telemetry: true
       max-size: 20
       min-size: 0
       initial-size: 1
