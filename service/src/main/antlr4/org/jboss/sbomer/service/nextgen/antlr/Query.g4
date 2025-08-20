@@ -8,7 +8,7 @@ atom
     ;
 
 value_list: value (COMMA value)*;
-value: op=(GT | LT | GTE | LTE)? (IDENTIFIER | STRING);
+value: op=(GT | LT | GTE | LTE | CONTAINS)? (IDENTIFIER | STRING);
 
 // --- LEXER RULES ---
 
@@ -19,6 +19,7 @@ GT: '>';
 LT: '<';
 GTE: '>=';
 LTE: '<=';
+CONTAINS: '~';
 
 // UNIFIED TOKEN: Can be a key or a value. Can start with a letter or number.
 IDENTIFIER: [a-zA-Z0-9_][a-zA-Z0-9_.-]*;

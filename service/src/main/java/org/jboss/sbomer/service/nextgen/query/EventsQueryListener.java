@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jboss.sbomer.service.nextgen.antlr.QueryBaseListener;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser;
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
@@ -88,13 +89,10 @@ public class EventsQueryListener extends QueryBaseListener {
 
     @Override
     public void exitAtom(QueryParser.AtomContext ctx) {
-        // This handles a standalone value, which we don't support.
         if (ctx.value() != null) {
-            throw new UnsupportedOperationException(
-                    "Standalone search terms are not supported. Use key:value filters.");
+            throw new UnsupportedOperationException("Standalone search terms are not supported. Use key:value filters.");
         }
 
-        // This handles key:value_list
         String field = ctx.IDENTIFIER().getText();
         handleValueList(field, ctx.value_list());
     }
@@ -105,11 +103,19 @@ public class EventsQueryListener extends QueryBaseListener {
         if (parsedValues.size() == 1) {
             ParsedValue pv = parsedValues.get(0);
             validatePredicate(field, pv.getOperator());
-            Object finalValue = convertValue(field, pv.getStringValue());
+
+            Object value = convertValue(field, pv.getStringValue());
+            Object finalValue = pv.getOperator().equals("LIKE") ? "%" + value + "%" : value;
+
             String paramName = nextParamName();
             parameters.put(paramName, finalValue);
             queryParts.push(field + " " + pv.getOperator() + " :" + paramName);
             return;
+        }
+
+        // Multiple comma-separated values for LIKE is not supported
+        if (parsedValues.get(0).getOperator().equals("LIKE")) {
+            throw new UnsupportedOperationException("The 'LIKE' operator (~) cannot be used with comma-separated values.");
         }
 
         ParsedValue firstValue = parsedValues.get(0);
@@ -117,8 +123,7 @@ public class EventsQueryListener extends QueryBaseListener {
 
         if (!operator.equals("=") && !operator.equals("!=")) {
             throw new UnsupportedOperationException(
-                    "Operator '" + operator + "' is not supported for comma-separated values in field '" + field
-                            + "'.");
+                    "Operator '" + operator + "' is not supported for comma-separated values in field '" + field + "'.");
         }
 
         List<String> paramNames = new ArrayList<>();
@@ -137,10 +142,12 @@ public class EventsQueryListener extends QueryBaseListener {
     private ParsedValue parseValue(QueryParser.ValueContext vCtx) {
         String op = "=";
         if (vCtx.op != null) {
-            op = vCtx.op.getText();
+            if (vCtx.op.getType() == QueryParser.CONTAINS) {
+                op = "LIKE";
+            } else {
+                op = vCtx.op.getText();
+            }
         }
-
-        // **MODIFIED**: Changed TERM to IDENTIFIER
         String text = (vCtx.IDENTIFIER() != null) ? vCtx.IDENTIFIER().getText() : unquote(vCtx.STRING().getText());
         return new ParsedValue(op, text);
     }
@@ -175,15 +182,19 @@ public class EventsQueryListener extends QueryBaseListener {
         switch (field) {
             case "id":
             case "reason":
-                if (!operator.equals("=") && !operator.equals("!=")) {
+                if (!operator.equals("=") && !operator.equals("!=") && !operator.equals("LIKE")) {
                     throw new UnsupportedOperationException(
-                            "Only '=' and '!=' operators are supported for string field '" + field + "'");
+                            "Operator '" + operator + "' is not supported for string field '" + field + "'");
                 }
                 break;
             case "created":
             case "updated":
             case "finished":
-                break; // All relational operators are valid for dates
+                if (operator.equals("LIKE")) {
+                    throw new UnsupportedOperationException(
+                            "The 'LIKE' operator (~) is not supported for date field '" + field + "'");
+                }
+                break;
             case "status":
                 if (!operator.equals("=") && !operator.equals("!=")) {
                     throw new UnsupportedOperationException(
@@ -209,16 +220,9 @@ public class EventsQueryListener extends QueryBaseListener {
         }
 
         DateTimeFormatter customFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy")
-                .optionalStart()
-                .appendPattern("-MM")
-                .optionalStart()
-                .appendPattern("-dd")
-                .optionalEnd()
-                .optionalEnd()
-                .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
-                .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
-                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-                .toFormatter(Locale.ROOT)
+                .optionalStart().appendPattern("-MM").optionalStart().appendPattern("-dd").optionalEnd().optionalEnd()
+                .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).toFormatter(Locale.ROOT)
                 .withZone(java.time.ZoneOffset.UTC);
 
         try {
