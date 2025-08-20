@@ -173,9 +173,11 @@ export const EventTable = () => {
         total === 0 ? noResults : table;
 
   return (
-    <Stack gap={4}>
-      {querySearchBar}
-      {tableArea}
-    </Stack>
+    <div className='table-wrapper'>
+      <Stack gap={4}>
+        {querySearchBar}
+        {tableArea}
+      </Stack>
+    </div>
   );
 };
