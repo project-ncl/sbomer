@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jboss.sbomer.service.nextgen.antlr.QueryBaseListener;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser;
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
@@ -89,10 +88,6 @@ public class EventsQueryListener extends QueryBaseListener {
 
     @Override
     public void exitAtom(QueryParser.AtomContext ctx) {
-        if (ctx.value() != null) {
-            throw new UnsupportedOperationException("Standalone search terms are not supported. Use key:value filters.");
-        }
-
         String field = ctx.IDENTIFIER().getText();
         handleValueList(field, ctx.value_list());
     }
@@ -115,7 +110,8 @@ public class EventsQueryListener extends QueryBaseListener {
 
         // Multiple comma-separated values for LIKE is not supported
         if (parsedValues.get(0).getOperator().equals("LIKE")) {
-            throw new UnsupportedOperationException("The 'LIKE' operator (~) cannot be used with comma-separated values.");
+            throw new UnsupportedOperationException(
+                    "The 'LIKE' operator (~) cannot be used with comma-separated values.");
         }
 
         ParsedValue firstValue = parsedValues.get(0);
@@ -123,7 +119,8 @@ public class EventsQueryListener extends QueryBaseListener {
 
         if (!operator.equals("=") && !operator.equals("!=")) {
             throw new UnsupportedOperationException(
-                    "Operator '" + operator + "' is not supported for comma-separated values in field '" + field + "'.");
+                    "Operator '" + operator + "' is not supported for comma-separated values in field '" + field
+                            + "'.");
         }
 
         List<String> paramNames = new ArrayList<>();
@@ -220,9 +217,16 @@ public class EventsQueryListener extends QueryBaseListener {
         }
 
         DateTimeFormatter customFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy")
-                .optionalStart().appendPattern("-MM").optionalStart().appendPattern("-dd").optionalEnd().optionalEnd()
-                .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
-                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).toFormatter(Locale.ROOT)
+                .optionalStart()
+                .appendPattern("-MM")
+                .optionalStart()
+                .appendPattern("-dd")
+                .optionalEnd()
+                .optionalEnd()
+                .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
+                .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .toFormatter(Locale.ROOT)
                 .withZone(java.time.ZoneOffset.UTC);
 
         try {

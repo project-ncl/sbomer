@@ -3,8 +3,7 @@ grammar Query;
 query: term+ EOF;
 term: MINUS? atom;
 atom
-    : IDENTIFIER COLON value_list // key:value
-    | value                        // standalone value
+    : IDENTIFIER COLON value_list // key:value                      // standalone value
     ;
 
 value_list: value (COMMA value)*;
