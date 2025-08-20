@@ -1,33 +1,27 @@
 grammar Query;
 
-query: expression;
-
-expression
-    : LPAREN expression RPAREN ( ( AND | OR ) expression )?
-    | predicate ( ( AND | OR ) expression )?
+query: term+ EOF;
+term: MINUS? atom;
+atom
+    : IDENTIFIER COLON value_list // key:value
+    | value                        // standalone value
     ;
 
-predicate
-    : IDENTIFIER (EQUAL | NOT_EQUAL | GREATER_THAN | LESS_THAN | GREATER_THAN_OR_EQUAL | LESS_THAN_OR_EQUAL | CONTAINS) value
-    ;
+value_list: value (COMMA value)*;
+value: op=(GT | LT | GTE | LTE)? (IDENTIFIER | STRING);
 
-value: STRING_IN_QUOTES;
+// --- LEXER RULES ---
 
-AND: 'AND' | 'and';
-OR: 'OR' | 'or';
-LPAREN: '(';
-RPAREN: ')';
-EQUAL: '=';
-NOT_EQUAL: '!=';
-GREATER_THAN: '>';
-LESS_THAN: '<';
-GREATER_THAN_OR_EQUAL: '>=';
-LESS_THAN_OR_EQUAL: '<=';
-CONTAINS: '~';
+COLON: ':';
+MINUS: '-';
+COMMA: ',';
+GT: '>';
+LT: '<';
+GTE: '>=';
+LTE: '<=';
 
-IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
-STRING_IN_QUOTES: '"' ( ~'"' )* '"';
+// UNIFIED TOKEN: Can be a key or a value. Can start with a letter or number.
+IDENTIFIER: [a-zA-Z0-9_][a-zA-Z0-9_.-]*;
 
+STRING: '"' ( '\\"' | ~'"' )*? '"';
 WS: [ \t\r\n]+ -> skip;
-
-UNEXPECTED_CHAR: . ;
