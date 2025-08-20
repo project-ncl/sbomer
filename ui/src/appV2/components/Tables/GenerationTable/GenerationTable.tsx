@@ -142,7 +142,7 @@ export const GenerationTable = () => {
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 
-  return <>
+  return <div className='table-wrapper'>
     {tableArea}
-  </>;
+  </div>;
 };
