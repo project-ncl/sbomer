@@ -1,5 +1,5 @@
 # https://catalog.redhat.com/software/containers/ubi9/nginx-120/61a609f2bfd4a5234d596287
-FROM registry.access.redhat.com/ubi9/nginx-120@sha256:c822b45eb08a13dd2b4ee9664e87ad8056d53a7e32ab93e38c6194b56c32747d
+FROM registry.access.redhat.com/ubi9/nginx-120@sha256:8eb9970a14fd398e2db52fe4d4e84b924f5852e0171dc63035823e5103c6e189
 
 COPY ui/dist/ .
 
