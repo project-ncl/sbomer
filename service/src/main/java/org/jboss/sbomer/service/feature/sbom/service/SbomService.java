@@ -502,7 +502,7 @@ public class SbomService {
      * @return The latest generated SBOM or {@code null}.
      */
     public Sbom findByPurl(String purl) {
-        String polishedPurl = UrlUtils.removeAllowedQualifiersFromPurl(purl, sbomerConfig.purlQualifiersAllowList());
+        String polishedPurl = UrlUtils.removeQualifiersFromPurl(purl, sbomerConfig.purlQualifiersAllowList());
         log.debug("Trying to find latest generated SBOM for purl: '{}' (polished to '{}')", purl, polishedPurl);
 
         QueryParameters parameters = QueryParameters.builder()

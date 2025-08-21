@@ -247,7 +247,7 @@ public class DefaultProcessor implements Processor {
                     processContainerImageComponent(c);
                 } else {
                     PackageURL purl = getPackageURL(c);
-                    if ("rpm".equals(purl.getType())) {
+                    if (PackageURL.StandardTypes.RPM.equals(purl.getType())) {
                         processRpmComponent(c, purl);
                     } else {
                         processComponent(c);
@@ -270,11 +270,16 @@ public class DefaultProcessor implements Processor {
 
     private void processRpmComponent(Component component, PackageURL purl) {
         Map<String, String> qualifiers = purl.getQualifiers();
-        if (qualifiers == null || !qualifiers.containsKey("arch")) {
-            log.debug("RPM purl is missing arch qualifier: {}", component.getPurl());
+        String arch = null;
+
+        if (qualifiers != null) {
+            arch = qualifiers.get("arch");
+        }
+
+        if (arch == null) {
+            log.debug("RPM purl is missing arch qualifier: '{}'", component.getPurl());
             return;
         }
-        String arch = qualifiers.get("arch");
 
         KojiBuildInfo buildInfo;
         try {
