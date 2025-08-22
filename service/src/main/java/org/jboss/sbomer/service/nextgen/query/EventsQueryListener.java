@@ -139,7 +139,6 @@ public class EventsQueryListener extends QueryBaseListener {
     private void handleSingleValue(String field, String value, String operator) {
         Object convertedValue = convertValue(field, value);
 
-        // Fix: Use equals() instead of == for string comparison
         if (operator.equals("LIKE")) {
             convertedValue = "%" + convertedValue + "%";
         }
@@ -150,7 +149,6 @@ public class EventsQueryListener extends QueryBaseListener {
     }
 
     private void handleMultipleValues(String field, List<String> values, String operator) {
-        // Fix: Use equals() instead of == for string comparison
         if (operator.equals("LIKE")) {
             throw new UnsupportedOperationException("LIKE operator cannot be used with multiple values");
         }
