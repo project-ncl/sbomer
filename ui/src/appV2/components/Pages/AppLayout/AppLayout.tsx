@@ -28,6 +28,8 @@ import {
   SideNavHeader,
   SideNavItems,
   SideNavLink,
+  SideNavMenu,
+  SideNavMenuItem,
   Theme
 } from '@carbon/react';
 import * as React from 'react';
@@ -81,12 +83,29 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </SideNavLink>
   );
 
-  const renderSideNavGroup = (group: IAppRouteGroup, groupIndex: number) => (
-    <React.Fragment key={`${group.label}-${groupIndex}`}>
-      <SideNavHeader renderIcon={ChevronRight}>{group.label}</SideNavHeader>
-      {group.routes.map((route, idx) => route.label && renderSideNavLink(route, idx))}
-    </React.Fragment>
-  );
+  const renderSideNavGroup = (group: IAppRouteGroup, groupIndex: number) => {
+    const isAnyChildActive = group.routes?.some(r => r.path && isRouteActive(r.path));
+    return (
+      <SideNavMenu
+        key={`${group.label}-${groupIndex}`}
+        title={group.label}
+        // Optionally open the group when a child is active
+        defaultExpanded={isAnyChildActive}
+      >
+        {group.routes.map((route, idx) =>
+          route.label ? (
+            <SideNavMenuItem
+              key={`${route.label}-${idx}`}
+              as={NavLink}
+              to={route.path}
+            >
+              {route.label}
+            </SideNavMenuItem>
+          ) : null
+        )}
+      </SideNavMenu>
+    );
+  };
 
   const Navigation = (
     <SideNavItems>
