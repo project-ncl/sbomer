@@ -53,6 +53,8 @@ const EventStatuses = new Map<
   ['SUCCESS', { description: 'Successfully finished', color: 'green' }],
   ['NEW', { description: 'New', color: 'teal' }],
   ['PROCESSED', { description: 'Processed', color: 'purple' }],
+  ['ERROR', { description: 'Error', color: 'red' }],
+  ['INITIALIZED', { description: 'Initialized', color: 'blue' }]
 ]);
 
 /**

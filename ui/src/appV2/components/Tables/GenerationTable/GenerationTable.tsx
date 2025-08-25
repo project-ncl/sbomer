@@ -1,16 +1,16 @@
-import { statusToColor, statusToDescription } from '@appV2/utils/Utils';
+import { statusToColor } from '@appV2/utils/Utils';
 
 import React from 'react';
-export default RelativeTimestamp;
 import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParam } from 'react-use';
+export default RelativeTimestamp;
 
-import { useGenerations as useGenerations } from '@appV2/components/Tables/GenerationTable/useGenerations';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
-import { DataTable, TableContainer, Table, TableHead, TableRow, TableHeader, TableBody, TableCell, Tooltip, Tag, SkeletonText, Pagination, DataTableSkeleton } from '@carbon/react';
+import { useGenerations } from '@appV2/components/Tables/GenerationTable/useGenerations';
 import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 import { SbomerGeneration } from '@appV2/types';
+import { DataTable, DataTableSkeleton, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow, Tag } from '@carbon/react';
 
 const columnNames = {
   id: 'ID',
@@ -124,7 +124,7 @@ export const GenerationTable = () => {
     />
   );
 
-  const noResults = <NoResultsSection />
+  const noResults = <NoResultsSection title="No generations found" message="Try adjusting your search criteria." onActionClick={() => { } } actionText={''} />;
   const loadingSkeleton = (
     <TableContainer title="Generations" description="Latest generations">
       <DataTableSkeleton
@@ -138,11 +138,11 @@ export const GenerationTable = () => {
   );
 
   const tableArea =
-    error ? <ErrorSection error={error} /> :
+    error ? <ErrorSection title="Could not load generations" message={error.message} /> :
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 
-  return <>
+  return <div className='table-wrapper'>
     {tableArea}
-  </>;
+  </div>;
 };

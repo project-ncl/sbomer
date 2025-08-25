@@ -1,13 +1,13 @@
-import { useManifests } from '@appV2/components/Tables/ManifestsTable/useSboms';
 import { useManifestsFilters } from '@appV2/components/Tables/ManifestsTable/useManifestsFilters';
+import { useManifests } from '@appV2/components/Tables/ManifestsTable/useSboms';
 
 
-import React from 'react';
-import { Link } from 'react-router-dom';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/NoResultSection';
-import { DataTable, DataTableSkeleton, Pagination, SkeletonText, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@carbon/react';
 import { RelativeTimestamp } from '@appV2/components/UtilsComponents/RelativeTimestamp';
+import { DataTable, DataTableSkeleton, Pagination, Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@carbon/react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 
 const columnNames = {
@@ -103,7 +103,7 @@ export const ManifestsTable = () => {
     />
   );
 
-  const noResults = <NoResultsSection />
+  const noResults = <NoResultsSection title="No manifests found" message="Try adjusting your search criteria." onActionClick={() => { } } actionText={''} />;
   const loadingSkeleton = (
     <TableContainer title="Manifests" description="Latest manifests">
       <DataTableSkeleton
@@ -118,12 +118,12 @@ export const ManifestsTable = () => {
 
 
   const tableArea =
-    error ? <ErrorSection error={error} /> :
+    error ? <ErrorSection title="Could not load manifests" message={error.message} /> :
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 
 
-  return <>
+  return <div className='table-wrapper'>
     {tableArea}
-  </>
+  </div>
 };

@@ -16,8 +16,8 @@
 /// limitations under the License.
 ///
 
-import { useEventsFilters } from '@appV2/components/Tables/EventTable/useEventsFilters';
 import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
+import { useEventsFilters } from '@appV2/components/Tables/EventTable/useEventsFilters';
 import { useCallback, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 

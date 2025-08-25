@@ -1,25 +1,21 @@
 import { InlineNotification } from '@carbon/react';
 import React from 'react';
 
-type NotificationKind = 'error' | 'warning';
-
 interface ErrorSectionProps {
-  error: Error;
-  kind?: NotificationKind;
+  title?: string;
+  message?: string;
 }
 
-export const ErrorSection = ({ error, kind = 'error' }: ErrorSectionProps) => {
-  const getTitle = (notificationKind: NotificationKind) => {
-    return notificationKind === 'error' ? 'An error occurred' : 'Warning';
-  };
-
-  return (
-    <InlineNotification
-      kind={kind}
-      title={getTitle(kind)}
-      subtitle={error.message}
-      hideCloseButton
-      lowContrast
-    />
-  );
-};
+export const ErrorSection = ({
+  title = 'Something went wrong',
+  message = 'An unexpected error occurred. Please try again.',
+}: ErrorSectionProps) => (
+  <InlineNotification
+    kind="error"
+    title={title}
+    subtitle={message}
+    hideCloseButton
+    lowContrast
+    role="alert"
+  />
+);
