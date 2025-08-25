@@ -203,19 +203,21 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     />
   </>
 
-  const content = <Content id="main-content">
+  const content =<Content id="main-content">
     <Grid>
       <Column sm={4} md={8} lg={16}>
         {children}
       </Column>
     </Grid>
-  </Content>;
-
+  </Content>
+  ;
 
   return (
     <Theme theme={currentTheme}>
-      {headerContainer}
-      {content}
+      <div className='page-wrapper'>
+        {headerContainer}
+        {content}
+      </div>
     </Theme>
   );
 };
