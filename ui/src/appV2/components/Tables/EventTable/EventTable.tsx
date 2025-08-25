@@ -7,6 +7,7 @@ import { eventStatusToColor } from '@appV2/utils/Utils';
 import {
   DataTable,
   DataTableSkeleton,
+  InlineNotification,
   Pagination,
   Search,
   Stack,
@@ -17,7 +18,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Tag
+  TableToolbar,
+  TableToolbarSearch,
+  Tag,
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -79,39 +82,57 @@ export const EventTable = () => {
     />
   );
 
-  const querySearchBarValueOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const querySearchBarValueOnChange = (event: any) => {
     setQuerySearchbarValue(event.target.value);
   };
 
-  const querySearchBar = (
-    <div style={{ marginBottom: 'var(--cds-spacing-05)' }}>
-      <Search
-        labelText="Search events"
-        placeholder="Enter query"
-        value={querySearchbarValue}
-        onChange={querySearchBarValueOnChange}
-        onClear={() => setQuerySearchbarValue('')}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            setFilters(querySearchbarValue || '', pageIndex, pageSize);
-          }
-        }}
-        size="lg" />
-    </div>
-  );
+
+  const isQueryValidationError = (error: any) => {
+    return error?.message?.includes('The provided query is not valid') ||
+      error?.status === 400 ||
+      error?.code === 'INVALID_QUERY';
+  };
 
   const table = (
     <DataTable
       rows={value || []}
-      headers={[
-        { key: 'id', header: columnNames.id },
-        { key: 'status', header: columnNames.status },
-        { key: 'created', header: columnNames.created },
-        { key: 'updated', header: columnNames.updated },
-        { key: 'finished', header: columnNames.finished },
-      ]}
+      headers={headers}
       render={({ rows, headers }) => (
         <TableContainer title="Events" description="Latest events">
+          <TableToolbar>
+            <TableToolbarSearch
+              labelText="Search events"
+              placeholder="Enter query"
+              value={querySearchbarValue}
+              onChange={querySearchBarValueOnChange}
+              onClear={() => {
+                setQuerySearchbarValue('');
+                setFilters('', pageIndex, pageSize);
+              }}
+              expanded
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  setFilters(querySearchbarValue || '', pageIndex, pageSize);
+                }
+              }}
+              size="lg"
+            />
+          </TableToolbar>
+
+          {error && isQueryValidationError(error) ? (
+            // query error
+            <TableToolbar>
+              <InlineNotification
+                kind="error"
+                title="Invalid Query"
+                subtitle={error.message}
+                hideCloseButton
+                lowContrast
+              />
+            </TableToolbar>
+          ) : error ? (
+            <ErrorSection error={error}></ErrorSection>
+          ) : null}
           <Table>
             <TableHead>
               <TableRow>
@@ -121,40 +142,50 @@ export const EventTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {value && value.map((requestEvent) => {
-                return (
-                  <TableRow key={requestEvent.id}>
-                    <TableCell>
-                      <Link to={`/events/${requestEvent.id}`}>
-                        <pre>{requestEvent.id}</pre>
-                      </Link>
+              {value && value.length > 0 ? (
+                value.map((requestEvent) => {
+                  return (
+                    <TableRow key={requestEvent.id}>
+                      <TableCell>
+                        <Link to={`/events/${requestEvent.id}`}>
+                          <pre>{requestEvent.id}</pre>
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Tag size='md' type={eventStatusToColor(requestEvent.status)}>
+                          {requestEvent?.status}
+                        </Tag>
+                      </TableCell>
+                      <TableCell>
+                        <RelativeTimestamp date={requestEvent?.created} />
+                      </TableCell>
+                      <TableCell>
+                        <RelativeTimestamp date={requestEvent?.updated} />
+                      </TableCell>
+                      <TableCell>
+                        <RelativeTimestamp date={requestEvent?.finished} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <>
+                  {error ? <TableRow><TableCell colSpan={5}><p>An error occurred</p></TableCell></TableRow> : <TableRow>
+                    <TableCell colSpan={5}>
+                      <p>No results found</p>
                     </TableCell>
-                    <TableCell>
-                      <Tag size='md' type={eventStatusToColor(requestEvent.status)}>
-                        {requestEvent?.status}
-                      </Tag>
-                    </TableCell>
-                    <TableCell>
-                      <RelativeTimestamp date={requestEvent?.created} />
-                    </TableCell>
-                    <TableCell>
-                      <RelativeTimestamp date={requestEvent?.updated} />
-                    </TableCell>
-                    <TableCell>
-                      <RelativeTimestamp date={requestEvent?.finished} />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                  </TableRow>}
+
+                </>
+              )}
             </TableBody>
           </Table>
-          {pagination}
+          {!error && pagination}
         </TableContainer>
       )}
     />
   );
 
-  const noResults = <NoResultsSection />;
   const loadingSkeleton = (
     <TableContainer title="Events" description="Latest events">
       <DataTableSkeleton
@@ -168,14 +199,12 @@ export const EventTable = () => {
   );
 
   const tableArea =
-    error ? <ErrorSection error={error} /> :
-      loading ? loadingSkeleton :
-        total === 0 ? noResults : table;
+    loading ? loadingSkeleton :
+      table;
 
   return (
     <div className='table-wrapper'>
       <Stack gap={4}>
-        {querySearchBar}
         {tableArea}
       </Stack>
     </div>
