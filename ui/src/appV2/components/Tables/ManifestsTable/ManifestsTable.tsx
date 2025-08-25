@@ -103,7 +103,7 @@ export const ManifestsTable = () => {
     />
   );
 
-  const noResults = <NoResultsSection />
+  const noResults = <NoResultsSection title="No manifests found" message="Try adjusting your search criteria." onActionClick={() => { } } actionText={''} />;
   const loadingSkeleton = (
     <TableContainer title="Manifests" description="Latest manifests">
       <DataTableSkeleton
@@ -118,7 +118,7 @@ export const ManifestsTable = () => {
 
 
   const tableArea =
-    error ? <ErrorSection error={error} /> :
+    error ? <ErrorSection title="Could not load manifests" message={error.message} /> :
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 

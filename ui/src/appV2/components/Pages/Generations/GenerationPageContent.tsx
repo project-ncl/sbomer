@@ -25,7 +25,7 @@ const GenerationPageContent: React.FunctionComponent = () => {
   useDocumentTitle('SBOMer | Generations | ' + id);
 
   if (error) {
-    return <ErrorSection error={error} />;
+    return <ErrorSection title="Could not load generations" message={error.message}  />;
   }
 
   if (loading) {
