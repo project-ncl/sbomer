@@ -30,7 +30,8 @@ import {
   SideNavLink,
   SideNavMenu,
   SideNavMenuItem,
-  Theme
+  Theme,
+  SkipToContent
 } from '@carbon/react';
 import * as React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -89,7 +90,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       <SideNavMenu
         key={`${group.label}-${groupIndex}`}
         title={group.label}
-        // Optionally open the group when a child is active
         defaultExpanded={isAnyChildActive}
       >
         {group.routes.map((route, idx) =>
@@ -122,6 +122,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <HeaderContainer
       render={({ onClickSideNavExpand }) => (
         <>
+          <SkipToContent href="#main-content">Skip to content</SkipToContent>
           <Header aria-label="SBOMER">
             <HeaderMenuButton
               aria-label={sideNavExpanded ? 'Close menu' : 'Open menu'}
