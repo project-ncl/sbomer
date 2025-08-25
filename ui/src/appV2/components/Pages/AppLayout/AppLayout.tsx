@@ -1,7 +1,6 @@
 import { IAppRoute, IAppRouteGroup, routes } from '@appV2/routes';
 import {
   Application,
-  Asleep,
   ChevronRight,
   Dashboard,
   DocumentMultiple_02,
@@ -11,6 +10,8 @@ import {
 import {
   Switcher as CarbonSwitcher,
   Column,
+  ContainedList,
+  ContainedListItem,
   Content,
   Grid,
   Header,
@@ -20,15 +21,17 @@ import {
   HeaderMenuButton,
   HeaderName,
   HeaderPanel,
+  Layer,
+  Select,
+  SelectItem,
   SideNav,
   SideNavHeader,
   SideNavItems,
   SideNavLink,
-  SwitcherItem,
   Theme
 } from '@carbon/react';
 import * as React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -36,12 +39,18 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [sideNavExpanded, setSideNavExpanded] = React.useState(true);
   const [menuPanelExpanded, setMenuPanelExpanded] = React.useState(false);
 
-  const [currentTheme, setCurrentTheme] = React.useState<'white' | 'g100'>(() => {
+  const [currentTheme, setCurrentTheme] = React.useState<'white' | 'g10' | 'g90' | 'g100'>(() => {
     const savedTheme = localStorage.getItem('sbomer-theme');
-    return (savedTheme as 'white' | 'g100') || 'g100';
+    if (savedTheme === 'white' || savedTheme === 'g10' || savedTheme === 'g90' || savedTheme === 'g100') {
+      return savedTheme;
+    }
+    // default to system preference on first load
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'g100' : 'white';
   });
 
   const getRouteIcon = (path: string, label?: string) => {
@@ -104,25 +113,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               isActive={sideNavExpanded}
               isCollapsible={true}
             />
-            <HeaderName prefix=''>
-              SBOMer
-            </HeaderName>
+            <HeaderName prefix="" href="/nextgen">SBOMer</HeaderName>
 
             <HeaderGlobalBar>
               <HeaderGlobalAction
-                aria-label="Theme switcher"
-                onClick={() => {
-                  setCurrentTheme(prevTheme => {
-                    const newTheme = prevTheme === 'g100' ? 'white' : 'g100';
-                    localStorage.setItem('sbomer-theme', newTheme);
-                    return newTheme as 'white' | 'g100';
-                  });
-                }}
-              >
-                <Asleep size={20} />
-              </HeaderGlobalAction>
-              <HeaderGlobalAction
-                aria-label="App switcher"
+                aria-label="Options"
                 isActive={menuPanelExpanded}
                 onClick={() => setMenuPanelExpanded(!menuPanelExpanded)}
                 tooltipAlignment="end"
@@ -133,24 +128,44 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
           </Header>
 
-          <HeaderPanel
-            aria-label="Application Switcher"
-            expanded={menuPanelExpanded}
-          >
-            <CarbonSwitcher aria-label="Switcher Container">
-              <SwitcherItem
-                aria-label="Switch to SBOMer Classic"
-                href="/"
-                onClick={() => {
-                  if (window.location.pathname !== '/') {
-                    window.location.href = '/';
-                  }
-                  setMenuPanelExpanded(false);
-                }}
-              >
-                Switch to SBOMer Classic
-              </SwitcherItem>
-            </CarbonSwitcher>
+          <HeaderPanel aria-label="Application Switcher" expanded={menuPanelExpanded}>
+            <Layer>
+              <CarbonSwitcher aria-label="Switcher Container">
+                <ContainedList label="Navigation" kind="on-page">
+                  <ContainedListItem
+                    onClick={() => {
+                      navigate('/');
+                      setMenuPanelExpanded(false);
+                    }}
+                  >
+                    Switch to SBOMer Classic
+                  </ContainedListItem>
+                </ContainedList>
+
+                <ContainedList label="Appearance" kind="on-page">
+                  <ContainedListItem>
+                    <Select
+                      id="theme-select"
+                      labelText="Theme"
+                      hideLabel
+                      size="sm"
+                      value={currentTheme}
+                      onChange={(e) => {
+                        const newTheme = e.target.value as 'white' | 'g10' | 'g90' | 'g100';
+                        setCurrentTheme(newTheme);
+                        localStorage.setItem('sbomer-theme', newTheme);
+                        setMenuPanelExpanded(false);
+                      }}
+                    >
+                      <SelectItem value="white" text="White (Light)" />
+                      <SelectItem value="g10" text="Gray 10 (Light)" />
+                      <SelectItem value="g90" text="Gray 90 (Dark)" />
+                      <SelectItem value="g100" text="Gray 100 (Darkest)" />
+                    </Select>
+                  </ContainedListItem>
+                </ContainedList>
+              </CarbonSwitcher>
+            </Layer>
           </HeaderPanel>
           <SideNav
             aria-label="Side navigation"
