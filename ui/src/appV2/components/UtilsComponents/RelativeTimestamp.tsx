@@ -28,9 +28,11 @@ export const RelativeTimestamp: React.FC<RelativeTimestampProps> = ({
   );
 
   return (
-    <Tooltip label={isoString}>
-      <span>{relativeTime}</span>
-    </Tooltip>
+    <span>
+      <Tooltip label={isoString}>
+        <span>{relativeTime}</span>
+      </Tooltip>
+    </span>
   );
 };
 
