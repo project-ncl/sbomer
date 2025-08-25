@@ -44,7 +44,7 @@ const ManifestPageContent: React.FunctionComponent = () => {
   };
 
   if (error) {
-    return <ErrorSection error={error} />;
+    return <ErrorSection title="Could not load manifests" message={error.message} />;
   }
 
   if (loading) {

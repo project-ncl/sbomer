@@ -23,7 +23,7 @@ export const EventDetailsTable = () => {
   const [{ request, loading, error }] = useRequestEventManifest(id!);
 
   if (error) {
-    return <ErrorSection error={error} />;
+    return <ErrorSection title="Could not load event details" message={error.message} />;
   }
 
   if (loading) {

@@ -9,8 +9,6 @@ import {
   DataTableSkeleton,
   InlineNotification,
   Pagination,
-  Search,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -21,6 +19,10 @@ import {
   TableToolbar,
   TableToolbarSearch,
   Tag,
+  Button,
+  Tile,
+  Heading,
+  Stack
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -56,6 +58,24 @@ export const EventTable = () => {
     setFilters(query, pageIndex, newPerPage);
   };
 
+
+  const isQueryValidationError = (error: any) => {
+    return error?.message?.includes('The provided query is not valid') ||
+      error?.status === 400 ||
+      error?.code === 'INVALID_QUERY';
+  };
+
+  const clearFilters = () => {
+    setQuerySearchbarValue('');
+    setFilters('', 1, 10);
+  };
+  const retryQuery = () => {
+    setFilters(query || '', pageIndex, pageSize);
+  };
+  const executeSearch = () => {
+    setFilters(querySearchbarValue || '', 1, pageSize);
+  };
+
   const pagination = (
     <Pagination
       backwardText="Previous page"
@@ -82,110 +102,6 @@ export const EventTable = () => {
     />
   );
 
-  const querySearchBarValueOnChange = (event: any) => {
-    setQuerySearchbarValue(event.target.value);
-  };
-
-
-  const isQueryValidationError = (error: any) => {
-    return error?.message?.includes('The provided query is not valid') ||
-      error?.status === 400 ||
-      error?.code === 'INVALID_QUERY';
-  };
-
-  const table = (
-    <DataTable
-      rows={value || []}
-      headers={headers}
-      render={({ rows, headers }) => (
-        <TableContainer title="Events" description="Latest events">
-          <TableToolbar>
-            <TableToolbarSearch
-              labelText="Search events"
-              placeholder="Enter query"
-              value={querySearchbarValue}
-              onChange={querySearchBarValueOnChange}
-              onClear={() => {
-                setQuerySearchbarValue('');
-                setFilters('', pageIndex, pageSize);
-              }}
-              expanded
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  setFilters(querySearchbarValue || '', pageIndex, pageSize);
-                }
-              }}
-              size="lg"
-            />
-          </TableToolbar>
-
-          {error && isQueryValidationError(error) ? (
-            // query error
-            <TableToolbar>
-              <InlineNotification
-                kind="error"
-                title="Invalid Query"
-                subtitle={error.message}
-                hideCloseButton
-                lowContrast
-              />
-            </TableToolbar>
-          ) : error ? (
-            <ErrorSection error={error}></ErrorSection>
-          ) : null}
-          <Table>
-            <TableHead>
-              <TableRow>
-                {headers.map(header => (
-                  <TableHeader key={header.key}>{header.header}</TableHeader>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {value && value.length > 0 ? (
-                value.map((requestEvent) => {
-                  return (
-                    <TableRow key={requestEvent.id}>
-                      <TableCell>
-                        <Link to={`/events/${requestEvent.id}`}>
-                          <pre>{requestEvent.id}</pre>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Tag size='md' type={eventStatusToColor(requestEvent.status)}>
-                          {requestEvent?.status}
-                        </Tag>
-                      </TableCell>
-                      <TableCell>
-                        <RelativeTimestamp date={requestEvent?.created} />
-                      </TableCell>
-                      <TableCell>
-                        <RelativeTimestamp date={requestEvent?.updated} />
-                      </TableCell>
-                      <TableCell>
-                        <RelativeTimestamp date={requestEvent?.finished} />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <>
-                  {error ? <TableRow><TableCell colSpan={5}><p>An error occurred</p></TableCell></TableRow> : <TableRow>
-                    <TableCell colSpan={5}>
-                      <p>No results found</p>
-                    </TableCell>
-                  </TableRow>}
-
-                </>
-              )}
-            </TableBody>
-          </Table>
-          {!error && pagination}
-        </TableContainer>
-      )}
-    />
-  );
-
   const loadingSkeleton = (
     <TableContainer title="Events" description="Latest events">
       <DataTableSkeleton
@@ -198,15 +114,96 @@ export const EventTable = () => {
     </TableContainer>
   );
 
-  const tableArea =
-    loading ? loadingSkeleton :
-      table;
+  const querySearchBarValueOnChange = (event: any) => {
+    setQuerySearchbarValue(event.target.value);
+  };
+
+
+
+  if (loading) {
+    return loadingSkeleton;
+  }
+
+  if (error && !isQueryValidationError(error)) {
+    return <ErrorSection title="Could not load events" message={error.message}/>;
+  }
+
+  const queryErrorTile = error && isQueryValidationError(error) && (
+    <Tile>
+      <Stack>
+        <Heading>Invalid Query</Heading>
+        <p>
+          {error.message || 'Your search query is not valid. Please check your syntax or clear filters to try again.'}
+        </p>
+        <Button kind="primary" size="sm" onClick={clearFilters}>
+          Clear filters
+        </Button>
+      </Stack>
+    </Tile>
+  );
+
 
   return (
-    <div className='table-wrapper'>
-      <Stack gap={4}>
-        {tableArea}
-      </Stack>
-    </div>
+    <DataTable rows={value || []} headers={headers} render={({ rows, headers }) => (
+      <TableContainer title="Events" description="Latest events">
+        <TableToolbar>
+          <TableToolbarSearch
+            labelText="Search events"
+            placeholder="Enter query"
+            value={querySearchbarValue}
+            onChange={querySearchBarValueOnChange}
+            onClear={clearFilters}
+            onKeyDown={(event) => { if (event.key === 'Enter') executeSearch(); }}
+            size="lg"
+            expanded
+          />
+        </TableToolbar>
+
+        {queryErrorTile
+          ? queryErrorTile
+          : value && value.length > 0 ? (
+            <>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    {headers.map(header => (
+                      <TableHeader key={header.key}>{header.header}</TableHeader>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {value.map((requestEvent) => (
+                    <TableRow key={requestEvent.id}>
+                      <TableCell><Link to={`/events/${requestEvent.id}`}><pre>{requestEvent.id}</pre></Link></TableCell>
+                      <TableCell><Tag size="md" type={eventStatusToColor(requestEvent.status)}>{requestEvent.status}</Tag></TableCell>
+                      <TableCell><RelativeTimestamp date={requestEvent.created} /></TableCell>
+                      <TableCell><RelativeTimestamp date={requestEvent.updated} /></TableCell>
+                      <TableCell><RelativeTimestamp date={requestEvent.finished} /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <Pagination
+                page={pageIndex}
+                pageSize={pageSize}
+                pageSizes={[10, 20, 50, 100]}
+                totalItems={total || 0}
+                onChange={({ page, pageSize: newPageSize }) => {
+                  if (page !== pageIndex) onSetPage(page);
+                  if (newPageSize !== pageSize) onPerPageSelect(newPageSize);
+                }}
+              />
+            </>
+          ) : (
+            <NoResultsSection
+              title="No events found"
+              message="Try adjusting your search query or clear the filters to see all events."
+              actionText="Clear filters"
+              onActionClick={clearFilters}
+            />
+          )
+        }
+      </TableContainer>
+    )} />
   );
 };

@@ -124,7 +124,7 @@ export const GenerationTable = () => {
     />
   );
 
-  const noResults = <NoResultsSection />
+  const noResults = <NoResultsSection title="No generations found" message="Try adjusting your search criteria." onActionClick={() => { } } actionText={''} />;
   const loadingSkeleton = (
     <TableContainer title="Generations" description="Latest generations">
       <DataTableSkeleton
@@ -138,7 +138,7 @@ export const GenerationTable = () => {
   );
 
   const tableArea =
-    error ? <ErrorSection error={error} /> :
+    error ? <ErrorSection title="Could not load generations" message={error.message} /> :
       loading ? loadingSkeleton :
         total === 0 ? noResults : table;
 
