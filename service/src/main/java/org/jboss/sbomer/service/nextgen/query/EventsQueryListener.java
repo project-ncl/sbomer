@@ -42,8 +42,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventsQueryListener extends QueryBaseListener {
 
+    // todo improve field setup, should be more generic
     private static final Set<String> VALID_SORT_FIELDS = Set
             .of("id", "created", "updated", "finished", "status", "reason");
+
+    private static final Set<String> STRING_FIELDS = Set.of("id", "reason");
 
     private final Stack<String> queryParts = new Stack<>();
     private final Map<String, Object> parameters = new HashMap<>();
@@ -137,6 +140,9 @@ public class EventsQueryListener extends QueryBaseListener {
     }
 
     private void handleSingleValue(String field, String value, String operator) {
+        if (operator.equals("LIKE") && !STRING_FIELDS.contains(field)) {
+            throw new UnsupportedOperationException("LIKE operator can only be used with string fields: " + STRING_FIELDS);
+        }
         Object convertedValue = convertValue(field, value);
 
         if (operator.equals("LIKE")) {
