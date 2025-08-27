@@ -42,12 +42,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventsQueryListener extends QueryBaseListener {
 
-    // Supported fields for sorting and querying
+    // todo refactor, make more generic
     private static final Set<String> VALID_FIELDS = Set.of("id", "created", "updated", "finished", "status", "reason");
-    private static final Set<String> VALID_SORT_FIELDS = Set
-            .of("id", "created", "updated", "finished", "status", "reason");
-
+    private static final Set<String> VALID_SORT_FIELDS = Set.of("id", "created", "updated", "finished", "status", "reason");
     private static final Set<String> STRING_FIELDS = Set.of("id", "reason");
+    private static final Set<String> COMPARABLE_FIELDS = Set.of("created", "updated", "finished");
 
     private final Stack<String> queryParts = new Stack<>();
     private final Map<String, Object> parameters = new HashMap<>();
@@ -147,6 +146,11 @@ public class EventsQueryListener extends QueryBaseListener {
         if (operator.equals("LIKE") && !STRING_FIELDS.contains(field)) {
             throw new UnsupportedOperationException("LIKE operator can only be used with string fields: " + STRING_FIELDS);
         }
+        if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
+                && !COMPARABLE_FIELDS.contains(field)) {
+            throw new UnsupportedOperationException("Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
+        }
+
         Object convertedValue = convertValue(field, value);
 
         if (operator.equals("LIKE")) {
@@ -164,6 +168,10 @@ public class EventsQueryListener extends QueryBaseListener {
         }
         if (operator.equals("LIKE")) {
             throw new UnsupportedOperationException("LIKE operator cannot be used with multiple values");
+        }
+        if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
+                && !COMPARABLE_FIELDS.contains(field)) {
+            throw new UnsupportedOperationException("Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
         }
 
         List<String> paramNames = new ArrayList<>();
