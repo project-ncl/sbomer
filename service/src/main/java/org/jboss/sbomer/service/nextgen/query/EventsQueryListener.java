@@ -42,7 +42,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventsQueryListener extends QueryBaseListener {
 
-    // todo improve field setup, should be more generic
+    // Supported fields for sorting and querying
+    private static final Set<String> VALID_FIELDS = Set.of("id", "created", "updated", "finished", "status", "reason");
     private static final Set<String> VALID_SORT_FIELDS = Set
             .of("id", "created", "updated", "finished", "status", "reason");
 
@@ -140,6 +141,9 @@ public class EventsQueryListener extends QueryBaseListener {
     }
 
     private void handleSingleValue(String field, String value, String operator) {
+        if (!VALID_FIELDS.contains(field)) {
+            throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
+        }
         if (operator.equals("LIKE") && !STRING_FIELDS.contains(field)) {
             throw new UnsupportedOperationException("LIKE operator can only be used with string fields: " + STRING_FIELDS);
         }
@@ -155,6 +159,9 @@ public class EventsQueryListener extends QueryBaseListener {
     }
 
     private void handleMultipleValues(String field, List<String> values, String operator) {
+        if (!VALID_FIELDS.contains(field)) {
+            throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
+        }
         if (operator.equals("LIKE")) {
             throw new UnsupportedOperationException("LIKE operator cannot be used with multiple values");
         }
