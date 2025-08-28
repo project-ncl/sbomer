@@ -1,6 +1,6 @@
 grammar Query;
 
-query: statement (WS+ statement)* WS* EOF;
+query: WS* statement (WS+ statement)* WS* EOF;
 statement: term | sort;
 term: MINUS? atom;
 sort: SORT COLON sort_field;

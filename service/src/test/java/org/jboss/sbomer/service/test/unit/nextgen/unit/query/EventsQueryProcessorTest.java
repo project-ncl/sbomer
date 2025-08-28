@@ -67,7 +67,19 @@ class EventsQueryProcessorTest {
                         "status:NEW id:~\"A\"",
                         "(status = :param0 AND id LIKE :param1)",
                         Map.of("param0", EventStatus.NEW, "param1", "%A%")),
-                Arguments.of("-reason:~\"Some\"", "(NOT reason LIKE :param0)", Map.of("param0", "%Some%")));
+                Arguments.of("-reason:~\"Some\"", "(NOT reason LIKE :param0)", Map.of("param0", "%Some%")),
+                // Whitespace Handling Queries
+                Arguments.of("      status:NEW", "status = :param0", Map.of("param0", EventStatus.NEW)),
+                Arguments.of("status:NEW      ", "status = :param0", Map.of("param0", EventStatus.NEW)),
+                Arguments.of(
+                        "  status:NEW     created:>=2024  ",
+                        "(status = :param0 AND created >= :param1)",
+                        Map.of("param0", EventStatus.NEW, "param1", Instant.parse("2024-01-01T00:00:00Z"))),
+                Arguments.of(
+                        "\tstatus:NEW\n\n   reason:~\"Test\"  ",
+                        "(status = :param0 AND reason LIKE :param1)",
+                        Map.of("param0", EventStatus.NEW, "param1", "%Test%"))
+                );
     }
 
     @DisplayName("Should reject queries with grammar violations")
