@@ -102,4 +102,11 @@ class EventsQueryProcessorTest {
         assertTrue(ex.getMessage().contains("Invalid query"));
         assertTrue(ex.getErrors().stream().anyMatch(e -> e.contains("Unknown field: 'priority'")));
     }
+
+    @Test
+    @DisplayName("Should reject malformed identifier with multiple equals")
+    void testMalformedIdentifier() {
+        String query = "status:==============NEW";
+        assertThrows(ClientException.class, () -> eventsQueryProcessor.process(query));
+    }
 }

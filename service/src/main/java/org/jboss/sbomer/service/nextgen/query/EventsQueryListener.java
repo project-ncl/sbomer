@@ -44,7 +44,8 @@ public class EventsQueryListener extends QueryBaseListener {
 
     // todo refactor, make more generic
     private static final Set<String> VALID_FIELDS = Set.of("id", "created", "updated", "finished", "status", "reason");
-    private static final Set<String> VALID_SORT_FIELDS = Set.of("id", "created", "updated", "finished", "status", "reason");
+    private static final Set<String> VALID_SORT_FIELDS = Set
+            .of("id", "created", "updated", "finished", "status", "reason");
     private static final Set<String> STRING_FIELDS = Set.of("id", "reason");
     private static final Set<String> COMPARABLE_FIELDS = Set.of("created", "updated", "finished");
 
@@ -84,7 +85,7 @@ public class EventsQueryListener extends QueryBaseListener {
     @Override
     public void exitSort(QueryParser.SortContext ctx) {
         QueryParser.Sort_fieldContext sortFieldCtx = ctx.sort_field();
-        String sortField = sortFieldCtx.IDENTIFIER().getText();
+        String sortField = sortFieldCtx.WORD().getText();
         String sortOrder = sortFieldCtx.DIRECTION() != null ? sortFieldCtx.DIRECTION().getText().toUpperCase() : "ASC";
 
         if (!isValidSortField(sortField)) {
@@ -113,17 +114,17 @@ public class EventsQueryListener extends QueryBaseListener {
     @Override
     public void exitAtom(QueryParser.AtomContext ctx) {
         // parsing the most atomic
-        String field = ctx.IDENTIFIER().getText();
+        String field = ctx.WORD().getText();
         handleValueList(field, ctx.value_list());
     }
 
     private void handleValueList(String field, QueryParser.Value_listContext ctx) {
         List<String> values = ctx.value()
                 .stream()
-                .map(v -> v.IDENTIFIER() != null ? v.IDENTIFIER().getText() : unquote(v.STRING().getText()))
+                .map(v -> v.WORD() != null ? v.WORD().getText() : unquote(v.STRING().getText()))
                 .collect(Collectors.toList());
 
-        String operator = getOperator(ctx.value().get(0));
+        String operator = getOperator(ctx.value(0));
 
         if (values.size() == 1) {
             handleSingleValue(field, values.get(0), operator);
@@ -144,11 +145,13 @@ public class EventsQueryListener extends QueryBaseListener {
             throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
         }
         if (operator.equals("LIKE") && !STRING_FIELDS.contains(field)) {
-            throw new UnsupportedOperationException("LIKE operator can only be used with string fields: " + STRING_FIELDS);
+            throw new UnsupportedOperationException(
+                    "LIKE operator can only be used with string fields: " + STRING_FIELDS);
         }
         if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
                 && !COMPARABLE_FIELDS.contains(field)) {
-            throw new UnsupportedOperationException("Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
+            throw new UnsupportedOperationException(
+                    "Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
         }
 
         Object convertedValue = convertValue(field, value);
@@ -171,7 +174,8 @@ public class EventsQueryListener extends QueryBaseListener {
         }
         if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
                 && !COMPARABLE_FIELDS.contains(field)) {
-            throw new UnsupportedOperationException("Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
+            throw new UnsupportedOperationException(
+                    "Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
         }
 
         List<String> paramNames = new ArrayList<>();
