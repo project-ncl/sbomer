@@ -154,7 +154,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 <ContainedList label="Navigation" kind="on-page">
                   <ContainedListItem
                     onClick={() => {
-                      navigate('/');
+                      window.location.href = '/';
                       setMenuPanelExpanded(false);
                     }}
                   >
