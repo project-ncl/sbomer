@@ -1,5 +1,6 @@
 package org.jboss.sbomer.service.test.unit.nextgen.unit.query;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -82,6 +84,23 @@ class EventsQueryProcessorTest {
                 );
     }
 
+    @DisplayName("Should correctly process valid sorting queries")
+    @ParameterizedTest
+    @CsvSource({
+            "'sort:status', 'ORDER BY status ASC'",
+            "'sort-asc:reason', 'ORDER BY reason ASC'",
+            "'sort-desc:id', 'ORDER BY id DESC'",
+            "'status:NEW sort:created', 'ORDER BY created ASC'",
+            "'created:>=2024-01-01 sort-desc:id', 'ORDER BY id DESC'"
+    })
+    void testValidSortingQueries(String query, String expectedOrderBy) {
+        EventsQueryListener listener = assertDoesNotThrow(
+                () -> eventsQueryProcessor.process(query),
+                "A valid sort query should not throw an exception");
+
+        assertEquals(expectedOrderBy, listener.getJpqlOrderByClause());
+    }
+
     @DisplayName("Should reject queries with grammar violations")
     @ParameterizedTest
     @ValueSource(strings = { "status NEW", "status :", "status !! PROCESSED" })
@@ -113,6 +132,20 @@ class EventsQueryProcessorTest {
         ClientException ex = assertThrows(ClientException.class, () -> eventsQueryProcessor.process(query));
         assertTrue(ex.getMessage().contains("Invalid query"));
         assertTrue(ex.getErrors().stream().anyMatch(e -> e.contains("Unknown field: 'priority'")));
+    }
+
+    @DisplayName("Should reject invalid sorting queries")
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "sort:status-asc",
+            "sort-asc:",
+            "sort desc:status",
+            "sort: created",
+            "sort:nonexistent_field"
+    })
+    void testInvalidSortingQueries(String query) {
+        assertThrows(Exception.class, () -> eventsQueryProcessor.process(query),
+                "Query '" + query + "' should have thrown an exception");
     }
 
     @Test

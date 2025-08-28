@@ -84,9 +84,12 @@ public class EventsQueryListener extends QueryBaseListener {
 
     @Override
     public void exitSort(QueryParser.SortContext ctx) {
-        QueryParser.Sort_fieldContext sortFieldCtx = ctx.sort_field();
-        String sortField = sortFieldCtx.WORD().getText();
-        String sortOrder = sortFieldCtx.DIRECTION() != null ? sortFieldCtx.DIRECTION().getText().toUpperCase() : "ASC";
+        String sortField = ctx.field.getText();
+        String sortOrder = "ASC";
+
+        if (ctx.direction.getType() == QueryParser.SORT_DESC) {
+            sortOrder = "DESC";
+        }
 
         if (!isValidSortField(sortField)) {
             throw new IllegalArgumentException(

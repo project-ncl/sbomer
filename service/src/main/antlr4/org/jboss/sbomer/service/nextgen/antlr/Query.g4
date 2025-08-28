@@ -3,19 +3,22 @@ grammar Query;
 query: WS* statement (WS+ statement)* WS* EOF;
 statement: term | sort;
 term: MINUS? atom;
-sort: SORT COLON sort_field;
-sort_field: WORD | WORD MINUS DIRECTION;
+sort: (direction=(SORT | SORT_ASC | SORT_DESC)) COLON field=WORD;
 atom: WORD COLON value_list;
 
 value_list: value (COMMA value)*;
 value: op=(GT | LT | GTE | LTE | CONTAINS)? (WORD | STRING);
 // --- LEXER RULES ---
 
+SORT: 'sort';
+SORT_ASC: 'sort-asc';
+SORT_DESC: 'sort-desc';
+
 COLON: ':';
 MINUS: '-';
 COMMA: ',';
-SORT: 'sort';
-DIRECTION: ('asc' | 'desc');
+ASC: 'asc';
+DESC: 'desc';
 GT: '>';
 LT: '<';
 GTE: '>=';
