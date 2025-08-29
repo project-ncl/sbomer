@@ -39,7 +39,7 @@ const GenerationPageContent: React.FunctionComponent = () => {
   return (
     <Stack gap={7}>
       <Heading>Generation {id}</Heading>
-      <StructuredListWrapper>
+      <StructuredListWrapper isCondensed>
         <StructuredListHead>
           <StructuredListRow head>
             <StructuredListCell head>Property</StructuredListCell>

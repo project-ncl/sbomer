@@ -35,9 +35,9 @@ export const EventDetailsTable = () => {
   }
 
   return (
-    <Stack gap={7}>
+    <Stack gap={50}>
       <Heading>Event {id}</Heading>
-        <StructuredListWrapper>
+        <StructuredListWrapper isCondensed>
               <StructuredListHead>
                 <StructuredListRow head>
                   <StructuredListCell head>Property</StructuredListCell>
