@@ -18,7 +18,7 @@ import { eventStatusToColor } from '@appV2/utils/Utils';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-export const EventDetailsTable = () => {
+export const EventPageContent = () => {
   const { id } = useParams<{ id: string }>();
   const [{ request, loading, error }] = useRequestEventManifest(id!);
 

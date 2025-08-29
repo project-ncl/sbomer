@@ -5,7 +5,7 @@ import { GenerationsPage } from './components/Pages/Generations/GenerationsPage'
 import { ManifestPage } from './components/Pages/Manifests/ManifestPage';
 import { ManifestsPage } from './components/Pages/Manifests/ManifestsPage';
 import { EventsPage } from './components/Pages/Events/EventsPage';
-import { EventDetailsPage } from './components/Pages/Events/EventDetailsPage';
+import { EventPage } from './components/Pages/Events/EventPage';
 import { NotFoundPage } from './components/Pages/NotFound/NotFoundPage';
 
 let routeFocusTimer: number;
@@ -61,7 +61,7 @@ const routes: AppRouteConfig[] = [
     path: '/events',
   },
   {
-    element: <EventDetailsPage />,
+    element: <EventPage />,
     path: '/events/:id',
   },
   {
