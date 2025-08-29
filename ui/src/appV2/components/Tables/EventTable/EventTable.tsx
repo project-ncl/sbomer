@@ -3,7 +3,7 @@ import { NoResultsSection } from '@appV2/components/Sections/NoResultsSection/No
 import { useRequestEvents } from '@appV2/components/Tables/EventTable/useEvents';
 import { useEventsFilters } from '@appV2/components/Tables/EventTable/useEventsFilters';
 import { RelativeTimestamp } from '@appV2/components/UtilsComponents/RelativeTimestamp';
-import { eventStatusToColor } from '@appV2/utils/Utils';
+import { eventStatusToColor, extractQueryErrorMessageDetails } from '@appV2/utils/Utils';
 import {
   Button,
   DataTable,
@@ -121,22 +121,26 @@ export const EventTable = () => {
   }
 
   if (error && !isQueryValidationError(error)) {
-    return <ErrorSection title="Could not load events" message={error.message}/>;
+    return <ErrorSection title="Could not load events" message={error.message} />;
   }
 
-  const queryErrorTile = error && isQueryValidationError(error) && (
-    <Tile>
-      <Stack>
-        <Heading>Invalid Query</Heading>
-        <p>
-          {error.message || 'Your search query is not valid. Please check your syntax or clear filters to try again.'}
-        </p>
-        <Button kind="primary" size="sm" onClick={clearFilters}>
-          Clear filters
-        </Button>
-      </Stack>
-    </Tile>
-  );
+  const queryErrorTile = error && isQueryValidationError(error) && (() => {
+    const { message, details } = extractQueryErrorMessageDetails(error);
+    return (
+      <Tile>
+        <Stack>
+          <Heading>Invalid Query</Heading>
+          <p>
+            {message || 'Your search query is not valid. Please check your syntax or clear filters to try again.'}
+          </p>
+          {details && <p>{details}</p>}
+          <Button kind="primary" size="sm" onClick={clearFilters}>
+            Clear filters
+          </Button>
+        </Stack>
+      </Tile>
+    );
+  })();
 
 
   return (

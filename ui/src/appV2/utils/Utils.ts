@@ -162,3 +162,29 @@ export function isInProgress(request: SbomerGeneration): boolean {
 export function isSuccess(request: SbomerGeneration): boolean {
   return request.result == 'SUCCESS' ? true : false;
 }
+
+export function extractQueryErrorMessageDetails(error: any): { message: string; details?: string } {
+  if (typeof error?.message === 'string') {
+    const match = error.message.match(/response:\s*(['"])(\{.*\})\1/);
+    if (match) {
+      try {
+        const json = JSON.parse(match[2]);
+        return {
+          message: json.message || 'Unknown error',
+          details: Array.isArray(json.details) ? json.details.join(', ') : json.details,
+        };
+      } catch {
+      }
+    }
+    return { message: error.message };
+  }
+
+  if (typeof error?.message === 'object') {
+    return {
+      message: error.message.message || 'Unknown error',
+      details: Array.isArray(error.message.details) ? error.message.details.join(', ') : error.message.details,
+    };
+  }
+
+  return { message: 'Unknown error' };
+}
