@@ -5,10 +5,12 @@ import { useEventsFilters } from '@appV2/components/Tables/EventTable/useEventsF
 import { RelativeTimestamp } from '@appV2/components/UtilsComponents/RelativeTimestamp';
 import { eventStatusToColor } from '@appV2/utils/Utils';
 import {
+  Button,
   DataTable,
   DataTableSkeleton,
-  InlineNotification,
+  Heading,
   Pagination,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -19,10 +21,7 @@ import {
   TableToolbar,
   TableToolbarSearch,
   Tag,
-  Button,
-  Tile,
-  Heading,
-  Stack
+  Tile
 } from '@carbon/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -68,9 +67,6 @@ export const EventTable = () => {
   const clearFilters = () => {
     setQuerySearchbarValue('');
     setFilters('', 1, 10);
-  };
-  const retryQuery = () => {
-    setFilters(query || '', pageIndex, pageSize);
   };
   const executeSearch = () => {
     setFilters(querySearchbarValue || '', 1, pageSize);
