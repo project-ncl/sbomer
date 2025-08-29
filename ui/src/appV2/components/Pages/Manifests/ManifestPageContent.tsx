@@ -1,24 +1,24 @@
 import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useManifest } from '@appV2/components/Pages/Manifests/useManifest';
-import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
+import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
+import { Download } from '@carbon/icons-react';
 import {
   Button,
-  SkeletonText,
-  CodeSnippet,
-  StructuredListWrapper,
-  StructuredListHead,
-  StructuredListBody,
-  StructuredListRow,
-  StructuredListCell,
-  Heading,
   ButtonSet,
+  CodeSnippet,
+  Heading,
+  SkeletonText,
   Stack,
+  StructuredListBody,
+  StructuredListCell,
+  StructuredListHead,
+  StructuredListRow,
+  StructuredListWrapper,
 } from '@carbon/react';
-import { Download } from '@carbon/icons-react';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
 const ManifestPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,7 +44,7 @@ const ManifestPageContent: React.FunctionComponent = () => {
   };
 
   if (error) {
-    return <ErrorSection error={error} />;
+    return <ErrorSection title="Could not load manifests" message={error.message} />;
   }
 
   if (loading) {

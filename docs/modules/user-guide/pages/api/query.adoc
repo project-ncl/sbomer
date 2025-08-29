@@ -1,303 +1,170 @@
-## REST API Nextgen Query Language (created with ANTLR)
+= REST API Nextgen Query Language (created with ANTLR)
 
+This article serves as a guide to the REST API query language for SBOMer. Note that this language is currently in development and is used only by the Nextgen REST API.
 
-This article serves as a guide to the REST API query language for SBOMer. Note that this language is currently in development and used only by the Nextgen REST API.
-
-## Quick examples
+== Quick Examples
 
 Here are some examples of valid queries to show how the query language looks like:
 
-Query for all entities with a specific ID:
+* **Find entities with a specific status:**
+    `status:NEW`
 
-``id = "E0AAAAA"``
+* **Find entities that do not have a specific status (negation):**
+    `-status:ERROR`
 
-Query for all entities that are not of a specific type:
+* **Find entities with a status of NEW or PROCESSED (IN clause):**
+    `status:NEW,PROCESSED`
 
-``status != "ERROR"``
+* **Find entities created after a specific date:**
+    `created:>=2022-01-01`
 
-Query for all entities that were created before a specific date:
+* **Find entities where the reason contains "processed" and the status is NEW (implicit AND):**
+    `reason:~processed status:NEW`
 
-``created < "2022-01-01T00:00:00Z"``
+* **Sort entities by their creation date (default ascending):**
+    `sort:created`
 
-Query for all entities that were created after or at a specific date:
+* **Find new entities and sort them by update date descending:**
+    `status:NEW sort-desc:updated`
 
-``finished > "2024-01-01T00:00:00Z"``
+***
 
-Find all entities created any time during the year 2023. The query parser will interpret `"2023"` as the start of the year (`2023-01-01T00:00:00Z`).
+## Basic Syntax
 
-``created >= "2023" AND created < "2024"``
+The query language is composed of one or more **statements** separated by spaces. There are two types of statements: **terms** for filtering and **sort** for ordering.
 
-Find all entities that were last updated in May 2024.
-
-``updated >= "2024-05" AND updated < "2024-06"``
-
-Find all entities that finished processing on October 25, 2023.
-
-``finished >= "2023-10-25" AND finished < "2023-10-26"``
-
-Find all entities created on or after 2:30 PM on October 25, 2023.
-
-``created >= "2023-10-25 14:30"``
-
-Query for all entities using operation LIKE to match a substring in a string field:
-
-``reason ~ "processed"``
-
-Query using AND to combine multiple conditions:
-
-``status = "NEW" AND reason ~ "processed"``
-
-Query using OR to combine multiple conditions:
-
-``status = "NEW" OR reason ~ "processed"``
-
-Query using parentheses to group conditions:
-
-``(id = "E0AAAAA" OR id = "E0BBBBB") AND status = "NEW"``
-
-
-## Whitespace Handling
-
-The query language is flexible when it comes to whitespace (e.g., spaces and tabs). Any extra whitespace between fields, operators, and values is **ignored** by the parser.
-
-For example, the following queries are all functionally **identical**:
-[source,text]
 ----
-id="E0AAAAA"
-id = "E0AAAAA"
-id      =       "E0AAAAA"
+statement1 statement2 ...
 ----
 
+### Filtering with Terms
 
-
-:toc: left
-:toclevels: 3
-
-
-## Basic Queries: The Predicate
-
-The most fundamental part of any query is the **predicate**. It's a single condition that checks a field against a value.
+A term is the fundamental part of a filter. It consists of a field, a colon, and a value.
 
 .Syntax
-[source,text]
 ----
-field_name operator "value"
-----
-
-* *field*: The data attribute you want to check (currently supporting values : 'id', 'status', 'created').
-* *operator*: The comparison to perform (see the table below).
-* *value*: The string you are checking against. **It must always be enclosed in double quotes ("")**.
-
-### Supported Operators
-
-The following table lists all available operators and their meanings.
-
-Note: Not all operators support all field types. For example, `~` (contains) is typically used with string fields, while `>` and `<` are used with numeric or date fields.
-
-[cols="1,3", options="header"]
-|===
-| Operator | Description
-| `=`      | **Equals**: Checks if the field is exactly equal to the value.
-| `!=`     | **Not Equals**: Checks if the field is not equal to the value.
-| `>`      | **Greater Than**: Checks if the field is numerically or alphabetically greater than the value.
-| `<`      | **Less Than**: Checks if the field is numerically or alphabetically less than the value.
-| `>=`     | **Greater Than or Equal**: Checks if the field is greater than or equal to the value.
-| `\<=`     | **Less Than or Equal**: Checks if the field is less than or equal to the value.
-| `~`      | **Contains**: Checks if the field's text includes the value as a substring.
-|===
-
-#### Examples of Basic Queries
-
-[source,subs="quotes"]
-----
-id = "E0AAAAA"
-
-// Find items where the status is NEW
-status = "NEW"
-
-// Find items where the status is not ERROR
-status != "ERROR"
-
-// Find items where the reason contains the word "processed"
-reason ~ "processed"
-
-// Find items with a creation date before Jan 1, 2022
-created < "2022-01-01T00:00:00Z"
+field:value
 ----
 
-## Combining Expressions with `AND` & `OR`
+* Multiple terms are automatically combined with a logical **AND**.
+* Whitespace between statements is ignored by the parser.
 
-You can create more powerful queries by combining multiple predicates using the logical operators `AND` and `OR`. These operators are **case-insensitive**, so `and` and `or` work as well.
+### Values
 
-.AND Operator
-The `AND` operator requires **all** conditions to be true.
+.Values can be provided in several ways:
+- **Single Value**: `status:NEW`
+- **Comma-Separated List**: To check for multiple possible values (creates an `IN` clause). `status:NEW,PROCESSED`
+- **Quoted String**: Use double quotes (`"`) for values containing spaces or special characters. `reason:"processed with errors"`
 
-[source,subs="quotes"]
-----
-// Finds items with a status of "NEW" AND a reason containing "Event"
-status = "NEW" AND reason ~ "Event"
-----
+***
 
-.OR Operator
-The `OR` operator requires **at least one** of the conditions to be true.
+## Filtering In-Depth
 
-[source,subs="quotes"]
-----
-// Finds items where the status is "PROCESSED" OR the ID is "E0BBBBB"
-status = "PROCESSED" OR id = "E0BBBBB"
-----
+### Operators
 
-## Grouping with Parentheses
+Operators are used as an optional prefix to the value to specify the type of comparison. If no operator is provided, it defaults to equals.
 
-Use parentheses `()` to group expressions and control the order of evaluation. This is essential when mixing `AND` and `OR` in the same query. Operations inside parentheses are always evaluated first.
-
-.Example of Grouping
-[source,subs="quotes"]
-----
-// Finds items where the status is "NEW" and the ID is either "E0AAAAA" OR "E0BBBBB"
-(id = "E0AAAAA" OR id = "E0BBBBB") AND status = "NEW"
-----
-
-
-### Invalid Queries and Common Mistakes
-
-Below are examples of invalid queries, along with explanations of why they will fail. Understanding these common mistakes can help you write valid queries faster.
-
-### Grammar Violations
-
-These queries break the fundamental `field operator "value"` structure of the language.
-
-[cols="1,1"]
+[cols="1,2,3", options="header"]
 |===
-| Invalid Query | Explanation
-
-| `id = E0AAAAA`
-| **Missing Quotes**: The value `E0AAAAA` must be enclosed in double quotes, like `"E0AAAAA"`.
-
-| `(id = "E0AAAAA"`
-| **Unmatched Parenthesis**: An opening parenthesis `(` was used without a matching closing parenthesis `)`.
-
-| `status =`
-| **Missing Value**: The operator `=` is missing a value to its right.
-
-| `status !! "PROCESSED"`
-| **Invalid Operator**: The operator `!!` does not exist. A valid operator, like `!=`, must be used.
-
-| `id = "E0AAAAA" AND`
-| **Incomplete Expression**: The `AND` operator must be followed by another complete expression (e.g., `status = "NEW"`).
-
-| `"PROCESSED" = status`
-| **Incorrect Order**: The query must start with the field name, not the value. The correct order is `status = "PROCESSED"`.
+| Operator | Description | Example
+| (none) | **Equals**: Checks if the field is exactly equal to the value. | `status:NEW`
+| `~` | **Contains**: Checks if the field's text includes the value as a substring. | `reason:~processed`
+| `>` | **Greater Than**: Checks if the field is greater than the value. | `created:>2024-01-01`
+| `<` | **Less Than**: Checks if the field is less than the value. | `finished:<2025-01-01`
+| `>=` | **Greater Than or Equal**: Checks if the field is greater than or equal to the value. | `updated:>=2023-05`
+| `\<=` | **Less Than or Equal**: Checks if the field is less than or equal to the value. | `created:\<=2023`
 |===
 
-## Semantic Violations
+### Negation
 
-These queries are grammatically correct, but they use operators that are not logically applicable to the specific field.
+You can negate any filtering term by prefixing it with a hyphen (`-`). This is equivalent to a "NOT" or "!=" operation.
 
-[cols="1,1"]
+.Examples of Negation
+Find all events where the status is NOT 'ERROR'
+
+`-status:ERROR`
+
+Find all events where the reason does not contain 'success'
+
+`-reason:~success`
+
+
+***
+
+## Sorting
+
+You can control the order of the results using a sort statement. In case of multiple sort statements, only the last one will take effect, the previous are ignored.
+
+[cols="1,2,3", options="header"]
 |===
-| Invalid Query | Explanation
-
-| `id > "E0AAAAA"`
-| **Unsupported Operator for Field**: The `id` field does not support greater-than (`>`) or less-than (`<`) comparisons. It only supports equals (`=`), not-equals (`!=`), or contains (`~`).
-
-| `created ~ "2024"`
-| **Unsupported Operator for Field**: The `created` timestamp field does not support the contains (`~`) operator. It should be compared using operators like `>`, `<`, or `=`.
-|===
-
-### Invalid Value Formats
-
-These queries use values that don't match the expected data format for a field.
-
-cols="1,1"]
-|===
-| Invalid Query | Explanation
-
-| `updated = "10-25-2023"`
-| **Incorrect Date Format**: The date format `MM-dd-yyyy` is not supported. Please use one of the supported formats, such as `yyyy-MM-dd` or ISO 8601.
-
-| `status="INCORRECT"`
-| **Invalid State**: The value `"INCORRECT"` is not a valid choice for the `status` field. It must be one of the predefined values like `"NEW"` or `"PROCESSED"`.
+| Syntax | Description | Example
+| `sort:field` | Sorts by `field` in the default **ascending** order. | `sort:created`
+| `sort-asc:field` | Explicitly sorts by `field` in **ascending** order. | `sort-asc:status`
+| `sort-desc:field` | Explicitly sorts by `field` in **descending** order. | `sort-desc:updated`
 |===
 
-### Unknown Fields
+***
 
-This type of error occurs when the query references a field that does not exist.
+## Supported Fields
 
-[cols="1,1"]
-|===
-| Invalid Query | Explanation
+### For entity: Events
 
-| `description = "Some description"`
-| **Field Does Not Exist**: The field `description` is not a valid field in the data model and cannot be queried.
-|===
-
-
-## Currently Supported Endpoints
-
-This section details currently supported endpoints and their query capabilities.
-
-### Events `/events`
-
-The following table lists the fields you can use when querying the Events API, along with their data types and example usage.
+The following table lists the fields you can use when querying the `/events` endpoint.
 
 |===
-| Field Name | Data Type | Example Query
+| Field Name | Data Type | Supported Operators | Example Query
 
 | `id`
 | String
-| `id = "E0BBBBB"`
+| `=`, `~`
+| `id:E0BBBBB`
 
-| `Status`
-| **Enum. Must be one of:**
-`NEW`, `IGNORED`, `RESOLVING`, `RESOLVED`, `INITIALIZING`, `INITIALIZED`, `PROCESSING`, `PROCESSED`, `ERROR`
-| `status != "IGNORED"`
+| `status`
+| Enum
+| `=`
+| `status:NEW,PROCESSED`
 
 | `created`
 | Timestamp
-| `created > "2025-07-01T00:00:00Z"`
+| `=`, `!=`, `>`, `<`, `>=`, `\<=`
+| `created:>2025-07-01`
 
 | `updated`
 | Timestamp
-| `updated < "2023-12-25T00:00:00Z"`
+| `=`, `!=`, `>`, `<`, `>=`, `\<=`
+| `updated:<2023-12-25`
 
 | `finished`
 | Timestamp
-| `finished >= "2024-01-01T00:00:00Z"`
+| `=`, `!=`, `>`, `<`, `>=`, `\<=`
+| `finished:>=2024`
 
 | `reason`
 | String
-| `reason ~ "processed"`
+| `=`, `~`
+| `reason:~processed`
 |===
 
-[IMPORTANT]
-====
-All `String` and `Enum` values **must** be enclosed in double quotes (`""`). Queries like `id = E0AAAAA` are invalid because the value is not quoted. The correct format is `id = "E0AAAAA"`.
-====
+#### Supported Enum Values for `status`
 
-### Supported Timestamp Formats
+The `status` field must be one of the following values: `NEW`, `IGNORED`, `RESOLVING`, `RESOLVED`, `INITIALIZING`, `INITIALIZED`, `PROCESSING`, `PROCESSED`, `ERROR`.
 
-Timestamp fields (e.g., `created`, `updated`, `finished`) support multiple formats. When a timezone is not specified, UTC is assumed. Partial dates are parsed from the beginning of the period (e.g., `2023` becomes `2023-01-01T00:00:00Z`).
+#### Supported Timestamp Formats
 
+Timestamp fields (`created`, `updated`, `finished`) support the following formats. When a timezone is not specified, UTC is assumed. Partial dates are interpreted as the beginning of the period (e.g., `"2023"` becomes `2023-01-01T00:00:00Z`).
 
 |===
 | Format | Example
 
 | `yyyy`
-| `"2023"`
+| `created:2023`
 
 | `yyyy-MM`
-| `"2023-10"`
+| `updated:>=2023-10`
 
 | `yyyy-MM-dd`
-| `"2023-10-25"`
+| `finished:<=2023-10-25`
 
-| `yyyy-MM-dd HH:mm`
-| `"2023-10-25 14:30"`
-
-| `yyyy-MM-dd HH:mm:ss`
-| `"2023-10-25 14:30:15"`
-
-| ISO 8601 (`yyyy-MM-dd'T'HH:mm:ss'Z'`)
-| `"2023-01-01T12:00:00Z"`
+| ISO 8601
+| `created:>"2023-01-01T12:00:00Z"`
 |===

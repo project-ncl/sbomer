@@ -1,6 +1,6 @@
-import React from 'react';
-import { Tooltip } from '@carbon/react';
 import { timestampToHumanReadable } from '@appV2/utils/Utils';
+import { Tooltip } from '@carbon/react';
+import React from 'react';
 
 interface RelativeTimestampProps {
   /**
@@ -28,9 +28,11 @@ export const RelativeTimestamp: React.FC<RelativeTimestampProps> = ({
   );
 
   return (
-    <Tooltip label={isoString}>
-      <span>{relativeTime}</span>
-    </Tooltip>
+    <span>
+      <Tooltip label={isoString}>
+        <span>{relativeTime}</span>
+      </Tooltip>
+    </span>
   );
 };
 

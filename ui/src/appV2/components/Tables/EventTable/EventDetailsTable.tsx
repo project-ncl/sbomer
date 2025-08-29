@@ -1,29 +1,29 @@
 import { useRequestEventManifest } from '@appV2/components/Tables/EventTable/useEventManifest';
 import {
-  SkeletonText,
   CodeSnippet,
-  StructuredListWrapper,
-  StructuredListHead,
-  StructuredListBody,
-  StructuredListRow,
-  StructuredListCell,
   Heading,
+  SkeletonText,
   Stack,
+  StructuredListBody,
+  StructuredListCell,
+  StructuredListHead,
+  StructuredListRow,
+  StructuredListWrapper,
   Tag,
 } from '@carbon/react';
 
+import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
+import { eventStatusToColor } from '@appV2/utils/Utils';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
-import { eventStatusToColor } from '@appV2/utils/Utils';
-import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 
 export const EventDetailsTable = () => {
   const { id } = useParams<{ id: string }>();
   const [{ request, loading, error }] = useRequestEventManifest(id!);
 
   if (error) {
-    return <ErrorSection error={error} />;
+    return <ErrorSection title="Could not load event details" message={error.message} />;
   }
 
   if (loading) {

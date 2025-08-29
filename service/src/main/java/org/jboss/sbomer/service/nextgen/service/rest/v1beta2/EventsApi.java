@@ -118,10 +118,35 @@ public class EventsApi {
                 EventsQueryListener listener = queryProcessor.process(query);
 
                 String whereClause = listener.getJpqlWhereClause();
+                String orderByClause = listener.getJpqlOrderByClause();
                 Map<String, Object> parameters = listener.getParameters();
+
                 log.debug("Using JPQL WHERE clause: '{}'", whereClause);
+                log.debug("Using JPQL ORDER BY clause: '{}'", orderByClause);
                 log.debug("Using parameters: {}", parameters);
-                panacheQuery = Event.find(whereClause, parameters);
+
+                // Build the complete query with both WHERE and ORDER BY
+                StringBuilder jpqlQuery = new StringBuilder();
+
+                if (!whereClause.isEmpty()) {
+                    jpqlQuery.append(whereClause);
+                }
+
+                if (!orderByClause.isEmpty()) {
+                    if (!whereClause.isEmpty()) {
+                        jpqlQuery.append(" ").append(orderByClause);
+                    } else {
+                        // todo thing of another way to structure this
+                        // setting always true condition to not keep WHERE empty
+                        jpqlQuery.append("1=1 ").append(orderByClause);
+                    }
+                }
+
+                if (jpqlQuery.length() > 0) {
+                    panacheQuery = Event.find(jpqlQuery.toString(), parameters);
+                } else {
+                    panacheQuery = Event.findAll();
+                }
 
             } catch (ClientException e) {
                 Map<String, Object> errorResponse = new HashMap<>();
@@ -131,6 +156,7 @@ public class EventsApi {
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
             }
         }
+
         List<EventRecord> events = panacheQuery.page(paginationParams.getPageIndex(), paginationParams.getPageSize())
                 .project(EventRecord.class)
                 .list();

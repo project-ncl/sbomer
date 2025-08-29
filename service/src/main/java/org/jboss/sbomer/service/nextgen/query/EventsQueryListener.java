@@ -22,231 +22,198 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.jboss.sbomer.service.nextgen.antlr.QueryBaseListener;
 import org.jboss.sbomer.service.nextgen.antlr.QueryParser;
-import org.jboss.sbomer.service.nextgen.antlr.QueryParser.PredicateContext;
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * <p>
- * An ANTLR Listener that traverses the parsed query tree and builds a JPQL (Java Persistence Query Language) `WHERE`
- * clause along with a map of named parameters. This is designed to be used with Panache queries.
- * </p>
- *
- * <p>
- * It uses a stack to construct the query string as the {@link org.antlr.v4.runtime.tree.ParseTreeWalker} fires
- * enter/exit events.
- * </p>
- */
 @Slf4j
 public class EventsQueryListener extends QueryBaseListener {
 
+    // todo refactor, make more generic
+    private static final Set<String> VALID_FIELDS = Set.of("id", "created", "updated", "finished", "status", "reason");
+    private static final Set<String> VALID_SORT_FIELDS = Set
+            .of("id", "created", "updated", "finished", "status", "reason");
+    private static final Set<String> STRING_FIELDS = Set.of("id", "reason");
+    private static final Set<String> COMPARABLE_FIELDS = Set.of("created", "updated", "finished");
+
     private final Stack<String> queryParts = new Stack<>();
     private final Map<String, Object> parameters = new HashMap<>();
+    private String orderByClause = null;
     private int paramIndex = 0;
 
-    /**
-     * Returns the final, fully constructed JPQL WHERE clause.
-     *
-     * @return The JPQL WHERE clause string.
-     */
+    // get full JPQL WHERE clause
     public String getJpqlWhereClause() {
-        if (queryParts.isEmpty()) {
-            return "";
-        }
-        return queryParts.peek();
+        return queryParts.isEmpty() ? "" : queryParts.peek();
     }
 
-    /**
-     * Returns the map of named parameters collected during the tree traversal.
-     *
-     * @return A map where keys are parameter names (e.g., "param0") and values are the corresponding query values.
-     */
+    // get full JPQL ORDER BY clause
+    public String getJpqlOrderByClause() {
+        return orderByClause != null ? orderByClause : "";
+    }
+
     public Map<String, Object> getParameters() {
         return parameters;
     }
 
     @Override
-    public void enterQuery(QueryParser.QueryContext ctx) {
-        log.trace("Entering Query: '{}'", ctx.getText());
-    }
-
-    @Override
     public void exitQuery(QueryParser.QueryContext ctx) {
-        log.trace("Exiting Query: '{}'", ctx.getText());
-    }
+        long termCount = ctx.statement().stream().filter(stmt -> stmt.term() != null).count();
 
-    @Override
-    public void enterExpression(QueryParser.ExpressionContext ctx) {
-        log.trace("  -> Entering Expression: '{}'", ctx.getText());
-    }
-
-    @Override
-    public void exitExpression(QueryParser.ExpressionContext ctx) {
-        log.trace("  <- Exiting Expression: '{}'", ctx.getText());
-
-        // If the expression is a logical AND or OR, its two operands will be on the top
-        // of the stack.
-        if (ctx.AND() != null || ctx.OR() != null) {
-            // The right-hand side was visited last, so it's on top.
-            String right = queryParts.pop();
-            String left = queryParts.pop();
-            String op = ctx.AND() != null ? " AND " : " OR ";
-
-            // Combine them, wrap in parentheses, and push the result back.
-            queryParts.push("(" + left + op + right + ")");
+        if (termCount > 1) {
+            List<String> operands = new ArrayList<>();
+            for (int i = 0; i < termCount; i++) {
+                operands.add(queryParts.pop());
+            }
+            Collections.reverse(operands);
+            queryParts.push("(" + String.join(" AND ", operands) + ")");
         }
-        // If it's a parenthesized expression, like `(id = "A")`, the inner result `id =
-        // :param0` is already on the
-        // stack. We just wrap it in parentheses.
-        else if (ctx.LPAREN() != null) {
+    }
+
+    @Override
+    public void exitSort(QueryParser.SortContext ctx) {
+        String sortField = ctx.field.getText();
+        String sortOrder = "ASC";
+
+        if (ctx.direction.getType() == QueryParser.SORT_DESC) {
+            sortOrder = "DESC";
+        }
+
+        if (!isValidSortField(sortField)) {
+            throw new IllegalArgumentException(
+                    "Invalid sort field: '" + sortField + "'. Valid fields: " + String.join(", ", VALID_SORT_FIELDS));
+        }
+
+        orderByClause = "ORDER BY " + sortField + " " + sortOrder;
+        log.debug("Sort by {} {}", sortField, sortOrder);
+    }
+
+    // supported fields for sorting
+    private boolean isValidSortField(String field) {
+        return VALID_SORT_FIELDS.contains(field);
+    }
+
+    @Override
+    public void exitTerm(QueryParser.TermContext ctx) {
+        // adding negation when minus is present
+        if (ctx.MINUS() != null) {
             String expr = queryParts.pop();
-            queryParts.push("(" + expr + ")");
-        } else if (ctx.predicate() == null) {
-            // If it's not a logical expression, not a parenthesized expression,
-            // and not a simple predicate, then it's an unsupported operation.
-            throw new UnsupportedOperationException("Unsupported operator in expression: " + ctx.getText());
+            queryParts.push("(NOT " + expr + ")");
         }
     }
 
     @Override
-    public void enterPredicate(QueryParser.PredicateContext ctx) {
-        log.trace("    -> Entering Predicate: '{}'", ctx.getText());
+    public void exitAtom(QueryParser.AtomContext ctx) {
+        // parsing the most atomic
+        String field = ctx.WORD().getText();
+        handleValueList(field, ctx.value_list());
     }
 
-    @Override
-    public void exitPredicate(QueryParser.PredicateContext ctx) {
-        log.trace("    <- Exiting Predicate: '{}'", ctx.getText());
+    private void handleValueList(String field, QueryParser.Value_listContext ctx) {
+        List<String> values = ctx.value()
+                .stream()
+                .map(v -> v.WORD() != null ? v.WORD().getText() : unquote(v.STRING().getText()))
+                .collect(Collectors.toList());
 
-        String field = ctx.IDENTIFIER().getText();
-        String operator = getOperator(ctx);
+        String operator = getOperator(ctx.value(0));
 
-        validatePredicate(field, operator);
-
-        String stringValue = parseValue(ctx.value());
-
-        Object finalValue;
-        if (ctx.CONTAINS() != null) {
-            // for LIKE operator, adding wildcards from both sides
-            finalValue = "%" + stringValue + "%";
+        if (values.size() == 1) {
+            handleSingleValue(field, values.get(0), operator);
         } else {
-            finalValue = convertValue(field, stringValue);
+            handleMultipleValues(field, values, operator);
+        }
+    }
+
+    private String getOperator(QueryParser.ValueContext valueCtx) {
+        if (valueCtx.op == null) {
+            return "="; // default operator when none specified
+        }
+        return valueCtx.op.getType() == QueryParser.CONTAINS ? "LIKE" : valueCtx.op.getText();
+    }
+
+    private void handleSingleValue(String field, String value, String operator) {
+        if (!VALID_FIELDS.contains(field)) {
+            throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
+        }
+        if (operator.equals("LIKE") && !STRING_FIELDS.contains(field)) {
+            throw new UnsupportedOperationException(
+                    "LIKE operator can only be used with string fields: " + STRING_FIELDS);
+        }
+        if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
+                && !COMPARABLE_FIELDS.contains(field)) {
+            throw new UnsupportedOperationException(
+                    "Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
         }
 
-        String paramName = "param" + paramIndex++;
-        parameters.put(paramName, finalValue);
-        queryParts.push(field + " " + operator + " " + ":" + paramName);
+        Object convertedValue = convertValue(field, value);
+
+        if (operator.equals("LIKE")) {
+            convertedValue = "%" + convertedValue + "%";
+        }
+
+        String paramName = nextParamName();
+        parameters.put(paramName, convertedValue);
+        queryParts.push(field + " " + operator + " :" + paramName);
     }
 
-    @Override
-    public void enterValue(QueryParser.ValueContext ctx) {
-        log.trace("      -> Entering Value: '{}'", ctx.getText());
+    private void handleMultipleValues(String field, List<String> values, String operator) {
+        if (!VALID_FIELDS.contains(field)) {
+            throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
+        }
+        if (operator.equals("LIKE")) {
+            throw new UnsupportedOperationException("LIKE operator cannot be used with multiple values");
+        }
+        if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
+                && !COMPARABLE_FIELDS.contains(field)) {
+            throw new UnsupportedOperationException(
+                    "Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
+        }
+
+        List<String> paramNames = new ArrayList<>();
+        for (String value : values) {
+            String paramName = nextParamName();
+            parameters.put(paramName, convertValue(field, value));
+            paramNames.add(":" + paramName);
+        }
+
+        queryParts.push(field + " IN (" + String.join(", ", paramNames) + ")");
     }
 
-    @Override
-    public void exitValue(QueryParser.ValueContext ctx) {
-        log.trace("      <- Exiting Value: '{}'", ctx.getText());
-    }
-
-    /**
-     * Converts the raw string value from the query into the correct Java type based on the field name. Also performs
-     * validation for the value format.
-     *
-     * @param field The field name being queried.
-     * @param stringValue The raw string value from the query.
-     * @return A correctly typed object (e.g., Instant, Long, Enum).
-     */
+    // parsing field + values
     private Object convertValue(String field, String stringValue) {
         switch (field) {
+            // parsing enum fields
             case "status":
                 try {
                     return EventStatus.valueOf(stringValue.toUpperCase());
                 } catch (IllegalArgumentException e) {
                     throw new IllegalArgumentException(
-                            "Invalid value for field 'status'. Valid values are: "
-                                    + Arrays.toString(EventStatus.values()));
+                            "Invalid status value. Valid values: " + Arrays.toString(EventStatus.values()));
                 }
+                // parsing date fields
             case "created":
             case "updated":
             case "finished":
-                try {
-                    return parseInstant(stringValue);
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException(
-                            "Invalid timestamp format for field '" + field + "'. " + e.getMessage());
-                }
-            case "id":
-            case "reason":
-                return stringValue;
+                return parseInstant(stringValue);
             default:
-                throw new IllegalArgumentException("Unknown field: '" + field + "'");
+                // other fields are string
+                return stringValue;
         }
     }
 
-    /**
-     * Validates that the operator is compatible with the field type.
-     *
-     * @param field The field name being queried.
-     * @param operator The operator being used.
-     */
-    private void validatePredicate(String field, String operator) {
-        switch (field) {
-            case "id":
-            case "reason":
-                if (operator.equals(">") || operator.equals("<") || operator.equals(">=") || operator.equals("<=")) {
-                    throw new UnsupportedOperationException(
-                            "Operator '" + operator.trim() + "' is not supported for string field '" + field + "'");
-                }
-                break;
-            case "created":
-            case "updated":
-            case "finished":
-                if (operator.equals("LIKE")) {
-                    throw new UnsupportedOperationException(
-                            "Operator 'LIKE' is not supported for numeric or date field '" + field + "'");
-                }
-                break;
-            case "status":
-                if (!operator.equals("=") && !operator.equals("!=")) {
-                    throw new UnsupportedOperationException(
-                            "Operator '" + operator.trim() + "' is not supported for enum field '" + field + "'");
-                }
-                break;
-        }
-    }
-
-    private String getOperator(PredicateContext ctx) {
-        if (ctx.EQUAL() != null)
-            return "=";
-        if (ctx.NOT_EQUAL() != null)
-            return "!=";
-        if (ctx.GREATER_THAN() != null)
-            return ">";
-        if (ctx.LESS_THAN() != null)
-            return "<";
-        if (ctx.GREATER_THAN_OR_EQUAL() != null)
-            return ">=";
-        if (ctx.LESS_THAN_OR_EQUAL() != null)
-            return "<=";
-        if (ctx.CONTAINS() != null)
-            return "LIKE";
-        throw new UnsupportedOperationException("Operator not implemented: " + ctx.getText());
-    }
-
-    private String parseValue(QueryParser.ValueContext valueCtx) {
-        String rawValue = valueCtx.STRING_IN_QUOTES().getText();
-        // The STRING_IN_QUOTES has ALWAYS quotes around it per the grammar
-        return rawValue.substring(1, rawValue.length() - 1);
-    }
-
+    // parse date formats
     private Instant parseInstant(String stringValue) {
         try {
             return Instant.parse(stringValue);
@@ -261,18 +228,9 @@ public class EventsQueryListener extends QueryBaseListener {
                 .appendPattern("-dd")
                 .optionalEnd()
                 .optionalEnd()
-                .optionalStart()
-                .appendLiteral(' ')
-                .appendPattern("HH:mm")
-                .optionalStart()
-                .appendPattern(":ss")
-                .optionalEnd()
-                .optionalEnd()
                 .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
                 .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
                 .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
                 .toFormatter(Locale.ROOT)
                 .withZone(java.time.ZoneOffset.UTC);
 
@@ -280,7 +238,16 @@ public class EventsQueryListener extends QueryBaseListener {
             return Instant.from(customFormatter.parse(stringValue));
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
-                    "Supported formats include 'yyyy', 'yyyy-MM', 'yyyy-MM-dd', 'yyyy-MM-dd HH:mm', 'yyyy-MM-dd HH:mm:ss', and ISO-8601 (e.g., '2023-01-01T12:00:00Z').");
+                    "Supported formats: 'yyyy', 'yyyy-MM', 'yyyy-MM-dd', or ISO-8601 ('2025-08-20T10:00:00Z').");
         }
+    }
+
+    private String unquote(String s) {
+        return (s == null || s.length() < 2) ? s : s.substring(1, s.length() - 1);
+    }
+
+    // keeping count of params
+    private String nextParamName() {
+        return "param" + paramIndex++;
     }
 }

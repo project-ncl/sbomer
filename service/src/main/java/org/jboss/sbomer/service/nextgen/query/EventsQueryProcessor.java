@@ -18,7 +18,9 @@
 package org.jboss.sbomer.service.nextgen.query;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -39,7 +41,16 @@ public class EventsQueryProcessor {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         QueryParser parser = new QueryParser(tokens);
 
-        parser.addErrorListener(new EventsQueryParseErrorListener());
+        lexer.removeErrorListeners();
+        parser.removeErrorListeners();
+
+        // our custom error listener
+        EventsQueryParseErrorListener errorListener = new EventsQueryParseErrorListener();
+        lexer.addErrorListener(errorListener);
+        parser.addErrorListener(errorListener);
+
+        // use a strategy that fails immediately on the first parse error
+        parser.setErrorHandler(new BailErrorStrategy());
 
         EventsQueryListener listener = new EventsQueryListener();
         ParseTreeWalker walker = new ParseTreeWalker();
@@ -58,8 +69,8 @@ public class EventsQueryProcessor {
             return listener;
 
         } catch (ParseCancellationException | IllegalArgumentException | UnsupportedOperationException e) {
-
-            throw new ClientException("Invalid query", List.of(e.getMessage()));
+            String errorMessage = Optional.ofNullable(e.getMessage()).orElse("Invalid query syntax");
+            throw new ClientException("Invalid query", List.of(errorMessage));
         } catch (Exception e) {
 
             log.error("Unexpected error while parsing query: {}", query, e);

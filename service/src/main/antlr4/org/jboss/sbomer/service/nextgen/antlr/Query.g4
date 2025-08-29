@@ -1,33 +1,32 @@
 grammar Query;
 
-query: expression;
+query: WS* statement (WS+ statement)* WS* EOF;
+statement: term | sort;
+term: MINUS? atom;
+sort: (direction=(SORT | SORT_ASC | SORT_DESC)) COLON field=WORD;
+atom: WORD COLON value_list;
 
-expression
-    : LPAREN expression RPAREN ( ( AND | OR ) expression )?
-    | predicate ( ( AND | OR ) expression )?
-    ;
+value_list: value (COMMA value)*;
+value: op=(GT | LT | GTE | LTE | CONTAINS)? (WORD | STRING);
+// --- LEXER RULES ---
 
-predicate
-    : IDENTIFIER (EQUAL | NOT_EQUAL | GREATER_THAN | LESS_THAN | GREATER_THAN_OR_EQUAL | LESS_THAN_OR_EQUAL | CONTAINS) value
-    ;
+SORT: 'sort';
+SORT_ASC: 'sort-asc';
+SORT_DESC: 'sort-desc';
 
-value: STRING_IN_QUOTES;
-
-AND: 'AND' | 'and';
-OR: 'OR' | 'or';
-LPAREN: '(';
-RPAREN: ')';
-EQUAL: '=';
-NOT_EQUAL: '!=';
-GREATER_THAN: '>';
-LESS_THAN: '<';
-GREATER_THAN_OR_EQUAL: '>=';
-LESS_THAN_OR_EQUAL: '<=';
+COLON: ':';
+MINUS: '-';
+COMMA: ',';
+ASC: 'asc';
+DESC: 'desc';
+GT: '>';
+LT: '<';
+GTE: '>=';
+LTE: '<=';
 CONTAINS: '~';
 
-IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
-STRING_IN_QUOTES: '"' ( ~'"' )* '"';
+// UNIFIED TOKEN: Can be a key or a value. Can start with a letter or number.
+WORD: [a-zA-Z0-9_][a-zA-Z0-9\-_]*;
+STRING: '"' ( '\\"' | ~'"' )*? '"';
 
-WS: [ \t\r\n]+ -> skip;
-
-UNEXPECTED_CHAR: . ;
+WS: [ \t\r\n]+;
