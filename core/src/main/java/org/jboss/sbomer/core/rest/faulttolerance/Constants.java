@@ -53,4 +53,18 @@ public class Constants {
             * (PYXIS_UNPUBLISHED_MAX_RETRIES + 1));
     public static final long PYXIS_UNPUBLISHED_MAX_DELAY = (PYXIS_UNPUBLISHED_INITIAL_DELAY
             * PYXIS_UNPUBLISHED_MAX_RETRIES);
+
+    /*
+     * In some circumstances when starting the sbomer service and there are a number of sucessful taskruns ready for
+     * manifests to be ingested, this causes the service to become overloaded and slow with this sudden influx of heavy
+     * i/o
+     *
+     * These properties are applied to a `Bulkhead` (essentially a queue that limits the number of concurrent
+     * executions), it can concurrently process two manifests at a time.
+     *
+     * MAX_QUEUE is not used but overrides the default if it where to be called Asyncronosuly and will throw
+     * `BulkheadException` We set it just so we remember it exists if we are to call it async
+     */
+    public static final int STORE_SBOM_CONCURENCY = 2;
+    public static final int STORE_SBOM_MAX_QUEUE = 10; // 10 is the microprofile default
 }

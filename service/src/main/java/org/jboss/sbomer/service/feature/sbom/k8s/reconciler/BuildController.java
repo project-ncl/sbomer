@@ -17,6 +17,9 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.STORE_SBOM_CONCURENCY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.STORE_SBOM_MAX_QUEUE;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,6 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -569,6 +573,7 @@ public class BuildController extends AbstractController {
         return action;
     }
 
+    @Bulkhead(value = STORE_SBOM_CONCURENCY, waitingTaskQueue = STORE_SBOM_MAX_QUEUE)
     protected List<Sbom> storeSboms(GenerationRequest generationRequest) {
         MDCUtils.removeOtelContext();
         MDCUtils.addIdentifierContext(generationRequest.getIdentifier());

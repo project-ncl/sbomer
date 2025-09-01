@@ -18,6 +18,8 @@
 package org.jboss.sbomer.service.feature.sbom.features.generator;
 
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.STORE_SBOM_CONCURENCY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.STORE_SBOM_MAX_QUEUE;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
@@ -210,7 +213,9 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param generationRequest the generation request
      * @param boms the BOMs to store
      * @return the list of stored {@link Sbom}s
+     * @throws InterruptedException
      */
+    @Bulkhead(value = STORE_SBOM_CONCURENCY, waitingTaskQueue = STORE_SBOM_MAX_QUEUE)
     @Transactional
     public List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
         MDCUtils.removeOtelContext();
@@ -660,6 +665,7 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param manifestPaths List of {@link Path}s to manifests in JSON format.
      * @return List of {@link Bom}s.
      */
+    @Bulkhead(value = STORE_SBOM_CONCURENCY, waitingTaskQueue = STORE_SBOM_MAX_QUEUE)
     public List<Bom> readManifests(List<Path> manifestPaths) {
         List<Bom> boms = new ArrayList<>();
 
