@@ -5,6 +5,7 @@ import {
   Dashboard,
   DocumentMultiple_02,
   EventChange,
+  Help,
   Switcher as SwitcherIcon
 } from '@carbon/icons-react';
 import {
@@ -25,13 +26,13 @@ import {
   Select,
   SelectItem,
   SideNav,
-  SideNavHeader,
+  SideNavDivider,
   SideNavItems,
   SideNavLink,
   SideNavMenu,
   SideNavMenuItem,
-  Theme,
-  SkipToContent
+  SkipToContent,
+  Theme
 } from '@carbon/react';
 import * as React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -61,6 +62,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     if (path.includes('/generations') || label === 'Generations') return Application;
     if (path.includes('/manifests') || label === 'Manifests') return DocumentMultiple_02;
     if (path.includes('/events') || label === 'Events') return EventChange;
+    if (path.includes('/help') || label === 'Help') return Help;
     return ChevronRight;
   };
 
@@ -87,23 +89,27 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const renderSideNavGroup = (group: IAppRouteGroup, groupIndex: number) => {
     const isAnyChildActive = group.routes?.some(r => r.path && isRouteActive(r.path));
     return (
-      <SideNavMenu
+      <><SideNavMenu
         key={`${group.label}-${groupIndex}`}
         title={group.label}
         defaultExpanded={isAnyChildActive}
       >
-        {group.routes.map((route, idx) =>
-          route.label ? (
-            <SideNavMenuItem
-              key={`${route.label}-${idx}`}
-              as={NavLink}
-              to={route.path}
-            >
-              {route.label}
-            </SideNavMenuItem>
-          ) : null
+        {group.routes.map((route, idx) => route.label ? (
+          <SideNavMenuItem
+            key={`${route.label}-${idx}`}
+            as={NavLink}
+            to={route.path}
+          >
+            {route.label}
+          </SideNavMenuItem>
+        ) : null
         )}
       </SideNavMenu>
+      <SideNavDivider>
+
+        </SideNavDivider>
+        <div> xd</div>
+        </>
     );
   };
 

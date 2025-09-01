@@ -7,6 +7,7 @@ import { ManifestsPage } from './components/Pages/Manifests/ManifestsPage';
 import { EventsPage } from './components/Pages/Events/EventsPage';
 import { EventPage } from './components/Pages/Events/EventPage';
 import { NotFoundPage } from './components/Pages/NotFound/NotFoundPage';
+import { HelpPage } from './components/Pages/Help/HelpPage';
 
 let routeFocusTimer: number;
 export interface IAppRoute {
@@ -63,6 +64,11 @@ const routes: AppRouteConfig[] = [
   {
     element: <EventPage />,
     path: '/events/:id',
+  },
+  {
+    element: <HelpPage />,
+    label: 'Help',
+    path: '/help',
   },
   {
     element: <NotFoundPage />,

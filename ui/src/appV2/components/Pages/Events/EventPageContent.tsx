@@ -38,7 +38,7 @@ export const EventPageContent = () => {
     <Stack gap={50}>
       <Heading>Event {id}</Heading>
         <StructuredListWrapper isCondensed>
-              <StructuredListHead>
+               <StructuredListHead>
                 <StructuredListRow head>
                   <StructuredListCell head>Property</StructuredListCell>
                   <StructuredListCell head>Value</StructuredListCell>
