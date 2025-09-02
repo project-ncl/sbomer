@@ -213,7 +213,6 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param generationRequest the generation request
      * @param boms the BOMs to store
      * @return the list of stored {@link Sbom}s
-     * @throws InterruptedException
      */
     @Bulkhead(value = STORE_SBOM_CONCURENCY, waitingTaskQueue = STORE_SBOM_MAX_QUEUE)
     @Transactional

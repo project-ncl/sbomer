@@ -180,13 +180,14 @@ public class SyftImageController extends AbstractController {
                     try {
                         boms = readManifests(manifestPaths);
                     } catch (Exception e) {
-                        if (e instanceof BulkheadException)
+                        if (e instanceof BulkheadException) {
                             log.error(
                                     "Unable to read one or more manifest, there is too many manifests being read concurrently (>= {})",
                                     STORE_SBOM_MAX_QUEUE,
                                     e);
-                        else
+                        } else {
                             log.error("Unable to read one or more manifests", e);
+                        }
 
                         return updateRequest(
                                 generationRequest,
