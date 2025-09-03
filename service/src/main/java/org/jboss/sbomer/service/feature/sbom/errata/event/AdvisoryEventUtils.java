@@ -204,11 +204,17 @@ public class AdvisoryEventUtils {
 
         try {
             PackageURL componentPurl = new PackageURL(purl);
-            if (componentPurl.getQualifiers() == null || !componentPurl.getQualifiers().containsKey("arch")) {
+
+            if (componentPurl.getQualifiers() == null) {
                 return Collections.emptySet();
             }
 
             String componentArch = componentPurl.getQualifiers().get("arch");
+
+            if (componentArch == null) {
+                return Collections.emptySet();
+            }
+
             if (componentArch.equals("src")) {
                 // Select the "-source-rpms" CDN repositories and include all the archs provided
                 return cdns.stream()
@@ -272,17 +278,7 @@ public class AdvisoryEventUtils {
         try {
 
             PackageURL purl = new PackageURL(originalPurl);
-            PackageURLBuilder builder = PackageURLBuilder.aPackageURL()
-                    .withName(purl.getName())
-                    .withNamespace(purl.getNamespace())
-                    .withSubpath(purl.getSubpath())
-                    .withType(purl.getType())
-                    .withVersion(purl.getVersion());
-
-            if (purl.getQualifiers() != null) {
-                // Copy all the original qualifiers
-                purl.getQualifiers().forEach(builder::withQualifier);
-            }
+            PackageURLBuilder builder = purl.toBuilder();
 
             // Add the repository_id name
             builder.withQualifier("repository_id", cdn.getCdnName());
@@ -308,17 +304,7 @@ public class AdvisoryEventUtils {
         try {
 
             PackageURL purl = new PackageURL(originalPurl);
-            PackageURLBuilder builder = PackageURLBuilder.aPackageURL()
-                    .withName(repository.getRepositoryFragment())
-                    .withNamespace(purl.getNamespace())
-                    .withSubpath(purl.getSubpath())
-                    .withType(purl.getType())
-                    .withVersion(purl.getVersion());
-
-            if (purl.getQualifiers() != null) {
-                // Copy all the original qualifiers
-                purl.getQualifiers().forEach(builder::withQualifier);
-            }
+            PackageURLBuilder builder = purl.toBuilder();
 
             // Override tag and set repository url
             builder.withQualifier("tag", repository.getTag())

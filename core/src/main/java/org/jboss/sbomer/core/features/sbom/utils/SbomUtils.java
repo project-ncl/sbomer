@@ -1463,21 +1463,8 @@ public class SbomUtils {
 
         try {
             PackageURL purl = new PackageURL(component.getPurl());
-            PackageURLBuilder builder = PackageURLBuilder.aPackageURL()
-                    .withName(purl.getName())
-                    .withNamespace(purl.getNamespace())
-                    .withSubpath(purl.getSubpath())
-                    .withType(purl.getType())
-                    .withVersion(purl.getVersion());
-
-            if (purl.getQualifiers() != null) {
-                // Copy all the original qualifiers
-                purl.getQualifiers().forEach(builder::withQualifier);
-            }
-
-            // Add the qualifiers
+            PackageURLBuilder builder = purl.toBuilder();
             qualifiers.forEach(builder::withQualifier);
-
             return builder.build().toString();
         } catch (MalformedPackageURLException | IllegalArgumentException e) {
             log.warn("Error while adding new qualifiers to component with purl {}", component.getPurl(), e);

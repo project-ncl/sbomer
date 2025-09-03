@@ -157,8 +157,11 @@ public class SyftImageCatalogCommand extends AbstractCatalogCommand {
         try {
             PackageURL purl = new PackageURL(component.getPurl());
             Map<String, String> qualifiers = purl.getQualifiers();
-            if (qualifiers != null && qualifiers.containsKey("arch")) {
-                return qualifiers.get("arch");
+            if (qualifiers != null) {
+                String arch = qualifiers.get("arch");
+                if (arch != null) {
+                    return arch;
+                }
             }
         } catch (MalformedPackageURLException e) {
             log.warn("Could not parse the PURL: {}", component.getPurl(), e);
