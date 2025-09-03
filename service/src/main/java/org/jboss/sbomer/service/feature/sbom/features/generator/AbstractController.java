@@ -19,8 +19,8 @@ package org.jboss.sbomer.service.feature.sbom.features.generator;
 
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
 import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_CONCURENCY;
-import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
 import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
 import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_RETRIES;
 
 import java.io.File;
@@ -223,7 +223,11 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return the list of stored {@link Sbom}s
      */
     @Bulkhead(value = SBOM_IO_CONCURENCY, waitingTaskQueue = SBOM_IO_MAX_QUEUE)
-    @Retry(maxRetries = SBOM_IO_MAX_RETRIES, delay = SBOM_IO_DELAY, delayUnit = ChronoUnit.SECONDS, retryOn = BulkheadException.class)
+    @Retry(
+            maxRetries = SBOM_IO_MAX_RETRIES,
+            delay = SBOM_IO_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            retryOn = BulkheadException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     @Transactional
@@ -676,7 +680,11 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @return List of {@link Bom}s.
      */
     @Bulkhead(value = SBOM_IO_CONCURENCY, waitingTaskQueue = SBOM_IO_MAX_QUEUE)
-    @Retry(maxRetries = SBOM_IO_MAX_RETRIES, delay = SBOM_IO_DELAY, delayUnit = ChronoUnit.SECONDS, retryOn = BulkheadException.class)
+    @Retry(
+            maxRetries = SBOM_IO_MAX_RETRIES,
+            delay = SBOM_IO_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            retryOn = BulkheadException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     public List<Bom> readManifests(List<Path> manifestPaths) {

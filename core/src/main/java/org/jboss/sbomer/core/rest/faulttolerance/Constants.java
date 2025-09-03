@@ -65,9 +65,9 @@ public class Constants {
      * MAX_QUEUE is not used but overrides the default if it where to be called Asyncronosuly and will throw
      * `BulkheadException` We set it just so we remember it exists if we are to call it async
      *
-     * When a `BulkheadException` is thrown the Retry logic will re-attempt with an incremental backoff each time
-     * this means MAX_RETRIES * DELAY, currently 640 seconds, @Retry will stop catching the exception at this point
-     * and the Generation marked as FAILED
+     * When a `BulkheadException` is thrown the Retry logic will re-attempt with an incremental backoff each time this
+     * means MAX_RETRIES * DELAY, currently 640 seconds, @Retry will stop catching the exception at this point and the
+     * Generation marked as FAILED
      */
     public static final int SBOM_IO_MAX_RETRIES = 7;
     public static final int SBOM_IO_DELAY = 10;

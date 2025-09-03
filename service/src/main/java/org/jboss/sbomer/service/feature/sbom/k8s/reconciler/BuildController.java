@@ -18,8 +18,8 @@
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
 import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_CONCURENCY;
-import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
 import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
 import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_RETRIES;
 
 import java.nio.file.Path;
@@ -582,7 +582,11 @@ public class BuildController extends AbstractController {
     }
 
     @Bulkhead(value = SBOM_IO_CONCURENCY, waitingTaskQueue = SBOM_IO_MAX_QUEUE)
-    @Retry(maxRetries = SBOM_IO_MAX_RETRIES, delay = SBOM_IO_DELAY, delayUnit = ChronoUnit.SECONDS, retryOn = BulkheadException.class)
+    @Retry(
+            maxRetries = SBOM_IO_MAX_RETRIES,
+            delay = SBOM_IO_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            retryOn = BulkheadException.class)
     @ExponentialBackoff
     @BeforeRetry(RetryLogger.class)
     protected List<Sbom> storeSboms(GenerationRequest generationRequest) {

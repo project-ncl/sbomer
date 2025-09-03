@@ -17,7 +17,7 @@
  */
 package org.jboss.sbomer.service.generator.image.controller;
 
-import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_RETRIES;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -182,8 +182,8 @@ public class SyftImageController extends AbstractController {
                     } catch (Exception e) {
                         if (e instanceof BulkheadException) {
                             log.error(
-                                    "Unable to read one or more manifest, there is too many manifests being read concurrently (>= {})",
-                                    SBOM_IO_MAX_QUEUE,
+                                    "Unable to read manifest, there is too many manifests queued concurrently and we have exceeded our retries (>= {})",
+                                    SBOM_IO_MAX_RETRIES,
                                     e);
                         } else {
                             log.error("Unable to read one or more manifests", e);

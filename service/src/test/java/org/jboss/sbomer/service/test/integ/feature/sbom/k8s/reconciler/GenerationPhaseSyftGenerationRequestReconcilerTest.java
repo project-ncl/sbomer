@@ -58,7 +58,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.generator.image.controller.SyftImageController;
 import org.jboss.sbomer.service.test.unit.feature.sbom.syftimage.TestControllerProfile;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;

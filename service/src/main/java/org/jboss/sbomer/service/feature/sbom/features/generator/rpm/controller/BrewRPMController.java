@@ -17,8 +17,7 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.generator.rpm.controller;
 
-import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOMER_CLIENT_MAX_RETRIES;
-import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_RETRIES;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -196,15 +195,12 @@ public class BrewRPMController extends AbstractController {
                     try {
                         boms = readManifests(manifestPaths);
                     } catch (Exception e) {
-                        if (e instanceof BulkheadException)
-                        {
+                        if (e instanceof BulkheadException) {
                             log.error(
-                                    "Unable to read one or more manifest, there is too many manifests being read concurrently and (>= {}) retries have been exceeded",
-                                    SBOMER_CLIENT_MAX_RETRIES,
+                                    "Unable to read manifest, there is too many manifests queued concurrently and we have exceeded our retries (>= {})",
+                                    SBOM_IO_MAX_RETRIES,
                                     e);
-                        }
-                        else
-                        {
+                        } else {
                             log.error("Unable to read one or more manifests", e);
                         }
                         return updateRequest(
@@ -232,8 +228,8 @@ public class BrewRPMController extends AbstractController {
                     } catch (BulkheadException e) {
                         // We should never actually hit this unless storeBoms becomes async call in future
                         log.error(
-                                "Unable to store manifest, there is too many manifests being stored concurrently (>= {})",
-                                SBOM_IO_MAX_QUEUE,
+                                "Unable to store manifest, there is too many manifests queued concurrently and we have exceeded our retries (>= {})",
+                                SBOM_IO_MAX_RETRIES,
                                 e);
 
                         return updateRequest(
