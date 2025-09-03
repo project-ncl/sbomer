@@ -17,24 +17,10 @@
  */
 package org.jboss.sbomer.service.feature.sbom.errors;
 
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_SPAN_ID_KEY;
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_FLAGS_KEY;
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
-import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_STATE_KEY;
-
-import java.util.Map;
-
-import org.jboss.pnc.common.otel.OtelUtils;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
-import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
-import org.slf4j.MDC;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.context.Scope;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -45,41 +31,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ClientExceptionMapper extends AbstractExceptionMapper<ClientException> {
 
+    @WithSpan
     @Override
     public Response toResponse(ClientException ex) {
-        Span span = OtelUtils
-                .buildChildSpan(
-                        GlobalOpenTelemetry.get().getTracer(""),
-                        OtelHelper.getEffectiveClassName(this.getClass()) + ".toResponse",
-                        SpanKind.CLIENT,
-                        MDC.get(MDC_TRACE_ID_KEY),
-                        MDC.get(MDC_SPAN_ID_KEY),
-                        MDC.get(MDC_TRACE_FLAGS_KEY),
-                        MDC.get(MDC_TRACE_STATE_KEY),
-                        Span.current().getSpanContext(),
-                        Map.of())
-                .startSpan();
-        try (Scope scope = span.makeCurrent()) {
-            span.recordException(ex);
-            span.setStatus(StatusCode.ERROR, ex.getMessage());
+        ErrorResponse error = ErrorResponse.builder()
+                .resource(uriInfo.getPath())
+                .errorId(ex.getErrorId())
+                .error(Status.fromStatusCode(ex.getCode()).getReasonPhrase())
+                .message(ex.getMessage())
+                .errors(ex.getErrors())
+                .build();
 
-            ErrorResponse error = ErrorResponse.builder()
-                    .resource(uriInfo.getPath())
-                    .errorId(ex.getErrorId())
-                    .error(Status.fromStatusCode(ex.getCode()).getReasonPhrase())
-                    .message(ex.getMessage())
-                    .errors(ex.getErrors())
-                    .build();
+        log.error(error.toString(), ex);
 
-            log.error(error.toString(), ex);
-
-            return Response.status(ex.getCode()).entity(error).type(MediaType.APPLICATION_JSON).build();
-        } catch (Throwable t) {
-            span.recordException(t);
-            span.setStatus(StatusCode.ERROR, t.getMessage());
-            throw t;
-        } finally {
-            span.end();
-        }
+        return Response.status(ex.getCode()).entity(error).type(MediaType.APPLICATION_JSON).build();
     }
 }
