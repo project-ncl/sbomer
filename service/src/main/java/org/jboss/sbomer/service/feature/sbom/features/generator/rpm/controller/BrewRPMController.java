@@ -17,7 +17,8 @@
  */
 package org.jboss.sbomer.service.feature.sbom.features.generator.rpm.controller;
 
-import static org.jboss.sbomer.core.rest.faulttolerance.Constants.STORE_SBOM_MAX_QUEUE;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOMER_CLIENT_MAX_RETRIES;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -195,14 +196,17 @@ public class BrewRPMController extends AbstractController {
                     try {
                         boms = readManifests(manifestPaths);
                     } catch (Exception e) {
-                        if (e instanceof InterruptedException)
+                        if (e instanceof BulkheadException)
+                        {
                             log.error(
-                                    "Unable to read one or more manifest, there is too many manifests being read concurrently (>= {})",
-                                    STORE_SBOM_MAX_QUEUE,
+                                    "Unable to read one or more manifest, there is too many manifests being read concurrently and (>= {}) retries have been exceeded",
+                                    SBOMER_CLIENT_MAX_RETRIES,
                                     e);
+                        }
                         else
+                        {
                             log.error("Unable to read one or more manifests", e);
-
+                        }
                         return updateRequest(
                                 generationRequest,
                                 SbomGenerationStatus.FAILED,
@@ -229,7 +233,7 @@ public class BrewRPMController extends AbstractController {
                         // We should never actually hit this unless storeBoms becomes async call in future
                         log.error(
                                 "Unable to store manifest, there is too many manifests being stored concurrently (>= {})",
-                                STORE_SBOM_MAX_QUEUE,
+                                SBOM_IO_MAX_QUEUE,
                                 e);
 
                         return updateRequest(

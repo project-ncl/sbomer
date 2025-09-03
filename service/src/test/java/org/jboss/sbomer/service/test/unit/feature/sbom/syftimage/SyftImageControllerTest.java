@@ -45,6 +45,10 @@ import io.fabric8.tekton.v1beta1.ParamValue;
 import io.fabric8.tekton.v1beta1.TaskRun;
 import io.fabric8.tekton.v1beta1.TaskRunBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import jakarta.enterprise.inject.Vetoed;
+
+
+
 
 class SyftImageControllerTest {
     static class MockSbomRepository extends SbomRepository {
@@ -54,6 +58,7 @@ class SyftImageControllerTest {
         }
     }
 
+    @Vetoed
     static class SyftImageControllerAlt extends SyftImageController {
         @Override
         public UpdateControl<GenerationRequest> reconcileGenerating(

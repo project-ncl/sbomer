@@ -17,10 +17,13 @@
  */
 package org.jboss.sbomer.service.feature.sbom.k8s.reconciler;
 
-import static org.jboss.sbomer.core.rest.faulttolerance.Constants.STORE_SBOM_CONCURENCY;
-import static org.jboss.sbomer.core.rest.faulttolerance.Constants.STORE_SBOM_MAX_QUEUE;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_CONCURENCY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_RETRIES;
 
 import java.nio.file.Path;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,6 +35,8 @@ import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.config.Config;
 import org.jboss.sbomer.core.features.sbom.config.PncBuildConfig;
@@ -41,6 +46,7 @@ import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.ObjectMapperProvider;
 import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.sbom.features.generator.AbstractController;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.GenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.k8s.model.SbomGenerationPhase;
@@ -68,6 +74,8 @@ import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.api.reconciler.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.Dependent;
+import io.smallrye.faulttolerance.api.BeforeRetry;
+import io.smallrye.faulttolerance.api.ExponentialBackoff;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -573,7 +581,10 @@ public class BuildController extends AbstractController {
         return action;
     }
 
-    @Bulkhead(value = STORE_SBOM_CONCURENCY, waitingTaskQueue = STORE_SBOM_MAX_QUEUE)
+    @Bulkhead(value = SBOM_IO_CONCURENCY, waitingTaskQueue = SBOM_IO_MAX_QUEUE)
+    @Retry(maxRetries = SBOM_IO_MAX_RETRIES, delay = SBOM_IO_DELAY, delayUnit = ChronoUnit.SECONDS, retryOn = BulkheadException.class)
+    @ExponentialBackoff
+    @BeforeRetry(RetryLogger.class)
     protected List<Sbom> storeSboms(GenerationRequest generationRequest) {
         MDCUtils.removeOtelContext();
         MDCUtils.addIdentifierContext(generationRequest.getIdentifier());
