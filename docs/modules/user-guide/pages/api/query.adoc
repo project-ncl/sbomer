@@ -163,7 +163,7 @@ Timestamp fields (`created`, `updated`, `finished`) support the following format
 | `updated:>=2023-10`
 
 | `yyyy-MM-dd`
-| `finished:<=2023-10-25`
+| `finished:\<=2023-10-25`
 
 | ISO 8601
 | `created:>"2023-01-01T12:00:00Z"`
