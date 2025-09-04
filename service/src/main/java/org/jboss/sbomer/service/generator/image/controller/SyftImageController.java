@@ -17,6 +17,8 @@
  */
 package org.jboss.sbomer.service.generator.image.controller;
 
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_RETRIES;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.cyclonedx.model.Bom;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationRequestType;
 import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
@@ -177,7 +180,14 @@ public class SyftImageController extends AbstractController {
                     try {
                         boms = readManifests(manifestPaths);
                     } catch (Exception e) {
-                        log.error("Unable to read one or more manifests", e);
+                        if (e instanceof BulkheadException) {
+                            log.error(
+                                    "Unable to read manifest, there is too many manifests queued concurrently and we have exceeded our retries (>= {})",
+                                    SBOM_IO_MAX_RETRIES,
+                                    e);
+                        } else {
+                            log.error("Unable to read one or more manifests", e);
+                        }
 
                         return updateRequest(
                                 generationRequest,
@@ -194,6 +204,13 @@ public class SyftImageController extends AbstractController {
                         // There was an error when validating the entity, most probably the SBOM is not valid
                         log.error("Unable to validate generated SBOMs: {}", e.getMessage(), e);
 
+                        return updateRequest(
+                                generationRequest,
+                                SbomGenerationStatus.FAILED,
+                                GenerationResult.ERR_GENERATION,
+                                "Generation failed. One or more generated SBOMs failed validation: {}. See logs for more information.",
+                                e.getMessage());
+                    } catch (BulkheadException e) {
                         return updateRequest(
                                 generationRequest,
                                 SbomGenerationStatus.FAILED,

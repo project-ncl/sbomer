@@ -18,11 +18,16 @@
 package org.jboss.sbomer.service.feature.sbom.features.generator;
 
 import static org.jboss.sbomer.core.features.sbom.utils.SbomUtils.addPropertyIfMissing;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_CONCURENCY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_DELAY;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_QUEUE;
+import static org.jboss.sbomer.core.rest.faulttolerance.Constants.SBOM_IO_MAX_RETRIES;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,6 +43,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.cyclonedx.model.Bom;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.sbomer.core.config.request.ErrataAdvisoryRequestConfig;
 import org.jboss.sbomer.core.errors.ApplicationException;
 import org.jboss.sbomer.core.features.sbom.Constants;
@@ -46,6 +54,7 @@ import org.jboss.sbomer.core.features.sbom.enums.GenerationResult;
 import org.jboss.sbomer.core.features.sbom.utils.MDCUtils;
 import org.jboss.sbomer.core.features.sbom.utils.OtelHelper;
 import org.jboss.sbomer.core.features.sbom.utils.SbomUtils;
+import org.jboss.sbomer.core.rest.faulttolerance.RetryLogger;
 import org.jboss.sbomer.service.feature.errors.FeatureDisabledException;
 import org.jboss.sbomer.service.feature.s3.S3StorageHandler;
 import org.jboss.sbomer.service.feature.sbom.atlas.AtlasHandler;
@@ -79,6 +88,8 @@ import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
+import io.smallrye.faulttolerance.api.BeforeRetry;
+import io.smallrye.faulttolerance.api.ExponentialBackoff;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -211,6 +222,14 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param boms the BOMs to store
      * @return the list of stored {@link Sbom}s
      */
+    @Bulkhead(value = SBOM_IO_CONCURENCY, waitingTaskQueue = SBOM_IO_MAX_QUEUE)
+    @Retry(
+            maxRetries = SBOM_IO_MAX_RETRIES,
+            delay = SBOM_IO_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            retryOn = BulkheadException.class)
+    @ExponentialBackoff
+    @BeforeRetry(RetryLogger.class)
     @Transactional
     public List<Sbom> storeBoms(GenerationRequest generationRequest, List<Bom> boms) {
         MDCUtils.removeOtelContext();
@@ -660,6 +679,14 @@ public abstract class AbstractController implements Reconciler<GenerationRequest
      * @param manifestPaths List of {@link Path}s to manifests in JSON format.
      * @return List of {@link Bom}s.
      */
+    @Bulkhead(value = SBOM_IO_CONCURENCY, waitingTaskQueue = SBOM_IO_MAX_QUEUE)
+    @Retry(
+            maxRetries = SBOM_IO_MAX_RETRIES,
+            delay = SBOM_IO_DELAY,
+            delayUnit = ChronoUnit.SECONDS,
+            retryOn = BulkheadException.class)
+    @ExponentialBackoff
+    @BeforeRetry(RetryLogger.class)
     public List<Bom> readManifests(List<Path> manifestPaths) {
         List<Bom> boms = new ArrayList<>();
 

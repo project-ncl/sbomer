@@ -53,4 +53,24 @@ public class Constants {
             * (PYXIS_UNPUBLISHED_MAX_RETRIES + 1));
     public static final long PYXIS_UNPUBLISHED_MAX_DELAY = (PYXIS_UNPUBLISHED_INITIAL_DELAY
             * PYXIS_UNPUBLISHED_MAX_RETRIES);
+
+    /*
+     * In some circumstances when starting the sbomer service and there are a number of sucessful taskruns ready for
+     * manifests to be ingested, this causes the service to become overloaded and slow with this sudden influx of heavy
+     * i/o
+     *
+     * These properties are applied to a `Bulkhead` (essentially a queue that limits the number of concurrent
+     * executions), it can concurrently process two manifests at a time, more and a `BulkheadException` is thrown
+     *
+     * MAX_QUEUE is not used but overrides the default if it where to be called Asyncronosuly and will throw
+     * `BulkheadException` We set it just so we remember it exists if we are to call it async
+     *
+     * When a `BulkheadException` is thrown the Retry logic will re-attempt with an incremental backoff each time this
+     * means MAX_RETRIES * DELAY, currently 640 seconds, @Retry will stop catching the exception at this point and the
+     * Generation marked as FAILED
+     */
+    public static final int SBOM_IO_MAX_RETRIES = 7;
+    public static final int SBOM_IO_DELAY = 10;
+    public static final int SBOM_IO_CONCURENCY = 2;
+    public static final int SBOM_IO_MAX_QUEUE = 10; // 10 is the microprofile default
 }
