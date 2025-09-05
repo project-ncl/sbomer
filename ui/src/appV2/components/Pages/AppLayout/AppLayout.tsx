@@ -35,7 +35,7 @@ import {
   Theme
 } from '@carbon/react';
 import * as React from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -43,7 +43,6 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [sideNavExpanded, setSideNavExpanded] = React.useState(true);
   const [menuPanelExpanded, setMenuPanelExpanded] = React.useState(false);
 
@@ -105,11 +104,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         ) : null
         )}
       </SideNavMenu>
-      <SideNavDivider>
-
-        </SideNavDivider>
-        <div> xd</div>
-        </>
+      <SideNavDivider />
+      </>
     );
   };
 
