@@ -19,12 +19,15 @@ import {
   TableHeader,
   TableRow,
   TableToolbar,
+  TableToolbarAction,
+  TableToolbarContent,
   TableToolbarSearch,
   Tag,
   Tile
 } from '@carbon/react';
+import { Help } from '@carbon/icons-react';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const columnNames = {
   id: 'ID',
@@ -43,6 +46,7 @@ const headers = [
 ];
 
 export const EventTable = () => {
+  const navigate = useNavigate();
   const { query, pageIndex, pageSize, setFilters } = useEventsFilters();
 
   const [querySearchbarValue, setQuerySearchbarValue] = React.useState<string>(query || '');
@@ -147,16 +151,25 @@ export const EventTable = () => {
     <DataTable rows={value || []} headers={headers} render={({ rows, headers }) => (
       <TableContainer title="Events" description="Latest events">
         <TableToolbar>
-          <TableToolbarSearch
-            labelText="Search events"
-            placeholder="Enter query"
-            value={querySearchbarValue}
-            onChange={querySearchBarValueOnChange}
-            onClear={clearFilters}
-            onKeyDown={(event) => { if (event.key === 'Enter') executeSearch(); }}
-            size="lg"
-            expanded
-          />
+          <TableToolbarContent>
+            <TableToolbarSearch
+              persistent
+              labelText="Search events"
+              placeholder="Enter query"
+              value={querySearchbarValue}
+              onChange={querySearchBarValueOnChange}
+              onClear={clearFilters}
+              onKeyDown={(event) => { if (event.key === 'Enter') executeSearch(); }}
+              size="md"
+            />
+            <Button
+              kind="ghost"
+              hasIconOnly
+              iconDescription="Query Reference"
+              renderIcon={Help}
+              onClick={() => navigate("/help")}
+            />
+          </TableToolbarContent>
         </TableToolbar>
 
         {queryErrorTile
