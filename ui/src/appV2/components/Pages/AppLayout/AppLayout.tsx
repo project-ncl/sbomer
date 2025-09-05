@@ -114,15 +114,30 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   };
 
   const Navigation = (
+   <SideNavItems>
+    {routes
+      .filter(route => route.label && route.label !== 'Help')
+      .map((route, idx) =>
+        !route.routes
+          ? renderSideNavLink(route, idx)
+          : renderSideNavGroup(route, idx)
+      )}
+
     <SideNavItems>
-      {routes
-        .filter(route => route.label)
-        .map((route, idx) =>
-          !route.routes
-            ? renderSideNavLink(route, idx)
-            : renderSideNavGroup(route, idx)
-        )}
+      <SideNavDivider />
+      <SideNavLink
+        key="help-link"
+        renderIcon={Help}
+        isActive={isRouteActive('/help')}
+        as={NavLink}
+        to="/help"
+        large
+        tabIndex={2}
+      >
+        Help
+      </SideNavLink>
     </SideNavItems>
+  </SideNavItems>
   );
   const headerContainer = <>
     <HeaderContainer
