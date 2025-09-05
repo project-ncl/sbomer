@@ -80,18 +80,17 @@ class EventsQueryProcessorTest {
                 Arguments.of(
                         "\tstatus:NEW\n\n   reason:~\"Test\"  ",
                         "(status = :param0 AND reason LIKE :param1)",
-                        Map.of("param0", EventStatus.NEW, "param1", "%Test%"))
-                );
+                        Map.of("param0", EventStatus.NEW, "param1", "%Test%")));
     }
 
     @DisplayName("Should correctly process valid sorting queries")
     @ParameterizedTest
     @CsvSource({
             "'sort:status', 'ORDER BY status ASC'",
-            "'sort-asc:reason', 'ORDER BY reason ASC'",
-            "'sort-desc:id', 'ORDER BY id DESC'",
+            "'sort:reason:asc', 'ORDER BY reason ASC'",
+            "'sort:id:desc', 'ORDER BY id DESC'",
             "'status:NEW sort:created', 'ORDER BY created ASC'",
-            "'created:>=2024-01-01 sort-desc:id', 'ORDER BY id DESC'"
+            "'created:>=2024-01-01 sort:id:desc', 'ORDER BY id DESC'"
     })
     void testValidSortingQueries(String query, String expectedOrderBy) {
         EventsQueryListener listener = assertDoesNotThrow(
@@ -137,14 +136,16 @@ class EventsQueryProcessorTest {
     @DisplayName("Should reject invalid sorting queries")
     @ParameterizedTest
     @ValueSource(strings = {
-            "sort:status-asc",
-            "sort-asc:",
-            "sort desc:status",
+            "sort:status:up",
+            "sort:",
+            "sort:created:",
             "sort: created",
             "sort:nonexistent_field"
     })
     void testInvalidSortingQueries(String query) {
-        assertThrows(Exception.class, () -> eventsQueryProcessor.process(query),
+        assertThrows(
+                Exception.class,
+                () -> eventsQueryProcessor.process(query),
                 "Query '" + query + "' should have thrown an exception");
     }
 

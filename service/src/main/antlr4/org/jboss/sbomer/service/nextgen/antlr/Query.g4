@@ -3,7 +3,7 @@ grammar Query;
 query: WS* statement (WS+ statement)* WS* EOF;
 statement: term | sort;
 term: MINUS? atom;
-sort: (direction=(SORT | SORT_ASC | SORT_DESC)) COLON field=WORD;
+sort: SORT COLON field=WORD (COLON direction=(ASC | DESC))?;
 atom: WORD COLON value_list;
 
 value_list: value (COMMA value)*;
@@ -11,8 +11,6 @@ value: op=(GT | LT | GTE | LTE | CONTAINS)? (WORD | STRING);
 // --- LEXER RULES ---
 
 SORT: 'sort';
-SORT_ASC: 'sort-asc';
-SORT_DESC: 'sort-desc';
 
 COLON: ':';
 MINUS: '-';

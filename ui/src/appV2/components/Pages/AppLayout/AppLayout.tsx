@@ -5,6 +5,7 @@ import {
   Dashboard,
   DocumentMultiple_02,
   EventChange,
+  Help,
   Switcher as SwitcherIcon
 } from '@carbon/icons-react';
 import {
@@ -25,16 +26,16 @@ import {
   Select,
   SelectItem,
   SideNav,
-  SideNavHeader,
+  SideNavDivider,
   SideNavItems,
   SideNavLink,
   SideNavMenu,
   SideNavMenuItem,
-  Theme,
-  SkipToContent
+  SkipToContent,
+  Theme
 } from '@carbon/react';
 import * as React from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -42,7 +43,6 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [sideNavExpanded, setSideNavExpanded] = React.useState(true);
   const [menuPanelExpanded, setMenuPanelExpanded] = React.useState(false);
 
@@ -61,6 +61,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     if (path.includes('/generations') || label === 'Generations') return Application;
     if (path.includes('/manifests') || label === 'Manifests') return DocumentMultiple_02;
     if (path.includes('/events') || label === 'Events') return EventChange;
+    if (path.includes('/help') || label === 'Help') return Help;
     return ChevronRight;
   };
 
@@ -87,36 +88,52 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const renderSideNavGroup = (group: IAppRouteGroup, groupIndex: number) => {
     const isAnyChildActive = group.routes?.some(r => r.path && isRouteActive(r.path));
     return (
-      <SideNavMenu
+      <><SideNavMenu
         key={`${group.label}-${groupIndex}`}
         title={group.label}
         defaultExpanded={isAnyChildActive}
       >
-        {group.routes.map((route, idx) =>
-          route.label ? (
-            <SideNavMenuItem
-              key={`${route.label}-${idx}`}
-              as={NavLink}
-              to={route.path}
-            >
-              {route.label}
-            </SideNavMenuItem>
-          ) : null
+        {group.routes.map((route, idx) => route.label ? (
+          <SideNavMenuItem
+            key={`${route.label}-${idx}`}
+            as={NavLink}
+            to={route.path}
+          >
+            {route.label}
+          </SideNavMenuItem>
+        ) : null
         )}
       </SideNavMenu>
+      <SideNavDivider />
+      </>
     );
   };
 
   const Navigation = (
+   <SideNavItems>
+    {routes
+      .filter(route => route.label && route.label !== 'Help')
+      .map((route, idx) =>
+        !route.routes
+          ? renderSideNavLink(route, idx)
+          : renderSideNavGroup(route, idx)
+      )}
+
     <SideNavItems>
-      {routes
-        .filter(route => route.label)
-        .map((route, idx) =>
-          !route.routes
-            ? renderSideNavLink(route, idx)
-            : renderSideNavGroup(route, idx)
-        )}
+      <SideNavDivider />
+      <SideNavLink
+        key="help-link"
+        renderIcon={Help}
+        isActive={isRouteActive('/help')}
+        as={NavLink}
+        to="/help"
+        large
+        tabIndex={2}
+      >
+        Help
+      </SideNavLink>
     </SideNavItems>
+  </SideNavItems>
   );
   const headerContainer = <>
     <HeaderContainer
