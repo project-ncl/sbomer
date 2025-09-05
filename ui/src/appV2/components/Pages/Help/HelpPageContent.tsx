@@ -1,135 +1,173 @@
 import {
+  CodeSnippet,
   Heading,
-  UnorderedList,
+  Link,
   ListItem,
+  Section,
+  Stack,
+  Tab,
   Table,
-  TableHead,
-  TableRow,
-  TableHeader,
   TableBody,
   TableCell,
-  CodeSnippet,
-  Grid,
-  Column,
-  Stack,
-  Tabs,
+  TableHead,
+  TableHeader,
+  TableRow,
   TabList,
-  Tab,
-  TabPanels,
   TabPanel,
-  Accordion,
-  AccordionItem,
+  TabPanels,
+  Tabs,
+  UnorderedList
 } from '@carbon/react';
 import React from 'react';
 
 export const HelpPageContent = () => {
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={12}>
-        <Tabs>
-          <TabList aria-label="Help page sections">
-            <Tab>Query Language</Tab>
-            <Tab>About</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <Accordion>
-                <AccordionItem title="Generations">
-                  <p>This entity does not support the query language at the moment.</p>
-                </AccordionItem>
+    <Stack gap={7}>
+      <Heading>Query Language Reference</Heading>
+      <Section level={3}>
+        <p>
+          Use the search bar on the <Link href="/nextgen/events">Events page</Link> to filter and sort events using a query language.
+        </p>
+      </Section>
 
-                <AccordionItem title="Manifests">
-                  <p>This entity does not support the query language at the moment.</p>
-                </AccordionItem>
-
-                <AccordionItem title="Events" open>
-                  <Stack gap={7}>
-                    <p>
-                      Use the search bar to filter and sort events using a simple query language. Combine multiple filters to
-                      narrow your results.
-                    </p>
-
-                    <Heading>Filtering</Heading>
-                    <p>The basic filter format is <CodeSnippet type="inline" hideCopyButton>field:value</CodeSnippet>.</p>
-
-                    <Heading>Searchable Fields</Heading>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableHeader>Field</TableHeader>
-                          <TableHeader>Description</TableHeader>
-                          <TableHeader>Example Value</TableHeader>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>id</TableCell>
-                          <TableCell>The unique identifier of the event.</TableCell>
-                          <TableCell><CodeSnippet type="inline" hideCopyButton>E0AAAAA</CodeSnippet></TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>status</TableCell>
-                          <TableCell>The current status of the event.</TableCell>
-                          <TableCell><CodeSnippet type="inline" hideCopyButton>NEW, PROCESSED, ERROR</CodeSnippet></TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>reason</TableCell>
-                          <TableCell>The reason text, often used for errors.</TableCell>
-                          <TableCell><CodeSnippet type="inline" hideCopyButton>"Processing failed"</CodeSnippet></TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>created</TableCell>
-                          <TableCell>Timestamp when the event was created.</TableCell>
-                          <TableCell><CodeSnippet type="inline" hideCopyButton>2025-09-04</CodeSnippet></TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>updated</TableCell>
-                          <TableCell>Timestamp when the event was last updated.</TableCell>
-                          <TableCell><CodeSnippet type="inline" hideCopyButton>2025-09-04T13:00:00Z</CodeSnippet></TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>finished</TableCell>
-                          <TableCell>Timestamp when the event processing finished.</TableCell>
-                          <TableCell><CodeSnippet type="inline" hideCopyButton>2025</CodeSnippet></TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-
-                    <Heading>Operators</Heading>
-                    <UnorderedList>
-                      <ListItem><CodeSnippet type="inline" hideCopyButton>:</CodeSnippet> Equals (e.g., <CodeSnippet type="inline" hideCopyButton>status:NEW</CodeSnippet>)</ListItem>
-                      <ListItem><CodeSnippet type="inline" hideCopyButton>:&gt;</CodeSnippet>, <CodeSnippet type="inline" hideCopyButton>:&gt;=</CodeSnippet>, <CodeSnippet type="inline" hideCopyButton>:&lt;</CodeSnippet>, <CodeSnippet type="inline" hideCopyButton>:&lt;=</CodeSnippet> Greater/Less than (for date fields)</ListItem>
-                      <ListItem><CodeSnippet type="inline" hideCopyButton>:~</CodeSnippet> Contains (for string fields like <CodeSnippet type="inline" hideCopyButton>reason</CodeSnippet>)</ListItem>
-                      <ListItem><CodeSnippet type="inline" hideCopyButton>,</CodeSnippet> OR for multiple values of the same field (e.g., <CodeSnippet type="inline" hideCopyButton>status:NEW,ERROR</CodeSnippet>)</ListItem>
-                      <ListItem><CodeSnippet type="inline" hideCopyButton>-</CodeSnippet> NOT, placed before a filter (e.g., <CodeSnippet type="inline" hideCopyButton>-status:PROCESSED</CodeSnippet>)</ListItem>
-                    </UnorderedList>
-
-                    <Heading>Sorting</Heading>
-                    <p>
-                      Use <CodeSnippet type="inline" hideCopyButton>sort:field</CodeSnippet> or <CodeSnippet type="inline" hideCopyButton>sort:field:direction</CodeSnippet>. Direction can be <CodeSnippet type="inline" hideCopyButton>asc</CodeSnippet> or <CodeSnippet type="inline" hideCopyButton>desc</CodeSnippet>.
-                      The default is <CodeSnippet type="inline" hideCopyButton>asc</CodeSnippet>.
-                    </p>
-
-                    <Heading>Examples</Heading>
-                    <CodeSnippet type="single">status:NEW -reason:~"failed"</CodeSnippet>
-                    <CodeSnippet type="single">status:PROCESSED created:&gt;=2025 sort:updated:desc</CodeSnippet>
-
-                  </Stack>
-                </AccordionItem>
+      <Tabs>
+        <TabList aria-label="List of tabs">
+          <Tab>Reference</Tab>
+          <Tab>Quick Examples</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <Stack gap={7}>
+              <Heading>Searchable Fields</Heading>
+              <p>The following fields can be used for filtering and sorting.</p>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Field</TableHeader>
+                    <TableHeader>Data Type</TableHeader>
+                    <TableHeader>Example Values</TableHeader>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><code>id</code></TableCell>
+                    <TableCell>String</TableCell>
+                    <TableCell><code>E0AAAAA</code></TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><code>status</code></TableCell>
+                    <TableCell>Enum</TableCell>
+                    <TableCell><Stack orientation='horizontal'>
+                      <code>NEW</code><code>PROCESSED</code><code>ERROR</code>
+                    </Stack></TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><code>reason</code></TableCell>
+                    <TableCell>String</TableCell>
+                    <TableCell><code>"Processing failed"</code></TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><code>created</code>, <code>updated</code>, <code>finished</code></TableCell>
+                    <TableCell>Date/Timestamp</TableCell>
+                    <TableCell><Stack orientation='horizontal'>
+                      <code>2025</code><code>2025-09</code><code>2025-09-05</code><code>2025-09-05T11:12:37Z</code></Stack></TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
 
 
-              </Accordion>
-            </TabPanel>
+                <Heading>Syntax &amp; Available Operations</Heading>
+                <Table size="sm">
+                  <TableHead>
+                    <TableRow>
+                      <TableHeader>Operator</TableHeader>
+                      <TableHeader>Description</TableHeader>
+                      <TableHeader>Example</TableHeader>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <code>:</code>
+                      </TableCell>
+                      <TableCell>Exact match</TableCell>
+                      <TableCell>
+                        <CodeSnippet type="inline">status:NEW</CodeSnippet>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <code>:~</code>
+                      </TableCell>
+                      <TableCell>Contains</TableCell>
+                      <TableCell>
+                        <CodeSnippet type="inline">reason:~"fail"</CodeSnippet>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Stack orientation='horizontal'>
+                          <code>:&gt;=</code>
+                          <code>:&lt;=</code>
+                          <code>:&lt;</code>
+                          <code>:&gt;</code>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>Compare (dates)</TableCell>
+                      <TableCell>
+                        <CodeSnippet type="inline">created:&gt;=2025</CodeSnippet>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <code>,</code>
+                      </TableCell>
+                      <TableCell>OR values</TableCell>
+                      <TableCell>
+                        <CodeSnippet type="inline">status:NEW,ERROR</CodeSnippet>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <code>-</code>
+                      </TableCell>
+                      <TableCell>Negate</TableCell>
+                      <TableCell>
+                        <CodeSnippet type="inline">-status:PROCESSED</CodeSnippet>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <code>sort:</code>
+                      </TableCell>
+                      <TableCell>Sort</TableCell>
+                      <TableCell>
+                        <CodeSnippet type="inline">sort:created:desc</CodeSnippet>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+            </Stack>
+          </TabPanel>
 
-            <TabPanel>
-              <Stack gap={7}>
-                <Heading>About SBOMer</Heading>
-                <p>This is the help page for the SBOMer application.</p>
-              </Stack>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Column>
-    </Grid>
+          <TabPanel>
+            <Stack>
+              <p>Find all new events</p>
+              <CodeSnippet type="single">status:NEW</CodeSnippet>
+
+              <p>Find failed events that were not a timeout</p>
+              <CodeSnippet type="single">status:ERROR -reason:~"timeout"</CodeSnippet>
+
+              <p>Find events processed after the start of 2025</p>
+              <CodeSnippet type="single">finished:&gt;=2025</CodeSnippet>
+
+              <p>Show new or processed events, sorted by oldest first</p>
+              <CodeSnippet type="single">status:NEW,PROCESSED sort:created:asc</CodeSnippet>
+            </Stack>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+
+    </Stack>
   );
 };
