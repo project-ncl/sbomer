@@ -2,7 +2,6 @@ import {
   CodeSnippet,
   Heading,
   Link,
-  ListItem,
   Section,
   Stack,
   Tab,
@@ -15,18 +14,19 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  Tabs,
-  UnorderedList
+  Tabs
 } from '@carbon/react';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const HelpPageContent = () => {
+  const navigate = useNavigate();
   return (
-    <Stack gap={7}>
+    <Stack gap={5}>
       <Heading>Query Language Reference</Heading>
-      <Section level={3}>
+      <Section level={2}>
         <p>
-          Use the search bar on the <Link href="/nextgen/events">Events page</Link> to filter and sort events using a query language.
+          Use the search bar on the <Link onClick={() => navigate('/events')}>Events page</Link> to filter and sort events using a query language.
         </p>
       </Section>
 
@@ -163,6 +163,24 @@ export const HelpPageContent = () => {
 
               <p>Show new or processed events, sorted by oldest first</p>
               <CodeSnippet type="single">status:NEW,PROCESSED sort:created:asc</CodeSnippet>
+
+              <p>Find events updated in September 2025</p>
+              <CodeSnippet type="single">updated:&gt;=2025-09-01 updated:&lt;2025-10-01</CodeSnippet>
+
+              <p>Find events with a specific ID</p>
+              <CodeSnippet type="single">id:E0AAAAA</CodeSnippet>
+
+              <p>Find events where the reason contains "network"</p>
+              <CodeSnippet type="single">reason:~"network"</CodeSnippet>
+
+              <p>Find all events except those with status ERROR</p>
+              <CodeSnippet type="single">-status:ERROR</CodeSnippet>
+
+              <p>Find events created before September 2025</p>
+              <CodeSnippet type="single">created:&lt;2025-09</CodeSnippet>
+
+              <p>Sort events by finished date, newest first</p>
+              <CodeSnippet type="single">sort:finished:desc</CodeSnippet>
             </Stack>
           </TabPanel>
         </TabPanels>
