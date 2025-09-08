@@ -1,7 +1,10 @@
 import {
   Accordion,
   AccordionItem,
+  Button,
   CodeSnippet,
+  Column,
+  Grid,
   Heading,
   Link,
   Stack,
@@ -168,34 +171,104 @@ export const HelpPageContent = () => {
                 <TabPanel>
                   <Stack>
                     <p>Find all new events</p>
-                    <CodeSnippet type="single">status:NEW</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">status:NEW</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=status:NEW')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Find failed events that were not a timeout</p>
-                    <CodeSnippet type="single">status:ERROR -reason:~"timeout"</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">status:ERROR -reason:~"timeout"</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=status:ERROR%20-reason:~%22timeout%22')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Find events processed after the start of 2025</p>
-                    <CodeSnippet type="single">finished:&gt;=2025</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">finished:&gt;=2025</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=finished:%3E=2025')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Show new or processed events, sorted by oldest first</p>
-                    <CodeSnippet type="single">status:NEW,PROCESSED sort:created:asc</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">status:NEW,PROCESSED sort:created:asc</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=status:NEW,PROCESSED%20sort:created:asc')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Find events updated in September 2025</p>
-                    <CodeSnippet type="single">updated:&gt;=2025-09-01 updated:&lt;2025-10-01</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">updated:&gt;=2025-09-01 updated:&lt;2025-10-01</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=updated:%3E=2025-09-01%20updated:%3C2025-10-01')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Find events with a specific ID</p>
-                    <CodeSnippet type="single">id:E0AAAAA</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">id:E0AAAAA</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=id:E0AAAAA')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Find events where the reason contains "network"</p>
-                    <CodeSnippet type="single">reason:~"network"</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">reason:~"network"</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=reason:~%22network%22')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Find all events except those with status ERROR</p>
-                    <CodeSnippet type="single">-status:ERROR</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">-status:ERROR</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=-status:ERROR')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Find events created before September 2025</p>
-                    <CodeSnippet type="single">created:&lt;2025-09</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">created:&lt;2025-09</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=created:%3C2025-09')}>Run Query</Button>
+                      </Column>
+                    </Grid>
 
                     <p>Sort events by finished date, newest first</p>
-                    <CodeSnippet type="single">sort:finished:desc</CodeSnippet>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">sort:finished:desc</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=sort:finished:desc')}>Run Query</Button>
+                      </Column>
+                    </Grid>
                   </Stack>
                 </TabPanel>
               </TabPanels>
