@@ -22,6 +22,12 @@ import { useNavigate } from 'react-router-dom';
 
 export const HelpPageContent = () => {
   const navigate = useNavigate();
+
+  // skip the reloading of the Event page
+  const handleNavigate = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    navigate('/events');
+  };
   return (
     <Stack gap={7}>
       <Stack gap={5}>
@@ -36,7 +42,7 @@ export const HelpPageContent = () => {
         <AccordionItem title="Query Language Reference" open>
           <Stack gap={7}>
             <p>
-              Use the search bar on the <Link onClick={() => navigate('/events')}>Events page</Link> to filter and sort events using a query language.
+              Use the search bar on the <Link href='/events' onClick={handleNavigate}>Events page</Link> to filter and sort events using a query language.
             </p>
 
             <Tabs>
