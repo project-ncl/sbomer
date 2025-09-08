@@ -59,7 +59,7 @@ const ManifestPageContent: React.FunctionComponent = () => {
     <Stack gap={7}>
       <Heading>Manifest {id}</Heading>
 
-        <StructuredListWrapper>
+        <StructuredListWrapper isCondensed>
           <StructuredListHead>
             <StructuredListRow head>
               <StructuredListCell head>Property</StructuredListCell>

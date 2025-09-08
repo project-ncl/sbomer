@@ -87,7 +87,7 @@ public class EventsQueryListener extends QueryBaseListener {
         String sortField = ctx.field.getText();
         String sortOrder = "ASC";
 
-        if (ctx.direction.getType() == QueryParser.SORT_DESC) {
+        if (ctx.direction != null && ctx.direction.getType() == QueryParser.DESC) {
             sortOrder = "DESC";
         }
 

@@ -25,7 +25,7 @@ Here are some examples of valid queries to show how the query language looks lik
     `sort:created`
 
 * **Find new entities and sort them by update date descending:**
-    `status:NEW sort-desc:updated`
+    `status:NEW sort:updated:desc`
 
 ***
 
@@ -99,8 +99,8 @@ You can control the order of the results using a sort statement. In case of mult
 |===
 | Syntax | Description | Example
 | `sort:field` | Sorts by `field` in the default **ascending** order. | `sort:created`
-| `sort-asc:field` | Explicitly sorts by `field` in **ascending** order. | `sort-asc:status`
-| `sort-desc:field` | Explicitly sorts by `field` in **descending** order. | `sort-desc:updated`
+| `sort:field:asc` | Explicitly sorts by `field` in **ascending** order. | `sort:status:asc`
+| `sort:field:desc` | Explicitly sorts by `field` in **descending** order. | `sort:updated:desc`
 |===
 
 ***
@@ -163,7 +163,7 @@ Timestamp fields (`created`, `updated`, `finished`) support the following format
 | `updated:>=2023-10`
 
 | `yyyy-MM-dd`
-| `finished:<=2023-10-25`
+| `finished:\<=2023-10-25`
 
 | ISO 8601
 | `created:>"2023-01-01T12:00:00Z"`
