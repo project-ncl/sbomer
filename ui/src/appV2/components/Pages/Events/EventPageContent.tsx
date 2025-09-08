@@ -35,7 +35,7 @@ export const EventPageContent = () => {
   }
 
   return (
-    <Stack gap={50}>
+    <Stack gap={7}>
       <Heading>Event {id}</Heading>
         <StructuredListWrapper isCondensed>
                <StructuredListHead>
@@ -97,7 +97,7 @@ export const EventPageContent = () => {
               </StructuredListBody>
             </StructuredListWrapper>
         <Stack gap={5}>
-          <Heading>Attributes</Heading>
+          <Heading>Raw JSON</Heading>
           <CodeSnippet type="multi">
             {JSON.stringify(request, null, 2)}
           </CodeSnippet>
