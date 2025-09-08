@@ -19,13 +19,13 @@ public class TestControllerProfile implements QuarkusTestProfile {
     public Map<String, String> getConfigOverrides() {
         return Map.of(
                 "Retry/maxRetries",
-                "2",
+                "3",
                 "Retry/delay",
-                "200",
+                "250",
                 "Retry/delayUnit",
                 "millis",
                 "ExponentialBackoff/maxDelay",
-                "450",
+                "500",
                 "Retry/maxDelayUnit",
                 "millis",
                 "Retry/maxDurationUnit",
