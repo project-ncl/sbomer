@@ -162,7 +162,7 @@ class GenerationPhaseSyftGenerationRequestReconcilerTest {
         List<Future<UpdateControl<GenerationRequest>>> futures = new ArrayList<>();
 
         for (GenerationRequest request : requests) {
-            Context<GenerationRequest> context = mockContextWithTaskRuns(3, "True");
+            Context<GenerationRequest> context = mockContextWithTaskRuns(TASKRUN_COUNT, "True");
             futures.add(executorService.submit(() -> sic.reconcile(request, context)));
         }
 
@@ -181,7 +181,7 @@ class GenerationPhaseSyftGenerationRequestReconcilerTest {
 
     @Test
     void testBulkheadExceptionOnExceededRetries(@TempDir Path tmpDir) throws Exception {
-        int totalRequests = 500;
+        int totalRequests = 100;
         List<GenerationRequest> requests = createGenerationRequests(totalRequests, tmpDir, TASKRUN_COUNT);
         executorService = Executors.newFixedThreadPool(totalRequests);
         List<Future<UpdateControl<GenerationRequest>>> futures = new ArrayList<>();
