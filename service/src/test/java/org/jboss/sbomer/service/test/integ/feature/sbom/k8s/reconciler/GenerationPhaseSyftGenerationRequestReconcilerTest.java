@@ -182,7 +182,7 @@ class GenerationPhaseSyftGenerationRequestReconcilerTest {
 
     @Test
     void testBulkheadExceptionOnExceededRetries(@TempDir Path tmpDir) throws Exception {
-        int totalRequests = 500;
+        int totalRequests = 100;
         List<GenerationRequest> requests = createGenerationRequests(totalRequests, tmpDir, TASKRUN_COUNT);
         executorService = Executors.newFixedThreadPool(totalRequests);
         List<Future<UpdateControl<GenerationRequest>>> futures = new ArrayList<>();

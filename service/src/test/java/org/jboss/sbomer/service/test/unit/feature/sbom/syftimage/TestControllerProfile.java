@@ -14,6 +14,7 @@ public class TestControllerProfile implements QuarkusTestProfile {
         return Set.of(AlternativeRequestEventRepository.class, AlternativeGeneratorConfigProvider.class);
     }
 
+    // Override fault tolerance and logging
     @Override
     public Map<String, String> getConfigOverrides() {
         return Map.of(
@@ -32,6 +33,10 @@ public class TestControllerProfile implements QuarkusTestProfile {
                 "Retry/maxDurationUnit",
                 "millis",
                 "Timeout/unit",
-                "millis");
+                "millis",
+                "quarkus.log.console.enable",
+                "false",
+                "quarkus.log.file.enable",
+                "false");
     }
 }
