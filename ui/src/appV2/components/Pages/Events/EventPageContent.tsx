@@ -10,6 +10,7 @@ import {
   StructuredListRow,
   StructuredListWrapper,
   Tag,
+  Tile
 } from '@carbon/react';
 
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
@@ -33,6 +34,18 @@ export const EventPageContent = () => {
   if (!request) {
     return null;
   }
+
+  // recursively flatten nested objects into key=value tags
+  const flattenObject = (obj: any, prefix = ''): Array<{ key: string; value: string }> =>
+    Object.entries(obj).reduce((acc, [k, v]) => {
+      const fullKey = prefix ? `${prefix}.${k}` : k;
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        acc.push(...flattenObject(v, fullKey));
+      } else {
+        acc.push({ key: fullKey, value: Array.isArray(v) ? JSON.stringify(v) : String(v) });
+      }
+      return acc;
+    }, [] as Array<{ key: string; value: string }>);
 
   return (
     <Stack gap={7}>
@@ -96,6 +109,27 @@ export const EventPageContent = () => {
           </StructuredListRow>
         </StructuredListBody>
       </StructuredListWrapper>
+
+
+      <Stack gap={5}>
+        <Heading>Metadata Overview</Heading>
+
+        <div className="tag-container">
+          <Tile>
+            <Stack gap={5}></Stack>
+            {request.metadata && typeof request.metadata === 'object' ? (
+              flattenObject(request.metadata).map(({ key, value }) => (
+                <Tag key={key} size='lg' type='blue'>
+                  {key}={value}
+                </Tag>
+              ))
+            ) : (
+              <p>No metadata available</p>
+            )}
+          </Tile>
+        </div>
+      </Stack>
+
       <Stack gap={5}>
         <Heading>Raw JSON</Heading>
         <CodeSnippet type="multi">
