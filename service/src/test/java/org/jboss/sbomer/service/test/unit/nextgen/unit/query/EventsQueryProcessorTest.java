@@ -85,13 +85,9 @@ class EventsQueryProcessorTest {
 
     @DisplayName("Should correctly process valid sorting queries")
     @ParameterizedTest
-    @CsvSource({
-            "'sort:status', 'ORDER BY status ASC'",
-            "'sort:reason:asc', 'ORDER BY reason ASC'",
-            "'sort:id:desc', 'ORDER BY id DESC'",
-            "'status:NEW sort:created', 'ORDER BY created ASC'",
-            "'created:>=2024-01-01 sort:id:desc', 'ORDER BY id DESC'"
-    })
+    @CsvSource({ "'sort:status', 'ORDER BY status ASC'", "'sort:reason:asc', 'ORDER BY reason ASC'",
+            "'sort:id:desc', 'ORDER BY id DESC'", "'status:NEW sort:created', 'ORDER BY created ASC'",
+            "'created:>=2024-01-01 sort:id:desc', 'ORDER BY id DESC'" })
     void testValidSortingQueries(String query, String expectedOrderBy) {
         EventsQueryListener listener = assertDoesNotThrow(
                 () -> eventsQueryProcessor.process(query),
@@ -135,13 +131,7 @@ class EventsQueryProcessorTest {
 
     @DisplayName("Should reject invalid sorting queries")
     @ParameterizedTest
-    @ValueSource(strings = {
-            "sort:status:up",
-            "sort:",
-            "sort:created:",
-            "sort: created",
-            "sort:nonexistent_field"
-    })
+    @ValueSource(strings = { "sort:status:up", "sort:", "sort:created:", "sort: created", "sort:nonexistent_field" })
     void testInvalidSortingQueries(String query) {
         assertThrows(
                 Exception.class,
