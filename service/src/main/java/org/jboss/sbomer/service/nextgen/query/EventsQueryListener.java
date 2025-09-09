@@ -43,10 +43,11 @@ import lombok.extern.slf4j.Slf4j;
 public class EventsQueryListener extends QueryBaseListener {
 
     // todo refactor, make more generic
-    private static final Set<String> VALID_FIELDS = Set.of("id", "created", "updated", "finished", "status", "reason");
+    private static final Set<String> VALID_FIELDS = Set
+            .of("id", "created", "updated", "finished", "metadata", "status", "reason");
     private static final Set<String> VALID_SORT_FIELDS = Set
             .of("id", "created", "updated", "finished", "status", "reason");
-    private static final Set<String> STRING_FIELDS = Set.of("id", "reason");
+    private static final Set<String> STRING_FIELDS = Set.of("id", "reason", "metadata");
     private static final Set<String> COMPARABLE_FIELDS = Set.of("created", "updated", "finished");
 
     private final Stack<String> queryParts = new Stack<>();
@@ -165,7 +166,9 @@ public class EventsQueryListener extends QueryBaseListener {
 
         String paramName = nextParamName();
         parameters.put(paramName, convertedValue);
-        queryParts.push(field + " " + operator + " :" + paramName);
+        // If metadata is stored as JSON/JsonNode in the entity, cast to text for string operations
+        String fieldExpr = fieldExpression(field);
+        queryParts.push(fieldExpr + " " + operator + " :" + paramName);
     }
 
     private void handleMultipleValues(String field, List<String> values, String operator) {
@@ -188,7 +191,19 @@ public class EventsQueryListener extends QueryBaseListener {
             paramNames.add(":" + paramName);
         }
 
-        queryParts.push(field + " IN (" + String.join(", ", paramNames) + ")");
+        String fieldExpr = fieldExpression(field);
+        queryParts.push(fieldExpr + " IN (" + String.join(", ", paramNames) + ")");
+    }
+
+    // Return an expression to use for the field in JPQL. For JSON fields (metadata) cast to text so
+    // string operators like LIKE work with Hibernate/JPA.
+    private String fieldExpression(String field) {
+        if ("metadata".equals(field)) {
+            // CAST(... AS text) works with Hibernate/Postgres; adjust if you target a different DB
+            return "CAST(" + field + " AS text)";
+        }
+
+        return field; // no change for other fields
     }
 
     // parsing field + values
