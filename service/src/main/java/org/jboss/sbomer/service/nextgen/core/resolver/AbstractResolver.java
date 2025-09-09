@@ -57,7 +57,7 @@ public abstract class AbstractResolver implements Resolver {
 
         log.info("Handling new {} event with metadata: {}", getType(), event.event().metadata());
 
-        String identifier = event.event().metadata().get(Resolver.KEY_IDENTIFIER);
+        String identifier = event.event().metadata().get(Resolver.KEY_IDENTIFIER).asText();
 
         if (identifier == null || identifier.trim().isEmpty()) {
             log.warn("Identifier missing, event won't be processed");
