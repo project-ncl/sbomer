@@ -117,9 +117,8 @@ public class EventsQueryListener extends QueryBaseListener {
 
     @Override
     public void exitAtom(QueryParser.AtomContext ctx) {
-        // parsing the most atomic
-        String field = ctx.WORD().getText();
-        handleValueList(field, ctx.value_list());
+        String fieldPath = ctx.path().getText();
+        handleValueList(fieldPath, ctx.value_list());
     }
 
     private void handleValueList(String field, QueryParser.Value_listContext ctx) {
@@ -144,21 +143,23 @@ public class EventsQueryListener extends QueryBaseListener {
         return valueCtx.op.getType() == QueryParser.CONTAINS ? "LIKE" : valueCtx.op.getText();
     }
 
-    private void handleSingleValue(String field, String value, String operator) {
-        if (!VALID_FIELDS.contains(field)) {
-            throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
+    private void handleSingleValue(String fieldPath, String value, String operator) {
+        String baseField = getBaseField(fieldPath);
+
+        if (!VALID_FIELDS.contains(baseField)) {
+            throw new IllegalArgumentException("Unknown field: '" + fieldPath + "'. Valid fields: " + VALID_FIELDS);
         }
-        if (operator.equals("LIKE") && !STRING_FIELDS.contains(field)) {
+        if (operator.equals("LIKE") && !STRING_FIELDS.contains(baseField)) {
             throw new UnsupportedOperationException(
                     "LIKE operator can only be used with string fields: " + STRING_FIELDS);
         }
         if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
-                && !COMPARABLE_FIELDS.contains(field)) {
+                && !COMPARABLE_FIELDS.contains(baseField)) {
             throw new UnsupportedOperationException(
                     "Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
         }
 
-        Object convertedValue = convertValue(field, value);
+        Object convertedValue = convertValue(baseField, value);
 
         if (operator.equals("LIKE")) {
             convertedValue = "%" + convertedValue + "%";
@@ -166,20 +167,23 @@ public class EventsQueryListener extends QueryBaseListener {
 
         String paramName = nextParamName();
         parameters.put(paramName, convertedValue);
-        // If metadata is stored as JSON/JsonNode in the entity, cast to text for string operations
-        String fieldExpr = fieldExpression(field);
+        // If metadata is stored as JSON/JsonNode in the entity, cast to text for string
+        // operations
+        String fieldExpr = fieldExpression(fieldPath);
         queryParts.push(fieldExpr + " " + operator + " :" + paramName);
     }
 
-    private void handleMultipleValues(String field, List<String> values, String operator) {
-        if (!VALID_FIELDS.contains(field)) {
-            throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
+    private void handleMultipleValues(String fieldPath, List<String> values, String operator) {
+        String baseField = getBaseField(fieldPath);
+
+        if (!VALID_FIELDS.contains(baseField)) {
+            throw new IllegalArgumentException("Unknown field: '" + baseField + "'. Valid fields: " + VALID_FIELDS);
         }
         if (operator.equals("LIKE")) {
             throw new UnsupportedOperationException("LIKE operator cannot be used with multiple values");
         }
         if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
-                && !COMPARABLE_FIELDS.contains(field)) {
+                && !COMPARABLE_FIELDS.contains(baseField)) {
             throw new UnsupportedOperationException(
                     "Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
         }
@@ -187,23 +191,35 @@ public class EventsQueryListener extends QueryBaseListener {
         List<String> paramNames = new ArrayList<>();
         for (String value : values) {
             String paramName = nextParamName();
-            parameters.put(paramName, convertValue(field, value));
+            parameters.put(paramName, convertValue(baseField, value));
             paramNames.add(":" + paramName);
         }
 
-        String fieldExpr = fieldExpression(field);
+        String fieldExpr = fieldExpression(baseField);
         queryParts.push(fieldExpr + " IN (" + String.join(", ", paramNames) + ")");
     }
 
-    // Return an expression to use for the field in JPQL. For JSON fields (metadata) cast to text so
+    // Return an expression to use for the field in JPQL. For JSON fields (metadata)
+    // cast to text so
     // string operators like LIKE work with Hibernate/JPA.
-    private String fieldExpression(String field) {
-        if ("metadata".equals(field)) {
-            // CAST(... AS text) works with Hibernate/Postgres; adjust if you target a different DB
-            return "CAST(" + field + " AS text)";
-        }
+    private String fieldExpression(String fieldPath) {
+        if (fieldPath.startsWith("metadata.")) {
+            // This syntax is for PostgreSQL JSONB.
+            // Example: metadata.components.format -> jsonb_extract_path_text(metadata,
+            // 'components', 'format')
+            String[] parts = fieldPath.split("\\.");
+            String baseField = parts[0];
+            String jsonPath = Arrays.stream(parts, 1, parts.length) // Get all parts after 'metadata'
+                    .map(p -> "'" + p + "'") // Quote each part
+                    .collect(Collectors.joining(", ")); // Join with commas
 
-        return field; // no change for other fields
+            return "jsonb_extract_path_text(" + baseField + ", " + jsonPath + ")";
+        }
+        return fieldPath; // No change for other fields
+    }
+
+    private String getBaseField(String fieldPath) {
+        return fieldPath.split("\\.")[0];
     }
 
     // parsing field + values
