@@ -43,6 +43,7 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
+  // enables the sidebar to be expanded by default instead of using the sidenav prop
   const [sideNavExpanded, setSideNavExpanded] = React.useState(true);
   const [menuPanelExpanded, setMenuPanelExpanded] = React.useState(false);
 
@@ -104,22 +105,21 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         ) : null
         )}
       </SideNavMenu>
-      <SideNavDivider />
+        <SideNavDivider />
       </>
     );
   };
 
   const Navigation = (
-   <SideNavItems>
-    {routes
-      .filter(route => route.label && route.label !== 'Help')
-      .map((route, idx) =>
-        !route.routes
-          ? renderSideNavLink(route, idx)
-          : renderSideNavGroup(route, idx)
-      )}
-
     <SideNavItems>
+      {routes
+        .filter(route => route.label && route.label !== 'Help')
+        .map((route, idx) =>
+          !route.routes
+            ? renderSideNavLink(route, idx)
+            : renderSideNavGroup(route, idx)
+        )}
+
       <SideNavDivider />
       <SideNavLink
         key="help-link"
@@ -133,7 +133,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         Help
       </SideNavLink>
     </SideNavItems>
-  </SideNavItems>
   );
   const headerContainer = <>
     <HeaderContainer
@@ -220,14 +219,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     />
   </>
 
-  const content =<Content id="main-content">
+  const content = <Content id="main-content">
     <Grid>
       <Column sm={4} md={8} lg={16}>
         {children}
       </Column>
     </Grid>
   </Content>
-  ;
+    ;
 
   return (
     <Theme theme={currentTheme}>
