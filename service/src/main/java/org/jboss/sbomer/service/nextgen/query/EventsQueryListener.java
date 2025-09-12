@@ -149,6 +149,12 @@ public class EventsQueryListener extends QueryBaseListener {
         if (!VALID_FIELDS.contains(baseField)) {
             throw new IllegalArgumentException("Unknown field: '" + fieldPath + "'. Valid fields: " + VALID_FIELDS);
         }
+        // todo enable like search for metadata fields
+        if (operator.equals("LIKE") && (baseField.equals("metadata") || fieldPath.startsWith("metadata."))) {
+            throw new UnsupportedOperationException(
+                "LIKE operator cannot be used with metadata or nested metadata fields."
+            );
+        }
         if (operator.equals("LIKE") && !STRING_FIELDS.contains(baseField)) {
             throw new UnsupportedOperationException(
                     "LIKE operator can only be used with string fields: " + STRING_FIELDS);
