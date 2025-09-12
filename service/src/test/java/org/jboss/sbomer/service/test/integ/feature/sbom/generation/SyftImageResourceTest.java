@@ -1,8 +1,12 @@
 package org.jboss.sbomer.service.test.integ.feature.sbom.generation;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hamcrest.CoreMatchers;
+import org.jboss.sbomer.core.config.request.ImageRequestConfig;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.service.feature.sbom.service.SbomService;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Nested;
@@ -132,20 +136,22 @@ class SyftImageResourceTest {
 
         @Test
         void shouldAllowCustomConfig() {
-            given().body("{\"type\": \"image\", \"image\": \"registry.com/image:tag\"}")
+            V1Beta1RequestRecord record = given().body("{\"type\": \"image\", \"image\": \"registry.com/image:tag\"}")
                     .when()
                     .contentType(ContentType.JSON)
                     .request("POST", "/api/v1beta1/generations")
                     .then()
                     .statusCode(202)
-                    .body("size()", CoreMatchers.is(1))
-                    .body("[0].id", CoreMatchers.any(String.class))
-                    .and()
-                    .body("[0].identifier", CoreMatchers.equalTo("registry.com/image:tag"))
-                    .and()
-                    .body("[0].type", CoreMatchers.equalTo("CONTAINERIMAGE"))
-                    .and()
-                    .body("[0].status", CoreMatchers.is("NEW"));
+                    .extract()
+                    .as(V1Beta1RequestRecord.class);
+
+            assertNotNull(record.id());
+            assertNotNull(record.receivalTime());
+            assertEquals("REST", record.eventType().toString());
+            assertEquals("IN_PROGRESS", record.eventStatus().toString());
+
+            ImageRequestConfig config = (ImageRequestConfig) record.requestConfig();
+            assertEquals("registry.com/image:tag", config.getImage());
         }
     }
 }

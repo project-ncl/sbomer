@@ -25,6 +25,8 @@ quarkus:
     password: password
     jdbc:
       url: jdbc:postgresql://localhost:5432/sbomer
+    devservices:
+      enabled: false
   hibernate-orm:
     database:
       generation: drop-and-create
@@ -33,6 +35,26 @@ quarkus:
 
   otel:
     enabled: false
+
+  devservices:
+    enabled: true
+
+  amqp:
+    devservices:
+      enabled: false
+
+  keycloak:
+    devservices:
+      enabled: false
+
+  unleash:
+    devservices:
+      enabled: false
+
+  wiremock:
+    devservices:
+      enabled: true
+      reload: true
 
   http:
     cors:
@@ -55,6 +77,8 @@ quarkus:
     logging:
       scope: request-response
       body-limit: 1024
+    errata:
+      url: http://localhost:${quarkus.wiremock.devservices.port}
 
   oidc-client:
     client-enabled: true
@@ -65,6 +89,13 @@ quarkus:
 
 kerberos-client:
   user-principal-name: principal
+
+SBOMER_FEATURE_ERRATA_INTEGRATION_ENABLED: true
+SBOMER_FEATURE_STANDARD_ERRATA_RPM_MANIFEST_ENABLED: true
+SBOMER_FEATURE_STANDARD_ERRATA_CONTAINERIMAGE_MANIFEST_ENABLED: true
+SBOMER_FEATURE_TEXTONLY_ERRATA_MANIFEST_ENABLED: true
+SBOMER_FEATURE_STANDARD_ERRATA_CONTAINERIMAGE_RELEASE_MANIFEST_ENABLED: true
+SBOMER_FEATURE_TEXTONLY_ERRATA_RELEASE_MANIFEST_ENABLED: true
 
 sbomer:
   api-url: "http://localhost:8080/api/v1beta1/"
@@ -87,7 +118,7 @@ sbomer:
       sync-batch: 5
 
   purl-qualifiers-allow-list:
-    - repository_url
+  - repository_url
 
   controller:
     generation-request:
@@ -101,8 +132,8 @@ sbomer:
       producer:
         enabled: false
     kerberos:
-        enabled: false
-        errata:
-          service-principal-name: errata-service-principal
-        pyxis:
-          service-principal-name: pyxis-service-principal
+      enabled: false
+      errata:
+        service-principal-name: errata-service-principal
+      pyxis:
+        service-principal-name: pyxis-service-principal

@@ -1,0 +1,66 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/api/v1/releases/2059"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "fixedDelayMilliseconds": 2000,
+    "jsonBody":
+{
+  "data": {
+    "id": 2059,
+    "type": "releases",
+    "attributes": {
+      "name": "ansible-automation-platform-2.5",
+      "description": "Red Hat Ansible Automation Platform 2.5",
+      "type": "QuarterlyUpdate",
+      "allow_pkg_dupes": true,
+      "ship_date": "2023-06-26T00:00:00Z",
+      "is_active": true,
+      "enabled": true,
+      "enable_batching": false,
+      "is_async": false,
+      "is_deferred": false,
+      "allow_shadow": false,
+      "allow_blocker": false,
+      "allow_exception": false,
+      "limit_bugs_by_product": false,
+      "supports_component_acl": false,
+      "blocker_flags": [
+        "ansible-automation-platform-2.5"
+      ],
+      "internal_target_release": "",
+      "zstream_target_release": null,
+      "notify_bugzilla_about_release_status": false,
+      "is_silent": false,
+      "pp_start_date": null,
+      "pp_end_date": null,
+      "forbid_container_advisories": false
+    },
+    "relationships": {
+      "brew_tags": [],
+      "product": {
+        "id": 158,
+        "short_name": "Ansible Automation Platform"
+      },
+      "product_versions": [
+        {
+          "id": 2034,
+          "name": "ansible-automation-platform-2.5-rhel-8"
+        },
+        {
+          "id": 2035,
+          "name": "ansible-automation-platform-2.5-rhel-9"
+        }
+      ],
+      "state_machine_rule_set": null,
+      "program_manager": null
+    }
+  }
+}
+}
+}
