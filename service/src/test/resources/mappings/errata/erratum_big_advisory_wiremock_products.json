@@ -1,0 +1,255 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/api/v1/products/Ansible%20Automation%20Platform"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "fixedDelayMilliseconds": 2000,
+    "jsonBody":{
+
+      "data": {
+    "id": 158,
+    "type": "products",
+    "attributes": {
+      "name": "Red Hat Ansible Automation Platform",
+      "description": "Red Hat Ansible Automation Platform",
+      "short_name": "Ansible Automation Platform",
+      "bugzilla_product_name": "",
+      "valid_bug_states": [
+        "VERIFIED",
+        "MODIFIED",
+        "ASSIGNED",
+        "NEW"
+      ],
+      "ftp_path": "",
+      "ftp_subdir": "AnsibleAutomationPlatform",
+      "is_internal": false,
+      "suppress_push_request_jira": false,
+      "isactive": true,
+      "move_bugs_on_qe": false,
+      "show_bug_package_mismatch_warning": false
+    },
+    "relationships": {
+      "default_docs_reviewer": {
+        "id": 1,
+        "login_name": "docs-errata-list@redhat.com"
+      },
+      "default_solution": {
+        "id": 2,
+        "title": "enterprise"
+      },
+      "product_versions": [
+        {
+          "id": 1356,
+          "name": "ANSIBLE-TOWER-3.8-RHEL-7"
+        },
+        {
+          "id": 1357,
+          "name": "ANSIBLE-TOWER-3.8-RHEL-8"
+        },
+        {
+          "id": 1359,
+          "name": "ANSIBLE-AUTOMATION-PLATFORM-1.2-RHEL-7"
+        },
+        {
+          "id": 1368,
+          "name": "AUTOMATION-HUB-4.2-RHEL-7"
+        },
+        {
+          "id": 1369,
+          "name": "AUTOMATION-HUB-4.2-RHEL-8"
+        },
+        {
+          "id": 1432,
+          "name": "ANSIBLE-AUTOMATION-PLATFORM-2.0-RHEL-8"
+        },
+        {
+          "id": 1570,
+          "name": "ANSIBLE-AUTOMATION-PLATFORM-2.1-RHEL-8"
+        },
+        {
+          "id": 1652,
+          "name": "ANSIBLE-AUTOMATION-PLATFORM-2.2-RHEL-8"
+        },
+        {
+          "id": 1706,
+          "name": "ANSIBLE-AUTOMATION-PLATFORM-2.2-RHEL-9"
+        },
+        {
+          "id": 1805,
+          "name": "ansible-automation-platform-2.3-rhel-8"
+        },
+        {
+          "id": 1806,
+          "name": "ansible-automation-platform-2.3-rhel-9"
+        },
+        {
+          "id": 1809,
+          "name": "ansible-automation-platform-ee-rhel-8"
+        },
+        {
+          "id": 1840,
+          "name": "ansible-inside-0.9-rhel-8"
+        },
+        {
+          "id": 1841,
+          "name": "ansible-inside-0.9-rhel-9"
+        },
+        {
+          "id": 1842,
+          "name": "ansible-inside-1.1-rhel-8"
+        },
+        {
+          "id": 1843,
+          "name": "ansible-inside-1.1-rhel-9"
+        },
+        {
+          "id": 1886,
+          "name": "ansible-automation-platform-2.4-rhel-8"
+        },
+        {
+          "id": 1887,
+          "name": "ansible-automation-platform-2.4-rhel-9"
+        },
+        {
+          "id": 1888,
+          "name": "ansible-developer-1.0-rhel-8"
+        },
+        {
+          "id": 1889,
+          "name": "ansible-developer-1.0-rhel-9"
+        },
+        {
+          "id": 1890,
+          "name": "ansible-developer-1.1-rhel-8"
+        },
+        {
+          "id": 1891,
+          "name": "ansible-developer-1.1-rhel-9"
+        },
+        {
+          "id": 1923,
+          "name": "aoc-azure-1.0-rhel-9"
+        },
+        {
+          "id": 1989,
+          "name": "ansible-automation-platform-ee-rhel-9"
+        },
+        {
+          "id": 2029,
+          "name": "ansible-inside-1.2-rhel-8"
+        },
+        {
+          "id": 2030,
+          "name": "ansible-inside-1.2-rhel-9"
+        },
+        {
+          "id": 2034,
+          "name": "ansible-automation-platform-2.5-rhel-8"
+        },
+        {
+          "id": 2035,
+          "name": "ansible-automation-platform-2.5-rhel-9"
+        },
+        {
+          "id": 2036,
+          "name": "ansible-inside-1.3-rhel-8"
+        },
+        {
+          "id": 2037,
+          "name": "ansible-inside-1.3-rhel-9"
+        },
+        {
+          "id": 2038,
+          "name": "ansible-developer-1.2-rhel-8"
+        },
+        {
+          "id": 2039,
+          "name": "ansible-developer-1.2-rhel-9"
+        },
+        {
+          "id": 2079,
+          "name": "aoc-saas-1.0-rhel-9"
+        },
+        {
+          "id": 2210,
+          "name": "ansible-automation-platform-2-beta-rhel-8"
+        },
+        {
+          "id": 2211,
+          "name": "ansible-automation-platform-2-beta-rhel-9"
+        },
+        {
+          "id": 2351,
+          "name": "ansible-automation-platform-2.6-rhel-9"
+        },
+        {
+          "id": 2353,
+          "name": "ansible-inside-1.4-rhel-9"
+        },
+        {
+          "id": 2355,
+          "name": "ansible-developer-1.3-rhel-9"
+        },
+        {
+          "id": 2447,
+          "name": "ansible-automation-platform-2.5-rhem-0.7-rhel-8"
+        },
+        {
+          "id": 2448,
+          "name": "ansible-automation-platform-2.5-rhem-0.7-rhel-9"
+        },
+        {
+          "id": 2501,
+          "name": "ansible-automation-platform-2.5-rhem-0.9-rhel-8"
+        },
+        {
+          "id": 2502,
+          "name": "ansible-automation-platform-2.5-rhem-0.9-rhel-9"
+        }
+      ],
+      "push_targets": [
+        {
+          "id": 3,
+          "name": "ftp"
+        },
+        {
+          "id": 7,
+          "name": "cdn_stage"
+        },
+        {
+          "id": 10,
+          "name": "cdn_docker_stage"
+        },
+        {
+          "id": 9,
+          "name": "cdn_docker"
+        },
+        {
+          "id": 4,
+          "name": "cdn"
+        }
+      ],
+      "state_machine_rule_set": {
+        "id": 26,
+        "name": "Non-blocking TPS - AAP"
+      },
+      "exd_org_group": {
+        "id": 3,
+        "name": "Middleware & Management",
+        "short_name": "M&M",
+        "jira_key": "SPMM",
+        "jira_ticket_project_keys": {
+          "push_request": "SPMM",
+          "listings_change": "SPMM"
+        }
+      }
+    }
+  }
+}
+}}
+
