@@ -162,12 +162,6 @@ public class GenerationsV1Beta1 {
                     mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = ErrorResponse.class)))
     @APIResponse(
-            responseCode = "409",
-            description = "Request rejected, there is already an unprocessed request matching this in the queue",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = ErrorResponse.class)))
-    @APIResponse(
             responseCode = "500",
             description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
