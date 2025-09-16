@@ -4,14 +4,11 @@ import { Link } from 'react-router-dom';
 
 export const AboutSection = () => {
   return (
-    <Tile>
       <Stack gap={5}>
-        <div>
           <Heading>About SBOMer</Heading>
           <p>
             A service to generate <strong>manifests</strong> in the <strong>CycloneDX</strong> format for products.
           </p>
-        </div>
         <ButtonSet>
           <Button
             kind="primary"
@@ -36,6 +33,5 @@ export const AboutSection = () => {
           </Button>
         </ButtonSet>
       </Stack>
-    </Tile>
   );
 };
