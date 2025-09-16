@@ -9,9 +9,7 @@ export function GenerationsPage() {
 
   return (
     <AppLayout>
-            <Stack gap={4}>
-              <GenerationTable />
-            </Stack>
+      <GenerationTable />
     </AppLayout>
   );
 }
