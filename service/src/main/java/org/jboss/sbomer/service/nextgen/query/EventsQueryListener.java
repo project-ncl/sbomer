@@ -149,6 +149,12 @@ public class EventsQueryListener extends QueryBaseListener {
         if (!VALID_FIELDS.contains(baseField)) {
             throw new IllegalArgumentException("Unknown field: '" + fieldPath + "'. Valid fields: " + VALID_FIELDS);
         }
+        // only allow chaining for metadata fields
+        if (fieldPath.contains(".") && !fieldPath.startsWith("metadata.")) {
+            throw new UnsupportedOperationException(
+                "Chained fields are only supported for metadata. Invalid chained field: '" + fieldPath + "'."
+            );
+        }
         // todo enable like search for metadata fields
         if (operator.equals("LIKE") && (baseField.equals("metadata") || fieldPath.startsWith("metadata."))) {
             throw new UnsupportedOperationException(
@@ -184,6 +190,12 @@ public class EventsQueryListener extends QueryBaseListener {
 
         if (!VALID_FIELDS.contains(baseField)) {
             throw new IllegalArgumentException("Unknown field: '" + baseField + "'. Valid fields: " + VALID_FIELDS);
+        }
+        // only allow chaining for metadata fields
+        if (fieldPath.contains(".") && !fieldPath.startsWith("metadata.")) {
+            throw new UnsupportedOperationException(
+                "Chained fields are only supported for metadata. Invalid chained field: '" + fieldPath + "'."
+            );
         }
         if (operator.equals("LIKE")) {
             throw new UnsupportedOperationException("LIKE operator cannot be used with multiple values");
@@ -221,7 +233,7 @@ public class EventsQueryListener extends QueryBaseListener {
 
             return "jsonb_extract_path_text(" + baseField + ", " + jsonPath + ")";
         }
-        return fieldPath; // No change for other fields
+        return fieldPath;
     }
 
     private String getBaseField(String fieldPath) {
