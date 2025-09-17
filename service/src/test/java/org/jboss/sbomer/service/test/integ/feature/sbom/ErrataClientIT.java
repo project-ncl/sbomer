@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.sbomer.service.feature.sbom.errata.ErrataClient;
@@ -16,6 +17,9 @@ import org.jboss.sbomer.service.feature.sbom.errata.dto.ErrataBuildList;
 import org.jboss.sbomer.service.test.ErrataWireMock;
 import org.jboss.sbomer.service.test.utils.umb.TestUmbProfile;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 
@@ -35,7 +39,17 @@ public class ErrataClientIT {
     @RestClient
     ErrataClient ec;
 
+    // Timing sensitive
     public static String BIG_ADVISORY_ID = "139014";
+    // Not really timing sensitive
+    public static String TEXT_ONLY_ADVISORY_ID = "107794";
+
+    // Reuse the statics as we use them elsewhere
+    private static Stream<Arguments> advisoryIdProvider() {
+        return Stream.of(
+                Arguments.of(BIG_ADVISORY_ID, "Ansible Automation Platform"),
+                Arguments.of(TEXT_ONLY_ADVISORY_ID, "JBEAP"));
+    }
 
     @Test
     void errataStubsLoaded() {
@@ -68,14 +82,13 @@ public class ErrataClientIT {
         assertEquals("Expected 501 builds attached to the erratum", 501, allBuilds.size());
     }
 
-    @Test
-    void fetchesProduct() {
+    // Verify we have loaded the right wiremocks
+    @ParameterizedTest
+    @MethodSource("advisoryIdProvider")
+    void fetchesProduct(String advisoryId, String expectedProductName) {
 
-        Errata e = ec.getErratum(BIG_ADVISORY_ID);
-        assertEquals(
-                "Product should be",
-                "Ansible Automation Platform",
-                e.getDetails().get().getProduct().getShortName());
+        Errata e = ec.getErratum(advisoryId);
+        assertEquals("Product should be", expectedProductName, e.getDetails().get().getProduct().getShortName());
     }
 
     @Test
