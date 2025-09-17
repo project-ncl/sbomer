@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export const AboutSection = () => {
   return (
-      <Stack gap={5}>
+      <>
           <Heading>About SBOMer</Heading>
           <p>
             A service to generate <strong>manifests</strong> in the <strong>CycloneDX</strong> format for products.
@@ -32,6 +32,6 @@ export const AboutSection = () => {
             Events
           </Button>
         </ButtonSet>
-      </Stack>
+      </>
   );
 };
