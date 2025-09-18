@@ -244,11 +244,10 @@ public class AdvisoryService {
 
                 // We can proceed with the release event notification, we trust the owners of the advisory to push live
                 // when appropriate
-                String productVersionText = erratum.getContent().getContent().getProductVersionText();
                 String cpeText = erratum.getContent().getContent().getTextOnlyCpe();
-                if (Strings.isEmpty(productVersionText) || Strings.isEmpty(cpeText)) {
+                if (Strings.isEmpty(cpeText)) {
                     String reason = String.format(
-                            "Text-Only Errata Advisory '%s'(%s) does not have Product Version or CPE configured",
+                            "Text-Only Errata Advisory '%s'(%s) does not have CPE configured",
                             erratum.getDetails().get().getFulladvisory(),
                             erratum.getDetails().get().getId());
 
@@ -258,7 +257,7 @@ public class AdvisoryService {
                 Map<String, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
                         erratum,
                         requestEvent,
-                        Set.of(productVersionText),
+                        Set.of(cpeText),
                         GenerationRequestType.BUILD);
 
                 // Send an async notification for the release event
@@ -309,6 +308,7 @@ public class AdvisoryService {
                 log.debug(
                         "Errata status is SHIPPED_LIVE, looking for successful request records for advisory {}",
                         erratum.getDetails().get().getId());
+
                 successfulRequestRecord = sbomService.searchLastSuccessfulAdvisoryBuildRequestRecord(
                         requestEvent.getId(),
                         String.valueOf(erratum.getDetails().get().getId()));
@@ -338,11 +338,10 @@ public class AdvisoryService {
             } else {
                 // We can proceed with the release event notification, we trust the owners of the advisory to push live
                 // when appropriate
-                String productVersionText = erratum.getContent().getContent().getProductVersionText();
                 String cpeText = erratum.getContent().getContent().getTextOnlyCpe();
-                if (Strings.isEmpty(productVersionText) || Strings.isEmpty(cpeText)) {
+                if (Strings.isEmpty(cpeText)) {
                     String reason = String.format(
-                            "Text-Only Errata Advisory '%s'(%s) does not have Product Version or CPE configured",
+                            "Text-Only Errata Advisory '%s'(%s) does not have CPE configured",
                             erratum.getDetails().get().getFulladvisory(),
                             erratum.getDetails().get().getId());
 
@@ -352,7 +351,7 @@ public class AdvisoryService {
                 Map<String, SbomGenerationRequest> releaseGenerations = createReleaseManifestsGenerationsForType(
                         erratum,
                         requestEvent,
-                        Set.of(productVersionText),
+                        Set.of(cpeText),
                         GenerationRequestType.BUILD);
 
                 // Send an async notification for the release event
@@ -597,7 +596,8 @@ public class AdvisoryService {
     protected Map<String, SbomGenerationRequest> createReleaseManifestsGenerationsForType(
             Errata erratum,
             RequestEvent requestEvent,
-            Set<String> productVersions,
+            // This is aquired differently for textonly advisories and cpe is used instead
+            Set<String> productVersions, 
             GenerationRequestType type) {
 
         ObjectNode otelMetadata = ObjectMapperProvider.json().createObjectNode();
