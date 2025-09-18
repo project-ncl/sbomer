@@ -3456,28 +3456,20 @@ VALUES (
         '2020-12-25T00:00:00.000000Z',
         '2022-12-25T00:00:00.000000Z',
         '2024-12-25T00:00:00.000000Z',
-        '{"source":"ibm", "type":"build"}',
+        '{}',
         'NEW',
         'Some reason'
 );
 
 
-INSERT INTO event(
-    id,
-    created,
-    updated,
-    finished,
-    metadata,
-    status,
-    reason
-)                                                                                                                                                                                                                                                                                                                       
+
 VALUES (
         'E0CCCCC',
-        '2025-09-09T11:15:23.000000Z',
-        '2025-09-09T11:15:23.000000Z',
-        '2025-09-09T11:15:25.000000Z',
-        '{"source":"redhat", "type":"container_image", "website":{"url":"redhat.com", "type": "url"}}',
-        'RESOLVED',
+        '2020-12-25T00:00:00.000000Z',
+        '2022-12-25T00:00:00.000000Z',
+        '2024-12-25T00:00:00.000000Z',
+        '{}',
+        'NEW',
         'Some reason'
 );
 

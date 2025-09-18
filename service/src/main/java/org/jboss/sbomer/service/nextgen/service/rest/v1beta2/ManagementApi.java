@@ -104,14 +104,13 @@ public class ManagementApi {
                 // Convert payload to JsonNode
                 .withRequest(JacksonUtils.toObjectNode(payload))
                 .withMetadata(
-                        JacksonUtils.toObjectNode(
-                                Map.of(
-                                        EventsApi.KEY_SOURCE,
-                                        String.format("%s:%s", Api.EVENT_TYPE, uriInfo.getPath()),
-                                        EventsApi.KEY_RESOLVER,
-                                        payload.resolver(),
-                                        EventsApi.KEY_IDENTIFIER,
-                                        payload.identifier())))
+                        Map.of(
+                                EventsApi.KEY_SOURCE,
+                                String.format("%s:%s", Api.EVENT_TYPE, uriInfo.getPath()),
+                                EventsApi.KEY_RESOLVER,
+                                payload.resolver(),
+                                EventsApi.KEY_IDENTIFIER,
+                                payload.identifier()))
                 .withReason("Created as a result of a REST API call")
                 .build()
                 .save();

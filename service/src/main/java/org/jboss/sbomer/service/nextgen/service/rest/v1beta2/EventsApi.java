@@ -42,7 +42,6 @@ import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 import org.jboss.sbomer.service.nextgen.core.enums.GenerationStatus;
 import org.jboss.sbomer.service.nextgen.core.events.EventStatusChangeEvent;
 import org.jboss.sbomer.service.nextgen.core.payloads.generation.EventStatusUpdatePayload;
-import org.jboss.sbomer.service.nextgen.core.utils.JacksonUtils;
 import org.jboss.sbomer.service.nextgen.query.EventsQueryListener;
 import org.jboss.sbomer.service.nextgen.query.EventsQueryProcessor;
 import org.jboss.sbomer.service.nextgen.service.EntityMapper;
@@ -332,7 +331,7 @@ public class EventsApi {
         Event event = Event.builder()
                 .withParent(parentEvent)
                 .withCreated(Instant.now())
-                .withMetadata(JacksonUtils.toObjectNode(Map.of("source", Api.EVENT_TYPE)))
+                .withMetadata(Map.of("source", Api.EVENT_TYPE))
                 .build()
                 .save();
 

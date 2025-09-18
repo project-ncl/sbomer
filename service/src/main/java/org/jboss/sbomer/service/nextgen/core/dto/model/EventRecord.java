@@ -18,6 +18,7 @@
 package org.jboss.sbomer.service.nextgen.core.dto.model;
 
 import java.time.Instant;
+import java.util.Map;
 
 import org.jboss.sbomer.service.nextgen.core.enums.EventStatus;
 
@@ -30,6 +31,6 @@ import io.quarkus.hibernate.orm.panache.common.ProjectedFieldName;
  */
 
 public record EventRecord(String id, @ProjectedFieldName("parent.id") String parent, Instant created, Instant updated,
-        Instant finished, JsonNode metadata, JsonNode request, EventStatus status, String reason) {
+        Instant finished, Map<String, String> metadata, JsonNode request, EventStatus status, String reason) {
 
 }

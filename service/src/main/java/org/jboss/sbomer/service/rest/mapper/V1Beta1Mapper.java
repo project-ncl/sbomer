@@ -43,10 +43,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 @Mapper(config = MapperConfig.class)
-@ApplicationScoped
 public interface V1Beta1Mapper extends EntityMapper<V1Beta1ManifestRecord, V1Beta1GenerationRecord> {
 
     @Override

@@ -130,10 +130,7 @@ public class GenerationsApi {
             event = Event.builder()
                     .withCreated(Instant.now())
                     .withMetadata(
-                            JacksonUtils.toObjectNode(
-                                    Map.of(
-                                            EventsApi.KEY_SOURCE,
-                                            String.format("%s:%s", Api.EVENT_TYPE, uriInfo.getPath()))))
+                            Map.of(EventsApi.KEY_SOURCE, String.format("%s:%s", Api.EVENT_TYPE, uriInfo.getPath())))
                     .withRequest(JacksonUtils.toObjectNode(payload))
                     .withReason("Created as a result of a REST API call")
                     .build()
