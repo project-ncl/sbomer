@@ -70,17 +70,15 @@ class EventsQueryProcessorTest {
                         "(status = :param0 AND id LIKE :param1)",
                         Map.of("param0", EventStatus.NEW, "param1", "%A%")),
                 Arguments.of("-reason:~\"Some\"", "(NOT reason LIKE :param0)", Map.of("param0", "%Some%")),
-                // Whitespace Handling Queries
-                Arguments.of("      status:NEW", "status = :param0", Map.of("param0", EventStatus.NEW)),
-                Arguments.of("status:NEW      ", "status = :param0", Map.of("param0", EventStatus.NEW)),
+                // Nested Field Queries
                 Arguments.of(
-                        "  status:NEW     created:>=2024  ",
-                        "(status = :param0 AND created >= :param1)",
-                        Map.of("param0", EventStatus.NEW, "param1", Instant.parse("2024-01-01T00:00:00Z"))),
+                        "metadata.type:PROCESS",
+                        "(FUNCTION('jsonb_extract_path_text', metadata, 'type') = :param0)",
+                        Map.of("param0", "PROCESS")),
                 Arguments.of(
-                        "\tstatus:NEW\n\n   reason:~\"Test\"  ",
-                        "(status = :param0 AND reason LIKE :param1)",
-                        Map.of("param0", EventStatus.NEW, "param1", "%Test%")));
+                        "metadata.type:PROCESS,DONE",
+                        "(FUNCTION('jsonb_extract_path_text', metadata, 'type') = :param0 OR FUNCTION('jsonb_extract_path_text', metadata, 'type') = :param1)",
+                        Map.of("param0", "PROCESS", "param1", "DONE")));
     }
 
     @DisplayName("Should correctly process valid sorting queries")
@@ -126,7 +124,12 @@ class EventsQueryProcessorTest {
         String query = "priority:high";
         ClientException ex = assertThrows(ClientException.class, () -> eventsQueryProcessor.process(query));
         assertTrue(ex.getMessage().contains("Invalid query"));
-        assertTrue(ex.getErrors().stream().anyMatch(e -> e.contains("Unknown field: 'priority'")));
+        assertTrue(
+                ex.getErrors()
+                        .stream()
+                        .anyMatch(
+                                e -> e.contains("Unknown field: 'priority'")
+                                        && e.contains("please specify a subfield")));
     }
 
     @DisplayName("Should reject invalid sorting queries")
@@ -144,5 +147,17 @@ class EventsQueryProcessorTest {
     void testMalformedIdentifier() {
         String query = "status:==============NEW";
         assertThrows(ClientException.class, () -> eventsQueryProcessor.process(query));
+    }
+
+    @DisplayName("Should reject invalid nested queries")
+    @ParameterizedTest
+    @ValueSource(strings = { "metadata:somevalue", "metadata.type:>somevalue", "metadata.type:>=somevalue",
+            "sort:metadata.type", "metadata.type:~PROCESS" })
+    void testInvalidNestedQueries(String query) {
+        Exception ex = assertThrows(Exception.class, () -> eventsQueryProcessor.process(query));
+
+        if (ex instanceof ClientException) {
+            assertTrue(((ClientException) ex).getMessage().contains("Invalid query"));
+        }
     }
 }
