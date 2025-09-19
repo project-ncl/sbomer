@@ -75,7 +75,7 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
         waitForRequest(requestId);
         List<String> generationIds = generationIdsFromRequest(requestId);
         assertEquals(1, generationIds.size());
-        String generationId = generationIds.get(0).toString();
+        String generationId = generationIds.get(0);
 
         log.info("Advisory in QE status with RPMs - Generation Request created: {}", generationId);
 

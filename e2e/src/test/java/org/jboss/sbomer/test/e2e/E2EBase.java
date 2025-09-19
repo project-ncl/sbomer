@@ -109,13 +109,9 @@ public abstract class E2EBase {
             }
 
             final String status = jsonPath.getString("eventStatus");
-            final String requestConfig  = jsonPath.getString("requestConfig");
+            final String requestConfig = jsonPath.getString("requestConfig");
 
-            log.info(
-                    "Generation '{}' (requestConfig '{}') current status: {}",
-                    requestId,
-                    requestConfig,
-                    status);
+            log.info("Generation '{}' (requestConfig '{}') current status: {}", requestId, requestConfig, status);
 
             if ("[FAILED]".equals(status)) {
                 log.error("Generation '{}' failed: {}", requestId, response.asPrettyString());
